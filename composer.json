@@ -1,0 +1,16 @@
+{
+    "name": "gogol/admin",
+    "description": "Dynamically laravel administration",
+    "authors": [
+        {
+            "name": "Marek Gogol",
+            "email": "info@marekgogol.sk"
+        }
+    ],
+    "require-dev": {
+        "php": ">=7.0.0",
+        "laravel/framework": "5.*",
+        "doctrine/dbal": "^2.5",
+        "intervention/image": "^2.3"
+    }
+}
