@@ -7,9 +7,11 @@ use Fields;
 use Illuminate\Support\Str;
 use Illuminate\Filesystem\Filesystem;
 use Gogol\Admin\Helpers\File;
+use Gogol\Admin\Helpers\Sluggable;
 use Localization;
 use Illuminate\Database\Eloquent\Collection;
 use DB;
+use Carbon\Carbon;
 use Validator;
 
 trait AdminModelTrait
@@ -29,6 +31,42 @@ trait AdminModelTrait
             return $gallery;
 
         return parent::__call($method, $parameters);
+    }
+
+    /*
+     * Update model data before saving
+     */
+    public function save(array $options = [])
+    {
+        $attributes = $this->attributes;
+
+        //If model has needs sluggable field
+        if ( $this->sluggable != null )
+        {
+            $attributes = (new Sluggable($attributes, $this))->get();
+        }
+
+        //If is creating new row
+        if ( $this->exists == false )
+        {
+            //Add auto order incement into row, when row is not in database yet
+            if ( $this->sortable == true && ! array_key_exists('_order', $attributes) )
+            {
+                $attributes['_order'] = $this->withTrashed()->count();
+            }
+
+            //Add auto publishing rows
+            if ( $this->publishable == true && ! array_key_exists('published_at', $attributes) )
+            {
+                $attributes['published_at'] = Carbon::now()->toDateTimeString();
+            }
+        }
+
+        //Override attributes
+        $this->attributes = $attributes;
+
+        //Save model
+        return parent::save($options);
     }
 
     public function __get($key)
@@ -130,6 +168,7 @@ trait AdminModelTrait
                 if ( Str::snake( class_basename($path) ) == str_singular($foreign_table) )
                 {
                     $properties = $this->getRelationProperty($field_key, 'belongsTo');
+
                     return $this->relationResponse($field_key, 'belongsTo', $path, $get, $properties);
                 }
             }
@@ -156,15 +195,15 @@ trait AdminModelTrait
                 }
 
                 //Checks all fields in model if has belongsTo relationship
-                foreach ( $this->getFields() as $key => $field )
+                foreach ( $model->getFields() as $key => $field )
                 {
                     if ( array_key_exists('belongsTo', $field) )
                     {
-                        $properties = $this->getRelationProperty($key, 'belongsTo');
+                        $properties = $model->getRelationProperty($key, 'belongsTo');
 
-                        if ( str_replace('_', '', $properties[3]) == $method_lowercase )
+                        if ( $properties[0] == $this->getTable() )
                         {
-                            return $this->relationResponse($method, 'belongsTo', $path, $get, $properties);
+                            return $this->relationResponse($method, 'hasMany', $path, $get);
                         }
                     }
                 }
@@ -259,6 +298,10 @@ trait AdminModelTrait
         if ( $this->belongsToModel != null )
             $this->fillable[] = $this->getForeignColumn();
 
+        //If is moddel sluggable
+        if ( $this->sluggable != null )
+            $this->fillable[] = 'slug';
+
         //Allow language foreign
         if ( $this->isEnabledLanguageForeign() )
             $this->fillable[] = 'language_id';
@@ -297,7 +340,7 @@ trait AdminModelTrait
         if ( $this->getTable() == 'users' )
             return;
 
-        $columns = array_merge(array_keys($this->getFields()), ['id', 'created_at', 'updated_at', 'published_at', 'deleted_at', '_order', 'language_id']);
+        $columns = array_merge(array_keys($this->getFields()), ['id', 'created_at', 'updated_at', 'published_at', 'deleted_at', '_order', 'slug', 'language_id']);
 
         foreach ($columns as $column) {
             if ( in_array($column, $this->hidden) )
@@ -516,6 +559,11 @@ trait AdminModelTrait
         //Add language id column
         if ($this->isEnabledLanguageForeign())
             $fields[] = 'language_id';
+
+        if ( $this->sluggable != null )
+        {
+            $fields[] = 'slug';
+        }
 
         if ( $this->sortable == true )
         {

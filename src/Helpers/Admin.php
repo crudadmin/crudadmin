@@ -18,6 +18,17 @@ class Admin
     }
 
     /*
+     * Save property, if is not in administration interface
+     */
+    public function bind($key, $data)
+    {
+        if ( ! $this->isAdmin() )
+            return $this->save($key, $data);
+
+        return $data;
+    }
+
+    /*
      * Save property with value into buffer
      */
     public function save($key, $data)

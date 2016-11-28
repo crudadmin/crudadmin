@@ -72,7 +72,7 @@
 
         orderby : ['id', 1],
 
-        hidden: ['language_id', '_order', 'published_at', 'updated_at', 'created_at'],
+        hidden: ['language_id', '_order', 'slug', 'published_at', 'updated_at', 'created_at'],
       };
     },
 

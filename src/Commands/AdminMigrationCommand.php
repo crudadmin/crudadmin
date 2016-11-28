@@ -128,6 +128,10 @@ class AdminMigrationCommand extends Command
             if ( $model->getProperty('sortable') == true )
                 $table->integer('_order')->unsigned();
 
+            //Sluggable column
+            if ( $model->getProperty('sluggable') != null )
+                $this->setSlug( $table, $model );
+
             //Published at column
             if ( $model->getProperty('publishable') == true)
                 $table->timestamp('published_at')->nullable()->default( DB::raw( 'CURRENT_TIMESTAMP' ) );
@@ -183,6 +187,19 @@ class AdminMigrationCommand extends Command
             {
                 $table->integer('_order')->unsigned();
                 $this->line('<comment>+ Added column:</comment> _order');
+            }
+
+
+            //Sluggable column
+            if ( $model->getProperty('sluggable') != null )
+            {
+                if ( ! $this->getSchema($model)->hasColumn($model->getTable(), 'slug') )
+                {
+                    $this->setSlug($table, $model);
+                    $this->line('<comment>+ Added column:</comment> slug');
+                } else {
+                    $this->setSlug($table, $model)->change();
+                }
             }
 
             //Published at column
@@ -372,6 +389,19 @@ class AdminMigrationCommand extends Command
 
             return true;
         }
+    }
+
+    protected function setSlug($table, $model)
+    {
+        $slugcolumn = $model->getProperty('sluggable');
+
+        $column = $table->string('slug', $model->getFieldLength($slugcolumn))->after( $slugcolumn );
+
+        //If is field required
+        if( ! $model->hasFieldParam( $slugcolumn , 'required') )
+            $column->nullable();
+
+        return $column;
     }
 
     /**

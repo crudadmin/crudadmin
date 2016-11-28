@@ -31,32 +31,17 @@ class DataController extends Controller
 
         $rows = [];
 
-        foreach ($data as $row) {
-            $model = new $model;
+        foreach ($data as $request_row) {
+            //Create row into db
+            $row = (new $model)->create($request_row);
 
-            $model->fill( $row );
-
-            //Checks if is enabled sortable
-            if ( $model->getProperty('sortable') == true )
-            {
-                $model->forceFill([ '_order' => $model->withTrashed()->count() + 1 ]);
-            }
-
-            $model->save();
-
-            $this->updateBelongsToMany($model, $model);
+            $this->updateBelongsToMany($model, $row);
 
             //Fire on create event
             if ( method_exists($model, 'onCreate') )
-                $model->onCreate($model);
+                $row->onCreate($row);
 
-            //Checks if is enabled publishing
-            if ( $model->getProperty('publishable') == true )
-            {
-                $model->forceFill(['published_at' => Carbon::now()->toDateTimeString() ]);
-            }
-
-            $rows[] = $model;
+            $rows[] = $row;
         }
 
         //Checks for upload errors
@@ -116,7 +101,7 @@ class DataController extends Controller
     }
 
     /*
-     * Add/update belongs to many rows to pivot table
+     * Add/update belongs to many rows into pivot table from selectbox
      */
     public function updateBelongsToMany($model, $row)
     {

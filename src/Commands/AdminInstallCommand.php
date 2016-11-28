@@ -167,7 +167,7 @@ class AdminInstallCommand extends Command
             ]) );
 
             $this->line('<comment>+ Demo user created</comment>');
-            $this->line('<info>- Admin path:</info> <comment>'.action('\Gogol\Admin\Controllers\Auth\AuthController@showLoginForm').'</comment>');
+            $this->line('<info>- Admin path:</info> <comment>'.action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
             $this->line('<info>- Email:</info> <comment>'.$this->auth['email'].'</comment>');
             $this->line('<info>- Password:</info> <comment>'.$this->auth['password'].'</comment>');
         }

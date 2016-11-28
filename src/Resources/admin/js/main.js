@@ -16691,7 +16691,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/BaseComponent.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/BaseComponent.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -16935,7 +16935,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Forms/FormBuilder.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Forms/FormBuilder.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -17111,7 +17111,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Forms/FormInputBuilder.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Forms/FormInputBuilder.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -17433,7 +17433,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Forms/ModelBuilder.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Forms/ModelBuilder.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -17474,7 +17474,7 @@ exports.default = {
 
       orderby: ['id', 1],
 
-      hidden: ['language_id', '_order', 'published_at', 'updated_at', 'created_at']
+      hidden: ['language_id', '_order', 'slug', 'published_at', 'updated_at', 'created_at']
     };
   },
 
@@ -17836,7 +17836,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Forms/ModelRowsBuilder.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Forms/ModelRowsBuilder.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -17888,7 +17888,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Partials/File.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Partials/File.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -17940,7 +17940,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Sidebar/Sidebar.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Sidebar/Sidebar.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -17999,7 +17999,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/Sidebar/SidebarRow.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/Sidebar/SidebarRow.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -18054,7 +18054,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/views/BasePageView.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/views/BasePageView.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {
@@ -18083,7 +18083,7 @@ if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
   if (!hotAPI.compatible) return
-  var id = "/Volumes/SSD/www/root/home/dev/ocovan/web/packages/gogol/admin/src/Resources/js/components/views/DashboardView.vue"
+  var id = "/Volumes/SSD/www/root/home/projects/admin/web/packages/gogol/admin/src/Resources/js/components/views/DashboardView.vue"
   if (!module.hot.data) {
     hotAPI.createRecord(id, module.exports)
   } else {

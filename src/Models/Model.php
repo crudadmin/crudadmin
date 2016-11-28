@@ -80,6 +80,11 @@ class Model extends BaseModel
     protected $maximum = 0;
 
     /*
+     * Automatic sluggable
+     */
+    protected $sluggable = null;
+
+    /*
      * Acivate/deactivate model in administration
      */
     protected $active = true;
