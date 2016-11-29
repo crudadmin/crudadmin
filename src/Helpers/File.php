@@ -55,7 +55,7 @@ class File {
      */
     public function __toString()
     {
-        return $this->source;
+        return $this->path;
     }
 
     public function __get($key)

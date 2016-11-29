@@ -119,6 +119,10 @@ class AdminMigrationCommand extends Command
             foreach ($model->getFields() as $key => $value)
             {
                 $this->setColumn( $table, $model, $key );
+
+                //Sluggable column
+                if ( $model->getProperty('sluggable') != null && $model->getProperty('sluggable') == $key )
+                    $this->setSlug( $table, $model );
             }
 
             //Add multilanguage support
@@ -127,10 +131,6 @@ class AdminMigrationCommand extends Command
             //Order column for sorting rows
             if ( $model->getProperty('sortable') == true )
                 $table->integer('_order')->unsigned();
-
-            //Sluggable column
-            if ( $model->getProperty('sluggable') != null )
-                $this->setSlug( $table, $model );
 
             //Published at column
             if ( $model->getProperty('publishable') == true)
@@ -195,10 +195,10 @@ class AdminMigrationCommand extends Command
             {
                 if ( ! $this->getSchema($model)->hasColumn($model->getTable(), 'slug') )
                 {
-                    $this->setSlug($table, $model);
+                    $this->setSlug($table, $model, true);
                     $this->line('<comment>+ Added column:</comment> slug');
                 } else {
-                    $this->setSlug($table, $model)->change();
+                    $this->setSlug($table, $model, true)->change();
                 }
             }
 
@@ -391,11 +391,14 @@ class AdminMigrationCommand extends Command
         }
     }
 
-    protected function setSlug($table, $model)
+    protected function setSlug($table, $model, $updating = false)
     {
         $slugcolumn = $model->getProperty('sluggable');
 
-        $column = $table->string('slug', $model->getFieldLength($slugcolumn))->after( $slugcolumn );
+        $column = $table->string('slug', $model->getFieldLength($slugcolumn));
+
+        if ( $updating == true )
+            $column->after( $slugcolumn );
 
         //If is field required
         if( ! $model->hasFieldParam( $slugcolumn , 'required') )

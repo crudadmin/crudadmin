@@ -7,8 +7,14 @@ class Admin
 {
     protected $files;
 
+    /*
+     * Checks if has been admin models loaded
+     */
+    protected $booted = false;
+
     public $buffer = [
         'namespaces' => [],
+        'modelnames' => [],
         'models' => [],
     ];
 
@@ -180,6 +186,9 @@ class Admin
         //Sorting models
         $this->sortModels();
 
+        //All admin models has been properly loaded
+        $this->booted = true;
+
         return $this->get('namespaces');
     }
 
@@ -209,15 +218,71 @@ class Admin
             if ( $model->getTable() == $table )
                 return $model;
         }
-
     }
 
+    /*
+     * Returns all model names in lowercase and without full namespace path
+     */
+    public function getAdminModelNames()
+    {
+        //Checks if is namespaces into buffer
+        if ( $this->get('modelnames') )
+        {
+            return $this->get( 'modelnames' );
+        }
+
+        $names = [];
+
+        foreach( $this->getAdminModelsPaths() as $path )
+        {
+            $names[ strtolower( class_basename($path) ) ] = $path;
+        }
+
+        if ( $this->isLoaded() )
+            $this->buffer['modelnames'] = $names;
+
+        return $names;
+    }
+
+    /*
+     * Checks if model exists in admin models list
+     */
+    public function hasAdminModel($model, $callback = null)
+    {
+        // var_dump($model);
+        $model = strtolower($model);
+
+        $modelnames = $this->getAdminModelNames();
+
+        //Checks if is model in modelnames array
+        if ( array_key_exists($model, $modelnames) )
+        {
+            if ( $callback )
+                return call_user_func_array($callback, [$model, $modelnames[$model]]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /*
+     * Returns if is in config allowed multi languages support
+     */
     public function isEnabledMultiLanguages()
     {
         if (config('admin.localization') == true)
             return true;
         else
             return false;
+    }
+
+    /*
+     * Returns if is admin model loaded
+     */
+    public function isLoaded()
+    {
+        return $this->booted;
     }
 
     public function stub($stub)

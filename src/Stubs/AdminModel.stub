@@ -31,7 +31,7 @@ class DummyClass extends AdminModel
      * Model Parent
      * Eg. Articles::class,
      */
-    protected $belongsToModel = null;
+    protected $belongsToModel = DummyBelongsTo::class;
 
     /*
      * Minimum page rows

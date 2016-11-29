@@ -19,7 +19,7 @@ class Controller extends BaseController
         $data = $request->all();
 
         $model = Admin::getModelByTable( $data['_model'] );
-        $rules = $model->getRules($row);
+        $rules = $model->getValidationRules($row);
 
         //Removes required validation parameter from input when is row avaiable and when is not field value empty
         if ( isset( $row ) )

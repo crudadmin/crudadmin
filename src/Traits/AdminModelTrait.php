@@ -4,10 +4,8 @@ namespace Gogol\Admin\Traits;
 
 use Admin;
 use Fields;
-use Illuminate\Support\Str;
 use Illuminate\Filesystem\Filesystem;
 use Gogol\Admin\Helpers\File;
-use Gogol\Admin\Helpers\Sluggable;
 use Localization;
 use Illuminate\Database\Eloquent\Collection;
 use DB;
@@ -20,66 +18,44 @@ trait AdminModelTrait
 
     private $_fields = null;
 
+    /*
+     * On calling method
+     *
+     * @see Illuminate\Database\Eloquent\Model
+     */
     public function __call($method, $parameters)
     {
         //Checks for relationships
         if (!method_exists($this, $method) && $relation = $this->returnAdminRelationship($method))
             return $relation;
 
-        //Checks for gallery
-        if ( $gallery = $this->checkForGallery($method) )
-            return $gallery;
+        //Checks for db relationship childrens into actual model
+        if ( $relation = $this->checkForChildrenModels($method) )
+            return $relation;
 
         return parent::__call($method, $parameters);
     }
 
     /*
-     * Update model data before saving
+     * On calling property
+     *
+     * @see Illuminate\Database\Eloquent\Model
      */
-    public function save(array $options = [])
-    {
-        $attributes = $this->attributes;
-
-        //If model has needs sluggable field
-        if ( $this->sluggable != null )
-        {
-            $attributes = (new Sluggable($attributes, $this))->get();
-        }
-
-        //If is creating new row
-        if ( $this->exists == false )
-        {
-            //Add auto order incement into row, when row is not in database yet
-            if ( $this->sortable == true && ! array_key_exists('_order', $attributes) )
-            {
-                $attributes['_order'] = $this->withTrashed()->count();
-            }
-
-            //Add auto publishing rows
-            if ( $this->publishable == true && ! array_key_exists('published_at', $attributes) )
-            {
-                $attributes['published_at'] = Carbon::now()->toDateTimeString();
-            }
-        }
-
-        //Override attributes
-        $this->attributes = $attributes;
-
-        //Save model
-        return parent::save($options);
-    }
-
     public function __get($key)
     {
         return $this->getValue($key);
     }
 
+    /*
+     * Returns modified called property
+     */
     public function getValue($key)
     {
         //Checks for relationship
         if (!property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) && $relation = $this->returnAdminRelationship($key, true))
             return $relation;
 
+        //If is called field type file, then return file wrapper
         if ( $field = $this->getField($key) )
         {
             //Register file type response
@@ -87,180 +63,63 @@ trait AdminModelTrait
             {
                 if ( $file = parent::__get($key) )
                     return new File( $file, $key, $this->getTable() );
-                else
-                    return null;
+
+                return null;
             }
-        } else if ( Localization::isEnabled() && ($localization = Localization::get()) && $field = $this->getField($key.'_'.$localization->slug) ) {
+        }
+
+        //If is called property with localization attribute, then add into called property language prefix
+        else if ( Localization::isEnabled() && ($localization = Localization::get()) && $field = $this->getField($key.'_'.$localization->slug) ) {
             $key = $key.'_'.$localization->slug;
-        } else if ( $gallery = $this->checkForGallery($key, true) ){
-            return $gallery;
+        }
+
+        //Checks for db relationship childrens into actual model
+        else if ( $relation = $this->checkForChildrenModels($key, true) ) {
+            return $relation;
         }
 
         return parent::__get($key);
     }
 
-    protected function checkForGallery($method, $get = false)
-    {
-        if ( $method != 'gallery' )
-            return false;
-
-        $modelGallery = class_basename( str_plural( get_class($this) ) ) . 'Gallery';
-
-        //Checks if actual model owns gallery, when yes, then returns gallery model relationship
-        foreach( Admin::getAdminModelsPaths() as $path )
-        {
-            $classname = class_basename($path);
-
-            if ( $modelGallery == $classname )
-            {
-                return $this->returnAdminRelationship($classname, $get);
-            }
-        }
-
-        return false;
-    }
-
     /*
-     * Returns relationship for sibling model
+     * Update model data before saving
+     *
+     * @see Illuminate\Database\Eloquent\Model
      */
-    public function returnAdminRelationship($method, $get = false)
+    public function save(array $options = [])
     {
-        $method_lowercase = strtolower( $method );
-        $method_snake = Str::snake($method);
-
-        //Checks laravel buffer for relations
-        if ( $this->relationLoaded($method) && $get == true)
+        //If model has needs sluggable field
+        if ( $this->sluggable != null )
         {
-            return $this->relations[$method];
+            $this->sluggable();
         }
 
-        //Get all admin modules
-        $models = Admin::getAdminModelsPaths();
-
-        //Belongs to many relation
-        if ( $this->hasFieldParam($method_snake, 'belongsToMany') )
+        //If is creating new row
+        if ( $this->exists == false )
         {
-            $properties = $this->getRelationProperty($method_snake, 'belongsToMany');
-
-            foreach ($models as $path)
+            //Add auto order incement into row, when row is not in database yet
+            if ( $this->sortable == true && ! array_key_exists('_order', $this->attributes) )
             {
-                //Find match
-                if ( strtolower( Str::snake( class_basename($path) ) ) == $properties[5] )
-                {
-                    return $this->relationResponse($method_snake, 'belongsToMany', $path, $get, $properties);
-                }
+                $this->attributes['_order'] = $this->withTrashed()->count();
+            }
+
+            //Add auto publishing rows
+            if ( $this->publishable == true && ! array_key_exists('published_at', $this->attributes) )
+            {
+                $this->attributes['published_at'] = Carbon::now()->toDateTimeString();
             }
         }
 
-
-        //Belongs to
-        if ( $this->hasFieldParam($method_snake . '_id', 'belongsTo') )
-        {
-            //Get edited field key
-            $field_key = $method_snake . '_id';
-
-            //Get related table
-            $foreign_table = explode(',', $this->getFieldParam($field_key, 'belongsTo'))[0];
-
-            foreach ($models as $path)
-            {
-                //Find match
-                if ( Str::snake( class_basename($path) ) == str_singular($foreign_table) )
-                {
-                    $properties = $this->getRelationProperty($field_key, 'belongsTo');
-
-                    return $this->relationResponse($field_key, 'belongsTo', $path, $get, $properties);
-                }
-            }
-        }
-
-        foreach ($models as $path)
-        {
-            $classname = strtolower( class_basename($path) );
-
-            //Find match
-            if ( $classname == $method_lowercase || str_plural($classname) == $method )
-            {
-                $model = new $path;
-
-                //If has belongs to many relation
-                if ( $field = $model->getField( $this->getTable() ) )
-                {
-                    if ( array_key_exists('belongsToMany', $field) )
-                    {
-                        $properties = $model->getRelationProperty($this->getTable(), 'belongsToMany');
-
-                        return $this->relationResponse($method, 'manyToMany', $path, $get, $properties);
-                    }
-                }
-
-                //Checks all fields in model if has belongsTo relationship
-                foreach ( $model->getFields() as $key => $field )
-                {
-                    if ( array_key_exists('belongsTo', $field) )
-                    {
-                        $properties = $model->getRelationProperty($key, 'belongsTo');
-
-                        if ( $properties[0] == $this->getTable() )
-                        {
-                            return $this->relationResponse($method, 'hasMany', $path, $get);
-                        }
-                    }
-                }
-
-                //Check if called model belongs to caller
-                if ( $model->getProperty('belongsToModel') != get_class($this) && $this->getProperty('belongsToModel') != get_class($model))
-                    break;
-
-                $relationType = $this->getProperty('belongsToModel') == get_class($model) ? 'belongsTo' : 'hasMany';
-
-                //If relationship can has only one child
-                if ( $relationType == 'hasMany' && $model->maximum == 1 )
-                    $relationType = 'hasOne';
-
-                return $this->relationResponse($method, $relationType, $path, $get, [ 4 => $this->getForeignColumn() ]);
-            }
-        }
-
-        return false;
-    }
-
-    /*
-     * Returns type of relation
-     */
-    protected function relationResponse($method, $relationType = false, $path, $get = false, $properties = [])
-    {
-        $relation = false;
-
-        if ( $relationType == 'belongsTo' ){
-            $relation = $this->belongsTo( $path, $properties[4] );
-        } else if ( $relationType == 'belongsToMany' ){
-            $relation = $this->belongsToMany( $path, $properties[3], $properties[6], $properties[7] );
-        } else if ( $relationType == 'hasOne' )
-            $relation = $this->hasOne( $path );
-        else if ( $relationType == 'hasMany' )
-            $relation = $this->hasMany( $path );
-        else if ( $relationType == 'manyToMany' )
-            $relation = $this->belongsToMany( $path, $properties[3], $properties[7], $properties[6] );
-
-        if ( $relation )
-        {
-            //If was relation called as property, and is only hasOne relationship, then return value
-            if ( $get === true )
-            {
-                $relation = in_array($relationType, ['hasOne', 'belongsTo']) ? $relation->first() : $relation->get();
-            }
-
-            //Save relation into laravel model buffer
-            $this->setRelation($method, $relation);
-        }
-
-        return $relation;
+        //Save model
+        return parent::save($options);
     }
 
     //Add fillable and dates fields
     public function initTrait()
     {
+        if ( ! Admin::isLoaded() )
+            return;
+
         //Add fillable fields
         $this->makeFillable();
 
@@ -270,14 +129,14 @@ trait AdminModelTrait
         //Add cast attributes
         $this->makeCastable();
 
-        //Remove hidden when needed in admin
+        //Remove hidden when is required in admin
         $this->removeHidden();
     }
 
     /**
      * Set fillable property for laravel model from admin fields
      */
-    public function makeFillable()
+    protected function makeFillable()
     {
         foreach ($this->getFields() as $key => $field)
         {
@@ -307,7 +166,10 @@ trait AdminModelTrait
             $this->fillable[] = 'language_id';
     }
 
-    public function makeDateable()
+    /*
+     * Set date fields
+     */
+    protected function makeDateable()
     {
         foreach ($this->getFields() as $key => $field)
         {
@@ -320,11 +182,13 @@ trait AdminModelTrait
     }
 
 
-    public function makeCastable()
+    /*
+     * Set selectbox field to automatic json format
+     */
+    protected function makeCastable()
     {
         foreach ($this->getFields() as $key => $field)
         {
-
             //Add cast attribute for fields with multiple select
             if ( $field['type'] == 'select' && $this->hasFieldParam($key, 'multiple') )
                 $this->casts[$key] = 'json';
@@ -332,7 +196,10 @@ trait AdminModelTrait
         }
     }
 
-    public function removeHidden()
+    /*
+     * Remove unneeded properties from model in administration
+     */
+    protected function removeHidden()
     {
         if ( ! Admin::isAdmin() )
             return;
@@ -377,7 +244,10 @@ trait AdminModelTrait
         return $this->_fields;
     }
 
-    public function getRules($row = null)
+    /*
+     * Returns validation rules of model
+     */
+    public function getValidationRules($row = null)
     {
         $fields = $this->getFields($row);
 
@@ -401,13 +271,17 @@ trait AdminModelTrait
                     $key = $key . '.*';
             }
 
-            $data[$key] = $this->checkAdminProperties($field);
+            //Removes admin properties in field from request
+            $data[$key] = $this->removeAdminProperties($field);
 
         }
 
         return $data;
     }
 
+    /*
+     * Makes properties from array to string
+     */
     protected function fieldToString($field)
     {
         $data = [];
@@ -423,7 +297,10 @@ trait AdminModelTrait
         return $data;
     }
 
-    protected function checkAdminProperties($field)
+    /*
+     * Removes admin properties in field from request
+     */
+    protected function removeAdminProperties($field)
     {
         //Remove admin columns
         foreach (Fields::getAttributes() as $key)
@@ -434,6 +311,9 @@ trait AdminModelTrait
         return $this->fieldToString($field);
     }
 
+    /*
+     * Returns needed field
+     */
     public function getField($key)
     {
         $fields = $this->getFields();
@@ -446,7 +326,6 @@ trait AdminModelTrait
 
     /*
      * Returns type of field
-     * string/text/editor/select/integer/decimal/file/password
      */
     public function getFieldType($key)
     {
@@ -509,7 +388,7 @@ trait AdminModelTrait
     }
 
     /*
-     * Returns if is field required
+     * Returns if field has required
      */
     public function hasFieldParam($key, $paramName)
     {
@@ -537,7 +416,7 @@ trait AdminModelTrait
     }
 
     /*
-     * Returns short values for table into administration
+     * Returns short values of fields for content table of rows in administration
      */
     public function getBaseFields($all = false)
     {
@@ -620,16 +499,25 @@ trait AdminModelTrait
         return $data;
     }
 
+    /*
+     * Returns path for uploaded files from actual model
+     */
     public function filePath($key)
     {
         return 'uploads/' . $this->getTable() . '/' . $key;
     }
 
+    /*
+     * Returns if model has group in administration submenu
+     */
     public function hasGroup()
     {
         return is_string( $this->group ) && !empty($this->group);
     }
 
+    /*
+     * Returns group for submenu
+     */
     public function getGroup()
     {
         $config_groups = config('admin.groups');
@@ -643,6 +531,9 @@ trait AdminModelTrait
         return $group_name;
     }
 
+    /*
+     * Return all database relationship childs, models which actual model owns
+     */
     public function getChilds()
     {
         $childs = [];
@@ -662,36 +553,28 @@ trait AdminModelTrait
         return $childs;
     }
 
-    public function getBaseModelTable()
-    {
-        return Str::snake(class_basename($this));
-    }
-
-    public function getForeignColumn($model = null)
-    {
-        if ( $this->belongsToModel == null && $model===null )
-            return null;
-
-        $parent = $model ? $model : new $this->belongsToModel;
-
-        $model_table_name = $parent->getBaseModelTable();
-
-        return $model_table_name . '_id';
-    }
-
+    /*
+     * Returns migration date
+     */
     public function getMigrationDate()
     {
         return $this->migration_date;
     }
 
+    /*
+     * Checks if is enabled language foreign column for actual model.
+     */
     public function isEnabledLanguageForeign()
     {
-        if ( ( $this->getBaseModelTable()!='language' && $this->belongsToModel == null && $this->localization === true || $this->localization === true ) && Admin::isEnabledMultiLanguages())
+        if ( ( $this->getTable()!='languages' && $this->belongsToModel == null && $this->localization === true || $this->localization === true ) && Admin::isEnabledMultiLanguages())
             return true;
 
         return false;
     }
 
+    /*
+     * Returns property
+     */
     public function getProperty($property, $row = null)
     {
         //Object / Array
@@ -702,43 +585,12 @@ trait AdminModelTrait
         return $this->{$property};
     }
 
-    public function getRelationProperty($key, $relation)
-    {
-        $field = $this->getField($key);
-
-        $properties = explode(',', $field[$relation]);
-        //If is not defined references column for other table
-        if ( count($properties) == 1 )
-            $properties[] = 'NULL';
-
-        if ( count($properties) == 2 )
-            $properties[] = 'id';
-
-        if ( $relation == 'belongsToMany' )
-        {
-            //Table names in singular
-            $tables = [
-                str_singular($this->getTable()),
-                str_singular($properties[0])
-            ];
-
-            //Pivot table name
-            $pivot_table = $tables[1] . '_' . $tables[0] . '_' . $key;
-
-            //Add pivot table into properties
-            $properties[] = $pivot_table;
-            $properties[] = $tables[0];
-            $properties[] = $tables[1];
-            $properties[] = $tables[0] . '_id';
-            $properties[] = $tables[1] . '_id';
-        } else {
-            $properties[] = str_singular( $properties[0] );
-            $properties[] = $key;
-        }
-
-        return $properties;
-    }
-
+    /**
+     * Convert the model's attributes to an array.
+     *
+     * @see Illuminate\Database\Eloquent\Model
+     * @return array
+     */
     public function attributesToArray()
     {
         $attributes = parent::attributesToArray();
@@ -775,7 +627,7 @@ trait AdminModelTrait
 
     public function validateRequest($row = null)
     {
-        $rules = $this->getRules( $row );
+        $rules = $this->getValidationRules( $row );
 
         $validator = Validator::make(request()->all(), $rules);
 

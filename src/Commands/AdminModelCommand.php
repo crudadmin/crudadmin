@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
 use Carbon\Carbon;
+use Admin;
 
 class AdminModelCommand extends GeneratorCommand
 {
@@ -22,6 +23,13 @@ class AdminModelCommand extends GeneratorCommand
      * @var string
      */
     protected $description = 'Create a new model into admin categories';
+
+    /**
+     * The type of class being generated.
+     *
+     * @var string
+     */
+    protected $type = 'Admin model';
 
     /**
      * Create a new command instance.
@@ -57,6 +65,9 @@ class AdminModelCommand extends GeneratorCommand
         return __DIR__.'/../Stubs/AdminModel.stub';
     }
 
+    /*
+     * Checks if is gallery model
+     */
     protected function isGallery()
     {
         $gallery = substr($this->getNameInput(), -7);
@@ -67,9 +78,40 @@ class AdminModelCommand extends GeneratorCommand
         return false;
     }
 
+    /*
+     * Get owner model of actual class
+     */
+    protected function getParentModelName()
+    {
+        $camel = snake_case($this->getNameInput());
+
+        $array = array_slice( explode('_', $camel), 0, -1 );
+
+        $parent = studly_case( str_singular( implode('_', $array) ) );
+
+        return $parent;
+    }
+
+    /*
+     * Checks if creating model has parent model with hasMany relation
+     */
+    protected function hasRelation()
+    {
+        $parent = $this->getParentModelName();
+
+        return Admin::hasAdminModel($parent);
+    }
+
+    /*
+     * Returns name of parent model
+     */
     protected function getBelongsTo()
     {
-        return str_replace('Gallery', '', $this->getNameInput());
+        //If creating model has not parent and is not belonging to any model
+        if ( ! $this->hasRelation() )
+            return 'null';
+
+        return $this->getParentModelName().'::class';
     }
 
     /**
@@ -89,8 +131,9 @@ class AdminModelCommand extends GeneratorCommand
             'DummyRootNamespace', $this->laravel->getNamespace(), $stub
         );
 
+        //Automatically bind model parent
         $stub = str_replace(
-            'DummyBelongsTo', $this->getBelongsTo(), $stub
+            'DummyBelongsTo::class', $this->getBelongsTo(), $stub
         );
 
         $stub = str_replace(

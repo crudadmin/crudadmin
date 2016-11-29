@@ -2,6 +2,7 @@
 namespace Gogol\Admin\Helpers\Fields\Mutations;
 
 use DB;
+use Admin;
 use Localization;
 
 class AddSelectSupport
@@ -10,7 +11,7 @@ class AddSelectSupport
 
     public function update( $field, $key, $model )
     {
-        if ( $field['type'] == 'select' )
+        if ( $field['type'] == 'select' && Admin::isAdmin() )
         {
             $options = (array)$model->getProperty('options');
 

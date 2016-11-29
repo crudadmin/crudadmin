@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Model as BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Gogol\Admin\Traits\AdminModelTrait;
+use Gogol\Admin\Traits\Sluggable;
+use Gogol\Admin\Traits\HasChildrens;
+use Gogol\Admin\Traits\ModelRelationships;
 use Localization;
 use Admin;
 
 class Model extends BaseModel
 {
-    use SoftDeletes;
-
-    use AdminModelTrait;
+    use SoftDeletes, ModelRelationships, Sluggable, HasChildrens, AdminModelTrait;
 
     /*
      * Template name
