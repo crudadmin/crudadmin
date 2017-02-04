@@ -3,22 +3,22 @@
 @section('content')
 <!-- /.login-logo -->
 <div class="login-box-body">
-  <p class="login-box-msg">Prosím, prihláste sa pomocou emailu a hesla</p>
+  <p class="login-box-msg">{{ config('admin.authentication.login.title', 'Prosím, prihláste sa pomocou emailu a hesla') }}</p>
 
   <form action="" method="post">
     {!! csrf_field() !!}
 
     <div class="form-group has-feedback">
-      <input type="email" name="email" class="form-control" value="{{ old('email') }}" placeholder="Email">
+      <input type="{{ $username == 'email' ? 'email' : 'text'  }}" name="{{ $username }}" class="form-control" value="{{ old($username) }}" placeholder="{{ config('admin.authentication.login.'.$username) }}">
       <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
-      @if ($errors->has('email'))
+      @if ($errors->has($username))
           <span class="help-block">
-              <strong>{{ $errors->first('email') }}</strong>
+              <strong>{{ $errors->first($username) }}</strong>
           </span>
       @endif
     </div>
     <div class="form-group has-feedback">
-      <input type="password" name="password" class="form-control" value="{{ old('password') }}" placeholder="Password">
+      <input type="password" name="password" class="form-control" value="{{ old('password') }}" placeholder="Heslo">
       <span class="glyphicon glyphicon-lock form-control-feedback"></span>
 
       @if ($errors->has('password'))

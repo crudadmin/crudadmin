@@ -83,7 +83,7 @@ class AdminModelCommand extends GeneratorCommand
      */
     protected function getParentModelName()
     {
-        $camel = snake_case($this->getNameInput());
+        $camel = snake_case( basename( $this->getNameInput() ) );
 
         $array = array_slice( explode('_', $camel), 0, -1 );
 

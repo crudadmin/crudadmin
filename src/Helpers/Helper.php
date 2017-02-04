@@ -1,5 +1,6 @@
 <?php
 namespace Gogol\Admin\Helpers;
+
 use Route;
 
 class Helper

@@ -1,167 +1,129 @@
 <?php
+
 namespace Gogol\Admin\Requests;
 
 use File;
 use Image;
+use Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Carbon\Carbon;
 
 abstract class Request extends FormRequest
 {
-    protected $_filesBuffer = [];
+    public $uploadedFiles = [];
 
-    protected function makeDirs($path)
+    private $errors = [];
+
+    private $model = false;
+
+    //Checks if is multiple or one file
+    protected function getFilesInArray($key)
     {
-        $tree = explode('/', trim($path, '/'));
+        //Return file from data array, for laravel bug...
+        if ( $this->get($key) instanceof \Symfony\Component\HttpFoundation\File\UploadedFile )
+            return [ $this->get( $key ) ];
 
-        $path = '.';
+        //Return file from files array
+        if ( $this->file($key) instanceof \Symfony\Component\HttpFoundation\File\UploadedFile )
+            return [ $this->file( $key ) ];
 
-        foreach ($tree as $dir)
-        {
-            $path = $path.'/'.$dir;
+        if ( $this->isMultipleFileUpload( $key ) )
+            return $this->get( $key );
 
-            if (!file_exists($path))
-                mkdir($path);
-        }
+        //Return all files
+        return $this->file( $key );
     }
 
-    protected function error($message)
+    protected function isMultipleFileUpload($key)
     {
-        return [
-            'error' => $message,
-        ];
+        //If multiple files uploading
+        if ( is_array($this->get( $key )) )
+        {
+            $files = $this->get( $key );
+
+            if ( method_exists($files[0], 'isFile') && $files[0]->isFile() )
+                return true;
+        }
+
+        return false;
     }
 
-    /**
-     * Automaticaly check, upload, and make resizing and other function on file object
-     * @param  string     $field         field name
-     * @param  string     $path          upload path
-     * @param  array|null $actions_steps resizing functions [ [ 'fit' => [ 100 ], 'dir' => 'someThumbDir' ], [ 'resize' => [ 100, 200 ] ] ]
-     * @return object
-     */
-    public function upload($file, string $field, $path='uploads', array $actions_steps = null)
+    protected function isFileUpload($key)
     {
-        //If is file aviable, but is not vail
-        if ( !$file->isValid() )
-        {
-            return $this->error('- Súbor "'.$field.'" nebol uložený na server, pre jeho chybnú štruktúru.');
-        }
+        if ( $this->isMultipleFileUpload($key) )
+            return true;
 
-        $this->makeDirs($path);
-        //Get count of files in upload directory and set new filename
-        $filename = str_pad(count(File::files($path)), 8, '0', STR_PAD_LEFT).'.'.$file->getClientOriginalExtension();
-
-        //Move photo from request to directory
-        $file = $file->move($path, $filename);
-
-        $this->_filesBuffer[$field][] = $filename;
-
-        //If is required some image post processing changes with Image class
-        if (is_array($actions_steps) && count($actions_steps) > 0 && $file->getExtension() != 'svg'){
-
-            //Checks if is Image class avaiable
-            if ( ! class_exists('Image') )
-            {
-                return $this->error('- Zmena obrázku nebola aplikovaná pre "'.$field.'", kedže rozšírenie pre spracovanie obrázkov nebolo nainštalované.');
-            }
-
-            foreach ((array)$actions_steps as $dir => $actions)
-            {
-                $thumb_dir = is_numeric($dir) ? 'thumbs' : $dir;
-
-                //Creating new whumb directory with where will be store changed images
-                if (!file_exists($path.'/'.$thumb_dir))
-                    mkdir($path.'/'.$thumb_dir);
-
-                $image = Image::make($file);
-
-                foreach ((array)$actions as $name => $params)
-                {
-                    $params = $this->paramsMutator($name, $params);
-
-                    $image = call_user_func_array([$image, $name], $params);
-                }
-
-                $image->save($path.'/'.$thumb_dir.'/'.$filename);
-            }
-
-        }
-
-        return $this;
+        return $this->get( $key ) && method_exists($this->get( $key ), 'isFile') && $this->get( $key )->isFile() || $this->hasFile( $key );
     }
 
-    protected function paramsMutator($name, $params)
+    protected function isEmptyFile($key)
     {
-        //Automatic aspect ratio in resizing image with one parameter
-        if ( $name == 'resize' && count($params) <= 2 )
-        {
-            //Add auto ratio
-            if ( count( $params ) == 1 )
-            {
-                $params[] = null;
-            }
+        //If is forced deleting of file in admin
+        if ( $this->has( '$remove_' . $key ) )
+            return false;
 
-            $params[] = function ($constraint) {
-                $constraint->aspectRatio();
-            };
-        }
+        //If is uploading file
+        if ( $this->isFileUpload( $key ) )
+            return false;
 
-        return $params;
+        return true;
     }
 
     /*
      * Uploads all files from request by model inputs
      */
-    public function uploadFiles( $model, $errors = [] )
+    public function uploadFiles(array $fields = null )
     {
-        $fields = $model->getFields();
-
         foreach ($fields as $key => $field)
         {
             if ( $field['type'] == 'file' )
             {
-                $resize = null;
-
-                if ( array_key_exists('resize', $field) )
-                {
-                    $resize = $field['resize'];
-                }
-
                 //If is File field empty, then remove this field for correct updating row in db
-                if ( !$this->hasFile( $key ) && !$this->has( '$remove_' . $key ))
+                if ( $this->isEmptyFile( $key ) )
                 {
                     $this->replace( $this->except( $key ) );
-                } else if ( $this->hasFile( $key ) ) {
-
-                    //Checks if is multiole or one file
-                    $files = $this->file($key) instanceof \Symfony\Component\HttpFoundation\File\UploadedFile ? [ $this->file($key) ] : $this->file($key);
-
-                    foreach ($files as $file)
+                } else if ( $this->isFileUpload( $key ) ) {
+                    foreach ($this->getFilesInArray($key) as $file)
                     {
                         //Checks for upload errors
-                        if ( ($error = $this->upload($file, $key, $model->filePath($key), $resize)) && is_array($error) && array_key_exists('error', $error) )
+                        if ( $fileObject = $this->model->upload($key, $file) )
                         {
-                            $errors[ $key ] = $error['error'];
+                            $this->uploadedFiles[$key][] = $fileObject->filename;
+                        } else {
+                            Admin::push('errors.request', $this->errors[ $key ] = $this->model->getUploadError());
                         }
 
                         //If is not multiple upload
-                        if ( !array_key_exists('multiple', $field) || $field['multiple'] !== true )
+                        if ( ! $this->model->hasFieldParam($key, 'array', true) )
                         {
                             break;
                         }
                     }
                 }
+
+                /*
+                 * Get already uploaded files
+                 */
+                if ( Admin::isAdmin() && $this->has('$uploaded_'.$key) )
+                {
+                    $uploadedFiles = $this->get('$uploaded_'.$key);
+
+                    $fromBuffer = array_key_exists($key, $this->uploadedFiles) ? $this->uploadedFiles[$key] : [];
+
+                    $this->uploadedFiles[$key] = array_merge($uploadedFiles, $fromBuffer);
+                }
             }
         }
-
-        return $errors;
     }
 
-    public function datetimes($model)
+    /*
+     * Update datetimes format by field options
+     */
+    public function datetimes(array $fields = null)
     {
-        foreach ($model->getFields() as $key => $field)
+        foreach ($fields as $key => $field)
         {
-            if ( $model->isFieldType($key, 'date') && $model->hasFieldParam($key, 'date_format') )
+            if ( $this->model->isFieldType($key, 'date') )
             {
                 if ( $this->has( $key ) )
                 {
@@ -172,11 +134,11 @@ abstract class Request extends FormRequest
     }
 
     //If is no value for checkbox, then automaticaly add zero value
-    public function checkboxes($model)
+    public function checkboxes(array $fields = null)
     {
-        foreach ($model->getFields() as $key => $field)
+        foreach ($fields as $key => $field)
         {
-            if ( $model->isFieldType($key, 'checkbox') )
+            if ( $this->model->isFieldType($key, 'checkbox') )
             {
                 if ( ! $this->has( $key ) )
                     $this->merge( [ $key => 0 ] );
@@ -185,11 +147,11 @@ abstract class Request extends FormRequest
     }
 
     //If is no value for checkbox, then automaticaly add zero value
-    public function removeEmptyForeign($model)
+    public function removeEmptyForeign(array $fields = null)
     {
-        foreach ($model->getFields() as $key => $field)
+        foreach ($fields as $key => $field)
         {
-            if ( $model->hasFieldParam($key, 'belongsTo') && ! $model->hasFieldParam($key, 'required') )
+            if ( $this->model->hasFieldParam($key, 'belongsTo') && ! $this->model->hasFieldParam($key, 'required', true) )
             {
                 if ( ! $this->has( $key ) || empty( $this->get( $key ) ) )
                     $this->merge( [ $key => NULL ] );
@@ -197,15 +159,36 @@ abstract class Request extends FormRequest
         }
     }
 
-    public function applyMutators($model)
+    private function getFieldsByRequest($fields = null)
     {
-        $errors = $this->uploadFiles( $model );
+        //Get fields by request
+        if ( $fields )
+            return array_intersect_key($this->model->getFields(), array_flip($fields));
+        else
+            return $this->model->getFields();
+    }
 
-        $this->checkboxes( $model );
-        $this->datetimes( $model );
-        $this->removeEmptyForeign( $model );
+    public function applyMutators($model, array $fields = null)
+    {
+        //Set model object
+        $this->model = $model;
 
-        return $errors;
+        $fields = $this->getFieldsByRequest($fields);
+
+        $this->uploadFiles( $fields );
+        $this->checkboxes( $fields );
+        $this->datetimes( $fields );
+        $this->removeEmptyForeign( $fields );
+
+        return count($this->errors) == 0;
+    }
+
+    /*
+     * Returns errors in array
+     */
+    public function getErrors()
+    {
+        return $this->errors;
     }
 
     /*
@@ -216,26 +199,39 @@ abstract class Request extends FormRequest
 
         $array = [];
 
-        //Bind single files values
-        foreach ((array)$this->_filesBuffer as $key => $files)
-        {
-            if ( count($files) == 1 ){
-                $data[$key] = $files[0];
-            }
-        }
-
         //Bing multiple files values as multiple rows
-        foreach ((array)$this->_filesBuffer as $key => $files)
+        foreach ((array)$this->uploadedFiles as $key => $files)
         {
-            if ( count($files) > 1 )
+            $count = count($files);
+
+            if ( $count == 1 )
             {
-                foreach ($files as $file)
+                $data[$key] = $files[0];
+            } else if ( $count > 1 ) {
+
+                //Returns one file as one db row
+                if ( $this->model->hasFieldParam($key, 'multirows', true) )
                 {
-                    $data[$key] = $file;
-                    $array[] = $data;
+                    if ( $this->model->exists === false )
+                    {
+                        foreach ($files as $file)
+                        {
+                            $data[$key] = $file;
+
+                            $array[] = $data;
+                        }
+
+                        return $array;
+                    } else {
+                        $data[$key] = end($files);
+                    }
                 }
 
-                return $array;
+                //Bind files into file value
+                else if ( $this->model->hasFieldParam($key, 'multiple', true) )
+                {
+                    $data[$key] = $files;
+                }
             }
         }
 

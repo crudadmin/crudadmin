@@ -2,21 +2,24 @@
 
 namespace Gogol\Admin\Traits;
 
-use Admin;
-use Fields;
 use Illuminate\Filesystem\Filesystem;
 use Gogol\Admin\Helpers\File;
-use Localization;
 use Illuminate\Database\Eloquent\Collection;
-use DB;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
-use Validator;
+use Localization;
+use Fields;
+use Admin;
+use Schema;
+use DB;
 
 trait AdminModelTrait
 {
     private $_fillable = [ 'published_at' ];
 
     private $_fields = null;
+
+    private $withAllOptions = false;
 
     /*
      * On calling method
@@ -62,7 +65,25 @@ trait AdminModelTrait
             if ( $field['type'] == 'file' && !$this->hasGetMutator($key))
             {
                 if ( $file = parent::__get($key) )
-                    return new File( $file, $key, $this->getTable() );
+                {
+                    if ( is_array($file) || $this->hasFieldParam($key, 'multiple', true) )
+                    {
+                        $files = [];
+
+                        if ( !is_array($file) )
+                            $file = [ $file ];
+
+                        foreach ($file as $value)
+                        {
+                            if ( is_string($value) )
+                                $files[] = new File( $value, $key, $this->getTable() );
+                        }
+
+                        return $files;
+                    } else {
+                        return new File( $file, $key, $this->getTable() );
+                    }
+                }
 
                 return null;
             }
@@ -190,7 +211,7 @@ trait AdminModelTrait
         foreach ($this->getFields() as $key => $field)
         {
             //Add cast attribute for fields with multiple select
-            if ( $field['type'] == 'select' && $this->hasFieldParam($key, 'multiple') )
+            if ( $this->isFieldType($key, ['select', 'file']) && $this->hasFieldParam($key, 'multiple') )
                 $this->casts[$key] = 'json';
 
         }
@@ -232,7 +253,7 @@ trait AdminModelTrait
      */
     public function getFields($param = null, $force = false)
     {
-        if ( $param !== null )
+        if ( $param !== null || $this->withAllOptions() === true)
             $force = true;
 
         //Field mutations
@@ -245,41 +266,6 @@ trait AdminModelTrait
     }
 
     /*
-     * Returns validation rules of model
-     */
-    public function getValidationRules($row = null)
-    {
-        $fields = $this->getFields($row);
-
-        $data = [];
-
-        foreach ($fields as $key => $field)
-        {
-            //If is multiple file
-            if ($this->isFieldType($key, 'file') && $this->hasFieldParam($key, 'multiple') && $field['multiple'] === true)
-            {
-                foreach (['multiple', 'array'] as $param)
-                {
-                    if ( array_key_exists($param, $field) )
-                    {
-                        unset($field[$param]);
-                    }
-                }
-
-                //Add multiple validation support
-                if ( ! $row )
-                    $key = $key . '.*';
-            }
-
-            //Removes admin properties in field from request
-            $data[$key] = $this->removeAdminProperties($field);
-
-        }
-
-        return $data;
-    }
-
-    /*
      * Makes properties from array to string
      */
     protected function fieldToString($field)
@@ -288,10 +274,15 @@ trait AdminModelTrait
 
         foreach ( $field as $key => $value )
         {
-            if ( $value === true )
+            if ( $value === true ){
                 $data[] = $key;
-            else
+            } else if ( is_array( $value ) ){
+                foreach ($value as $item) {
+                    $data[] = $key . ':' . $item;
+                }
+            } else {
                 $data[] = $key . ':' . $value;
+            }
         }
 
         return $data;
@@ -390,14 +381,20 @@ trait AdminModelTrait
     /*
      * Returns if field has required
      */
-    public function hasFieldParam($key, $paramName)
+    public function hasFieldParam($key, $paramName, $paramValue = null)
     {
         if (!$field = $this->getField($key))
             return false;
 
         if ( array_key_exists($paramName, $field) )
+        {
+            if ( $paramValue !== null )
+            {
+                return $field[$paramName] === $paramValue;
+            }
+
             return true;
-        else
+        } else
             return false;
     }
 
@@ -435,6 +432,12 @@ trait AdminModelTrait
             $fields[] = $key;
         }
 
+        //Insert skipped columns
+        foreach ((array)$this->skipDropping as $key)
+        {
+            $fields[] = $key;
+        }
+
         //Add language id column
         if ($this->isEnabledLanguageForeign())
             $fields[] = 'language_id';
@@ -465,20 +468,60 @@ trait AdminModelTrait
         return $fields;
     }
 
+    protected function loadWithDependecies()
+    {
+        $with = [];
+
+        //Load relationships
+        if ( Admin::isAdmin() )
+        {
+            foreach ($this->getFields() as $key => $field)
+            {
+                if ( $this->hasFieldParam($key, 'belongsTo') )
+                {
+                    $with[] = substr($key, 0, -3);
+                }
+
+                if ( $this->hasFieldParam($key, 'belongsToMany') )
+                {
+                    $with[] = $key;
+                }
+            }
+        }
+
+        return $with;
+    }
+
     /*
      * Returns all rows with base fields
      */
-    public function getBaseRows($from_id = 0)
+    public function getBaseRows($subid, $langid, $callback = null)
     {
         $fields = $this->getBaseFields();
 
-        $query = $this->select( $fields )->orderBy('id', 'asc')->where('id', '>', $from_id);
+        //Get model dependencies
+        $with = $this->loadWithDependecies();
 
-        //Limit for models with big data in first data request
-        if ( $from_id == -1 )
-            $query = $query->limit(200);
+        //Get base columns from database with relationships
+        $query = $this->select( $fields )->with($with);
+
+        //Filter rows by language id and parent id
+        $query->filterByParentOrLanguage($subid, $langid);
+
+        if ( is_callable( $callback ) )
+            call_user_func_array($callback, [$query]);
 
         return $query->get();
+    }
+
+    public function scopeFilterByParentOrLanguage($query, $subid, $langid)
+    {
+        if ( $langid > 0 )
+            $query->localization($langid);
+
+        if ( $subid > 0 )
+            $query->where($this->getForeignColumn(), $subid);
+
     }
 
     /*
@@ -497,14 +540,6 @@ trait AdminModelTrait
         }
 
         return $data;
-    }
-
-    /*
-     * Returns path for uploaded files from actual model
-     */
-    public function filePath($key)
-    {
-        return 'uploads/' . $this->getTable() . '/' . $key;
     }
 
     /*
@@ -579,10 +614,21 @@ trait AdminModelTrait
     {
         //Object / Array
         if (in_array($property, ['fields', 'options'])) {
-            return method_exists($this, $property) ? $this->{$property}($row) : $this->{$property};
+            if ( method_exists($this, $property) )
+                return $this->{$property}($row);
+
+            if ( property_exists($this, $property) )
+                return $this->{$property};
+
+            return null;
         }
 
         return $this->{$property};
+    }
+
+    public function setProperty($property, $value)
+    {
+        $this->{$property} = $value;
     }
 
     /**
@@ -612,11 +658,9 @@ trait AdminModelTrait
                 foreach ($models as $path)
                 {
                     //Find match
-                    if ( strtolower( class_basename($path) ) == strtolower( $properties[5] ) )
+                    if ( strtolower( Str::snake(class_basename($path) ) ) == strtolower( $properties[5] ) )
                     {
-                        $rows = DB::table($properties[3])->where( $properties[6], $this->getKey() )->lists( $properties[7] );
-
-                        $attributes[ $key ] = $rows;
+                        $attributes[ $key ] = $this->{$key}->pluck( 'id' );
                     }
                 }
             }
@@ -625,18 +669,47 @@ trait AdminModelTrait
         return $attributes;
     }
 
-    public function validateRequest($row = null)
+
+    /**
+     * Convert the model instance to an array.
+     *
+     * @return array
+     */
+    public function toArray()
     {
-        $rules = $this->getValidationRules( $row );
+        $attributes = $this->attributesToArray();
 
-        $validator = Validator::make(request()->all(), $rules);
-
-        if ($validator->fails()) {
-            return redirect( url()->previous() )
-                        ->withErrors($validator)
-                        ->withInput();
+        //For administration is reversed way of merging arrays for multiselect relationships support
+        if ( Admin::isAdmin() )
+        {
+            return array_merge($this->relationsToArray(), $attributes);
         }
 
-        return false;
+        return array_merge($attributes, $this->relationsToArray());
+    }
+
+    //Returns schema with correct connection
+    public function getSchema()
+    {
+        return Schema::connection( $this->getProperty('connection') );
+    }
+
+    /**
+     * Create a new Eloquent Collection instance.
+     *
+     * @param  array  $models
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function newCollection(array $models = [])
+    {
+        return new \Gogol\Admin\Helpers\AdminCollection($models);
+    }
+
+    public function withAllOptions( $set = null )
+    {
+        if ( $set === true || $set === false )
+            $this->withAllOptions = $set;
+
+        return $this->withAllOptions;
     }
 }

@@ -4,13 +4,11 @@ namespace Gogol\Admin\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Database\Schema\Blueprint;
 use Admin;
 use Gogol\Admin\Models\User as BaseUser;
 use App\User;
 use Illuminate\Console\ConfirmableTrait;
 use Artisan;
-use Schema;
 
 class AdminInstallCommand extends Command
 {
@@ -124,35 +122,11 @@ class AdminInstallCommand extends Command
 
     public function runMigrations()
     {
-
         //Run migration for password reset table
         Artisan::call('admin:migrate');
 
         //Run other migrations
         Artisan::call('migrate');
-
-        $this->addRememberTokenIntoUser();
-    }
-
-    protected function addRememberTokenIntoUser()
-    {
-        $user = $this->getUserModel();
-
-        $connection = $this->getSchema( $user );
-
-        //Add remember token into user table
-        if ( ! $connection->hasColumn( $user->getTable(), 'remember_token') )
-        {
-            $connection->table( $user->getTable() , function (Blueprint $table) use ( $connection, $user ) {
-
-                $column = $table->rememberToken();
-
-                //if is avatar column avaiable, than add remember token after this column
-                if ( $connection->hasColumn( $user->getTable(), 'avatar') )
-                    $column->after('avatar');
-
-            });
-        }
     }
 
     public function createDemoUser()
@@ -171,11 +145,5 @@ class AdminInstallCommand extends Command
             $this->line('<info>- Email:</info> <comment>'.$this->auth['email'].'</comment>');
             $this->line('<info>- Password:</info> <comment>'.$this->auth['password'].'</comment>');
         }
-    }
-
-    //Returns schema with correct connection
-    protected function getSchema($model)
-    {
-        return Schema::connection( $model->getProperty('connection') );
     }
 }

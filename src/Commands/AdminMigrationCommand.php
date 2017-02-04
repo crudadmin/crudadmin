@@ -80,16 +80,26 @@ class AdminMigrationCommand extends Command
      */
     protected function generateMigration($model)
     {
-        if ( $this->getSchema($model)->hasTable( $model->getTable() ) )
+        if ( $model->getSchema()->hasTable( $model->getTable() ) )
         {
             $this->updateTable( $model );
-            $this->runFromCache( $model->getTable() );
-
-            return;
+        } else {
+            $this->createTable( $model );
         }
 
-        $this->createTable( $model );
-        $this->runFromCache( $model->getTable() );
+        //Checks if model has some extre migrations on create
+        if ( method_exists($model, 'onMigrate') )
+        {
+            $this->buffer[ $model->getTable() ][] = function() use($model) {
+
+                $model->getSchema()->table( $model->getTable() , function (Blueprint $table) use ($model) {
+                    $model->onMigrate($table, $model->getSchema());
+                });
+
+            };
+        }
+
+        $this->runFromCache($model->getTable());
     }
 
     public function runFromCache($table)
@@ -109,7 +119,7 @@ class AdminMigrationCommand extends Command
      */
     protected function createTable($model)
     {
-        $this->getSchema($model)->create( $model->getTable() , function (Blueprint $table) use ($model) {
+        $model->getSchema()->create( $model->getTable() , function (Blueprint $table) use ($model) {
 
             //Increment
             $table->increments('id');
@@ -155,20 +165,20 @@ class AdminMigrationCommand extends Command
     {
         $this->line('<info>Updated table:</info> '.$model->getTable());
 
-        $this->getSchema($model)->table( $model->getTable() , function (Blueprint $table) use ($model) {
+        $model->getSchema()->table( $model->getTable() , function (Blueprint $table) use ($model) {
             //Add relationships with other models
             $this->addRelationships($table, $model, true);
 
             foreach ($model->getFields() as $key => $value)
             {
                 //Checks if table has column
-                if ( $this->getSchema($model)->hasColumn($model->getTable(), $key) ){
+                if ( $model->getSchema()->hasColumn($model->getTable(), $key) ){
                     if ( $column = $this->setColumn( $table, $model, $key ) )
                         $column->change();
                 } else {
                     $column = $this->setColumn( $table, $model, $key );
 
-                    if ( $column && $this->getSchema($model)->hasColumn($model->getTable(), $model->beforeFieldName($key)) )
+                    if ( $column && $model->getSchema()->hasColumn($model->getTable(), $model->beforeFieldName($key)) )
                         $column->after( $model->beforeFieldName($key) );
 
                     if ( $column )
@@ -177,13 +187,13 @@ class AdminMigrationCommand extends Command
             }
 
             //Add multilanguage support
-            if ( ! $this->getSchema($model)->hasColumn($model->getTable(), 'language_id') )
+            if ( ! $model->getSchema()->hasColumn($model->getTable(), 'language_id') )
             {
                 $this->createLanguageRelationship($table, $model, true);
             }
 
             //Order column
-            if ( ! $this->getSchema($model)->hasColumn($model->getTable(), '_order') && $model->getProperty('sortable') == true )
+            if ( ! $model->getSchema()->hasColumn($model->getTable(), '_order') && $model->getProperty('sortable') == true )
             {
                 $table->integer('_order')->unsigned();
                 $this->line('<comment>+ Added column:</comment> _order');
@@ -193,9 +203,9 @@ class AdminMigrationCommand extends Command
             //Sluggable column
             if ( $model->getProperty('sluggable') != null )
             {
-                if ( ! $this->getSchema($model)->hasColumn($model->getTable(), 'slug') )
+                if ( ! $model->getSchema()->hasColumn($model->getTable(), 'slug') )
                 {
-                    $this->setSlug($table, $model, true);
+                    $this->setSlug($table, $model, true, true);
                     $this->line('<comment>+ Added column:</comment> slug');
                 } else {
                     $this->setSlug($table, $model, true)->change();
@@ -203,14 +213,14 @@ class AdminMigrationCommand extends Command
             }
 
             //Published at column
-            if ( ! $this->getSchema($model)->hasColumn($model->getTable(), 'published_at') && $model->getProperty('publishable') == true )
+            if ( ! $model->getSchema()->hasColumn($model->getTable(), 'published_at') && $model->getProperty('publishable') == true )
             {
                 $table->timestamp('published_at')->nullable()->default( DB::raw( 'CURRENT_TIMESTAMP' ) );
                 $this->line('<comment>+ Added column:</comment> published_at');
             }
 
             //Deleted at
-            if ( ! $this->getSchema($model)->hasColumn($model->getTable(), 'deleted_at') )
+            if ( ! $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
             {
                 $table->softDeletes();
                 $this->line('<comment>+ Added column:</comment> deleted_at');
@@ -219,36 +229,78 @@ class AdminMigrationCommand extends Command
             /**
              *  Automatic dropping columns
              */
-            if ( $model->getProperty('skipDroppingColumn') == false )
+            $base_fields = $model->getBaseFields(true);
+
+            //Removes unneeded columns
+            foreach ($model->getSchema()->getColumnListing($model->getTable()) as $column)
             {
-                $base_fields = $model->getBaseFields(true);
-
-                //Removes unneeded columns
-                foreach ($this->getSchema($model)->getColumnListing($model->getTable()) as $column)
+                if ( ! in_array($column, $base_fields) && ! in_array($column, (array)$model->getProperty('skipDropping')) )
                 {
-                    if ( ! in_array($column, $base_fields) )
+                    $this->line('<comment>+ Unknown column:</comment> '.$column);
+
+                    if ( $this->confirm('Do you want drop this column? [y|N]') )
                     {
-                        $this->line('<comment>+ Unknown column:</comment> '.$column);
-
-                        if ( $this->confirm('Do you want drop this column? [y|N]') )
+                        if ( $this->hasIndex($model, $column) )
                         {
-                            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-                            $table->dropColumn($column);
-
-                            $this->line('<comment>+ Dropped column:</comment> '.$column);
+                            $this->dropIndex($model, $column);
                         }
+
+                        $table->dropColumn($column);
+
+                        $this->line('<comment>+ Dropped column:</comment> '.$column);
                     }
                 }
             }
-
         });
 
     }
 
+    /*
+     * Returns foreign key name
+     */
+    protected function getForeignKeyName($model, $key)
+    {
+        return $model->getTable().'_'.$key.'_foreign';
+    }
+
+    /*
+     * Returns if table has index
+     */
+    protected function hasIndex($model, $key)
+    {
+        return count( $model->getConnection()->select(
+            DB::raw(
+                'SHOW KEYS
+                FROM '.$model->getTable().'
+                WHERE Key_name=\''. $this->getForeignKeyName($model, $key) . '\''
+            )
+        ) );
+    }
+
+    /*
+     * Drops foreign key in table
+     */
+    protected function dropIndex($model, $key)
+    {
+        return $model->getConnection()->select(
+            DB::raw( 'alter table `'.$model->getTable().'` drop foreign key `'.$this->getForeignKeyName($model, $key) .'`' )
+        );
+    }
+
+    protected function fileColumn($table, $model, $key)
+    {
+        if ( $model->isFieldType($key, 'file') )
+        {
+            if ( $model->hasFieldParam($key, 'multiple') )
+                return $table->json($key);
+
+            return $table->string($key, $model->getFieldLength($key));
+        }
+    }
+
     protected function stringColumn($table, $model, $key)
     {
-        if ( $model->isFieldType($key, ['string', 'file', 'password']) )
+        if ( $model->isFieldType($key, ['string', 'password']) )
         {
             return $table->string($key, $model->getFieldLength($key));
         }
@@ -338,15 +390,9 @@ class AdminMigrationCommand extends Command
 
             $keyExists = 0;
 
-            if ( $this->getSchema($model)->hasTable( $model->getTable() ) )
+            if ( $model->getSchema()->hasTable( $model->getTable() ) )
             {
-                $keyExists = count($model->getConnection()->select(
-                    DB::raw(
-                        'SHOW KEYS
-                        FROM '.$model->getTable().'
-                        WHERE Key_name=\''.$model->getTable().'_'.$key.'_foreign\''
-                    )
-                ));
+                $keyExists = $this->hasIndex($model, $key);
             }
 
             //If table has not foreign column
@@ -368,10 +414,10 @@ class AdminMigrationCommand extends Command
                 $properties = $model->getRelationProperty($key, 'belongsToMany');
 
                 //If pivot table non exists
-                if ( ! $this->getSchema($model)->hasTable( $properties[3] ) )
+                if ( ! $model->getSchema()->hasTable( $properties[3] ) )
                 {
                     //Create pivot table
-                    $this->getSchema($model)->create( $properties[3] , function (Blueprint $table) use ( $model, $properties ) {
+                    $model->getSchema()->create( $properties[3] , function (Blueprint $table) use ( $model, $properties ) {
                         //Add integer reference for owner table
                         $table->integer( $properties[6] )->unsigned();
                         $table->foreign( $properties[6] )->references($model->getKeyName())->on( $model->getTable() );
@@ -391,7 +437,7 @@ class AdminMigrationCommand extends Command
         }
     }
 
-    protected function setSlug($table, $model, $updating = false)
+    protected function setSlug($table, $model, $updating = false, $render = true)
     {
         $slugcolumn = $model->getProperty('sluggable');
 
@@ -404,7 +450,24 @@ class AdminMigrationCommand extends Command
         if( ! $model->hasFieldParam( $slugcolumn , 'required') )
             $column->nullable();
 
+        //If was added column to existing table, then reload sluggs
+        if ( $render == true )
+        {
+            $this->updateSlugs($model);
+        }
+
         return $column;
+    }
+
+    //Resave all rows in model for updating slug if needed
+    protected function updateSlugs($model)
+    {
+        $this->buffer[ $model->getTable() ][] = function() use ($model) {
+            foreach ($model->all() as $row)
+            {
+                $row->save();
+            }
+        };
     }
 
     /**
@@ -423,6 +486,7 @@ class AdminMigrationCommand extends Command
             'textColumn',
             'integerColumn',
             'decimalColumn',
+            'fileColumn',
             'dateColumn',
             'selectColumn',
             'checkboxColumn',
@@ -434,9 +498,14 @@ class AdminMigrationCommand extends Command
                 break;
         }
 
-        if ( !$column || $column === true )
-            return;
+        //Unknown column type
+        if ( !$column )
+            $this->line('<comment>+ Unknown field type</comment> <error>'.$model->getFieldType($key).'</error> <comment>in field</comment> <error>'.$key.'</error>');
 
+        if ( !$column || $column === true )
+        {
+            return;
+        }
 
         //If is field required
         if( ! $model->hasFieldParam($key, 'required') )
@@ -496,7 +565,7 @@ class AdminMigrationCommand extends Command
         $foreign_column = $model->getForeignColumn();
 
         //Check if table has column
-        if ( $updating === true && $this->getSchema($model)->hasColumn($model->getTable(), $foreign_column) )
+        if ( $updating === true && $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
             return;
 
         $row = $table->integer( $foreign_column )->unsigned();

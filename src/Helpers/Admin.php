@@ -26,10 +26,16 @@ class Admin
     /*
      * Save property, if is not in administration interface
      */
-    public function bind($key, $data)
+    public function bind($key, $data, $call = true)
     {
         if ( ! $this->isAdmin() )
+        {
+            //If is passed data callable function
+            if ( is_callable($data) && $call == true )
+                $data = call_user_func($data);
+
             return $this->save($key, $data);
+        }
 
         return $data;
     }
@@ -40,6 +46,17 @@ class Admin
     public function save($key, $data)
     {
         return $this->buffer[$key] = $data;
+    }
+
+    /*
+     * Push data into array buffer
+     */
+    public function push($key, $data)
+    {
+        if ( !array_key_exists($key, $this->buffer) || !is_array($this->buffer[$key]) )
+            $this->buffer[$key] = [];
+
+        return $this->buffer[$key][] = $data;
     }
 
     /*
@@ -183,6 +200,12 @@ class Admin
             $this->addModel( \Gogol\Admin\Models\Language::class, false );
         }
 
+        //If is enabled admin groups
+        if ( config('admin.admin_groups') === true && !in_array('App\AdminsGroup', $this->get('namespaces')) )
+        {
+            $this->addModel( \Gogol\Admin\Models\AdminsGroup::class, false );
+        }
+
         //Sorting models
         $this->sortModels();
 
@@ -249,7 +272,6 @@ class Admin
      */
     public function hasAdminModel($model, $callback = null)
     {
-        // var_dump($model);
         $model = strtolower($model);
 
         $modelnames = $this->getAdminModelNames();

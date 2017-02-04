@@ -38,26 +38,39 @@ class LoginController extends Controller
         $this->middleware('admin.guest', ['except' => 'logout']);
     }
 
+    protected function guard()
+    {
+        return auth()->guard('web');
+    }
+
     /*
      * Redirect login form to homepage
      */
-    public function showLoginForm(){
-
+    public function showLoginForm()
+    {
         //If is user logged
-        if (auth()->user())
+        if ($this->guard()->user()) {
             return redirect( $this->redirectPath() );
+        }
 
-        return view('admin::auth.login');
+        $username = $this->username();
+
+        return view('admin::auth.login', compact('username'));
     }
 
     public function logout(Request $request)
     {
         $this->guard()->logout();
 
-        $request->session()->flush();
+        //Custom logout path
+        if ( !($path = config('admin.authentication.login.path')) )
+            $path = $this->redirectTo;
 
-        $request->session()->regenerate();
+        return redirect($path);
+    }
 
-        return redirect($this->redirectTo);
+    public function username()
+    {
+        return config('admin.authentication.login.column', 'email');
     }
 }

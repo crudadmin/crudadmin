@@ -3,8 +3,15 @@ namespace Gogol\Admin\Helpers\Fields\Mutations;
 
 class FieldToArray
 {
+    protected function bindValue($row)
+    {
+        return count($row) == 1 ? true : $row[1];
+    }
+
     public function update( $field )
     {
+        $data = [];
+
         if ( is_string($field) )
         {
             $fields = explode('|', $field);
@@ -13,7 +20,16 @@ class FieldToArray
             {
                 $row = explode(':', $value);
 
-                $data[$row[0]] = count($row) == 1 ? true : $row[1];
+                if ( array_key_exists($row[0], $data) )
+                {
+                    //If property has multiple properties yet
+                    if ( is_array( $data[$row[0]] ) )
+                        $data[$row[0]][] = $this->bindValue($row);
+                    else
+                        $data[$row[0]] = [$data[$row[0]], $this->bindValue($row)];
+                } else {
+                    $data[$row[0]] = $this->bindValue($row);
+                }
             }
         } else {
             $data = $field;

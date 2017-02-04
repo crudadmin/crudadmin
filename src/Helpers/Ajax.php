@@ -1,29 +1,34 @@
 <?php
+
 namespace Gogol\Admin\Helpers;
+
+use Gogol\Admin\Exceptions\AjaxException;
 
 class Ajax {
 
-    static function success($message = null, $title = null, $data = null)
+    static function success($message = null, $title = null, $data = null, $code = 200)
     {
         return self::message(
             $message ? $message : _('Zmeny boli úspešne uložené.'),
             $title,
             'success',
-            $data
+            $data,
+            $code
         );
     }
 
-    static function error($message = null, $title = null, $data = false)
+    static function error($message = null, $title = null, $data = null, $code = 200)
     {
         return self::message(
             $message ? $message : _('Nastala nečakana chyba, skúste neskôr prosím.'),
             $title ? $title : _('Upozornenie'),
             'error',
-            $data
+            $data,
+            $code
         );
     }
 
-    static function message($message = null, $title = null, $type = 'info', $data = null)
+    static function message($message = null, $title = null, $type = 'info', $data = null, $code = 200)
     {
         $array = [
             'type' => $type,
@@ -34,7 +39,13 @@ class Ajax {
         if ( isset( $data ) )
             $array['data'] = $data;
 
-        return response()->json($array);
+
+        throw new AjaxException( response()->json($array, $code), $code );
+    }
+
+    static function permissionsError()
+    {
+        return self::error( 'Nemate právomoc k pristúpeniu do tejto sekcie.', null, null, 401 );
     }
 
 }

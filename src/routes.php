@@ -24,19 +24,21 @@ Route::post('/admin/password/email', 'Auth\ForgotPasswordController@sendResetLin
 Route::get('/admin/password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
 Route::post('/admin/password/reset', 'Auth\ResetPasswordController@reset');
 
+//Download files
+Route::get('/admin/download', 'DownloadController@index');
+Route::get('/admin/signedDownload/{hash}', 'DownloadController@signedDownload');
+
 /*
  * Admin routes
  */
-Route::group(['middleware' => ['web', 'admin']], function(){
+Route::group(['middleware' => 'admin'], function(){
     // Dashboard
     Route::get('/admin', 'DashboardController@index');
 
-    //Download files
-    Route::get('/admin/download', 'DownloadController@index');
-
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
-    Route::get('/admin/api/layout/refresh/{model}/{id}', 'LayoutController@refresh');
+    // Route::get('/admin/api/layout/refresh/{model}/{count}/{id}', 'LayoutController@refresh');
+    Route::get('/admin/api/layout/paginate/{model}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
 
     //Requests
     Route::get('/admin/api/show/{model}/{id}', 'DataController@show');

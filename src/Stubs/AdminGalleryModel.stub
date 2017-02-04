@@ -41,7 +41,7 @@ class DummyClass extends AdminModel
             'type' => 'file',
             'required' => true,
             'image' => true,
-            'multiple' => true,
+            'multirows' => true,
 
             //Post processing photo
             'resize' => [

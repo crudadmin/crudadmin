@@ -1,0 +1,56 @@
+<template>
+  <!-- Content Header (model header) -->
+  <section class="content-header">
+    <h1>
+      {{ model.name }}
+      <small>{{{ model.title }}}</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="#"><i class="fa fa-dashboard"></i> Administrace</a></li>
+      <li v-if="getGroup">{{ getGroup.name}}</li>
+      <li class="active">{{ model.name }}</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+      <model-builder :langid="langid"></model-builder>
+  </section>
+  <!-- /.content -->
+</template>
+
+<script>
+  import ModelBuilder from '../Forms/ModelBuilder.vue';
+
+  export default {
+      data : function(){
+        return {
+          model : {},
+        };
+      },
+
+      props : ['langid'],
+
+      created() {
+        //Passing model data from parent
+        this.model = this.$parent.model;
+      },
+
+      computed: {
+        getGroup(){
+          if ( this.model.slug in this.$root.models )
+            return false;
+
+          for ( var key in this.$root.models )
+          {
+            if ( this.model.slug in this.$root.models[key].submenu )
+              return this.$root.models[key];
+          }
+
+          return false;
+        }
+      },
+
+      components : { ModelBuilder }
+  }
+</script>

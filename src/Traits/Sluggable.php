@@ -119,17 +119,17 @@ trait Sluggable
         return redirect( action( '\\'.$current_controller, $binding ) );
     }
 
-    private static function redirectWithWrongSlug($slug, $id, $key = null)
+    private function redirectWithWrongSlug($slug, $id, $key = null)
     {
         //If is definer row where is slug saved
         if ( is_numeric($id) )
         {
-            $row = self::where((new self)->getKeyName(), $id)->first();
+            $row = $this->where($this->getKeyName(), $id)->first();
 
             //Compare given slug and slug from db
             if ($row && $row->slug != $slug)
             {
-                throw new SluggableException( self::buildFailedSlugResponse($row->slug, $slug, $id, $key) );
+                throw new SluggableException( $this->buildFailedSlugResponse($row->slug, $slug, $id, $key) );
             }
         }
     }
@@ -147,17 +147,17 @@ trait Sluggable
     /**
      * Find a model by its primary slug.
      */
-    public static function findBySlug($slug, $id = null, $key = null, array $columns = ['*'])
+    public function scopefindBySlug($query, $slug, $id = null, $key = null, array $columns = ['*'])
     {
         if ( is_array($id) )
             $columns = $id;
         else if ( ! is_string($id) )
             $id = null;
 
-        $row = static::whereSlug($slug, $id, $key, $key)->first($columns);
+        $row = $query->whereSlug($slug, $id, $key, $key)->first($columns);
 
         if ( ! $row )
-            self::redirectWithWrongSlug($slug, $id, $key);
+            $this->redirectWithWrongSlug($slug, $id, $key);
 
         return $row;
     }
@@ -166,18 +166,23 @@ trait Sluggable
      * Find a model by its primary slug or throw an exception.
      *
      */
-    public static function findBySlugOrFail($slug, $id = null, $key = null, array $columns = ['*'])
+    public function scopefindBySlugOrFail($query, $slug, $id = null, $key = null, array $columns = ['*'])
     {
         if ( is_array($id) )
             $columns = $id;
         else if ( ! is_string($id) )
             $id = null;
 
-        $row = static::findBySlug($slug, $id, $key, $columns);
+        $row = $this->findBySlug($slug, $id, $key, $columns);
 
         if ( ! $row )
             abort(404);
 
         return $row;
+    }
+
+    public function getSlug()
+    {
+        return $this->slug;
     }
 }

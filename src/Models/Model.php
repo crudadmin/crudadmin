@@ -9,12 +9,14 @@ use Gogol\Admin\Traits\AdminModelTrait;
 use Gogol\Admin\Traits\Sluggable;
 use Gogol\Admin\Traits\HasChildrens;
 use Gogol\Admin\Traits\ModelRelationships;
+use Gogol\Admin\Traits\Uploadable;
+use Gogol\Admin\Traits\Validation;
 use Localization;
 use Admin;
 
 class Model extends BaseModel
 {
-    use SoftDeletes, ModelRelationships, Sluggable, HasChildrens, AdminModelTrait;
+    use SoftDeletes, ModelRelationships, Sluggable, Uploadable, Validation, HasChildrens, AdminModelTrait;
 
     /*
      * Template name
@@ -100,6 +102,9 @@ class Model extends BaseModel
      */
     protected $fields = [];
 
+    /*
+     * Filter rows by selected language
+     */
     public function scopeLocalization($query, $language_id = null)
     {
         if ( ! $this->isEnabledLanguageForeign() )
@@ -114,6 +119,9 @@ class Model extends BaseModel
         $query->where('language_id', $language_id);
     }
 
+    /*
+     * Returns also unpublished rows
+     */
     public function scopeWithUnpublished($query)
     {
         $query->withoutGlobalScope('publishable');

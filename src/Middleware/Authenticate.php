@@ -15,13 +15,26 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle($request, Closure $next, $guard = null, $errors = [])
     {
-        if (Auth::guard($guard)->guest() || ! auth()->user()->hasAdminAccess()) {
+        if (auth()->guard($guard)->guest() || ! auth()->guard($guard)->user()->isEnabled()) {
+
+            //If is user logged but has not privilegies
+            if (auth()->guard($guard)->user() && ! auth()->guard($guard)->user()->isEnabled())
+            {
+                auth()->guard($guard)->logout();
+
+                $errors = [ 'email' => _('Your account has been disabled.') ];
+            }
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response('Unauthorized.', 401);
             } else {
-                return redirect()->guest( action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm') );
+                //Custom login path
+                if ( !($path = config('admin.authentication.login.path')) )
+                    $path = $this->redirectTo;
+
+                return redirect()->guest( $path )->withErrors($errors);
             }
         }
 

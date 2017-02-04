@@ -51,6 +51,7 @@ return [
         'belongsTo' => 'type:select',
         'belongsToMany' => 'type:select|array',
         'multiple' => 'array',
+        'multirows' => 'array',
     ],
 
     /*
@@ -58,11 +59,12 @@ return [
      */
     'global_rules' => [
         'string' => 'max:255',
-        'integer' => 'integer',
+        'integer' => 'integer|max:4294967295',
         'decimal' => 'numeric',
-        'file' => 'max:10240',
+        'file' => 'max:10240|file',
         'editor' => 'hidden',
         'password' => 'hidden',
         'checkbox' => 'boolean',
+        'date' => 'date_format:d.m.Y'
     ],
 ];

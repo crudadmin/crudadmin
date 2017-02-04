@@ -1,20 +1,20 @@
 <template>
   <!-- Horizontal Form -->
-  <form method="post" action="" id="form-{{ model.slug }}" v-on:submit.prevent="saveForm">
-    <div v-bind:class="{ 'box' : true, 'box-info' : isActive, 'box-warning' : !isActive }">
+  <form method="post" action="" v-bind:id="'form-'+model.slug" v-on:submit.prevent="saveForm">
+    <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
       <div class="box-header">
-        <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" data-original-title="Tento záznam je viacjazyčný" class="fa fa-globe"></span> {{ row ? 'Upraviť záznam č. ' + row.id : 'Nový záznam' }}</h3>
-        <button v-if="row && canaddrow" v-on:click.prevent="row=null" type="button" class="pull-right btn btn-default btn-sm">nový záznam</button>
+        <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" data-original-title="Tento záznam je viacjazyčný" class="fa fa-globe"></span> {{ title }}</h3>
+        <button v-if="row && canaddrow" v-on:click.prevent="row=null" type="button" class="pull-right btn btn-default btn-sm">{{ newRowTitle }}</button>
       </div>
 
       <div class="box-body">
-        <form-input-builder v-for="field in model.fields" :model="model" :row="row" :index="$index" :key="$key" :field="field"></form-input-builder>
+        <form-input-builder v-for="field in model.fields" v-if="canShowField(field)" :model="model" :row="row" :index="$index" :key="$key" :field="field"></form-input-builder>
       </div>
 
       <div class="box-footer">
-          <button v-if="progress" type="button" name="submit" class="btn btn-primary"><i class="fa updating fa-refresh"></i> {{ row ? 'Ukláda' : 'Odosiela' }} sa</button>
-          <button v-if="!progress" type="submit" name="submit" class="btn btn-primary">{{ row ? 'Uložiť' : 'Odoslať' }}</button>
+          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ row ? 'Ukláda' : 'Odosiela' }} sa</button>
+          <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]">{{ row ? 'Uložiť' : 'Odoslať' }}</button>
       </div>
 
     </div>
@@ -25,12 +25,11 @@
   import FormInputBuilder from '../Forms/FormInputBuilder.vue';
   export default {
 
-    props : ['model', 'row', 'canaddrow'],
+    props : ['model', 'row', 'rows', 'canaddrow', 'progress'],
 
     data(){
       return {
         submit : false,
-        progress : false,
         isActive : true,
         form : null,
       };
@@ -41,11 +40,11 @@
       //Initialize form
       this.form = $('form#form-' + this.model.slug);
 
-      //Reset form
-      this.initForm(null);
-
       //Enable ckeditors
       this.form.find('.js_editor').ckEditors();
+
+      //Reset form
+      this.initForm(null);
     },
 
 
@@ -59,31 +58,71 @@
       },
     },
 
+    computed: {
+      title(){
+        var title;
+
+        if ( this.row )
+        {
+          //Update title
+          if ( title = this.$root.getModelProperty(this.model, 'settings.title.update') )
+          {
+            //Bind value from row to title
+            for ( var key in this.row )
+              title = title.replace(':'+key, this.row[key]);
+
+            return title;
+          }
+
+          return 'Upraviť záznam č. ' + this.row.id;
+        }
+
+        //Insert title
+        if ( title = this.$root.getModelProperty(this.model, 'settings.title.insert') )
+          return title;
+
+        return 'Nový záznam';
+      },
+      newRowTitle(){
+        var title;
+
+        if ( title = this.$root.getModelProperty(this.model, 'settings.buttons.insert') )
+          return title;
+
+        return 'nový záznam';
+      },
+    },
+
     methods: {
+      canShowField(field){
+        return !('removeFromForm' in field);
+      },
       //Resets form values and errors
       initForm(row){
-          this.form.resetForm();
+        this.form.resetForm();
 
-          this.resetErrors();
+        this.resetErrors();
 
-          //Checks if form can be editable
-          if ( row && this.canaddrow && this.model.editable == false )
-          {
-            this.row = null;
-            return;
-          }
+        //Checks if form can be editable
+        if ( row && this.canaddrow && this.model.editable == false )
+        {
+          this.row = null;
+          return;
+        }
 
-          for ( var key in this.model.fields )
-          {
-            this.model.fields[key].value = row ? row[key] : null;
-          }
+        for ( var key in this.model.fields )
+        {
+          this.model.fields[key].value = row ? row[key] : null;
 
-          //Set box color
-          if (!row) {
-            this.isActive = true;
-          } else {
-            this.isActive = row.published_at == null;
-          }
+          this.$broadcast('updateField', [key, this.model.fields[key]]);
+        }
+
+        //Set box color
+        if (!row) {
+          this.isActive = true;
+        } else {
+          this.isActive = row.published_at == null;
+        }
       },
       resetErrors(){
         this.form.find('.form-group.has-error').removeClass('has-error').find('.help-block').remove();
@@ -179,55 +218,49 @@
           },
 
           error(response){
+            _this.resetErrors();
 
             // Wrong validation
-            if ( response.status == 422 ){
+            _this.$root.errorResponseLayer( response, 422, function(){
 
-                _this.resetErrors();
+              var obj = response.responseJSON,
+                  array = [];
 
-                var obj = response.responseJSON,
-                    array = [];
+              for ( var key in obj )
+              {
+                //One or multiple errors
+                if ( typeof obj[key] == 'string' )
+                    array = [ obj[key] ];
+                else
+                    array = obj[key];
 
-                for ( var key in obj )
-                {
-                  //One or multiple errors
-                  if ( typeof obj[key] == 'string' )
-                      array = [ obj[key] ];
-                  else
-                      array = obj[key];
+                //Display errors
+                for (var i = 0; i < array.length; i++){
+                  for ( var a = 0; a <= 1; a++ )
+                  {
+                    var key = key.replace('.0', ''),
+                        key = a == 0 ? key : key + '[]';
 
-                  //Display errors
-                  for (var i = 0; i < array.length; i++){
-                    for ( var a = 0; a <= 1; a++ )
-                    {
-                      var key = key.replace('.0', ''),
-                          key = a == 0 ? key : key + '[]';
+                    _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).each(function(){
+                        var where = $(this);
 
-                      _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).each(function(){
-                          $(this).after( '<span class="help-block">'+array[i]+'</span>' );
+                        if ( $(this).is('select') )
+                          where = where.parent().children().last().prev();
 
-                          if ( i == 0 )
-                            $(this).parent().addClass('has-error').find('label').prepend('<i class="fa fa-times-circle-o"></i> ');
-                      });
-                    }
+                        where.after( '<span class="help-block">'+array[i]+'</span>' );
+
+                        if ( i == 0 )
+                          $(this).parent().addClass('has-error').find('label').prepend('<i class="fa fa-times-circle-o"></i> ');
+                    });
                   }
                 }
-
-            } else {
-              console.log( 'some errors...' );
-
-              unknownError();
-            }
-
+              }
+            })
           }
-
         });
       },
-
       saveForm(e)
       {
-        var _this = this;
-
         //Devide if is updating or creating form
         var action = this.row == null ? 'store' : 'update';
 
@@ -238,36 +271,34 @@
           //Push new row
           if ( action == 'store' )
           {
-            var index, i;
-            for ( var key in response.data.rows )
-            {
-                i = _this.model.rows.push( response.data.rows[key] );
-
-                if ( !index )
-                  index = i;
-            }
-
             //Bind values for input builder
-            _this.$broadcast('onSubmit', response.data.rows[0]);
-            _this.$dispatch('proxy', 'onCreate', [_this.model.rows[index - 1], response.data.rows[0], _this.model.slug]);
+            this.$broadcast('onSubmit', response.data.rows[0]);
+
+            //Send notification about new row
+            this.$dispatch('proxy', 'onCreate', response.data.rows);
+
+            this.initForm(null);
           }
 
           //Update existing row
           else if ( action == 'update' ) {
             //Bind values for input builder
-            _this.$broadcast('onSubmit', response.data.row);
+            this.$broadcast('onSubmit', response.data.row);
+
+            //Send notification about updated row
+            this.$dispatch('proxy', 'onUpdate', [this.model.slug, response.data.row]);
 
             for ( var key in response.data.row )
             {
-              _this.row[key] = response.data.row[key];
+              this.row[key] = response.data.row[key];
 
               //Update values in fields cause updating files in form
-              if ( key in _this.model.fields )
-                _this.model.fields[key].value = response.data.row[key];
+              if ( key in this.model.fields )
+                this.model.fields[key].value = response.data.row[key];
             }
           }
 
-        });
+        }.bind(this));
 
       },
     },

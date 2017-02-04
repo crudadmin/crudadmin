@@ -65,7 +65,7 @@ trait ModelRelationships
             $classname = strtolower( class_basename($path) );
 
             //Find match
-            if ( $classname == $method_lowercase || str_plural($classname) == $method )
+            if ( $classname == $method_lowercase || str_plural($classname) == $method_lowercase )
             {
                 $model = new $path;
 

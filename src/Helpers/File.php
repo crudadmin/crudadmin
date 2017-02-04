@@ -24,6 +24,11 @@ class File {
     public $path;
 
     /*
+     * Absolute path to download file
+     */
+    public $download;
+
+    /*
      * Field name
      */
     protected $field;
@@ -46,6 +51,8 @@ class File {
         $this->source = 'uploads/' . $directory . '/' . $field . '/' . ( $subdirectory ? $subdirectory . '/' : '' ) . $filename;
 
         $this->path = url( $this->source );
+
+        $this->download = $this->download();
     }
 
     /**
@@ -72,6 +79,25 @@ class File {
         $extension = explode('.', $filename);
 
         return last($extension);
+    }
+
+    public static function getHash( $path )
+    {
+        return sha1( md5( '!$%' . $path ) );
+    }
+
+    public function download( $displayableInBrowser = null )
+    {
+        if ( $displayableInBrowser )
+        {
+            if ( in_array($this->extension, (array)$displayableInBrowser) )
+                return $this->path;
+        }
+
+        $source = substr($this->source, 8);
+        $action = action( '\Gogol\Admin\Controllers\DownloadController@signedDownload', self::getHash( $source ) );
+
+        return $action . '?file=' . urlencode($source);
     }
 }
 

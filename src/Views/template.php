@@ -21,6 +21,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- Theme style -->
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datatables/dataTables.bootstrap.css') ?>">
+  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/chosen/chosen.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datepicker/datepicker3.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/AdminLTE.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/css/style.css') ?>">
@@ -30,6 +31,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
   -->
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/skins/skin-blue.min.css') ?>">
 
+  <?php if ( ($customCssPath = '/assets/admin/css/custom.css') && file_exists( public_path($customCssPath) ) ){ ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo asset($customCssPath) ?>">
+  <?php } ?>
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -77,7 +81,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
 
                     <p>
-                      {{ user.username }} - Administrátor
+                      {{ user.username }} - {{ getPermissions }}
                     </p>
                   </li>
                   <!-- Menu Body -->
@@ -185,10 +189,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="<?php echo asset('/assets/admin/plugins/datepicker/bootstrap-datepicker.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/ckeditor/ckeditor.js') ?>"></script>
+    <script src="<?php echo asset('/assets/admin/plugins/chosen/chosen.jquery.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/dist/js/app.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/dist/js/main.js') ?>"></script>
 
     <!-- APP JS -->
-    <script src="<?php echo asset('/assets/admin/js/main.js?') ?>"></script>
+    <script src="<?php echo asset('/assets/admin/js/main.js?v=' . (env('APP_DEBUG') == true ? rand(00000, 99999) : date('d') ) ) ?>"></script>
   </body>
 </html>

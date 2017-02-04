@@ -35,11 +35,17 @@
 
 .model-info { color: #888 }
 .form-group input.js_date { background: white }
+.form-group small { color: #555; }
 
 table.table.sortable tr[draggable="true"] { cursor: move; }
 
 label.checkbox {
 
+}
+
+label.checkbox span {
+    color: #555;
+    font-weight: normal;
 }
 
 .checkbox input[type="checkbox"] {
@@ -198,4 +204,50 @@ label.checkbox {
         transform: scale(1.0);
         -webkit-transform: scale(1.0);
     }
+}
+
+select[multiple] {height: 34px;color: white;}
+
+.content > .box > .box-body > .box {
+    margin-left: 40px;
+    width: calc(100% - 40px);
+}
+
+.help-block { margin-bottom: 0 }
+
+.filesList div {display: inline}
+.filesList div:last-child span { display: none;  }
+.file-group .chosen-container-multi .chosen-drop .result-selected { display: none }
+.file-group .chosen-container-multi .chosen-choices { background: none; border: none; padding: 2px 0; }
+.file-group .chosen-container-multi .chosen-drop { border: none; }
+.file-group .chosen-container-active .chosen-choices { box-shadow: none !important }
+
+.th-id { width: 50px; text-align: center; }
+.td-id { text-align: center; }
+
+.refreshing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(60, 141, 188, 0.55);
+}
+.refreshing .loading {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    display: table;
+}
+
+.refreshing .loading .middle {
+    vertical-align: middle;
+    display: table-cell;
+}
+
+.refreshing .loading p {color: white;font-size: 18px;font-weight: 600;margin-top: 10px;}
+.refreshing .loading i {
+    color: white;
+    font-size: 50px;
+    margin-top: 10px;
 }

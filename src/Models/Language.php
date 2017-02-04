@@ -1,4 +1,5 @@
 <?php
+
 namespace Gogol\Admin\Models;
 
 use Gogol\Admin\Models\Model;
@@ -49,7 +50,7 @@ class Language extends Model
             'name' => 'name:Názov jazyka|placeholder:Zadajte názov jazyka|required|max:25',
             'slug' => 'name:Skratka jazyka|placeholder:Zadajte skrátku jazyka (en, sk, de, cz)...|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
         ];
-        
+
         /*
          * Checks for gettext support
          */

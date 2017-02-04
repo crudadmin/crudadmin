@@ -12,35 +12,53 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function checkValidation($row = null)
+    public function checkValidation($request, $row = null)
     {
-        $request = request();
+        $model = Admin::getModelByTable( request('_model') );
 
-        $data = $request->all();
-
-        $model = Admin::getModelByTable( $data['_model'] );
         $rules = $model->getValidationRules($row);
 
-        //Removes required validation parameter from input when is row avaiable and when is not field value empty
-        if ( isset( $row ) )
+        $updated_rules = [];
+
+        foreach ($rules as $validation_key => $data)
         {
-            foreach ($rules as $key => $data)
+            //Removes required validation parameter from input when is row avaiable and when is not field value empty
+            if ( isset( $row ) )
             {
+                //If is multirows with editing
+                if ( ($replaced_key = str_replace('.*', '', $validation_key)) && $model->hasFieldParam($replaced_key, 'multirows') )
+                    $key = $replaced_key;
+                else
+                    $key = $validation_key;
+
                 //Allow send form without file, when is file uploaded
-                if ( $model->isFieldType($key, 'file') && in_array('required', $data) && !empty($row->$key) && !$request->has( '$remove_' . $key ) )
+                if ( $model->isFieldType($key, 'file')
+                    && $model->hasFieldParam($key, 'required', true)
+                    && !empty($row->$key)
+                    && !$request->has( '$remove_' . $key ) )
                 {
-                    if(($k = array_search('required', $data)) !== false) {
+                    $isEmptyFiles = ! $model->hasFieldParam($key, 'multiple', true) || ( $request->has('$uploaded_'.$key) && count((array)$request->get('$uploaded_'.$key)) > 0 );
+
+                    if( $isEmptyFiles && ($k = array_search('required', $data)) !== false) {
                         unset($data[$k]);
                     }
-                } else if ( $request->has( '$remove_' . $key ) )
+                } else if ( $request->has( '$remove_' . $key ) && ! $model->hasFieldParam($key, 'multiple', true) )
                 {
                     $request->merge( [ $key => null ] );
-                }
 
-                $rules[$key] = $data;
+                    //Add nullable param to field request
+                    if ( !$model->hasFieldParam($key, 'required', true) )
+                    {
+                        $data[] = 'nullable';
+                    }
+                }
+            } else {
+                $key = $validation_key;
             }
+
+            $updated_rules[$key] = $data;
         }
 
-        $this->validate($request, $rules);
+        $this->validate($request, $updated_rules);
     }
 }

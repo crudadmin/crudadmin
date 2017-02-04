@@ -4,10 +4,15 @@
     export default {
         init(layout){
             //Replace requests paths
+            var replace = ['model', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
+
             for (var key in layout.requests)
             {
-                layout.requests[key] = layout.requests[key].replace(':model', '{model}').replace(':id', '{id}').replace(':subid', '{subid}');
+                for ( var i = 0; i < replace.length; i++ )
+                    layout.requests[key] = layout.requests[key].replace(':'+replace[i], '{'+replace[i]+'}');
             }
+
+            // console.log(layout.requests);
 
             return {
                 data : function(){
@@ -53,6 +58,19 @@
                     getAvatar()
                     {
                         return this.user.avatar != null ? this.user.avatar : this.$http.options.root + '/../assets/admin/dist/img/avatar.png';
+                    },
+                    getPermissions()
+                    {
+                        var permissions = [];
+
+                        for (var i = 0; i < this.user.admins_groups.length; i++){
+                            permissions.push( this.user.admins_groups[i].name );
+                        }
+
+                        if ( permissions.length > 0 )
+                            return permissions.join(', ');
+
+                        return 'Administrátor';
                     }
                 },
 
@@ -120,6 +138,63 @@
                             localStorage.language_id = this.languages[0].id;
 
                         this.language_id = localStorage.language_id;
+                    },
+                    //Check for all error response in all requests
+                    errorResponseLayer(response, code, callback)
+                    {
+                        //Fix for jquery response
+                        if ( 'responseJSON' in response )
+                            response.data = response.responseJSON;
+
+                        //If error response comes with some message information, then display it
+                        if ( response.data && response.data.message && response.data.title && response.data.type )
+                        {
+                            return this.$root.openAlert(response.data.title, response.data.message, response.data.type, null, function(){
+                                if ( response.status == 401 )
+                                {
+                                    window.location.reload();
+                                }
+                            });
+                        }
+
+                        if ( response.status == 404 )
+                        {
+                            return this.$root.openAlert('Upozornenie!', 'Záznam neexistuje, pravdepodobne už bol vymazaný.', 'warning');
+                        }
+
+                        //If has been client logged off
+                        if ( response.status == 401 )
+                        {
+                            return this.$root.openAlert('Upozornenie!', 'Boli ste automatický odhlásený. Prosím, znova sa prihláste.', 'warning', null, function(){
+                                window.location.reload();
+                            });
+                        }
+
+                        //Callback on code
+                        if ( callback && (code === response.status || code === null) )
+                            return callback(response);
+
+                        //Unknown error
+                        this.$root.arrorAlert();
+                    },
+                    //Check specifics property in model
+                    getModelProperty(model, key){
+                        var path = key.split('.');
+
+                        if ( ! model )
+                            return null;
+
+                        for ( var i = 0; i < path.length; i++ )
+                        {
+                            if ( ! ( path[i] in model ) )
+                            {
+                                return null;
+                            }
+
+                            model = model[path[i]];
+                        }
+
+                        return model;
                     }
                 }
             }

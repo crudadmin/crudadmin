@@ -17,8 +17,11 @@ class Fields
         Mutations\AddEmptyValue::class,
     ];
 
+    /*
+     * Registred custom admin attributes for fields
+     */
     protected $attributes = [
-         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'orderBy'
+         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'orderBy', 'limit', 'removeFromForm', 'multirows',
     ];
 
     /*
@@ -99,6 +102,7 @@ class Fields
 
     protected function registerField( $field, $key, $model, $skip = [] )
     {
+
         //Field mutations
         foreach ($this->mutations as $namespace)
         {

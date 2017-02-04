@@ -4,19 +4,20 @@ namespace Gogol\Admin\Controllers;
 
 use Illuminate\Http\Request;
 
+use Ajax;
 use Admin;
 use Localization;
 use App\Http\Requests;
 use App\Http\Controllers\Controller as BaseController;
+use DB;
 
 class LayoutController extends BaseController
 {
 
     public function index()
     {
-        // sleep(1);
         return [
-            'user' => $this->getUser(),
+            'user' => auth()->user()->withAvatarPath(),
             'models' => $this->getAppTree(),
             'languages' => $this->getLanguages(),
             'requests' => [
@@ -27,37 +28,44 @@ class LayoutController extends BaseController
                 'togglePublishedAt' => action('\Gogol\Admin\Controllers\DataController@togglePublishedAt'),
                 'updateOrder' => action('\Gogol\Admin\Controllers\DataController@updateOrder', [':model', ':id', ':subid']),
                 'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),
-                'refresh' => action('\Gogol\Admin\Controllers\LayoutController@refresh', [':model', ':id']),
+                'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':subid', ':langid', ':limit', ':page', ':count']),
             ],
         ];
 
     }
 
-    public function refresh($table, $from_id)
+    public function returnModelData($model, $subid, $langid, $limit, $page)
     {
-        $models = Admin::getAdminModels();
+        return [
+            'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page ) {
+                if ( $limit == 0 )
+                    return;
 
-        //Bind pages into groups
-        foreach ($models as $model)
-        {
-            if ( $model->getTable() == $table )
-            {
-                return $this->makePage( $model, $from_id );
-            }
+                $start = $limit * $page;
+                $offset = $start - $limit;
 
-        }
-
-        return [];
+                $query->offset($offset)->take($limit);
+            }),
+            'count' => $model->filterByParentOrLanguage($subid, $langid)->count(),
+            'page' => $page,
+        ];
     }
 
-    public function getUser()
+    /*
+     * Returns paginated rows and all required model informations
+     */
+    public function getRows($table, $subid, $langid, $limit, $page, $count)
     {
-        $user = auth()->user();
+        $model = Admin::getModelByTable($table);
 
-        if ( $user->avatar )
-            $user->avatar = $user->avatar->thumbs->path;
+        //Check if user has allowed model
+        if ( !$model || ! auth()->user()->hasAccess( $model ) )
+            Ajax::permissionsError();
 
-        return $user;
+        if ( $count == 0 )
+            $model->withAllOptions(true);
+
+        return $this->makePage( $model, $this->returnModelData( $model, $subid, $langid, $limit, $page ), false);
     }
 
     /**
@@ -78,7 +86,15 @@ class LayoutController extends BaseController
             if ( $model->getProperty('belongsToModel') != null )
                 continue;
 
-            $page = $this->makePage($model, -1);
+            //Check if user has allowed model
+            if ( ! auth()->user()->hasAccess( $model ) )
+                continue;
+
+            //If is deactivated model
+            if ( $model->getProperty('active') === false )
+                continue;
+
+            $page = $this->makePage($model);
 
             $group_name = $model->hasGroup() ? $model->getGroup() : '_root';
 
@@ -94,7 +110,7 @@ class LayoutController extends BaseController
         return $this->addSlugPath( $groups );
     }
 
-    protected function makePage($model, $from_id = 0)
+    protected function makePage($model, $data = null, $withChilds = true)
     {
         $fields = $model->getFields();
 
@@ -104,11 +120,23 @@ class LayoutController extends BaseController
 
         foreach ($childs_models as $child_model)
         {
+            if ( $withChilds === false )
+                continue;
+
+            //Check if user has allowed model
+            if ( ! auth()->user()->hasAccess( $child_model ) )
+                continue;
+
+            //If is deactivated model
+            if ( $child_model->getProperty('active') === false )
+                continue;
+
             $childs[ $child_model->getTable() ] = $this->makePage($child_model);
         }
 
-        return [
+        return array_merge((array)$data, [
             'name' => $model->getProperty('name'),
+            'settings' => (array)$model->getProperty('settings'),
             'foreign_column' => $model->getForeignColumn(),
             'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),
@@ -120,12 +148,18 @@ class LayoutController extends BaseController
             'publishable' => $model->getProperty('publishable'),
             'sortable' => $model->getProperty('sortable'),
             'fields' => $fields,
-            'rows' => $model->getBaseRows($from_id),
             'childs' => $childs,
-            'active' => $model->getProperty('active'),
             'localization' => $model->isEnabledLanguageForeign(),
             'submenu' => [],
-        ];
+        ]);
+    }
+
+    protected function getLastId($model)
+    {
+        if ( ($row = $model->select('id')->orderBy('id', 'DESC')->first()) === null )
+            return 0;
+
+        return $row->getKey();
     }
 
     /*

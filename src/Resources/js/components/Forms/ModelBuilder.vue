@@ -1,10 +1,10 @@
 <template>
 
   <div class="box">
-    <div class="box-header">
-      <h3 class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
+    <div class="box-header" v-if="ischild || isEnabledGrid">
+      <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
-      <ul class="pagination pull-right pagination-sm no-margin">
+      <ul class="pagination pull-right pagination-sm no-margin" v-if="isEnabledGrid">
         <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
       </ul>
     </div>
@@ -15,19 +15,19 @@
 
         <!-- left column -->
         <div class="col col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm">
-          <form-builder :model="model" :canaddrow="canAddRow" :row.sync="row"></form-builder>
+          <form-builder :progress.sync="progress" :rows.sync="rows" :model="model" :canaddrow="canAddRow" :row.sync="row"></form-builder>
         </div>
         <!--/.col (left) -->
 
         <!-- right column -->
         <div class="col col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12" v-show="hasRows && canShowRows">
-          <model-rows-builder :model="model" :row.sync="row"></model-rows-builder>
+          <model-rows-builder :model.sync="model" :rows.sync="rows" :row.sync="row" :langid="langid" :progress.sync="progress"></model-rows-builder>
         </div>
         <!--/.col (right) -->
 
       </div>
 
-      <model-builder v-if="row" :langid="langid" v-for="child in model.childs" :ischild="true" :model="child"></model-builder>
+      <model-builder v-if="row" :langid="langid" v-for="child in model.childs" :ischild="true" :model="child" :parentrow="row"></model-builder>
     </div>
   </div>
 
@@ -38,7 +38,7 @@
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
 
   export default {
-    props : ['model', 'langid', 'ischild'],
+    props : ['model', 'langid', 'ischild', 'parentrow'],
     name : 'model-builder',
     data : function(){
       return {
@@ -53,13 +53,15 @@
 
         row : null,
 
-        buffer : {
-          rows : null,
+        rows : {
+          data : [],
+          count : 0,
+          loaded : false,
         },
 
         language_id : null,
 
-        refreshInterval : 3000,
+        progress : false,
       };
     },
 
@@ -74,45 +76,30 @@
 
     ready() {
       this.checkIfCanShowLanguages();
-
-      //Refresh rows refreshInterval
-      this.refreshRows();
-    },
-
-    destroyed() {
-      if ( this.updateTimeout )
-        clearTimeout(this.updateTimeout);
     },
 
     watch : {
       sizes : {
         deep: true,
         handler(data){
-          var _this = this;
 
           this.activeSize = data.filter(function(row){
 
             if ( row.active == true )
             {
-              var rows = _this.getStorage();
-              rows[ _this.model.slug ] = row.size;
+              var rows = this.getStorage();
+              rows[ this.model.slug ] = row.size;
               localStorage.sizes = JSON.stringify( rows );
             }
 
             return row.active == true;
-          })[0].size;
+          }.bind(this))[0].size;
 
           this.activeSize;
         }
       },
-      langid(){
-
-        //resets form after language change
-        if ( this.hasChilds() == 0 )
-        {
-          this.$broadcast('onCreate', [true, null, this.model.slug]);
-        }
-
+      parentrow(row){
+        this.$children[1].reloadRows();
       },
     },
 
@@ -151,7 +138,8 @@
       },
       checkActiveSize(columns){
 
-        var data = this.getStorage();
+        var data = this.getStorage(),
+            defaultValue = this.$root.getModelProperty(this.model, 'settings.grid.default');
 
         //Full screen
         if ( ! this.canShowForm )
@@ -167,7 +155,19 @@
             {
               return this.sizes[key].active = true;
             }
+        } else if ( defaultValue !== null ){
+          // If model has default grid property
+          for ( var key in this.sizes )
+            if ( this.sizes[key].size == defaultValue )
+            {
+              return this.sizes[key].active = true;
+            }
         }
+
+
+        /*
+         * When is localStorage value empty, then automatic chose the best grid value
+         */
 
         if ( columns.length >= 5 )
           this.sizes[2].disabled = true;
@@ -204,29 +204,18 @@
       },
 
       saveLanguageFilter(rows){
-        this.buffer['rows'] = rows;
+
+        rows = rows.sort(function(a, b){
+          return parseInt(b.id) - parseInt(a.id);
+        });
+
+        this.buffer.rows = rows;
+
+        console.log('updateee');
+
+        this.$broadcast('updateBufferRows');
 
         return rows;
-      },
-
-      filterLanguage(array){
-        if ( ! array )
-          return this.saveLanguageFilter(array);
-
-        if ( this.$root.languages.length == 0 )
-          return this.saveLanguageFilter(array);
-
-        //If is languages table
-        if ( this.model.slug == 'languages' )
-          return this.saveLanguageFilter(array);
-
-        return this.saveLanguageFilter(array.filter(function(row){
-
-          if ( ! ('language_id' in row) )
-            return true;
-
-          return row.language_id == this.$root.language_id;
-        }.bind(this)));
       },
       checkIfCanShowLanguages(){
         var languages_active = false;
@@ -260,51 +249,20 @@
 
         return field.date_format.toLowerCase().replace('y', value[0]).replace('m', value[1]).replace('d', value[2]);
       },
-      refreshRows(){
-        var t = this;
-        this.$root.$http.get(this.$root.requests.refresh, { model : this.model.slug, id : this.getLastRowsId })
-        .then(function(response){
-
-          //Add new rows from database
-          if ( response.data.rows.length > 0 )
-          {
-            for ( var key in response.data.rows )
-            {
-              this.model.rows.push(response.data.rows[key]);
-            }
-          }
-
-          //Update fields from database, for dynamic selectbox values
-          for ( var key in response.data.fields )
-          {
-            if ( 'options' in this.model.fields[ key ] )
-              this.model.fields[ key ].options = response.data.fields[ key ].options;
-          }
-
-          this.updateTimeout = setTimeout(function(){
-            this.refreshRows.call(this);
-          }.bind(this), this.refreshInterval);
-        }.bind(this))
-        .catch(function(e){
-          //If has been client logged off
-          if ( e.status == 401 )
-          {
-            if ( this.updateTimeout )
-              clearTimeout(this.updateTimeout);
-
-            this.$root.openAlert('Upozornenie!', 'Boli ste automatický odhlásený. Prosím, znova sa prihláste.', 'warning', null, function(){
-              window.location.reload();
-            });
-          }
-        });
-      },
     },
 
     computed: {
+      //Checks if is enabled grid system
+      isEnabledGrid(){
+        if ( this.$root.getModelProperty(this.model, 'settings.grid.enabled') === false )
+          return false;
+
+        return true;
+      },
       canShowRows(){
         if ( this.model.minimum == 1 && this.model.maximum == 1)
         {
-          this.$broadcast('onCreate', [this.getRows[0], null, this.model.slug]);
+          this.$broadcast('onCreate', [this.rows.data[0], null, this.model.slug]);
 
           this.enableOnlyFullScreen();
 
@@ -322,7 +280,7 @@
         if ( this.model.maximum == 0 )
           return true;
 
-        if ( this.model.maximum <= this.getRows.length )
+        if ( this.model.maximum <= this.rows.count )
           return false;
 
         return true;
@@ -337,42 +295,12 @@
         return true;
 
       },
-      getRows(){
-        //Check if is form belongs to other form
-        if ( this.$parent.row == null || !( 'id' in this.$parent.row ) ){
-          return this.filterLanguage(this.model.rows);
-        } else {
-          if ( ! this.model.rows )
-            return false;
-
-          var _this = this;
-
-          return this.filterLanguage(this.model.rows).filter(function(row){
-            return row[_this.model.foreign_column] == _this.$parent.row.id;
-          });
-        }
-      },
       hasRows(){
-        var hasRows = this.getRows.length > 0;
+        if ( this.rows.loaded == false && this.model.maximum != 1 )
+          return true
 
-        //Resets opened form
-        if ( hasRows == false )
-        {
-          this.$broadcast('onCreate', [true, null, this.model.slug]);
-        }
-
-        return hasRows;
+        return this.rows.data.length > 0;
       },
-      getLastRowsId(){
-        var lastid = 0;
-
-        //Get last id
-        for (var key in this.model.rows)
-          if ( this.model.rows[key].id > lastid )
-            lastid = this.model.rows[key].id;
-
-        return lastid;
-      }
     },
 
     components : { FormBuilder, ModelRowsBuilder }

@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Models;
+namespace App;
 
-use Illuminate\Notifications\Notifiable;
 use Gogol\Admin\Models\Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -59,20 +59,6 @@ class User extends Authenticatable
     protected $publishable = false;
 
     /*
-     * Skipping dropping columns
-     */
-    protected $skipDroppingColumn = true;
-
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
-
-    /*
      * Automatic form and database generation
      * @name - field name
      * @placeholder - field placeholder
@@ -81,11 +67,10 @@ class User extends Authenticatable
      */
     protected function fields($row)
     {
-        return [
+        $fields = [
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
             'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:30|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
-            'password' => 'name:Heslo|type:password|confirmed|min:4|max:30|'.( ! isset($row) ? 'required' : '' ),
-            'permissions' => 'name:Administrátor|type:checkbox',
+            'password' => 'name:Heslo|type:password|confirmed|min:4|max:30'.( ! isset($row) ? '|required' : '' ),
             'avatar' => [
                 'name' => 'Profilová fotografia',
                 'type' => 'file',
@@ -97,11 +82,18 @@ class User extends Authenticatable
                     [ 'fit' => [100] ], // thumbs directory
                 ],
             ],
+            'enabled' => 'name:Aktívny|type:checkbox|default:1',
         ];
-    }
 
-    public function hasAdminAccess()
-    {
-        return $this->permissions === 1;
+        /*
+         * If is enabled admin groups
+         */
+        if ( config('admin.admin_groups') === true )
+        {
+            $fields['permissions'] = 'name:Super administrátor|type:checked';
+            $fields['admins_groups'] = 'name:Administrátorska skupina|belongsToMany:admins_groups,name|required';
+        }
+
+        return $fields;
     }
 }
