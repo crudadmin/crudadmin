@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Gogol\Admin\Models;
 
 use Gogol\Admin\Models\Authenticatable;
 use Illuminate\Notifications\Notifiable;

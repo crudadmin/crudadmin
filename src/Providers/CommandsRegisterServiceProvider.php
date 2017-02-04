@@ -16,17 +16,11 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
         /*
          * Register commands
          */
-        $this->app->bind('gogol::admin.install', function ($app) {
-            return new \Gogol\Admin\Commands\AdminInstallCommand();
-        });        
+        $this->app->bind('gogol::admin.install', \Gogol\Admin\Commands\AdminInstallCommand::class);
 
-        $this->app->bind('gogol::admin.migrate', function ($app) {
-            return new \Gogol\Admin\Commands\AdminMigrationCommand(new Filesystem);
-        });
+        $this->app->bind('gogol::admin.migrate', \Gogol\Admin\Commands\AdminMigrationCommand::class);
 
-        $this->app->bind('gogol::admin.model', function ($app) {
-            return new \Gogol\Admin\Commands\AdminModelCommand();
-        });
+        $this->app->bind('gogol::admin.model', \Gogol\Admin\Commands\AdminModelCommand::class);
 
         $this->commands([
             'gogol::admin.install',

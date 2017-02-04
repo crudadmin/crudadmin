@@ -12,9 +12,6 @@ class LocalizationServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app['localization'] = $this->app->share(function($app)
-        {
-            return new \Gogol\Admin\Helpers\Localization();
-        });
+        $this->app->bind('localization', \Gogol\Admin\Helpers\Localization::class);
     }
 }

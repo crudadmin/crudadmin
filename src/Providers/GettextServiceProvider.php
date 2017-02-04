@@ -12,9 +12,6 @@ class GettextServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app['gettext'] = $this->app->share(function($app)
-        {
-            return new \Gogol\Admin\Helpers\Gettext();
-        });
+        $this->app->bind('gettext', \Gogol\Admin\Helpers\Gettext::class);
     }
 }

@@ -41,11 +41,11 @@ class AdminMigrationCommand extends Command
      *
      * @return void
      */
-    public function __construct(Filesystem $files)
+    public function __construct()
     {
         parent::__construct();
 
-        $this->files = $files;
+        $this->files = new Filesystem;
 
         //Add json support
         \Doctrine\DBAL\Types\Type::addType('json', \Doctrine\DBAL\Types\JsonArrayType::class);

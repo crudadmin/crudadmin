@@ -2,9 +2,9 @@
 namespace Gogol\Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Filesystem\Filesystem;
 
-class AdminServiceProvider extends ServiceProvider {
+class AdminServiceProvider extends ServiceProvider
+{
 
     /**
      * Register the service provider.
@@ -13,9 +13,6 @@ class AdminServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app['admin'] = $this->app->share(function($app)
-        {
-            return new \Gogol\Admin\Helpers\Admin(new Filesystem);
-        });
+        $this->app->bind('admin', \Gogol\Admin\Helpers\Admin::class);
     }
 }

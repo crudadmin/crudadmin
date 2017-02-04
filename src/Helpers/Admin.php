@@ -2,6 +2,7 @@
 namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Models\Model as AdminModel;
+use Illuminate\Filesystem\Filesystem;
 
 class Admin
 {
@@ -18,9 +19,9 @@ class Admin
         'models' => [],
     ];
 
-    public function __construct($files)
+    public function __construct()
     {
-        $this->files = $files;
+        $this->files = new Filesystem;
     }
 
     /*

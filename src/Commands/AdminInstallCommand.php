@@ -5,8 +5,8 @@ namespace Gogol\Admin\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Admin;
-use Gogol\Admin\Models\User as BaseUser;
 use App\User;
+use Gogol\Admin\Models\User as BaseUser;
 use Illuminate\Console\ConfirmableTrait;
 use Artisan;
 

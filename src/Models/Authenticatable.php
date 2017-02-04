@@ -59,6 +59,9 @@ class Authenticatable extends Model implements
      */
     public function hasAccess($model)
     {
+        if ( config('admin.admin_groups') !== true )
+            return true;
+
         //If is super admin
         if ( $this->hasAdminAccess() )
             return true;

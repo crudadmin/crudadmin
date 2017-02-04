@@ -42,7 +42,6 @@ class AppServiceProvider extends ServiceProvider {
      */
     public function boot()
     {
-
         /*
          * Bind variable to admin views path
          */
@@ -89,7 +88,16 @@ class AppServiceProvider extends ServiceProvider {
     {
         foreach ($this->routeMiddleware as $name => $middleware)
         {
-            $this->app['router']->middleware($name, $middleware);
+            $router = $this->app['router'];
+
+            /*
+             * Support for laravel 5.3
+             * does not know aliasMiddleware method
+             */
+            if ( method_exists($router, 'aliasMiddleware') )
+                $router->aliasMiddleware($name, $middleware);
+            else
+                $router->middleware($name, $middleware);
         }
     }
 }

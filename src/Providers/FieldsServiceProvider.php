@@ -13,9 +13,6 @@ class FieldsServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app['fields'] = $this->app->share(function($app)
-        {
-            return new \Gogol\Admin\Helpers\Fields\Fields();
-        });
+        $this->app->bind('fields', \Gogol\Admin\Helpers\Fields\Fields::class);
     }
 }
