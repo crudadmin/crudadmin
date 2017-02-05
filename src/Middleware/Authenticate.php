@@ -15,7 +15,7 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null, $errors = [])
+    public function handle($request, Closure $next, $guard = 'web', $errors = [])
     {
         if (auth()->guard($guard)->guest() || ! auth()->guard($guard)->user()->isEnabled()) {
 

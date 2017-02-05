@@ -40,13 +40,7 @@ class User extends Authenticatable
      * Minimum page rows
      * Default = 0
      */
-    protected $minimum = 0;
-
-    /*
-     * Maximum page rows
-     * Default = 0 = ∞
-     */
-    protected $maximum = 0;
+    protected $minimum = 1;
 
     /*
      * Enable sorting rows
@@ -70,7 +64,7 @@ class User extends Authenticatable
         $fields = [
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
             'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:30|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
-            'password' => 'name:Heslo|type:password|confirmed|min:4|max:30'.( ! isset($row) ? '|required' : '' ),
+            'password' => 'name:Heslo|type:password|confirmed|min:4|max:30'.( ! isset($row) ? '|required' : '|nullable' ),
             'avatar' => [
                 'name' => 'Profilová fotografia',
                 'type' => 'file',

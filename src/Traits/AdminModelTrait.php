@@ -497,7 +497,7 @@ trait AdminModelTrait
      */
     public function getBaseRows($subid, $langid, $callback = null)
     {
-        $fields = $this->getBaseFields();
+        $fields = $this->maximum === 1 ? ['*'] : $this->getBaseFields();
 
         //Get model dependencies
         $with = $this->loadWithDependecies();
@@ -711,5 +711,12 @@ trait AdminModelTrait
             $this->withAllOptions = $set;
 
         return $this->withAllOptions;
+    }
+
+    public function makeDescription($field, $limit = 200)
+    {
+        $string = $this->{$field};
+
+        return str_limit(strip_tags($string, $limit), $limit);
     }
 }

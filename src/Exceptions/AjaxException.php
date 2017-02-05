@@ -5,7 +5,7 @@ namespace Gogol\Admin\Exceptions;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
-class AjaxException extends \Illuminate\Http\Exception\HttpResponseException
+class AjaxException extends \Illuminate\Http\Exceptions\HttpResponseException
 {
     public $code;
 

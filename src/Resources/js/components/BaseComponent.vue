@@ -12,8 +12,6 @@
                     layout.requests[key] = layout.requests[key].replace(':'+replace[i], '{'+replace[i]+'}');
             }
 
-            // console.log(layout.requests);
-
             return {
                 data : function(){
                     return {
@@ -61,14 +59,17 @@
                     },
                     getPermissions()
                     {
-                        var permissions = [];
+                        if ( 'admins_groups' in this.user )
+                        {
+                            var permissions = [];
 
-                        for (var i = 0; i < this.user.admins_groups.length; i++){
-                            permissions.push( this.user.admins_groups[i].name );
+                            for (var i = 0; i < this.user.admins_groups.length; i++){
+                                permissions.push( this.user.admins_groups[i].name );
+                            }
+
+                            if ( permissions.length > 0 )
+                                return permissions.join(', ');
                         }
-
-                        if ( permissions.length > 0 )
-                            return permissions.join(', ');
 
                         return 'Administrátor';
                     }

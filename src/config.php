@@ -61,7 +61,7 @@ return [
         'string' => 'max:255',
         'integer' => 'integer|max:4294967295',
         'decimal' => 'numeric',
-        'file' => 'max:10240|file',
+        'file' => 'max:10240|file|nullable',
         'editor' => 'hidden',
         'password' => 'hidden',
         'checkbox' => 'boolean',

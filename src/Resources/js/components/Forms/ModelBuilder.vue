@@ -141,6 +141,8 @@
         var data = this.getStorage(),
             defaultValue = this.$root.getModelProperty(this.model, 'settings.grid.default');
 
+        console.log(this.model.slug, this.canAddRow);
+
         //Full screen
         if ( ! this.canShowForm )
         {
@@ -211,8 +213,6 @@
 
         this.buffer.rows = rows;
 
-        console.log('updateee');
-
         this.$broadcast('updateBufferRows');
 
         return rows;
@@ -262,7 +262,7 @@
       canShowRows(){
         if ( this.model.minimum == 1 && this.model.maximum == 1)
         {
-          this.$broadcast('onCreate', [this.rows.data[0], null, this.model.slug]);
+          this.row = this.rows.data[0];
 
           this.enableOnlyFullScreen();
 
@@ -286,7 +286,6 @@
         return true;
       },
       canShowForm(){
-
         if ( !this.row && !this.canAddRow || ( this.row && this.model.editable == false && !this.canAddRow ))
         {
           return false;

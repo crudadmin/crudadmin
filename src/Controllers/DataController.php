@@ -20,7 +20,7 @@ class DataController extends Controller
         $model = Admin::getModelByTable($model);
 
         //Check if user has allowed model
-        if ( ! auth()->user()->hasAccess( $model ) )
+        if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
         {
             Ajax::permissionsError();
         }

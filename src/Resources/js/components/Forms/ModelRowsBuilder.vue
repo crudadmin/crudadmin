@@ -95,7 +95,7 @@
 
     events: {
       onCreate(array){
-        if ( this.pagination.page == 1 )
+        if ( this.pagination.position == 1 )
         {
           var rows = array.concat( this.rows.data );
 
@@ -155,6 +155,10 @@
       },
       rowsData(){
         return this.rows.data.sort(function(a, b){
+          //If is null value
+          if ( ! a || ! b )
+            return false;
+
           a = a[ this.orderBy[0] ]+'',
           b = b[ this.orderBy[0] ]+'';
 
@@ -166,10 +170,6 @@
 
             return a - b;
           } else {
-            //If is null value
-            if ( ! a || ! b )
-              return false;
-
             if ( this.orderBy[1] == 1 )
               return b.toLowerCase().localeCompare(a.toLowerCase(), 'sk');
 
@@ -220,9 +220,6 @@
             return;
           }
 
-          //Add next timeout
-          this.initTimeout(false);
-
           //Disable loader
           this.pagination.refreshing = false;
 
@@ -237,6 +234,12 @@
 
           //Update field options
           this.updateFieldOptions(response.data.fields);
+
+          //Add next timeout
+          if ( !(this.rows.count > 0 && this.model.maximum === 1) )
+          {
+            this.initTimeout(false);
+          }
         })
         .catch(function(response){
           //If has been component destroyed, and request is delivered...
@@ -256,6 +259,10 @@
       },
       initTimeout(indicator){
         this.destroyTimeout();
+
+        //Disable autorefreshing when is one row
+        if ( this.rows.count > 0 && this.model.maximum === 1 )
+          return;
 
         this.updateTimeout = setTimeout(function(){
           this.loadRows(indicator);

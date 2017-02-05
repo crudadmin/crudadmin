@@ -17,7 +17,7 @@ class LayoutController extends BaseController
     public function index()
     {
         return [
-            'user' => auth()->user()->withAvatarPath(),
+            'user' => auth()->guard('web')->user()->withAvatarPath(),
             'models' => $this->getAppTree(),
             'languages' => $this->getLanguages(),
             'requests' => [
@@ -59,7 +59,7 @@ class LayoutController extends BaseController
         $model = Admin::getModelByTable($table);
 
         //Check if user has allowed model
-        if ( !$model || ! auth()->user()->hasAccess( $model ) )
+        if ( !$model || ! auth()->guard('web')->user()->hasAccess( $model ) )
             Ajax::permissionsError();
 
         if ( $count == 0 )
@@ -87,7 +87,7 @@ class LayoutController extends BaseController
                 continue;
 
             //Check if user has allowed model
-            if ( ! auth()->user()->hasAccess( $model ) )
+            if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
                 continue;
 
             //If is deactivated model
@@ -124,7 +124,7 @@ class LayoutController extends BaseController
                 continue;
 
             //Check if user has allowed model
-            if ( ! auth()->user()->hasAccess( $child_model ) )
+            if ( ! auth()->guard('web')->user()->hasAccess( $child_model ) )
                 continue;
 
             //If is deactivated model
@@ -152,14 +152,6 @@ class LayoutController extends BaseController
             'localization' => $model->isEnabledLanguageForeign(),
             'submenu' => [],
         ]);
-    }
-
-    protected function getLastId($model)
-    {
-        if ( ($row = $model->select('id')->orderBy('id', 'DESC')->first()) === null )
-            return 0;
-
-        return $row->getKey();
     }
 
     /*

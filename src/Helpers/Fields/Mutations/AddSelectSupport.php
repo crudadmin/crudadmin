@@ -37,6 +37,8 @@ class AddSelectSupport
                 if ( ! array_key_exists('options', $field) )
                 {
                     $field['options'] = [];
+                } else if ( is_string($field['options']) ) {
+                    $field['options'] = explode(',', $field['options']);
                 }
 
                 return $field;

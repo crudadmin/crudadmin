@@ -35,9 +35,6 @@ trait Validation {
                     if ( $this->hasFieldParam($key, 'array', true) )
                         $key = $key . '.*';
                 }
-
-                if ( $this->hasFieldParam($key, 'required', true) && $this->hasFieldParam($key, 'nullable', true) )
-                    unset($field['nullable']);
             }
 
             //Removes admin properties in field from request

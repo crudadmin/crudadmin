@@ -39,7 +39,18 @@
       data(){
         return {
           hidden: ['language_id', '_order', 'slug', 'published_at', 'updated_at', 'created_at'],
+          autoSize : false,
         };
+      },
+
+      watch: {
+        rowsdata(data){
+          if ( this.autoSize == false )
+          {
+            //Automaticaly choose size of tables
+            this.$parent.$parent.checkActiveSize( this.columns );
+          }
+        }
       },
 
       created() {
@@ -49,8 +60,7 @@
       },
 
       ready() {
-        //Automaticaly choose size of tables
-        this.$parent.$parent.checkActiveSize( this.columns );
+
       },
 
       computed: {

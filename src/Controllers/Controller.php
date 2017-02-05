@@ -22,15 +22,15 @@ class Controller extends BaseController
 
         foreach ($rules as $validation_key => $data)
         {
-            //Removes required validation parameter from input when is row avaiable and when is not field value empty
-            if ( isset( $row ) )
-            {
-                //If is multirows with editing
-                if ( ($replaced_key = str_replace('.*', '', $validation_key)) && $model->hasFieldParam($replaced_key, 'multirows') )
-                    $key = $replaced_key;
-                else
-                    $key = $validation_key;
+            //If is multirows with editing
+            if ( ($replaced_key = str_replace('.*', '', $validation_key)) && isset($row) && $model->hasFieldParam($replaced_key, 'multirows') )
+                $key = $replaced_key;
+            else
+                $key = $validation_key;
 
+            //Removes required validation parameter from input when is row avaiable and when is not field value empty
+            if ( isset($row) )
+            {
                 //Allow send form without file, when is file uploaded
                 if ( $model->isFieldType($key, 'file')
                     && $model->hasFieldParam($key, 'required', true)
@@ -42,18 +42,15 @@ class Controller extends BaseController
                     if( $isEmptyFiles && ($k = array_search('required', $data)) !== false) {
                         unset($data[$k]);
                     }
-                } else if ( $request->has( '$remove_' . $key ) && ! $model->hasFieldParam($key, 'multiple', true) )
-                {
+                } else if ( $request->has( '$remove_' . $key ) && ! $model->hasFieldParam($key, 'multiple', true) ) {
                     $request->merge( [ $key => null ] );
 
-                    //Add nullable param to field request
-                    if ( !$model->hasFieldParam($key, 'required', true) )
-                    {
-                        $data[] = 'nullable';
-                    }
+                    if ( $model->hasFieldParam($key, 'required', true) && ($k = array_search('nullable', $data)) !== false )
+                        unset($data[$k]);
                 }
             } else {
-                $key = $validation_key;
+                if ( $model->hasFieldParam($replaced_key, 'required', true) && ($k = array_search('nullable', $data)) !== false )
+                    unset($data[$k]);
             }
 
             $updated_rules[$key] = $data;
