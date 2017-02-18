@@ -59,7 +59,7 @@
         refresh : {
           refreshing : true,
           count : 0,
-          interval : 3000,
+          interval : 5000,
         },
       };
     },
@@ -103,6 +103,7 @@
             rows = rows.slice(0, this.pagination.limit);
 
           this.rows.data = rows;
+          this.rows.count += array.length;
         } else {
           this.loadRows();
         }
@@ -209,6 +210,7 @@
 
         this.$http.get(this.$root.requests.rows, {
           model : this.model.slug,
+          parent : this.$parent.getParentTableName(),
           subid : this.getParentRowId(),
           langid : this.model.localization === true ? this.langid : 0,
           limit : this.isPaginationEnabled ? this.pagination.limit : 0,
@@ -228,12 +230,15 @@
           this.rows.count = response.data.count;
           this.$parent.rows.loaded = true;
 
+
+          //Update field options
+          if ( this.refresh.count == 0 ){
+            this.updateFieldOptions(response.data.fields);
+          }
+
           //Update refresh informations
           this.refresh.count++;
           this.refresh.refreshing = false;
-
-          //Update field options
-          this.updateFieldOptions(response.data.fields);
 
           //Add next timeout
           if ( !(this.rows.count > 0 && this.model.maximum === 1) )

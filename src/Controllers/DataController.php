@@ -3,7 +3,6 @@
 namespace Gogol\Admin\Controllers;
 
 use Illuminate\Http\Request;
-
 use Gogol\Admin\Requests\DataRequest;
 use Admin;
 use Carbon\Carbon;
@@ -17,7 +16,7 @@ class DataController extends Controller
      */
     protected function getModel($model)
     {
-        $model = Admin::getModelByTable($model);
+        $model = Admin::getModelByTable($model)->getAdminRows();
 
         //Check if user has allowed model
         if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
@@ -63,7 +62,7 @@ class DataController extends Controller
     {
         $model = $this->getModel( $model );
 
-        return $model->findOrFail($id);
+        return $model->findOrFail($id)->getAdminAttributes();
     }
 
     /*
@@ -104,7 +103,7 @@ class DataController extends Controller
         $message = $this->responseMessage('Záznam bol úspešne uložený');
 
         Ajax::message( $message, null, $this->responseType(), [
-            'row' => $row,
+            'row' => $row->getAdminAttributes(),
         ] );
     }
 
@@ -113,7 +112,8 @@ class DataController extends Controller
      */
     protected function insertRows($model, $request, $rows = [])
     {
-        foreach ($request->allWithMutators() as $request_row) {
+        foreach ($request->allWithMutators() as $request_row)
+        {
             //Create row into db
             $row = (new $model)->create($request_row);
 
@@ -123,7 +123,7 @@ class DataController extends Controller
             if ( method_exists($model, 'onCreate') )
                 $row->onCreate($row);
 
-            $rows[] = $row;
+            $rows[] = $row->getAdminAttributes();
         }
 
         return $rows;
@@ -204,10 +204,10 @@ class DataController extends Controller
         if ( method_exists($model, 'onDelete') )
             $model->onDelete($row);
 
-        $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('subid'), request('language_id'), request('limit'), request('page'));
+        $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page'));
 
         if ( count($rows['rows']) == 0 && request('page') > 1 )
-            $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('subid'), request('language_id'), request('limit'), request('page') - 1);
+            $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1);
 
         Ajax::message( null, null, null, [
             'rows' => $rows,

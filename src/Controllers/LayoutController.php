@@ -28,13 +28,13 @@ class LayoutController extends BaseController
                 'togglePublishedAt' => action('\Gogol\Admin\Controllers\DataController@togglePublishedAt'),
                 'updateOrder' => action('\Gogol\Admin\Controllers\DataController@updateOrder', [':model', ':id', ':subid']),
                 'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),
-                'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':subid', ':langid', ':limit', ':page', ':count']),
+                'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
             ],
         ];
 
     }
 
-    public function returnModelData($model, $subid, $langid, $limit, $page)
+    public function returnModelData($model, $parent_table, $subid, $langid, $limit, $page)
     {
         return [
             'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page ) {
@@ -45,8 +45,8 @@ class LayoutController extends BaseController
                 $offset = $start - $limit;
 
                 $query->offset($offset)->take($limit);
-            }),
-            'count' => $model->filterByParentOrLanguage($subid, $langid)->count(),
+            }, $parent_table),
+            'count' => $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table)->count(),
             'page' => $page,
         ];
     }
@@ -54,7 +54,7 @@ class LayoutController extends BaseController
     /*
      * Returns paginated rows and all required model informations
      */
-    public function getRows($table, $subid, $langid, $limit, $page, $count)
+    public function getRows($table, $parent_table, $subid, $langid, $limit, $page, $count)
     {
         $model = Admin::getModelByTable($table);
 
@@ -62,10 +62,15 @@ class LayoutController extends BaseController
         if ( !$model || ! auth()->guard('web')->user()->hasAccess( $model ) )
             Ajax::permissionsError();
 
-        if ( $count == 0 )
+        if ( $count == 0 ){
             $model->withAllOptions(true);
+        }
 
-        return $this->makePage( $model, $this->returnModelData( $model, $subid, $langid, $limit, $page ), false);
+        if ( $parent_table == '0' )
+            $parent_table = null;
+
+
+        return $this->makePage( $model, $this->returnModelData( $model, $parent_table, $subid, $langid, $limit, $page ), false);
     }
 
     /**

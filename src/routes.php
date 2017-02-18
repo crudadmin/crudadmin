@@ -38,7 +38,7 @@ Route::group(['middleware' => 'admin'], function(){
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
     // Route::get('/admin/api/layout/refresh/{model}/{count}/{id}', 'LayoutController@refresh');
-    Route::get('/admin/api/layout/paginate/{model}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
+    Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
 
     //Requests
     Route::get('/admin/api/show/{model}/{id}', 'DataController@show');

@@ -32,7 +32,7 @@ class AddSelectSupport
         if ( $field['type'] == 'select' )
         {
             //If is not allowed to displaying all options data
-            if ( $model->withAllOptions() !== true )
+            if ( $model->withAllOptions() !== true || ( array_key_exists('hidden', $field) && array_key_exists('removeFromForm', $field) ) )
             {
                 if ( ! array_key_exists('options', $field) )
                 {
@@ -43,6 +43,9 @@ class AddSelectSupport
 
                 return $field;
             }
+
+            //Add admin rows global scope into model
+            $model->getAdminRows();
 
             //Get options from model, and cache them
             $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {

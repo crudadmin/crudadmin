@@ -5,7 +5,16 @@ class FieldToArray
 {
     protected function bindValue($row)
     {
-        return count($row) == 1 ? true : $row[1];
+        $count = count($row);
+
+        if ( $count == 1 )
+            return true;
+
+        if ( $count == 2 )
+            return $row[1];
+
+        if ( $count > 2 )
+            return implode(array_slice($row, 1), ':');
     }
 
     public function update( $field )

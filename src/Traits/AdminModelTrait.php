@@ -2,9 +2,9 @@
 
 namespace Gogol\Admin\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
 use Gogol\Admin\Helpers\File;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Localization;
@@ -176,7 +176,9 @@ trait AdminModelTrait
 
         //If has relationship, then allow foreign key
         if ( $this->belongsToModel != null )
-            $this->fillable[] = $this->getForeignColumn();
+        {
+            $this->fillable = array_merge(array_values($this->getForeignColumn()), $this->fillable);
+        }
 
         //If is moddel sluggable
         if ( $this->sluggable != null )
@@ -238,11 +240,13 @@ trait AdminModelTrait
         }
 
         //Removes foreign column from hidden
-        if ( count($this->hidden) > 0 && $column = $foreign_column = $this->getForeignColumn())
+        if ( count($this->hidden) > 0 && is_array($columns = $this->getForeignColumn()))
         {
-            if ( in_array($column, $this->hidden) )
-            {
-                unset($this->hidden[array_search($column, $this->hidden)]);
+            foreach ($columns as $column) {
+                if ( in_array($column, $this->hidden) )
+                {
+                    unset($this->hidden[array_search($column, $this->hidden)]);
+                }
             }
         }
     }
@@ -421,7 +425,7 @@ trait AdminModelTrait
 
         //If has foreign key, add column name to base fields
         if ( $this->getForeignColumn() )
-            $fields[] = $this->getForeignColumn();
+            $fields = array_merge($fields, array_values($this->getForeignColumn()));
 
         foreach ($this->getFields() as $key => $field)
         {
@@ -495,7 +499,7 @@ trait AdminModelTrait
     /*
      * Returns all rows with base fields
      */
-    public function getBaseRows($subid, $langid, $callback = null)
+    public function getBaseRows($subid, $langid, $callback = null, $parent_table = null)
     {
         $fields = $this->maximum === 1 ? ['*'] : $this->getBaseFields();
 
@@ -503,24 +507,39 @@ trait AdminModelTrait
         $with = $this->loadWithDependecies();
 
         //Get base columns from database with relationships
-        $query = $this->select( $fields )->with($with);
+        $query = $this->getAdminRows()->select( $fields )->with($with);
 
         //Filter rows by language id and parent id
-        $query->filterByParentOrLanguage($subid, $langid);
+        $query->filterByParentOrLanguage($subid, $langid, $parent_table);
 
         if ( is_callable( $callback ) )
             call_user_func_array($callback, [$query]);
 
-        return $query->get();
+        $rows = [];
+
+        foreach ($query->get() as $row)
+        {
+            $rows[] = $row->getAdminAttributes();
+        };
+
+        return $rows;
     }
 
-    public function scopeFilterByParentOrLanguage($query, $subid, $langid)
+    public function scopeFilterByParentOrLanguage($query, $subid, $langid, $parent_table = null)
     {
         if ( $langid > 0 )
             $query->localization($langid);
 
-        if ( $subid > 0 )
-            $query->where($this->getForeignColumn(), $subid);
+        if ( $subid > 0 ){
+            $column = $this->getForeignColumn($parent_table);
+
+            if ( $parent_table === null && count($column) == 1 )
+            {
+                $column = array_values($column)[0];
+            }
+
+            $query->where($column, $subid);
+        }
 
     }
 
@@ -579,7 +598,12 @@ trait AdminModelTrait
 
         foreach ($models as $model)
         {
-            if ( $model->belongsToModel == $classname )
+            if ( ! $model->belongsToModel )
+                continue;
+
+            $belongsToModel = is_array($model->belongsToModel) ? $model->belongsToModel : [ $model->belongsToModel ];
+
+            if ( in_array($classname, $belongsToModel) )
             {
                 $childs[] = $model;
             }
@@ -637,13 +661,9 @@ trait AdminModelTrait
      * @see Illuminate\Database\Eloquent\Model
      * @return array
      */
-    public function attributesToArray()
+    public function getAdminAttributes()
     {
-        $attributes = parent::attributesToArray();
-
-        //Automaticaly binded belongsToMany relationships only for administration
-        if ( ! Admin::isAdmin() )
-            return $attributes;
+        $attributes = $this->attributesToArray();
 
         //Bing belongs to many values
         foreach ($this->getFields() as $key => $field)
@@ -669,7 +689,6 @@ trait AdminModelTrait
         return $attributes;
     }
 
-
     /**
      * Convert the model instance to an array.
      *
@@ -677,7 +696,7 @@ trait AdminModelTrait
      */
     public function toArray()
     {
-        $attributes = $this->attributesToArray();
+        $attributes = $this->getAdminAttributes();
 
         //For administration is reversed way of merging arrays for multiselect relationships support
         if ( Admin::isAdmin() )
@@ -718,5 +737,17 @@ trait AdminModelTrait
         $string = $this->{$field};
 
         return str_limit(strip_tags($string, $limit), $limit);
+    }
+
+    /*
+     * Add global scope for models in administration
+     */
+    public function getAdminRows()
+    {
+        $this->addGlobalScope('adminRows', function(Builder $builder){
+            $builder->adminRows();
+        });
+
+        return $this;
     }
 }

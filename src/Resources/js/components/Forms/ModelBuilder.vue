@@ -1,6 +1,6 @@
 <template>
 
-  <div class="box">
+  <div class="box" v-show="canShowForm || (hasRows && canShowRows)">
     <div class="box-header" v-if="ischild || isEnabledGrid">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
@@ -82,7 +82,6 @@
       sizes : {
         deep: true,
         handler(data){
-
           this.activeSize = data.filter(function(row){
 
             if ( row.active == true )
@@ -113,6 +112,14 @@
     },
 
     methods : {
+      getParentTableName(){
+        var row = this.$parent.row;
+
+        if ( !row || !( 'id' in row ))
+          return 0;
+
+        return this.$parent.model.slug;
+      },
       hasChilds(){
         var length = 0;
 
@@ -140,8 +147,6 @@
 
         var data = this.getStorage(),
             defaultValue = this.$root.getModelProperty(this.model, 'settings.grid.default');
-
-        console.log(this.model.slug, this.canAddRow);
 
         //Full screen
         if ( ! this.canShowForm )
@@ -296,7 +301,7 @@
       },
       hasRows(){
         if ( this.rows.loaded == false && this.model.maximum != 1 )
-          return true
+          return true;
 
         return this.rows.data.length > 0;
       },

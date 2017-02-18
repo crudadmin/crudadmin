@@ -127,6 +127,11 @@ class Model extends BaseModel
         $query->withoutGlobalScope('publishable');
     }
 
+    public function scopeAdminRows($query)
+    {
+
+    }
+
     public function __construct(array $attributes = [])
     {
         //Boot base model trait

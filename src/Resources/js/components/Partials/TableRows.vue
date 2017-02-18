@@ -43,20 +43,17 @@
         };
       },
 
-      watch: {
-        rowsdata(data){
-          if ( this.autoSize == false )
-          {
-            //Automaticaly choose size of tables
-            this.$parent.$parent.checkActiveSize( this.columns );
-          }
-        }
-      },
-
       created() {
         //If table has foreign column, will be hidden
         if ( this.model.foreign_column != null )
           this.hidden.push( this.model.foreign_column );
+
+        //Automatically set columns
+        if ( this.autoSize == false )
+        {
+          //Automaticaly choose size of tables
+          this.$parent.$parent.checkActiveSize( this.columns );
+        }
       },
 
       ready() {
@@ -284,6 +281,7 @@
 
             var data = {
               model : this.model.slug,
+              parent : this.$parent.$parent.getParentTableName(),
               id : row.id,
               subid : this.$parent.getParentRowId(),
               limit : this.$parent.pagination.limit,
@@ -307,9 +305,10 @@
               //Load rows into array
               this.rows.data = data.data.rows.rows;
               this.rows.count = data.data.rows.count;
+
               this.$parent.pagination.position = data.data.rows.page;
 
-              if ( this.row == row )
+              if ( this.row && this.row.id == row.id )
                 this.row = null;
             })
             .catch(function(response){

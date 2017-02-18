@@ -151,7 +151,9 @@
 
         //Check if form belongs to other form
         if ( this.model.foreign_column != null )
-          data[this.model.foreign_column] = this.$parent.$parent.row.id;
+        {
+          data[this.model.foreign_column[this.$parent.getParentTableName()]] = this.$parent.$parent.row.id;
+        }
 
         //If is updating, then add row ID
         if ( action == 'update' )

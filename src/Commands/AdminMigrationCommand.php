@@ -126,6 +126,7 @@ class AdminMigrationCommand extends Command
 
             //Add relationships with other models
             $this->addRelationships($table, $model);
+
             foreach ($model->getFields() as $key => $value)
             {
                 $this->setColumn( $table, $model, $key );
@@ -199,7 +200,6 @@ class AdminMigrationCommand extends Command
                 $this->line('<comment>+ Added column:</comment> _order');
             }
 
-
             //Sluggable column
             if ( $model->getProperty('sluggable') != null )
             {
@@ -208,7 +208,8 @@ class AdminMigrationCommand extends Command
                     $this->setSlug($table, $model, true, true);
                     $this->line('<comment>+ Added column:</comment> slug');
                 } else {
-                    $this->setSlug($table, $model, true)->change();
+                    if ( $setSlug = $this->setSlug($table, $model, true) )
+                        $setSlug->change();
                 }
             }
 
@@ -441,6 +442,13 @@ class AdminMigrationCommand extends Command
     {
         $slugcolumn = $model->getProperty('sluggable');
 
+        if ( ! $model->getField($slugcolumn) )
+        {
+            $this->line('<comment>+ Unknown slug column for</comment> <error>'.$slugcolumn.'</error> <comment>column</comment>');
+
+            return;
+        }
+
         $column = $table->string('slug', $model->getFieldLength($slugcolumn));
 
         if ( $updating == true )
@@ -560,28 +568,42 @@ class AdminMigrationCommand extends Command
         if ( $belongsToModel == null )
             return;
 
-        $parent = new $belongsToModel;
-
-        $foreign_column = $model->getForeignColumn();
-
-        //Check if table has column
-        if ( $updating === true && $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
-            return;
-
-        $row = $table->integer( $foreign_column )->unsigned();
+        if ( !is_array($belongsToModel) )
+            $belongsToModel = [ $belongsToModel ];
 
         if ( $updating === true )
-        {
-            $row->after('id');
-            $this->line('<comment>+ Added column:</comment> '.$foreign_column);
-        }
+            $belongsToModel = array_reverse($belongsToModel);
 
-        if ( $parent->getConnection() != $model->getConnection() )
+        foreach ($belongsToModel as $parent)
         {
-            return $this->line('<comment>+ Skipped foreign relationship:</comment> '.$foreign_column . ' <comment>( different db connections )</comment> ');
-        }
+            $parent = new $parent;
 
-        $table->foreign( $foreign_column )->references( 'id' )->on( $parent->getTable() );
+            $foreign_column = $model->getForeignColumn( $parent->getTable() );
+
+            //Check if table has column
+            if ( $updating === true && $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
+                continue;
+
+            $column = $table->integer( $foreign_column )->unsigned();
+
+            //If parent belongs to more models...
+            if ( count($belongsToModel) > 1 )
+                $column->nullable();
+
+            if ( $updating === true )
+            {
+                $column->after('id');
+                $this->line('<comment>+ Added column:</comment> '.$foreign_column);
+            }
+
+            if ( $parent->getConnection() != $model->getConnection() )
+            {
+                $this->line('<comment>+ Skipped foreign relationship:</comment> '.$foreign_column . ' <comment>( different db connections )</comment> ');
+                continue;
+            }
+
+            $table->foreign( $foreign_column )->references( 'id' )->on( $parent->getTable() );
+        }
     }
 
     //Returns schema with correct connection

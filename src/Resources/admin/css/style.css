@@ -251,3 +251,5 @@ select[multiple] {height: 34px;color: white;}
     font-size: 50px;
     margin-top: 10px;
 }
+
+form label span.required { color: red; position: relative; top: 2px }

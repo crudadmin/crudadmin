@@ -94,17 +94,20 @@ trait ModelRelationships
                     }
                 }
 
+                $modelBelongsToModel = is_array($model->getProperty('belongsToModel')) ? $model->getProperty('belongsToModel') : [ $model->getProperty('belongsToModel') ];
+                $thisBelongsToModel = is_array($this->getProperty('belongsToModel')) ? $this->getProperty('belongsToModel') : [ $this->getProperty('belongsToModel') ];
+
                 //Check if called model belongs to caller
-                if ( $model->getProperty('belongsToModel') != get_class($this) && $this->getProperty('belongsToModel') != get_class($model))
+                if ( !($isBelongsTo = in_array(get_class($model), $thisBelongsToModel)) && ! in_array(get_class($this), $modelBelongsToModel) )
                     break;
 
-                $relationType = $this->getProperty('belongsToModel') == get_class($model) ? 'belongsTo' : 'hasMany';
+                $relationType = $isBelongsTo ? 'belongsTo' : 'hasMany';
 
                 //If relationship can has only one child
                 if ( $relationType == 'hasMany' && $model->maximum == 1 )
                     $relationType = 'hasOne';
 
-                return $this->relationResponse($method, $relationType, $path, $get, [ 4 => $this->getForeignColumn() ]);
+                return $this->relationResponse($method, $relationType, $path, $get, [ 4 => $this->getForeignColumn( $model->getTable() ) ]);
             }
         }
 
@@ -149,14 +152,25 @@ trait ModelRelationships
      */
     public function getForeignColumn($model = null)
     {
-        if ( $this->belongsToModel == null && $model===null )
+        if ( $this->belongsToModel == null )
             return null;
 
-        $parent = $model ? $model : new $this->belongsToModel;
+        $belongsToModel = is_array($this->belongsToModel) ? $this->belongsToModel : [ $this->belongsToModel ];
 
-        $model_table_name = Str::snake(class_basename($parent));
+        $columns = [];
 
-        return $model_table_name . '_id';
+        foreach ($belongsToModel as $parent)
+        {
+            $model_table_name = Str::snake(class_basename($parent));
+
+            $columns[ str_plural($model_table_name) ] = $model_table_name . '_id';
+        }
+
+        if ( $model ) {
+            return array_key_exists($model, $columns) ? $columns[$model] : null;
+        }
+
+        return $columns;
     }
 
     public function getBaseModelTable()

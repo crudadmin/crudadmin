@@ -1,28 +1,28 @@
 <template>
     <!-- STRING INPUT -->
     <div class="form-group" v-if="isString || isPassword">
-      <label for="{{ getId }}">{{ getName }}</label>
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <input v-bind:id="getId" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" v-if="isInteger">
-      <label for="{{ getId }}">{{ getName }}</label>
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <input v-bind:id="getId" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.02' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATE INPUT -->
     <div class="form-group" v-if="isDate">
-      <label for="{{ getId }}">{{ getName }}</label>
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <input v-bind:id="getId" type="text" readonly v-bind:name="key" class="form-control js_date" value="{{ dateValue( getValueOrDefault ) }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- Checkbox INPUT -->
     <div class="form-group" v-if="isCheckbox">
-      <label for="{{ getId }}" class="checkbox">
+      <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
         <input type="checkbox" v-bind:id="getId" v-bind:checked="getValueOrDefault== 1" value="1" class="ios-switch green" v-bind:name="key">
         <div><div></div></div>
@@ -32,14 +32,14 @@
 
     <!-- TEXT INPUT -->
     <div class="form-group" v-if="isText || isEditor">
-      <label for="{{ getId }}">{{ getName }}</label>
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <textarea v-bind:id="getId" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
     <!-- FILE INPUT -->
     <div class="form-group" v-if="isFile">
-      <label for="{{ getId }}">{{ getName }}</label>
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="form-group file-group">
         <input v-bind:id="getId" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
@@ -63,14 +63,14 @@
     </div>
 
     <!-- Row Confirmation -->
-    <form-input-builder v-if="field.confirmed == true && !isConfirmation" :model="model" :row="row" :index="index" :key="key + '_confirmation'" :field="field" :confirmation="true"></form-input-builder>
+    <form-input-builder v-if="field.confirmed == true && !isConfirmation" :model="model" :field="field" :index="index" :key="key + '_confirmation'" :row="row" :confirmation="true"></form-input-builder>
 
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
-      <label for="{{ getId }}">{{ getName }}</label>
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <select v-bind:id="getId" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">Vyberte jednú z možností</option>
-        <option v-for="option in field.options | languageOptions" v-bind:selected="selectIndex(hasValue($key, value, isMultiple) || (!row && $key == field.default), $key)" value="{{ $key }}">{{ option }}</option>
+        <option v-for="($key, option) in field.options | languageOptions" v-bind:selected="selectIndex(hasValue($key, value, isMultiple) || (!row && $key == field.default), $key)" v-bind:value="$key">{{ option }}</option>
       </select>
       <small>{{ field.title }}</small>
     </div>
@@ -191,7 +191,7 @@
           {
             if ( value.indexOf( $.isNumeric(key) ? parseInt(key) : key ) > -1 )
               return true;
-          } else if (key == value) {
+          } else if (key && value && key == value) {
             return true;
           }
 
@@ -208,7 +208,7 @@
 
             this.updateSelectTimeout = setTimeout(function(){
               $('#'+this.getId).trigger("chosen:updated");
-            }.bind(this), 100);
+            }.bind(this), 50);
           }
 
           return select;
@@ -218,7 +218,10 @@
       computed : {
         getId()
         {
-          return 'id-' + this.model.slug + '-' + this.index + '-' + this.key;
+          var parent = 'getParentTableName' in this.$parent.$parent ?
+            this.$parent.$parent.getParentTableName() : this.$parent.$parent.$parent.getParentTableName();
+
+          return 'id-' + this.model.slug + '-' + parent + '-' + this.index + '-' + this.key;
         },
         getName()
         {
@@ -334,6 +337,9 @@
             return value;
 
           return [ value ];
+        },
+        isRequired(){
+            return 'required' in this.field && this.field.required == true;
         }
       },
 

@@ -4,7 +4,7 @@
     export default {
         init(layout){
             //Replace requests paths
-            var replace = ['model', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
+            var replace = ['model', 'parent', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
 
             for (var key in layout.requests)
             {
