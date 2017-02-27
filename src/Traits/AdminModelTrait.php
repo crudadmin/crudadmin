@@ -55,8 +55,14 @@ trait AdminModelTrait
     public function getValue($key)
     {
         //Checks for relationship
-        if (!property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) && $relation = $this->returnAdminRelationship($key, true))
-            return $relation;
+        if (!property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) )
+        {
+            //If relations has been in buffer, but returns nullable value
+            if ( $relation = $this->returnAdminRelationship($key, true) )
+            {
+                return $relation === true ? null : $relation;
+            }
+        }
 
         //If is called field type file, then return file wrapper
         if ( $field = $this->getField($key) )

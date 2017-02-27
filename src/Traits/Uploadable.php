@@ -24,11 +24,11 @@ trait Uploadable
     /*
      * If directories for postprocessed images dones not exists
      */
-    private function makeDirs($path)
+    public function makeDirs($path)
     {
         $tree = explode('/', trim($path, '/'));
 
-        $path = '.';
+        $path = $path[0] == '/' ? '' : '.';
 
         foreach ($tree as $dir)
         {

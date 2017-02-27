@@ -79,7 +79,7 @@ class Authenticatable extends Model implements
      */
     public function hasAdminAccess()
     {
-        return $this->permissions === 1;
+        return $this->permissions == 1;
     }
 
     /*
@@ -87,7 +87,7 @@ class Authenticatable extends Model implements
      */
     public function isEnabled()
     {
-        return $this->enabled === 1;
+        return $this->enabled == 1;
     }
 
     /*

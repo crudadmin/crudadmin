@@ -168,6 +168,19 @@ abstract class Request extends FormRequest
             return $this->model->getFields();
     }
 
+    protected function emptyStringsToNull($fields = null)
+    {
+        foreach ($fields as $key => $field)
+        {
+            $value = $value = $this->get( $key );
+
+            if ( is_string($value) && $value === '')
+            {
+                $this->merge( [ $key => NULL ] );
+            }
+        }
+    }
+
     public function applyMutators($model, array $fields = null)
     {
         //Set model object
@@ -179,6 +192,7 @@ abstract class Request extends FormRequest
         $this->checkboxes( $fields );
         $this->datetimes( $fields );
         $this->removeEmptyForeign( $fields );
+        $this->emptyStringsToNull( $fields );
 
         return count($this->errors) == 0;
     }

@@ -9,7 +9,7 @@
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.02' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
@@ -70,6 +70,7 @@
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <select v-bind:id="getId" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">Vyberte jednú z možností</option>
+        <option v-if="missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="($key, option) in field.options | languageOptions" v-bind:selected="selectIndex(hasValue($key, value, isMultiple) || (!row && $key == field.default), $key)" v-bind:value="$key">{{ option }}</option>
       </select>
       <small>{{ field.title }}</small>
@@ -206,17 +207,14 @@
         },
         selectIndex(select, index)
         {
-          if ( select === true || this.updateSelect === true )
-          {
-            this.updateSelect = true;
+          this.updateSelect = true;
 
-            if ( this.updateSelectTimeout )
-              clearTimeout(this.updateSelectTimeout);
+          if ( this.updateSelectTimeout )
+            clearTimeout(this.updateSelectTimeout);
 
-            this.updateSelectTimeout = setTimeout(function(){
-              $('#'+this.getId).trigger("chosen:updated");
-            }.bind(this), 50);
-          }
+          this.updateSelectTimeout = setTimeout(function(){
+            $('#'+this.getId).trigger("chosen:updated");
+          }.bind(this), 50);
 
           return select;
         }
@@ -347,7 +345,10 @@
         },
         isRequired(){
             return 'required' in this.field && this.field.required == true;
-        }
+        },
+        missingValueInSelectOptions(){
+          return this.row && !(this.field.value in this.field.options);
+        },
       },
 
       components: { File },

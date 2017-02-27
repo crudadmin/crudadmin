@@ -308,6 +308,16 @@ class Admin
         return $this->booted;
     }
 
+    /*
+     * Force boot admin models
+     */
+    public function boot()
+    {
+        $this->getAdminModelsPaths();
+
+        return true;
+    }
+
     public function stub($stub)
     {
         return __DIR__ . '/../Stubs/'.$stub.'.stub';

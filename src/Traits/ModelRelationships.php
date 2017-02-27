@@ -4,6 +4,7 @@ namespace Gogol\Admin\Traits;
 
 use Admin;
 use Illuminate\Support\Str;
+use \Illuminate\Database\Eloquent\Collection;
 
 trait ModelRelationships
 {
@@ -18,7 +19,15 @@ trait ModelRelationships
         //Checks laravel buffer for relations
         if ( $this->relationLoaded($method) && $get == true)
         {
-            return $this->relations[$method];
+            $relation = $this->relations[$method];
+
+            if ( !is_array($relation) || !array_key_exists('type', $relation))
+            {
+                return $relation;
+            }
+
+            return !($relation['relation'] instanceof Collection) ?
+                    $this->returnRelationItems($relation) : $relation['relation'];
         }
 
         //Get all admin modules
@@ -134,14 +143,19 @@ trait ModelRelationships
 
         if ( $relation )
         {
+            $relation_buffer = [
+                'relation' => $relation,
+                'type' => $relationType,
+            ];
+
             //If was relation called as property, and is only hasOne relationship, then return value
             if ( $get === true )
             {
-                $relation = in_array($relationType, ['hasOne', 'belongsTo']) ? $relation->first() : $relation->get();
+                $relation = $this->returnRelationItems($relation_buffer) ?: true;
             }
 
             //Save relation into laravel model buffer
-            $this->setRelation($method, $relation);
+            $this->setRelation($method, $relation_buffer);
         }
 
         return $relation;
@@ -217,5 +231,16 @@ trait ModelRelationships
         }
 
         return $properties;
+    }
+
+    /*
+     * Return type of data according to relation type, when is single relation, then method returns model,
+     * else returns collection
+     */
+    public function returnRelationItems($relation)
+    {
+        return in_array($relation['type'], ['hasOne', 'belongsTo']) ?
+            $relation['relation']->first()
+            : $relation['relation']->get();
     }
 }
