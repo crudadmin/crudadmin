@@ -119,7 +119,7 @@ trait AdminModelTrait
         if ( $this->exists == false )
         {
             //Add auto order incement into row, when row is not in database yet
-            if ( $this->sortable == true && ! array_key_exists('_order', $this->attributes) )
+            if ( $this->isSortable() && ! array_key_exists('_order', $this->attributes) )
             {
                 $this->attributes['_order'] = $this->withTrashed()->count();
             }
@@ -749,5 +749,16 @@ trait AdminModelTrait
         });
 
         return $this;
+    }
+
+    /*
+     * Returns if has model sortabel support
+     */
+    public function isSortable()
+    {
+        if ( $this->minimum == 1 && $this->maximum == 1 )
+            return false;
+
+        return $this->getProperty('sortable');
     }
 }

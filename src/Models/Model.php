@@ -140,7 +140,7 @@ class Model extends BaseModel
         /**
          * Add global scope for ordering
          */
-        if ( $this->sortable == true )
+        if ( $this->isSortable() )
         {
             static::addGlobalScope('order', function(Builder $builder) {
                 $builder->orderBy('_order', 'DESC');

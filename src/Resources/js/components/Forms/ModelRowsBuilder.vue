@@ -254,8 +254,11 @@
           //Add next timeout
           this.initTimeout(false);
 
-          //Add next timeout
-          this.$root.errorResponseLayer(response, null, function(){});
+          //Show error alert at first request
+          if ( this.refresh.count == 0 && this.hasShowedError !== true ){
+            this.hasShowedError = true;
+            this.$root.errorResponseLayer(response, null);
+          }
         });
       },
       destroyTimeout(){

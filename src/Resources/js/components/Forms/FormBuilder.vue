@@ -279,7 +279,9 @@
             //Send notification about new row
             this.$dispatch('proxy', 'onCreate', response.data.rows);
 
-            this.initForm(null);
+            //Reseting form after new row
+            if ( !(this.model.maximum == 1 && this.model.maximum == 1) )
+              this.initForm(null);
           }
 
           //Update existing row

@@ -152,9 +152,16 @@
 
       methods : {
         updateField(field){
+
           //After change value, update same value in ckeditor
-          if ( field.type == 'editor' ){
-            CKEDITOR.instances[this.getId].setData( field.value ? field.value : '' );
+          if ( field.type == 'editor'){
+            var editor = CKEDITOR.instances[this.getId];
+
+            //If is editor not ready yet, then wait for ready state
+            editor.setData( field.value ? field.value : '' );
+            editor.on('instanceReady', function(){
+              editor.setData( field.value ? field.value : '' );
+            });
           }
 
           if (field.type == 'file')

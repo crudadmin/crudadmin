@@ -140,7 +140,7 @@ class AdminMigrationCommand extends Command
             $this->createLanguageRelationship($table, $model);
 
             //Order column for sorting rows
-            if ( $model->getProperty('sortable') == true )
+            if ( $model->isSortable() )
                 $table->integer('_order')->unsigned();
 
             //Published at column
@@ -194,7 +194,7 @@ class AdminMigrationCommand extends Command
             }
 
             //Order column
-            if ( ! $model->getSchema()->hasColumn($model->getTable(), '_order') && $model->getProperty('sortable') == true )
+            if ( ! $model->getSchema()->hasColumn($model->getTable(), '_order') && $model->isSortable() )
             {
                 $table->integer('_order')->unsigned();
                 $this->line('<comment>+ Added column:</comment> _order');
