@@ -398,7 +398,12 @@ class AdminMigrationCommand extends Command
 
             //If table has not foreign column
             if ( $keyExists == 0 )
-                $table->foreign($key)->references($properties[2])->on($properties[0]);
+            {
+                $this->buffer[ $model->getTable() ][] = function() use ( $table, $key, $properties )
+                {
+                    $table->foreign($key)->references($properties[2])->on($properties[0]);
+                };
+            }
 
             return $table->integer($key)->unsigned();
         }
@@ -602,7 +607,9 @@ class AdminMigrationCommand extends Command
                 continue;
             }
 
-            $table->foreign( $foreign_column )->references( 'id' )->on( $parent->getTable() );
+            $this->buffer[ $model->getTable() ][] = function() use($foreign_column, $parent, $table) {
+                $table->foreign( $foreign_column )->references( 'id' )->on( $parent->getTable() );
+            };
         }
     }
 

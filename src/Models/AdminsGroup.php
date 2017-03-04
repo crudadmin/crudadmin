@@ -10,7 +10,7 @@ class AdminsGroup extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2017-01-05 14:12:07';
+    protected $migration_date = '2016-07-09 17:00:00';
 
     /*
      * Template name

@@ -106,7 +106,7 @@ class Authenticatable extends Model implements
      */
     public function setEnabledAttribute($value)
     {
-        if ( $this->getKey() === auth()->user()->getKey() && $this->enabled != $value )
+        if ( Admin::isAdmin() && $this->getKey() === auth()->user()->getKey() && $this->enabled != $value )
         {
             return Admin::push('errors.request', 'Nie je možné deaktivovať vlastný účet.');
         }
@@ -119,7 +119,7 @@ class Authenticatable extends Model implements
      */
     public function setPermissionsAttribute($value)
     {
-        if ( $this->getKey() === auth()->user()->getKey() && $this->permissions != $value )
+        if ( Admin::isAdmin() && $this->getKey() === auth()->user()->getKey() && $this->permissions != $value )
         {
             return Admin::push('errors.request', 'Nie je možné upravovať vlastne administrátorske práva.');
         }

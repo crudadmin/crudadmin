@@ -17,7 +17,6 @@ class AdminInstallCommand extends Command
     protected $auth = [
         'username' => 'Administrator',
         'email' => 'admin@admin.com',
-        'password' => 'password',
     ];
 
     /**
@@ -132,18 +131,30 @@ class AdminInstallCommand extends Command
     public function createDemoUser()
     {
         $user = $this->getUserModel();
+        $demo = property_exists($user, 'demo') ? $user->getProperty('demo') : [];
 
-        if ( $user->where('email', 'admin@admin.com')->count() == 0 )
+        if ( $user->where('email', $this->auth['email'])->count() == 0 )
         {
+            $data = $demo + $this->auth + [
+                'permissions' => 1,
+                'password' => str_random(6),
+            ];
+
             //Demo user
-            $user->create( array_merge($this->auth, [
-                'permissions' => 1
-            ]) );
+            $user->create( $data );
 
             $this->line('<comment>+ Demo user created</comment>');
             $this->line('<info>- Admin path:</info> <comment>'.action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
-            $this->line('<info>- Email:</info> <comment>'.$this->auth['email'].'</comment>');
-            $this->line('<info>- Password:</info> <comment>'.$this->auth['password'].'</comment>');
+            $this->line('<info>- Email:</info> <comment>'.$data['email'].'</comment>');
+            $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
+
+            //Show additional columns in demo user
+            foreach ($demo as $key => $value)
+            {
+                if ( ! in_array($key, ['email', 'password']) )
+                    $this->line('<info>- '.ucfirst($key).':</info> <comment>'.$value.'</comment>');
+            }
+
         }
     }
 }
