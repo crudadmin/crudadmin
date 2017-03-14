@@ -97,7 +97,7 @@ class DataController extends Controller
 
         //Fire on update event
         if ( method_exists($model, 'onUpdate') )
-            $model->onUpdate($row);
+            $row->onUpdate($row);
 
         //Checks for upload errors
         $message = $this->responseMessage('Záznam bol úspešne uložený');

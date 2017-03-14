@@ -123,11 +123,11 @@ abstract class Request extends FormRequest
     {
         foreach ($fields as $key => $field)
         {
-            if ( $this->model->isFieldType($key, 'date') )
+            if ( $this->model->isFieldType($key, ['date', 'datetime', 'time']) )
             {
                 if ( $this->has( $key ) )
                 {
-                    $this->merge( [ $key => Carbon::createFromFormat( $field['date_format'], $this->get($key) )->format('Y-m-d') ] );
+                    $this->merge( [ $key => Carbon::createFromFormat( $field['date_format'], $this->get($key) ) ] );
                 }
             }
         }
@@ -151,10 +151,16 @@ abstract class Request extends FormRequest
     {
         foreach ($fields as $key => $field)
         {
-            if ( $this->model->hasFieldParam($key, 'belongsTo') && ! $this->model->hasFieldParam($key, 'required', true) )
+            //If is belongsTo value in request empty, and is not required and is in formular then reset it
+            if ( $this->model->hasFieldParam($key, 'belongsTo')
+             && !$this->model->hasFieldParam($key, 'required', true)
+             && !$this->model->hasFieldParam($key, 'removeFromForm', true) )
             {
                 if ( ! $this->has( $key ) || empty( $this->get( $key ) ) )
+                {
                     $this->merge( [ $key => NULL ] );
+                }
+
             }
         }
     }

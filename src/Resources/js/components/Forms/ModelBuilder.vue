@@ -1,12 +1,44 @@
 <template>
 
   <div class="box" v-show="canShowForm || (hasRows && canShowRows)">
-    <div class="box-header" v-if="ischild || isEnabledGrid">
+    <div class="box-header" v-if="ischild || isEnabledGrid || canShowSearchBar">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
-      <ul class="pagination pull-right pagination-sm no-margin" v-if="isEnabledGrid">
-        <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
-      </ul>
+      <div class="pull-right">
+        <div class="search-bar" v-if="canShowSearchBar">
+          <div class="input-group input-group-sm">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
+                <span class="fa fa-caret-down"></span></button>
+                <ul class="dropdown-menu">
+                  <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">Hľadať všade</a></li>
+                  <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
+                  <li v-for="key in getSearchableFields" v-bind:class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
+                </ul>
+            </div>
+            <!-- /btn-group -->
+
+            <!-- Search columns -->
+            <input type="text" v-show="isSearch" placeholder="Vyhľadajte..." debounce="300" v-model="search.query" class="form-control">
+            <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
+              <option value="0">Vypnuté</option>
+              <option value="1">Zapnuté</option>
+            </select>
+
+            <div class="select" v-show="isSelect">
+              <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId">
+                <option v-for="($key, option) in (isSelect ? model.fields[search.column].options : []) | languageOptions" v-bind:value="$key">{{ option }}</option>
+              </select>
+            </div>
+            <!-- Search columns -->
+          </div>
+        </div>
+
+
+        <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid">
+          <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
+        </ul>
+      </div>
     </div>
 
     <div class="box-body">
@@ -21,7 +53,7 @@
 
         <!-- right column -->
         <div class="col col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12" v-show="hasRows && canShowRows">
-          <model-rows-builder :model.sync="model" :rows.sync="rows" :row.sync="row" :langid="langid" :progress.sync="progress"></model-rows-builder>
+          <model-rows-builder :model.sync="model" :rows.sync="rows" :row.sync="row" :langid="langid" :progress.sync="progress" :search="search"></model-rows-builder>
         </div>
         <!--/.col (right) -->
 
@@ -41,6 +73,7 @@
     props : ['model', 'langid', 'ischild', 'parentrow'],
     name : 'model-builder',
     data : function(){
+
       return {
         sizes : [
           { size : 8, name : 'Small', active : false, disabled : false },
@@ -52,6 +85,15 @@
         activeSize : null,
 
         row : null,
+
+        /*
+         * Search engine
+         */
+        search : {
+          column : this.$root.getModelProperty(this.model, 'settings.search.column', null),
+          query : null,
+          used : false,
+        },
 
         rows : {
           data : [],
@@ -66,16 +108,14 @@
     },
 
     created() {
-      //Passing model data from parent
-      if ( ! this.model )
-        this.model = this.$parent.model;
-
       //For file paths
       this.root = this.$root.$http.$options.root;
     },
 
     ready() {
       this.checkIfCanShowLanguages();
+
+      this.initSearchSelectboxes();
     },
 
     watch : {
@@ -97,9 +137,38 @@
           this.activeSize;
         }
       },
+      search : {
+        deep : true,
+        handler(search){
+          //Update select
+          $('#'+this.getFilterSelectId).trigger("chosen:updated");
+        },
+      },
       parentrow(row){
         this.$children[1].reloadRows();
       },
+    },
+
+    filters: {
+      /*
+       * Returns correct values into multilangual select
+       */
+      languageOptions(array){
+
+        //Checks if values are devided by language
+        var localization = false;
+
+        for ( var key in array )
+        {
+          if (array[key] !== null && typeof array[key] === 'object')
+          {
+            localization = true;
+            break;
+          }
+        }
+
+        return localization ? array[ this.$root.language_id ] : array;
+      }
     },
 
     events : {
@@ -112,6 +181,21 @@
     },
 
     methods : {
+      initSearchSelectboxes(){
+        window.js_date_event = document.createEvent('HTMLEvents');
+        var dispached = false;
+
+        js_date_event.initEvent('change', true, true);
+        $('#'+this.getFilterSelectId).chosen({disable_search_threshold: 10}).on('change', function(){
+            if ( dispached == false )
+            {
+                dispached = true;
+                this.dispatchEvent(js_date_event);
+            } else {
+                dispached = false;
+            }
+        });
+      },
       getParentTableName(){
         var row = this.$parent.row;
 
@@ -241,22 +325,27 @@
         //Show or hide languages menu
         this.$root.languages_active = languages_active ? true : false;
       },
-      dateValue(value, field){
-        if ( !value )
-          return;
+      getSearchingColumnName(column){
+        if ( column == 'id' )
+          return 'ID. (č.)';
 
-        value = value.substr(0, 10);
+        if ( ! column || !(column in this.model.fields) )
+          return 'Hľadať všade';
 
-        if ( ! ('date_format' in field) )
-          return value;
+        var field = this.model.fields[column],
+            name = field.name.length > 20 ? field.name.substr(0, 20) + '...' : field.name;
 
-        value = value.split('-');
-
-        return field.date_format.toLowerCase().replace('y', value[0]).replace('m', value[1]).replace('d', value[2]);
-      },
+        return name;
+      }
     },
 
     computed: {
+      getFilterSelectId(){
+        return 'js_chosen_filter' + this.getModelKey;
+      },
+      getModelKey(){
+        return this.model.slug + '-' + this.getParentTableName();
+      },
       //Checks if is enabled grid system
       isEnabledGrid(){
         if ( this.$root.getModelProperty(this.model, 'settings.grid.enabled') === false )
@@ -305,6 +394,53 @@
 
         return this.rows.data.length > 0;
       },
+      /*
+       * Show search if has been at least one time used, or if is not single row, or if is more then 10 rows
+       */
+      canShowSearchBar(){
+        var searching = this.$root.getModelProperty(this.model, 'settings.search.enabled', null);
+
+        //If is forced showing searchbar
+        if ( searching === true )
+          return true;
+        else if ( searching === false )
+          return false;
+
+        return this.search.used === true || (this.model.maximum==0 || this.model.maximum > 10) && this.rows.count > 10;
+      },
+      getSearchableFields(){
+        var keys = [];
+
+        //Get searchable fields
+        for ( var key in this.model.fields )
+        {
+          var field = this.model.fields[key];
+
+          if ( 'belongToMany' in field || 'multiple' in field || ( 'removeFromForm' in field && 'hidden' in field ))
+            continue;
+
+          keys.push(key);
+        }
+
+        return keys;
+      },
+
+      /*
+       * Search columns
+       */
+      isSearch(){
+        return (this.isCheckbox || this.isSelect) ? false : true;
+      },
+      isCheckbox(){
+        var column = this.search.column;
+
+        return column && column in this.model.fields && this.model.fields[column].type == 'checkbox' ? true : false;
+      },
+      isSelect(){
+        var column = this.search.column;
+
+        return column && column in this.model.fields && this.model.fields[column].type == 'select' ? true : false;
+      }
     },
 
     components : { FormBuilder, ModelRowsBuilder }

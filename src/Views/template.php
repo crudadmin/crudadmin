@@ -22,7 +22,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datatables/dataTables.bootstrap.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/chosen/chosen.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datepicker/datepicker3.css') ?>">
+  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datetimepicker/jquery.datetimepicker.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/AdminLTE.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/css/style.css') ?>">
   <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
@@ -186,7 +186,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="<?php echo asset('/assets/admin/bootstrap/js/bootstrap.min.js') ?>"></script>
 
     <!-- AdminLTE App -->
-    <script src="<?php echo asset('/assets/admin/plugins/datepicker/bootstrap-datepicker.js') ?>"></script>
+    <script src="<?php echo asset('/assets/admin/plugins/datetimepicker/jquery.datetimepicker.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/ckeditor/ckeditor.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/chosen/chosen.jquery.min.js') ?>"></script>

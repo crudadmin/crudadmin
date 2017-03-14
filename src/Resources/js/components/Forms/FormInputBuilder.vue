@@ -2,21 +2,21 @@
     <!-- STRING INPUT -->
     <div class="form-group" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" v-bind:readonly="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" v-bind:readonly="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
-    <!-- DATE INPUT -->
-    <div class="form-group" v-if="isDate">
+    <!-- DATETIME INPUT -->
+    <div class="form-group" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" type="text" readonly v-bind:name="key" class="form-control js_date" value="{{ dateValue( getValueOrDefault ) }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" v-bind:readonly="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
@@ -24,7 +24,7 @@
     <div class="form-group" v-if="isCheckbox">
       <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-        <input type="checkbox" v-bind:id="getId" v-bind:checked="getValueOrDefault== 1" value="1" class="ios-switch green" v-bind:name="key">
+        <input type="checkbox" v-bind:id="getId" v-bind:readonly="isDisabled" v-bind:checked="getValueOrDefault== 1" value="1" class="ios-switch green" v-bind:name="key">
         <div><div></div></div>
       </label>
       <small>{{ field.title }}</small>
@@ -33,7 +33,7 @@
     <!-- TEXT INPUT -->
     <div class="form-group" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
+      <textarea v-bind:id="getId" v-bind:readonly="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
@@ -42,7 +42,7 @@
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="form-group file-group">
-        <input v-bind:id="getId" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
+        <input v-bind:id="getId" v-bind:readonly="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
         <input v-if="!field.value && file_will_remove == true" type="hidden" name="$remove_{{ key }}" value="1">
 
         <button v-if="field.value && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" data-original-title="Vymazať súbor"><i class="fa fa-remove"></i></button>
@@ -68,7 +68,7 @@
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <select v-bind:id="getId" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
+      <select v-bind:id="getId" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">Vyberte jednú z možností</option>
         <option v-if="missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="($key, option) in field.options | languageOptions" v-bind:selected="selectIndex(hasValue($key, value, isMultiple) || (!row && $key == field.default), $key)" v-bind:value="$key">{{ option }}</option>
@@ -103,34 +103,23 @@
 
       filters: {
         languageOptions(array){
-
-          //Checks if values are devided by language
-          var localization = false;
-
-          for ( var key in array )
-          {
-            if (array[key] !== null && typeof array[key] === 'object')
-            {
-              localization = true;
-              break;
-            }
-          }
-
-          return localization ? array[ this.$root.language_id ] : array;
+          return this.$parent.$parent.$options.filters.languageOptions(array);
         }
       },
 
       ready()
       {
-        if ( this.field.type == 'date' )
+        if ( this.isDatepicker )
         {
-          //Add datepickers
-          $('#' + this.getId).datepicker({
-            autoclose: true,
-            format: this.getDateFormat,
-          });
+          jQuery.datetimepicker.setLocale('sk');
 
-          this.getDateFormat;
+          //Add datepickers
+          $('#' + this.getId).datetimepicker({
+            lang: 'sk',
+            format: this.getDateFormat,
+            timepicker: this.field.type != 'date',
+            datepicker: this.field.type != 'time',
+          });
         }
       },
 
@@ -189,9 +178,6 @@
         addFile(e){
           this.file_will_remove = false;
           this.file_from_server = false;
-        },
-        dateValue(value){
-          return this.$parent.$parent.dateValue(value, this.field);
         },
         hasValue(key, value, multiple)
         {
@@ -273,13 +259,17 @@
         {
           return this.confirmation == true;
         },
-        isDate()
+        isDatepicker()
         {
-          return this.field.type == 'date';
+          return this.field.type == 'date' || this.field.type == 'datetime' || this.field.type == 'time';
         },
         isCheckbox()
         {
           return this.field.type == 'checkbox';
+        },
+        isDisabled()
+        {
+          return this.field.disabled == true;
         },
         isMultiple()
         {
@@ -295,9 +285,7 @@
         },
         getDateFormat()
         {
-          var format = this.field.date_format.toLowerCase();
-
-          return format.replace( 'd', 'dd' ).replace('m', 'mm').replace('y', 'yyyy');
+          return this.field.date_format;
         },
         getValueOrDefault()
         {
@@ -347,7 +335,7 @@
             return 'required' in this.field && this.field.required == true;
         },
         missingValueInSelectOptions(){
-          return this.row && !(this.field.value in this.field.options);
+          return this.row && !this.isMultiple && !this.isMultipleUpload && !(this.field.value in this.field.options);
         },
       },
 

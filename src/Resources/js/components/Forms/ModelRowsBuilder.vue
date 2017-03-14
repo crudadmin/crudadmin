@@ -32,14 +32,14 @@
   import TableRows from '../Partials/TableRows.vue';
 
   export default {
-    props : ['model', 'row', 'rows', 'langid', 'progress'],
+    props : ['model', 'row', 'rows', 'langid', 'progress', 'search'],
 
     components : { Refreshing, TableRows },
 
     data : function(){
 
       //Load pagination limit from localStorage
-      var limit = 'limit' in localStorage ? localStorage.limit : 10;
+      var limit = 'limit' in localStorage ? localStorage.limit : this.$root.getModelProperty(this.model, 'settings.pagination.limit', 10);
 
       return {
         table : null,
@@ -53,6 +53,7 @@
           maxpages : 15,
         },
 
+        searching : false,
         dragging : false,
         orderBy : null,
 
@@ -138,6 +139,27 @@
       langid(langid){
         this.setPosition(1);
       },
+      search : {
+        deep : true,
+        handler : function(search){
+
+          var query = search.query,
+              was_searching = this.searching;
+
+          this.searching = (query && (query.length >= 3 || (search.column && $.isNumeric(query)))) ? true : false;
+
+          this.search.used = true;
+
+          //On first search query reset pagination
+          if ( this.searching == true && was_searching == false ){
+            this.setPosition(1, true);
+
+          //If is normal searching, then search in every char, or if is turned searching from on to off state, then show normal rows
+          } else if ( this.searching || ( this.searching == false && was_searching == true ) ) {
+            this.loadRows(true);
+          }
+        },
+      },
     },
 
     computed: {
@@ -208,7 +230,7 @@
         // Remove last auto timeout
         this.destroyTimeout();
 
-        this.$http.get(this.$root.requests.rows, {
+        var query = {
           model : this.model.slug,
           parent : this.$parent.getParentTableName(),
           subid : this.getParentRowId(),
@@ -216,7 +238,15 @@
           limit : this.isPaginationEnabled ? this.pagination.limit : 0,
           page : this.pagination.position,
           count : this.refresh.count,
-        }).then(function(response){
+        };
+
+        //If is enabled searching
+        if ( this.searching == true ){
+          query.query = this.search.query;
+          query.column = this.search.column;
+        }
+
+        this.$http.get(this.$root.requests.rows, query).then(function(response){
           //If has been component destroyed, and request is delivered... and some conditions
           if ( this.dragging === true || this.progress === true || !this.$root ){
             return;
@@ -228,8 +258,8 @@
           //Load rows into array
           this.rows.data = response.data.rows;
           this.rows.count = response.data.count;
-          this.$parent.rows.loaded = true;
 
+          this.$parent.rows.loaded = true;
 
           //Update field options
           if ( this.refresh.count == 0 ){
@@ -336,11 +366,11 @@
 
         return true;
       },
-      setPosition(position){
+      setPosition(position, indicator){
         this.pagination.position = position;
 
         //Load paginated rows...
-        this.loadRows();
+        this.loadRows(indicator);
       }
     },
   }

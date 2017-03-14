@@ -110,7 +110,6 @@ class Gettext
 
         if ( $language->poedit_mo == null )
             return false;
-
         $domain = explode('.', $language->poedit_mo->filename);
         $domain = $domain[0];
         if ( ! ($locale = $this->getLocale($locale)) )
@@ -199,6 +198,9 @@ class Gettext
         foreach ($views_paths as $path)
         {
             $path = base_path( $path );
+
+            if ( ! file_exists($path) )
+                continue;
 
             $fs = new Filesystem( $path );
             $files = $fs->allFiles( $path );

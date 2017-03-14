@@ -2,6 +2,7 @@
 namespace Gogol\Admin\Helpers;
 
 use Route;
+use Admin;
 
 class Helper
 {
@@ -101,5 +102,4 @@ class Helper
     {
         return str_pad($number, 10, 0, STR_PAD_LEFT);
     }
-
 }

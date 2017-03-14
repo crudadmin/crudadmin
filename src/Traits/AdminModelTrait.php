@@ -29,12 +29,14 @@ trait AdminModelTrait
     public function __call($method, $parameters)
     {
         //Checks for relationships
-        if (!method_exists($this, $method) && $relation = $this->returnAdminRelationship($method))
-            return $relation;
-
-        //Checks for db relationship childrens into actual model
-        if ( $relation = $this->checkForChildrenModels($method) )
-            return $relation;
+        if (!method_exists($this, $method))
+        {
+            //Checks for db relationship of childrens into actual model
+            if ( ($relation = $this->checkForChildrenModels($method)) || ($relation = $this->returnAdminRelationship($method)) )
+            {
+                return $relation;
+            }
+        }
 
         return parent::__call($method, $parameters);
     }
@@ -54,18 +56,10 @@ trait AdminModelTrait
      */
     public function getValue($key)
     {
-        //Checks for relationship
-        if (!property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) )
-        {
-            //If relations has been in buffer, but returns nullable value
-            if ( $relation = $this->returnAdminRelationship($key, true) )
-            {
-                return $relation === true ? null : $relation;
-            }
-        }
+        $force_check_relation = false;
 
         //If is called field type file, then return file wrapper
-        if ( $field = $this->getField($key) )
+        if ( ($field = $this->getField($key)) || ($field = $this->getField($key . '_id')) )
         {
             //Register file type response
             if ( $field['type'] == 'file' && !$this->hasGetMutator($key))
@@ -93,16 +87,39 @@ trait AdminModelTrait
 
                 return null;
             }
+
+            //If field has not relationship, then return field value... This condition is here for better framework performance
+            else if ( !array_key_exists('belongsTo', $field) && !array_key_exists('belongsToMany', $field) ){
+                return parent::__get($key);
+            } else {
+                $force_check_relation = true;
+            }
+        }
+
+        //Register this offen called properties for better performance
+        else if ( in_array($key, ['id', 'slug', 'created_at', 'published_at', 'deleted_at']) ) {
+            if ( $key != 'slug' || $this->sluggable == true && $key == 'slug' )
+                return parent::__get($key);
         }
 
         //If is called property with localization attribute, then add into called property language prefix
-        else if ( Localization::isEnabled() && ($localization = Localization::get()) && $field = $this->getField($key.'_'.$localization->slug) ) {
-            $key = $key.'_'.$localization->slug;
+        else if ( Localization::isEnabled() && ($localization = Localization::get()) && ($slug = $localization->slug) && $field = $this->getField($key.'_'.$slug) ) {
+            $key = $key.'_'.$slug;
         }
 
-        //Checks for db relationship childrens into actual model
-        else if ( $relation = $this->checkForChildrenModels($key, true) ) {
-            return $relation;
+        //Checks for relationship
+        if ($force_check_relation === true || !property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) )
+        {
+            //If relations has been in buffer, but returns nullable value
+            if ( $relation = $this->returnAdminRelationship($key, true) )
+            {
+                return $relation === true ? null : $relation;
+            }
+
+            //Checks for db relationship childrens into actual model
+            else if ( $relation = $this->checkForChildrenModels($key, true) ) {
+                return $relation;
+            }
         }
 
         return parent::__get($key);
@@ -158,6 +175,18 @@ trait AdminModelTrait
 
         //Remove hidden when is required in admin
         $this->removeHidden();
+    }
+
+    /*
+     * Turn model to single row in database
+     */
+    protected function makeSingle()
+    {
+        if ( $this->single === true )
+        {
+            $this->minimum = 1;
+            $this->maximum = 1;
+        }
     }
 
     /**
@@ -267,9 +296,11 @@ trait AdminModelTrait
             $force = true;
 
         //Field mutations
-        if ( $this->_fields == null || $force == true )
+        if ( $this->_fields == null || $force == true || $this->withAllOptions() === true )
         {
             $this->_fields = Fields::getFields( $this, $param, $force );
+
+            $this->withAllOptions(false);
         }
 
         return $this->_fields;
@@ -443,9 +474,12 @@ trait AdminModelTrait
         }
 
         //Insert skipped columns
-        foreach ((array)$this->skipDropping as $key)
+        if ( is_array($this->skipDropping) )
         {
-            $fields[] = $key;
+            foreach ($this->skipDropping as $key)
+            {
+                $fields[] = $key;
+            }
         }
 
         //Add language id column
@@ -513,14 +547,13 @@ trait AdminModelTrait
         $with = $this->loadWithDependecies();
 
         //Get base columns from database with relationships
-        $query = $this->getAdminRows()->select( $fields )->with($with);
+        $query = $this->getAdminRows()->addSelect( $fields )->with($with);
 
         //Filter rows by language id and parent id
         $query->filterByParentOrLanguage($subid, $langid, $parent_table);
 
         if ( is_callable( $callback ) )
             call_user_func_array($callback, [$query]);
-
         $rows = [];
 
         foreach ($query->get() as $row)
@@ -643,7 +676,8 @@ trait AdminModelTrait
     public function getProperty($property, $row = null)
     {
         //Object / Array
-        if (in_array($property, ['fields', 'options'])) {
+        if (in_array($property, ['fields', 'options', 'insertable', 'editable', 'deletable'])) {
+
             if ( method_exists($this, $property) )
                 return $this->{$property}($row);
 
@@ -669,11 +703,14 @@ trait AdminModelTrait
      */
     public function getAdminAttributes()
     {
-        $attributes = $this->attributesToArray();
+        $attributes = parent::attributesToArray();
 
         //Bing belongs to many values
         foreach ($this->getFields() as $key => $field)
         {
+            /*
+             * Update multiple values in many relationship
+             */
             if ( array_key_exists('belongsToMany', $field) )
             {
                 $properties = $this->getRelationProperty($key, 'belongsToMany');
@@ -690,6 +727,22 @@ trait AdminModelTrait
                     }
                 }
             }
+
+            /*
+             * Parse decimal format
+             */
+            if ( $field['type'] == 'decimal' && array_key_exists($key, $attributes) && $attributes[$key])
+            {
+                $attributes[$key] = number_format($attributes[$key], 2, '.', '');
+            }
+
+            /*
+             * Update to correct datetime format
+             */
+            if ( in_array($field['type'], ['date', 'datetime', 'time']) && array_key_exists($key, $attributes) )
+            {
+                $attributes[$key] = (new Carbon($attributes[$key]))->format( $field['date_format'] );
+            }
         }
 
         return $attributes;
@@ -702,15 +755,16 @@ trait AdminModelTrait
      */
     public function toArray()
     {
-        $attributes = $this->getAdminAttributes();
 
         //For administration is reversed way of merging arrays for multiselect relationships support
         if ( Admin::isAdmin() )
         {
+            $attributes = $this->getAdminAttributes();
+
             return array_merge($this->relationsToArray(), $attributes);
         }
 
-        return array_merge($attributes, $this->relationsToArray());
+        return parent::toArray();
     }
 
     //Returns schema with correct connection
@@ -738,7 +792,7 @@ trait AdminModelTrait
         return $this->withAllOptions;
     }
 
-    public function makeDescription($field, $limit = 200)
+    public function makeDescription($field, $limit = 150)
     {
         $string = $this->{$field};
 
@@ -766,5 +820,50 @@ trait AdminModelTrait
             return false;
 
         return $this->getProperty('sortable');
+    }
+
+    private function assignArrayByPath(&$arr, $path, $value, $separator='.') {
+        $keys = explode($separator, $path);
+
+        foreach ($keys as $key) {
+            $arr = &$arr[$key];
+        }
+
+        $arr = $value;
+    }
+
+    public function getModelSettings($separator = '.', &$arr = [])
+    {
+        $settings = (array)$this->getProperty('settings');
+
+        $data = [];
+
+        foreach ($settings as $path => $value)
+        {
+            $row = [];
+
+            //Create multidimensional array
+            $this->assignArrayByPath($row, $path, $value);
+
+            $data = array_merge_recursive($data, $row);
+        }
+
+        return $data;
+    }
+
+    /*
+     * Enable sorting
+     */
+    public function scopeAddSorting($query)
+    {
+        /**
+         * Add global scope for ordering
+         */
+        if ( $this->isSortable() )
+        {
+            $query->orderBy('_order', 'DESC');
+        } else if ( Admin::isAdmin() ){
+            $query->orderBy('id', 'DESC');
+        }
     }
 }

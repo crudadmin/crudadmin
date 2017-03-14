@@ -25,7 +25,7 @@ class Localization
 
     public function bootLanguages()
     {
-        return $this->languages = Language::all();
+        return $this->languages = BaseAdmin::getModelByTable('languages')->all();
     }
 
     public function boot()

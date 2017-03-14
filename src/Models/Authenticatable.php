@@ -34,6 +34,21 @@ class Authenticatable extends Model implements
     ];
 
     /*
+     * Enable sorting rows
+     */
+    protected $sortable = false;
+
+    /*
+     * Enable publishing rows
+     */
+    protected $publishable = false;
+
+    /*
+     * Guard for authentification model
+     */
+    protected $guard = 'web';
+
+    /*
      * Get all allowed models from all groups which user owns
      */
     public function permissions()
@@ -106,7 +121,7 @@ class Authenticatable extends Model implements
      */
     public function setEnabledAttribute($value)
     {
-        if ( Admin::isAdmin() && $this->getKey() === auth()->user()->getKey() && $this->enabled != $value )
+        if ( Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard( $this->guard )->user()->getKey() && $this->enabled != $value )
         {
             return Admin::push('errors.request', 'Nie je možné deaktivovať vlastný účet.');
         }
@@ -119,7 +134,7 @@ class Authenticatable extends Model implements
      */
     public function setPermissionsAttribute($value)
     {
-        if ( Admin::isAdmin() && $this->getKey() === auth()->user()->getKey() && $this->permissions != $value )
+        if ( Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard( $this->guard )->user()->getKey() && $this->permissions != $value )
         {
             return Admin::push('errors.request', 'Nie je možné upravovať vlastne administrátorske práva.');
         }
@@ -143,7 +158,7 @@ class Authenticatable extends Model implements
         //Add remember token into user table
         if ( ! $schema->hasColumn( $this->getTable(), 'remember_token') )
         {
-            $column = $table->rememberToken()->after('avatar');
+            $column = $table->rememberToken();
 
             //add remember token after this columns
             if ( $schema->hasColumn( $this->getTable(), 'deleted_at') )

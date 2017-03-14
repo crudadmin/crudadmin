@@ -143,21 +143,29 @@ trait Sluggable
         return $scope->where('slug', $slug);
     }
 
+    public function scopeFindBySlug($query, $slug, $id = null, $key = null, array $columns = ['*'])
+    {
+        return static::findBySlug($slug, $id, $key, $columns, $query);
+    }
+
+    public function scopeFindBySlugOrFail($query, $slug, $id = null, $key = null, array $columns = ['*'])
+    {
+        return static::findBySlugOrFail($slug, $id, $key, $columns, $query);
+    }
 
     /**
      * Find a model by its primary slug.
      */
-    public function scopefindBySlug($query, $slug, $id = null, $key = null, array $columns = ['*'])
+    public static function findBySlug($slug, $id = null, $key = null, array $columns = ['*'], $query = null)
     {
         if ( is_array($id) )
             $columns = $id;
         else if ( ! is_string($id) )
             $id = null;
 
-        $row = $query->whereSlug($slug, $id, $key, $key)->first($columns);
+        $row = ($query ?: new static)->whereSlug($slug, $id, $key, $key)->first($columns);
 
-        if ( ! $row )
-            $this->redirectWithWrongSlug($slug, $id, $key);
+        (new static)->redirectWithWrongSlug($slug, $id, $key);
 
         return $row;
     }
@@ -166,14 +174,14 @@ trait Sluggable
      * Find a model by its primary slug or throw an exception.
      *
      */
-    public function scopefindBySlugOrFail($query, $slug, $id = null, $key = null, array $columns = ['*'])
+    public static function findBySlugOrFail($slug, $id = null, $key = null, array $columns = ['*'], $query = null)
     {
         if ( is_array($id) )
             $columns = $id;
         else if ( ! is_string($id) )
             $id = null;
 
-        $row = $this->findBySlug($slug, $id, $key, $columns);
+        $row = static::findBySlug($slug, $id, $key, $columns, $query);
 
         if ( ! $row )
             abort(404);

@@ -5,9 +5,53 @@ namespace Gogol\Admin\Traits;
 use Admin;
 use Illuminate\Support\Str;
 use \Illuminate\Database\Eloquent\Collection;
+use \Illuminate\Database\Eloquent\Model as BaseModel;
 
 trait ModelRelationships
 {
+    /*
+     * Relation key in admin buffer
+     */
+    protected function getAdminRelationKey( $method )
+    {
+        return '$relations.' . $this->getTable() . '.' . $method .'.'. ($this->exists ? $this->getKey() : 'global');
+    }
+
+    /*
+     * Checks if is relation in laravel buffer or in admin buffer
+     */
+    public function isAdminRelationLoaded($key)
+    {
+        $loaded = parent::relationLoaded($key);
+
+        if ( ! $loaded )
+            $loaded = Admin::has( $this->getAdminRelationKey( $key ) );
+
+        return $loaded;
+    }
+
+    /*
+     * Get relation from laravel buffer if exists, or admin buffer
+     */
+    public function getRelationFromCache($key)
+    {
+        if ( parent::relationLoaded($key) ){
+            return parent::getRelation($key);
+        }
+
+        return Admin::get( $this->getAdminRelationKey( $key ) );
+    }
+
+    /*
+     * Set Relation into laravel buffer, and also into admin buffer
+     */
+    public function setRelation($relation, $value)
+    {
+        Admin::save( $this->getAdminRelationKey( $relation ), $value );
+
+        return parent::setRelation($relation, $value);
+    }
+
     /*
      * Returns relationship for sibling model
      */
@@ -17,17 +61,30 @@ trait ModelRelationships
         $method_snake = Str::snake($method);
 
         //Checks laravel buffer for relations
-        if ( $this->relationLoaded($method) && $get == true)
+        if ( $this->isAdminRelationLoaded($method) )
         {
-            $relation = $this->relations[$method];
+            $relation = $this->getRelationFromCache($method);
 
             if ( !is_array($relation) || !array_key_exists('type', $relation))
             {
                 return $relation;
             }
 
-            return !($relation['relation'] instanceof Collection) ?
-                    $this->returnRelationItems($relation) : $relation['relation'];
+            //Returns relationship builder
+            if ( $get === false && $relation['get'] === false ) {
+                return $relation['relation'];
+            }
+
+
+            //Returns items from already loaded relationship
+            if ( $get == true )
+            {
+                if ( $relation['relation'] instanceof Collection || $relation['relation'] instanceof BaseModel ){
+                    return $relation['relation'];
+                }
+                else
+                    return $this->returnRelationItems($relation);
+            }
         }
 
         //Get all admin modules
@@ -64,7 +121,7 @@ trait ModelRelationships
                 {
                     $properties = $this->getRelationProperty($field_key, 'belongsTo');
 
-                    return $this->relationResponse($field_key, 'belongsTo', $path, $get, $properties);
+                    return $this->relationResponse($method, 'belongsTo', $path, $get, $properties);
                 }
             }
         }
@@ -145,13 +202,14 @@ trait ModelRelationships
         {
             $relation_buffer = [
                 'relation' => $relation,
+                'get' => $get,
                 'type' => $relationType,
             ];
 
             //If was relation called as property, and is only hasOne relationship, then return value
             if ( $get === true )
             {
-                $relation = $this->returnRelationItems($relation_buffer) ?: true;
+                $relation_buffer['relation'] = $relation = $this->returnRelationItems($relation_buffer) ?: true;
             }
 
             //Save relation into laravel model buffer
@@ -201,6 +259,7 @@ trait ModelRelationships
         $field = $this->getField($key);
 
         $properties = explode(',', $field[$relation]);
+
         //If is not defined references column for other table
         if ( count($properties) == 1 )
             $properties[] = 'NULL';
@@ -239,6 +298,10 @@ trait ModelRelationships
      */
     public function returnRelationItems($relation)
     {
+        //If is saved relationship with any result
+        if ( $relation['relation'] === true )
+            return true;
+
         return in_array($relation['type'], ['hasOne', 'belongsTo']) ?
             $relation['relation']->first()
             : $relation['relation']->get();

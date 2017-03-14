@@ -3,13 +3,14 @@
   "description": "Super Admin",
   "version": "1.0.0",
   "devDependencies": {
+    "gulp": "^3.9.1",
     "jquery-form": "^3.50.0",
     "laravel-elixir": "5.0.0",
     "laravel-elixir-vueify": "1.0.3",
     "node-fetch": "1.6.3",
     "vue": "1.0.24",
     "vue-drag-and-drop": "^2.2.0",
-    "vue-router": "0.7.13",
-    "vue-resource": "0.7.0"
+    "vue-resource": "0.7.0",
+    "vue-router": "0.7.13"
   }
 }

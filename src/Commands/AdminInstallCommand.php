@@ -99,7 +99,7 @@ class AdminInstallCommand extends Command
     public function rewriteUserModel()
     {
         // Checks if model has been copied
-        if ( ! class_exists('App\User') || ! Admin::isAdminModel( new User ) )
+        if ( !file_exists(app_path('User.php')) || ! class_exists('App\User') || ! Admin::isAdminModel( new User ) )
         {
             Artisan::call('vendor:publish', [
                 '--tag' => 'admin.user',

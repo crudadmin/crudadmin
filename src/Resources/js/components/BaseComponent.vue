@@ -90,6 +90,11 @@
                         this.alert.success = success;
                         this.alert.close = close;
 
+                        //After opening alert focus close button of this alert for disabling sending form...
+                        setTimeout(function(){
+                            $('.modal button[data-dismiss="modal"]').eq(0).focus();
+                        }, 100);
+
                         return this.alert;
                     },
                     closeAlert(callback){
@@ -179,7 +184,7 @@
                         this.$root.arrorAlert();
                     },
                     //Check specifics property in model
-                    getModelProperty(model, key){
+                    getModelProperty(model, key, value){
                         var path = key.split('.');
 
                         if ( ! model )
@@ -189,7 +194,7 @@
                         {
                             if ( ! ( path[i] in model ) )
                             {
-                                return null;
+                                return value ? value : null;
                             }
 
                             model = model[path[i]];

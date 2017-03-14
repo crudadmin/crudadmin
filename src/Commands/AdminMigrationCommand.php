@@ -36,6 +36,11 @@ class AdminMigrationCommand extends Command
      */
     protected $buffer = [];
 
+    /*
+     * Here will is migrations which will be booted at the end of actual migration
+     */
+    protected $buffer_after = [];
+
     /**
      * Create a new command instance.
      *
@@ -72,6 +77,14 @@ class AdminMigrationCommand extends Command
         {
             $this->generateMigration($model);
         }
+
+        /*
+         * Run migrations from buffer
+         */
+        foreach ($models as $model)
+        {
+            $this->runFromCache($model);
+        }
     }
 
     /**
@@ -90,26 +103,30 @@ class AdminMigrationCommand extends Command
         //Checks if model has some extre migrations on create
         if ( method_exists($model, 'onMigrate') )
         {
-            $this->buffer[ $model->getTable() ][] = function() use($model) {
-
-                $model->getSchema()->table( $model->getTable() , function (Blueprint $table) use ($model) {
-                    $model->onMigrate($table, $model->getSchema());
-                });
-
+            $this->buffer[ $model->getTable() ][] = function( $table ) use( $model ) {
+                $model->onMigrate($table, $model->getSchema());
             };
         }
 
-        $this->runFromCache($model->getTable());
+        //Run migrations from cache which have to be runned after actual migration
+        $this->runFromCache($model, 'buffer_after');
     }
 
-    public function runFromCache($table)
+    /*
+     * Run all migrations saved into buffer
+     */
+    public function runFromCache($model, $from = 'buffer')
     {
-        if ( ! array_key_exists($table, $this->buffer) )
+        $table = $model->getTable();
+
+        if ( ! array_key_exists($table, $this->{$from}) )
             return;
 
-        foreach ($this->buffer[ $table ] as $function)
+        foreach ($this->{$from}[ $table ] as $function)
         {
-            $function();
+            $model->getSchema()->table( $table , function (Blueprint $table) use ($function) {
+                $function($table);
+            });
         }
     }
 
@@ -172,10 +189,12 @@ class AdminMigrationCommand extends Command
 
             foreach ($model->getFields() as $key => $value)
             {
-                //Checks if table has column
+                //Checks if table has column and update it if can...
                 if ( $model->getSchema()->hasColumn($model->getTable(), $key) ){
-                    if ( $column = $this->setColumn( $table, $model, $key ) )
+                    if ( !$model->isFieldType($key, ['date', 'datetime', 'time']) && ($column = $this->setColumn( $table, $model, $key )) )
+                    {
                         $column->change();
+                    }
                 } else {
                     $column = $this->setColumn( $table, $model, $key );
 
@@ -333,7 +352,7 @@ class AdminMigrationCommand extends Command
 
     protected function decimalColumn($table, $model, $key)
     {
-        //Integer columns
+        //Decimal columns
         if ( $model->isFieldType($key, 'decimal') )
         {
             $column = $table->decimal($key, 8, 2);
@@ -346,12 +365,12 @@ class AdminMigrationCommand extends Command
         }
     }
 
-    protected function dateColumn($table, $model, $key)
+    protected function datetimeColumn($table, $model, $key)
     {
-        //Integer columns
-        if ( $model->isFieldType($key, 'date') )
+        //Timestamp columns
+        if ( $model->isFieldType($key, ['date', 'datetime', 'time']) )
         {
-            $column = $table->date($key);
+            $column = $table->timestamp($key)->nullable();
 
             return $column;
         }
@@ -399,7 +418,43 @@ class AdminMigrationCommand extends Command
             //If table has not foreign column
             if ( $keyExists == 0 )
             {
-                $this->buffer[ $model->getTable() ][] = function() use ( $table, $key, $properties )
+                if ( $model->count() > 0 )
+                {
+                    $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column in</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$properties[0].'</error> <comment>table.</comment>');
+                    $this->line('<comment>+ Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
+
+                    $ids_in_reference_table = Admin::getModelByTable($properties[0])->take(10)->select('id')->pluck('id');
+
+                    //If reference table has some rows
+                    if ( count($ids_in_reference_table) > 0 )
+                    {
+                        $this->line('<comment>+ Here are some ids from '.$properties[0].' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
+
+                        //Define ids for existing rows
+                        do {
+                            $requested_id = $this->ask('Which id would you like define for existing rows?');
+
+                            if ( !is_numeric($requested_id) )
+                                continue;
+
+                            if ( DB::table( $properties[0] )->where('id', $requested_id)->count() == 0 )
+                            {
+                                $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
+                                $requested_id = false;
+                            }
+                        } while( ! is_numeric($requested_id) );
+
+                        $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
+                        {
+                            DB::table($model->getTable())->update([ $key => $requested_id ]);
+                        };
+                    } else {
+                        $this->line('<error>+ You have to insert at least one row into '.$properties[0].' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
+                        dd();
+                    }
+                }
+
+                $this->buffer[ $model->getTable() ][] = function( $table ) use ( $key, $properties, $model )
                 {
                     $table->foreign($key)->references($properties[2])->on($properties[0]);
                 };
@@ -475,10 +530,14 @@ class AdminMigrationCommand extends Command
     //Resave all rows in model for updating slug if needed
     protected function updateSlugs($model)
     {
-        $this->buffer[ $model->getTable() ][] = function() use ($model) {
-            foreach ($model->all() as $row)
+        $this->buffer_after[ $model->getTable() ][] = function() use ($model) {
+            //If has empty slugs
+            if ( ($rows = $model->whereNull('slug')->orWhere('slug', ''))->count() > 0 )
             {
-                $row->save();
+                foreach ($rows->get() as $row)
+                {
+                    $row->save();
+                }
             }
         };
     }
@@ -500,7 +559,7 @@ class AdminMigrationCommand extends Command
             'integerColumn',
             'decimalColumn',
             'fileColumn',
-            'dateColumn',
+            'datetimeColumn',
             'selectColumn',
             'checkboxColumn',
         ];
@@ -607,7 +666,7 @@ class AdminMigrationCommand extends Command
                 continue;
             }
 
-            $this->buffer[ $model->getTable() ][] = function() use($foreign_column, $parent, $table) {
+            $this->buffer[ $model->getTable() ][] = function( $table ) use ($foreign_column, $parent) {
                 $table->foreign( $foreign_column )->references( 'id' )->on( $parent->getTable() );
             };
         }

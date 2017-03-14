@@ -14,7 +14,7 @@
 
   <!-- Main content -->
   <section class="content">
-      <model-builder :langid="langid"></model-builder>
+      <model-builder :model="model" :langid="langid"></model-builder>
   </section>
   <!-- /.content -->
 </template>
@@ -25,16 +25,12 @@
   export default {
       data : function(){
         return {
-          model : {},
+          //Passing model data from parent
+          model : this.$parent.model,
         };
       },
 
       props : ['langid'],
-
-      created() {
-        //Passing model data from parent
-        this.model = this.$parent.model;
-      },
 
       computed: {
         getGroup(){

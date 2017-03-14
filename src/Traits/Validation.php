@@ -77,7 +77,7 @@ trait Validation {
      * @param  [model] $row model data with existing row for rules in validation
      * @return [boolean]
      */
-    public function scopeValidateRequest($query, array $fields = null, $mutators = true, $row = null)
+    public function scopeValidateRequest($query, array $fields = null, array $except = null, $mutators = true, $row = null)
     {
         //If row exists
         if ( ! $row && $this->exists )
@@ -91,6 +91,12 @@ trait Validation {
         if ( is_array($fields) )
         {
             $rules = array_intersect_key($rules, array_flip($fields));
+        }
+
+        //Remove unnecesary fields
+        if ( is_array($except) )
+        {
+            $rules = array_diff_key($rules, array_flip($except));
         }
 
         $validator = Validator::make(request()->all(), $rules);

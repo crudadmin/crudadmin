@@ -79,11 +79,6 @@ export default {
             }
           }
 
-          if ( this.model.fields[field].type == 'date' && row[field] )
-          {
-            return this.$parent.$parent.$parent.dateValue(row[field], this.model.fields[field]);
-          }
-
           if ( this.model.fields[field].type == 'checkbox' )
           {
             return row[field] == 1 ? 'Áno' : 'Nie';

@@ -252,4 +252,13 @@ select[multiple] {height: 34px;color: white;}
     margin-top: 10px;
 }
 
+.search-bar {
+    max-width: 280px;
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.search-bar .chosen-single { height: 30px }
+.search-bar .chosen-container-single .chosen-single span { margin-top: 2px; font-size: 13px }
+
 form label span.required { color: red; position: relative; top: 2px }

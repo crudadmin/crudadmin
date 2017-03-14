@@ -34,19 +34,77 @@ class LayoutController extends BaseController
 
     }
 
+    /*
+     * Apply multi-text search scope for given query
+     */
+    protected function checkForSearching($query, $model)
+    {
+        if ( request()->has('query') )
+        {
+            $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query'))));
+
+            //If is more than 3 chars for searching
+            if ( strlen($search) >= 3 || is_numeric($search) )
+            {
+                $columns = array_merge(array_keys($model->getFields()), [ 'id' ]);
+                $queries = explode(' ', $search);
+
+                //If is valid column
+                if ( in_array(request('column'), $columns) )
+                {
+                    $columns = [ request('column') ];
+                }
+
+                //Search scope
+                $query->where(function($builder) use ( $columns, $queries ) {
+                    foreach ($columns as $column)
+                    {
+                        //Search in all columns
+                        $builder->orWhere(function($builder) use ( $column, $queries ) {
+
+                            //Search for all inserted words
+                            foreach ($queries as $query)
+                            {
+                                $builder->where($column, 'like', '%'.$query.'%');
+                            }
+
+                        });
+                    }
+                });
+            }
+        }
+
+        return $query;
+    }
+
+    /*
+     * Apply pagination for given eloqment builder
+     */
+    protected function paginateRecords($query, $limit, $page)
+    {
+        if ( $limit == 0 )
+            return;
+
+        $start = $limit * $page;
+        $offset = $start - $limit;
+
+        $query->offset($offset)->take($limit);
+    }
+
     public function returnModelData($model, $parent_table, $subid, $langid, $limit, $page)
     {
         return [
-            'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page ) {
-                if ( $limit == 0 )
-                    return;
+            'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page, $model ) {
+                //Search in rows
+                $this->checkForSearching($query, $model);
 
-                $start = $limit * $page;
-                $offset = $start - $limit;
-
-                $query->offset($offset)->take($limit);
+                //Paginate rows
+                $this->paginateRecords($query, $limit, $page);
             }, $parent_table),
-            'count' => $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table)->count(),
+            'count' => $this->checkForSearching(
+                            $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table),
+                            $model)
+                        ->count(),
             'page' => $page,
         ];
     }
@@ -68,7 +126,6 @@ class LayoutController extends BaseController
 
         if ( $parent_table == '0' )
             $parent_table = null;
-
 
         return $this->makePage( $model, $this->returnModelData( $model, $parent_table, $subid, $langid, $limit, $page ), false);
     }
@@ -141,7 +198,7 @@ class LayoutController extends BaseController
 
         return array_merge((array)$data, [
             'name' => $model->getProperty('name'),
-            'settings' => (array)$model->getProperty('settings'),
+            'settings' => $model->getModelSettings(),
             'foreign_column' => $model->getForeignColumn(),
             'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),

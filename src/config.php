@@ -35,7 +35,6 @@ return [
         'app/Http',
         'app/Http/Controllers',
         'app/Http/Middleware',
-        'app/Console/Commands',
     ],
 
     /*
@@ -65,6 +64,8 @@ return [
         'editor' => 'hidden',
         'password' => 'hidden',
         'checkbox' => 'boolean',
-        'date' => 'date_format:d.m.Y'
+        'date' => 'date_format:d.m.Y',
+        'datetime' => 'date_format:d.m.Y H:i',
+        'time' => 'date_format:H:i',
     ],
 ];

@@ -23,37 +23,20 @@ class DummyClass extends AdminModel
     protected $title = '';
 
     /*
-     * Group
-     */
-    protected $group = null;
-
-    /*
      * Model Parent
      * Eg. Articles::class,
      */
     protected $belongsToModel = DummyBelongsTo::class;
 
     /*
-     * Minimum page rows
-     * Default = 0
-     */
-    protected $minimum = 0;
-
-    /*
-     * Maximum page rows
-     * Default = 0 = ∞
-     */
-    protected $maximum = 0;
-
-    /*
      * Automatic form and database generation
      * @name - field name
      * @placeholder - field placeholder
-     * @type - field type | string/text/editor/select/integer/decimal/file/password/data/checkbox
+     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox
      * ... other validation methods from laravel
      */
     protected $fields = [
-        'title' => 'name:Názov|placeholder:Zadajte názov článku|type:string|required|max:90',
+        'name' => 'name:Názov|placeholder:Zadajte názov článku|type:string|required|max:90',
         'content' => 'name:Obsah článku|type:editor|required',
         'image' => [
             'name' => 'Obrazok',

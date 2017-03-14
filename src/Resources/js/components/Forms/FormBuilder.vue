@@ -279,9 +279,18 @@
             //Send notification about new row
             this.$dispatch('proxy', 'onCreate', response.data.rows);
 
+            //If form has disabled autoreseting
+            var autoreset = this.$root.getModelProperty(this.model, 'settings.autoreset');
+
             //Reseting form after new row
-            if ( !(this.model.maximum == 1 && this.model.maximum == 1) )
+            if ( !(this.model.minimum == 1 && this.model.maximum == 1) && autoreset !== false)
+            {
               this.initForm(null);
+
+            //If is disabled autoreseting form, then select inserted row
+            } else if ( autoreset === false ){
+              this.row = response.data.rows[0];
+            }
           }
 
           //Update existing row

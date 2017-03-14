@@ -31,26 +31,10 @@ class User extends Authenticatable
     protected $group = 'settings';
 
     /*
-     * Model Parent
-     * Eg. Articles::class,
-     */
-    protected $belongsToModel = null;
-
-    /*
      * Minimum page rows
      * Default = 0
      */
     protected $minimum = 1;
-
-    /*
-     * Enable sorting rows
-     */
-    protected $sortable = false;
-
-    /*
-     * Enable publishing rows
-     */
-    protected $publishable = false;
 
     /*
      * Automatic form and database generation
@@ -84,8 +68,8 @@ class User extends Authenticatable
          */
         if ( config('admin.admin_groups') === true )
         {
-            $fields['permissions'] = 'name:Super administrátor|type:checked';
-            $fields['admins_groups'] = 'name:Administrátorska skupina|belongsToMany:admins_groups,name|required';
+            $fields['permissions'] = 'name:Super administrátor|type:checkbox|default:0';
+            $fields['admins_groups'] = 'name:Administrátorska skupina|belongsToMany:admins_groups,name';
         }
 
         return $fields;

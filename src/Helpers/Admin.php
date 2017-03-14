@@ -93,6 +93,14 @@ class Admin
     }
 
     /*
+     * Returns if is frontend part of web
+     */
+    public function isFrontend()
+    {
+        return !$this->isAdmin() && !app()->runningInConsole();
+    }
+
+    /*
      * Get all files from paths which can has admin models
      */
     protected function getModelFiles()
@@ -321,6 +329,22 @@ class Admin
     public function stub($stub)
     {
         return __DIR__ . '/../Stubs/'.$stub.'.stub';
+    }
+
+    /*
+     * Measure time
+     */
+    public function start()
+    {
+        $this->save('microtime.start', microtime(true));
+    }
+
+    /*
+     * Return time in seconds
+     */
+    public function end()
+    {
+        return microtime(true) - $this->get('microtime.start', 0);
     }
 }
 ?>

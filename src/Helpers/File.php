@@ -24,11 +24,6 @@ class File {
     public $path;
 
     /*
-     * Absolute path to download file
-     */
-    public $download;
-
-    /*
      * Field name
      */
     protected $field;
@@ -51,8 +46,6 @@ class File {
         $this->source = 'uploads/' . $directory . '/' . $field . '/' . ( $subdirectory ? $subdirectory . '/' : '' ) . $filename;
 
         $this->path = url( $this->source );
-
-        $this->download = $this->download();
     }
 
     /**
@@ -86,6 +79,9 @@ class File {
         return sha1( md5( '!$%' . $path ) );
     }
 
+    /*
+     * Returns absolute signed path for downloading file
+     */
     public function download( $displayableInBrowser = null )
     {
         if ( $displayableInBrowser )

@@ -95,7 +95,12 @@ class Model extends BaseModel
     /*
      * Skipping dropping columns into database in migration
      */
-    protected $skipDroppingColumn = false;
+    protected $skipDropping = [];
+
+    /*
+     * Single row in table, automatically set minimum and maximum to 1
+     */
+    protected $single = false;
 
     /*
      * Automatic form and database generation
@@ -127,6 +132,9 @@ class Model extends BaseModel
         $query->withoutGlobalScope('publishable');
     }
 
+    /*
+     * Query for rows displayed in administration
+     */
     public function scopeAdminRows($query)
     {
 
@@ -137,19 +145,13 @@ class Model extends BaseModel
         //Boot base model trait
         $this->initTrait();
 
-        /**
-         * Add global scope for ordering
-         */
-        if ( $this->isSortable() )
-        {
-            static::addGlobalScope('order', function(Builder $builder) {
-                $builder->orderBy('_order', 'DESC');
-            });
-        } else if ( Admin::isAdmin() ){
-            static::addGlobalScope('order', function(Builder $builder) {
-                $builder->orderBy('id', 'DESC');
-            });
-        }
+        //Make single row model if is needed
+        $this->makeSingle();
+
+        //Add sortable functions
+        static::addGlobalScope('order', function(Builder $builder) {
+            $builder->addSorting();
+        });
 
         /**
          * Add global scope for publishing extepts admin interface
