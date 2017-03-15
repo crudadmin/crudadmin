@@ -408,17 +408,19 @@ class AdminMigrationCommand extends Command
         {
             $properties = $model->getRelationProperty($key, 'belongsTo');
 
+            $parent = Admin::getModelByTable($properties[0]);
+
             $keyExists = 0;
 
-            if ( $model->getSchema()->hasTable( $model->getTable() ) )
+            if ( $tableExists = $model->getSchema()->hasTable( $model->getTable() ) )
             {
                 $keyExists = $this->hasIndex($model, $key);
             }
 
             //If table has not foreign column
-            if ( $keyExists == 0 )
+            if ( $keyExists == 0 && $parent->getSchema()->hasTable( $parent->getTable() ) )
             {
-                if ( $model->count() > 0 )
+                if ( $tableExists === true && $model->count() > 0 )
                 {
                     $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column in</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$properties[0].'</error> <comment>table.</comment>');
                     $this->line('<comment>+ Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
@@ -644,20 +646,24 @@ class AdminMigrationCommand extends Command
 
             $foreign_column = $model->getForeignColumn( $parent->getTable() );
 
-            //Check if table has column
-            if ( $updating === true && $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
-                continue;
-
             $column = $table->integer( $foreign_column )->unsigned();
 
             //If parent belongs to more models...
             if ( count($belongsToModel) > 1 )
                 $column->nullable();
 
-            if ( $updating === true )
+            //If foreign key does not exists in table
+            if ( ! $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
             {
-                $column->after('id');
+
+                //If column does not exists in already created table, then create it after id
+                if ( $updating === true )
+                    $column->after('id');
+
                 $this->line('<comment>+ Added column:</comment> '.$foreign_column);
+            } else if ( $updating === true ) {
+                $column->change();
+                continue;
             }
 
             if ( $parent->getConnection() != $model->getConnection() )
