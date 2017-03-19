@@ -61,7 +61,7 @@ class Authenticatable extends Model implements
 
         $models = [];
 
-        foreach ($this->adminsGroups as $group)
+        foreach ((array)$this->adminsGroups as $group)
         {
             $models = array_merge($models, (array)$group->models);
         }
