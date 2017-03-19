@@ -38,7 +38,7 @@ function CheckAuthentication()
 
     //Save user state
     if (!isset($_SESSION['_ckfinder_hasAccess']))
-        $_SESSION['_ckfinder_hasAccess'] = auth()->check() && auth()->user()->hasAdminAccess();
+        $_SESSION['_ckfinder_hasAccess'] = auth()->guard('web')->check() && auth()->guard('web')->user()->isEnabled();
 
     return $_SESSION['_ckfinder_hasAccess']===true;
 }

@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
         PasswordResetServiceProvider::class,
         PublishServiceProvider::class,
         FieldsServiceProvider::class,
+        \Intervention\Image\ImageServiceProvider::class,
     ];
 
     protected $facades = [
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         'Gettext' => Facades\Gettext::class,
         'Localization' => Facades\Localization::class,
         'Fields' => Facades\Fields::class,
+        'Image' => \Intervention\Image\Facades\Image::class,
     ];
 
     protected $routeMiddleware = [
