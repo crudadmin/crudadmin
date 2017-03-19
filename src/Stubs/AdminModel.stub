@@ -1,0 +1,55 @@
+<?php
+
+namespace DummyNamespace;
+
+use Gogol\Admin\Models\Model as AdminModel;
+
+class DummyClass extends AdminModel
+{
+    /*
+     * Model created date, for ordering tables in database and in user interface
+     */
+    protected $migration_date = 'CREATED_DATETIME';
+
+    /*
+     * Template name
+     */
+    protected $name = 'DummyClass';
+
+    /*
+     * Template title
+     * Default ''
+     */
+    protected $title = '';
+
+    /*
+     * Model Parent
+     * Eg. Articles::class,
+     */
+    protected $belongsToModel = DummyBelongsTo::class;
+
+    /*
+     * Automatic form and database generation
+     * @name - field name
+     * @placeholder - field placeholder
+     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox
+     * ... other validation methods from laravel
+     */
+    protected $fields = [
+        'name' => 'name:Názov|placeholder:Zadajte názov článku|type:string|required|max:90',
+        'content' => 'name:Obsah článku|type:editor|required',
+        'image' => [
+            'name' => 'Obrazok',
+            'type' => 'file',
+            'required' => true,
+            'image' => true,
+
+            //Post processing photo
+            'resize' => [
+                [ 'fit' => [100] ], // thumbs directory
+                // 'covers' => [ 'fit' => [1920, 500], 'blur' => [ 40 ] ], //covers directory
+            ],
+        ]
+    ];
+
+}
