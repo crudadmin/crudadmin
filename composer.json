@@ -1,16 +1,22 @@
 {
-    "name": "gogol/admin",
-    "description": "Dynamically laravel administration",
+    "name": "marekgogol/crudadmin",
+    "type": "library",
+    "description": "Dynamically Laravel CRUD administration with automatic database migrations",
+    "keywords": ["migrations", "database", "framework", "crud", "admin", "administration", "automatic", "laravel", "form"],
+    "homepage": "https://crudadmin.com",
+    "license": "MIT",
     "authors": [
-        {
-            "name": "Marek Gogol",
-            "email": "info@marekgogol.sk"
-        }
+        { "name": "Marek Gogoľ", "email": "info@marekgogol.sk" }
     ],
-    "require-dev": {
+    "require": {
         "php": ">=7.0.0",
-        "laravel/framework": "5.*",
+        "laravel/framework": "5.4.*",
         "doctrine/dbal": "^2.5",
         "intervention/image": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gogol\\Admin\\": "src"
+        }
     }
 }
