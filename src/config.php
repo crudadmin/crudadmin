@@ -6,6 +6,16 @@ return [
     'name' => 'My Admin',
 
     /*
+     * CrudAdmin version
+     */
+    'version' => '1.0',
+
+    /*
+     * License key
+     */
+    'license_key' => 'campaignunlimited2017',
+
+    /*
      * Administration groups names
      */
     'groups' => [
@@ -64,8 +74,8 @@ return [
         'editor' => 'hidden',
         'password' => 'hidden',
         'checkbox' => 'boolean',
-        'date' => 'date_format:d.m.Y',
-        'datetime' => 'date_format:d.m.Y H:i',
-        'time' => 'date_format:H:i',
+        'date' => 'date_format:d.m.Y|nullable',
+        'datetime' => 'date_format:d.m.Y H:i|nullable',
+        'time' => 'date_format:H:i|nullable',
     ],
 ];

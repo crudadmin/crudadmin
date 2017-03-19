@@ -8,8 +8,8 @@ use Gogol\Admin\Middleware as Middleware;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Http\Kernel;
 
-class AppServiceProvider extends ServiceProvider {
-
+class AppServiceProvider extends ServiceProvider
+{
     protected $providers = [
         AdminServiceProvider::class,
         RouteServiceProvider::class,

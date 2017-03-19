@@ -1,5 +1,6 @@
 <script>
     import Sidebar from './Sidebar/Sidebar.vue';
+    import License from './Partials/License.vue';
 
     export default {
         init(layout){
@@ -15,6 +16,8 @@
             return {
                 data : function(){
                     return {
+                        version : layout.version,
+                        license_key : layout.license_key,
                         requests: layout.requests,
                         user : layout.user,
                         models: layout.models,
@@ -37,9 +40,7 @@
                     }
                 },
 
-                components: {
-                    Sidebar,
-                },
+                components: { Sidebar, License },
 
                 created(){
                     this.bootLanguages();
