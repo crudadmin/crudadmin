@@ -32,7 +32,9 @@ class Authenticate
             } else {
                 //Custom login path
                 if ( !($path = config('admin.authentication.login.path')) )
+                {
                     $path = action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm');
+                }
 
                 return redirect()->guest( $path )->withErrors($errors);
             }

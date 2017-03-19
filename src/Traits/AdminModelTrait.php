@@ -676,7 +676,7 @@ trait AdminModelTrait
     public function getProperty($property, $row = null)
     {
         //Object / Array
-        if (in_array($property, ['fields', 'options', 'insertable', 'editable', 'deletable'])) {
+        if (in_array($property, ['fields', 'options', 'settings', 'insertable', 'editable', 'deletable'])) {
 
             if ( method_exists($this, $property) )
                 return $this->{$property}($row);

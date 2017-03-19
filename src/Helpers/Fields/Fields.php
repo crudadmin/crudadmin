@@ -21,7 +21,7 @@ class Fields
      * Registred custom admin attributes for fields
      */
     protected $attributes = [
-         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled', 'orderBy', 'limit', 'removeFromForm', 'multirows',
+         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled', 'orderBy', 'limit', 'removeFromForm', 'multirows', 'phone'
     ];
 
     /*

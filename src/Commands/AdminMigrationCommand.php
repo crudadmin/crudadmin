@@ -428,31 +428,34 @@ class AdminMigrationCommand extends Command
                     $ids_in_reference_table = Admin::getModelByTable($properties[0])->take(10)->select('id')->pluck('id');
 
                     //If reference table has some rows
-                    if ( count($ids_in_reference_table) > 0 )
+                    if ( $model->hasFieldParam($key, 'required', true) )
                     {
-                        $this->line('<comment>+ Here are some ids from '.$properties[0].' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
-
-                        //Define ids for existing rows
-                        do {
-                            $requested_id = $this->ask('Which id would you like define for existing rows?');
-
-                            if ( !is_numeric($requested_id) )
-                                continue;
-
-                            if ( DB::table( $properties[0] )->where('id', $requested_id)->count() == 0 )
-                            {
-                                $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
-                                $requested_id = false;
-                            }
-                        } while( ! is_numeric($requested_id) );
-
-                        $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
+                        if ( count($ids_in_reference_table) > 0 )
                         {
-                            DB::table($model->getTable())->update([ $key => $requested_id ]);
-                        };
-                    } else {
-                        $this->line('<error>+ You have to insert at least one row into '.$properties[0].' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
-                        dd();
+                            $this->line('<comment>+ Here are some ids from '.$properties[0].' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
+
+                            //Define ids for existing rows
+                            do {
+                                $requested_id = $this->ask('Which id would you like define for existing rows?');
+
+                                if ( !is_numeric($requested_id) )
+                                    continue;
+
+                                if ( DB::table( $properties[0] )->where('id', $requested_id)->count() == 0 )
+                                {
+                                    $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
+                                    $requested_id = false;
+                                }
+                            } while( ! is_numeric($requested_id) );
+
+                            $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
+                            {
+                                DB::table($model->getTable())->update([ $key => $requested_id ]);
+                            };
+                        } else {
+                            $this->line('<error>+ You have to insert at least one row into '.$properties[0].' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
+                            die;
+                        }
                     }
                 }
 

@@ -46,6 +46,12 @@ export default {
           return string.replace(/\n/g, '<br>');
         }
 
+        //Is phone number
+        if ( this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key]))
+        {
+          return '<a href="tel:'+string+'">'+string+'</a>';
+        }
+
         return string;
       },
     },
