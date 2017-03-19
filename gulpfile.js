@@ -15,11 +15,11 @@ require('laravel-elixir-vueify');
 
 //Gulp watch for browserify
 elixir.config.js.browserify.watchify.options.poll = true;
-// elixir.config.production = true;
+elixir.config.production = true;
 
 elixir(function(mix) {
 
     mix.browserify('src/Resources/js/main.js', '../../../public/assets/admin/js', './')
-       // .browserify('src/Resources/js/main.js', 'src/Resources/admin/js', './');
+       .browserify('src/Resources/js/main.js', 'src/Resources/admin/js', './');
 
 });
