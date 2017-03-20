@@ -43,7 +43,7 @@ trait ModelRelationships
     }
 
     /*
-     * Set Relation into laravel buffer, and also into admin buffer
+     * Set relation into laravel buffer, and also into admin buffer
      */
     public function setRelation($relation, $value)
     {
@@ -64,7 +64,6 @@ trait ModelRelationships
         if ( $this->isAdminRelationLoaded($method) )
         {
             $relation = $this->getRelationFromCache($method);
-
             if ( !is_array($relation) || !array_key_exists('type', $relation))
             {
                 return $relation;
@@ -75,15 +74,14 @@ trait ModelRelationships
                 return $relation['relation'];
             }
 
-
             //Returns items from already loaded relationship
-            if ( $get == true )
+            if ( $get == true && $relation['get'] == true )
             {
                 if ( $relation['relation'] instanceof Collection || $relation['relation'] instanceof BaseModel ){
                     return $relation['relation'];
-                }
-                else
+                } else {
                     return $this->returnRelationItems($relation);
+                }
             }
         }
 
