@@ -160,10 +160,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <footer class="main-footer">
         <!-- To the right -->
         <div class="pull-right hidden-xs">
-          Enjoy it!
+          Version {{ version }}
         </div>
         <!-- Default to the left -->
-        <strong>Copyright &copy; <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> <a href="http://marekgogol.sk" target="_blank">Marek Gogoľ</a>.</strong> All rights reserved.
+        <strong>&copy; <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> <a href="http://crudadmin.com" target="_blank">CrudAdmin</a> system by <a href="http://marekgogol.sk" target="_blank">Marek Gogoľ</a>.</strong>
       </footer>
 
       <div class="control-sidebar-bg"></div>
@@ -173,7 +173,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- REQUIRED JS SCRIPTS -->
     <div id="loader" v-bind:class="{ hidenloader : true }">
         <div class="spinner">
-            <h2><strong>Super Admin</strong> <span>&copy;</span> <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> by Marek Gogoľ</h2>
+            <h2><strong>CrudAdmin</strong> <span>&copy;</span> <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> by Marek Gogoľ</h2>
             <div class="bounce1"></div>
             <div class="bounce2"></div>
             <div class="bounce3"></div>

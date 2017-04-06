@@ -61,9 +61,12 @@ class Authenticatable extends Model implements
 
         $models = [];
 
-        foreach ((array)$this->adminsGroups as $group)
+        if ( $this->adminsGroups )
         {
-            $models = array_merge($models, (array)$group->models);
+            foreach ($this->adminsGroups as $group)
+            {
+                $models = array_merge($models, (array)$group->models);
+            }
         }
 
         return Admin::save($key, $models);

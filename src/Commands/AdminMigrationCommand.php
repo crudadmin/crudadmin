@@ -198,8 +198,10 @@ class AdminMigrationCommand extends Command
                 } else {
                     $column = $this->setColumn( $table, $model, $key );
 
-                    if ( $column && $model->getSchema()->hasColumn($model->getTable(), $model->beforeFieldName($key)) )
-                        $column->after( $model->beforeFieldName($key) );
+                    if ( $column && $model->getSchema()->hasColumn($model->getTable(), $this->getPreviousColumn($model, $key)) )
+                        $column->after( $this->getPreviousColumn($model, $key) );
+                    else if ( $column && $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
+                        $column->before( 'deleted_at' );
 
                     if ( $column )
                         $this->line('<comment>+ Added column:</comment> '.$key);
@@ -274,6 +276,33 @@ class AdminMigrationCommand extends Command
         });
 
     }
+
+    /*
+     * Returns field before selected field, if is selected field first, returns last field
+     */
+    public function getPreviousColumn($model, $find_key)
+    {
+        $last = null;
+        $i = 0;
+
+        foreach ($model->getFields() as $key => $item)
+        {
+            if ( $key == $find_key )
+            {
+                if ( $i == 0 )
+                    return 'id';
+                else
+                    return $last;
+            }
+
+            $i++;
+
+            $last = $key;
+        }
+
+        return $last;
+    }
+
 
     /*
      * Returns foreign key name
