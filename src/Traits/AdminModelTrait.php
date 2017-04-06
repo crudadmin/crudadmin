@@ -398,28 +398,6 @@ trait AdminModelTrait
     }
 
     /*
-     * Returns field before selected field, if is selected field first, returns last field
-     */
-    public function beforeFieldName($find_key)
-    {
-        $last = null;
-
-        $i = 0;
-
-        foreach ($this->getFields() as $key => $value)
-        {
-            if ( $key == $find_key && $i!==0 )
-                break;
-
-            $i++;
-
-            $last = $key;
-        }
-
-        return $last;
-    }
-
-    /*
      * Returns if field has required
      */
     public function hasFieldParam($key, $paramName, $paramValue = null)
