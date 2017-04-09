@@ -18,12 +18,15 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
          */
         $this->app->bind('gogol::admin.install', \Gogol\Admin\Commands\AdminInstallCommand::class);
 
+        $this->app->bind('gogol::admin.update', \Gogol\Admin\Commands\AdminUpdateCommand::class);
+
         $this->app->bind('gogol::admin.migrate', \Gogol\Admin\Commands\AdminMigrationCommand::class);
 
         $this->app->bind('gogol::admin.model', \Gogol\Admin\Commands\AdminModelCommand::class);
 
         $this->commands([
             'gogol::admin.install',
+            'gogol::admin.update',
             'gogol::admin.migrate',
             'gogol::admin.model',
         ]);

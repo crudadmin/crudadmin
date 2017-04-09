@@ -18,5 +18,10 @@
         "psr-4": {
             "Gogol\\Admin\\": "src"
         }
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "php artisan admin:update"
+        ],
     }
 }

@@ -17,7 +17,7 @@ class LayoutController extends BaseController
     public function index()
     {
         return [
-            'version' => config('admin.version'),
+            'version' => Admin::getVersion(),
             'license_key' => config('admin.license_key'),
             'user' => auth()->guard('web')->user()->withAvatarPath(),
             'models' => $this->getAppTree(),
