@@ -8,7 +8,7 @@ return [
     /*
      * CrudAdmin version
      */
-    'version' => '1.0.3',
+    'version' => '1.0.4',
 
     /*
      * License key
