@@ -346,5 +346,40 @@ class Admin
     {
         return microtime(true) - $this->get('microtime.start', 0);
     }
+
+    /*
+     * Returns version of package from packagelist
+     */
+    protected function getPackageVersion()
+    {
+        $composer_file = base_path('composer.lock');
+
+        if ( file_exists($composer_file) )
+        {
+            if ( !($data = file_get_contents(base_path('composer.lock'))) )
+                return false;
+
+            $json = json_decode($data);
+
+            foreach ([$json->packages, $json->{'packages-dev'}] as $list)
+            {
+                foreach ($list as $package)
+                {
+                    if ( $package->name == 'marekgogol/crudadmin' )
+                        return $package->version;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /*
+     * Returns version of package
+     */
+    public function getVersion()
+    {
+        return $this->getPackageVersion() ?: 'unknown';
+    }
 }
 ?>

@@ -160,7 +160,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <footer class="main-footer">
         <!-- To the right -->
         <div class="pull-right hidden-xs">
-          Version {{ version }}
+          Version <a target="_blank" v-bind:href="'https://packagist.org/packages/marekgogol/crudadmin#'+version">{{ version }}</a>
         </div>
         <!-- Default to the left -->
         <strong>&copy; <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> <a href="http://crudadmin.com" target="_blank">CrudAdmin</a> system by <a href="http://marekgogol.sk" target="_blank">Marek Gogoľ</a>.</strong>

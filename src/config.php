@@ -6,11 +6,6 @@ return [
     'name' => 'My Admin',
 
     /*
-     * CrudAdmin version
-     */
-    'version' => '1.0.4',
-
-    /*
      * License key
      */
     'license_key' => 'campaignunlimited2017',
