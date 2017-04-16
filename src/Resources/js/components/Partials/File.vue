@@ -13,7 +13,7 @@
 
         methods : {
             isExtension(path, types){
-              var type = path.split('.').pop();
+              var type = path.split('.').pop().toLowerCase();
 
               if (types.indexOf( type ) > -1)
                 return true;
