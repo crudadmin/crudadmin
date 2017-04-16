@@ -39,6 +39,9 @@
 .form-group small { color: #555; }
 
 table.table.sortable tr[draggable="true"] { cursor: move; }
+table.table td.image_field {padding: 0 1px;}
+table.table td.image_field img {height: 46px;transition: 0.2s all ease-in-out;}
+table.table td.image_field img:hover {height: 46px;opacity: 0.8}
 
 label.checkbox {
 
@@ -216,8 +219,9 @@ select[multiple] {height: 34px;color: white;}
 
 .help-block { margin-bottom: 0 }
 
+.filesList {position: relative;}
 .filesList div {display: inline}
-.filesList div:last-child span { display: none;  }
+.filesList div:last-child span { display: none; }
 .file-group .chosen-container-multi .chosen-drop .result-selected { display: none }
 .file-group .chosen-container-multi .chosen-choices { background: none; border: none; padding: 2px 0; }
 .file-group .chosen-container-multi .chosen-drop { border: none; }

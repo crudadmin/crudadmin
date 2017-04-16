@@ -13,8 +13,8 @@
     <tbody data-model="{{ model.slug }}">
       <tr v-for="(key, item) in rowsdata" data-index="{{ item.id }}" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
 
-        <td v-for="(field, name) in columns" v-bind:class="'td-'+field">
-          <table-row-value :field="field" :name="name" :item="item" :model="model"></table-row-value>
+        <td v-for="(field, name) in columns" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
+          <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
         </td>
 
         <td class="buttons-options">
@@ -191,19 +191,37 @@
           //Checks if dropped column is in same table
           if ( $(dragged).parent().attr('data-model') != $(dropped).parent().attr('data-model') )
           {
-            this.$root.openAlert('Upozornenie', 'Medzi rozličnými tabuľkami nie je možné presúvať riadky.', 'warning', null, function(){});
             this.enableDraggind();
             return;
           }
 
           var dragged_id = $(dragged).attr('data-index'),
               dropped_id = $(dropped).attr('data-index'),
-              dragged_order = this.findById(dragged_id)._order;
+              dragged_order = this.findById(dragged_id)._order,
+              dropped_order = this.findById(dropped_id)._order,
+              rows = {},
+              changed_ids = [];
 
-          this.findById(dragged_id)._order = this.findById(dropped_id)._order;
-          this.findById(dropped_id)._order = dragged_order;
+          //Sort all rows between sorted rows
+          for ( var i = this.$parent.$parent.rows.data.length - 1; i >= 0; i-- )
+          {
+            var row = this.$parent.$parent.rows.data[i];
 
-          this.$http.get(this.$root.requests.updateOrder, { model : this.model.slug, id : dragged_id, subid : dropped_id })
+            //From top to bottom
+            if ( row.id == dragged_id ){
+              row._order = dropped_order;
+              rows[ row.id ] = row._order;
+            } else if ( dragged_order > dropped_order && row._order >= dropped_order && row._order <= dragged_order ){
+              row._order += 1;
+              rows[ row.id ] = row._order;
+            //From bottom to top
+            } else if ( dragged_order < dropped_order && row._order <= dropped_order && row._order > dragged_order) {
+              row._order -= 1;
+              rows[ row.id ] = row._order;
+            }
+          }
+
+          this.$http.post(this.$root.requests.updateOrder, { model : this.model.slug, rows : rows })
           .then(function(response){
 
             var data = response.data;
@@ -340,6 +358,17 @@
             this.$root.errorResponseLayer(response);
           });
         },
+        isImageField(field){
+          if ( field in this.model.fields )
+          {
+            var field = this.model.fields[field];
+
+            if ( 'image' in field )
+              return true;
+          }
+
+          return false;
+        }
       },
   }
 </script>

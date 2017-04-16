@@ -24,8 +24,11 @@ Route::get('/admin/password/reset/{token}', 'Auth\ResetPasswordController@showRe
 Route::post('/admin/password/reset', 'Auth\ResetPasswordController@reset');
 
 //Download files
-Route::get('/admin/download', 'DownloadController@index');
-Route::get('/admin/signedDownload/{hash}', 'DownloadController@signedDownload');
+Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
+Route::get('/admin/download/file', 'DownloadController@index');
+Route::get('/admin/download/image', 'ImageController@getThumbnail');
+
+Route::get('/uploads/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
 
 /*
  * Admin routes
@@ -36,14 +39,14 @@ Route::group(['middleware' => 'admin'], function(){
 
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
-    // Route::get('/admin/api/layout/refresh/{model}/{count}/{id}', 'LayoutController@refresh');
     Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
+
 
     //Requests
     Route::get('/admin/api/show/{model}/{id}', 'DataController@show');
     Route::post('/admin/api/store', 'DataController@store');
     Route::put('/admin/api/update', 'DataController@update');
     Route::post('/admin/api/togglePublishedAt', 'DataController@togglePublishedAt');
-    Route::get('/admin/api/updateOrder/{model}/{id}/{subid}', 'DataController@updateOrder');
+    Route::post('/admin/api/updateOrder', 'DataController@updateOrder');
     Route::delete('/admin/api/delete', 'DataController@delete');
 });

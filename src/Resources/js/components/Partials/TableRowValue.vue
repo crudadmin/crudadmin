@@ -4,7 +4,7 @@
     <!-- File -->
     <div v-if="isFile(field)" class="filesList">
       <div v-for="file in getFiles(item, field)">
-        <file :uploadpath="model.slug + '/' + field + '/' + file"></file> <span>, </span>
+        <file :file="file" :field="field" :model="model" :image="image"></file> <span>, </span>
       </div>
     </div>
 
@@ -18,7 +18,7 @@
 import File from '../Partials/File.vue';
 
 export default {
-    props : ['model', 'item', 'field', 'name'],
+    props : ['model', 'item', 'field', 'name', 'image'],
 
     components : { File },
 

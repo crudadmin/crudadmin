@@ -1,14 +1,16 @@
 <template>
-  <a v-if="isImage(uploadpath)" href="{{ path }}" data-lightbox="gallery" title="">Zobraziť fotografiu</a>
-  <a v-if="isPdf(uploadpath)" href="{{ path }}" target="_blank" title="">Zobraziť pdf</a>
-  <a v-if="isZip(uploadpath)" href="{{ downloadPath }}" target="_blank" title="">Stiahnuť ZIP</a>
-  <a v-if="isDoc(uploadpath)" href="{{ downloadPath }}" target="_blank" title="">Stiahnuť dokument</a>
-  <a v-if="isOther(uploadpath)" href="{{ downloadPath }}" target="_blank" target="_blank" title="">Stiahnuť súbor</a>
+  <a v-if="isImage(file) && image != true" href="{{ path }}" data-lightbox="gallery" title="">Zobraziť obrázok</a>
+  <a v-if="isImage(file) && image == true" href="{{ path }}" data-lightbox="gallery" title=""><img v-bind:src="imagePath" alt=""></a>
+  <a v-if="isPdf(file)" href="{{ path }}" target="_blank" title="">Zobraziť pdf</a>
+  <a v-if="isZip(file)" href="{{ downloadPath }}" target="_blank" title="">Stiahnuť ZIP</a>
+  <a v-if="isDoc(file)" href="{{ downloadPath }}" target="_blank" title="">Stiahnuť dokument</a>
+  <a v-if="isOther(file)" href="{{ downloadPath }}" target="_blank" target="_blank" title="">Stiahnuť súbor</a>
 </template>
 
 <script>
     export default {
-        props: ['uploadpath'],
+        props: ['file', 'field', 'model', 'image'],
+
         methods : {
             isExtension(path, types){
               var type = path.split('.').pop();
@@ -41,10 +43,13 @@
         },
         computed : {
           downloadPath(){
-            return this.$root.requests.download + '?file=' + encodeURIComponent(this.uploadpath);
+            return this.$root.requests.download + '?model=' + encodeURIComponent(this.model.slug) + '&field=' + encodeURIComponent(this.field) + '&file=' + encodeURIComponent(this.file);
+          },
+          imagePath(){
+            return this.$root.requests.thumbnail + '?model=' + encodeURIComponent(this.model.slug) + '&field=' + encodeURIComponent(this.field) + '&file=' + encodeURIComponent(this.file);
           },
           path(){
-            return this.$root.$http.options.root + '/../uploads/' + this.uploadpath;
+            return this.$root.$http.options.root + '/../uploads/' + this.model.slug + '/' + this.field + '/' + this.file;
           }
         }
     }

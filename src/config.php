@@ -48,6 +48,11 @@ return [
     'gettext_supported_codes' => [ ],
 
     /*
+     * Permanently delete files after deleted row in db or after overridden uploaded files
+     */
+    'reduce_space' => true,
+
+    /*
      * Custom rules aliases
      */
     'custom_rules' => [

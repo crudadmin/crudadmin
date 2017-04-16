@@ -56,7 +56,7 @@
         <small v-show="uploadSelectPluginAfterLoad">{{ field.title }}</small>
 
         <span v-if="field.value && !hasMultipleFilesValue && file_from_server && !isMultiple">
-          <file :uploadpath="model.slug + '/' + key + '/' + field.value"></file>
+          <file :file="field.value" :field="key" :model="model"></file>
         </span>
 
       </div>

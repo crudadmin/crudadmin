@@ -88,7 +88,12 @@ class DataController extends Controller
         //Save original values
         $original = $row['original'];
 
-        $row->update( $request->allWithMutators()[0] );
+        $changes = $request->allWithMutators()[0];
+
+        //Remove overridden files
+        $this->removeOverridenFiles($row, $changes);
+
+        $row->update( $changes );
 
         $this->updateBelongsToMany($model, $row);
 
@@ -186,6 +191,34 @@ class DataController extends Controller
     }
 
     /*
+     * Permanently removes files from deleted rows
+     */
+    protected function removeFilesOnDelete($model)
+    {
+        foreach ($model->getFields() as $key => $field)
+        {
+            if ( $model->isFieldType($key, 'file') )
+            {
+                $model->deleteFiles($key);
+            }
+        }
+    }
+
+    /*
+     * Removing all overridden files
+     */
+    protected function removeOverridenFiles($model, $changes)
+    {
+        foreach ($changes as $key => $change)
+        {
+            if ( $model->isFieldType($key, 'file') && !$model->hasFieldParam($key, 'multiple', false) )
+            {
+                $model->deleteFiles($key);
+            }
+        }
+    }
+
+    /*
      * Deleting row from db
      */
     public function delete(Request $request)
@@ -198,6 +231,11 @@ class DataController extends Controller
         }
 
         $row = $model->findOrFail( $request->get('id') );
+
+        //Remove uploaded files
+        $this->removeFilesOnDelete($row);
+
+        //Remove row from db (softDeletes)
         $row->delete();
 
         //Fire on delete event
@@ -241,9 +279,9 @@ class DataController extends Controller
         ];
     }
 
-    public function updateOrder($model, $id, $subid)
+    public function updateOrder()
     {
-        $model = $this->getModel( $model );
+        $model = $this->getModel( request('model') );
 
         //Checks for disabled sorting rows
         if ( $model->getProperty('sortable') == false )
@@ -251,15 +289,11 @@ class DataController extends Controller
             Ajax::error( 'Tento záznam nie je možné presúvať.' );
         }
 
-        $first_row = $model->findOrFail( $id );
-        $second_row = $model->findOrFail( $subid );
-
-        $first_row_order = $first_row->_order;
-
-        //Update first row
-        $first_row->forceFill([ '_order' => $second_row->_order ])->save();
-
-        //Update second row
-        $second_row->forceFill([ '_order' => $first_row_order ])->save();
+        //Update rows and theirs orders
+        foreach (request('rows') as $id => $order)
+        {
+            //Update first row
+            $model->newInstance()->where('id', $id)->update([ '_order' => $order ]);
+        }
     }
 }

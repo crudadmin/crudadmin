@@ -13,8 +13,8 @@ trait Gettextable
         {
             Gettext::createLocale($row->slug);
             Gettext::updateLanguage($row->slug, [
-                $row->poedit_po ? $row->poedit_po->source : null,
-                $row->poedit_mo ? $row->poedit_mo->source : null
+                $row->poedit_po ? $row->poedit_po->path : null,
+                $row->poedit_mo ? $row->poedit_mo->path : null
             ]);
         }
     }
@@ -26,8 +26,8 @@ trait Gettextable
         {
             Gettext::renameLocale($row->original['slug'], $row->slug);
             Gettext::updateLanguage($row->slug, [
-                $row->poedit_po ? $row->poedit_po->source : null,
-                $row->poedit_mo ? $row->poedit_mo->source : null
+                $row->poedit_po ? $row->poedit_po->path : null,
+                $row->poedit_mo ? $row->poedit_mo->path : null
             ]);
         }
     }

@@ -22,6 +22,6 @@
     "scripts": {
         "post-update-cmd": [
             "php artisan admin:update"
-        ],
+        ]
     }
 }

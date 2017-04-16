@@ -93,7 +93,7 @@
 
                         //After opening alert focus close button of this alert for disabling sending form...
                         setTimeout(function(){
-                            $('.modal button[data-dismiss="modal"]').eq(0).focus();
+                            $('.modal .modal-footer button:last-child').focus();
                         }, 100);
 
                         return this.alert;
