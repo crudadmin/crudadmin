@@ -22,24 +22,6 @@ trait Uploadable
     }
 
     /*
-     * If directories for postprocessed images dones not exists
-     */
-    public function makeDirs($path)
-    {
-        $tree = explode('/', trim($path, '/'));
-
-        $path = $path[0] == '/' ? '' : '.';
-
-        foreach ($tree as $dir)
-        {
-            $path = $path.'/'.$dir;
-
-            if (!file_exists($path))
-                mkdir($path);
-        }
-    }
-
-    /*
      * Returns path for uploaded files from actual model
      */
     public function filePath($key, $file = null)
@@ -50,28 +32,6 @@ trait Uploadable
             return $path . '/' . $file;
 
         return $path;
-    }
-
-    /*
-     * Update postprocess params
-     */
-    private function paramsMutator($name, $params)
-    {
-        //Automatic aspect ratio in resizing image with one parameter
-        if ( $name == 'resize' && count($params) <= 2 )
-        {
-            //Add auto ratio
-            if ( count( $params ) == 1 )
-            {
-                $params[] = null;
-            }
-
-            $params[] = function ($constraint) {
-                $constraint->aspectRatio();
-            };
-        }
-
-        return $params;
     }
 
     private function filePostProcess($field, $path, $file, $filename, $extension, $actions_steps = null)
@@ -101,7 +61,7 @@ trait Uploadable
 
                 foreach ((array)$actions as $name => $params)
                 {
-                    $params = $this->paramsMutator($name, $params);
+                    $params = AdminFile::paramsMutator($name, $params);
 
                     $image = call_user_func_array([$image, $name], $params);
                 }
@@ -205,7 +165,7 @@ trait Uploadable
         $filename = $this->filename($path, $file);
 
         //If dirs does not exists, create it
-        $this->makeDirs($path);
+        AdminFile::makeDirs($path);
 
         //File input is file from request
         if ( $file instanceof \Illuminate\Http\UploadedFile )
@@ -235,6 +195,61 @@ trait Uploadable
             return false;
 
         return new AdminFile($filename, $field, $this->getTable());
+    }
+
+    /*
+     * Remove all uploaded files in existing field attribute
+     */
+    public function deleteFiles($key)
+    {
+        //Remove fixed thumbnails
+        if ( ($file = $this->getValue($key)) )
+        {
+            $files = is_array($file) ? $file : [ $file ];
+
+            //Remove also multiple uploded files
+            foreach ($files as $file)
+            {
+                $field = $this->getField($key);
+
+                if ( array_key_exists('resize', $field) && config('admin.reduce_space', true) === true )
+                {
+                    foreach ($field['resize'] as $method => $value)
+                    {
+                        if ( is_numeric($method) )
+                            $method = 'thumbs';
+
+                        $file->{$method}->delete();
+                    }
+                }
+
+                $cache_path = AdminFile::adminModelCachePath($this->getTable() . '/' . $key );
+
+                //Remove dynamicaly cached thumbnails
+                if ( file_exists($cache_path) )
+                {
+                    foreach ((array)scandir($cache_path) as $dir)
+                    {
+                        $path = $cache_path . '/' . $dir;
+
+                        if ( !in_array($dir, array('.', '..')) && is_dir($path) )
+                        {
+                            $cache_file_path = $path . '/' . $file->filename;
+
+                            if ( file_exists($cache_file_path) )
+                                unlink($cache_file_path);
+                        }
+                    }
+                }
+
+                //Removing original files
+                if ( config('admin.reduce_space', true) === true )
+                {
+                    $file->delete();
+                }
+            }
+        }
+
     }
 }
 ?>

@@ -76,12 +76,12 @@ trait AdminModelTrait
                         foreach ($file as $value)
                         {
                             if ( is_string($value) )
-                                $files[] = new File( $value, $key, $this->getTable() );
+                                $files[] = File::adminModelFile($this->getTable(), $key, $value);
                         }
 
                         return $files;
                     } else {
-                        return new File( $file, $key, $this->getTable() );
+                        return File::adminModelFile($this->getTable(), $key, $file);
                     }
                 }
 

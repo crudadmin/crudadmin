@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Gogol\Admin\Helpers\File;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Image;
 
 class DownloadController extends Controller
 {
@@ -15,23 +16,29 @@ class DownloadController extends Controller
         $this->muddleware('auth', [ 'except' => 'signedDownload' ]);
     }
 
-    public function index($file = null)
+    public function getPath($file = null)
     {
-        if ( ! $file )
-            $file = request()->get('file');
+        $file = request('file');
+        $model = request('model');
+        $field = request('field');
 
-        $file = str_replace('..', '', $file);
-        $array = explode('/', $file);
-
-        $path = public_path( 'uploads/' . $file );
+        $file = File::adminModelFile($model, $field, $file);
 
         //Protection
-        if ( ! file_exists( $path ) || count($array) != 3 || !file_exists(public_path('uploads/'.$array[0])) || !file_exists(public_path('uploads/'.$array[0].'/'.$array[1])) )
+        if ( ! file_exists( $file->path ) )
         {
-            return '<h1>404 - file not found...</h1>';
+            abort(404, '<h1>404 - file not found...</h1>');
         }
 
-        return response()->download( $path );
+        return $file->path;
+    }
+
+    /*
+     * Returns download resposne of file
+     */
+    public function index($file = null)
+    {
+        return response()->download( $this->getPath($file) );
     }
 
     public function signedDownload($hash)
