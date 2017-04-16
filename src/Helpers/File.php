@@ -3,6 +3,7 @@
 namespace Gogol\Admin\Helpers;
 
 use Image;
+use File as BaseFile;
 
 class File {
 
@@ -219,16 +220,9 @@ class File {
      */
     public static function makeDirs($path)
     {
-        $tree = explode('/', trim($path, '/'));
-
-        $path = $path[0] == '/' ? '' : '.';
-
-        foreach ($tree as $dir)
+        if ( ! file_exists($path) )
         {
-            $path = $path.'/'.$dir;
-
-            if (!file_exists($path))
-                mkdir($path);
+            BaseFile::makeDirectory( $path, 0755, true);
         }
     }
 
