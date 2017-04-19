@@ -141,15 +141,17 @@ class File {
     /*
      * Postprocess image file
      */
-    public function image($mutators = [], $force = false)
+    public function image($mutators = [], $directory = null, $force = false)
     {
         //When is file type svg, then image postprocessing subdirectories not exists
         if ( $this->extension == 'svg' || !file_exists($this->path) )
             return $this;
 
         //Hash of directory which belongs to image mutators
-        if ( count( $mutators ) > 1 )
+        if ( $directory )
         {
+            $hash = str_slug($directory);
+        } else if ( count( $mutators ) > 1 ) {
             $hash = md5($this->directory.serialize($mutators));
         } else {
             $first_value = array_first($mutators);
@@ -229,7 +231,7 @@ class File {
     /*
      * Resize or fit image depending on dimensions
      */
-    public function resize($width = null, $height = null, $force = false)
+    public function resize($width = null, $height = null, $directory = null, $force = false)
     {
         if ( is_numeric($width) && is_numeric($height) )
         {
@@ -240,7 +242,7 @@ class File {
 
         return $this->image([
             $action => [ $width, $height ],
-        ], $force);
+        ], $directory, $force);
     }
 
     /*

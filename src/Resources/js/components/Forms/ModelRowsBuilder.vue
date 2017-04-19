@@ -60,7 +60,7 @@
         refresh : {
           refreshing : true,
           count : 0,
-          interval : 5000,
+          interval : this.getRefreshInterval(),
         },
       };
     },
@@ -371,7 +371,16 @@
 
         //Load paginated rows...
         this.loadRows(indicator);
-      }
+      },
+      getRefreshInterval(){
+        var interval = this.$root.getModelProperty(this.model, 'settings.refresh_interval', 10000);
+
+        //Infinity interval
+        if ( interval == false )
+          interval = 3600 * 1000;
+
+        return interval;
+      },
     },
   }
 </script>

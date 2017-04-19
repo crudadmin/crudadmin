@@ -12,20 +12,22 @@ use Admin;
 
 class ImageController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('admin', [ 'only' => 'getThumbnail' ]);
+    }
+
     /*
      * Returns image response of file
      */
-    public function getThumbnail()
+    public function getThumbnail($model, $field, $file)
     {
-        $model = request('model');
-        $field = request('field');
-
-        $file = File::adminModelFile($model, $field, request('file'));
+        $file = File::adminModelFile($model, $field, $file);
 
         //Check if model and field exists
         if ( ($model = Admin::getModelByTable($model)) && $model->getField($field) )
         {
-            return response()->download( $file->resize(40, 40, true)->path );
+            return response()->download( $file->resize(40, 40, 'admin-thumbnails', true)->path );
         }
 
         return abort(404);
