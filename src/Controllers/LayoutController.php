@@ -30,7 +30,6 @@ class LayoutController extends BaseController
                 'togglePublishedAt' => action('\Gogol\Admin\Controllers\DataController@togglePublishedAt'),
                 'updateOrder' => action('\Gogol\Admin\Controllers\DataController@updateOrder'),
                 'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),
-                'thumbnail' => action('\Gogol\Admin\Controllers\ImageController@getThumbnail'),
                 'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
             ],
         ];
