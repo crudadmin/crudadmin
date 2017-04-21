@@ -53,6 +53,9 @@ class Authenticatable extends Model implements
      */
     public function permissions()
     {
+        if ( config('admin.admin_groups') != true )
+            return [];
+
         $key = 'users.'.$this->getKey().'.permissions';
 
         //Check for buffer
@@ -61,9 +64,9 @@ class Authenticatable extends Model implements
 
         $models = [];
 
-        if ( $this->adminsGroups )
+        if ( $admin_groups = $this->adminsGroups )
         {
-            foreach ($this->adminsGroups as $group)
+            foreach ($admin_groups as $group)
             {
                 $models = array_merge($models, (array)$group->models);
             }
@@ -145,12 +148,15 @@ class Authenticatable extends Model implements
         $this->attributes['permissions'] = $value;
     }
 
-    public function withAvatarPath()
+    public function getAdminUser()
     {
         if ( $this->avatar )
             $this->avatar = $this->avatar->thumbs->path;
 
-        return $this;
+        if ( config('admin.admin_groups') == true )
+            $this->load('adminsGroups');
+
+        return $this->getAttributes() + $this->relationsToArray();
     }
 
     /*

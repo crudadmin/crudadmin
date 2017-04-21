@@ -19,7 +19,7 @@ class LayoutController extends BaseController
         return [
             'version' => Admin::getVersion(),
             'license_key' => config('admin.license_key'),
-            'user' => auth()->guard('web')->user()->withAvatarPath(),
+            'user' => auth()->guard('web')->user()->getAdminUser(),
             'models' => $this->getAppTree(),
             'languages' => $this->getLanguages(),
             'requests' => [
@@ -55,6 +55,13 @@ class LayoutController extends BaseController
                 if ( in_array(request('column'), $columns) )
                 {
                     $columns = [ request('column') ];
+                }
+
+                //Remove fake column
+                foreach ($columns as $key => $column)
+                {
+                    if ( $model->hasFieldParam($column, 'belongsToMany') )
+                        unset($columns[$key]);
                 }
 
                 //Search scope
