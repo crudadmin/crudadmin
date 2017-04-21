@@ -119,6 +119,7 @@
             format: this.getDateFormat,
             timepicker: this.field.type != 'date',
             datepicker: this.field.type != 'time',
+            scrollInput: false,
           });
         }
       },
