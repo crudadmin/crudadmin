@@ -53,6 +53,9 @@ class Authenticatable extends Model implements
      */
     public function permissions()
     {
+        if ( config('admin.admin_groups') != true )
+            return [];
+
         $key = 'users.'.$this->getKey().'.permissions';
 
         //Check for buffer
@@ -150,7 +153,8 @@ class Authenticatable extends Model implements
         if ( $this->avatar )
             $this->avatar = $this->avatar->thumbs->path;
 
-        $this->load('adminsGroups');
+        if ( config('admin.admin_groups') == true )
+            $this->load('adminsGroups');
 
         return $this->getAttributes() + $this->relationsToArray();
     }
