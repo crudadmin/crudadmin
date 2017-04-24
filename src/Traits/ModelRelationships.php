@@ -71,22 +71,9 @@ trait ModelRelationships
             }
 
             //Returns relationship builder
-            if ( $get === false && $relation['get'] === false )
+            if ( $get === false )
             {
-                /*
-                 * After loading relation from cache needs to reset all bindings in query and reset wheres...
-                 * Marek, you should find more attractive sollution.
-                 */
-                $query = $relation['relation']->getBaseQuery();
-
-                //Resets all contraits
-                foreach ($query->newQuery() as $key => $value)
-                {
-                    if ( $key != 'from' )
-                        $query->$key = $value;
-                }
-
-                return $relation['relation'];
+                return $this->relationResponse($method, $relation['type'], $relation['path'], false, $relation['properties']);
             }
 
             //Returns items from already loaded relationship
@@ -215,8 +202,10 @@ trait ModelRelationships
         {
             $relation_buffer = [
                 'relation' => $relation,
-                'get' => $get,
                 'type' => $relationType,
+                'properties' => $properties,
+                'path' => $path,
+                'get' => $get,
             ];
 
             //If was relation called as property, and is only hasOne relationship, then return value
