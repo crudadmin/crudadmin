@@ -14,6 +14,20 @@ session_start();
  * advanced features of CKFinder.
  */
 
+/*
+ * Check for laravel path
+ */
+if ( file_exists(__DIR__.'/../../../../../../../bootstrap/autoload.php') )
+    $path = __DIR__.'/../../../../../../../bootstrap';
+else
+    $path = __DIR__.'/../../../../../../laravel_app/bootstrap';
+
+require $path.'/autoload.php';
+$app = require_once $path.'/app.php';
+
+$app->make('Illuminate\Contracts\Http\Kernel')
+->handle(Illuminate\Http\Request::capture());
+
 /**
  * This function must check the user session to be sure that he/she is
  * authorized to upload and access files in the File Browser.
@@ -22,20 +36,6 @@ session_start();
  */
 function CheckAuthentication()
 {
-    /*
-     * Check for laravel path
-     */
-    if ( file_exists(__DIR__.'/../../../../../../../bootstrap/autoload.php') )
-        $path = __DIR__.'/../../../../../../../bootstrap';
-    else
-        $path = __DIR__.'/../../../../../../laravel_app/bootstrap';
-
-    require $path.'/autoload.php';
-    $app = require_once $path.'/app.php';
-
-    $app->make('Illuminate\Contracts\Http\Kernel')
-    ->handle(Illuminate\Http\Request::capture());
-
     //Save user state
     if (!isset($_SESSION['_ckfinder_hasAccess']))
         $_SESSION['_ckfinder_hasAccess'] = auth()->guard('web')->check() && auth()->guard('web')->user()->isEnabled();
@@ -90,7 +90,7 @@ Examples:
 
 ATTENTION: The trailing slash is required.
 */
-$baseDir = resolveUrl($baseUrl);
+$baseDir = public_path($baseUrl);
 
 /*
  * ### Advanced Settings

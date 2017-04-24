@@ -64,13 +64,28 @@ trait ModelRelationships
         if ( $this->isAdminRelationLoaded($method) )
         {
             $relation = $this->getRelationFromCache($method);
+
             if ( !is_array($relation) || !array_key_exists('type', $relation))
             {
                 return $relation;
             }
 
             //Returns relationship builder
-            if ( $get === false && $relation['get'] === false ) {
+            if ( $get === false && $relation['get'] === false )
+            {
+                /*
+                 * After loading relation from cache needs to reset all bindings in query and reset wheres...
+                 * Marek, you should find more attractive sollution.
+                 */
+                $query = $relation['relation']->getBaseQuery();
+
+                //Resets all contraits
+                foreach ($query->newQuery() as $key => $value)
+                {
+                    if ( $key != 'from' )
+                        $query->$key = $value;
+                }
+
                 return $relation['relation'];
             }
 
