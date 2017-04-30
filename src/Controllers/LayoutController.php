@@ -102,20 +102,26 @@ class LayoutController extends BaseController
 
     public function returnModelData($model, $parent_table, $subid, $langid, $limit, $page)
     {
-        return [
-            'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page, $model ) {
-                //Search in rows
-                $this->checkForSearching($query, $model);
+        try {
+            $data = [
+                'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page, $model ) {
+                    //Search in rows
+                    $this->checkForSearching($query, $model);
 
-                //Paginate rows
-                $this->paginateRecords($query, $limit, $page);
-            }, $parent_table),
-            'count' => $this->checkForSearching(
-                            $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table),
-                            $model)
-                        ->count(),
-            'page' => $page,
-        ];
+                    //Paginate rows
+                    $this->paginateRecords($query, $limit, $page);
+                }, $parent_table),
+                'count' => $this->checkForSearching(
+                                $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table),
+                                $model)
+                            ->count(),
+                'page' => $page,
+            ];
+        } catch (\Illuminate\Database\QueryException $e) {
+            return Ajax::error('Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:<br><strong>php artisan admin:migrate</strong>', null, null, 500);
+        }
+
+        return $data;
     }
 
     /*

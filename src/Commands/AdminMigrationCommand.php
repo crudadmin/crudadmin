@@ -690,9 +690,11 @@ class AdminMigrationCommand extends Command
 
                 //If column does not exists in already created table, then create it after id
                 if ( $updating === true )
+                {
                     $column->after('id');
 
-                $this->line('<comment>+ Added column:</comment> '.$foreign_column);
+                    $this->line('<comment>+ Added column:</comment> '.$foreign_column);
+                }
             } else if ( $updating === true ) {
                 $column->change();
                 continue;
