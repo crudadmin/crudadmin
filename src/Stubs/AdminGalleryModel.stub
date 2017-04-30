@@ -36,18 +36,7 @@ class DummyClass extends AdminModel
      * ... other validation methods from laravel
      */
     protected $fields = [
-        'image' => [
-            'name' => 'Obrazok',
-            'type' => 'file',
-            'required' => true,
-            'image' => true,
-            'multirows' => true,
-
-            //Post processing photo
-            'resize' => [
-                [ 'fit' => [ 100 ] ],
-            ],
-        ]
+        'image' => 'name:Obrázok|type:file|required|image|multirows',
     ];
 
 }

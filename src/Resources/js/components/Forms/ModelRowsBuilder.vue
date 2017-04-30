@@ -114,18 +114,18 @@
           return;
 
         //Update row in table rows
-        var data = this.rows.data.slice(0),
-            row = array[1];
+        var row = array[1];
 
-        for ( var key in data )
+        for ( var key in this.rows.data )
         {
-          if ( data[key].id == row.id )
+          if ( this.rows.data[key].id == row.id )
           {
-            data[key] = row;
+            for ( var k in row )
+            {
+              this.$parent.rows.data[key][k] = row[k];
+            }
           }
         }
-
-        this.rows.data = data;
       },
     },
 
@@ -256,7 +256,7 @@
           this.pagination.refreshing = false;
 
           //Load rows into array
-          this.rows.data = response.data.rows;
+          this.updateRowsData(response.data.rows);
           this.rows.count = response.data.count;
 
           this.$parent.rows.loaded = true;
@@ -380,6 +380,29 @@
           interval = 3600 * 1000;
 
         return interval;
+      },
+      /*
+       * Change updated rows in db
+       */
+      updateRowsData(data){
+        if ( this.rows.data.length != data.length || this.rows.data[0].id != data[0].id )
+        {
+          this.rows.data = data;
+          return;
+        }
+
+        //Update changed data in vue object
+        for ( var i in this.rows.data )
+        {
+          for ( var k in data[i] )
+          {
+            if ( this.rows.data[i][k] != data[i][k] )
+            {
+              this.rows.data[i][k] = data[i][k];
+            }
+          }
+        }
+
       },
     },
   }

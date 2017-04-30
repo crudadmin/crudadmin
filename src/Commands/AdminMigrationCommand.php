@@ -196,15 +196,21 @@ class AdminMigrationCommand extends Command
                         $column->change();
                     }
                 } else {
-                    $column = $this->setColumn( $table, $model, $key );
+                    if ( $column = $this->setColumn( $table, $model, $key ) )
+                    {
 
-                    if ( $column && $model->getSchema()->hasColumn($model->getTable(), $this->getPreviousColumn($model, $key)) )
-                        $column->after( $this->getPreviousColumn($model, $key) );
-                    else if ( $column && $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
-                        $column->before( 'deleted_at' );
+                    }
 
                     if ( $column )
-                        $this->line('<comment>+ Added column:</comment> '.$key);
+                    {
+                        if ( $model->getSchema()->hasColumn($model->getTable(), $this->getPreviousColumn($model, $key)) )
+                            $column->after( $this->getPreviousColumn($model, $key) );
+                        else if ( $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
+                            $column->before( 'deleted_at' );
+
+                        if ( $column )
+                            $this->line('<comment>+ Added column:</comment> '.$key);
+                    }
                 }
             }
 
@@ -282,7 +288,7 @@ class AdminMigrationCommand extends Command
      */
     public function getPreviousColumn($model, $find_key)
     {
-        $last = null;
+        $last = 'id';
         $i = 0;
 
         foreach ($model->getFields() as $key => $item)
@@ -297,7 +303,8 @@ class AdminMigrationCommand extends Command
 
             $i++;
 
-            $last = $key;
+            if ( !$model->hasFieldParam($key, 'belongsToMany') )
+                $last = $key;
         }
 
         return $last;
@@ -513,6 +520,9 @@ class AdminMigrationCommand extends Command
                 {
                     //Create pivot table
                     $model->getSchema()->create( $properties[3] , function (Blueprint $table) use ( $model, $properties ) {
+                        //Increment
+                        $table->increments('id');
+
                         //Add integer reference for owner table
                         $table->integer( $properties[6] )->unsigned();
                         $table->foreign( $properties[6] )->references($model->getKeyName())->on( $model->getTable() );
@@ -525,6 +535,17 @@ class AdminMigrationCommand extends Command
                     $this->line('<info>Created table:</info> '.$properties[3]);
                 } else {
                     $this->line('<info>Skipped table:</info> '.$properties[3]);
+
+                    if ( ! $model->getSchema()->hasColumn($properties[3], 'id') )
+                    {
+                        $model->getSchema()->table( $properties[3] , function (Blueprint $table) use ( $model, $properties ) {
+                            //Increment
+                            $table->increments('id')->first();
+                        });
+
+                        $this->line('<comment>+ Added column:</comment> id');
+                    }
+
                 }
             };
 

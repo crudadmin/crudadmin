@@ -20,7 +20,7 @@
 }
 
 .flex-table { display: flex; flex-wrap: wrap;}
-.flex-table .col { overflow-x: auto; }
+.flex-table .col-rows { overflow-x: auto; }
 .flex-table .col:nth-child(1) { order: 2; }
 
 .box-header .form-group.pull-right { margin: 0 }

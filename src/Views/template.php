@@ -200,6 +200,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/ckeditor/ckeditor.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/chosen/chosen.jquery.min.js') ?>"></script>
+    <script src="<?php echo asset('/assets/admin/plugins/chosen-order/chosen.order.jquery.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/dist/js/app.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/dist/js/main.js') ?>"></script>
 

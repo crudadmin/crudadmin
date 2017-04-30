@@ -46,13 +46,13 @@
       <div v-bind:class="{ 'row' : true, 'flex-table' : activeSize == 0 }">
 
         <!-- left column -->
-        <div class="col col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm">
+        <div class="col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm">
           <form-builder :progress.sync="progress" :rows.sync="rows" :model="model" :canaddrow="canAddRow" :row.sync="row"></form-builder>
         </div>
         <!--/.col (left) -->
 
         <!-- right column -->
-        <div class="col col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12" v-show="hasRows && canShowRows">
+        <div class="col col-rows col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12" v-show="hasRows && canShowRows">
           <model-rows-builder :model.sync="model" :rows.sync="rows" :row.sync="row" :langid="langid" :progress.sync="progress" :search="search"></model-rows-builder>
         </div>
         <!--/.col (right) -->

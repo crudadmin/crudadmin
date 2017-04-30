@@ -34,10 +34,35 @@ trait Uploadable
         return $path;
     }
 
+    /*
+     * Resize images by resize parameter
+     */
+    protected function resizeCacheImages($path, $resolution)
+    {
+        $file = new AdminFile($path);
+
+        foreach ((array)explode(',', $resolution) as $dimentions)
+        {
+            $dimentions = explode('x', strtolower($dimentions));
+
+            $file->resize( $dimentions[0], isset($dimentions[1]) ? $dimentions[1] : null, null, true);
+        }
+
+        return true;
+    }
+
+    /*
+     * Postprocess images
+     */
     private function filePostProcess($field, $path, $file, $filename, $extension, $actions_steps = null)
     {
         if ( ! $actions_steps )
             $actions_steps = $this->getFieldParam($field, 'resize');
+
+        if ( is_string($actions_steps) )
+        {
+            return $this->resizeCacheImages( public_path( $path . '/' . $filename ), $actions_steps);
+        }
 
         //If is required some image post processing changes with Image class
         if (is_array($actions_steps) && count($actions_steps) > 0 && $extension != 'svg'){
@@ -212,7 +237,7 @@ trait Uploadable
             {
                 $field = $this->getField($key);
 
-                if ( array_key_exists('resize', $field) && config('admin.reduce_space', true) === true )
+                if ( array_key_exists('resize', $field) && is_array($field['resize']) && config('admin.reduce_space', true) === true )
                 {
                     foreach ($field['resize'] as $method => $value)
                     {

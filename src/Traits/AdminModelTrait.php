@@ -701,7 +701,7 @@ trait AdminModelTrait
                     //Find match
                     if ( strtolower( Str::snake(class_basename($path) ) ) == strtolower( $properties[5] ) )
                     {
-                        $attributes[ $key ] = $this->{$key}->pluck( 'id' );
+                        $attributes[ $key ] = $this->getValue($key)->pluck( 'id' );
                     }
                 }
             }

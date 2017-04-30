@@ -122,6 +122,8 @@
             scrollInput: false,
           });
         }
+
+        this.onChangeSelect();
       },
 
       events : {
@@ -160,7 +162,17 @@
 
           if ( this.isSelect )
           {
-            $('#' + this.getId).chosen({disable_search_threshold: 10}).trigger("chosen:updated");
+            var select = $('#' + this.getId).chosen({disable_search_threshold: 10}).trigger("chosen:updated");
+
+            //Choosen throws error when order is set first time
+            if ( field.value )
+            {
+              try {
+                select.setSelectionOrder(field.value);
+              } catch(e){
+
+              }
+            }
           }
 
           if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows )
@@ -200,10 +212,47 @@
             clearTimeout(this.updateSelectTimeout);
 
           this.updateSelectTimeout = setTimeout(function(){
-            $('#'+this.getId).trigger("chosen:updated");
+            var select = $('#'+this.getId).trigger("chosen:updated");
+
+            if ( this.value )
+            {
+              select.setSelectionOrder(this.value);
+
+              this.rebuildSelect();
+            }
           }.bind(this), 50);
 
           return select;
+        },
+        onChangeSelect(){
+          if ( this.isSelect && this.isMultiple )
+          {
+            var select = $('#' + this.getId),
+                _this = this;
+
+            select.attr('name', null).change(function(){
+              setTimeout(function(){
+                _this.rebuildSelect();
+              }, 50);
+            });
+          }
+        },
+        rebuildSelect(){
+          var select = $('#' + this.getId),
+              fake_select = select.prev(),
+              values = select.getSelectionOrder();
+
+          if ( ! fake_select.is('select') )
+            fake_select = select.before('<select name="'+this.key+'[]" multiple="multiple" style="display: none"></select>').prev();
+
+          //Remove inserted options
+          fake_select.find('option').remove();
+
+          for ( var i = 0; i < values.length; i++ )
+          {
+            fake_select.append($('<option></option>').attr('selected', true).attr('value', values[i]).text(values[i]));
+          }
+
         }
       },
 

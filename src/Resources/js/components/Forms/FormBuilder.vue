@@ -307,7 +307,9 @@
 
               //Update values in fields cause updating files in form
               if ( key in this.model.fields )
+              {
                 this.model.fields[key].value = response.data.row[key];
+              }
             }
           }
 

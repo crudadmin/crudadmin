@@ -166,7 +166,8 @@ class File {
         }
 
         //Correct trim directory name
-        $directory = substr($this->directory, 0, 8) == 'uploads/' ? substr($this->directory, 8) : $this->directory;
+        $directory = ltrim($this->directory, '/');
+        $directory = substr($directory, 0, 8) == 'uploads/' ? substr($directory, 8) : $directory;
 
         //Get directory path for file
         $cache_path = self::adminModelCachePath($directory.'/'.$hash);

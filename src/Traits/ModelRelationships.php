@@ -190,7 +190,7 @@ trait ModelRelationships
         if ( $relationType == 'belongsTo' ){
             $relation = $this->belongsTo( $path, $properties[4] );
         } else if ( $relationType == 'belongsToMany' ){
-            $relation = $this->belongsToMany( $path, $properties[3], $properties[6], $properties[7] );
+            $relation = $this->belongsToMany( $path, $properties[3], $properties[6], $properties[7] )->orderBy($properties[3].'.id', 'asc');
         } else if ( $relationType == 'hasOne' )
             $relation = $this->hasOne( $path );
         else if ( $relationType == 'hasMany' )
