@@ -89,10 +89,20 @@ class LayoutController extends BaseController
     /*
      * Apply pagination for given eloqment builder
      */
-    protected function paginateRecords($query, $limit, $page)
+    protected function paginateRecords($query, $limit, $page, $model, $count = null)
     {
         if ( $limit == 0 )
             return;
+
+        //If is first loading of first page and model is in reversed mode, then return last x rows.
+        if ( $page == 1 && $count !== null && $count == 0 && $model->isReversed() === true )
+        {
+            $count = $query->count();
+            $take = $limit - ((ceil($count / $limit) * $limit) - $count);
+
+            $query->offset( $count - $take )->take($take);
+            return;
+        }
 
         $start = $limit * $page;
         $offset = $start - $limit;
@@ -100,16 +110,16 @@ class LayoutController extends BaseController
         $query->offset($offset)->take($limit);
     }
 
-    public function returnModelData($model, $parent_table, $subid, $langid, $limit, $page)
+    public function returnModelData($model, $parent_table, $subid, $langid, $limit, $page, $count = null)
     {
         try {
             $data = [
-                'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page, $model ) {
+                'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page, $model, $count ) {
                     //Search in rows
                     $this->checkForSearching($query, $model);
 
                     //Paginate rows
-                    $this->paginateRecords($query, $limit, $page);
+                    $this->paginateRecords($query, $limit, $page, $model, $count);
                 }, $parent_table),
                 'count' => $this->checkForSearching(
                                 $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table),
@@ -118,7 +128,7 @@ class LayoutController extends BaseController
                 'page' => $page,
             ];
         } catch (\Illuminate\Database\QueryException $e) {
-            return Ajax::error('Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:<br><strong>php artisan admin:migrate</strong>', null, null, 500);
+            return Ajax::mysqlError($e);
         }
 
         return $data;
@@ -142,7 +152,7 @@ class LayoutController extends BaseController
         if ( $parent_table == '0' )
             $parent_table = null;
 
-        return $this->makePage( $model, $this->returnModelData( $model, $parent_table, $subid, $langid, $limit, $page ), false);
+        return $this->makePage( $model, $this->returnModelData( $model, $parent_table, $subid, $langid, $limit, $page, $count ), false);
     }
 
     /**
@@ -223,7 +233,8 @@ class LayoutController extends BaseController
             'editable' => $model->getProperty('editable'),
             'deletable' => $model->getProperty('deletable'),
             'publishable' => $model->getProperty('publishable'),
-            'sortable' => $model->getProperty('sortable'),
+            'sortable' => $model->isSortable(),
+            'orderBy' => $model->getProperty('orderBy'),
             'fields' => $fields,
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),

@@ -172,7 +172,7 @@ class AdminMigrationCommand extends Command
                 $table->timestamps();
         });
 
-        $this->line('<info>Created table:</info> '.$model->getTable());
+        $this->line('<comment>Created table:</comment> '.$model->getTable());
     }
 
     /**
@@ -198,11 +198,6 @@ class AdminMigrationCommand extends Command
                 } else {
                     if ( $column = $this->setColumn( $table, $model, $key ) )
                     {
-
-                    }
-
-                    if ( $column )
-                    {
                         if ( $model->getSchema()->hasColumn($model->getTable(), $this->getPreviousColumn($model, $key)) )
                             $column->after( $this->getPreviousColumn($model, $key) );
                         else if ( $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
@@ -223,8 +218,12 @@ class AdminMigrationCommand extends Command
             //Order column
             if ( ! $model->getSchema()->hasColumn($model->getTable(), '_order') && $model->isSortable() )
             {
+
                 $table->integer('_order')->unsigned();
                 $this->line('<comment>+ Added column:</comment> _order');
+
+                //Insert default increment into order
+                $this->addDefaultOrder($model);
             }
 
             //Sluggable column
@@ -458,14 +457,14 @@ class AdminMigrationCommand extends Command
             {
                 if ( $tableExists === true && $model->count() > 0 )
                 {
-                    $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column in</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$properties[0].'</error> <comment>table.</comment>');
-                    $this->line('<comment>+ Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
-
-                    $ids_in_reference_table = Admin::getModelByTable($properties[0])->take(10)->select('id')->pluck('id');
-
                     //If reference table has some rows
                     if ( $model->hasFieldParam($key, 'required', true) )
                     {
+                        $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column in</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$properties[0].'</error> <comment>table.</comment>');
+                        $this->line('<comment>- Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
+
+                        $ids_in_reference_table = Admin::getModelByTable($properties[0])->take(10)->select('id')->pluck('id');
+
                         if ( count($ids_in_reference_table) > 0 )
                         {
                             $this->line('<comment>+ Here are some ids from '.$properties[0].' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
@@ -505,6 +504,17 @@ class AdminMigrationCommand extends Command
         }
     }
 
+    protected function makeForeignIndexForBelongsToMany($table, $key)
+    {
+        $table_index = '';
+        foreach((array)explode('_', $table) as $t)
+        {
+            $table_index .= $t[0];
+        }
+
+        return 'fk_'.$table_index.'_'.$key;
+    }
+
     /*
      * Add relationship for column created by developer
      */
@@ -525,16 +535,16 @@ class AdminMigrationCommand extends Command
 
                         //Add integer reference for owner table
                         $table->integer( $properties[6] )->unsigned();
-                        $table->foreign( $properties[6] )->references($model->getKeyName())->on( $model->getTable() );
+                        $table->foreign( $properties[6], $this->makeForeignIndexForBelongsToMany($properties[3], $properties[6]) )->references($model->getKeyName())->on( $model->getTable() );
 
                         //Add integer reference for belongs to table
                         $table->integer( $properties[7] )->unsigned();
-                        $table->foreign( $properties[7] )->references($properties[2])->on( $properties[0] );
+                        $table->foreign( $properties[7], $this->makeForeignIndexForBelongsToMany($properties[3], $properties[7]) )->references($properties[2])->on( $properties[0] );
                     });
 
-                    $this->line('<info>Created table:</info> '.$properties[3]);
+                    $this->line('<comment>Created table:</comment> '.$properties[3]);
                 } else {
-                    $this->line('<info>Skipped table:</info> '.$properties[3]);
+                    $this->line('<info>Checked table:</info> '.$properties[3]);
 
                     if ( ! $model->getSchema()->hasColumn($properties[3], 'id') )
                     {
@@ -593,6 +603,20 @@ class AdminMigrationCommand extends Command
                 {
                     $row->save();
                 }
+            }
+        };
+    }
+
+    //Resave all rows in model for updating slug if needed
+    protected function addDefaultOrder($model)
+    {
+        $this->buffer_after[ $model->getTable() ][] = function() use ($model) {
+            $i = 0;
+
+            foreach ($model->get() as $row)
+            {
+                $row->_order = $i++;
+                $row->save();
             }
         };
     }

@@ -28,6 +28,12 @@ class Controller extends BaseController
             else
                 $key = $validation_key;
 
+            //If field is hidden
+            if ( $model->hasFieldParam($key, 'removeFromForm', true) && $model->hasFieldParam($key, 'required', true) )
+            {
+                unset($data[array_search('required', $data)]);
+            }
+
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             if ( isset($row) )
             {

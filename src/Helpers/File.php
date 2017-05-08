@@ -141,7 +141,7 @@ class File {
     /*
      * Postprocess image file
      */
-    public function image($mutators = [], $directory = null, $force = false)
+    public function image($mutators = [], $directory = null, $force = false, $return_object = false)
     {
         //When is file type svg, then image postprocessing subdirectories not exists
         if ( $this->extension == 'svg' || !file_exists($this->path) )
@@ -214,6 +214,9 @@ class File {
 
         //Save image into cache folder
         $image->save( $filepath );
+
+        if ( $return_object )
+            return $image;
 
         return new static($filepath);
     }

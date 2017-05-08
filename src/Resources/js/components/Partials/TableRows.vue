@@ -18,7 +18,7 @@
         </td>
 
         <td class="buttons-options">
-          <button type="button" v-if="model.editable" v-on:click="selectRow( item )" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button>
+          <button type="button" v-if="isEditable" v-on:click="selectRow( item )" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button>
           <button type="button" v-on:click="showInfo( item )" class="btn btn-sm btn-default" data-toggle="tooltip" title="" data-original-title="Informácie o zázname"><i class="fa fa-info"></i></button>
           <button type="button" v-if="model.publishable" v-on:click="togglePublishedAt( item )" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? 'Skryť' : 'Zobraziť' }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button>
           <button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" data-toggle="tooltip" title="" data-original-title="Vymazat"><i class="fa fa-remove"></i></button>
@@ -118,6 +118,9 @@
         },
         avaliableColumns(){
           return ['id'].concat( Object.keys( this.model.fields ) );
+        },
+        isEditable(){
+          return this.model.editable || this.$parent.$parent.hasChilds() > 0;
         },
       },
 

@@ -47,7 +47,7 @@
         //Sorting
         pagination: {
           position: 1,
-          limit : limit,
+          limit : parseInt(limit),
           limits : [ 5, 10, 20, 30, 50, 100, 200 ],
           refreshing : false,
           maxpages : 15,
@@ -69,21 +69,7 @@
       //For file paths
       this.root = this.$root.$http.options.root;
 
-      if ( this.orderBy == null)
-      {
-        var orderBy = this.$root.getModelProperty(this.model, 'settings.orderBy');
-        if ( orderBy )
-        {
-          var keys = Object.keys(orderBy);
-
-          orderBy = [keys[0], orderBy[keys[0]].toLowerCase().replace('asc', 0).replace('desc', 1)]
-        } else {
-          orderBy = ['id', 1];
-        }
-
-        this.orderBy = orderBy;
-      }
-
+      //Set default order rows
       this.setOrder();
 
       //Refresh rows refreshInterval
@@ -95,8 +81,24 @@
     },
 
     events: {
+      /*
+       * When row is added, then push it into table
+       */
       onCreate(array){
-        if ( this.pagination.position == 1 )
+        var pages = Math.ceil(this.rows.count / this.pagination.limit);
+
+        //If last page is full, and need to add new page
+        if ( this.isReversed(true) && pages == this.rows.count / this.pagination.limit ){
+          this.setPosition( pages + 1 );
+        }
+
+        //If user is not on lage page, then change page into last, for see added rows
+        else if ( this.isReversed(true) && this.pagination.position < pages ){
+          this.setPosition( pages );
+        }
+
+        //If row can be pushed without reloading rows into first or last page
+        else if ( this.pagination.position == 1 || this.isReversed(true) && this.pagination.position == pages )
         {
           var rows = array.concat( this.rows.data );
 
@@ -109,6 +111,9 @@
           this.loadRows();
         }
       },
+      /*
+       * When row is updated, then change data into table for changed rows
+       */
       onUpdate(array){
         if ( array[0] != this.model.slug )
           return;
@@ -174,7 +179,7 @@
         return 'Záznamy';
       },
       isPaginationEnabled(){
-        return this.$root.getModelProperty(this.model, 'settings.pagination') !== false;
+        return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false;
       },
       rowsData(){
         return this.rows.data.sort(function(a, b){
@@ -261,6 +266,12 @@
 
           this.$parent.rows.loaded = true;
 
+          //If is reversed sorting in model, then set pagination into last page after first displaying table
+          if ( this.isReversed() && this.refresh.count == 0 )
+          {
+            this.pagination.position = Math.ceil(this.rows.count / this.pagination.limit);
+          }
+
           //Update field options
           if ( this.refresh.count == 0 ){
             this.updateFieldOptions(response.data.fields);
@@ -285,7 +296,7 @@
           this.initTimeout(false);
 
           //Show error alert at first request
-          if ( this.refresh.count == 0 && this.hasShowedError !== true ){
+          if ( this.refresh.count == 0 && this.hasShowedError !== true || response.status == 401 ){
             this.hasShowedError = true;
             this.$root.errorResponseLayer(response, null);
           }
@@ -325,7 +336,25 @@
 
         return false;
       },
+      /*
+       * Sets default order after loading compoennt
+       */
       setOrder(){
+        //Set order by settings parameter
+        if ( this.orderBy == null)
+        {
+          var orderBy = this.$root.getModelProperty(this.model, 'settings.orderBy');
+
+          if ( orderBy )
+          {
+            var keys = Object.keys(orderBy);
+
+            this.orderBy = [keys[0], orderBy[keys[0]].toLowerCase().replace('asc', 0).replace('desc', 1)];
+            return;
+          }
+        }
+
+        //Set order by field parameter
         for ( var key in this.model.fields )
         {
           var field = this.model.fields[key];
@@ -334,19 +363,13 @@
           {
             var order = 1;
 
-            if ( field['orderBy'] == 'desc' || parseInt(field['orderBy']) == 1 )
-              order = 1;
-            else
-              order = 0;
-
-            this.orderBy = [key, order];
+            this.orderBy = [key, field['orderBy'].toLowerCase().replace('asc', 0).replace('desc', 1)];
             return;
           }
         }
 
-        //Add default sorting by order
-        if ( this.model.sortable == 1 )
-          this.orderBy = ['_order', 1];
+        //Add default order of rows
+        this.orderBy = [this.model.orderBy[0], this.model.orderBy[1].toLowerCase().replace('asc', 0).replace('desc', 1)];
       },
       showLimit(i){
         var max = parseInt(this.rows.count / this.pagination.limit);
@@ -385,15 +408,19 @@
        * Change updated rows in db
        */
       updateRowsData(data){
-        if ( this.rows.data.length != data.length || this.rows.data[0].id != data[0].id )
+        //This update rows just in table, not in forms
+        if ( this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id )
         {
           this.rows.data = data;
           return;
         }
-
         //Update changed data in vue object
         for ( var i in this.rows.data )
         {
+          //Cant update opened row
+          if (this.row && this.row.id == data[i].id)
+            continue;
+
           for ( var k in data[i] )
           {
             if ( this.rows.data[i][k] != data[i][k] )
@@ -402,8 +429,18 @@
             }
           }
         }
-
       },
+      /*
+       * Return if model is in reversed mode
+       * new rows will be added on the end
+       */
+      isReversed(except)
+      {
+        if ( except != true && ( !(2 in this.model.orderBy) || this.model.orderBy[2] != true ) )
+          return false;
+
+        return ['id', '_order'].indexOf(this.model.orderBy[0]) > -1 && this.model.orderBy[1].toLowerCase() == 'asc';
+      }
     },
   }
 </script>

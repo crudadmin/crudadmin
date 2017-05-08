@@ -1,10 +1,10 @@
 <template>
 
-  <div class="box" v-show="canShowForm || (hasRows && canShowRows)">
-    <div class="box-header" v-if="ischild || isEnabledGrid || canShowSearchBar">
+  <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows)">
+    <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-if="ischild || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
-      <div class="pull-right">
+      <div class="pull-right" v-if="!isSingle">
         <div class="search-bar" v-if="canShowSearchBar">
           <div class="input-group input-group-sm">
             <div class="input-group-btn">
@@ -35,7 +35,7 @@
         </div>
 
 
-        <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid">
+        <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" data-original-title="Upravte šírku zobrazenia formulára pre prehľadnejšie zobrazenie záznamov">
           <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
         </ul>
       </div>
@@ -204,6 +204,9 @@
 
         return this.$parent.model.slug;
       },
+      /*
+       * Returns if model has next childs
+       */
       hasChilds(){
         var length = 0;
 
@@ -254,7 +257,6 @@
               return this.sizes[key].active = true;
             }
         }
-
 
         /*
          * When is localStorage value empty, then automatic chose the best grid value
@@ -353,8 +355,12 @@
 
         return true;
       },
+      //Returns if is model in single row mode
+      isSingle(){
+        return this.model.minimum == 1 && this.model.maximum == 1;
+      },
       canShowRows(){
-        if ( this.model.minimum == 1 && this.model.maximum == 1)
+        if ( this.isSingle )
         {
           this.row = this.rows.data[0];
 
@@ -380,7 +386,7 @@
         return true;
       },
       canShowForm(){
-        if ( !this.row && !this.canAddRow || ( this.row && this.model.editable == false && !this.canAddRow ))
+        if ( !this.row && !this.canAddRow || this.row && this.model.editable == false)
         {
           return false;
         }

@@ -165,7 +165,7 @@
             var select = $('#' + this.getId).chosen({disable_search_threshold: 10}).trigger("chosen:updated");
 
             //Choosen throws error when order is set first time
-            if ( field.value )
+            if ( field.value && this.isSelect && this.isMultiple)
             {
               try {
                 select.setSelectionOrder(field.value);
@@ -214,7 +214,7 @@
           this.updateSelectTimeout = setTimeout(function(){
             var select = $('#'+this.getId).trigger("chosen:updated");
 
-            if ( this.value )
+            if ( this.value && this.isSelect && this.isMultiple )
             {
               select.setSelectionOrder(this.value);
 
@@ -238,6 +238,10 @@
           }
         },
         rebuildSelect(){
+          //If is not multiple select
+          if ( !(this.isSelect && this.isMultiple) )
+            return;
+
           var select = $('#' + this.getId),
               fake_select = select.prev(),
               values = select.getSelectionOrder();
@@ -252,7 +256,6 @@
           {
             fake_select.append($('<option></option>').attr('selected', true).attr('value', values[i]).text(values[i]));
           }
-
         }
       },
 

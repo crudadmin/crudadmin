@@ -37,7 +37,6 @@ trait AdminModelTrait
                 return $relation;
             }
         }
-
         return parent::__call($method, $parameters);
     }
 
@@ -107,6 +106,12 @@ trait AdminModelTrait
             $key = $key.'_'.$slug;
         }
 
+        //If is fields called from outside of class, then try to search relationship
+        if ( in_array($key, ['fields']) )
+        {
+            $force_check_relation = true;
+        }
+
         //Checks for relationship
         if ($force_check_relation === true || !property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) )
         {
@@ -161,6 +166,12 @@ trait AdminModelTrait
     //Add fillable and dates fields
     public function initTrait()
     {
+        //Make single row model if is needed
+        $this->makeSingle();
+
+        //Checks if is model in sortable mode
+        $this->setOrder();
+
         if ( ! Admin::isLoaded() )
             return;
 
@@ -283,6 +294,31 @@ trait AdminModelTrait
                     unset($this->hidden[array_search($column, $this->hidden)]);
                 }
             }
+        }
+    }
+
+    /*
+     * Set property of sorting rows to right mode
+     */
+    protected function setOrder()
+    {
+        //If is turned of sorting of rows
+        if ( ! $this->isSortable() && $this->orderBy[0] == '_order' )
+        {
+            $this->orderBy[0] = 'id';
+        }
+
+        if ( ! array_key_exists(1, $this->orderBy) )
+        {
+            $this->orderBy[1] = 'ASC';
+        }
+
+        /*
+         * Reverse default order
+         */
+        if ( $this->reversed === true )
+        {
+            $this->orderBy[1] = strtolower($this->orderBy[1]) == 'asc' ? 'DESC' : 'ASC';
         }
     }
 
@@ -469,7 +505,7 @@ trait AdminModelTrait
             $fields[] = 'slug';
         }
 
-        if ( $this->sortable == true )
+        if ( $this->isSortable() )
         {
             $fields[] = '_order';
         }
@@ -634,6 +670,9 @@ trait AdminModelTrait
      */
     public function getMigrationDate()
     {
+        if ( !property_exists($this, 'migration_date') )
+            return false;
+
         return $this->migration_date;
     }
 
@@ -792,14 +831,31 @@ trait AdminModelTrait
     /*
      * Returns if has model sortabel support
      */
-    public function isSortable()
+    public function isSortable($with_order = true)
     {
+        if ( $this->orderBy[0] != '_order' )
+            return false;
+
         if ( $this->minimum == 1 && $this->maximum == 1 )
             return false;
 
         return $this->getProperty('sortable');
     }
 
+    /*
+     Returns if form is in reversed mode, it mean that new rows will be added on end
+     */
+    public function isReversed()
+    {
+        if ( ! array_key_exists(2, $this->orderBy) || $this->orderBy[2] != true )
+            return false;
+
+        return in_array($this->orderBy[0], ['id', '_order']) && strtolower($this->orderBy[1]) == 'asc';
+    }
+
+    /*
+     * Convert inline settings into array
+     */
     private function assignArrayByPath(&$arr, $path, $value, $separator='.') {
         $keys = explode($separator, $path);
 
@@ -810,6 +866,9 @@ trait AdminModelTrait
         $arr = $value;
     }
 
+    /*
+     * Returns model settings in array
+     */
     public function getModelSettings($separator = '.', &$arr = [])
     {
         $settings = (array)$this->getProperty('settings');
@@ -837,11 +896,6 @@ trait AdminModelTrait
         /**
          * Add global scope for ordering
          */
-        if ( $this->isSortable() )
-        {
-            $query->orderBy('_order', 'DESC');
-        } else if ( Admin::isAdmin() ){
-            $query->orderBy('id', 'DESC');
-        }
+        $query->orderBy($this->orderBy[0], $this->orderBy[1]);
     }
 }

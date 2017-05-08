@@ -93,7 +93,11 @@ class DataController extends Controller
         //Remove overridden files
         $this->removeOverridenFiles($row, $changes);
 
-        $row->update( $changes );
+        try {
+            $row->update( $changes );
+        } catch (\Illuminate\Database\QueryException $e) {
+            return Ajax::mysqlError($e);
+        }
 
         $this->updateBelongsToMany($model, $row);
 
@@ -119,8 +123,12 @@ class DataController extends Controller
     {
         foreach ($request->allWithMutators() as $request_row)
         {
-            //Create row into db
-            $row = (new $model)->create($request_row);
+            try {
+                //Create row into db
+                $row = (new $model)->create($request_row);
+            } catch (\Illuminate\Database\QueryException $e) {
+                return Ajax::mysqlError($e);
+            }
 
             $this->updateBelongsToMany($model, $row);
 
@@ -242,10 +250,10 @@ class DataController extends Controller
         if ( method_exists($model, 'onDelete') )
             $model->onDelete($row);
 
-        $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page'));
+        $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
 
         if ( count($rows['rows']) == 0 && request('page') > 1 )
-            $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1);
+            $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1, 0);
 
         Ajax::message( null, null, null, [
             'rows' => $rows,

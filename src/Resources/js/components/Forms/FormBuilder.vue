@@ -3,7 +3,7 @@
   <form method="post" action="" v-bind:id="'form-'+model.slug" v-on:submit.prevent="saveForm">
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
-      <div class="box-header">
+      <div class="box-header with-border">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" data-original-title="Tento záznam je viacjazyčný" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="row && canaddrow" v-on:click.prevent="row=null" type="button" class="pull-right btn btn-default btn-sm">{{ newRowTitle }}</button>
       </div>
@@ -104,7 +104,7 @@
         this.resetErrors();
 
         //Checks if form can be editable
-        if ( row && this.canaddrow && this.model.editable == false )
+        if ( row && this.canaddrow && this.model.editable == false && this.$parent.hasChilds() == 0 )
         {
           this.row = null;
           return;
@@ -246,7 +246,7 @@
                     _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).each(function(){
                         var where = $(this);
 
-                        if ( $(this).is('select') )
+                        if ( $(this).is('select') || $(this).is('textarea') )
                           where = where.parent().children().last().prev();
 
                         where.after( '<span class="help-block">'+array[i]+'</span>' );

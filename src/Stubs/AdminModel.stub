@@ -14,13 +14,13 @@ class DummyClass extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'DummyClass';
+    protected $name = 'DummyAdminName';
 
     /*
      * Template title
      * Default ''
      */
-    protected $title = '';
+    protected $title = 'DummyTitle';
 
     /*
      * Model Parent
