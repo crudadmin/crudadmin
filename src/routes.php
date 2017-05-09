@@ -48,6 +48,7 @@ Route::group(['middleware' => 'admin'], function(){
     Route::get('/admin/api/show/{model}/{id}', 'DataController@show');
     Route::post('/admin/api/store', 'DataController@store');
     Route::put('/admin/api/update', 'DataController@update');
+    Route::post('/admin/api/buttonAction', 'DataController@buttonAction');
     Route::post('/admin/api/togglePublishedAt', 'DataController@togglePublishedAt');
     Route::post('/admin/api/updateOrder', 'DataController@updateOrder');
     Route::delete('/admin/api/delete', 'DataController@delete');

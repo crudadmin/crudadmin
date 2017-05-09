@@ -84,7 +84,7 @@ class Admin
      */
     public function isAdminModel($model)
     {
-        return $model instanceof AdminModel;
+        return $model instanceof AdminModel && $model->getMigrationDate();
     }
 
     public function isAdmin()
@@ -133,8 +133,8 @@ class Admin
      */
     protected function fromPathToNamespace($path)
     {
-        $path = str_replace(base_path(), '', $path);
-        $path = str_replace('app/', 'App/', $path);
+        $path = str_replace_first(base_path(), '', $path);
+        $path = str_replace_first('app/', 'App/', $path);
         $path = str_replace('.php', '', $path);
         $path = str_replace('/', '\\', $path);
         $path = trim($path, '\\');
@@ -160,14 +160,14 @@ class Admin
         $model = new $namespace;
 
         //Checks if is admin models
-        if ( $this->isAdminModel( $model ) )
-        {
-            //Save model namespace into array
-            $this->buffer['namespaces'][ $model->getMigrationDate() ] = $namespace;
+        if ( ! $this->isAdminModel( $model ) )
+            return;
 
-            //Save model into array
-            $this->buffer['models'][ $model->getMigrationDate() ] = $model;
-        }
+        //Save model namespace into array
+        $this->buffer['namespaces'][ $model->getMigrationDate() ] = $namespace;
+
+        //Save model into array
+        $this->buffer['models'][ $model->getMigrationDate() ] = $model;
 
         //Sorting models by migration date
         if ( $sort == true )
@@ -379,7 +379,7 @@ class Admin
      */
     public function getVersion()
     {
-        return $this->getPackageVersion() ?: 'unknown';
+        return $this->getPackageVersion() ?: 'dev-master';
     }
 }
 ?>

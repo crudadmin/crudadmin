@@ -1,0 +1,34 @@
+<?php
+
+namespace DummyNamespace;
+
+use Gogol\Admin\Helpers\Button;
+use Gogol\Admin\Models\Model as AdminModel;
+
+class DummyButton extends Button
+{
+    /*
+     * Here is your place for binding button properties for each row
+     */
+    public function __construct(AdminModel $row)
+    {
+        //Name of button on hover
+        $this->name = 'DummyButton';
+
+        //Button classes
+        $this->class = 'btn-default';
+
+        //Button Icon
+        $this->icon = 'fa-gift';
+    }
+
+    /*
+     * Firing callback on press button
+     */
+    public function fire(AdminModel $row)
+    {
+        //...
+
+        return $this->message('Your action is done!');
+    }
+}

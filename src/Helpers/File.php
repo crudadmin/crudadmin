@@ -5,7 +5,8 @@ namespace Gogol\Admin\Helpers;
 use Image;
 use File as BaseFile;
 
-class File {
+class File
+{
 
     /*
      * Filename
@@ -141,7 +142,7 @@ class File {
     /*
      * Postprocess image file
      */
-    public function image($mutators = [], $directory = null, $force = false)
+    public function image($mutators = [], $directory = null, $force = false, $return_object = false)
     {
         //When is file type svg, then image postprocessing subdirectories not exists
         if ( $this->extension == 'svg' || !file_exists($this->path) )
@@ -166,7 +167,8 @@ class File {
         }
 
         //Correct trim directory name
-        $directory = substr($this->directory, 0, 8) == 'uploads/' ? substr($this->directory, 8) : $this->directory;
+        $directory = ltrim($this->directory, '/');
+        $directory = substr($directory, 0, 8) == 'uploads/' ? substr($directory, 8) : $directory;
 
         //Get directory path for file
         $cache_path = self::adminModelCachePath($directory.'/'.$hash);
@@ -213,6 +215,9 @@ class File {
 
         //Save image into cache folder
         $image->save( $filepath );
+
+        if ( $return_object )
+            return $image;
 
         return new static($filepath);
     }

@@ -50,12 +50,12 @@ class ImageController extends Controller
         $cache = json_decode(file_get_contents($temporary_path), true);
 
         //Resize image
-        $file = (new File($cache['original_path']))->image($cache['mutators'], true);
+        $file = (new File($cache['original_path']))->image($cache['mutators'], null, true, true);
 
         //Remove temporary file with settings
         unlink($temporary_path);
 
         //Return resized image response
-        return response()->download( $file->path );
+        return $file->response();
     }
 }

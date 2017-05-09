@@ -3,6 +3,8 @@
 namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Exceptions\AjaxException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Log;
 
 class Ajax {
 
@@ -46,6 +48,20 @@ class Ajax {
     static function permissionsError()
     {
         return self::error( 'Nemate právomoc k pristúpeniu do tejto sekcie.', null, null, 401 );
+    }
+
+    /*
+     * Return error according to laravel debug mode
+     */
+    static function mysqlError(\Exception $e)
+    {
+        //Log error
+        Log::error( $e );
+
+        if ( env('APP_DEBUG') == true )
+            Ajax::error('Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:<br><strong>php artisan admin:migrate</strong><br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
+
+        return Ajax::error('Nastala nečakaná chyba. Váš administrátor pravdepodobne zabudol aktualizovať databázu. Ak táto chyba pretrváva, kontaktujte ho.<br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
     }
 
 }

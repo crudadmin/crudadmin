@@ -1,5 +1,6 @@
 <?php
-namespace Gogol\Admin\Helpers\Fields;
+
+namespace Gogol\Admin\Fields;
 
 class Fields
 {
@@ -25,9 +26,14 @@ class Fields
     ];
 
     /*
-     * Model base fields
+     * Model fields
      */
     protected $fields = [];
+
+    /*
+     * Model groups of fields
+     */
+    protected $groups = [];
 
     /*
      * Fields which will be removed
@@ -59,6 +65,33 @@ class Fields
         $this->mutations[] = $namespace;
     }
 
+    /*
+     * Checks if key of field is key for group fields
+     */
+    protected function isFieldGroup($field)
+    {
+        if ( is_string($field) )
+            return false;
+
+        if ( $field instanceof Group )
+            return $field;
+
+        return false;
+    }
+
+    /*
+     * Push additional parameters into field from group
+     */
+    protected function pushParams($field, $add)
+    {
+        foreach ($add as $params)
+        {
+            $field = (new Mutations\FieldToArray)->update($field) + (new Mutations\FieldToArray)->update($params);
+        }
+
+        return $field;
+    }
+
     /**
      * Returns all fields of model
      * @param  object  $model
@@ -86,8 +119,28 @@ class Fields
 
         foreach ($fields as $key => $field)
         {
-            //Create mutation on field
-            $this->registerField( $field, str_slug( $key, '_' ), $model );
+            //If is group
+            if ( $group = $this->isFieldGroup($field) )
+            {
+                //If group name is not set
+                if ( ! $group->name )
+                    $group->name($key);
+
+                //Register groups into buffer
+                $this->registerGroup( $group, $model );
+
+                foreach ($group->fields as $field_key => $field_from_group)
+                {
+                    if ( count($group->add) > 0 )
+                        $field_from_group = $this->pushParams( $field_from_group, $group->add );
+
+                    //Create mutation on field
+                    $this->registerField( $field_from_group, str_slug( $field_key, '_' ), $model );
+                }
+            } else {
+                //Create mutation on field
+                $this->registerField( $field, str_slug( $key, '_' ), $model );
+            }
         }
 
         //Remove fields from mutations
@@ -100,6 +153,30 @@ class Fields
         return $this->fields[ $table ];
     }
 
+    public function getFieldsGroups($model)
+    {
+        $table = $model->getTable();
+
+        if ( ! array_key_exists($table, $this->groups) )
+        {
+            return false;
+        }
+
+        return $this->groups[ $table ];
+    }
+
+    /*
+     * Register group into field buffer for groups
+     */
+    protected function registerGroup( $group, $model )
+    {
+        //Update and register field
+        $this->groups[ $model->getTable() ][] = $group;
+    }
+
+    /*
+     * Register field into fields buffer
+     */
     protected function registerField( $field, $key, $model, $skip = [] )
     {
 

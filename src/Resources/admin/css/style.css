@@ -7,7 +7,8 @@
 .box-info { background: #fafeff }
 .box-warning { background: #fffdfa }
 .data-table td {line-height: 198% !important;}
-
+.modal-dialog a { color: white; font-weight: 600; text-decoration: underline; }
+.modal-dialog a:hover { color: white; text-decoration: none; }
 @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
@@ -20,11 +21,24 @@
 }
 
 .flex-table { display: flex; flex-wrap: wrap;}
-.flex-table .col { overflow-x: auto; }
+.flex-table .col-rows { overflow-x: auto; }
 .flex-table .col:nth-child(1) { order: 2; }
 
-.box-header .form-group.pull-right { margin: 0 }
-.box-limit { padding-bottom: 0 }
+.content .box > .box-body > .box {
+    margin-left: 40px;
+    width: calc(100% - 40px);
+}
+
+.content .single-mode > .box-body > .box { margin-top: 10px; width: calc(100% - 50px); }
+.content .single-mode > .box-body > .row > div.col > form > .box { border: none; box-shadow: none; margin-bottom: 0; }
+.content .single-mode > .box-body > .row > div.col > form > .box > .box-header { display: none; }
+.content .single-mode > .box-body,
+.content .single-mode > .box-footer { padding: 0 }
+
+.content .box-header { min-height: 51px }
+.content .box-header > *:not(div) { position: relative; top: 6px; }
+.content .box-header .form-group.pull-right { margin: 0 }
+.content .box-limit { padding-bottom: 0 }
 
 .file-group { position: relative; }
 .file-group button[type=button] { position: absolute; right: 0; top: 0; }
@@ -211,11 +225,6 @@ label.checkbox span {
 }
 
 select[multiple] {height: 34px;color: white;}
-
-.content > .box > .box-body > .box {
-    margin-left: 40px;
-    width: calc(100% - 40px);
-}
 
 .help-block { margin-bottom: 0 }
 

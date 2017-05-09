@@ -71,6 +71,16 @@ class Model extends BaseModel
     protected $sortable = true;
 
     /*
+     * Ordering rows
+     */
+    protected $orderBy = ['_order', 'DESC'];
+
+    /*
+     * Reverse acutal order
+     */
+    protected $reversed = false;
+
+    /*
      * Minimum page rows
      * Default = 0
      */
@@ -144,9 +154,6 @@ class Model extends BaseModel
     {
         //Boot base model trait
         $this->initTrait();
-
-        //Make single row model if is needed
-        $this->makeSingle();
 
         //Add sortable functions
         static::addGlobalScope('order', function(Builder $builder) {

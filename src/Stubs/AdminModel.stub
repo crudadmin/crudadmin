@@ -14,13 +14,13 @@ class DummyClass extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'DummyClass';
+    protected $name = 'DummyAdminName';
 
     /*
      * Template title
      * Default ''
      */
-    protected $title = '';
+    protected $title = 'DummyTitle';
 
     /*
      * Model Parent
@@ -38,18 +38,7 @@ class DummyClass extends AdminModel
     protected $fields = [
         'name' => 'name:Názov|placeholder:Zadajte názov článku|type:string|required|max:90',
         'content' => 'name:Obsah článku|type:editor|required',
-        'image' => [
-            'name' => 'Obrazok',
-            'type' => 'file',
-            'required' => true,
-            'image' => true,
-
-            //Post processing photo
-            'resize' => [
-                [ 'fit' => [100] ], // thumbs directory
-                // 'covers' => [ 'fit' => [1920, 500], 'blur' => [ 40 ] ], //covers directory
-            ],
-        ]
+        'image' => 'name:Obrázok|type:file|image|required',
     ];
 
 }
