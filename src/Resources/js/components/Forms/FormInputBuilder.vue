@@ -103,7 +103,7 @@
 
       filters: {
         languageOptions(array){
-          return this.$parent.$parent.$options.filters.languageOptions(array);
+          return this.$parent.$parent.$options.filters.languageOptions(array, this.$root.language_id);
         }
       },
 

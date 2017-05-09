@@ -154,7 +154,7 @@
       /*
        * Returns correct values into multilangual select
        */
-      languageOptions(array){
+      languageOptions(array, langid){
 
         //Checks if values are devided by language
         var localization = false;
@@ -168,7 +168,7 @@
           }
         }
 
-        return localization ? array[ this.$root.language_id ] : array;
+        return localization ? array[ langid||this.$root.language_id ] : array;
       }
     },
 
