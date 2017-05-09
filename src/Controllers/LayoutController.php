@@ -9,6 +9,7 @@ use Admin;
 use Localization;
 use App\Http\Requests;
 use App\Http\Controllers\Controller as BaseController;
+use Gogol\Admin\Fields\Group;
 use DB;
 
 class LayoutController extends BaseController
@@ -199,8 +200,6 @@ class LayoutController extends BaseController
 
     protected function makePage($model, $data = null, $withChilds = true)
     {
-        $fields = $model->getFields();
-
         $childs_models = $model->getChilds();
 
         $childs = [];
@@ -235,7 +234,8 @@ class LayoutController extends BaseController
             'publishable' => $model->getProperty('publishable'),
             'sortable' => $model->isSortable(),
             'orderBy' => $model->getProperty('orderBy'),
-            'fields' => $fields,
+            'fields' => $model->getFields(),
+            'fields_groups' => Group::build($model),
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
             'submenu' => [],

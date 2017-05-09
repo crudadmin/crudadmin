@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Helpers\Fields\Mutations;
+namespace Gogol\Admin\Fields\Mutations;
 
 class UpdateDateFormat
 {

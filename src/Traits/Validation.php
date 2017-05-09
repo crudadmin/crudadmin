@@ -86,11 +86,42 @@ trait Validation {
         }
 
         $rules = $this->getValidationRules( $row );
+        $only = [];
+        $replace = [];
+        $add = [];
 
         //Custom properties
         if ( is_array($fields) )
         {
-            $rules = array_intersect_key($rules, array_flip($fields));
+            //Filtrate which fields will be validated
+            foreach ($fields as $key => $field)
+            {
+                //If is just key, then just this fields will be allowed in validation
+                if ( is_numeric($key) && is_string($field) && $this->getField($field) )
+                    $only[] = $field;
+
+                //If field has also attributes to validation, then exists validation rules will be replaced
+                else if ( ! is_numeric($key) )
+                {
+                    if ( $this->getField($key) )
+                        $replace[$key] = $field;
+                    else
+                        $add[$key] = $field;
+                }
+
+            }
+
+            if ( count($only) > 0 )
+                $rules = array_intersect_key($rules, array_flip($only));
+
+            //Add rules
+            foreach ($add as $key => $value)
+                $rules[$key] = $value;
+
+            //Replace rules
+            foreach ($replace as $key => $value)
+                $rules[$key] = $value;
+
         }
 
         //Remove unnecesary fields
@@ -107,7 +138,7 @@ trait Validation {
 
         //Modify request data with admin mutators
         if ( $mutators == true )
-            return $this->muttatorsResponse($fields);
+            return $this->muttatorsResponse( count($only) > 0 ? $only : null );
     }
 }
 ?>

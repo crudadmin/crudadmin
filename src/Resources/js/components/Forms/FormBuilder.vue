@@ -9,7 +9,14 @@
       </div>
 
       <div class="box-body">
-        <form-input-builder v-for="field in model.fields" v-if="canShowField(field)" :model="model" :row="row" :index="$index" :key="$key" :field="field"></form-input-builder>
+        <div class="row" v-for="groups in chunkGroups">
+          <div v-for="group_name in groups">
+              <div v-bind:class="getGroupClass(group_name)">
+                <h4 v-if="canShowGroupName(group_name)">{{ group_name }}</h4>
+                <form-input-builder v-for="field_key in getGroup(group_name).fields" v-if="canShowField(model.fields[field_key])" :model="model" :row="row" :index="$index" :key="field_key" :field="model.fields[field_key]"></form-input-builder>
+              </div>
+          </div>
+        </div>
       </div>
 
       <div class="box-footer">
@@ -91,9 +98,35 @@
 
         return 'nový záznam';
       },
+      chunkGroups(){
+        var groups = Object.keys(this.model.fields_groups),
+            chunkSize = 2,
+            data = [];
+
+        for (var i=0; i<groups.length; i+=chunkSize)
+            data.push(groups.slice(i,i+chunkSize));
+
+        return data;
+      },
     },
 
     methods: {
+      //Return group class
+      getGroupClass(group_name){
+        if ( this.getGroup(group_name).width == 'half' )
+          return 'col-md-6';
+
+        return 'col-md-12';
+      },
+      //Return group by key
+      getGroup(key){
+        return this.model.fields_groups[key];
+      },
+      canShowGroupName(group_name){
+        var group = this.getGroup(group_name);
+
+        return !$.isNumeric(group_name) && group.type!='default';
+      },
       canShowField(field){
         return !('removeFromForm' in field);
       },

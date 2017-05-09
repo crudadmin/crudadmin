@@ -1,5 +1,5 @@
-<?php 
-namespace Gogol\Admin\Helpers\Fields\Mutations;
+<?php
+namespace Gogol\Admin\Fields\Mutations;
 
 use Fields;
 

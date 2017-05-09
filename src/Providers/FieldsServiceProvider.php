@@ -2,7 +2,6 @@
 namespace Gogol\Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Filesystem\Filesystem;
 
 class FieldsServiceProvider extends ServiceProvider {
 
@@ -13,6 +12,6 @@ class FieldsServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bind('fields', \Gogol\Admin\Helpers\Fields\Fields::class);
+        $this->app->bind('fields', \Gogol\Admin\Fields\Fields::class);
     }
 }
