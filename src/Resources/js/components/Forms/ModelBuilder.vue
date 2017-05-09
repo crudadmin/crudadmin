@@ -1,11 +1,11 @@
 <template>
 
-  <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows)">
+  <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
     <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-if="ischild || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
       <div class="pull-right" v-if="!isSingle">
-        <div class="search-bar" v-if="canShowSearchBar">
+        <div class="search-bar" v-show="canShowSearchBar">
           <div class="input-group input-group-sm">
             <div class="input-group-btn">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
@@ -26,7 +26,8 @@
             </select>
 
             <div class="select" v-show="isSelect">
-              <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId">
+              <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId" data-placeholder="Vyberte hodnotu">
+                <option value="">Zobraziť všetko</option>
                 <option v-for="($key, option) in (isSelect ? model.fields[search.column].options : []) | languageOptions" v-bind:value="$key">{{ option }}</option>
               </select>
             </div>
@@ -73,7 +74,6 @@
     props : ['model', 'langid', 'ischild', 'parentrow'],
     name : 'model-builder',
     data : function(){
-
       return {
         sizes : [
           { size : 8, name : 'Small', active : false, disabled : false },
@@ -141,7 +141,7 @@
         deep : true,
         handler(search){
           //Update select
-          $('#'+this.getFilterSelectId).trigger("chosen:updated");
+          this.reloadSearchBarSelect();
         },
       },
       parentrow(row){
@@ -186,6 +186,7 @@
         var dispached = false;
 
         js_date_event.initEvent('change', true, true);
+
         $('#'+this.getFilterSelectId).chosen({disable_search_threshold: 10}).on('change', function(){
             if ( dispached == false )
             {
@@ -338,7 +339,10 @@
             name = field.name.length > 20 ? field.name.substr(0, 20) + '...' : field.name;
 
         return name;
-      }
+      },
+      reloadSearchBarSelect(){
+        $('#'+this.getFilterSelectId).trigger("chosen:updated");
+      },
     },
 
     computed: {
@@ -446,6 +450,9 @@
         var column = this.search.column;
 
         return column && column in this.model.fields && this.model.fields[column].type == 'select' ? true : false;
+      },
+      isSearching(){
+        return this.search.used == true;
       }
     },
 

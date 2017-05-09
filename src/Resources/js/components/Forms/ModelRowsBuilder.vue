@@ -3,7 +3,7 @@
     <div class="box-header box-limit">
       <h3 class="box-title">{{ title }} <small>({{ rows.count }})</small></h3>
 
-      <div class="form-group pull-right" title="Zobraziť na stránke">
+      <div class="form-group pull-right" v-if="isPaginationEnabled" title="Počet záznamov v tabuľke">
         <select @change="changeLimit" class="form-control" v-model="pagination.limit">
           <option v-for="count in pagination.limits">{{ count }}</option>
         </select>
@@ -326,12 +326,17 @@
               this.model.fields[ key ].options = fields[ key ].options;
             }
           }
+
+          //Update fields options in selectbar for choosenjs
+          setTimeout(function(){
+            this.$parent.reloadSearchBarSelect();
+          }.bind(this), 100);
       },
       isNumericValue(key){
         if ( ['id', '_order'].indexOf( key ) > -1)
           return true;
 
-        if ( ['integer', 'decimal', 'checkbox'].indexOf( this.model.fields[ key ].type ) > -1 )
+        if ( key in this.model.fields && ['integer', 'decimal', 'checkbox'].indexOf( this.model.fields[ key ].type ) > -1 )
           return true;
 
         return false;
@@ -349,7 +354,7 @@
           {
             var keys = Object.keys(orderBy);
 
-            this.orderBy = [keys[0], orderBy[keys[0]].toLowerCase().replace('asc', 0).replace('desc', 1)];
+            this.orderBy = [keys[0], parseFloat(orderBy[keys[0]].toLowerCase().replace('asc', 0).replace('desc', 1))];
             return;
           }
         }

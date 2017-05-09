@@ -23,7 +23,7 @@ class Controller extends BaseController
         foreach ($rules as $validation_key => $data)
         {
             //If is multirows with editing
-            if ( ($replaced_key = str_replace('.*', '', $validation_key)) && isset($row) && $model->hasFieldParam($replaced_key, 'multirows') )
+            if ( ($replaced_key = str_replace('.*', '', $validation_key)) && isset($row) && ($model->hasFieldParam($replaced_key, 'multirows')) )
                 $key = $replaced_key;
             else
                 $key = $validation_key;
@@ -38,12 +38,12 @@ class Controller extends BaseController
             if ( isset($row) )
             {
                 //Allow send form without file, when is file uploaded
-                if ( $model->isFieldType($key, 'file')
-                    && $model->hasFieldParam($key, 'required', true)
-                    && !empty($row->$key)
-                    && !$request->has( '$remove_' . $key ) )
+                if ( $model->isFieldType($replaced_key, 'file')
+                    && $model->hasFieldParam($replaced_key, 'required', true)
+                    && !empty($row->$replaced_key)
+                    && !$request->has( '$remove_' . $replaced_key ) )
                 {
-                    $isEmptyFiles = ! $model->hasFieldParam($key, 'multiple', true) || ( $request->has('$uploaded_'.$key) && count((array)$request->get('$uploaded_'.$key)) > 0 );
+                    $isEmptyFiles = ! $model->hasFieldParam($replaced_key, 'multiple', true) || ( $request->has('$uploaded_'.$replaced_key) && count((array)$request->get('$uploaded_'.$replaced_key)) > 0 );
 
                     if( $isEmptyFiles && ($k = array_search('required', $data)) !== false) {
                         unset($data[$k]);

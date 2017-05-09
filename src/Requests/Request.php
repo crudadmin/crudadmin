@@ -12,6 +12,8 @@ abstract class Request extends FormRequest
 {
     public $uploadedFiles = [];
 
+    private $resetValuesInFields = [];
+
     private $errors = [];
 
     private $model = false;
@@ -104,13 +106,22 @@ abstract class Request extends FormRequest
                 /*
                  * Get already uploaded files
                  */
-                if ( Admin::isAdmin() && $this->has('$uploaded_'.$key) )
+                if ( Admin::isAdmin() && $this->model->hasFieldParam($key, 'multiple', true) )
                 {
-                    $uploadedFiles = $this->get('$uploaded_'.$key);
+                    if ( $this->has('$uploaded_'.$key) )
+                    {
+                        $uploadedFiles = $this->get('$uploaded_'.$key);
 
-                    $fromBuffer = array_key_exists($key, $this->uploadedFiles) ? $this->uploadedFiles[$key] : [];
+                        $fromBuffer = array_key_exists($key, $this->uploadedFiles) ? $this->uploadedFiles[$key] : [];
 
-                    $this->uploadedFiles[$key] = array_merge($uploadedFiles, $fromBuffer);
+                        $this->uploadedFiles[$key] = array_merge($uploadedFiles, $fromBuffer);
+                    }
+
+                    //If is multiple file, and 0 files has been send into this field
+                    else if ( ! array_key_exists($key, $this->uploadedFiles) )
+                    {
+                        $this->resetValuesInFields[] = $key;
+                    }
                 }
             }
         }
@@ -253,6 +264,12 @@ abstract class Request extends FormRequest
                     $data[$key] = $files;
                 }
             }
+        }
+
+        //Reset file values
+        foreach ($this->resetValuesInFields as $field)
+        {
+            $data[$field] = null;
         }
 
         return [ $data ];

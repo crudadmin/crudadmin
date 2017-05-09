@@ -568,6 +568,7 @@ trait AdminModelTrait
 
         if ( is_callable( $callback ) )
             call_user_func_array($callback, [$query]);
+
         $rows = [];
 
         foreach ($query->get() as $row)

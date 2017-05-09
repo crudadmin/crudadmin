@@ -228,7 +228,7 @@ trait Uploadable
     public function deleteFiles($key)
     {
         //Remove fixed thumbnails
-        if ( ($file = $this->getValue($key)) )
+        if ( ($file = $this->getValue($key)) && ! $this->hasFieldParam($key, 'multiple', true) )
         {
             $files = is_array($file) ? $file : [ $file ];
 
