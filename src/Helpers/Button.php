@@ -64,6 +64,8 @@ class Button
         $this->message['title'] = $title;
         $this->message['message'] = $message;
         $this->message['type'] = $type;
+
+        return $this;
     }
 
     /*
@@ -71,7 +73,7 @@ class Button
      */
     public function error($message, $title = null)
     {
-        $this->message($message, $title, 'danger');
+        return $this->message($message, $title, 'danger');
     }
 
     /*
@@ -79,7 +81,7 @@ class Button
      */
     public function success($message, $title = null)
     {
-        $this->message($message, $title, 'success');
+        return $this->message($message, $title, 'success');
     }
 
     /*
@@ -88,6 +90,8 @@ class Button
     public function redirect($redirect)
     {
         $this->redirect = $redirect;
+
+        return $this;
     }
 }
 

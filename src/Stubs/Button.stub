@@ -29,6 +29,6 @@ class DummyButton extends Button
     {
         //...
 
-        $this->message('Your action is done!');
+        return $this->message('Your action is done!');
     }
 }
