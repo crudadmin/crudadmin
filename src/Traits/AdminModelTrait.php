@@ -21,6 +21,8 @@ trait AdminModelTrait
 
     private $withAllOptions = false;
 
+    private $justBaseFields = false;
+
     /*
      * On calling method
      *
@@ -126,7 +128,6 @@ trait AdminModelTrait
                 return $relation;
             }
         }
-
         return parent::__get($key);
     }
 
@@ -526,59 +527,6 @@ trait AdminModelTrait
         return $fields;
     }
 
-    protected function loadWithDependecies()
-    {
-        $with = [];
-
-        //Load relationships
-        if ( Admin::isAdmin() )
-        {
-            foreach ($this->getFields() as $key => $field)
-            {
-                if ( $this->hasFieldParam($key, 'belongsTo') )
-                {
-                    $with[] = substr($key, 0, -3);
-                }
-
-                if ( $this->hasFieldParam($key, 'belongsToMany') )
-                {
-                    $with[] = $key;
-                }
-            }
-        }
-
-        return $with;
-    }
-
-    /*
-     * Returns all rows with base fields
-     */
-    public function getBaseRows($subid, $langid, $callback = null, $parent_table = null)
-    {
-        $fields = $this->maximum === 1 ? ['*'] : $this->getBaseFields();
-
-        //Get model dependencies
-        $with = $this->loadWithDependecies();
-
-        //Get base columns from database with relationships
-        $query = $this->getAdminRows()->addSelect( $fields )->with($with);
-
-        //Filter rows by language id and parent id
-        $query->filterByParentOrLanguage($subid, $langid, $parent_table);
-
-        if ( is_callable( $callback ) )
-            call_user_func_array($callback, [$query]);
-
-        $rows = [];
-
-        foreach ($query->get() as $row)
-        {
-            $rows[] = $row->getAdminAttributes();
-        };
-
-        return $rows;
-    }
-
     public function scopeFilterByParentOrLanguage($query, $subid, $langid, $parent_table = null)
     {
         if ( $langid > 0 )
@@ -694,7 +642,7 @@ trait AdminModelTrait
     public function getProperty($property, $row = null)
     {
         //Object / Array
-        if (in_array($property, ['fields', 'options', 'settings', 'insertable', 'editable', 'deletable'])) {
+        if (in_array($property, ['fields', 'options', 'settings', 'buttons', 'insertable', 'editable', 'deletable'])) {
 
             if ( method_exists($this, $property) )
                 return $this->{$property}($row);
@@ -763,27 +711,15 @@ trait AdminModelTrait
             }
         }
 
+        //Return just base fields
+        if ( $this->maximum == 0 && $this->justBaseFields === true )
+        {
+            return array_intersect_key($attributes, array_flip($this->getBaseFields()));
+        }
+
         return $attributes;
     }
 
-    /**
-     * Convert the model instance to an array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-
-        //For administration is reversed way of merging arrays for multiselect relationships support
-        if ( Admin::isAdmin() )
-        {
-            $attributes = $this->getAdminAttributes();
-
-            return array_merge($this->relationsToArray(), $attributes);
-        }
-
-        return parent::toArray();
-    }
 
     //Returns schema with correct connection
     public function getSchema()

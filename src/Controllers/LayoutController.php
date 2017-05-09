@@ -10,6 +10,7 @@ use Localization;
 use App\Http\Requests;
 use App\Http\Controllers\Controller as BaseController;
 use Gogol\Admin\Fields\Group;
+use Gogol\Admin\Helpers\AdminRows;
 use DB;
 
 class LayoutController extends BaseController
@@ -30,109 +31,12 @@ class LayoutController extends BaseController
                 'delete' => action('\Gogol\Admin\Controllers\DataController@delete'),
                 'togglePublishedAt' => action('\Gogol\Admin\Controllers\DataController@togglePublishedAt'),
                 'updateOrder' => action('\Gogol\Admin\Controllers\DataController@updateOrder'),
+                'buttonAction' => action('\Gogol\Admin\Controllers\DataController@buttonAction'),
                 'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),
                 'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
             ],
         ];
 
-    }
-
-    /*
-     * Apply multi-text search scope for given query
-     */
-    protected function checkForSearching($query, $model)
-    {
-        if ( request()->has('query') )
-        {
-            $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query'))));
-
-            //If is more than 3 chars for searching
-            if ( strlen($search) >= 3 || is_numeric($search) )
-            {
-                $columns = array_merge(array_keys($model->getFields()), [ 'id' ]);
-                $queries = explode(' ', $search);
-
-                //If is valid column
-                if ( in_array(request('column'), $columns) )
-                {
-                    $columns = [ request('column') ];
-                }
-
-                //Remove fake column
-                foreach ($columns as $key => $column)
-                {
-                    if ( $model->hasFieldParam($column, 'belongsToMany') )
-                        unset($columns[$key]);
-                }
-
-                //Search scope
-                $query->where(function($builder) use ( $columns, $queries ) {
-                    foreach ($columns as $column)
-                    {
-                        //Search in all columns
-                        $builder->orWhere(function($builder) use ( $column, $queries ) {
-
-                            //Search for all inserted words
-                            foreach ($queries as $query)
-                            {
-                                $builder->where($column, 'like', '%'.$query.'%');
-                            }
-
-                        });
-                    }
-                });
-            }
-        }
-
-        return $query;
-    }
-
-    /*
-     * Apply pagination for given eloqment builder
-     */
-    protected function paginateRecords($query, $limit, $page, $model, $count = null)
-    {
-        if ( $limit == 0 )
-            return;
-
-        //If is first loading of first page and model is in reversed mode, then return last x rows.
-        if ( $page == 1 && $count !== null && $count == 0 && $model->isReversed() === true )
-        {
-            $count = $query->count();
-            $take = $limit - ((ceil($count / $limit) * $limit) - $count);
-
-            $query->offset( $count - $take )->take($take);
-            return;
-        }
-
-        $start = $limit * $page;
-        $offset = $start - $limit;
-
-        $query->offset($offset)->take($limit);
-    }
-
-    public function returnModelData($model, $parent_table, $subid, $langid, $limit, $page, $count = null)
-    {
-        try {
-            $data = [
-                'rows' => $model->getBaseRows($subid, $langid, function($query) use ( $limit, $page, $model, $count ) {
-                    //Search in rows
-                    $this->checkForSearching($query, $model);
-
-                    //Paginate rows
-                    $this->paginateRecords($query, $limit, $page, $model, $count);
-                }, $parent_table),
-                'count' => $this->checkForSearching(
-                                $model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table),
-                                $model)
-                            ->count(),
-                'page' => $page,
-            ];
-        } catch (\Illuminate\Database\QueryException $e) {
-            return Ajax::mysqlError($e);
-        }
-
-        return $data;
     }
 
     /*
@@ -146,6 +50,7 @@ class LayoutController extends BaseController
         if ( !$model || ! auth()->guard('web')->user()->hasAccess( $model ) )
             Ajax::permissionsError();
 
+        //If is first request into table, then load allso all options from fields
         if ( $count == 0 ){
             $model->withAllOptions(true);
         }
@@ -153,7 +58,11 @@ class LayoutController extends BaseController
         if ( $parent_table == '0' )
             $parent_table = null;
 
-        return $this->makePage( $model, $this->returnModelData( $model, $parent_table, $subid, $langid, $limit, $page, $count ), false);
+        return $this->makePage(
+            $model,
+            (new AdminRows($model))->returnModelData( $parent_table, $subid, $langid, $limit, $page, $count ),
+            false
+        );
     }
 
     /**

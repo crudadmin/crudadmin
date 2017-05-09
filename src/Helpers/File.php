@@ -5,7 +5,8 @@ namespace Gogol\Admin\Helpers;
 use Image;
 use File as BaseFile;
 
-class File {
+class File
+{
 
     /*
      * Filename

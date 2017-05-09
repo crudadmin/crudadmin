@@ -97,6 +97,7 @@
 
         rows : {
           data : [],
+          buttons : {},
           count : 0,
           loaded : false,
         },

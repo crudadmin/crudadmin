@@ -11,7 +11,7 @@
     </div>
 
     <div class="box-body box-table-body">
-      <table-rows :model="model" :row.sync="row" :count="rows.count" :rows="rows" :rowsdata.sync="rowsData" :item="$row" :dragging.sync="dragging" :orderby.sync="orderBy"></table-row>
+      <table-rows :model="model" :row.sync="row" :buttons="rows.buttons" :count="rows.count" :rows="rows" :rowsdata.sync="rowsData" :item="$row" :dragging.sync="dragging" :orderby.sync="orderBy"></table-row>
     </div>
 
     <div class="box-header" v-if="isPaginationEnabled && rows.count>pagination.limit">
@@ -264,6 +264,9 @@
           this.updateRowsData(response.data.rows);
           this.rows.count = response.data.count;
 
+          //Bind additional buttons for rows
+          this.rows.buttons = response.data.buttons;
+
           this.$parent.rows.loaded = true;
 
           //If is reversed sorting in model, then set pagination into last page after first displaying table
@@ -419,6 +422,7 @@
           this.rows.data = data;
           return;
         }
+
         //Update changed data in vue object
         for ( var i in this.rows.data )
         {

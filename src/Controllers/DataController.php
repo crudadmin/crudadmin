@@ -4,6 +4,7 @@ namespace Gogol\Admin\Controllers;
 
 use Illuminate\Http\Request;
 use Gogol\Admin\Requests\DataRequest;
+use Gogol\Admin\Helpers\AdminRows;
 use Admin;
 use Carbon\Carbon;
 use Ajax;
@@ -250,10 +251,10 @@ class DataController extends Controller
         if ( method_exists($model, 'onDelete') )
             $model->onDelete($row);
 
-        $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
+        $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
 
         if ( count($rows['rows']) == 0 && request('page') > 1 )
-            $rows = (new \Gogol\Admin\Controllers\LayoutController)->returnModelData($model, request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1, 0);
+            $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1, 0);
 
         Ajax::message( null, null, null, [
             'rows' => $rows,
@@ -285,6 +286,35 @@ class DataController extends Controller
         return [
             'published_at' => $row->published_at ? $row->published_at->toDateTimeString() : null
         ];
+    }
+
+    /*
+     * Event on button
+     */
+    public function buttonAction(Request $request)
+    {
+        $model = $this->getModel( $request->get('model') );
+
+        $row = $model->findOrFail( $request->get('id') );
+
+        $buttons = $model->getProperty('buttons');
+
+        $button = new $buttons[ $request->get('button_id') ]($row);
+
+        $response = $button->fire($row);
+
+        //On redirect response
+        if ( $response instanceof \Illuminate\Http\RedirectResponse )
+        {
+            $button->redirect = $response->getTargetUrl();
+        }
+
+        $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
+
+        return Ajax::message( $button->message['message'], $button->message['title'], $button->message['type'], [
+            'rows' => $rows,
+            'redirect' => $button->redirect,
+        ] );
     }
 
     public function updateOrder()

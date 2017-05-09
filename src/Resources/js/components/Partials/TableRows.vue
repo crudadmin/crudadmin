@@ -18,9 +18,12 @@
         </td>
 
         <td class="buttons-options">
-          <button type="button" v-if="isEditable" v-on:click="selectRow( item )" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button>
-          <button type="button" v-on:click="showInfo( item )" class="btn btn-sm btn-default" data-toggle="tooltip" title="" data-original-title="Informácie o zázname"><i class="fa fa-info"></i></button>
-          <button type="button" v-if="model.publishable" v-on:click="togglePublishedAt( item )" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? 'Skryť' : 'Zobraziť' }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button>
+          <button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button>
+          <button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" data-original-title="Informácie o zázname"><i class="fa fa-info"></i></button>
+
+          <button type="button" v-for="(button_key, button) in getButtonsForRow(item)" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button.icon]"></i></button>
+
+          <button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? 'Skryť' : 'Zobraziť' }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button>
           <button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" data-toggle="tooltip" title="" data-original-title="Vymazat"><i class="fa fa-remove"></i></button>
         </td>
       </tr>
@@ -32,7 +35,7 @@
   import TableRowValue from './TableRowValue.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'count', 'field', 'model', 'orderby', 'dragging'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'model', 'orderby', 'dragging'],
 
       components: { TableRowValue },
 
@@ -125,6 +128,53 @@
       },
 
       methods: {
+        getButtonsForRow(item){
+          if ( ! this.rows.buttons )
+            return [];
+
+          if ( item.id in this.rows.buttons )
+          {
+            return this.rows.buttons[item.id];
+          }
+        },
+        buttonAction(key, button, row){
+          var _this = this;
+
+          this.$http.post( this.$root.requests.buttonAction, {
+              model : this.model.slug,
+              parent : this.$parent.$parent.getParentTableName(),
+              id : row.id,
+              subid : this.$parent.getParentRowId(),
+              limit : this.$parent.pagination.limit,
+              page : this.$parent.pagination.position,
+              button_id : key,
+          }).then(function(response){
+            var data = response.data;
+
+            //Load rows into array
+            if ( 'data' in data )
+            {
+              if ( 'rows' in data.data )
+              {
+                this.$parent.updateRowsData(data.data.rows.rows);
+                this.rows.count = data.data.rows.count;
+                this.rows.buttons = data.data.rows.buttons;
+              }
+
+              //Redirect on page
+              if ( ('redirect' in data.data) && data.data.redirect )
+                window.location.replace(data.data.redirect);
+            }
+
+            if ( data && 'type' in data )
+            {
+              return this.$root.openAlert(data.title, data.message, data.type);
+            }
+          }).catch(function(response){
+            console.log(response);
+            this.$root.errorResponseLayer(response);
+          });
+        },
         toggleSorting(key){
           var sortable = this.$root.getModelProperty(this.model, 'settings.sortable');
 
@@ -324,7 +374,7 @@
               }
 
               //Load rows into array
-              this.rows.data = data.data.rows.rows;
+              this.$parent.updateRowsData(data.data.rows.rows);
               this.rows.count = data.data.rows.count;
 
               this.$parent.pagination.position = data.data.rows.page;
