@@ -86,6 +86,7 @@ trait Validation {
         }
 
         $rules = $this->getValidationRules( $row );
+
         $only = [];
         $replace = [];
         $add = [];
