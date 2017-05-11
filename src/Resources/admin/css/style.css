@@ -7,8 +7,7 @@
 .box-info { background: #fafeff }
 .box-warning { background: #fffdfa }
 .data-table td {line-height: 198% !important;}
-.modal-dialog a { color: white; font-weight: 600; text-decoration: underline; }
-.modal-dialog a:hover { color: white; text-decoration: none; }
+
 @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }

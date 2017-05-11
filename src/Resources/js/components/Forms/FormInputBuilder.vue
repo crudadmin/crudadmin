@@ -198,7 +198,7 @@
           {
             if ( value.indexOf( $.isNumeric(key) ? parseInt(key) : key ) > -1 )
               return true;
-          } else if (key && value && key == value) {
+          } else if ((key || key == 0) && value && key == value) {
             return true;
           }
 
