@@ -24,11 +24,7 @@ export default {
 
     filters: {
       stringLimit(string, key){
-        if ( !( key in this.model.fields ) )
-          return string;
-
-        var field = this.model.fields[key],
-            limit = 'limit' in field ? field.limit : 20;
+        var limit = this.getFieldLimit(key, 20);
 
         if ( limit != 0 && string.length > limit )
           return string.substr(0, limit) + '...';
@@ -36,18 +32,21 @@ export default {
         return string;
       },
       encodeValue(string, key){
-        if ( !( key in this.model.fields ) )
-          return string;
+        var isReal = this.isRealField(key);
 
-        var string = $(document.createElement('div')).text(string).html();
+        //Check if column can be encoded
+        if ( isReal || this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) == true )
+        {
+          string = $(document.createElement('div')).text(string).html();
+        }
 
-        if ( this.model.fields[key].type == 'text' && parseInt(this.model.fields[key].limit) === 0)
+        if ( this.isRealField(key) && this.model.fields[key].type == 'text' && parseInt(this.model.fields[key].limit) === 0)
         {
           return string.replace(/\n/g, '<br>');
         }
 
         //Is phone number
-        if ( this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key]))
+        if ( this.isRealField(key) && this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key]))
         {
           return '<a href="tel:'+string+'">'+string+'</a>';
         }
@@ -80,8 +79,17 @@ export default {
 
               return values.join(', ');
             } else {
-              if ( row[field] in this.getLanguageSelectOptions( this.model.fields[field].options ) )
-                return this.getLanguageSelectOptions( this.model.fields[field].options )[ row[field] ];
+              var options = this.getLanguageSelectOptions( this.model.fields[field].options );
+
+              //Check if key exists in options
+              if ( ! options )
+                return row[field];
+
+              for ( var i = 0; i < options.length; i++ )
+              {
+                if ( row[field] == options[i][0] )
+                  return options[i][1];
+              }
             }
           }
 
@@ -97,20 +105,7 @@ export default {
 
     methods: {
       getLanguageSelectOptions(array){
-
-        //Checks if values are devided by language
-        var localization = false;
-
-        for ( var key in array )
-        {
-          if (array[key] !== null && typeof array[key] === 'object')
-          {
-            localization = true;
-            break;
-          }
-        }
-
-        return localization ? array[ this.$root.language_id ] : array;
+        return this.$parent.$parent.$parent.$options.filters.languageOptions(array, this.$root.language_id);
       },
       isFile(field){
 
@@ -134,6 +129,19 @@ export default {
 
         return [ value ];
       },
+      isRealField(key){
+        return key in this.model.fields;
+      },
+      getFieldLimit(key, defaultLimit){
+        if ( this.isRealField(key) )
+        {
+          var field = this.model.fields[key];
+
+          return 'limit' in field ? field.limit : defaultLimit;
+        } else {
+          return this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.limit', defaultLimit);
+        }
+      }
     }
 }
 </script>

@@ -1,6 +1,7 @@
 <script>
     import Sidebar from './Sidebar/Sidebar.vue';
     import License from './Partials/License.vue';
+    import CheckAssetsVersion from './Partials/CheckAssetsVersion.vue';
 
     export default {
         init(layout){
@@ -17,6 +18,7 @@
                 data : function(){
                     return {
                         version : layout.version,
+                        version_assets : layout.version_assets,
                         license_key : layout.license_key,
                         requests: layout.requests,
                         user : layout.user,
@@ -40,7 +42,7 @@
                     }
                 },
 
-                components: { Sidebar, License },
+                components: { Sidebar, License, CheckAssetsVersion },
 
                 created(){
                     this.bootLanguages();

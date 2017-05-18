@@ -3,7 +3,6 @@
 namespace Gogol\Admin\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
 use Admin;
 use App\User;
 use Gogol\Admin\Models\User as BaseUser;
@@ -51,6 +50,8 @@ class AdminInstallCommand extends Command
     public function handle()
     {
         $this->publishVendor();
+
+        Admin::publishAssetsVersion();
 
         $this->removeUserMigration();
 

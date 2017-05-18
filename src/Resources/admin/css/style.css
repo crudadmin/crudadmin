@@ -36,7 +36,7 @@
 .content .single-mode > .box-footer { padding: 0 }
 
 .content .box-header { min-height: 51px }
-.content .box-header > *:not(div) { position: relative; top: 6px; }
+.content .box-header > *:not(div):not(button) { position: relative; top: 6px; }
 .content .box-header .form-group.pull-right { margin: 0 }
 .content .box-limit { padding-bottom: 0 }
 

@@ -96,7 +96,7 @@ class Authenticatable extends Model implements
     }
 
     /*
-     * Check if is user enabled
+     * Check if is user super administrator with all permissions
      */
     public function hasAdminAccess()
     {
@@ -151,7 +151,7 @@ class Authenticatable extends Model implements
     public function getAdminUser()
     {
         if ( $this->avatar )
-            $this->avatar = $this->avatar->thumbs->path;
+            $this->avatar = $this->avatar->thumbs->url;
 
         if ( config('admin.admin_groups') == true )
             $this->load('adminsGroups');

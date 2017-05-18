@@ -263,6 +263,14 @@ trait AdminModelTrait
             if ( $this->isFieldType($key, ['select', 'file']) && $this->hasFieldParam($key, 'multiple') )
                 $this->casts[$key] = 'json';
 
+            else if ( $this->isFieldType($key, 'checkbox') )
+                $this->casts[$key] = 'boolean';
+
+            else if ( $this->isFieldType($key, 'integer') )
+                $this->casts[$key] = 'integer';
+
+            else if ( $this->isFieldType($key, 'decimal') )
+                $this->casts[$key] = 'float';
         }
     }
 
@@ -738,12 +746,26 @@ trait AdminModelTrait
         return new \Gogol\Admin\Helpers\AdminCollection($models);
     }
 
+    /*
+     * Define, that field mutator for selects will returns all options (also from db, etc...)
+     */
     public function withAllOptions( $set = null )
     {
         if ( $set === true || $set === false )
             $this->withAllOptions = $set;
 
         return $this->withAllOptions;
+    }
+
+    /*
+     * Returns just base fields of model
+     */
+    public function justBaseFields( $set = null )
+    {
+        if ( $set === true || $set === false )
+            $this->justBaseFields = $set;
+
+        return $this->justBaseFields;
     }
 
     public function makeDescription($field, $limit = 150)

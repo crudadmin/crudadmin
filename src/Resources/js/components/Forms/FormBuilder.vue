@@ -32,7 +32,7 @@
   import FormInputBuilder from '../Forms/FormInputBuilder.vue';
   export default {
 
-    props : ['model', 'row', 'rows', 'canaddrow', 'progress'],
+    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress'],
 
     data(){
       return {
@@ -63,6 +63,10 @@
         },
         deep: true,
       },
+      //On change language reset editing form
+      // langid(langid){
+      //   this.row = null;
+      // },
     },
 
     computed: {

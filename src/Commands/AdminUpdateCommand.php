@@ -4,6 +4,7 @@ namespace Gogol\Admin\Commands;
 
 use Illuminate\Console\Command;
 use Artisan;
+use Admin;
 use File;
 
 class AdminUpdateCommand extends Command
@@ -39,9 +40,12 @@ class AdminUpdateCommand extends Command
      */
     public function handle()
     {
+
         $this->removeOldVendor();
 
         $this->publishVendor();
+
+        Admin::publishAssetsVersion();
 
         $this->line('Updating completed!');
 
@@ -72,7 +76,7 @@ class AdminUpdateCommand extends Command
                 unlink($path);
         }
 
-        $this->line('<comment>+ Old Vendor directories was successfully removed</comment>');
+        $this->line('<comment>+ Old Vendor directories has been successfully removed</comment>');
     }
 
     /*
@@ -82,7 +86,7 @@ class AdminUpdateCommand extends Command
     {
         Artisan::call('vendor:publish', [ '--tag' => 'admin.resources' ]);
 
-        $this->line('<comment>+ Vendor directories was successfully published</comment>');
+        $this->line('<comment>+ Vendor directories has been successfully published</comment>');
     }
 
     public function runMigrations()

@@ -6,8 +6,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\BladeCompiler;
 use Storage;
-use Localization as BaseLocalization;
-use Admin as BaseAdmin;
 
 class Gettext
 {
@@ -82,7 +80,7 @@ class Gettext
 
     protected function poTemplate($locale)
     {
-        $contents = $this->filesystem->get( BaseAdmin::stub('gettext') );
+        $contents = $this->filesystem->get( \Admin::stub('gettext') );
 
         $contents = str_replace('{locale}', $locale, $contents);
         $contents = str_replace('{timestamp}', date('Y-m-d H:iO'), $contents);
@@ -100,13 +98,13 @@ class Gettext
 
     public function setLocale($locale)
     {
-        if ( ! ($language = BaseLocalization::getLanguages()->where('slug', $locale)->first()))
+        if ( ! ($language = \Localization::getLanguages()->where('slug', $locale)->first()))
         {
             return false;
         }
 
         if ( $language->poedit_mo == null )
-            $language = BaseLocalization::getDefaultLanguage();
+            $language = \Localization::getDefaultLanguage();
 
         if ( $language->poedit_mo == null )
             return false;
@@ -192,7 +190,7 @@ class Gettext
         $this->filesystem->cleanDirectory( $cache_dir );
 
         //Copy gitignore
-        $this->filesystem->copy( BaseAdmin::stub('gitignore'), $cache_dir.'/.gitignore' );
+        $this->filesystem->copy( \Admin::stub('gitignore'), $cache_dir.'/.gitignore' );
 
         //Get source paths which contains gettext translates
         $views_paths = $this->getSourcePaths(false);

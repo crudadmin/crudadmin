@@ -20,6 +20,7 @@ class LayoutController extends BaseController
     {
         return [
             'version' => Admin::getVersion(),
+            'version_assets' => Admin::getAssetsVersion(),
             'license_key' => config('admin.license_key'),
             'user' => auth()->guard('web')->user()->getAdminUser(),
             'models' => $this->getAppTree(),
@@ -63,6 +64,46 @@ class LayoutController extends BaseController
             (new AdminRows($model))->returnModelData( $parent_table, $subid, $langid, $limit, $page, $count ),
             false
         );
+    }
+
+    /*
+     * Return fields with correct order of options in select for administration
+     * because browser dont know correct values of keys in object
+     *
+     * Every row in options will be represented as array of key and value,
+     */
+    protected function getModelFields($model)
+    {
+        $fields = $model->getFields();
+
+        foreach ($fields as $key => $field)
+        {
+            if ( array_key_exists('options', $field) )
+            {
+                $data = [];
+
+                //Also for multilanguages
+                if ( is_array(reset($field['options'])) )
+                {
+                    foreach ($field['options'] as $lang_id => $lang_data)
+                    {
+                        foreach ($lang_data as $k => $v)
+                        {
+                            $data[$lang_id][] = [$k, $v];
+                        }
+                    }
+                } else {
+                    foreach ($field['options'] as $k => $v)
+                    {
+                        $data[] = [$k, $v];
+                    }
+                }
+
+                $fields[$key]['options'] = $data;
+            }
+        }
+
+        return $fields;
     }
 
     /**
@@ -143,7 +184,7 @@ class LayoutController extends BaseController
             'publishable' => $model->getProperty('publishable'),
             'sortable' => $model->isSortable(),
             'orderBy' => $model->getProperty('orderBy'),
-            'fields' => $model->getFields(),
+            'fields' => $this->getModelFields( $model ),
             'fields_groups' => Group::build($model),
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),

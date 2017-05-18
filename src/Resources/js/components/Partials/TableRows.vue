@@ -99,7 +99,7 @@
                   for ( var k in columns )
                   {
                     if ( 'before' in columns[k] && columns[k].before == key )
-                      modifiedData[k] = columns[k].title;
+                      modifiedData[k] = columns[k].name||columns[k].title;
                   }
 
                 modifiedData[key] = data[key];
@@ -109,7 +109,7 @@
                   for ( var k in columns )
                   {
                     if ( 'after' in columns[k] && columns[k].after == key )
-                      modifiedData[k] = columns[k].title;
+                      modifiedData[k] = columns[k].name||columns[k].title;
                   }
               }
 
@@ -147,6 +147,7 @@
               subid : this.$parent.getParentRowId(),
               limit : this.$parent.pagination.limit,
               page : this.$parent.pagination.position,
+              language_id : this.model.localization === true ? this.$parent.langid : 0,
               button_id : key,
           }).then(function(response){
             var data = response.data;

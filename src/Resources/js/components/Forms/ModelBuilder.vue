@@ -28,7 +28,7 @@
             <div class="select" v-show="isSelect">
               <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId" data-placeholder="Vyberte hodnotu">
                 <option value="">Zobraziť všetko</option>
-                <option v-for="($key, option) in (isSelect ? model.fields[search.column].options : []) | languageOptions" v-bind:value="$key">{{ option }}</option>
+                <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions" v-bind:value="data[0]">{{ data[1] }}</option>
               </select>
             </div>
             <!-- Search columns -->
@@ -48,7 +48,7 @@
 
         <!-- left column -->
         <div class="col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm">
-          <form-builder :progress.sync="progress" :rows.sync="rows" :model="model" :canaddrow="canAddRow" :row.sync="row"></form-builder>
+          <form-builder :progress.sync="progress" :rows.sync="rows" :model="model" :langid="langid" :canaddrow="canAddRow" :row.sync="row"></form-builder>
         </div>
         <!--/.col (left) -->
 
@@ -76,10 +76,10 @@
     data : function(){
       return {
         sizes : [
-          { size : 8, name : 'Small', active : false, disabled : false },
-          { size : 6, name : 'Medium', active : false, disabled : false },
-          { size : 3, name : 'Big', active : false, disabled : false },
-          { size : 0, name : 'Full width', active : false, disabled : false },
+          { size : 8, key : 'small', name : 'Small', active : false, disabled : false },
+          { size : 6, key : 'medium', name : 'Medium', active : false, disabled : false },
+          { size : 3, key : 'big', name : 'Big', active : false, disabled : false },
+          { size : 0, key : 'full', name : 'Full width', active : false, disabled : false },
         ],
 
         activeSize : null,
@@ -161,7 +161,7 @@
 
         for ( var key in array )
         {
-          if (array[key] !== null && typeof array[key] === 'object')
+          if (array[key][1] !== null && typeof array[key][1] === 'object')
           {
             localization = true;
             break;
@@ -188,7 +188,7 @@
 
         js_date_event.initEvent('change', true, true);
 
-        $('#'+this.getFilterSelectId).chosen({disable_search_threshold: 10}).on('change', function(){
+        $('#'+this.getFilterSelectId).chosen({disable_search_threshold: 5}).on('change', function(){
             if ( dispached == false )
             {
                 dispached = true;
@@ -252,9 +252,10 @@
               return this.sizes[key].active = true;
             }
         } else if ( defaultValue !== null ){
+
           // If model has default grid property
           for ( var key in this.sizes )
-            if ( this.sizes[key].size == defaultValue )
+            if ( this.sizes[key].size == defaultValue || this.sizes[key].key == defaultValue )
             {
               return this.sizes[key].active = true;
             }

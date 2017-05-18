@@ -347,7 +347,11 @@ class AdminMigrationCommand extends Command
         if ( $model->isFieldType($key, 'file') )
         {
             if ( $model->hasFieldParam($key, 'multiple') )
+            {
+                $this->checkForCorrectMysqlVersion($model, 'file');
+
                 return $table->json($key);
+            }
 
             return $table->string($key, $model->getFieldLength($key));
         }
@@ -417,6 +421,8 @@ class AdminMigrationCommand extends Command
         {
             if ( $model->hasFieldParam($key, 'multiple') )
             {
+                $this->checkForCorrectMysqlVersion($model, 'select');
+
                 return $table->json($key);
             } else {
                 return $table->string($key, $model->getFieldLength($key));
@@ -444,6 +450,13 @@ class AdminMigrationCommand extends Command
             $properties = $model->getRelationProperty($key, 'belongsTo');
 
             $parent = Admin::getModelByTable($properties[0]);
+
+            //If table in belongsTo relation does not exists
+            if ( ! $parent )
+            {
+                $this->line('<error>Table '.$properties[0].' does not exists.</error>');
+                die;
+            }
 
             $keyExists = 0;
 
@@ -507,6 +520,9 @@ class AdminMigrationCommand extends Command
     protected function makeForeignIndexForBelongsToMany($table, $key)
     {
         $table_index = '';
+
+        $table = preg_replace('/_+/', '_', $table);
+
         foreach((array)explode('_', $table) as $t)
         {
             $table_index .= $t[0];
@@ -761,6 +777,24 @@ class AdminMigrationCommand extends Command
     protected function getSchema($model)
     {
         return Schema::connection( $model->getProperty('connection') );
+    }
+
+    /*
+     * Checks if DB supports mysql columns
+     */
+    public function checkForCorrectMysqlVersion($model, $type = null)
+    {
+        $pdo     = $model->getConnection()->getPdo();
+        $version = $pdo->query('select version()')->fetchColumn();
+
+        (float)$version = mb_substr($version, 0, 6);
+
+        //Compare of mysql versions
+        if (version_compare($version, '5.7.0', '<')) {
+            $this->line('<error>Sorry, but JSON columns are not supported in your MySQL '.$version.' database.</error>');
+            $this->line('<comment>You need minimum MySQL 5.7.0 for supporting multiple '.($type == 'select' ? 'select columns' : 'upload files').'.<comment>');
+            die;
+        }
     }
 
     /**

@@ -3,6 +3,7 @@ namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Models\Model as AdminModel;
 use Illuminate\Filesystem\Filesystem;
+use Gogol\Admin\Helpers\File as AdminFile;
 
 class Admin
 {
@@ -380,6 +381,45 @@ class Admin
     public function getVersion()
     {
         return $this->getPackageVersion() ?: 'dev-master';
+    }
+
+    /*
+     * Return directory for version file
+     */
+    public function getAssetsVersionPath( $file = null )
+    {
+        return public_path('assets/admin/dist/version/' . $file);
+    }
+
+    /*
+     * Return version of admin vendor files in public directory
+     */
+    public function getAssetsVersion()
+    {
+        $file = $this->getAssetsVersionPath('version.txt');
+
+        if ( ! file_exists($file) )
+            return null;
+
+        return file_get_contents($file);
+    }
+
+    /*
+     * Save actual version of vendor package into public assets of package
+     */
+    public function publishAssetsVersion()
+    {
+        $directory = Admin::getAssetsVersionPath();
+
+        //Create directory if not exists
+        AdminFile::makeDirs($directory);
+
+        $this->files->put($directory . 'version.txt', Admin::getVersion());
+
+        $htaccess = $directory . '.htaccess';
+
+        if ( ! file_exists($htaccess) )
+            $this->files->put($htaccess, 'deny from all');
     }
 }
 ?>

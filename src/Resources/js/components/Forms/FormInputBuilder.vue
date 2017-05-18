@@ -71,7 +71,7 @@
       <select v-bind:id="getId" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">Vyberte jednú z možností</option>
         <option v-if="missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
-        <option v-for="($key, option) in field.options | languageOptions" v-bind:selected="selectIndex(hasValue($key, value, isMultiple) || (!row && $key == field.default), $key)" v-bind:value="$key">{{ option }}</option>
+        <option v-for="data in field.options | languageOptions" v-bind:selected="selectIndex(hasValue(data[0], value, isMultiple) || (!row && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
       </select>
       <small>{{ field.title }}</small>
     </div>
@@ -103,7 +103,10 @@
 
       filters: {
         languageOptions(array){
-          return this.$parent.$parent.$options.filters.languageOptions(array, this.$root.language_id);
+          //For rebuilding select with no options (when changing language)
+          this.selectIndex();
+
+          return this.$parent.$parent.$options.filters.languageOptions(array, this.getLangageId);
         }
       },
 
@@ -387,8 +390,27 @@
         isRequired(){
             return 'required' in this.field && this.field.required == true;
         },
+        /*
+         If is selected row, which not belongs to selected language,
+         then select options from language of selected row
+         */
+        getLangageId(){
+          return this.row && 'language_id' in this.row ? this.row.language_id : this.$root.language_id;
+        },
         missingValueInSelectOptions(){
-          return this.row && !this.isMultiple && !this.isMultipleUpload && !(this.field.value in this.field.options);
+          if ( !this.row || this.isMultiple || this.isMultipleUpload)
+            return false;
+
+          var options = this.$parent.$parent.$options.filters.languageOptions(this.field.options, this.getLangageId);
+
+          //Check if is value in options
+          for ( var i = 0; i < options.length; i++ )
+          {
+            if ( options[i][0] == this.field.value )
+              return false;
+          }
+
+          return true;
         },
       },
 

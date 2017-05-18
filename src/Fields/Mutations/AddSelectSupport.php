@@ -27,6 +27,20 @@ class AddSelectSupport
         return Admin::save($key, $options);
     }
 
+    /*
+     * Check if is array associative
+     */
+    protected function isAssoc(array $arr)
+    {
+        if ([] === $arr)
+            return false;
+
+        if ( array_keys($arr) !== range(0, count($arr) - 1) )
+            return true;
+
+        return false;
+    }
+
     public function update( $field, $key, $model )
     {
         if ( $field['type'] == 'select' )
@@ -102,7 +116,7 @@ class AddSelectSupport
             if ( array_key_exists('options', $field) )
             {
                 //Checks if is array associative
-                if ( array_keys($field['options']) === range(0, count($field['options']) - 1) )
+                if ( ! $this->isAssoc($field['options']) )
                 {
                     $field['options'] = array_combine($field['options'], $field['options']);
                 }
