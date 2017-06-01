@@ -124,6 +124,15 @@ class Admin
         foreach ($paths as $path)
         {
             $files = array_merge($files, $this->files->files( $path ));
+
+            //If is enabled recursive listing of folder
+            if ( substr($path, -1) == '*' )
+            {
+                $path = rtrim(substr($path, 0, -1), '/');
+
+                if ( file_exists($path) )
+                    $files = array_merge($files, $this->files->files( $path ));
+            }
         }
 
         return $files;
