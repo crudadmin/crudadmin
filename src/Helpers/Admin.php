@@ -164,6 +164,12 @@ class Admin
         if ( ! $this->isAdminModel( $model ) )
             return;
 
+        //If model with migration date already exists
+        if ( array_key_exists($model->getMigrationDate(), $this->buffer['namespaces']) )
+        {
+            abort(500, 'Model name '.$model->getTable().' has migration date which '.$model->getMigrationDate().' already exists in other model '.$this->buffer['models'][$model->getMigrationDate()]->getTable().'.');
+        }
+
         //Save model namespace into array
         $this->buffer['namespaces'][ $model->getMigrationDate() ] = $namespace;
 

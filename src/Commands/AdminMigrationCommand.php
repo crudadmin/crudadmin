@@ -458,6 +458,7 @@ class AdminMigrationCommand extends Command
                 die;
             }
 
+            //If foreign key in table exists
             $keyExists = 0;
 
             if ( $tableExists = $model->getSchema()->hasTable( $model->getTable() ) )
@@ -470,40 +471,10 @@ class AdminMigrationCommand extends Command
             {
                 if ( $tableExists === true && $model->count() > 0 )
                 {
-                    //If reference table has some rows
+                    //Checks if table has already inserted rows which won't allow insert foreign key without NULL value
                     if ( $model->hasFieldParam($key, 'required', true) )
                     {
-                        $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column in</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$properties[0].'</error> <comment>table.</comment>');
-                        $this->line('<comment>- Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
-
-                        $ids_in_reference_table = Admin::getModelByTable($properties[0])->take(10)->select('id')->pluck('id');
-
-                        if ( count($ids_in_reference_table) > 0 )
-                        {
-                            $this->line('<comment>+ Here are some ids from '.$properties[0].' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
-
-                            //Define ids for existing rows
-                            do {
-                                $requested_id = $this->ask('Which id would you like define for existing rows?');
-
-                                if ( !is_numeric($requested_id) )
-                                    continue;
-
-                                if ( DB::table( $properties[0] )->where('id', $requested_id)->count() == 0 )
-                                {
-                                    $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
-                                    $requested_id = false;
-                                }
-                            } while( ! is_numeric($requested_id) );
-
-                            $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
-                            {
-                                DB::table($model->getTable())->update([ $key => $requested_id ]);
-                            };
-                        } else {
-                            $this->line('<error>+ You have to insert at least one row into '.$properties[0].' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
-                            die;
-                        }
+                        $this->checkForReferenceTable($model, $key, $properties[0]);
                     }
                 }
 
@@ -514,6 +485,42 @@ class AdminMigrationCommand extends Command
             }
 
             return $table->integer($key)->unsigned();
+        }
+    }
+
+    //Checks if table has already inserted rows which won't allow insert foreign key without NULL value
+    protected function checkForReferenceTable($model, $key, $reference_table)
+    {
+        $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column into</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$reference_table.'</error> <comment>table.</comment>');
+        $this->line('<comment>  Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
+
+        $ids_in_reference_table = Admin::getModelByTable($reference_table)->take(10)->select('id')->pluck('id');
+
+        if ( count($ids_in_reference_table) > 0 )
+        {
+            $this->line('<comment>+ Here are some ids from '.$reference_table.' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
+
+            //Define ids for existing rows
+            do {
+                $requested_id = $this->ask('Which id would you like define for existing rows?');
+
+                if ( !is_numeric($requested_id) )
+                    continue;
+
+                if ( Admin::getModelByTable($reference_table)->where('id', $requested_id)->count() == 0 )
+                {
+                    $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
+                    $requested_id = false;
+                }
+            } while( ! is_numeric($requested_id) );
+
+            $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
+            {
+                DB::connection($model->getConnectionName())->table($model->getTable())->update([ $key => $requested_id ]);
+            };
+        } else {
+            $this->line('<error>+ You have to insert at least one row into '.$reference_table.' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
+            die;
         }
     }
 
@@ -748,11 +755,12 @@ class AdminMigrationCommand extends Command
             //If foreign key does not exists in table
             if ( ! $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
             {
-
                 //If column does not exists in already created table, then create it after id
                 if ( $updating === true )
                 {
                     $column->after('id');
+
+                    $this->checkForReferenceTable($model, $foreign_column, $parent->getTable());
 
                     $this->line('<comment>+ Added column:</comment> '.$foreign_column);
                 }

@@ -308,4 +308,12 @@ trait ModelRelationships
             $relation['relation']->first()
             : $relation['relation']->get();
     }
+
+    /*
+     * If is relation empty, owns TRUE value, so we need return null
+     */
+    protected function checkIfIsRelationNull($relation)
+    {
+        return $relation === true ? null : $relation;
+    }
 }

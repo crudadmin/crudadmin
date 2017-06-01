@@ -36,7 +36,7 @@ trait AdminModelTrait
             //Checks for db relationship of childrens into actual model
             if ( ($relation = $this->checkForChildrenModels($method)) || ($relation = $this->returnAdminRelationship($method)) )
             {
-                return $relation;
+                return $this->checkIfIsRelationNull($relation);
             }
         }
         return parent::__call($method, $parameters);
@@ -120,12 +120,12 @@ trait AdminModelTrait
             //If relations has been in buffer, but returns nullable value
             if ( $relation = $this->returnAdminRelationship($key, true) )
             {
-                return $relation === true ? null : $relation;
+                return $this->checkIfIsRelationNull($relation);
             }
 
             //Checks for db relationship childrens into actual model
             else if ( $relation = $this->checkForChildrenModels($key, true) ) {
-                return $relation;
+                return $this->checkIfIsRelationNull($relation);
             }
         }
         return parent::__get($key);

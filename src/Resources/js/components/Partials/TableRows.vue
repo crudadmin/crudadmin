@@ -98,7 +98,7 @@
                 if ( columns )
                   for ( var k in columns )
                   {
-                    if ( 'before' in columns[k] && columns[k].before == key )
+                    if ( 'before' in columns[k] && (columns[k].before == key || columns[k].before + '_id' == key) )
                       modifiedData[k] = columns[k].name||columns[k].title;
                   }
 
@@ -108,7 +108,7 @@
                 if ( columns )
                   for ( var k in columns )
                   {
-                    if ( 'after' in columns[k] && columns[k].after == key )
+                    if ( 'after' in columns[k] && (columns[k].after == key || columns[k].after + '_id' == key) )
                       modifiedData[k] = columns[k].name||columns[k].title;
                   }
               }

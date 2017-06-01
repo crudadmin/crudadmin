@@ -217,9 +217,10 @@
           this.updateSelectTimeout = setTimeout(function(){
             var select = $('#'+this.getId).trigger("chosen:updated");
 
-            if ( this.value && this.isSelect && this.isMultiple )
+            if ( this.isSelect && this.isMultiple )
             {
-              select.setSelectionOrder(this.value);
+              if ( this.value )
+                select.setSelectionOrder(this.value);
 
               this.rebuildSelect();
             }
