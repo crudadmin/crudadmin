@@ -2,7 +2,6 @@
 namespace Gogol\Admin\Helpers;
 
 use Route;
-use Admin;
 
 class Helper
 {
