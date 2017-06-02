@@ -24,7 +24,7 @@
     <div class="form-group" v-if="isCheckbox">
       <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-        <input type="checkbox" v-bind:id="getId" v-bind:readonly="isDisabled" v-bind:checked="getValueOrDefault== 1" value="1" class="ios-switch green" v-bind:name="key">
+        <input type="checkbox" v-bind:id="getId" v-bind:readonly="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
         <div><div></div></div>
       </label>
       <small>{{ field.title }}</small>
@@ -72,6 +72,27 @@
         <option v-if="!isMultiple" value="">Vyberte jednú z možností</option>
         <option v-if="missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="data in field.options | languageOptions" v-bind:selected="selectIndex(hasValue(data[0], value, isMultiple) || (!row && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
+      </select>
+      <small>{{ field.title }}</small>
+    </div>
+
+    <!-- RADIO INPUT -->
+    <div class="form-group radio-group" v-if="isRadio">
+      <label>{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+        <div class="radio" v-if="!isRequired">
+          <label>
+            <input type="radio" v-bind:name="key" value="">
+            Žiadna možnosť
+          </label>
+        </div>
+
+        <div class="radio" v-for="data in field.options">
+          <label>
+            <input type="radio" v-bind:name="key" v-bind:checked="hasValue(data[0], value)" v-bind:value="data[0]">
+
+            {{ data[1] }}
+          </label>
+        </div>
       </select>
       <small>{{ field.title }}</small>
     </div>
@@ -311,6 +332,10 @@
         isSelect()
         {
           return this.field.type == 'select';
+        },
+        isRadio()
+        {
+          return this.field.type == 'radio';
         },
         isConfirmation()
         {

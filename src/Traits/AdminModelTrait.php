@@ -752,7 +752,11 @@ trait AdminModelTrait
     public function withAllOptions( $set = null )
     {
         if ( $set === true || $set === false )
+        {
             $this->withAllOptions = $set;
+
+            return $this;
+        }
 
         return $this->withAllOptions;
     }

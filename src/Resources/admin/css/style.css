@@ -42,7 +42,9 @@
 
 .file-group { position: relative; }
 .file-group button[type=button] { position: absolute; right: 0; top: 0; }
-
+.radio-group label { display: block }
+.radio-group .radio { display: inline-block; margin-right: 20px; }
+.radio-group .help-block { margin-top: 0; }
 .language_select {padding: 10px 0 0 0;margin: 0;border-radius: 0px;}
 .language_select select {border-radius: 0px !important;background: #0b0d0e;color: #888;border: 1px solid black;height: 22px;font-size: 12px;}
 

@@ -43,7 +43,7 @@ class AddSelectSupport
 
     public function update( $field, $key, $model )
     {
-        if ( $field['type'] == 'select' )
+        if ( $field['type'] == 'select' || $field['type'] == 'radio' )
         {
             //If is not allowed to displaying all options data
             if ( $model->withAllOptions() !== true || ( array_key_exists('hidden', $field) && array_key_exists('removeFromForm', $field) ) )

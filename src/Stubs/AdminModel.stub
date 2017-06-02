@@ -32,7 +32,7 @@ class DummyClass extends AdminModel
      * Automatic form and database generation
      * @name - field name
      * @placeholder - field placeholder
-     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox
+     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox/radio
      * ... other validation methods from laravel
      */
     protected $fields = [

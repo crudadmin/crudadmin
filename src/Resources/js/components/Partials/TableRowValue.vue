@@ -64,9 +64,11 @@ export default {
         //Get select original value
         if ( ( field in this.model.fields ) )
         {
-          if ( this.model.fields[field].type == 'select' )
+          var isRadio = this.model.fields[field].type == 'radio';
+
+          if ( this.model.fields[field].type == 'select' || isRadio )
           {
-            if ( 'multiple' in this.model.fields[field] && this.model.fields[field].multiple == true && $.isArray(row[field]))
+            if ( 'multiple' in this.model.fields[field] && this.model.fields[field].multiple == true && $.isArray(row[field]) || !isRadio )
             {
               var values = [],
                   rows = row[field];
@@ -79,7 +81,7 @@ export default {
 
               return values.join(', ');
             } else {
-              var options = this.getLanguageSelectOptions( this.model.fields[field].options );
+              var options = isRadio ? this.model.fields[field].options : this.getLanguageSelectOptions( this.model.fields[field].options );
 
               //Check if key exists in options
               if ( ! options )
@@ -91,9 +93,7 @@ export default {
                   return options[i][1];
               }
             }
-          }
-
-          if ( this.model.fields[field].type == 'checkbox' )
+          } else if ( this.model.fields[field].type == 'checkbox' )
           {
             return row[field] == 1 ? 'Áno' : 'Nie';
           }

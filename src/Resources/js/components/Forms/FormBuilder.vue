@@ -283,13 +283,30 @@
                     _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).each(function(){
                         var where = $(this);
 
-                        if ( $(this).is('select') || $(this).is('textarea') )
+                        if ( $(this).is('select') || $(this).is('textarea') ){
                           where = where.parent().children().last().prev();
+                        }
 
-                        where.after( '<span class="help-block">'+array[i]+'</span>' );
+                        else if ( $(this).is('input:radio') )
+                        {
+                          where = where.parent().parent().parent();
 
-                        if ( i == 0 )
-                          $(this).parent().addClass('has-error').find('label').prepend('<i class="fa fa-times-circle-o"></i> ');
+                          if ( where.find('.help-block').length == 0 )
+                            where = where.children().last().prev();
+                          else
+                            where = null;
+                        }
+
+                        if ( where )
+                          where.after( '<span class="help-block">'+array[i]+'</span>' );
+
+                        //On first error
+                        if ( i == 0 ){
+                          var label = $(this).closest('div.form-group').addClass('has-error').find('> label');
+
+                          if ( label.find('.fa-times-circle-o').length == 0 )
+                            label.prepend('<i class="fa fa-times-circle-o"></i> ');
+                        }
                     });
                   }
                 }

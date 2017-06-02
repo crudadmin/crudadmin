@@ -359,7 +359,7 @@ class AdminMigrationCommand extends Command
 
     protected function stringColumn($table, $model, $key)
     {
-        if ( $model->isFieldType($key, ['string', 'password']) )
+        if ( $model->isFieldType($key, ['string', 'password', 'radio']) )
         {
             return $table->string($key, $model->getFieldLength($key));
         }
