@@ -2,8 +2,6 @@
 
 namespace Gogol\Admin\Fields;
 
-use Fields;
-
 class Group
 {
     public $name = null;
@@ -94,10 +92,14 @@ class Group
     {
         $data = [];
 
-        if ( $groups = Fields::getFieldsGroups( $model ) )
+        if ( $groups = \Fields::getFieldsGroups( $model ) )
         {
-            foreach ($model->getFields() as $key => $value)
+            foreach ($model->getFields() as $key => $field)
             {
+                //If columns is hidden from form
+                if ( array_key_exists('removeFromForm', $field) )
+                    continue;
+
                 foreach ($groups as $group)
                 {
                     //If group does not exists

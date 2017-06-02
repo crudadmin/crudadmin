@@ -347,7 +347,11 @@ class AdminMigrationCommand extends Command
         if ( $model->isFieldType($key, 'file') )
         {
             if ( $model->hasFieldParam($key, 'multiple') )
+            {
+                $this->checkForCorrectMysqlVersion($model, 'file');
+
                 return $table->json($key);
+            }
 
             return $table->string($key, $model->getFieldLength($key));
         }
@@ -355,7 +359,7 @@ class AdminMigrationCommand extends Command
 
     protected function stringColumn($table, $model, $key)
     {
-        if ( $model->isFieldType($key, ['string', 'password']) )
+        if ( $model->isFieldType($key, ['string', 'password', 'radio']) )
         {
             return $table->string($key, $model->getFieldLength($key));
         }
@@ -417,6 +421,8 @@ class AdminMigrationCommand extends Command
         {
             if ( $model->hasFieldParam($key, 'multiple') )
             {
+                $this->checkForCorrectMysqlVersion($model, 'select');
+
                 return $table->json($key);
             } else {
                 return $table->string($key, $model->getFieldLength($key));
@@ -445,6 +451,14 @@ class AdminMigrationCommand extends Command
 
             $parent = Admin::getModelByTable($properties[0]);
 
+            //If table in belongsTo relation does not exists
+            if ( ! $parent )
+            {
+                $this->line('<error>Table '.$properties[0].' does not exists.</error>');
+                die;
+            }
+
+            //If foreign key in table exists
             $keyExists = 0;
 
             if ( $tableExists = $model->getSchema()->hasTable( $model->getTable() ) )
@@ -457,40 +471,10 @@ class AdminMigrationCommand extends Command
             {
                 if ( $tableExists === true && $model->count() > 0 )
                 {
-                    //If reference table has some rows
+                    //Checks if table has already inserted rows which won't allow insert foreign key without NULL value
                     if ( $model->hasFieldParam($key, 'required', true) )
                     {
-                        $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column in</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$properties[0].'</error> <comment>table.</comment>');
-                        $this->line('<comment>- Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
-
-                        $ids_in_reference_table = Admin::getModelByTable($properties[0])->take(10)->select('id')->pluck('id');
-
-                        if ( count($ids_in_reference_table) > 0 )
-                        {
-                            $this->line('<comment>+ Here are some ids from '.$properties[0].' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
-
-                            //Define ids for existing rows
-                            do {
-                                $requested_id = $this->ask('Which id would you like define for existing rows?');
-
-                                if ( !is_numeric($requested_id) )
-                                    continue;
-
-                                if ( DB::table( $properties[0] )->where('id', $requested_id)->count() == 0 )
-                                {
-                                    $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
-                                    $requested_id = false;
-                                }
-                            } while( ! is_numeric($requested_id) );
-
-                            $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
-                            {
-                                DB::table($model->getTable())->update([ $key => $requested_id ]);
-                            };
-                        } else {
-                            $this->line('<error>+ You have to insert at least one row into '.$properties[0].' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
-                            die;
-                        }
+                        $this->checkForReferenceTable($model, $key, $properties[0]);
                     }
                 }
 
@@ -504,9 +488,48 @@ class AdminMigrationCommand extends Command
         }
     }
 
+    //Checks if table has already inserted rows which won't allow insert foreign key without NULL value
+    protected function checkForReferenceTable($model, $key, $reference_table)
+    {
+        $this->line('<comment>+ Cannot add foreign key for</comment> <error>'.$key.'</error> <comment>column into</comment> <error>'.$model->getTable().'</error> <comment>table with reference on</comment> <error>'.$reference_table.'</error> <comment>table.</comment>');
+        $this->line('<comment>  Because table has already inserted rows. But you can insert value for existing rows for this</comment> <error>'.$key.'</error> <comment>column.</comment>');
+
+        $ids_in_reference_table = Admin::getModelByTable($reference_table)->take(10)->select('id')->pluck('id');
+
+        if ( count($ids_in_reference_table) > 0 )
+        {
+            $this->line('<comment>+ Here are some ids from '.$reference_table.' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
+
+            //Define ids for existing rows
+            do {
+                $requested_id = $this->ask('Which id would you like define for existing rows?');
+
+                if ( !is_numeric($requested_id) )
+                    continue;
+
+                if ( Admin::getModelByTable($reference_table)->where('id', $requested_id)->count() == 0 )
+                {
+                    $this->line('<error>Id #'.$requested_id.' does not exists.</error>');
+                    $requested_id = false;
+                }
+            } while( ! is_numeric($requested_id) );
+
+            $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
+            {
+                DB::connection($model->getConnectionName())->table($model->getTable())->update([ $key => $requested_id ]);
+            };
+        } else {
+            $this->line('<error>+ You have to insert at least one row into '.$reference_table.' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
+            die;
+        }
+    }
+
     protected function makeForeignIndexForBelongsToMany($table, $key)
     {
         $table_index = '';
+
+        $table = preg_replace('/_+/', '_', $table);
+
         foreach((array)explode('_', $table) as $t)
         {
             $table_index .= $t[0];
@@ -732,11 +755,12 @@ class AdminMigrationCommand extends Command
             //If foreign key does not exists in table
             if ( ! $model->getSchema()->hasColumn($model->getTable(), $foreign_column) )
             {
-
                 //If column does not exists in already created table, then create it after id
                 if ( $updating === true )
                 {
                     $column->after('id');
+
+                    $this->checkForReferenceTable($model, $foreign_column, $parent->getTable());
 
                     $this->line('<comment>+ Added column:</comment> '.$foreign_column);
                 }
@@ -761,6 +785,24 @@ class AdminMigrationCommand extends Command
     protected function getSchema($model)
     {
         return Schema::connection( $model->getProperty('connection') );
+    }
+
+    /*
+     * Checks if DB supports mysql columns
+     */
+    public function checkForCorrectMysqlVersion($model, $type = null)
+    {
+        $pdo     = $model->getConnection()->getPdo();
+        $version = $pdo->query('select version()')->fetchColumn();
+
+        (float)$version = mb_substr($version, 0, 6);
+
+        //Compare of mysql versions
+        if (version_compare($version, '5.7.0', '<')) {
+            $this->line('<error>Sorry, but JSON columns are not supported in your MySQL '.$version.' database.</error>');
+            $this->line('<comment>You need minimum MySQL 5.7.0 for supporting multiple '.($type == 'select' ? 'select columns' : 'upload files').'.<comment>');
+            die;
+        }
     }
 
     /**

@@ -3,6 +3,7 @@ namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Models\Model as AdminModel;
 use Illuminate\Filesystem\Filesystem;
+use Gogol\Admin\Helpers\File as AdminFile;
 
 class Admin
 {
@@ -123,6 +124,15 @@ class Admin
         foreach ($paths as $path)
         {
             $files = array_merge($files, $this->files->files( $path ));
+
+            //If is enabled recursive listing of folder
+            if ( substr($path, -1) == '*' )
+            {
+                $path = rtrim(substr($path, 0, -1), '/');
+
+                if ( file_exists($path) )
+                    $files = array_merge($files, $this->files->files( $path ));
+            }
         }
 
         return $files;
@@ -162,6 +172,12 @@ class Admin
         //Checks if is admin models
         if ( ! $this->isAdminModel( $model ) )
             return;
+
+        //If model with migration date already exists
+        if ( array_key_exists($model->getMigrationDate(), $this->buffer['namespaces']) )
+        {
+            abort(500, 'Model name '.$model->getTable().' has migration date which '.$model->getMigrationDate().' already exists in other model '.$this->buffer['models'][$model->getMigrationDate()]->getTable().'.');
+        }
 
         //Save model namespace into array
         $this->buffer['namespaces'][ $model->getMigrationDate() ] = $namespace;
@@ -380,6 +396,45 @@ class Admin
     public function getVersion()
     {
         return $this->getPackageVersion() ?: 'dev-master';
+    }
+
+    /*
+     * Return directory for version file
+     */
+    public function getAssetsVersionPath( $file = null )
+    {
+        return public_path('assets/admin/dist/version/' . $file);
+    }
+
+    /*
+     * Return version of admin vendor files in public directory
+     */
+    public function getAssetsVersion()
+    {
+        $file = $this->getAssetsVersionPath('version.txt');
+
+        if ( ! file_exists($file) )
+            return null;
+
+        return file_get_contents($file);
+    }
+
+    /*
+     * Save actual version of vendor package into public assets of package
+     */
+    public function publishAssetsVersion()
+    {
+        $directory = Admin::getAssetsVersionPath();
+
+        //Create directory if not exists
+        AdminFile::makeDirs($directory);
+
+        $this->files->put($directory . 'version.txt', Admin::getVersion());
+
+        $htaccess = $directory . '.htaccess';
+
+        if ( ! file_exists($htaccess) )
+            $this->files->put($htaccess, 'deny from all');
     }
 }
 ?>

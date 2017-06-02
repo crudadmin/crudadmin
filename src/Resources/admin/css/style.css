@@ -36,13 +36,15 @@
 .content .single-mode > .box-footer { padding: 0 }
 
 .content .box-header { min-height: 51px }
-.content .box-header > *:not(div) { position: relative; top: 6px; }
+.content .box-header > *:not(div):not(button) { position: relative; top: 6px; }
 .content .box-header .form-group.pull-right { margin: 0 }
 .content .box-limit { padding-bottom: 0 }
 
 .file-group { position: relative; }
 .file-group button[type=button] { position: absolute; right: 0; top: 0; }
-
+.radio-group label { display: block }
+.radio-group .radio { display: inline-block; margin-right: 20px; }
+.radio-group .help-block { margin-top: 0; }
 .language_select {padding: 10px 0 0 0;margin: 0;border-radius: 0px;}
 .language_select select {border-radius: 0px !important;background: #0b0d0e;color: #888;border: 1px solid black;height: 22px;font-size: 12px;}
 
@@ -235,6 +237,8 @@ select[multiple] {height: 34px;color: white;}
 .file-group .chosen-container-multi .chosen-choices { background: none; border: none; padding: 2px 0; }
 .file-group .chosen-container-multi .chosen-drop { border: none; }
 .file-group .chosen-container-active .chosen-choices { box-shadow: none !important }
+.form-group.has-error > .chosen-container > .chosen-single,
+.form-group.has-error > .chosen-container > .chosen-choices { border-color: #dd4b39; box-shadow: none; }
 
 .th-id { width: 50px; text-align: center; }
 .td-id { text-align: center; }

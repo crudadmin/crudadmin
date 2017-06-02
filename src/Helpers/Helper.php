@@ -6,7 +6,6 @@ use Admin;
 
 class Helper
 {
-
     public static function controllerName($route, $method=true)
     {
         $route = str_replace('App\Http\Controllers', '', $route);

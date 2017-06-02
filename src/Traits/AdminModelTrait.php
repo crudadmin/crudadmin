@@ -36,7 +36,7 @@ trait AdminModelTrait
             //Checks for db relationship of childrens into actual model
             if ( ($relation = $this->checkForChildrenModels($method)) || ($relation = $this->returnAdminRelationship($method)) )
             {
-                return $relation;
+                return $this->checkIfIsRelationNull($relation);
             }
         }
         return parent::__call($method, $parameters);
@@ -120,12 +120,12 @@ trait AdminModelTrait
             //If relations has been in buffer, but returns nullable value
             if ( $relation = $this->returnAdminRelationship($key, true) )
             {
-                return $relation === true ? null : $relation;
+                return $this->checkIfIsRelationNull($relation);
             }
 
             //Checks for db relationship childrens into actual model
             else if ( $relation = $this->checkForChildrenModels($key, true) ) {
-                return $relation;
+                return $this->checkIfIsRelationNull($relation);
             }
         }
         return parent::__get($key);
@@ -263,6 +263,14 @@ trait AdminModelTrait
             if ( $this->isFieldType($key, ['select', 'file']) && $this->hasFieldParam($key, 'multiple') )
                 $this->casts[$key] = 'json';
 
+            else if ( $this->isFieldType($key, 'checkbox') )
+                $this->casts[$key] = 'boolean';
+
+            else if ( $this->isFieldType($key, 'integer') )
+                $this->casts[$key] = 'integer';
+
+            else if ( $this->isFieldType($key, 'decimal') )
+                $this->casts[$key] = 'float';
         }
     }
 
@@ -738,19 +746,44 @@ trait AdminModelTrait
         return new \Gogol\Admin\Helpers\AdminCollection($models);
     }
 
+    /*
+     * Define, that field mutator for selects will returns all options (also from db, etc...)
+     */
     public function withAllOptions( $set = null )
     {
         if ( $set === true || $set === false )
+        {
             $this->withAllOptions = $set;
+
+            return $this;
+        }
 
         return $this->withAllOptions;
     }
 
+    /*
+     * Returns just base fields of model
+     */
+    public function justBaseFields( $set = null )
+    {
+        if ( $set === true || $set === false )
+            $this->justBaseFields = $set;
+
+        return $this->justBaseFields;
+    }
+
+    /*
+     * Return short description of content for meta tags etc...
+     */
     public function makeDescription($field, $limit = 150)
     {
-        $string = $this->{$field};
+        $string = $this->getValue($field);
+        $string = strip_tags($string);
+        $string = preg_replace("/&nbsp;/", ' ', $string);
+        $string = preg_replace("/(\s| |\n)+/", ' ', $string);
+        $string = trim($string, ' ');
 
-        return str_limit(strip_tags($string, $limit), $limit);
+        return str_limit($string, $limit);
     }
 
     /*

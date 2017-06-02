@@ -1,7 +1,6 @@
 <?php
 namespace Gogol\Admin\Helpers;
 
-use Admin as BaseAdmin;
 use Gogol\Admin\Models\Language;
 use Illuminate\Support\Collection;
 use Gettext;
@@ -17,7 +16,7 @@ class Localization
         $this->languages = new Collection;
 
         //Checks if is enabled multi language support
-        if ( ! BaseAdmin::isEnabledMultiLanguages() || app()->runningInConsole() == true )
+        if ( ! \Admin::isEnabledMultiLanguages() || app()->runningInConsole() == true )
             return false;
 
         $this->bootLanguages();
@@ -25,7 +24,7 @@ class Localization
 
     public function bootLanguages()
     {
-        return $this->languages = BaseAdmin::getModelByTable('languages')->all();
+        return $this->languages = \Admin::getModelByTable('languages')->all();
     }
 
     public function boot()
@@ -78,7 +77,7 @@ class Localization
 
     public function isEnabled()
     {
-        return BaseAdmin::isEnabledMultiLanguages() && app()->runningInConsole() == false && request()->segment(1) != 'admin';
+        return \Admin::isEnabledMultiLanguages() && app()->runningInConsole() == false && request()->segment(1) != 'admin';
     }
 
     public function getLanguages($console = false)

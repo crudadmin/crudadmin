@@ -142,7 +142,7 @@ class AdminRows
         foreach ($rows_data as $row)
         {
             //Return just base fields
-            $row->justBaseFields = true;
+            $row->justBaseFields(true);
 
             $rows[] = $row->getAdminAttributes();
         };
