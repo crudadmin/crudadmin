@@ -772,11 +772,18 @@ trait AdminModelTrait
         return $this->justBaseFields;
     }
 
+    /*
+     * Return short description of content for meta tags etc...
+     */
     public function makeDescription($field, $limit = 150)
     {
-        $string = $this->{$field};
+        $string = $this->getValue($field);
+        $string = strip_tags($string);
+        $string = preg_replace("/&nbsp;/", ' ', $string);
+        $string = preg_replace("/(\s| |\n)+/", ' ', $string);
+        $string = trim($string, ' ');
 
-        return str_limit(strip_tags($string, $limit), $limit);
+        return str_limit($string, $limit);
     }
 
     /*
