@@ -68,7 +68,7 @@ export default {
 
           if ( this.model.fields[field].type == 'select' || isRadio )
           {
-            if ( 'multiple' in this.model.fields[field] && this.model.fields[field].multiple == true && $.isArray(row[field]) || !isRadio )
+            if ( 'multiple' in this.model.fields[field] && this.model.fields[field].multiple == true && $.isArray(row[field]) && !isRadio )
             {
               var values = [],
                   rows = row[field];
