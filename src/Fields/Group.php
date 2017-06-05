@@ -112,7 +112,7 @@ class Group
                         ];
                     }
 
-                    if ( array_key_exists($key, $group->fields) )
+                    if ( array_key_exists($key, $group->fields) || array_key_exists(rtrim($key, '_id'), $group->fields) )
                     {
                       $data[ $group->name ]['fields'][] = $key;
 

@@ -95,22 +95,29 @@
               for ( var key in data )
               {
                 //Add custom column before actual column
-                if ( columns )
-                  for ( var k in columns )
+                for ( var k in columns )
+                {
+                  if ( 'before' in columns[k] && (columns[k].before == key || columns[k].before + '_id' == key) )
                   {
-                    if ( 'before' in columns[k] && (columns[k].before == key || columns[k].before + '_id' == key) )
-                      modifiedData[k] = columns[k].name||columns[k].title;
+                    if ( k in modifiedData )
+                      delete modifiedData[k];
+
+                    modifiedData[k] = columns[k].name||columns[k].title||this.model.fields[k].name;
                   }
+                }
 
                 modifiedData[key] = data[key];
 
                 //Add custom column after actual column
-                if ( columns )
-                  for ( var k in columns )
+                for ( var k in columns )
+                {
+                  if ( 'after' in columns[k] && (columns[k].after == key || columns[k].after + '_id' == key) )
                   {
-                    if ( 'after' in columns[k] && (columns[k].after == key || columns[k].after + '_id' == key) )
-                      modifiedData[k] = columns[k].name||columns[k].title;
+                    if ( k in modifiedData )
+                      delete modifiedData[k];
+                    modifiedData[k] = columns[k].name||columns[k].title||this.model.fields[k].name;
                   }
+                }
               }
 
               data = modifiedData;
