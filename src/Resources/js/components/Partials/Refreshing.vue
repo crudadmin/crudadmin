@@ -3,7 +3,7 @@
       <div class="loading">
         <div class="middle">
           <i class="updating fa fa-refresh"></i>
-          <p>Načitávam dáta...</p>
+          <p>Načítavam dáta...</p>
         </div>
       </div>
     </div>

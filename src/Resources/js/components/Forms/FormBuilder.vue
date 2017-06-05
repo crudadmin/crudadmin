@@ -20,7 +20,7 @@
       </div>
 
       <div class="box-footer">
-          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ row ? 'Ukláda' : 'Odosiela' }} sa</button>
+          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ row ? 'Ukladá' : 'Odosiela' }} sa</button>
           <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]">{{ row ? 'Uložiť' : 'Odoslať' }}</button>
       </div>
 
