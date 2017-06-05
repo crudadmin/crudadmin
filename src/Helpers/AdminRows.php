@@ -163,11 +163,14 @@ class AdminRows
             {
                 $button = new $button_class($row);
 
-                $data[] = [
-                    'name' => $button->name,
-                    'class' => $button->class,
-                    'icon' => $button->icon,
-                ];
+                if ( $button->active === true )
+                {
+                    $data[] = [
+                        'name' => $button->name,
+                        'class' => $button->class,
+                        'icon' => $button->icon,
+                    ];
+                }
             }
 
             return $data;

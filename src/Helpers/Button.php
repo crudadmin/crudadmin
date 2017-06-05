@@ -32,6 +32,11 @@ class Button
     public $redirect = null;
 
     /*
+     * Is enabled button
+     */
+    public $active = true;
+
+    /*
      * Title
      */
     public $message = [
