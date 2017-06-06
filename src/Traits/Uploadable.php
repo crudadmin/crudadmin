@@ -165,11 +165,18 @@ trait Uploadable
 
         $filename = substr( str_slug( $filename ), 0, 40);
 
-        $filename = $filename . '-' . count($files);
+        $extension = $file->getClientOriginalExtension();
 
-        //If filename exists, ??? super duper lucky
-        if ( File::exists($path . '/' . $filename) )
-            return uniqid() . '-' . $filename;
+        //If filename exists, then add number prefix of file
+        if ( File::exists($path . '/' . $filename .'.'. $extension) )
+        {
+            $i = 0;
+
+            while(file_exists($path.'/'.$filename.'-'.$i.'.'.$extension))
+                $i++;
+
+            $filename = $filename.'-'.$i;
+        }
 
         return $filename;
     }
