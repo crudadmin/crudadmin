@@ -205,6 +205,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="<?php echo asset('/assets/admin/dist/js/app.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/dist/js/main.js') ?>"></script>
 
+    <?php foreach((array)config('admin.scripts', []) as $script){ ?>
+    <script type="text/javascript" src="<?php echo $script ?>"></script>
+    <?php } ?>
+
     <!-- APP JS -->
     <script src="<?php echo asset('/assets/admin/js/main.js?v=' . (env('APP_DEBUG') == true ? rand(00000, 99999) : date('d') ) ) ?>"></script>
   </body>

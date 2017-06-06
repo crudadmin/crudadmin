@@ -1,6 +1,12 @@
 <template>
+  <!-- Additional top layouts -->
+  <div v-for="layout in layouts | positionLayout 'top'">
+    {{{ layout.view }}}
+  </div>
 
   <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
+
+
     <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-if="ischild || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
@@ -64,6 +70,10 @@
     </div>
   </div>
 
+  <!-- Additional bottom layouts -->
+  <div v-for="layout in layouts | positionLayout 'bottom'">
+    {{{ layout.view }}}
+  </div>
 </template>
 
 <script>
@@ -101,6 +111,9 @@
           count : 0,
           loaded : false,
         },
+
+        //Additional layouts for model
+        layouts : [],
 
         language_id : null,
 
@@ -148,6 +161,39 @@
       parentrow(row){
         this.$children[1].reloadRows();
       },
+      layouts(layouts){
+        var Vue = this;
+
+        /*
+         * Run all inline javascripts
+         */
+        for ( var key in layouts )
+        {
+          var layout = layouts[key];
+
+          $(layout.view).find('script').each(function(){
+            //Run external js
+            if ( $(this).attr('src') ){
+              var js = document.createElement('script');
+                  js.src = $(this).attr('src');
+                  js.type = 'text/javascript';
+
+              $('body').append(js);
+            }
+
+            //Run inline javascripts
+            else {
+              try {
+                var func = new Function($(this).html());
+
+                func.call(Vue);
+              } catch(e){
+                console.error(e);
+              }
+            }
+          });
+        }
+      }
     },
 
     filters: {
@@ -169,6 +215,15 @@
         }
 
         return localization ? array[ langid||this.$root.language_id ] : array;
+      },
+
+      /*
+       * Return layouts for correct position
+       */
+      positionLayout(array, position){
+        return array.filter(function(row){
+          return row.position == position;
+        })
       }
     },
 

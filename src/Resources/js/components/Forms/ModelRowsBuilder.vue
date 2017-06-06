@@ -251,9 +251,24 @@
           query.column = this.search.column;
         }
 
+        //My error
+        function customErrorAlert(response){
+          var url = response.request.url;
+
+          for ( var key in response.request.params )
+            url = url.replace('{'+key+'}', response.request.params[key]);
+
+          this.$root.openAlert('Upozornenie', 'Nastala nečakana chyba, skúste neskôr prosím.<br><br>Príčinu zlyhania požiadavky môžete zistiť na tejto adrese:<br> <a target="_blank" href="'+url+'">'+url+'</a>', 'error');
+        }
+
         this.$http.get(this.$root.requests.rows, query).then(function(response){
           //If has been component destroyed, and request is delivered... and some conditions
           if ( this.dragging === true || this.progress === true || !this.$root ){
+            return;
+          }
+
+          if ( typeof response.data == 'string' ){
+            customErrorAlert.call(this, response);
             return;
           }
 
@@ -267,6 +282,7 @@
           //Bind additional buttons for rows
           this.rows.buttons = response.data.buttons;
 
+          //Rows are successfully loaded
           this.$parent.rows.loaded = true;
 
           //If is reversed sorting in model, then set pagination into last page after first displaying table
@@ -275,9 +291,12 @@
             this.pagination.position = Math.ceil(this.rows.count / this.pagination.limit);
           }
 
-          //Update field options
           if ( this.refresh.count == 0 ){
+            //Update field options
             this.updateFieldOptions(response.data.fields);
+
+            //Render additional layouts
+            this.$parent.layouts = response.data.layouts;
           }
 
           //Update refresh informations
@@ -298,8 +317,13 @@
           //Add next timeout
           this.initTimeout(false);
 
+          //On first error
+          if ( response.status == 500 && this.refresh.count == 0 ){
+            customErrorAlert.call(this, response);
+          }
+
           //Show error alert at first request
-          if ( this.refresh.count == 0 && this.hasShowedError !== true || response.status == 401 ){
+          else if ( this.refresh.count == 0 && this.hasShowedError !== true || response.status == 401 ){
             this.hasShowedError = true;
             this.$root.errorResponseLayer(response, null);
           }

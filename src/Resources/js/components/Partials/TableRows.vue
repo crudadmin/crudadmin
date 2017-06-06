@@ -115,6 +115,7 @@
                   {
                     if ( k in modifiedData )
                       delete modifiedData[k];
+
                     modifiedData[k] = columns[k].name||columns[k].title||this.model.fields[k].name;
                   }
                 }
@@ -122,6 +123,13 @@
 
               data = modifiedData;
             }
+
+
+            for ( var key in columns )
+              if ( !(key in data) && columns[key].hidden != true )
+              {
+                data[key] = columns[key].name||columns[key].title||this.model.fields[key].name;
+              }
           }
 
           return data;
