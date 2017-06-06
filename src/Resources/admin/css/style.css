@@ -24,9 +24,11 @@
 .flex-table .col-rows { overflow-x: auto; }
 .flex-table .col:nth-child(1) { order: 2; }
 
-.content .box > .box-body > .box {
-    margin-left: 40px;
-    width: calc(100% - 40px);
+@media screen and (min-width: 768px) {
+    .content .box > .box-body > .box {
+        margin-left: 40px;
+        width: calc(100% - 40px);
+    }
 }
 
 /*
@@ -45,6 +47,25 @@
 .content .box-header > *:not(div):not(button) { position: relative; top: 6px; }
 .content .box-header .form-group.pull-right { margin: 0 }
 .content .box-limit { padding-bottom: 0 }
+
+@media screen and (max-width: 768px) {
+    .content .box > .box-body > .box {
+        margin-left: 10px;
+        width: calc(100% - 10px);
+    }
+
+    .box-header .pagination {
+        display: none;
+    }
+
+    .content .box-body > .row > div.col { width: 100% }
+
+    .box-header h3.box-title {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px
+    }
+}
 
 /*
  * Form settings

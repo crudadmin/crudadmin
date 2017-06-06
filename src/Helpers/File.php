@@ -93,7 +93,7 @@ class File
 
     public static function getHash( $path )
     {
-        return sha1( md5( '!$%' . $path ) );
+        return sha1( md5( '!$%' . sha1(env('APP_KEY')) . $path ) );
     }
 
     /*
@@ -197,7 +197,7 @@ class File
                 ]));
             }
 
-            return action( '\Gogol\Admin\Controllers\ImageController@resizeImage', str_replace(self::adminModelCachePath(), '', $filepath));
+            return new static($filepath);
         }
 
         //Set image for processing

@@ -333,5 +333,9 @@ class DataController extends Controller
             //Update first row
             $model->newInstance()->where('id', $id)->update([ '_order' => $order ]);
         }
+
+        //Fire on update order event
+        if ( method_exists($model, 'onUpdateOrder') )
+            return $model->onUpdateOrder();
     }
 }

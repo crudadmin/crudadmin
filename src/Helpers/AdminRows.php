@@ -163,11 +163,14 @@ class AdminRows
             {
                 $button = new $button_class($row);
 
-                $data[] = [
-                    'name' => $button->name,
-                    'class' => $button->class,
-                    'icon' => $button->icon,
-                ];
+                if ( $button->active === true )
+                {
+                    $data[] = [
+                        'name' => $button->name,
+                        'class' => $button->class,
+                        'icon' => $button->icon,
+                    ];
+                }
             }
 
             return $data;
@@ -192,6 +195,32 @@ class AdminRows
         return $buttons;
     }
 
+    /*
+     * Return rendered blade layouts
+     */
+    protected function getLayouts($count)
+    {
+        $layouts = [];
+
+        if ( $count > 0 )
+            return [];
+
+        foreach ((array)$this->model->getProperty('layouts') as $class)
+        {
+            $layout = new $class;
+
+            if ( ($view = $layout->build()) instanceof \Illuminate\View\View )
+            {
+                $layouts[] = [
+                    'position' => $layout->position,
+                    'view' => $view->render(),
+                ];
+            }
+        }
+
+        return $layouts;
+    }
+
     public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null)
     {
         try {
@@ -210,6 +239,7 @@ class AdminRows
                 'count' => $this->checkForSearching( $all_rows_data )->count(),
                 'page' => $page,
                 'buttons' => $this->generateButtonsProperties($paginated_rows_data),
+                'layouts' => $this->getLayouts($count),
             ];
         } catch (\Illuminate\Database\QueryException $e) {
             return Ajax::mysqlError($e);

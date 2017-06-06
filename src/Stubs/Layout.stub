@@ -1,0 +1,22 @@
+<?php
+
+namespace DummyNamespace;
+
+class DummyLayout
+{
+    /*
+     * Layout position
+     * top/bottom
+     */
+    public $position = 'top';
+
+    /*
+     * On build blade layour
+     */
+    public function build()
+    {
+        //...
+
+        return view('admin.DummyBladeLayout');
+    }
+}
