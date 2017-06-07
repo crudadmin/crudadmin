@@ -309,7 +309,15 @@ class DataController extends Controller
             $button->redirect = $response->getTargetUrl();
         }
 
-        $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
+        $rows = (new AdminRows($model))->returnModelData(
+            request('parent'),
+            request('subid'),
+            request('language_id'),
+            request('limit'),
+            request('page'),
+            0,
+            $button->reloadAll ? false : $row->getKey()
+        );
 
         return Ajax::message( $button->message['message'], $button->message['title'], $button->message['type'], [
             'rows' => $rows,

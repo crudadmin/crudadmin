@@ -169,6 +169,7 @@ class AdminRows
                         'name' => $button->name,
                         'class' => $button->class,
                         'icon' => $button->icon,
+                        'reloadAll' => $button->reloadAll,
                     ];
                 }
             }
@@ -221,10 +222,15 @@ class AdminRows
         return $layouts;
     }
 
-    public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null)
+    public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null, $id = false)
     {
         try {
-            $paginated_rows_data = $this->getRowsData($subid, $langid, function($query) use ( $limit, $page, $count ) {
+            $paginated_rows_data = $this->getRowsData($subid, $langid, function($query) use ( $limit, $page, $count, $id ) {
+
+                //Get specific id
+                if ( $id !== false )
+                    $query->where('id', $id);
+
                 //Search in rows
                 $this->checkForSearching($query, $this->model);
 

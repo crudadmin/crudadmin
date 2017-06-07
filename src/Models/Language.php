@@ -42,6 +42,11 @@ class Language extends Model
     protected $minimum = 1;
 
     /*
+     * Reversed rows
+     */
+    protected $reversed = true;
+
+    /*
      * Automatic form and database generation
      */
     protected function fields($row)

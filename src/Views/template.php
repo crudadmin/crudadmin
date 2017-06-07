@@ -21,10 +21,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- Theme style -->
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.css') ?>">
   <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datatables/dataTables.bootstrap.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/chosen/chosen.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datetimepicker/jquery.datetimepicker.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/AdminLTE.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/css/style.css') ?>">
+  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/chosen/chosen.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datetimepicker/jquery.datetimepicker.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/AdminLTE.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo asset('/assets/admin/css/style.css?v=').Admin::getAssetsVersion() ?>">
   <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect.
@@ -136,8 +136,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <p>{{{ alert.message }}}</p>
               </div>
               <div class="modal-footer">
-                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal">Zrušiť</button>
-                <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success" class="btn btn-outline">Potvrdiť</button>
+                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type!='success' && !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal">Zrušiť</button>
+                <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success || alert.type=='success' && !alert.close && !alert.success" class="btn btn-outline">Potvrdiť</button>
               </div>
             </div>
             <!-- /.modal-content -->
@@ -203,13 +203,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="<?php echo asset('/assets/admin/plugins/chosen/chosen.jquery.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/plugins/chosen-order/chosen.order.jquery.min.js') ?>"></script>
     <script src="<?php echo asset('/assets/admin/dist/js/app.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/dist/js/main.js') ?>"></script>
+    <script src="<?php echo asset('/assets/admin/dist/js/main.js?v=').Admin::getAssetsVersion() ?>">"></script>
 
     <?php foreach((array)config('admin.scripts', []) as $script){ ?>
     <script type="text/javascript" src="<?php echo $script ?>"></script>
     <?php } ?>
 
     <!-- APP JS -->
-    <script src="<?php echo asset('/assets/admin/js/main.js?v=' . (env('APP_DEBUG') == true ? rand(00000, 99999) : date('d') ) ) ?>"></script>
+    <script src="<?php echo asset('/assets/admin/js/main.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
   </body>
 </html>
