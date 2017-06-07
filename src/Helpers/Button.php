@@ -37,6 +37,11 @@ class Button
     public $active = true;
 
     /*
+     * Need load all rows after action?
+     */
+    public $reloadAll = false;
+
+    /*
      * Title
      */
     public $message = [

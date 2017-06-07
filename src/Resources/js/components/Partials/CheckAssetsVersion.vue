@@ -20,6 +20,9 @@ export default {
 
     computed: {
         isDifferent(){
+            if ( this.version == 'dev-master' )
+                return false;
+
             return this.version != this.version_assets;
         },
     },

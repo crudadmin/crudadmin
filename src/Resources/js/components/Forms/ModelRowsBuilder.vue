@@ -439,9 +439,9 @@
       /*
        * Change updated rows in db
        */
-      updateRowsData(data){
+      updateRowsData(data, update){
         //This update rows just in table, not in forms
-        if ( this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id )
+        if ( update !== true && (this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id) )
         {
           this.rows.data = data;
           return;

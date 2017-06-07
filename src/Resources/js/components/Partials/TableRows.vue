@@ -172,9 +172,24 @@
             {
               if ( 'rows' in data.data )
               {
-                this.$parent.updateRowsData(data.data.rows.rows);
-                this.rows.count = data.data.rows.count;
-                this.rows.buttons = data.data.rows.buttons;
+                this.$parent.updateRowsData(data.data.rows.rows, true);
+
+                //Reload just one row which owns button
+                if ( button.reloadAll == false ){
+                  if ( !(row.id in data.data.rows.buttons) )
+                  {
+                    this.rows.buttons[row.id] = [];
+                  } else {
+                    this.rows.buttons[row.id] = data.data.rows.buttons[row.id];
+                  }
+                }
+
+                //Reload all rows
+                else {
+                  this.rows.count = data.data.rows.count;
+                  this.rows.buttons = data.data.rows.buttons;
+                }
+
               }
 
               //Redirect on page
