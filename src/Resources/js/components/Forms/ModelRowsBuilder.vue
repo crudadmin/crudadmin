@@ -48,7 +48,7 @@
         pagination: {
           position: 1,
           limit : parseInt(limit),
-          limits : [ 5, 10, 20, 30, 50, 100, 200 ],
+          limits : [ 5, 10, 20, 30, 50, 100, 200, 500 ],
           refreshing : false,
           maxpages : 15,
         },
