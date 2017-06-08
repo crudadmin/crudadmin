@@ -4,8 +4,47 @@ namespace Gogol\Admin\Traits;
 
 use Validator;
 use Gogol\Admin\Exceptions\ValidationException;
+use Fields;
 
 trait Validation {
+
+    /*
+     * Makes properties from array to string
+     */
+    protected function fieldToString($field)
+    {
+        $data = [];
+
+        foreach ( $field as $key => $value )
+        {
+            if ( $value === true ){
+                $data[] = $key;
+            } else if ( is_array( $value ) ){
+                foreach ($value as $item) {
+                    $data[] = $key . ':' . $item;
+                }
+            } else if ( $value !== false ) {
+                $data[] = is_string($value) ? $key . ':' . $value : $key;
+            }
+        }
+
+        return $data;
+    }
+
+    /*
+     * Removes admin properties in field from request
+     */
+    protected function removeAdminProperties($field)
+    {
+        //Remove admin columns
+        foreach (Fields::getAttributes() as $key)
+        {
+            unset($field[$key]);
+        }
+
+        return $this->fieldToString($field);
+    }
+
 
     /*
      * Returns validation rules of model

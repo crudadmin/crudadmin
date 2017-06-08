@@ -41,7 +41,16 @@ class FieldToArray
                 }
             }
         } else {
-            $data = $field;
+
+            //Bind values without keys as key => true (required -> true)
+            foreach ($field as $key => $value)
+            {
+                if ( is_numeric($key) && is_string($value) )
+                    $data[$value] = true;
+                else
+                    $data[$key] = $value;
+            }
+
         }
 
         return $data;

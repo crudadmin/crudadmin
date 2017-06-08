@@ -352,43 +352,6 @@ trait AdminModelTrait
     }
 
     /*
-     * Makes properties from array to string
-     */
-    protected function fieldToString($field)
-    {
-        $data = [];
-
-        foreach ( $field as $key => $value )
-        {
-            if ( $value === true ){
-                $data[] = $key;
-            } else if ( is_array( $value ) ){
-                foreach ($value as $item) {
-                    $data[] = $key . ':' . $item;
-                }
-            } else {
-                $data[] = $key . ':' . $value;
-            }
-        }
-
-        return $data;
-    }
-
-    /*
-     * Removes admin properties in field from request
-     */
-    protected function removeAdminProperties($field)
-    {
-        //Remove admin columns
-        foreach (Fields::getAttributes() as $key)
-        {
-            unset($field[$key]);
-        }
-
-        return $this->fieldToString($field);
-    }
-
-    /*
      * Returns needed field
      */
     public function getField($key)
