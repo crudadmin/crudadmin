@@ -144,9 +144,9 @@ class Admin
     protected function fromPathToNamespace($path)
     {
         $path = str_replace_first(base_path(), '', $path);
-        $path = str_replace_first('app/', 'App/', $path);
-        $path = str_replace('.php', '', $path);
         $path = str_replace('/', '\\', $path);
+        $path = str_replace_first('app\\', 'App\\', $path);
+        $path = str_replace('.php', '', $path);
         $path = trim($path, '\\');
 
         return $path;
