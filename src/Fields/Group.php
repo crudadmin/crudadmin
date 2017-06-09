@@ -112,7 +112,11 @@ class Group
                         ];
                     }
 
-                    if ( array_key_exists($key, $group->fields) || array_key_exists(rtrim($key, '_id'), $group->fields) )
+                    if (
+                        array_key_exists($key, $group->fields) ||
+                        array_key_exists(rtrim($key, '_id'), $group->fields) ||
+                        array_key_exists('localization', $field) && array_key_exists(implode(' ', array_slice(explode('_', $key), 0, -1)), $group->fields)
+                    )
                     {
                       $data[ $group->name ]['fields'][] = $key;
 
