@@ -685,6 +685,15 @@ class AdminMigrationCommand extends Command
         if( ! $model->hasFieldParam($key, 'required') )
             $column->nullable();
 
+        /**
+         * TO DO UNIQUE COLUMNS
+         */
+        //If is field required
+        // if( $model->hasFieldParam($key, 'unique_db') )
+        // {
+        //     $column->unique($key);
+        // }
+
         //If is field required
         if( $model->hasFieldParam($key, 'default') )
         {

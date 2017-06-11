@@ -5,12 +5,12 @@ use DB;
 use Admin;
 use Localization;
 use Gogol\Admin\Helpers\Helper;
+use Illuminate\Support\Collection;
+use Ajax;
 
 class AddSelectSupport
 {
     public $attributes = ['options', 'multiple', 'default'];
-
-    protected $maxRowsLimit = 50;
 
     /*
      * If has key in admin buffer, returns data from buffer, if has not, then get data from database and save into buffer
@@ -45,8 +45,11 @@ class AddSelectSupport
     {
         if ( $field['type'] == 'select' || $field['type'] == 'radio' )
         {
+            //Get allowed options
+            $with_options = in_array($key, $model->withOptions());
+
             //If is not allowed to displaying all options data
-            if ( $model->withAllOptions() !== true || ( array_key_exists('hidden', $field) && array_key_exists('removeFromForm', $field) ) )
+            if ( $with_options !== true || ( array_key_exists('hidden', $field) && array_key_exists('removeFromForm', $field) && Admin::isAdmin() ) )
             {
                 if ( ! array_key_exists('options', $field) )
                 {
@@ -63,15 +66,37 @@ class AddSelectSupport
 
             //Get options from model, and cache them
             $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {
+                $options = $model->getProperty('options');
+
                 return (array)$model->getProperty('options');
             });
 
+            /*
+             * If options are defined in method od $options property
+             */
             if ( array_key_exists($key, $options) )
             {
                 $field['options'] = $options[$key];
-            } else if ( array_key_exists('options', $field) ){
+
+                //If has been inserted collection between array, then convert collection into array
+                if ( $field['options'] instanceof Collection )
+                {
+                    $field['options'] = $field['options']->toArray();
+                }
+
+            }
+
+            /*
+             * If options are defined in field
+             */
+            else if ( array_key_exists('options', $field) ){
                 $field['options'] = is_string($field['options']) ? explode(',', $field['options']) : $field['options'];
-            } else if ( array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field) ) {
+            }
+
+            /*
+             * If options are in db as relationship
+             */
+            else if ( array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field) ) {
                 $properties = explode(',', array_key_exists('belongsTo', $field) ? $field['belongsTo'] : $field['belongsToMany']);
 
                 //When is defined column which will be in selectbox
@@ -79,7 +104,6 @@ class AddSelectSupport
                 {
                     //Get data from table, and bind them info buffer for better performance
                     $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model ) {
-
                         if ($model = Admin::getModelByTable($properties[0]))
                         {
                             return $model->all()->toArray();
@@ -102,6 +126,13 @@ class AddSelectSupport
                             {
                                 $rows[ $option['language_id'] ][ $option[$key] ] = $option[$properties[1]];
                             } else {
+
+                                //If is unknown belongs to column
+                                if ( ! array_key_exists($properties[1], $option) && Admin::isAdmin() )
+                                {
+                                    Ajax::error('Nie je možné načítať tabuľku, keďže stĺpec <strong>'.$properties[1].'</strong> v tabuľke <strong>'.$properties[0].'</strong> neexistuje.', null, null, 500);
+                                }
+
                                 $rows[ $option[$key] ] = $option[$properties[1]];
                             }
                         }

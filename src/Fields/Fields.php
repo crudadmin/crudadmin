@@ -11,8 +11,8 @@ class Fields
         Mutations\FieldToArray::class,
         Mutations\AddGlobalRules::class,
         Mutations\AddAttributeRules::class,
-        Mutations\AddSelectSupport::class,
         Mutations\BelongsToAttributeMutator::class,
+        Mutations\AddSelectSupport::class,
         Mutations\AddLocalizationSupport::class,
         Mutations\UpdateDateFormat::class,
         Mutations\AddEmptyValue::class,
@@ -22,7 +22,8 @@ class Fields
      * Registred custom admin attributes for fields
      */
     protected $attributes = [
-         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled', 'orderBy', 'limit', 'removeFromForm', 'multirows', 'phone'
+         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled',
+         'orderBy', 'limit', 'removeFromForm', 'multirows', 'phone', 'unique_db'
     ];
 
     /*
@@ -179,7 +180,6 @@ class Fields
      */
     protected function registerField( $field, $key, $model, $skip = [] )
     {
-
         //Field mutations
         foreach ($this->mutations as $namespace)
         {

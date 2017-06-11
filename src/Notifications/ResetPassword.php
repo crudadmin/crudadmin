@@ -14,15 +14,19 @@ class ResetPassword extends Notification
      */
     public $token;
 
+    private $user;
+
     /**
      * Create a notification instance.
      *
      * @param  string  $token
      * @return void
      */
-    public function __construct($token)
+    public function __construct($token, $user)
     {
         $this->token = $token;
+
+        $this->user = $user;
     }
 
     /**
@@ -36,6 +40,14 @@ class ResetPassword extends Notification
         return ['mail'];
     }
 
+    protected function getTranslate($key)
+    {
+        if ( ($text = trans($key)) == $key )
+            return false;
+
+        return $text;
+    }
+
     /**
      * Build the mail representation of the notification.
      *
@@ -44,9 +56,15 @@ class ResetPassword extends Notification
      */
     public function toMail($notifiable)
     {
+        if ( $this->user instanceof \App\User )
+            $action = action('\Gogol\Admin\Controllers\Auth\ResetPasswordController@showResetForm', $this->token);
+        else
+            $action = route('password.reset', $this->token);
+
         return (new MailMessage)
-            ->line('You are receiving this email because we received a password reset request for your account.')
-            ->action('Reset Password', action('\Gogol\Admin\Controllers\Auth\ResetPasswordController@showResetForm', $this->token))
-            ->line('If you did not request a password reset, no further action is required.');
+            ->subject($this->getTranslate('passwords.email.subject') ?: 'Reset password')
+            ->line($this->getTranslate('passwords.email.intro') ?: 'You are receiving this email because we received a password reset request for your account.')
+            ->action($this->getTranslate('passwords.email.button') ?: 'Reset Password', $action)
+            ->line($this->getTranslate('passwords.email.info') ?: 'If you did not request a password reset, no further action is required.');
     }
 }
