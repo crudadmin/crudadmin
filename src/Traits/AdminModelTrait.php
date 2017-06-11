@@ -15,13 +15,15 @@ use DB;
 
 trait AdminModelTrait
 {
+    /*
+     * Default fillable fields
+     */
     private $_fillable = [ 'published_at' ];
 
+    /*
+     * Buffered fields in model
+     */
     private $_fields = null;
-
-    private $withAllOptions = false;
-
-    private $justBaseFields = false;
 
     /*
      * On calling method
@@ -337,11 +339,13 @@ trait AdminModelTrait
      */
     public function getFields($param = null, $force = false)
     {
-        if ( $param !== null || $this->withAllOptions() === true)
+        $with_options = count($this->withOptions) > 0;
+
+        if ( $param !== null || $with_options === true )
             $force = true;
 
         //Field mutations
-        if ( $this->_fields == null || $force == true || $this->withAllOptions() === true )
+        if ( $this->_fields == null || $force == true || $with_options === true )
         {
             $this->_fields = Fields::getFields( $this, $param, $force );
 
@@ -707,32 +711,6 @@ trait AdminModelTrait
     public function newCollection(array $models = [])
     {
         return new \Gogol\Admin\Helpers\AdminCollection($models);
-    }
-
-    /*
-     * Define, that field mutator for selects will returns all options (also from db, etc...)
-     */
-    public function withAllOptions( $set = null )
-    {
-        if ( $set === true || $set === false )
-        {
-            $this->withAllOptions = $set;
-
-            return $this;
-        }
-
-        return $this->withAllOptions;
-    }
-
-    /*
-     * Returns just base fields of model
-     */
-    public function justBaseFields( $set = null )
-    {
-        if ( $set === true || $set === false )
-            $this->justBaseFields = $set;
-
-        return $this->justBaseFields;
     }
 
     /*

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Gogol\Admin\Traits\AdminModelTrait;
 use Gogol\Admin\Traits\Sluggable;
 use Gogol\Admin\Traits\HasChildrens;
+use Gogol\Admin\Traits\FieldProperties;
 use Gogol\Admin\Traits\ModelRelationships;
 use Gogol\Admin\Traits\Uploadable;
 use Gogol\Admin\Traits\Validation;
@@ -16,7 +17,7 @@ use Admin;
 
 class Model extends BaseModel
 {
-    use SoftDeletes, ModelRelationships, Sluggable, Uploadable, Validation, HasChildrens, AdminModelTrait;
+    use SoftDeletes, ModelRelationships, Sluggable, Uploadable, Validation, HasChildrens, AdminModelTrait, FieldProperties;
 
     /*
      * Template name

@@ -20,7 +20,7 @@
         }
     },
     "scripts": {
-        "post-update-cmd": [
+        "post-package-update": [
             "php artisan admin:update"
         ]
     }
