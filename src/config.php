@@ -61,6 +61,7 @@ return [
         'belongsToMany' => 'type:select|array',
         'multiple' => 'array',
         'multirows' => 'array',
+        'invisible' => 'hidden|removeFromForm',
     ],
 
     /*

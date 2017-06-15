@@ -234,12 +234,12 @@ class DataController extends Controller
     {
         $model = $this->getModel( $request->get('model') );
 
-        if ( $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() || $model->getProperty('deletable') == false )
+        $row = $model->findOrFail( $request->get('id') );
+
+        if ( $row->canDelete($row) !== true || $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() || $model->getProperty('deletable') == false )
         {
             Ajax::error( 'Tento záznam nie je možné vymazať.', 'error' );
         }
-
-        $row = $model->findOrFail( $request->get('id') );
 
         //Remove uploaded files
         $this->removeFilesOnDelete($row);

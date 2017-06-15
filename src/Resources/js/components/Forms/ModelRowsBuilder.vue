@@ -303,6 +303,9 @@
           this.refresh.count++;
           this.refresh.refreshing = false;
 
+          //Get new csrf token
+          reloadCSRFToken(response.data.token);
+
           //Add next timeout
           if ( !(this.rows.count > 0 && this.model.maximum === 1) )
           {

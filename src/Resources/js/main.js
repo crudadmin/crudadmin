@@ -25,16 +25,22 @@ var router = new VueRouter();
  * Requests settings
  */
 (function(){
-    Vue.http.options.root = $('meta[name="root"]').attr('content'),
-    Vue.http.options.headers = {
-        'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content'),
-    };
+    Vue.http.options.root = $('meta[name="root"]').attr('content');
 
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': Vue.http.options.headers['X-CSRF-TOKEN'],
-        }
-    });
+    window.reloadCSRFToken = function(token)
+    {
+        Vue.http.options.headers = {
+            'X-CSRF-TOKEN' : token,
+        };
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': token,
+            }
+        });
+    }
+
+    reloadCSRFToken($('meta[name="csrf-token"]').attr('content'));
 })();
 
 /*

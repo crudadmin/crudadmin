@@ -59,9 +59,14 @@ class LayoutController extends BaseController
         if ( $parent_table == '0' )
             $parent_table = null;
 
+        $data = (new AdminRows($model))->returnModelData( $parent_table, $subid, $langid, $limit, $page, $count );
+
+        //Add token
+        $data['token'] = csrf_token();
+
         return $this->makePage(
             $model,
-            (new AdminRows($model))->returnModelData( $parent_table, $subid, $langid, $limit, $page, $count ),
+            $data,
             false
         );
     }
