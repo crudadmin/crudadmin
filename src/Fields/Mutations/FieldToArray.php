@@ -23,6 +23,8 @@ class FieldToArray
 
         if ( is_string($field) )
         {
+            $field = preg_replace('/\|+/', '|', $field);
+
             $fields = explode('|', $field);
 
             foreach ($fields as $k => $value)
