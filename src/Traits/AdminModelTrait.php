@@ -273,6 +273,9 @@ trait AdminModelTrait
 
             else if ( $this->isFieldType($key, 'decimal') )
                 $this->casts[$key] = 'float';
+
+            else if ( $this->isFieldType($key, ['date', 'datetime', 'time']) )
+                $this->casts[$key] = 'datetime';
         }
     }
 

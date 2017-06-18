@@ -60,7 +60,8 @@ class AdminsGroup extends AdminModel
         {
             $model = new $path;
 
-            $options[ $path ] = $model->getProperty('name');
+            if ( $model->getProperty('active') === true )
+                $options[ $path ] = $model->getProperty('name');
         }
 
         return [

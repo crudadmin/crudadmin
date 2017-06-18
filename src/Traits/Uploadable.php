@@ -165,10 +165,10 @@ trait Uploadable
 
         $filename = substr( str_slug( $filename ), 0, 40);
 
-        $extension = $file->getClientOriginalExtension();
+        $extension = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : false;
 
         //If filename exists, then add number prefix of file
-        if ( File::exists($path . '/' . $filename .'.'. $extension) )
+        if ( $extension && File::exists($path . '/' . $filename . '.' . $extension) )
         {
             $i = 0;
 

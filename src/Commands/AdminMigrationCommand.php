@@ -409,7 +409,7 @@ class AdminMigrationCommand extends Command
         //Timestamp columns
         if ( $model->isFieldType($key, ['date', 'datetime', 'time']) )
         {
-            $column = $table->timestamp($key)->nullable();
+            $column = $table->datetime($key)->nullable();
 
             return $column;
         }
