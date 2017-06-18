@@ -409,7 +409,7 @@ class AdminMigrationCommand extends Command
         //Timestamp columns
         if ( $model->isFieldType($key, ['date', 'datetime', 'time']) )
         {
-            $column = $table->timestamp($key)->nullable();
+            $column = $table->datetime($key)->nullable();
 
             return $column;
         }
@@ -684,15 +684,6 @@ class AdminMigrationCommand extends Command
         //If is field required
         if( ! $model->hasFieldParam($key, 'required') )
             $column->nullable();
-
-        /**
-         * TO DO UNIQUE COLUMNS
-         */
-        //If is field required
-        // if( $model->hasFieldParam($key, 'unique_db') )
-        // {
-        //     $column->unique($key);
-        // }
 
         //If is field required
         if( $model->hasFieldParam($key, 'default') )

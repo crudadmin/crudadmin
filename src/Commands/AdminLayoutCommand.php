@@ -5,6 +5,7 @@ namespace Gogol\Admin\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
+use Gogol\Admin\Helpers\File;
 use Admin;
 
 class AdminLayoutCommand extends GeneratorCommand
@@ -54,7 +55,11 @@ class AdminLayoutCommand extends GeneratorCommand
 
     protected function copyBladeLayout()
     {
-        $path = resource_path('views/admin/'. $this->getLayoutName() . '.blade.php');
+        $directory = resource_path('views/admin/');
+
+        $path = $directory . $this->getLayoutName() . '.blade.php';
+
+        File::makeDirs($directory);
 
         if ( ! file_exists($path) )
         {
