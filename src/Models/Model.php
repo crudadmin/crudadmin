@@ -151,6 +151,14 @@ class Model extends BaseModel
 
     }
 
+    /*
+     * Check if user can delete row
+     */
+    public function canDelete($row)
+    {
+        return true;
+    }
+
     public function __construct(array $attributes = [])
     {
         //Boot base model trait
