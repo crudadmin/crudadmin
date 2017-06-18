@@ -71,12 +71,17 @@ export default {
             if ( 'multiple' in this.model.fields[field] && this.model.fields[field].multiple == true && $.isArray(row[field]) && !isRadio )
             {
               var values = [],
-                  rows = row[field];
+                  rows = row[field],
+                  options = this.getLanguageSelectOptions( this.model.fields[field].options );
 
               for ( var i = 0; i < rows.length; i++ )
               {
-                if ( rows[i] in this.getLanguageSelectOptions( this.model.fields[field].options ) )
-                  values.push( this.getLanguageSelectOptions( this.model.fields[field].options )[ rows[i] ] );
+                var searched = options.filter(function(item){
+                  return item[0] == rows[i];
+                }.bind(this));
+
+                if ( searched.length > 0 )
+                  values.push( searched[0][1] );
               }
 
               return values.join(', ');
