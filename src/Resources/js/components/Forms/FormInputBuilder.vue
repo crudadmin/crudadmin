@@ -70,7 +70,7 @@
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <select v-bind:id="getId" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">Vyberte jednu z možností</option>
-        <option v-if="missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
+        <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="data in field.options | languageOptions" v-bind:selected="selectIndex(hasValue(data[0], value, isMultiple) || (!row && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
       </select>
       <small>{{ field.title }}</small>
@@ -424,19 +424,42 @@
           return this.row && 'language_id' in this.row ? this.row.language_id : this.$root.language_id;
         },
         missingValueInSelectOptions(){
-          if ( !this.row || this.isMultiple || this.isMultipleUpload)
-            return false;
+          if ( !this.row )
+            return [];
 
-          var options = this.$parent.$parent.$options.filters.languageOptions(this.field.options, this.getLangageId);
+          var options = this.$parent.$parent.$options.filters.languageOptions(this.field.options, this.getLangageId),
+              missing = [];
 
-          //Check if is value in options
-          for ( var i = 0; i < options.length; i++ )
+          //For multiple selects
+          if ( this.isMultiple )
           {
-            if ( options[i][0] == this.field.value )
-              return false;
+            if ( this.field.value )
+            {
+              for (var i = 0; i < this.field.value.length; i++)
+              {
+                var searched = options.filter(function(item){
+                  return item[0] == this.field.value[i];
+                }.bind(this));
+
+                if (searched.length == 0)
+                  missing.push(this.field.value[i]);
+              }
+            }
           }
 
-          return true;
+          //For single select
+          else {
+            //Check if is value in options
+            for ( var i = 0; i < options.length; i++ )
+            {
+              if ( options[i][0] == this.field.value )
+                return [];
+            }
+
+            return [this.field.value];
+          }
+
+          return missing;
         },
       },
 
