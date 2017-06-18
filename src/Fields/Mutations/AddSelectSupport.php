@@ -74,7 +74,7 @@ class AddSelectSupport
             /*
              * If options are defined in method od $options property
              */
-            if ( array_key_exists($key, $options) )
+            if ( array_key_exists($key, $options) || array_key_exists(($key = rtrim($key, '_id')), $options) )
             {
                 $field['options'] = $options[$key];
 
@@ -99,6 +99,8 @@ class AddSelectSupport
             else if ( array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field) ) {
                 $properties = explode(',', array_key_exists('belongsTo', $field) ? $field['belongsTo'] : $field['belongsToMany']);
 
+                $rows = [];
+
                 //When is defined column which will be in selectbox
                 if ( count($properties) >= 2 && strtolower($properties[1]) != 'null' )
                 {
@@ -112,7 +114,6 @@ class AddSelectSupport
                         return DB::table($properties[0])->whereNull('deleted_at')->get();
                     });
 
-                    $rows = [];
 
                     if ( $options !== false )
                     {
