@@ -47,7 +47,7 @@ class AdminsGroup extends AdminModel
      */
     protected $fields = [
         'name' => 'name:Názov skupiny|placeholder:Zadajte názov skupiny|type:string|required|max:90',
-        'models' => 'name:Povolené moduly|type:select|multiple',
+        'models' => 'name:Povolené moduly|type:select|multiple|limit:40',
     ];
 
     public function options()
