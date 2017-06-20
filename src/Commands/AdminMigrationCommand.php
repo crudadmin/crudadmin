@@ -81,7 +81,7 @@ class AdminMigrationCommand extends Command
         if ( ! file_exists($path) )
             return false;
 
-        $namespace = get_class($model);
+        $namespace = 'admin_migrations.' . md5(get_class($model));
 
         $hash = md5_file($path);
 
