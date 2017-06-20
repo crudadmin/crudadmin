@@ -4,12 +4,13 @@ namespace Gogol\Admin\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-
-use Admin;
-use Schema;
-use DB;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Schema\Blueprint;
+use Symfony\Component\Console\Input\InputOption;
+use Admin;
+use Schema;
+use Cache;
+use DB;
 
 class AdminMigrationCommand extends Command
 {
@@ -20,7 +21,7 @@ class AdminMigrationCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'admin:migrate';
+    protected $name = 'admin:migrate';
 
     /**
      * The console command description.
@@ -67,16 +68,51 @@ class AdminMigrationCommand extends Command
         $migrations = $this->migrate( $models );
     }
 
+    /*
+     * Return if is class updated
+     */
+    protected function isOutOfDate($model)
+    {
+        if ( $this->option('force') )
+            return false;
+
+        $path = (new \ReflectionClass($model))->getFileName();
+
+        if ( ! file_exists($path) )
+            return false;
+
+        $namespace = get_class($model);
+
+        $hash = md5_file($path);
+
+        if ( Cache::get($namespace) == $hash )
+            return true;
+
+        Cache::forever($namespace, $hash);
+
+        return false;
+    }
+
     /**
      * Generate laravel migratons
      * @return [type] [description]
      */
     protected function migrate($models)
     {
+        $migrated = 0;
+
         foreach ($models as $model)
         {
+            if ( $this->isOutOfDate($model) )
+                continue;
+
             $this->generateMigration($model);
+
+            $migrated++;
         }
+
+        if ( $migrated === 0 )
+            return $this->line('<info>Noting to migrate.</info>');
 
         /*
          * Run migrations from buffer
@@ -813,5 +849,17 @@ class AdminMigrationCommand extends Command
     public function handle()
     {
         $this->fire();
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return [
+            ['force', 'f', InputOption::VALUE_NONE, 'Forced migration of all models'],
+        ];
     }
 }
