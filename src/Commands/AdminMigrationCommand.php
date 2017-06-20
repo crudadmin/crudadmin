@@ -75,6 +75,7 @@ class AdminMigrationCommand extends Command
     {
         $path = (new \ReflectionClass($model))->getFileName();
 
+        //If file class does not exists
         if ( ! file_exists($path) )
         {
             //Migrate
@@ -285,7 +286,6 @@ class AdminMigrationCommand extends Command
             //Order column
             if ( ! $model->getSchema()->hasColumn($model->getTable(), '_order') && $model->isSortable() )
             {
-
                 $table->integer('_order')->unsigned();
                 $this->line('<comment>+ Added column:</comment> _order');
 
