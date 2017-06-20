@@ -212,7 +212,6 @@ class AdminModelCommand extends GeneratorCommand
             'DummyRootNamespace', $this->laravel->getNamespace(), $stub
         );
 
-
         $stub = str_replace(
             'CREATED_DATETIME', Carbon::now(), $stub
         );

@@ -37,7 +37,7 @@ trait Uploadable
     /*
      * Resize images by resize parameter
      */
-    protected function resizeCacheImages($path, $resolution)
+    private function resizeCacheImages($path, $resolution)
     {
         $file = new AdminFile($path);
 
@@ -126,12 +126,12 @@ trait Uploadable
     /*
      * Upload file from local directory or server
      */
-    private function uploadFileFromLocal($file, $filename, $path)
+    private function uploadFileFromLocal($file, $filename, $path, $field)
     {
         $extension = File::extension($file);
 
         if ( !empty( $extension ) )
-            $filename = $filename . '.' . $extension;
+            $filename = $this->filenameModifier($filename . '.' . $extension, $field);
 
         //Copy file from server, or directory into uploads for field
         File::copy($file, $path . '/' . $filename);
@@ -141,9 +141,12 @@ trait Uploadable
         {
             if ( $extension = $this->guessExtension($path, $filename) )
             {
-                File::move($path . '/' . $filename, $path . '/' . $filename . '.' . $extension);
+                //Modified filename
+                $filename_with_extension = $this->filenameModifier($filename . '.' . $extension);
 
-                $filename = $filename . '.' . $extension;
+                File::move($path . '/' . $filename, $path . '/' . $filename_with_extension);
+
+                $filename = $filename_with_extension;
             }
         }
 
@@ -153,10 +156,8 @@ trait Uploadable
         ];
     }
 
-    protected function filename($path, $file)
+    private function filename($path, $file)
     {
-        $files = File::files($path);
-
         //If file exists and is not from server, when is from server make unique name
         if ( method_exists($file, 'getClientOriginalName') )
             $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -181,6 +182,21 @@ trait Uploadable
         return $filename;
     }
 
+    /*
+     * Check if model has filename modifier
+     */
+    private function filenameModifier($filename, $field)
+    {
+        //Filename modifier
+        $method_filename_modifier = 'set' . studly_case($field) . 'Filename';
+
+        //Check if exists filename modifier
+        if ( method_exists($this, $method_filename_modifier) )
+            $filename = $this->{$method_filename_modifier}($filename);
+
+        return $filename;
+    }
+
     /**
      * Automaticaly check, upload, and make resizing and other function on file object
      * @param  string     $field         field name
@@ -194,7 +210,7 @@ trait Uploadable
             $path = $this->filePath($field);
 
         //Get count of files in upload directory and set new filename
-        $filename = $this->filename($path, $file);
+        $filename = $this->filename($path, $file, $field);
 
         //If dirs does not exists, create it
         AdminFile::makeDirs($path);
@@ -212,12 +228,12 @@ trait Uploadable
 
             //Get extension of file
             $extension = $file->getClientOriginalExtension();
-            $filename = $filename . '.' . $extension;
+            $filename = $this->filenameModifier($filename . '.' . $extension, $field);
 
             //Move photo from request to directory
             $file = $file->move($path, $filename);
         } else {
-            $response = $this->uploadFileFromLocal($file, $filename, $path);
+            $response = $this->uploadFileFromLocal($file, $filename, $path, $field);
 
             $filename = $response['filename'];
             $extension = $response['extension'];
