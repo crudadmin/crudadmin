@@ -277,6 +277,10 @@ trait AdminModelTrait
             else if ( $this->isFieldType($key, ['date', 'datetime', 'time']) )
                 $this->casts[$key] = 'datetime';
         }
+
+        //Add cast for order field
+        if ( $this->isSortable() )
+            $this->casts['_order'] = 'integer';
     }
 
     /*
