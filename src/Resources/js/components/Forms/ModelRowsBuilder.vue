@@ -307,10 +307,7 @@
           reloadCSRFToken(response.data.token);
 
           //Add next timeout
-          if ( !(this.rows.count > 0 && this.model.maximum === 1) )
-          {
-            this.initTimeout(false);
-          }
+          this.initTimeout(false);
         })
         .catch(function(response){
           //If has been component destroyed, and request is delivered...
@@ -318,7 +315,7 @@
             return;
 
           //Add next timeout
-          this.initTimeout(false);
+          this.initTimeout(false, true);
 
           //On first error
           if ( response.status == 500 && this.refresh.count == 0 ){
@@ -336,11 +333,13 @@
         if ( this.updateTimeout )
           clearTimeout(this.updateTimeout);
       },
-      initTimeout(indicator){
+      initTimeout(indicator, force){
         this.destroyTimeout();
 
+        var limit = this.isPaginationEnabled ? this.pagination.limit : 0;
+
         //Disable autorefreshing when is one row
-        if ( this.rows.count > 0 && this.model.maximum === 1 )
+        if ( (this.rows.count > 0 && this.model.maximum === 1 || parseInt(limit) > 50) && force !== true )
           return;
 
         this.updateTimeout = setTimeout(function(){
