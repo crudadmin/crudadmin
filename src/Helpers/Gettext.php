@@ -207,9 +207,10 @@ class Gettext
 
             $compiler = new BladeCompiler($fs, $cache_dir);
 
-            foreach ($files as $file) {
-
+            foreach ($files as $file)
+            {
                 $filePath = $file->getRealPath();
+
                 $compiler->setPath($filePath);
 
                 $contents = $compiler->compileString($fs->get($filePath));

@@ -31,4 +31,13 @@ trait Gettextable
             ]);
         }
     }
+
+    /*
+     * Change filename po mo files,
+     * because .mo files need to be unique
+     */
+    public function setPoeditMoFilename($filename)
+    {
+        return date('d-m-Y-h-i-s') . '.mo';
+    }
 }
