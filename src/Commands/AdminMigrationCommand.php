@@ -71,23 +71,29 @@ class AdminMigrationCommand extends Command
     /*
      * Return if is class updated
      */
-    protected function isOutOfDate($model)
+    protected function isOutOfDate($model, $migration)
     {
-        if ( $this->option('force') )
-            return false;
-
         $path = (new \ReflectionClass($model))->getFileName();
 
         if ( ! file_exists($path) )
+        {
+            //Migrate
+            call_user_func($migration);
+
             return false;
+        }
 
         $namespace = 'admin_migrations.' . md5(get_class($model));
 
         $hash = md5_file($path);
 
-        if ( Cache::get($namespace) == $hash )
+        if ( $this->option('force') === false && Cache::get($namespace) == $hash )
             return true;
 
+        //Migrate
+        call_user_func($migration);
+
+        //Cache model after migration done
         Cache::forever($namespace, $hash);
 
         return false;
@@ -103,10 +109,12 @@ class AdminMigrationCommand extends Command
 
         foreach ($models as $model)
         {
-            if ( $this->isOutOfDate($model) )
-                continue;
+            $migration = function() use ($model) {
+                $this->generateMigration($model);
+            };
 
-            $this->generateMigration($model);
+            if ( $this->isOutOfDate($model, $migration) )
+                continue;
 
             $migrated++;
         }
@@ -223,6 +231,13 @@ class AdminMigrationCommand extends Command
             //Add relationships with other models
             $this->addRelationships($table, $model, true);
 
+            //Which columns will be added in reversed order
+            $add_columns = [];
+
+            //Which columns has been added, so next columns can not be added after this columns,
+            //because this columns are not in database yet
+            $except_columns = [];
+
             foreach ($model->getFields() as $key => $value)
             {
                 //Checks if table has column and update it if can...
@@ -232,18 +247,34 @@ class AdminMigrationCommand extends Command
                         $column->change();
                     }
                 } else {
-                    if ( $column = $this->setColumn( $table, $model, $key ) )
-                    {
-                        if ( $model->getSchema()->hasColumn($model->getTable(), $this->getPreviousColumn($model, $key)) )
-                            $column->after( $this->getPreviousColumn($model, $key) );
-                        else if ( $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
-                            $column->before( 'deleted_at' );
+                    $except_columns[] = $key;
 
-                        if ( $column )
-                            $this->line('<comment>+ Added column:</comment> '.$key);
-                    }
+                    $add_columns[] = [
+                        'key' => $key,
+                        'callback' => function($except_columns) use ($table, $model, $key, $value){
+                            if ( $column = $this->setColumn( $table, $model, $key ) )
+                            {
+                                $previous_column = $this->getPreviousColumn($model, $key, $except_columns);
+
+                                if ( $model->getSchema()->hasColumn($model->getTable(), $previous_column) )
+                                    $column->after( $previous_column );
+
+                                //If column does not exists, then add before deleted ad column
+                                else if ( $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
+                                    $column->after( 'id' );
+                            }
+                        },
+                    ];
                 }
             }
+
+            //Add columns in reversed order
+            for ( $i = count($add_columns) - 1; $i >= 0; $i-- )
+                call_user_func_array($add_columns[$i]['callback'], [ $except_columns ]);
+
+            //Which columns has been successfully added
+            foreach ($add_columns as $row)
+                $this->line('<comment>+ Added column:</comment> '.$row['key']);
 
             //Add multilanguage support
             if ( ! $model->getSchema()->hasColumn($model->getTable(), 'language_id') )
@@ -321,7 +352,7 @@ class AdminMigrationCommand extends Command
     /*
      * Returns field before selected field, if is selected field first, returns last field
      */
-    public function getPreviousColumn($model, $find_key)
+    public function getPreviousColumn($model, $find_key, $except = [])
     {
         $last = 'id';
         $i = 0;
@@ -338,7 +369,7 @@ class AdminMigrationCommand extends Command
 
             $i++;
 
-            if ( !$model->hasFieldParam($key, 'belongsToMany') )
+            if ( !$model->hasFieldParam($key, 'belongsToMany') && !in_array($key, $except) )
                 $last = $key;
         }
 
