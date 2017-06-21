@@ -827,7 +827,10 @@ class AdminMigrationCommand extends Command
                 {
                     $column->after('id');
 
-                    $this->checkForReferenceTable($model, $foreign_column, $parent->getTable());
+                    //If is one foreign column, this columns is not null
+                    //so if some rows exists, we need push values into this row
+                    if ( count($belongsToModel) == 1 )
+                        $this->checkForReferenceTable($model, $foreign_column, $parent->getTable());
 
                     $this->line('<comment>+ Added column:</comment> '.$foreign_column);
                 }
