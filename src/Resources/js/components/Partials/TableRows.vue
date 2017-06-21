@@ -99,10 +99,12 @@
                 {
                   if ( 'before' in columns[k] && (columns[k].before == key || columns[k].before + '_id' == key) )
                   {
-                    if ( k in modifiedData )
-                      delete modifiedData[k];
+                    var field_key = (k in this.model.fields ? k : k + '_id');
 
-                    modifiedData[k] = columns[k].name||columns[k].title||this.model.fields[k].name;
+                    if ( k in modifiedData )
+                      delete modifiedData[field_key];
+
+                    modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
                   }
                 }
 
@@ -113,10 +115,12 @@
                 {
                   if ( 'after' in columns[k] && (columns[k].after == key || columns[k].after + '_id' == key) )
                   {
-                    if ( k in modifiedData )
-                      delete modifiedData[k];
+                    var field_key = (k in this.model.fields ? k : k + '_id');
 
-                    modifiedData[k] = columns[k].name||columns[k].title||this.model.fields[k].name;
+                    if ( k in modifiedData )
+                      delete modifiedData[field_key];
+
+                    modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
                   }
                 }
               }
@@ -126,10 +130,14 @@
 
 
             for ( var key in columns )
+            {
               if ( !(key in data) && columns[key].hidden != true )
               {
-                data[key] = columns[key].name||columns[key].title||this.model.fields[key].name;
+                var field_key = (k in this.model.fields ? k : k + '_id');
+
+                data[key] = columns[key].name||columns[key].title||this.model.fields[field_key].name;
               }
+            }
           }
 
           return data;
