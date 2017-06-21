@@ -48,8 +48,6 @@ class InterfaceRules
      */
     private function registerAttributes($rules, $field)
     {
-        $rules = is_array($rules) ? $rules : [$rules];
-
         return $field + Fields::mutate(FieldToArray::class, $rules);
     }
 }
