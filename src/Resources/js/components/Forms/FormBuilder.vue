@@ -10,12 +10,10 @@
 
       <div class="box-body">
         <div class="row" v-for="groups in chunkGroups">
-          <div v-for="group_name in groups">
-              <div v-bind:class="getGroupClass(group_name)">
-                <h4 v-if="canShowGroupName(group_name)">{{ group_name }}</h4>
-                <form-input-builder v-for="field_key in getGroup(group_name).fields" v-if="canShowField(model.fields[field_key])" :model="model" :row="row" :index="$index" :key="field_key" :field="model.fields[field_key]"></form-input-builder>
-              </div>
-          </div>
+            <div v-bind:class="getGroupClass(group)" v-for="group in groups">
+              <h4 v-if="canShowGroupName(group)">{{ group.name }}</h4>
+              <form-input-builder v-for="field_key in group.fields" v-if="canShowField(model.fields[field_key])" :model="model" :row="row" :index="$index" :key="field_key" :field="model.fields[field_key]"></form-input-builder>
+            </div>
         </div>
       </div>
 
@@ -103,12 +101,28 @@
         return 'nový záznam';
       },
       chunkGroups(){
-        var groups = Object.keys(this.model.fields_groups),
+        var groups = this.model.fields_groups,
             chunkSize = 2,
-            data = [];
+            offset = 0,
+            data = [],
+            chunk;
 
-        for (var i=0; i<groups.length; i+=chunkSize)
-            data.push(groups.slice(i,i+chunkSize));
+        for (var i = 0; i < groups.length - offset; i += chunkSize)
+        {
+          chunk = groups.slice(i + offset, i + offset + chunkSize);
+
+          if ( chunk.length > 0 && (chunk[0].type == 'default' || chunk[0].width == 'full') )
+          {
+            offset--;
+            data.push([chunk[0]]);
+          } else if ( chunk[1] && (chunk[1].type == 'default' || chunk[1].width == 'full') ){
+            data.push([chunk[0]]);
+            data.push([chunk[1]]);
+          } else {
+            data.push(chunk);
+          }
+
+        }
 
         return data;
       },
@@ -116,20 +130,14 @@
 
     methods: {
       //Return group class
-      getGroupClass(group_name){
-        if ( this.getGroup(group_name).width == 'half' )
+      getGroupClass(group){
+        if ( group.width == 'half' )
           return 'col-md-6';
 
         return 'col-md-12';
       },
-      //Return group by key
-      getGroup(key){
-        return this.model.fields_groups[key];
-      },
-      canShowGroupName(group_name){
-        var group = this.getGroup(group_name);
-
-        return !$.isNumeric(group_name) && group.type!='default';
+      canShowGroupName(group){
+        return !$.isNumeric(group.name) && group.type!='default';
       },
       canShowField(field){
         return !('removeFromForm' in field);
