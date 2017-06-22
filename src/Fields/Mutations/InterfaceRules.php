@@ -6,7 +6,7 @@ use Admin;
 
 class InterfaceRules
 {
-    public $attributes = ['in_frontend', 'in_backend', 'in_admin', 'in_console'];
+    public $attributes = ['inFrontend', 'inBackend', 'inAdmin', 'inConsole'];
 
     public function update( $field )
     {
@@ -31,13 +31,13 @@ class InterfaceRules
      */
     private function canRegisterRules($type)
     {
-        if ( $type == 'in_frontend' && Admin::isFrontend() )
+        if ( $type == 'inFrontend' && Admin::isFrontend() )
             return true;
 
-        if ( in_array($type, ['in_backend', 'in_admin']) && Admin::isAdmin() )
+        if ( in_array($type, ['inBackend', 'inAdmin']) && Admin::isAdmin() )
             return true;
 
-        if ( $type == 'in_console' && app()->runningInConsole() )
+        if ( $type == 'inConsole' && app()->runningInConsole() )
             return true;
 
         return false;
