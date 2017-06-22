@@ -264,6 +264,8 @@ class AdminMigrationCommand extends Command
                                 else if ( $model->getSchema()->hasColumn($model->getTable(), 'deleted_at') )
                                     $column->after( 'id' );
                             }
+
+                            return $column;
                         },
                     ];
                 }
@@ -271,7 +273,13 @@ class AdminMigrationCommand extends Command
 
             //Add columns in reversed order
             for ( $i = count($add_columns) - 1; $i >= 0; $i-- )
-                call_user_func_array($add_columns[$i]['callback'], [ $except_columns ]);
+            {
+                //if no column has been added, then remove column from array for messages
+                if ( !($column = call_user_func_array($add_columns[$i]['callback'], [ $except_columns ])) )
+                {
+                    unset($add_columns[$i]);
+                }
+            }
 
             //Which columns has been successfully added
             foreach ($add_columns as $row)
