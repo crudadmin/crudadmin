@@ -11,6 +11,7 @@ class Fields
         Mutations\FieldToArray::class,
         Mutations\AddGlobalRules::class,
         Mutations\AddAttributeRules::class,
+        Mutations\InterfaceRules::class,
         Mutations\BelongsToAttributeMutator::class,
         Mutations\AddSelectSupport::class,
         Mutations\AddLocalizationSupport::class,

@@ -86,6 +86,24 @@ class Group
     }
 
     /*
+     * Return if is key in inserted group
+     */
+    private static function isFieldInGroup($key, $group, $field)
+    {
+        //If is field in group fields list
+        if ( array_key_exists($key, $group->fields) )
+            return true;
+
+        //If fiels is belongsTo relation, and exists in field list
+        if ( array_key_exists(rtrim($key, '_id'), $group->fields) )
+            return true;
+
+        //if is localization field and exists in field group
+        if ( array_key_exists('localization', $field) && array_key_exists(implode(' ', array_slice(explode('_', $key), 0, -1)), $group->fields) )
+            return true;
+    }
+
+    /*
      * Returns groups of fields with correct order
      */
     public static function build( $model )
@@ -102,22 +120,20 @@ class Group
 
                 foreach ($groups as $group)
                 {
-                    //If group does not exists
-                    if ( !array_key_exists($group->name, $data) )
+                    //If field is in group,
+                    //or field with relationship, or field with localization support
+                    if ( self::isFieldInGroup($key, $group, $field) )
                     {
-                        $data[ $group->name ] = [
-                            'type' => $group->type,
-                            'width' => $group->width,
-                            'fields' => []
-                        ];
-                    }
+                        //If group does not exists
+                        if ( !array_key_exists($group->name, $data) )
+                        {
+                            $data[ $group->name ] = [
+                                'type' => $group->type,
+                                'width' => $group->width,
+                                'fields' => []
+                            ];
+                        }
 
-                    if (
-                        array_key_exists($key, $group->fields) ||
-                        array_key_exists(rtrim($key, '_id'), $group->fields) ||
-                        array_key_exists('localization', $field) && array_key_exists(implode(' ', array_slice(explode('_', $key), 0, -1)), $group->fields)
-                    )
-                    {
                       $data[ $group->name ]['fields'][] = $key;
 
                       continue 2;
@@ -135,6 +151,7 @@ class Group
                     ];
                 }
 
+                //Add column into last added group
                 $data[key( array_slice( $data, -1, 1, TRUE ) )]['fields'][] = $key;
             }
         } else {
@@ -144,7 +161,15 @@ class Group
             ];
         }
 
-        return $data;
+        //Returns groups as non assiociative array
+        //becuase javascript does not know order of keys
+        $groups = [];
+        foreach ($data as $name => $group)
+        {
+            $groups[] = array_merge($group, ['name' => $name]);
+        }
+
+        return $groups;
     }
 }
 ?>
