@@ -245,7 +245,7 @@ trait AdminModelTrait
     {
         foreach ($this->getFields() as $key => $field)
         {
-            if ( $field['type'] == 'date' )
+            if ( $this->isFieldType($key, ['date', 'datetime', 'time']) )
                 $this->dates[] = $key;
         }
 
@@ -689,7 +689,7 @@ trait AdminModelTrait
              */
             if ( in_array($field['type'], ['date', 'datetime', 'time']) && array_key_exists($key, $attributes) )
             {
-                $attributes[$key] = (new Carbon($attributes[$key]))->format( $field['date_format'] );
+                $attributes[$key] = $attributes[$key] ? (new Carbon($attributes[$key]))->format( $field['date_format'] ) : null;
             }
         }
 
