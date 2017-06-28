@@ -71,7 +71,7 @@ trait ModelRelationships
             }
 
             //Returns relationship builder
-            if ( $get === false || !$this->exists )
+            if ( $get === false || (!$this->exists && !parent::relationLoaded($method)) )
             {
                 return $this->relationResponse(
                     $method,
