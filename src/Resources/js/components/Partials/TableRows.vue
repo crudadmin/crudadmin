@@ -96,44 +96,23 @@
               {
                 //Add custom column before actual column
                 for ( var k in columns )
-                {
-                  if ( 'before' in columns[k] && (columns[k].before == key || columns[k].before + '_id' == key) )
-                  {
-                    var field_key = (k in this.model.fields ? k : k + '_id');
-
-                    if ( k in modifiedData )
-                      delete modifiedData[field_key];
-
-                    modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
-                  }
-                }
+                  modifiedData = this.addColumn(modifiedData, k, key, 'before', columns);
 
                 modifiedData[key] = data[key];
 
                 //Add custom column after actual column
                 for ( var k in columns )
-                {
-                  if ( 'after' in columns[k] && (columns[k].after == key || columns[k].after + '_id' == key) )
-                  {
-                    var field_key = (k in this.model.fields ? k : k + '_id');
-
-                    if ( k in modifiedData )
-                      delete modifiedData[field_key];
-
-                    modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
-                  }
-                }
+                  modifiedData = this.addColumn(modifiedData, k, key, 'after', columns);
               }
 
               data = modifiedData;
             }
 
-
             for ( var key in columns )
             {
               if ( !(key in data) && columns[key].hidden != true )
               {
-                var field_key = (k in this.model.fields ? k : k + '_id');
+                var field_key = this.getColumnRightKey(key);
 
                 data[key] = columns[key].name||columns[key].title||this.model.fields[field_key].name;
               }
@@ -460,6 +439,35 @@
           }
 
           return false;
+        },
+        /*
+         * Returns varians of column names
+         */
+        getColumnRightKey(k){
+          if ( !(k in this.model.fields) && ((k + '_id') in this.model.fields) )
+            return k + '_id';
+
+          return k;
+        },
+        /*
+         * Check if can be added column after other column
+         */
+        addColumn(modifiedData, k, key, where, columns)
+        {
+          if ( where in columns[k] && (columns[k][where] == key || columns[k][where] + '_id' == key) )
+          {
+            var field_key = this.getColumnRightKey(k);
+
+            if ( k in modifiedData )
+              delete modifiedData[k];
+
+            if ( field_key in modifiedData )
+              delete modifiedData[field_key];
+
+            modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
+          }
+
+          return modifiedData;
         }
       },
   }
