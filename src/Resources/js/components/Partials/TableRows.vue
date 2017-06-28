@@ -85,6 +85,34 @@
 
           var columns = this.$root.getModelProperty(this.model, 'settings.columns');
 
+         /*
+          * Check if can be added column after other column
+          */
+          var except = [];
+          var addColumn = function(modifiedData, k, key, where, columns)
+          {
+            if ( where in columns[k] && (columns[k][where] == key || columns[k][where] + '_id' == key) )
+            {
+              var field_key = this.getColumnRightKey(k);
+
+              //We can't add column which has been added, because we reorder array
+              if ( except.indexOf(field_key) > -1 )
+                return modifiedData;
+
+              except.push(field_key);
+
+              if ( k in modifiedData )
+                delete modifiedData[k];
+
+              if ( field_key in modifiedData )
+                delete modifiedData[field_key];
+
+              modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
+            }
+
+            return modifiedData;
+          }.bind(this);
+
           //Add before and after column values
           if ( columns )
           {
@@ -96,17 +124,18 @@
               {
                 //Add custom column before actual column
                 for ( var k in columns )
-                  modifiedData = this.addColumn(modifiedData, k, key, 'before', columns);
+                  modifiedData = addColumn(modifiedData, k, key, 'before', columns);
 
                 modifiedData[key] = data[key];
 
                 //Add custom column after actual column
                 for ( var k in columns )
-                  modifiedData = this.addColumn(modifiedData, k, key, 'after', columns);
+                  modifiedData = addColumn(modifiedData, k, key, 'after', columns);
               }
 
               data = modifiedData;
             }
+
 
             for ( var key in columns )
             {
@@ -449,26 +478,6 @@
 
           return k;
         },
-        /*
-         * Check if can be added column after other column
-         */
-        addColumn(modifiedData, k, key, where, columns)
-        {
-          if ( where in columns[k] && (columns[k][where] == key || columns[k][where] + '_id' == key) )
-          {
-            var field_key = this.getColumnRightKey(k);
-
-            if ( k in modifiedData )
-              delete modifiedData[k];
-
-            if ( field_key in modifiedData )
-              delete modifiedData[field_key];
-
-            modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
-          }
-
-          return modifiedData;
-        }
       },
   }
 </script>
