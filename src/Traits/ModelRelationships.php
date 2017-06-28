@@ -71,9 +71,15 @@ trait ModelRelationships
             }
 
             //Returns relationship builder
-            if ( $get === false )
+            if ( $get === false || !$this->exists )
             {
-                return $this->relationResponse($method, $relation['type'], $relation['path'], false, $relation['properties']);
+                return $this->relationResponse(
+                    $method,
+                    $relation['type'],
+                    $relation['path'],
+                    $get === false ? false : true,
+                    $relation['properties']
+                );
             }
 
             //Returns items from already loaded relationship
