@@ -210,7 +210,10 @@
 
               //Redirect on page
               if ( ('redirect' in data.data) && data.data.redirect )
-                window.location.replace(data.data.redirect);
+                if ( data.data.open == true )
+                  window.location.replace(data.data.redirect);
+                else
+                  window.open(data.data.redirect);
             }
 
             if ( data && 'type' in data )
