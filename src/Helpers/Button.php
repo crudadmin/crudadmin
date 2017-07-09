@@ -32,6 +32,11 @@ class Button
     public $redirect = null;
 
     /*
+     * Redirect in new tab
+     */
+    public $open = false;
+
+    /*
      * Is enabled button
      */
     public $active = true;
@@ -100,6 +105,18 @@ class Button
     public function redirect($redirect)
     {
         $this->redirect = $redirect;
+
+        return $this;
+    }
+
+    /*
+     * Set redirect in new tab
+     */
+    public function open($redirect)
+    {
+        $this->redirect = $redirect;
+
+        $this->open = true;
 
         return $this;
     }

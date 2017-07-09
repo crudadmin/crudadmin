@@ -1,4 +1,11 @@
-.buttons-options { min-width: 170px; max-width: 170px; width: 170px; text-align: right; }
+.buttons-options { text-align: right; font-size: 0 }
+.buttons-options > div { margin: 1.25px; display: inline-block; }
+.buttons-options > div:first-child { margin-left: 0 }
+.buttons-options > div:last-child { margin-right: 0 }
+.buttons-options { min-width: 150px; max-width: 150px; width: 150px; }
+.buttons-options.additional-1 { min-width: 190px; max-width: 190px; width: 190px; }
+.buttons-options.additional-2 { min-width: 220px; max-width: 220px; width: 220px; }
+.buttons-options.additional-3 { min-width: 245px; max-width: 245px; width: 245px; }
 .sidebar a { cursor: pointer; }
 .no-margin { margin: 0 }
 .tooltip-inner { word-wrap: break-word; }
