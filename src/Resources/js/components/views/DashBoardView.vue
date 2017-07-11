@@ -6,7 +6,7 @@
       <small>Vitajte v administrácii</small>
     </h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Administrace</a></li>
+      <li><a href="#"><i class="fa fa-dashboard"></i> Administrácia</a></li>
       <li class="active">Dashboard</li>
     </ol>
   </section>

@@ -6,7 +6,7 @@
       <small>{{{ model.title }}}</small>
     </h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Administrace</a></li>
+      <li><a href="#"><i class="fa fa-dashboard"></i> Administrácia</a></li>
       <li v-if="getGroup">{{ getGroup.name}}</li>
       <li class="active">{{ model.name }}</li>
     </ol>
