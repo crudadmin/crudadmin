@@ -114,6 +114,11 @@ class Model extends BaseModel
     protected $single = false;
 
     /*
+     * History feature for model
+     */
+    protected $history = false;
+
+    /*
      * Automatic form and database generation
      */
     protected $fields = [];
