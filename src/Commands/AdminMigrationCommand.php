@@ -760,6 +760,10 @@ class AdminMigrationCommand extends Command
         if( ! $model->hasFieldParam($key, 'required') )
             $column->nullable();
 
+        //If field has index
+        if( $model->hasFieldParam($key, 'index') )
+            $column->index();
+
         //If is field required
         if( $model->hasFieldParam($key, 'default') )
         {

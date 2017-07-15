@@ -189,6 +189,7 @@ class LayoutController extends BaseController
             'publishable' => $model->getProperty('publishable'),
             'sortable' => $model->isSortable(),
             'orderBy' => $model->getProperty('orderBy'),
+            'history' => $model->getProperty('history'),
             'fields' => $this->getModelFields( $model ),
             'fields_groups' => Group::build($model),
             'childs' => $childs,

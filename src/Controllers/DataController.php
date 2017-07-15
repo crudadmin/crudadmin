@@ -5,6 +5,7 @@ namespace Gogol\Admin\Controllers;
 use Illuminate\Http\Request;
 use Gogol\Admin\Requests\DataRequest;
 use Gogol\Admin\Helpers\AdminRows;
+use Gogol\Admin\Models\ModelsHistory;
 use Admin;
 use Carbon\Carbon;
 use Ajax;
@@ -91,6 +92,14 @@ class DataController extends Controller
 
         $changes = $request->allWithMutators()[0];
 
+        /*
+         * Save into hustory
+         */
+        if ( $model->getProperty('history') === true )
+        {
+            (new ModelsHistory)->pushChanges($model->getTable(), $row->getKey(), $changes);
+        }
+
         //Remove overridden files
         $this->removeOverridenFiles($row, $changes);
 
@@ -132,6 +141,14 @@ class DataController extends Controller
             }
 
             $this->updateBelongsToMany($model, $row);
+
+            /*
+             * Save into hustory
+             */
+            if ( $model->getProperty('history') === true )
+            {
+                (new ModelsHistory)->pushChanges($model->getTable(), $row->getKey(), $request_row);
+            }
 
             //Fire on create event
             if ( method_exists($model, 'onCreate') )
