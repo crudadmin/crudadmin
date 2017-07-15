@@ -1,0 +1,106 @@
+<template>
+    <div class="history-table">
+
+      <!-- MODAL -->
+      <div class="example-modal">
+        <div class="modal modal-default" style="display: block">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" @click="closeHistory" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">História zmien</h4>
+              </div>
+              <div class="modal-body">
+                  <table class="table data-table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th class="td-id">Č.</th>
+                        <th>Zmeny vykonal</th>
+                        <th>Počet zmien</th>
+                        <th>Dátum zmeny</th>
+                        <th class="th-history-buttons"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in history.rows | orderBy 'id' -1">
+                        <td class="td-id">{{ history.rows.length - $index }}</td>
+                        <td>{{ item.user ? item.user.username : 'Anonym' }}</td>
+                        <td>
+                          <span data-toggle="tooltip" title="" :data-original-title="changedFields(item)">{{ item.changed_fields.length }} <i class="fa fa-eye"></i></span>
+                        </td>
+                        <td>{{ date(item.created_at) }}</td>
+                        <td>
+                          <div><button type="button" v-on:click="applyChanges(item)" class="btn btn-sm btn-success" v-bind:class="{ 'enabled-history' : history.history_id == item.id }" data-toggle="tooltip" title="Zobraziť zmeny" data-original-title="Zobraziť zmeny"><i class="fa fa-eye"></i></button></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+              </div>
+              <div class="modal-footer">
+                <button type="button" @click="closeHistory" class="btn btn-primary">Zatvoriť</button>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+      </div>
+    </div>
+</template>
+
+<script>
+  export default {
+      props : ['history'],
+
+      data(){
+        return {
+
+        };
+      },
+
+      created() {
+
+      },
+
+      ready() {
+
+      },
+
+      computed: {
+
+      },
+
+      methods: {
+        applyChanges(item){
+            this.$parent.history.fields = item.changed_fields;
+            this.$parent.history.history_id = item.id;
+
+            this.$parent.selectRow({ id : this.history.id }, null, null, item.id);
+        },
+        date(date){
+            return moment(date).format('D.M.Y H:mm');
+        },
+        closeHistory(){
+            this.$parent.$parent.$parent.closeHistory(true);
+        },
+        changedFields(items){
+          var changes = [];
+
+          for ( var k in items.changed_fields )
+          {
+            var key = items.changed_fields[k];
+
+            if ( key in this.$parent.model.fields )
+              changes.push(this.$parent.model.fields[key].name);
+            else
+              changes.push(key);
+          }
+
+          return changes.join(', ');
+        }
+      },
+  }
+</script>

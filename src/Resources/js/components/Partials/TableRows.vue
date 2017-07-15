@@ -1,43 +1,50 @@
 <template>
-  <table v-bind:id="'table-'+model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
-    <thead>
-      <tr>
-        <th v-for="(field, name) in columns" v-bind:class="'th-'+field" v-on:click="toggleSorting(field)">
-          <i class="arrow-sorting fa fa-arrow-up" v-if="orderby[0] == field && orderby[1] == 0"></i>
-          <i class="arrow-sorting fa fa-arrow-down" v-if="orderby[0] == field && orderby[1] == 1"></i>
-          {{ name }}
-        </th>
-        <th class="th-options-buttons"></th>
-      </tr>
-    </thead>
-    <tbody data-model="{{ model.slug }}">
-      <tr v-for="(key, item) in rowsdata" data-index="{{ item.id }}" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
+  <div>
+    <history v-if="history.id" :history="history"></history>
 
-        <td v-for="(field, name) in columns" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
-          <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
-        </td>
+    <table v-bind:id="'table-'+model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
+      <thead>
+        <tr>
+          <th v-for="(field, name) in columns" v-bind:class="'th-'+field" v-on:click="toggleSorting(field)">
+            <i class="arrow-sorting fa fa-arrow-up" v-if="orderby[0] == field && orderby[1] == 0"></i>
+            <i class="arrow-sorting fa fa-arrow-down" v-if="orderby[0] == field && orderby[1] == 1"></i>
+            {{ name }}
+          </th>
+          <th class="th-options-buttons"></th>
+        </tr>
+      </thead>
+      <tbody data-model="{{ model.slug }}">
+        <tr v-for="(key, item) in rowsdata" data-index="{{ item.id }}" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
 
-        <td class="buttons-options" v-bind:class="[ 'additional-' + buttonsCount(item) ]">
-          <div><button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button></div>
-          <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" data-original-title="Informácie o zázname"><i class="fa fa-info"></i></button></div>
-          <div v-for="(button_key, button) in getButtonsForRow(item)">
-            <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button.icon]"></i></button>
-          </div>
-          <div><button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? 'Skryť' : 'Zobraziť' }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
+          <td v-for="(field, name) in columns" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
+            <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
+          </td>
+
+          <td class="buttons-options" v-bind:class="[ 'additional-' + buttonsCount(item) ]">
+            <div><button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button></div>
+            <div><button type="button" v-if="isEnabledHistory" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" data-original-title="História zmien"><i class="fa fa-history"></i></button></div>
+            <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" data-original-title="Informácie o zázname"><i class="fa fa-info"></i></button></div>
+
+            <div v-for="(button_key, button) in getButtonsForRow(item)">
+              <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button.icon]"></i></button>
+            </div>
+            <div><button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? 'Skryť' : 'Zobraziť' }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
           <div><button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" data-toggle="tooltip" title="" data-original-title="Vymazat"><i class="fa fa-remove"></i></button></div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
   import TableRowValue from './TableRowValue.vue';
+  import History from './History.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'model', 'orderby', 'dragging'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'model', 'orderby', 'dragging', 'history'],
 
-      components: { TableRowValue },
+      components: { TableRowValue, History },
 
       data(){
         return {
@@ -156,6 +163,9 @@
         isEditable(){
           return this.model.editable || this.$parent.$parent.hasChilds() > 0;
         },
+        isEnabledHistory(){
+          return this.model.history == true;
+        },
       },
 
       methods: {
@@ -163,9 +173,9 @@
           var buttons = this.getButtonsForRow(item);
 
           if ( ! buttons )
-            return 0;
+            buttons = { length : 0 };
 
-          return buttons.length;
+          return buttons.length + (this.isEnabledHistory ? 1 : 0);
         },
         getButtonsForRow(item){
           if ( ! this.rows.buttons )
@@ -364,24 +374,37 @@
 
           this.$root.openAlert('Informácie o zázname č. ' + row.id, data, 'primary', null, function(){});
         },
-        selectRow(row, data, model){
+        showHistory(row){
+          this.$http.get( this.$root.requests.getHistory, {
+            model : this.model.slug,
+            id : row.id,
+          })
+          .then(function(response){
+
+            var data = response.data;
+
+            if ( data.length <= 1 )
+              return this.$root.openAlert('Informácia', 'V aktuálnom zázname neboli vykonané žiadné zmeny.', 'warning');
+
+            this.history.id = row.id;
+            this.history.rows = data;
+          })
+          .catch(function(response){
+            this.$root.errorResponseLayer(response);
+          });
+        },
+        selectRow(row, data, model, history_id){
           //If is selected same row
-          if ( this.row && this.row.id == row.id )
-          {
+          if ( this.row && this.row.id == row.id && !history_id )
             return;
-          }
 
           //Recieve just messages between form and rows in one model component
           if (model && this.model.slug != model)
-          {
             return;
-          }
 
           //Resets form
           if ( row === true && data === null )
-          {
             return this.row = null;
-          }
 
           var render = function(response){
             for ( var key in response )
@@ -390,12 +413,16 @@
             }
 
             this.row = row;
+
+            this.$parent.$parent.closeHistory(history_id ? true : false);
+
+            this.scrollToForm();
           };
 
           if ( data ) {
             render(data);
           } else {
-            this.$http.get(this.$root.requests.show, { model : this.model.slug, id : row.id })
+            this.$http.get(this.$root.requests.show, { model : this.model.slug, id : row.id, subid : history_id })
             .then(function(response){
               render.call(this, response.data );
             })
@@ -489,6 +516,16 @@
 
           return k;
         },
+        scrollToForm(){
+
+          //Allow scroll form only on full width table
+          if ( this.$parent.$parent.activeSize != 0 )
+            return;
+
+          $('html, body').animate({
+              scrollTop: $("#form-" + this.model.slug).offset().top - 10
+          }, 500);
+        }
       },
   }
 </script>

@@ -54,19 +54,42 @@
 
         <!-- left column -->
         <div class="col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm">
-          <form-builder :progress.sync="progress" :rows.sync="rows" :model="model" :langid="langid" :canaddrow="canAddRow" :row.sync="row"></form-builder>
+          <form-builder
+            :progress.sync="progress"
+            :rows.sync="rows"
+            :history="history"
+            :model="model"
+            :langid="langid"
+            :canaddrow="canAddRow"
+            :row.sync="row"
+          ></form-builder>
         </div>
         <!--/.col (left) -->
 
         <!-- right column -->
         <div class="col col-rows col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12" v-show="hasRows && canShowRows">
-          <model-rows-builder :model.sync="model" :rows.sync="rows" :row.sync="row" :langid="langid" :progress.sync="progress" :search="search"></model-rows-builder>
+          <model-rows-builder
+            :model.sync="model"
+            :rows.sync="rows"
+            :row.sync="row"
+            :langid="langid"
+            :progress.sync="progress"
+            :search="search"
+            :history="history">
+          </model-rows-builder>
         </div>
         <!--/.col (right) -->
 
       </div>
 
-      <model-builder v-if="row" :langid="langid" v-for="child in model.childs" :ischild="true" :model="child" :parentrow="row"></model-builder>
+      <model-builder
+        v-if="row"
+        v-for="child in model.childs"
+        :langid="langid"
+        :ischild="true"
+        :model="child"
+        :parentrow="row">
+      </model-builder>
     </div>
   </div>
 
@@ -105,11 +128,24 @@
           used : false,
         },
 
+        /*
+         * Loaded rows from db
+         */
         rows : {
           data : [],
           buttons : {},
           count : 0,
           loaded : false,
+        },
+
+        /*
+         * History for selected row
+         */
+        history : {
+          history_id : null,
+          id : null,
+          rows : [],
+          fields : [],
         },
 
         //Additional layouts for model
@@ -400,6 +436,19 @@
       reloadSearchBarSelect(){
         $('#'+this.getFilterSelectId).trigger("chosen:updated");
       },
+      /*
+       * Close history rows
+       */
+      closeHistory(with_fields){
+        this.history.id = null;
+        this.history.rows = [];
+
+        if ( ! with_fields )
+        {
+          this.history.fields = [];
+          this.history.history_id = null;
+        }
+      }
     },
 
     computed: {
@@ -510,7 +559,7 @@
       },
       isSearching(){
         return this.search.used == true;
-      }
+      },
     },
 
     components : { FormBuilder, ModelRowsBuilder }

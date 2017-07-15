@@ -26,11 +26,12 @@ class LayoutController extends BaseController
             'models' => $this->getAppTree(),
             'languages' => $this->getLanguages(),
             'requests' => [
-                'show' => action('\Gogol\Admin\Controllers\DataController@show', [':model', ':id']),
+                'show' => action('\Gogol\Admin\Controllers\DataController@show', [':model', ':id', ':subid']),
                 'store' => action('\Gogol\Admin\Controllers\DataController@store'),
                 'update' => action('\Gogol\Admin\Controllers\DataController@update'),
                 'delete' => action('\Gogol\Admin\Controllers\DataController@delete'),
                 'togglePublishedAt' => action('\Gogol\Admin\Controllers\DataController@togglePublishedAt'),
+                'getHistory' => action('\Gogol\Admin\Controllers\DataController@getHistory', [':model', ':id']),
                 'updateOrder' => action('\Gogol\Admin\Controllers\DataController@updateOrder'),
                 'buttonAction' => action('\Gogol\Admin\Controllers\DataController@buttonAction'),
                 'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),

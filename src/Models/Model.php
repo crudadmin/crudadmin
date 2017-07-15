@@ -119,6 +119,11 @@ class Model extends BaseModel
     protected $history = false;
 
     /*
+     * Delete old rewrited files from
+     */
+    protected $delete_files = true;
+
+    /*
      * Automatic form and database generation
      */
     protected $fields = [];

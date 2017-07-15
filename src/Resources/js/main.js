@@ -4,6 +4,8 @@ var VueRouter = require('vue-router');
 
 require('jquery-form/jquery.form.js');
 
+window.moment = require('moment');
+
 //Uses
 Vue.use(require('vue-resource'));
 Vue.use(require('vue-drag-and-drop'));

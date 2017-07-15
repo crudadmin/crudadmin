@@ -3,6 +3,8 @@
 namespace Gogol\Admin\Models;
 
 use Gogol\Admin\Models\Model;
+use Carbon\Carbon;
+
 
 class ModelsHistory extends Model
 {
@@ -31,6 +33,8 @@ class ModelsHistory extends Model
 
     protected $publishable = false;
 
+    protected $orderBy = ['id', 'asc'];
+
     /*
      * Automatic form and database generation
      * @name - field name
@@ -41,15 +45,19 @@ class ModelsHistory extends Model
     protected $fields = [
         'table' => 'name:Tabuľka',
         'row_id' => 'name:ID|type:integer|index|unsigned',
+        'user' => 'name:Administrator|belongsTo:users,id',
         'data' => 'name:Data|type:text',
     ];
 
     /*
      * Foreach all rows in history, and get acutal data status
      */
-    public function getActualRowData($table, $id)
+    public function getActualRowData($table, $id, $max_id = null)
     {
-        if (!($changes = $this->where('table', $table)->where('row_id', $id)->orderBy('id', 'ASC')->get()))
+        if (!($changes = $this->where('table', $table)->where('row_id', $id)->where(function($query) use ( $max_id ) {
+            if ( $max_id )
+                $query->where('id', '<=', $max_id);
+        })->orderBy('id', 'ASC')->get()))
             return [];
 
         $data = [];
@@ -63,6 +71,18 @@ class ModelsHistory extends Model
                 $data[$key] = $value;
             }
         }
+
+        return $data;
+    }
+
+    public function convertData($data)
+    {
+        foreach ($data as $key => $value)
+        {
+            if ( $value instanceof Carbon )
+                $data[$key] = $value->format('Y-m-d H:i:00');
+        }
+
 
         return $data;
     }
@@ -82,6 +102,10 @@ class ModelsHistory extends Model
                 $changes[$key] = $value;
         }
 
+        //Push empty values into missing keys in actual request
+        foreach (array_diff_key($old_data, $data) as $key => $value)
+            $changes[$key] = is_array($value) ? [] : '';
+
         return $changes;
     }
 
@@ -95,16 +119,32 @@ class ModelsHistory extends Model
                 unset($data[$key]);
         }
 
+        $data = $this->convertData($data);
+
         $data = $this->checkChanges($table, $id, $data);
 
         //If no changes
         if ( count($data) == 0 )
             return;
 
+        $user = auth()->guard('web')->user();
+
         return $this->create([
+            'user_id' => $user ? $user->getKey() : null,
             'table' => $table,
             'row_id' => $id,
             'data' => json_encode($data),
         ]);
+    }
+
+    public function attributesToArray()
+    {
+        $attributes = parent::attributesToArray();
+
+        $attributes['changed_fields'] = array_keys((array)json_decode($attributes['data']));
+
+        unset($attributes['data']);
+
+        return $attributes;
     }
 }

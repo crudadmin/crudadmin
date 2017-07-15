@@ -255,12 +255,14 @@ trait Uploadable
         {
             $files = is_array($file) ? $file : [ $file ];
 
+            $is_allowed_deleting = config('admin.reduce_space', true) === true && $this->delete_files === true;
+
             //Remove also multiple uploded files
             foreach ($files as $file)
             {
                 $field = $this->getField($key);
 
-                if ( array_key_exists('resize', $field) && is_array($field['resize']) && config('admin.reduce_space', true) === true )
+                if ( array_key_exists('resize', $field) && is_array($field['resize']) && $is_allowed_deleting )
                 {
                     foreach ($field['resize'] as $method => $value)
                     {
@@ -291,7 +293,7 @@ trait Uploadable
                 }
 
                 //Removing original files
-                if ( config('admin.reduce_space', true) === true )
+                if ( $is_allowed_deleting )
                 {
                     $file->delete();
                 }

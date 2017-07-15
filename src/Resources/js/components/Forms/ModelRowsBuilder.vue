@@ -11,7 +11,18 @@
     </div>
 
     <div class="box-body box-table-body">
-      <table-rows :model="model" :row.sync="row" :buttons="rows.buttons" :count="rows.count" :rows="rows" :rowsdata.sync="rowsData" :item="$row" :dragging.sync="dragging" :orderby.sync="orderBy"></table-row>
+      <table-rows
+        :model="model"
+        :row.sync="row"
+        :buttons="rows.buttons"
+        :count="rows.count"
+        :history="history"
+        :rows="rows"
+        :rowsdata.sync="rowsData"
+        :item="$row"
+        :dragging.sync="dragging"
+        :orderby.sync="orderBy">
+      </table-row>
     </div>
 
     <div class="box-header" v-if="isPaginationEnabled && rows.count>pagination.limit">
@@ -32,7 +43,7 @@
   import TableRows from '../Partials/TableRows.vue';
 
   export default {
-    props : ['model', 'row', 'rows', 'langid', 'progress', 'search'],
+    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history'],
 
     components : { Refreshing, TableRows },
 
@@ -131,6 +142,9 @@
             }
           }
         }
+
+        //Reset history on update row
+        this.$parent.closeHistory();
       },
     },
 

@@ -641,6 +641,8 @@ trait AdminModelTrait
     public function setProperty($property, $value)
     {
         $this->{$property} = $value;
+
+        return $this;
     }
 
     /**
@@ -659,7 +661,7 @@ trait AdminModelTrait
             /*
              * Update multiple values in many relationship
              */
-            if ( array_key_exists('belongsToMany', $field) )
+            if ( array_key_exists('belongsToMany', $field) && $this->skipBelongsToMany === false )
             {
                 $properties = $this->getRelationProperty($key, 'belongsToMany');
 

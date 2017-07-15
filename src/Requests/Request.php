@@ -132,13 +132,32 @@ abstract class Request extends FormRequest
      */
     public function datetimes(array $fields = null)
     {
+        $reset = [
+            'd' => ['day', 1],
+            'm' => ['month', 1],
+            'y' => ['year', 1970],
+            'h' => ['hour', 0],
+            'i' => ['minute', 0],
+            's' => ['second', 0],
+        ];
+
         foreach ($fields as $key => $field)
         {
             if ( $this->model->isFieldType($key, ['date', 'datetime', 'time']) )
             {
                 if ( $this->has( $key ) )
                 {
-                    $this->merge( [ $key => Carbon::createFromFormat( $field['date_format'], $this->get($key) ) ] );
+                    $date = Carbon::createFromFormat( $field['date_format'], $this->get($key) );
+
+                    $date_format = strtolower($field['date_format']);
+
+                    foreach ($reset as $identifier => $arr) {
+                        //Reset hours if are not in date format
+                        if ( strpos($date_format, $identifier) === false )
+                            $date->{$arr[0]}($arr[1]);
+                    }
+
+                    $this->merge( [ $key => $date ] );
                 }
             }
         }

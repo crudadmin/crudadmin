@@ -11,8 +11,8 @@
       <div class="box-body">
         <div class="row" v-for="groups in chunkGroups">
             <div v-bind:class="getGroupClass(group)" v-for="group in groups">
-              <h4 v-if="canShowGroupName(group)">{{ group.name }}</h4>
-              <form-input-builder v-for="field_key in group.fields" v-if="canShowField(model.fields[field_key])" :model="model" :row="row" :index="$index" :key="field_key" :field="model.fields[field_key]"></form-input-builder>
+              <h4 class="group-title" v-if="canShowGroupName(group)">{{ group.name }}</h4>
+              <form-input-builder v-for="field_key in group.fields" v-if="canShowField(model.fields[field_key])" :history="history"  :model="model" :row="row" :index="$index" :key="field_key" :field="model.fields[field_key]"></form-input-builder>
             </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
   import FormInputBuilder from '../Forms/FormInputBuilder.vue';
   export default {
 
-    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress'],
+    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history'],
 
     data(){
       return {
@@ -165,6 +165,8 @@
         //Set box color
         if (!row) {
           this.isActive = true;
+
+          this.$parent.closeHistory();
         } else {
           this.isActive = row.published_at == null;
         }

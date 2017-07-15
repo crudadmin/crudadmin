@@ -1,4 +1,5 @@
 <template>
+  <div v-bind:class="{ 'is-changed-from-history' : isChangedFromHistory }">
     <!-- STRING INPUT -->
     <div class="form-group" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
@@ -63,7 +64,7 @@
     </div>
 
     <!-- Row Confirmation -->
-    <form-input-builder v-if="field.confirmed == true && !isConfirmation" :model="model" :field="field" :index="index" :key="key + '_confirmation'" :row="row" :confirmation="true"></form-input-builder>
+    <form-input-builder v-if="field.confirmed == true && !isConfirmation" :model="model" :history="history" :field="field" :index="index" :key="key + '_confirmation'" :row="row" :confirmation="true"></form-input-builder>
 
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
@@ -96,6 +97,7 @@
       </select>
       <small>{{ field.title }}</small>
     </div>
+  </div>
 </template>
 
 <script>
@@ -103,7 +105,7 @@
 
   export default {
       name: 'form-input-builder',
-      props: ['model', 'field', 'index', 'key', 'row', 'confirmation'],
+      props: ['model', 'field', 'index', 'key', 'row', 'confirmation', 'history'],
 
       data(){
         return {
@@ -460,6 +462,9 @@
           }
 
           return missing;
+        },
+        isChangedFromHistory(){
+          return this.history.fields.indexOf(this.key) > -1;
         },
       },
 
