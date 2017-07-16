@@ -1,8 +1,10 @@
+.th-history-buttons { width: 51px }
+
 .buttons-options { text-align: right; font-size: 0 }
 .buttons-options > div { margin: 1.25px; display: inline-block; }
 .buttons-options > div:first-child { margin-left: 0 }
 .buttons-options > div:last-child { margin-right: 0 }
-.buttons-options { min-width: 150px; max-width: 150px; width: 150px; }
+.buttons-options { min-width: 152px; max-width: 152px; width: 152px; }
 .buttons-options.additional-1 { min-width: 190px; max-width: 190px; width: 190px; }
 .buttons-options.additional-2 { min-width: 220px; max-width: 220px; width: 220px; }
 .buttons-options.additional-3 { min-width: 245px; max-width: 245px; width: 245px; }
@@ -77,7 +79,7 @@
 /*
  * Form settings
  */
-.content .box-body h4 {font-size: 18px; font-weight: 900; border-bottom: 1px solid rgb(51, 51, 51); padding-bottom: 10px;}
+.content .box-body h4.group-title {font-size: 18px; font-weight: 900; border-bottom: 1px solid rgb(51, 51, 51); padding-bottom: 10px;}
 .content .box-body .file-group { position: relative; }
 .content .box-body .file-group button[type=button] { position: absolute; right: 0; top: 0; }
 .content .box-body .radio-group label { display: block }
@@ -319,3 +321,25 @@ select[multiple] {height: 34px;color: white;}
 .search-bar .chosen-container-single .chosen-single span { margin-top: 2px; font-size: 13px }
 
 form label span.required { color: red; position: relative; top: 2px }
+
+.history-table table {
+    background: white;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 0;
+}
+
+.history-table .modal-body {
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+/*
+ * History field color
+ */
+form .is-changed-from-history label { color: #b900e2; }
+form .is-changed-from-history .form-control,
+form .is-changed-from-history .form-group > .chosen-container > .chosen-choices,
+form .is-changed-from-history .form-group > .chosen-container > .chosen-single { border: 1px solid #b900e2; }
+button.enabled-history { background: #b900e2; color: white !important; border: 1px solid #80009c !important; }
+button.enabled-history:hover, button.enabled-history:focus, button.enabled-history:active, button.enabled-history:visited { background: #80009c !important }
