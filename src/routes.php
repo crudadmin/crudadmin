@@ -45,11 +45,12 @@ Route::group(['middleware' => 'admin'], function(){
     Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
 
     //Requests
-    Route::get('/admin/api/show/{model}/{id}', 'DataController@show');
+    Route::get('/admin/api/show/{model}/{id}/{subid?}', 'DataController@show');
     Route::post('/admin/api/store', 'DataController@store');
     Route::put('/admin/api/update', 'DataController@update');
     Route::post('/admin/api/buttonAction', 'DataController@buttonAction');
     Route::post('/admin/api/togglePublishedAt', 'DataController@togglePublishedAt');
     Route::post('/admin/api/updateOrder', 'DataController@updateOrder');
+    Route::get('/admin/api/getHistory/{model}/{id}', 'DataController@getHistory');
     Route::delete('/admin/api/delete', 'DataController@delete');
 });

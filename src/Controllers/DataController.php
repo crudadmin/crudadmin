@@ -5,6 +5,7 @@ namespace Gogol\Admin\Controllers;
 use Illuminate\Http\Request;
 use Gogol\Admin\Requests\DataRequest;
 use Gogol\Admin\Helpers\AdminRows;
+use Gogol\Admin\Models\ModelsHistory;
 use Admin;
 use Carbon\Carbon;
 use Ajax;
@@ -59,11 +60,26 @@ class DataController extends Controller
     /*
      * Displaying row data
      */
-    public function show($model, $id)
+    public function show($model, $id, $history_id = null)
     {
+        if ( is_numeric($history_id) )
+            return $this->showDataFromHistory($model, $id, $history_id);
+
         $model = $this->getModel( $model );
 
         return $model->findOrFail($id)->getAdminAttributes();
+    }
+
+    /*
+     * Returns data in history point
+     */
+    public function showDataFromHistory($model, $id, $history_id)
+    {
+        $model = $this->getModel( $model );
+
+        $row = (new ModelsHistory)->getActualRowData($model->getTable(), $id, $history_id);
+
+        return $model->forceFill($row)->setProperty('skipBelongsToMany', true)->getAdminAttributes();
     }
 
     /*
@@ -90,6 +106,14 @@ class DataController extends Controller
         $original = $row['original'];
 
         $changes = $request->allWithMutators()[0];
+
+        /*
+         * Save into hustory
+         */
+        if ( $model->getProperty('history') === true )
+        {
+            (new ModelsHistory)->pushChanges($model->getTable(), $row->getKey(), $changes);
+        }
 
         //Remove overridden files
         $this->removeOverridenFiles($row, $changes);
@@ -132,6 +156,14 @@ class DataController extends Controller
             }
 
             $this->updateBelongsToMany($model, $row);
+
+            /*
+             * Save into hustory
+             */
+            if ( $model->getProperty('history') === true )
+            {
+                (new ModelsHistory)->pushChanges($model->getTable(), $row->getKey(), $request_row);
+            }
 
             //Fire on create event
             if ( method_exists($model, 'onCreate') )
@@ -345,5 +377,20 @@ class DataController extends Controller
         //Fire on update order event
         if ( method_exists($model, 'onUpdateOrder') )
             return $model->onUpdateOrder();
+    }
+
+    /*
+     * Return history rows
+     */
+    public function getHistory($model, $id)
+    {
+        $rows = ModelsHistory::where('table', $model)
+                            ->where('row_id', $id)
+                            ->with(['user' => function($query){
+                                $query->select(['id', 'username']);
+                            }])
+                            ->get(['id', 'data', 'user_id', 'created_at']);
+
+        return $rows;
     }
 }

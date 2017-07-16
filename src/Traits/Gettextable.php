@@ -3,6 +3,8 @@
 namespace Gogol\Admin\Traits;
 
 use Gettext;
+use Admin;
+use Ajax;
 
 trait Gettextable
 {
@@ -39,5 +41,21 @@ trait Gettextable
     public function setPoeditMoFilename($filename)
     {
         return date('d-m-Y-h-i-s') . '.mo';
+    }
+
+    /*
+     * Set slug
+     */
+    public function setSlugAttribute($value)
+    {
+        $slug = str_slug($value);
+
+        if ( strlen(str_replace('-', '', $slug)) != 2 )
+            Ajax::error('Zadali skratku jazyka v nesprávnom formáte.');
+
+        if ( ! $this->exists )
+            $this->attributes['slug'] = $slug;
+        else if ( $this->original['slug'] != $value )
+            Admin::push('errors', 'Skratku jazyka nie je možné po jej vytvorení premenovať.');
     }
 }

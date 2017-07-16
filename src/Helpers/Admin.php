@@ -231,6 +231,12 @@ class Admin
             $this->addModel( \Gogol\Admin\Models\AdminsGroup::class, false );
         }
 
+        //If is enabled admin groups
+        if ( config('admin.history') === true && !in_array('App\ModelsHistory', $this->get('namespaces')) )
+        {
+            $this->addModel( \Gogol\Admin\Models\ModelsHistory::class, false );
+        }
+
         //Sorting models
         $this->sortModels();
 

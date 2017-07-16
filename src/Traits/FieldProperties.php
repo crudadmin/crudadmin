@@ -15,6 +15,11 @@ trait FieldProperties
     private $justBaseFields = false;
 
     /*
+     * Skip belongsToMany properties in getAdminModelAttributes
+     */
+    private $skipBelongsToMany = false;
+
+    /*
      * Field mutator for selects returns all options (also from db, etc...)
      */
     public function withAllOptions($set = null)

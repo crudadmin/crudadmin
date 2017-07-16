@@ -388,21 +388,21 @@ class AdminMigrationCommand extends Command
     /*
      * Returns foreign key name
      */
-    protected function getForeignKeyName($model, $key)
+    protected function getForeignKeyName($model, $key, $prefix = 'foreign')
     {
-        return $model->getTable().'_'.$key.'_foreign';
+        return $model->getTable().'_'.$key.'_'.$prefix;
     }
 
     /*
      * Returns if table has index
      */
-    protected function hasIndex($model, $key)
+    protected function hasIndex($model, $key, $prefix = null)
     {
         return count( $model->getConnection()->select(
             DB::raw(
                 'SHOW KEYS
                 FROM '.$model->getTable().'
-                WHERE Key_name=\''. $this->getForeignKeyName($model, $key) . '\''
+                WHERE Key_name=\''. $this->getForeignKeyName($model, $key, $prefix) . '\''
             )
         ) );
     }
@@ -759,6 +759,12 @@ class AdminMigrationCommand extends Command
         //If is field required
         if( ! $model->hasFieldParam($key, 'required') )
             $column->nullable();
+
+        //If field is index
+        if( $model->hasFieldParam($key, 'index') && !$this->hasIndex($model, $key, 'index'))
+        {
+            $column->index();
+        }
 
         //If is field required
         if( $model->hasFieldParam($key, 'default') )

@@ -47,6 +47,11 @@ class Language extends Model
     protected $reversed = true;
 
     /*
+     * Disable deleting old files
+     */
+    protected $delete_files = false;
+
+    /*
      * Automatic form and database generation
      */
     protected function fields($row)

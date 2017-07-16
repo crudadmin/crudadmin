@@ -62,6 +62,7 @@ return [
         'multiple' => 'array',
         'multirows' => 'array',
         'invisible' => 'hidden|removeFromForm',
+        'unsigned' => 'min:0',
     ],
 
     /*
