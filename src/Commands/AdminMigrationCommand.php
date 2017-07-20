@@ -388,9 +388,9 @@ class AdminMigrationCommand extends Command
     /*
      * Returns foreign key name
      */
-    protected function getForeignKeyName($model, $key, $prefix = 'foreign')
+    protected function getForeignKeyName($model, $key, $prefix = null)
     {
-        return $model->getTable().'_'.$key.'_'.$prefix;
+        return $model->getTable().'_'.$key.'_'.($prefix ? : 'foreign');
     }
 
     /*
@@ -761,7 +761,12 @@ class AdminMigrationCommand extends Command
             $column->nullable();
 
         //If field is index
-        if( $model->hasFieldParam($key, 'index') && !$this->hasIndex($model, $key, 'index'))
+        if( $model->hasFieldParam($key, 'index') &&
+            (
+                !$model->getSchema()->hasTable( $model->getTable() ) ||
+                !$this->hasIndex($model, $key, 'index')
+            )
+        )
         {
             $column->index();
         }
