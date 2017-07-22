@@ -1,13 +1,13 @@
 <template>
     <li class="treeview" v-if="!isGroup" data-slug="{{ row.slug }}" v-link="{ name : row.slug, params: { pageName : row.slug }, activeClass : 'active' }">
-      <a><i class="fa fa-link"></i> <span>{{ row.name }}</span> <i v-if="hasSubmenu" class="fa fa-angle-left pull-right"></i></a>
+      <a><i v-bind:class="['fa', row.icon]"></i> <span>{{ row.name }}</span> <i v-if="hasSubmenu" class="fa fa-angle-left pull-right"></i></a>
       <ul v-if="hasSubmenu" class="treeview-menu">
         <sidebar-row v-for="subrow in row.submenu" :row="subrow" :parent="levels"></sidebar-row>
       </ul>
     </li>
 
     <li class="treeview" v-if="isGroup && hasChilds" data-slug="{{ row.slug }}" >
-      <a><i class="fa fa-link"></i> <span>{{ row.name }}</span> <i v-if="hasSubmenu" class="fa fa-angle-left pull-right"></i></a>
+      <a><i class="fa fa-folder-open-o"></i> <span>{{ row.name }}</span> <i v-if="hasSubmenu" class="fa fa-angle-left pull-right"></i></a>
       <ul v-if="hasSubmenu" class="treeview-menu">
         <sidebar-row v-for="subrow in row.submenu" :row="subrow" :parent="levels"></sidebar-row>
       </ul>

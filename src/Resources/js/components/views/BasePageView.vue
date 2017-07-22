@@ -8,7 +8,7 @@
     <ol class="breadcrumb">
       <li><a href="#"><i class="fa fa-dashboard"></i> Administrácia</a></li>
       <li v-if="getGroup">{{ getGroup.name}}</li>
-      <li class="active">{{ model.name }}</li>
+      <li class="active"><a class="active"><i v-bind:class="['fa', model.icon]"></i> {{ model.name }}</a></li>
     </ol>
   </section>
 
