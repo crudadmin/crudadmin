@@ -7,6 +7,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Schema\Blueprint;
 use Symfony\Component\Console\Input\InputOption;
+use \Doctrine\DBAL\Types\Type as DBType;
 use Admin;
 use Schema;
 use Cache;
@@ -53,12 +54,10 @@ class AdminMigrationCommand extends Command
 
         $this->files = new Filesystem;
 
-        //Add json support
-        \Doctrine\DBAL\Types\Type::addType('json', \Doctrine\DBAL\Types\JsonArrayType::class);
+        $this->fixJsonColumns();
 
         //DB doctrine fix for enum columns
         DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('json', 'string');
     }
 
     protected function fire()
@@ -66,6 +65,19 @@ class AdminMigrationCommand extends Command
         $models = Admin::getAdminModels();
 
         $migrations = $this->migrate( $models );
+    }
+
+    /*
+     * Fix json columns in doctrine dbal
+     */
+    protected function fixJsonColumns()
+    {
+        //Add json support
+        if ( ! DBType::hasType('json') )
+        {
+            DBType::addType('json', \Doctrine\DBAL\Types\JsonArrayType::class);
+            DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('json', 'string');
+        }
     }
 
     /*

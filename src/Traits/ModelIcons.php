@@ -29,7 +29,8 @@ trait ModelIcons
         'hour' => 'fa-clock-o',
         'product' => 'fa-shopping-basket',
         'basket' => 'fa-shopping-basket',
-        'order' => 'fa-check-square-o',
+        'order' => 'fa-credit-card',
+        'payment' => 'fa-credit-card',
         'song' => 'fa-music',
         'region' => 'fa-map-marker',
         'city' => 'fa-map-marker',
@@ -37,6 +38,13 @@ trait ModelIcons
         'analysis' => 'fa-pie-chart',
         'delivery' => 'fa-truck',
         'category' => 'fa-bars',
+        'about' => 'fa-info',
+        'student' => 'fa-graduation-cap',
+        'grade' => 'fa-graduation-cap',
+        'college' => 'fa-graduation-cap',
+        'faculty' => 'fa-graduation-cap',
+        'appliance' => 'fa-wpforms',
+        'social' => 'fa-share-alt',
     ];
 
 
