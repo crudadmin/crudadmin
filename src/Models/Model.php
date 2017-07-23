@@ -10,6 +10,7 @@ use Gogol\Admin\Traits\Sluggable;
 use Gogol\Admin\Traits\HasChildrens;
 use Gogol\Admin\Traits\FieldProperties;
 use Gogol\Admin\Traits\ModelRelationships;
+use Gogol\Admin\Traits\ModelIcons;
 use Gogol\Admin\Traits\Uploadable;
 use Gogol\Admin\Traits\Validation;
 use Localization;
@@ -17,7 +18,15 @@ use Admin;
 
 class Model extends BaseModel
 {
-    use SoftDeletes, ModelRelationships, Sluggable, Uploadable, Validation, HasChildrens, AdminModelTrait, FieldProperties;
+    use SoftDeletes,
+        ModelRelationships,
+        Sluggable,
+        Uploadable,
+        Validation,
+        HasChildrens,
+        AdminModelTrait,
+        ModelIcons,
+        FieldProperties;
 
     /*
      * Template name
@@ -122,6 +131,11 @@ class Model extends BaseModel
      * Delete old rewrited files from
      */
     protected $delete_files = true;
+
+    /*
+     * Model icon
+     */
+    protected $icon = null;
 
     /*
      * Automatic form and database generation

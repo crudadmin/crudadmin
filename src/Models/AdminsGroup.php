@@ -39,6 +39,11 @@ class AdminsGroup extends AdminModel
     protected $sortable = false;
 
     /*
+     * Model icon
+     */
+    protected $icon = 'fa-universal-access';
+
+    /*
      * Automatic form and database generation
      * @name - field name
      * @placeholder - field placeholder

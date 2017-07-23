@@ -178,6 +178,7 @@ class LayoutController extends BaseController
 
         return array_merge((array)$data, [
             'name' => $model->getProperty('name'),
+            'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
             'foreign_column' => $model->getForeignColumn(),
             'title' => $model->getProperty('title'),

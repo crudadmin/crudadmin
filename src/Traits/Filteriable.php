@@ -1,4 +1,5 @@
 <?php
+
 namespace Gogol\Admin\Traits;
 
 use Validator;
