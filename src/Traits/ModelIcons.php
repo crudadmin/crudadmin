@@ -43,8 +43,10 @@ trait ModelIcons
         'grade' => 'fa-graduation-cap',
         'college' => 'fa-graduation-cap',
         'faculty' => 'fa-graduation-cap',
-        'appliance' => 'fa-wpforms',
+        'application' => 'fa-wpforms',
         'social' => 'fa-share-alt',
+        'pdf' => 'fa-file-pdf-o',
+        'certificate' => 'fa-certificate',
     ];
 
 

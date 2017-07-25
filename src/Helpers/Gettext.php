@@ -273,9 +273,9 @@ class Gettext
         $locale_po_file = $this->getLocalePath($locale, $locale . '.po');
 
         //Copy po file
-        if ( md5_file($uploaded_path_po) != md5_file($locale_po_file))
+        if ( !file_exists($locale_po_file) || md5_file($uploaded_path_po) != md5_file($locale_po_file))
         {
-            $this->filesystem->copy($uploaded_path_po, $this->getLocalePath($locale, $locale . '.po'));
+            $this->filesystem->copy($uploaded_path_po, $locale_po_file);
         }
     }
 }
