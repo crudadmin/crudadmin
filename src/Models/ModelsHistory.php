@@ -4,7 +4,7 @@ namespace Gogol\Admin\Models;
 
 use Gogol\Admin\Models\Model;
 use Carbon\Carbon;
-
+use Admin;
 
 class ModelsHistory extends Model
 {
@@ -75,6 +75,9 @@ class ModelsHistory extends Model
         return $data;
     }
 
+    /*
+     * Modify all request data
+     */
     public function convertData($data)
     {
         foreach ($data as $key => $value)
@@ -88,16 +91,44 @@ class ModelsHistory extends Model
     }
 
     /*
+     * Is Password or hidden field
+     */
+    private function isHiddenField($model, $key)
+    {
+        return in_array($key, $model->getHidden()) || $model->isFieldType($key, 'password');
+    }
+
+    /*
+     * Returns if field can be skipped in history
+     */
+    private function canSkipFieldInHistory($model, $key)
+    {
+        if ( $this->isHiddenField($model, $key) )
+            return true;
+
+        if ( ($_key = substr($key, -13) == '_confirmation') && $this->isHiddenField($model, $_key) )
+            return true;
+
+        return false;
+    }
+
+    /*
      * Compare by last change
      */
     public function checkChanges($table, $id, $data)
     {
         $old_data = $this->getActualRowData($table, $id);
 
+        $model = Admin::getModelByTable($table);
+
         $changes = [];
 
         foreach ($data as $key => $value)
         {
+            //Reset changed value
+            if ( $this->canSkipFieldInHistory($model, $key) )
+                $value = null;
+
             if ( !array_key_exists($key, $old_data) || $old_data[$key] != $value )
                 $changes[$key] = $value;
         }
@@ -119,8 +150,10 @@ class ModelsHistory extends Model
                 unset($data[$key]);
         }
 
+        //Modify request data
         $data = $this->convertData($data);
 
+        //Compare and get new changes
         $data = $this->checkChanges($table, $id, $data);
 
         //If no changes
