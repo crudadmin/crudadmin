@@ -4,6 +4,7 @@ namespace Gogol\Admin\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Filesystem\Filesystem;
+use Gogol\Admin\Models\ModelsHistory;
 use Gogol\Admin\Helpers\File;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -817,5 +818,40 @@ trait AdminModelTrait
          * Add global scope for ordering
          */
         $query->orderBy($this->orderBy[0], $this->orderBy[1]);
+    }
+
+    /*
+     * Save actual model row into history
+     */
+    public function historySnapshot($request)
+    {
+        return (new ModelsHistory)->pushChanges($this, $request);
+    }
+
+
+    /*
+     * Foreach all rows in history, and get acutal data status
+     */
+    public function getHistorySnapshot($max_id = null, $id = null)
+    {
+        if (!($changes = ModelsHistory::where('table', $this->getTable())->where('row_id', $id ?: $this->getKey())->where(function($query) use ( $max_id ) {
+            if ( $max_id )
+                $query->where('id', '<=', $max_id);
+        })->orderBy('id', 'ASC')->get()))
+            return [];
+
+        $data = [];
+
+        foreach ($changes as $row)
+        {
+            $array = (array)json_decode($row['data']);
+
+            foreach ($array as $key => $value)
+            {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
     }
 }
