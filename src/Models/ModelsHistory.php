@@ -50,35 +50,9 @@ class ModelsHistory extends Model
     ];
 
     /*
-     * Foreach all rows in history, and get acutal data status
-     */
-    public function getActualRowData($table, $id, $max_id = null)
-    {
-        if (!($changes = $this->where('table', $table)->where('row_id', $id)->where(function($query) use ( $max_id ) {
-            if ( $max_id )
-                $query->where('id', '<=', $max_id);
-        })->orderBy('id', 'ASC')->get()))
-            return [];
-
-        $data = [];
-
-        foreach ($changes as $row)
-        {
-            $array = (array)json_decode($row['data']);
-
-            foreach ($array as $key => $value)
-            {
-                $data[$key] = $value;
-            }
-        }
-
-        return $data;
-    }
-
-    /*
      * Modify all request data
      */
-    public function convertData($data)
+    public function convertData($model, $data)
     {
         foreach ($data as $key => $value)
         {
@@ -91,43 +65,30 @@ class ModelsHistory extends Model
     }
 
     /*
-     * Is Password or hidden field
-     */
-    private function isHiddenField($model, $key)
-    {
-        return in_array($key, $model->getHidden()) || $model->isFieldType($key, 'password');
-    }
-
-    /*
-     * Returns if field can be skipped in history
+     * Return if field can be skipped in history
      */
     private function canSkipFieldInHistory($model, $key)
     {
-        if ( $this->isHiddenField($model, $key) )
-            return true;
-
-        if ( ($_key = substr($key, -13) == '_confirmation') && $this->isHiddenField($model, $_key) )
-            return true;
-
-        return false;
+        return ! $model->getField($key);
     }
 
     /*
      * Compare by last change
      */
-    public function checkChanges($table, $id, $data)
+    public function checkChanges($model, $data)
     {
-        $old_data = $this->getActualRowData($table, $id);
-
-        $model = Admin::getModelByTable($table);
+        $old_data = $model->getHistorySnapshot();
 
         $changes = [];
 
+        //Get also modified field by mutators, which are not in request
+        $data = array_merge($data, array_diff($model->attributes, $data));
+
+        //Compare changes
         foreach ($data as $key => $value)
         {
-            //Reset changed value
             if ( $this->canSkipFieldInHistory($model, $key) )
-                $value = null;
+                continue;
 
             if ( !array_key_exists($key, $old_data) || $old_data[$key] != $value )
                 $changes[$key] = $value;
@@ -143,7 +104,7 @@ class ModelsHistory extends Model
     /*
      * Save changes into history
      */
-    public function pushChanges($table, $id, $data)
+    public function pushChanges($model, $data)
     {
         foreach (['_id', '_order', '_method', '_model', 'language_id'] as $key) {
             if ( array_key_exists($key, $data) )
@@ -151,10 +112,10 @@ class ModelsHistory extends Model
         }
 
         //Modify request data
-        $data = $this->convertData($data);
+        $data = $this->convertData($model, $data);
 
         //Compare and get new changes
-        $data = $this->checkChanges($table, $id, $data);
+        $data = $this->checkChanges($model, $data);
 
         //If no changes
         if ( count($data) == 0 )
@@ -164,8 +125,8 @@ class ModelsHistory extends Model
 
         return $this->create([
             'user_id' => $user ? $user->getKey() : null,
-            'table' => $table,
-            'row_id' => $id,
+            'table' => $model->getTable(),
+            'row_id' => $model->getKey(),
             'data' => json_encode($data),
         ]);
     }

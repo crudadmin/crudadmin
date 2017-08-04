@@ -77,7 +77,7 @@ class DataController extends Controller
     {
         $model = $this->getModel( $model );
 
-        $row = (new ModelsHistory)->getActualRowData($model->getTable(), $id, $history_id);
+        $row = $model->getHistorySnapshot($history_id, $id);
 
         return $model->forceFill($row)->setProperty('skipBelongsToMany', true)->getAdminAttributes();
     }
@@ -107,14 +107,6 @@ class DataController extends Controller
 
         $changes = $request->allWithMutators()[0];
 
-        /*
-         * Save into hustory
-         */
-        if ( $model->getProperty('history') === true )
-        {
-            (new ModelsHistory)->pushChanges($model->getTable(), $row->getKey(), $changes);
-        }
-
         //Remove overridden files
         $this->removeOverridenFiles($row, $changes);
 
@@ -123,6 +115,12 @@ class DataController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             return Ajax::mysqlError($e);
         }
+
+        /*
+         * Save into hustory
+         */
+        if ( $model->getProperty('history') === true )
+            $row->historySnapshot($changes);
 
         $this->updateBelongsToMany($model, $row);
 
@@ -161,9 +159,7 @@ class DataController extends Controller
              * Save into hustory
              */
             if ( $model->getProperty('history') === true )
-            {
-                (new ModelsHistory)->pushChanges($model->getTable(), $row->getKey(), $request_row);
-            }
+                $row->historySnapshot($request_row);
 
             //Fire on create event
             if ( method_exists($model, 'onCreate') )

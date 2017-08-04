@@ -9,6 +9,8 @@ use \Illuminate\Database\Eloquent\Model as BaseModel;
 
 trait ModelRelationships
 {
+    private $save_collection = null;
+
     /*
      * Relation key in admin buffer
      */
@@ -65,32 +67,48 @@ trait ModelRelationships
         {
             $relation = $this->getRelationFromCache($method);
 
+            //If is in relation buffer saved collection and not admin relation object
             if ( !is_array($relation) || !array_key_exists('type', $relation))
             {
-                return $relation;
+                //If is saved collection, and requested is also collection
+                if ( !(($is_collection = $relation instanceof Collection) && $get === false) )
+                    return $relation;
+
+                //If is saved collection, but requested is object, then save old collection and return new relation object
+                else if ( $is_collection )
+                    $this->save_collection = $relation;
             }
 
-            //Returns relationship builder
-            if ( $get === false || (!$this->exists && !parent::relationLoaded($method)) )
-            {
-                return $this->relationResponse(
-                    $method,
-                    $relation['type'],
-                    $relation['path'],
-                    $get === false ? false : true,
-                    $relation['properties']
-                );
-            }
+            //If is in relation buffer saved admin relation object
+            else {
+                //Returns relationship builder
+                if ( $get === false || (!$this->exists && !parent::relationLoaded($method)) )
+                {
+                    //Save old collection when is generating new object
+                    if ( $relation['relation'] instanceof Collection )
+                        $this->save_collection = $relation['relation'];
 
-            //Returns items from already loaded relationship
-            if ( $get == true && $relation['get'] == true )
-            {
-                if ( $relation['relation'] instanceof Collection || $relation['relation'] instanceof BaseModel ){
-                    return $relation['relation'];
-                } else {
-                    return $this->returnRelationItems($relation);
+                    return $this->relationResponse(
+                        $method,
+                        $relation['type'],
+                        $relation['path'],
+                        $get === false ? false : true,
+                        $relation['properties'],
+                        $relation['relation']
+                    );
+                }
+
+                //Returns items from already loaded relationship
+                if ( $get == true && $relation['get'] == true )
+                {
+                    if ( $relation['relation'] instanceof Collection || $relation['relation'] instanceof BaseModel ){
+                        return $relation['relation'];
+                    } else {
+                        return $this->returnRelationItems($relation);
+                    }
                 }
             }
+
         }
 
         //Get all admin modules
@@ -220,7 +238,14 @@ trait ModelRelationships
                 $relation_buffer['relation'] = $relation = $this->returnRelationItems($relation_buffer) ?: true;
             }
 
-            //Save relation into laravel model buffer
+            //Save previous loaded collection into laravel admin buffer
+            if ( $this->save_collection !== null ){
+                $relation_buffer['relation'] = $this->save_collection;
+                $relation_buffer['get'] = true;
+
+                $this->save_collection = null;
+            }
+
             $this->setRelation($method, $relation_buffer);
         }
 
