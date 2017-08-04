@@ -25,8 +25,8 @@ trait Validation {
                 }
             } else if ( is_object($value) ) {
                 $data[] = $value;
-            } else if ( $value !== false && is_string($key) ) {
-                $data[] = is_string($value) ? $key . ':' . $value : $key;
+            } else if ( $value !== false && ($is_string = (is_string($value) || is_numeric($value)))) {
+                $data[] = $is_string ? $key . ':' . $value : $key;
             }
         }
 
