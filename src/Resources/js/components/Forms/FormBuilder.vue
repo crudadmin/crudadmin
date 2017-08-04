@@ -354,6 +354,8 @@
             //If is disabled autoreseting form, then select inserted row
             } else if ( autoreset === false ){
               this.row = response.data.rows[0];
+
+              this.scrollToForm();
             }
           }
 
@@ -380,6 +382,13 @@
         }.bind(this));
 
       },
+      scrollToForm(){
+        setTimeout(function(){
+          $('html, body').animate({
+              scrollTop: $("#form-" + this.model.slug).offset().top - 10
+          }, 500);
+        }.bind(this), 400);
+      }
     },
 
     components : { FormInputBuilder }

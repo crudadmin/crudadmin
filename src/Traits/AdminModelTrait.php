@@ -784,7 +784,17 @@ trait AdminModelTrait
             $arr = &$arr[$key];
         }
 
-        $arr = $value;
+        $row = [];
+
+        if ( is_array($value) )
+        {
+            foreach ($value as $k => $v) {
+                //Create multidimensional array
+                $this->assignArrayByPath($row, $k, $v);
+            }
+        }
+
+        $arr = is_array($value) ? $row : $value;
     }
 
     /*
@@ -818,6 +828,11 @@ trait AdminModelTrait
          * Add global scope for ordering
          */
         $query->orderBy($this->orderBy[0], $this->orderBy[1]);
+    }
+
+    public function scopeWithPublished($query)
+    {
+        $query->where('published_at', '!=', null);
     }
 
     /*

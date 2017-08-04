@@ -199,7 +199,7 @@ class Model extends BaseModel
         if ( ! Admin::isAdmin() && $this->publishable == true )
         {
             static::addGlobalScope('publishable', function(Builder $builder) {
-                $builder->where('published_at', '!=', null);
+                $builder->withPublished();
             });
         }
 

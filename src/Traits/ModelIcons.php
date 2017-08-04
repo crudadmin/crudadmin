@@ -47,6 +47,9 @@ trait ModelIcons
         'social' => 'fa-share-alt',
         'pdf' => 'fa-file-pdf-o',
         'certificate' => 'fa-certificate',
+        'slider' => 'fa-th-large',
+        'complaint' => 'fa-refresh',
+        'brand' => 'fa-tags',
     ];
 
 

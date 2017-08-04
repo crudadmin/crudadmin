@@ -95,7 +95,7 @@ class Group
             return true;
 
         //If fiels is belongsTo relation, and exists in field list
-        if ( array_key_exists(rtrim($key, '_id'), $group->fields) )
+        if ( array_key_exists(substr($key, 0, -3), $group->fields) )
             return true;
 
         //if is localization field and exists in field group

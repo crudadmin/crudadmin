@@ -36,7 +36,7 @@ class DummyClass extends AdminModel
      * ... other validation methods from laravel
      */
     protected $fields = [
-        'name' => 'name:Názov|placeholder:Zadajte názov článku|type:string|required|max:90',
+        'name' => 'name:Názov|placeholder:Zadajte názov článku|required|max:90',
         'content' => 'name:Obsah článku|type:editor|required',
         'image' => 'name:Obrázok|type:file|image|required',
     ];

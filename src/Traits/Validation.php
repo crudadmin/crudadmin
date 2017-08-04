@@ -78,6 +78,12 @@ trait Validation {
                 }
             }
 
+            //If field is not required
+            if (!$this->hasFieldParam($key, 'required'))
+            {
+                $field['nullable'] = true;
+            }
+
             //Removes admin properties in field from request
             $data[$key] = $this->removeAdminProperties($field);
 
