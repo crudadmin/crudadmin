@@ -80,6 +80,7 @@ class AdminInstallCommand extends Command
         Artisan::call('vendor:publish', [ '--tag' => 'admin.config' ]);
         Artisan::call('vendor:publish', [ '--tag' => 'admin.resources' ]);
         Artisan::call('vendor:publish', [ '--tag' => 'admin.migrations' ]);
+        Artisan::call('vendor:publish', [ '--tag' => 'admin.languages' ]);
 
         $this->line('<comment>+ Vendor directories was successfully published</comment>');
     }

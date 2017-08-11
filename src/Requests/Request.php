@@ -208,11 +208,25 @@ abstract class Request extends FormRequest
     {
         foreach ($fields as $key => $field)
         {
-            $value = $value = $this->get( $key );
+            $value = $this->get( $key );
 
             if ( is_string($value) && $value === '')
             {
                 $this->merge( [ $key => NULL ] );
+            }
+        }
+    }
+
+    protected function resetMultipleSelects($fields = null)
+    {
+        foreach ($fields as $key => $field)
+        {
+            if ( !($this->model->isFieldType($key, 'select') && $this->model->hasFieldParam($key, 'multiple')) )
+                continue;
+
+            if ( ! $this->has($key) )
+            {
+                $this->merge( [ $key => [] ] );
             }
         }
     }
@@ -229,6 +243,7 @@ abstract class Request extends FormRequest
         $this->datetimes( $fields );
         $this->removeEmptyForeign( $fields );
         $this->emptyStringsToNull( $fields );
+        $this->resetMultipleSelects( $fields );
 
         return count($this->errors) == 0;
     }
