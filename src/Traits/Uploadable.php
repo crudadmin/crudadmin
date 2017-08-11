@@ -142,7 +142,7 @@ trait Uploadable
             if ( $extension = $this->guessExtension($path, $filename) )
             {
                 //Modified filename
-                $filename_with_extension = $this->filenameModifier($filename . '.' . $extension);
+                $filename_with_extension = $this->filenameModifier($filename . '.' . $extension, $field);
 
                 File::move($path . '/' . $filename, $path . '/' . $filename_with_extension);
 
