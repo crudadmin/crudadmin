@@ -16,7 +16,7 @@ class AddAttributeRules
             {
                 $rules = Fields::mutate(FieldToArray::class, $rules);
 
-                $field = $field + $rules;
+                $field = $rules + $field;
 
                 if ( array_key_exists('type', $rules) )
                     $field['type'] = $rules['type'];

@@ -100,7 +100,7 @@ class DataController extends Controller
         $this->checkValidation($request, $row);
 
         //Upload files with postprocess if are available
-        $request->applyMutators( $row );
+        $request->applyMutators($row);
 
         //Save original values
         $original = $row['original'];
