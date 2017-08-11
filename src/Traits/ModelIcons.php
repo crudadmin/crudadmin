@@ -15,6 +15,7 @@ trait ModelIcons
             'form' => 'fa-wpforms',
             'user' => 'fa-users',
             'news' => 'fa-newspaper-o',
+            'bulletin' => 'fa-newspaper-o',
             'client' => 'fa-address-book-o',
             'partner' => 'fa-address-book-o',
             'contact' => 'fa-address-card-o',
@@ -40,8 +41,9 @@ trait ModelIcons
             'analysis' => 'fa-pie-chart',
             'delivery' => 'fa-truck',
             'category' => 'fa-bars',
+            'department' => 'fa-bars',
             'about' => 'fa-info',
-            'student' => 'fa-graduation-cap',
+            'student' => 'fa-users',
             'grade' => 'fa-graduation-cap',
             'college' => 'fa-graduation-cap',
             'faculty' => 'fa-graduation-cap',
@@ -52,6 +54,13 @@ trait ModelIcons
             'slider' => 'fa-th-large',
             'complaint' => 'fa-refresh',
             'brand' => 'fa-tags',
+            'curriculum' => 'fa-book',
+            'download' => 'fa-download',
+            'work' => 'fa-briefcase',
+            'vote' => 'fa-question-circle-o',
+            'pool' => 'fa-question-circle-o',
+            'subject' => 'fa-tasks',
+            'import' => 'fa-upload',
         ];
     }
 
