@@ -461,6 +461,15 @@ class AdminMigrationCommand extends Command
         }
     }
 
+    protected function longtextColumn($table, $model, $key)
+    {
+        //Text columns
+        if ( $model->isFieldType($key, ['longtext']) )
+        {
+            return $table->longText($key);
+        }
+    }
+
     protected function integerColumn($table, $model, $key)
     {
         //Integer columns
@@ -745,6 +754,7 @@ class AdminMigrationCommand extends Command
             'belongsToMany',
             'stringColumn',
             'textColumn',
+            'longtextColumn',
             'integerColumn',
             'decimalColumn',
             'fileColumn',
