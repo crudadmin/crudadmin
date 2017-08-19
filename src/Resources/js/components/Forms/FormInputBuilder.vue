@@ -317,7 +317,7 @@
         },
         isText()
         {
-          return this.field.type == 'text';
+          return this.field.type == 'text' || this.field.type == 'longtext';
         },
         isEditor()
         {

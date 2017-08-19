@@ -40,6 +40,7 @@ return [
         'app/Http',
         'app/Http/Controllers',
         'app/Http/Middleware',
+        'routes',
     ],
 
     /*
