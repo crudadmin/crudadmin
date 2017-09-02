@@ -206,24 +206,8 @@
             {
               if ( 'rows' in data.data )
               {
-                this.$parent.updateRowsData(data.data.rows.rows, !button.reloadAll);
-
-                //Reload just one row which owns button
-                if ( button.reloadAll == false ){
-                  if ( !(row.id in data.data.rows.buttons) )
-                  {
-                    this.rows.buttons[row.id] = [];
-                  } else {
-                    this.rows.buttons[row.id] = data.data.rows.buttons[row.id];
-                  }
-                }
-
-                //Reload all rows
-                else {
-                  this.rows.count = data.data.rows.count;
-                  this.rows.buttons = data.data.rows.buttons;
-                }
-
+                //Update received rows by button action
+                this.updateParentData(key, button, row, data);
               }
 
               //Redirect on page
@@ -242,6 +226,40 @@
             console.log(response);
             this.$root.errorResponseLayer(response);
           });
+        },
+        updateParentData(key, button, row, data){
+          //Reload just one row which owns button
+          if ( button.reloadAll == false ){
+            if ( !(row.id in data.data.rows.buttons) ){
+              this.rows.buttons[row.id] = [];
+            } else {
+              this.rows.buttons[row.id] = data.data.rows.buttons[row.id];
+            }
+
+            //Update just selected row
+            for ( var i in this.rows.data )
+            {
+              if ( this.rows.data[i].id == data.data.rows.rows[0].id )
+              {
+                for ( var k in this.$parent.rows.data[i] )
+                {
+                  if ( this.$parent.rows.data[i][k] != data.data.rows.rows[0][k] )
+                  {
+
+                    this.$parent.rows.data[i][k] = data.data.rows.rows[0][k];
+                  }
+                }
+              }
+            }
+          }
+
+          //Reload all rows
+          else {
+            this.$parent.updateRowsData(data.data.rows.rows, false);
+
+            this.rows.count = data.data.rows.count;
+            this.rows.buttons = data.data.rows.buttons;
+          }
         },
         toggleSorting(key){
           var sortable = this.$root.getModelProperty(this.model, 'settings.sortable');
