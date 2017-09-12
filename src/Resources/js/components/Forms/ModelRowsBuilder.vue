@@ -201,11 +201,20 @@
           if ( ! a || ! b )
             return false;
 
-          a = a[ this.orderBy[0] ]+'',
-          b = b[ this.orderBy[0] ]+'';
+          var field = this.orderBy[0];
+
+          //Support for booleans
+          if ( a[ field ] === true || a[ field ] === false )
+            a[ field ] = a[ field ] === true ? 1 : 0;
+
+          if ( b[ field ] === true || b[ field ] === false )
+            b[ field ] = b[ field ] === true ? 1 : 0;
+
+          a = a[ field ]+'',
+          b = b[ field ]+'';
 
           //Sorting numbers
-          if ( this.isNumericValue( this.orderBy[0] ) )
+          if ( this.isNumericValue( field ) )
           {
             if ( this.orderBy[1] == 1 )
               return b - a;
