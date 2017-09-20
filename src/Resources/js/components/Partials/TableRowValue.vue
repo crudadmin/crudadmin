@@ -9,7 +9,7 @@
     </div>
 
     <!-- Table value -->
-    <span v-else data-toggle="{{ fieldValue.length > 20 ? 'tooltip' : '' }}" data-original-title="{{ fieldValue }}">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
+    <span v-else data-toggle="{{ fieldValue.length > 20 ? 'tooltip' : '' }}" data-original-title="{{ fieldValue | encodedTitle field }}">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
 
   </div>
 </template>
@@ -53,6 +53,12 @@ export default {
 
         return string;
       },
+      encodedTitle(string, key){
+        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
+          return '';
+
+        return string;
+      }
     },
 
     computed: {
