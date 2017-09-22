@@ -540,9 +540,11 @@
           if ( this.$parent.$parent.activeSize != 0 )
             return;
 
-          $('html, body').animate({
-              scrollTop: $("#form-" + this.model.slug).offset().top - 10
-          }, 500);
+          setTimeout(function(){
+            $('html, body').animate({
+                scrollTop: $("#form-" + this.model.slug).offset().top - 10
+            }, 500);
+          }.bind(this), 25);
         }
       },
   }
