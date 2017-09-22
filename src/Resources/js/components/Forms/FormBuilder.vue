@@ -352,7 +352,7 @@
             this.$broadcast('onSubmit', response.data.rows[0]);
 
             //Send notification about new row
-            this.$dispatch('proxy', 'onCreate', response.data.rows);
+            this.$dispatch('proxy', 'onCreate', response.data);
 
             //If form has disabled autoreseting
             var autoreset = this.$root.getModelProperty(this.model, 'settings.autoreset');
