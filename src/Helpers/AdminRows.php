@@ -183,7 +183,7 @@ class AdminRows
     /*
      * Generate buttons properties for each row
      */
-    protected function generateButtonsProperties($rows)
+    public function generateButtonsProperties($rows)
     {
         $buttons = [];
 

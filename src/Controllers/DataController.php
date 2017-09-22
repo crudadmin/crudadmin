@@ -47,13 +47,14 @@ class DataController extends Controller
         //Upload files with postprocess if are available
         $request->applyMutators($model);
 
-        $rows = $this->insertRows($model, $request);
+        $data = $this->insertRows($model, $request);
 
         //Checks for upload errors
         $message = $this->responseMessage('Záznam bol úspešne pridaný');
 
         Ajax::message( $message, null, $this->responseType(), [
-            'rows' => $rows,
+            'rows' => $data['rows'],
+            'buttons' => $data['buttons'],
         ] );
     }
 
@@ -142,7 +143,7 @@ class DataController extends Controller
     /*
      * Insert rows form request into db and call callback
      */
-    protected function insertRows($model, $request, $rows = [])
+    protected function insertRows($model, $request, $rows = [], $models = [])
     {
         foreach ($request->allWithMutators() as $request_row)
         {
@@ -165,10 +166,15 @@ class DataController extends Controller
             if ( method_exists($model, 'onCreate') )
                 $row->onCreate($row);
 
+            $models[] = $row;
+
             $rows[] = $row->getAdminAttributes();
         }
 
-        return $rows;
+        return [
+            'rows' => $rows,
+            'buttons' => (new AdminRows($model))->generateButtonsProperties($models),
+        ];
     }
 
     /*
