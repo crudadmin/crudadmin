@@ -171,7 +171,6 @@
 
       methods : {
         updateField(field){
-
           //After change value, update same value in ckeditor
           if ( field.type == 'editor'){
             var editor = CKEDITOR.instances[this.getId];

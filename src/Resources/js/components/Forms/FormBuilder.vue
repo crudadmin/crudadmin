@@ -57,7 +57,10 @@
       //After click on edit button, push data into form values
       row : {
         handler : function (row, oldRow) {
-          this.initForm(row);
+          //Form cannot be resetted if data has been synced from db
+          var canResetForm = !row || ! oldRow || row.id != oldRow.id;
+
+          this.initForm(row, canResetForm);
         },
         deep: true,
       },
@@ -143,8 +146,13 @@
         return !('removeFromForm' in field);
       },
       //Resets form values and errors
-      initForm(row){
-        this.form.resetForm();
+      initForm(row, reset){
+        //Resets document values of elements
+        //can be reseted just when ich changed row for other, or inserting new row
+        if ( reset !== false )
+        {
+          this.form.resetForm();
+        }
 
         this.resetErrors();
 
@@ -157,9 +165,12 @@
 
         for ( var key in this.model.fields )
         {
-          this.model.fields[key].value = row ? row[key] : null;
+          if ( ! row || this.model.fields[key].value != row[key] )
+          {
+            this.model.fields[key].value = row ? row[key] : null;
 
-          this.$broadcast('updateField', [key, this.model.fields[key]]);
+            this.$broadcast('updateField', [key, this.model.fields[key]]);
+          }
         }
 
         //Set box color

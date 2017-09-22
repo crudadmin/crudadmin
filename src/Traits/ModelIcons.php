@@ -61,6 +61,9 @@ trait ModelIcons
             'pool' => 'fa-question-circle-o',
             'subject' => 'fa-tasks',
             'import' => 'fa-upload',
+            'invoice' => 'fa-file-text-o',
+            'proform' => 'fa-file-text-o',
+            'export' => 'fa-download',
         ];
     }
 

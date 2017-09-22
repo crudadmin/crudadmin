@@ -475,10 +475,6 @@
         //Update changed data in vue object
         for ( var i in this.rows.data )
         {
-          //Cant update opened row
-          if (this.row && this.row.id == data[i].id)
-            continue;
-
           for ( var k in data[i] )
           {
             if ( this.rows.data[i][k] != data[i][k] )
