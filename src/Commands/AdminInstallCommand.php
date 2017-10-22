@@ -124,7 +124,9 @@ class AdminInstallCommand extends Command
     public function runMigrations()
     {
         //Run migration for password reset table
-        Artisan::call('admin:migrate');
+        Artisan::call('admin:migrate', [
+            '--force' => true,
+        ]);
 
         //Run other migrations
         Artisan::call('migrate');
