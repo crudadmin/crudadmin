@@ -56,7 +56,9 @@ class ResetPassword extends Notification
      */
     public function toMail($notifiable)
     {
-        if ( $this->user instanceof \App\User )
+        if ( method_exists($this->user, 'getResetLink') )
+            $action = $this->user->getResetLink($this->token);
+        elseif ( $this->user instanceof \App\User )
             $action = action('\Gogol\Admin\Controllers\Auth\ResetPasswordController@showResetForm', $this->token);
         else
             $action = route('password.reset', $this->token);
