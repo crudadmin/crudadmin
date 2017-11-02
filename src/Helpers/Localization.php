@@ -92,9 +92,6 @@ class Localization
 
     public function getDefaultLanguage()
     {
-        if ( $this->localization && $language = $this->languages->where('slug', $this->localization)->first() )
-            return $language;
-
         return $this->languages->first();
     }
 

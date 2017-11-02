@@ -12,7 +12,6 @@ class LocalizationMiddleware
         $segment = $request->segment(1);
 
         $remove_default = config('admin.localization_remove_default');
-
         //Checks if is enabled multulanguages
         if ( ! Localization::isEnabled() )
             return $next( $request );
