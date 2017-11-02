@@ -255,7 +255,7 @@ class AdminMigrationCommand extends Command
             {
                 //Checks if table has column and update it if can...
                 if ( $model->getSchema()->hasColumn($model->getTable(), $key) ){
-                    if ( !$model->isFieldType($key, ['date', 'datetime', 'time']) && ($column = $this->setColumn( $table, $model, $key )) )
+                    if ( $column = $this->setColumn( $table, $model, $key, true ) )
                     {
                         $column->change();
                     }
@@ -500,11 +500,21 @@ class AdminMigrationCommand extends Command
         }
     }
 
-    protected function datetimeColumn($table, $model, $key)
+    protected function datetimeColumn($table, $model, $key, $update = false)
     {
         //Timestamp columns
         if ( $model->isFieldType($key, ['date', 'datetime', 'time']) )
         {
+            //Check for correct values
+            if ( $update === true )
+            {
+                $type = $model->getConnection()->getDoctrineColumn($model->getTable(), $key)->getType()->getName();
+
+                //If previoius column has not been datetime and has some value
+                if ( $type != 'datetime' )
+                    $model->getConnection()->table($model->getTable())->update([ $key => null ]);
+            }
+
             $column = $table->datetime($key)->nullable();
 
             return $column;
@@ -746,7 +756,7 @@ class AdminMigrationCommand extends Command
      * @param [object] $model
      * @param [string] $key
      */
-    protected function setColumn($table, $model, $key)
+    protected function setColumn($table, $model, $key, $update = false)
     {
         //Registred column types
         $types = [
@@ -765,7 +775,7 @@ class AdminMigrationCommand extends Command
 
         //Get column
         foreach ($types as $column) {
-            if ( $column = $this->{$column}($table, $model, $key) )
+            if ( $column = $this->{$column}($table, $model, $key, $update) )
                 break;
         }
 
