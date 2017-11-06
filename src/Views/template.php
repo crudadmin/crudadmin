@@ -211,5 +211,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     <!-- APP JS -->
     <script src="<?php echo asset('/assets/admin/js/main.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-42935841-6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-42935841-6');
+    </script>
+
   </body>
 </html>

@@ -32,6 +32,10 @@
 
       props : ['langid'],
 
+      ready(){
+        ga('send', 'pageview', 'auto');
+      },
+
       computed: {
         getGroup(){
           if ( this.model.slug in this.$root.models )

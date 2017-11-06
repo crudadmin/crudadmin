@@ -207,7 +207,7 @@
         {
           var layout = layouts[key];
 
-          $(layout.view).find('script').each(function(){
+          $('<div>'+layout.view+'</div>').find('script').each(function(){
             //Run external js
             if ( $(this).attr('src') ){
               var js = document.createElement('script');
