@@ -286,6 +286,10 @@
               var obj = response.responseJSON,
                   array = [];
 
+              //Laravel 5.5 provides validation errors in errors object.
+              if ( 'errors' in obj && !('length' in obj.errors) )
+                obj = obj.errors;
+
               for ( var key in obj )
               {
                 //One or multiple errors
