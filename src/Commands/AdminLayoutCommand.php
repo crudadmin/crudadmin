@@ -46,11 +46,15 @@ class AdminLayoutCommand extends GeneratorCommand
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
         $this->copyBladeLayout();
 
-        parent::fire();
+        //Laravel 5.4 support
+        if ( method_exists($this, 'fire') )
+            parent::fire();
+        else
+            parent::handle();
     }
 
     protected function copyBladeLayout()

@@ -12,7 +12,6 @@ class AppServiceProvider extends ServiceProvider
 {
     protected $providers = [
         AdminServiceProvider::class,
-        RouteServiceProvider::class,
         LocalizationServiceProvider::class,
         GettextServiceProvider::class,
         ValidatorServiceProvider::class,
@@ -48,6 +47,13 @@ class AppServiceProvider extends ServiceProvider
          * Bind variable to admin views path
          */
         $this->loadViewsFrom(__DIR__ . '/../Views', 'admin');
+
+        /*
+         * Bind route provider after application boot, for correct route actions in localizations
+         */
+        $this->bootProviders([
+            RouteServiceProvider::class
+        ]);
     }
 
     /**
@@ -57,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__.'/../Config/config_additional.php', 'admin'
+        );
+
         $this->bootFacades();
 
         $this->bootProviders();
@@ -78,9 +88,9 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    public function bootProviders()
+    public function bootProviders($providers = null)
     {
-        foreach ($this->providers as $provider)
+        foreach ($providers ?: $this->providers as $provider)
         {
             app()->register($provider);
         }

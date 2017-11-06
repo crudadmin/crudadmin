@@ -51,6 +51,11 @@ class Language extends Model
      */
     protected $delete_files = false;
 
+    protected $settings = [
+        'title.insert' => 'Pridať nový jazyk',
+        'title.update' => 'Upravujete jazyk :name',
+    ];
+
     /*
      * Automatic form and database generation
      */

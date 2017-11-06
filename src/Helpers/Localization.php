@@ -11,6 +11,8 @@ class Localization
 
     protected $localization = null;
 
+    protected $default_localization = null;
+
     public function __construct()
     {
         $this->languages = new Collection;
@@ -77,7 +79,12 @@ class Localization
 
     public function isEnabled()
     {
-        return \Admin::isEnabledMultiLanguages() && app()->runningInConsole() == false && request()->segment(1) != 'admin';
+        $segment = request()->segment(1);
+
+        return \Admin::isEnabledMultiLanguages()
+            && app()->runningInConsole() == false
+            && $segment != 'admin'
+            && $segment != 'uploads';
     }
 
     public function getLanguages($console = false)
@@ -92,10 +99,17 @@ class Localization
 
     public function getDefaultLanguage()
     {
-        if ( $this->localization && $language = $this->languages->where('slug', $this->localization)->first() )
+        if ( $this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first() )
+        {
             return $language;
+        }
 
         return $this->languages->first();
+    }
+
+    public function setDefaultLocale($prefix)
+    {
+        $this->default_localization = $prefix;
     }
 
     public function isValid($segment)
