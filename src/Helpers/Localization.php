@@ -79,7 +79,12 @@ class Localization
 
     public function isEnabled()
     {
-        return \Admin::isEnabledMultiLanguages() && app()->runningInConsole() == false && request()->segment(1) != 'admin';
+        $segment = request()->segment(1);
+
+        return \Admin::isEnabledMultiLanguages()
+            && app()->runningInConsole() == false
+            && $segment != 'admin'
+            && $segment != 'uploads';
     }
 
     public function getLanguages($console = false)
