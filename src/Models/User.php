@@ -49,17 +49,7 @@ class User extends Authenticatable
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
             'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:30|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
             'password' => 'name:Heslo|type:password|confirmed|min:4|max:30'.( ! isset($row) ? '|required' : '|nullable' ),
-            'avatar' => [
-                'name' => 'Profilová fotografia',
-                'type' => 'file',
-                'image' => true,
-                'max' => 8024,
-
-                //Postprocess image
-                'resize' => [
-                    [ 'fit' => [100] ], // thumbs directory
-                ],
-            ],
+            'avatar' => 'name:Profilová fotografia|type:file|image',
             'enabled' => 'name:Aktívny|type:checkbox|default:1',
         ];
 

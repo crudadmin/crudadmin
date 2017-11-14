@@ -151,7 +151,7 @@ class Authenticatable extends Model implements
     public function getAdminUser()
     {
         if ( $this->avatar )
-            $this->avatar = $this->avatar->thumbs->url;
+            $this->avatar = $this->avatar->resize(100, 100)->url;
 
         if ( config('admin.admin_groups') == true )
             $this->load('adminsGroups');
