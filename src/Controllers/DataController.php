@@ -39,7 +39,7 @@ class DataController extends Controller
         //Checks for disabled publishing
         if ( $model->getProperty('insertable') == false )
         {
-            Ajax::error( 'Nie je možné pridať nový záznam.' );
+            Ajax::error( trans('admin::admin.cannot-create') );
         }
 
         $this->checkValidation($request);
@@ -50,7 +50,7 @@ class DataController extends Controller
         $data = $this->insertRows($model, $request);
 
         //Checks for upload errors
-        $message = $this->responseMessage('Záznam bol úspešne pridaný');
+        $message = $this->responseMessage(trans('admin::admin.success-created'));
 
         Ajax::message( $message, null, $this->responseType(), [
             'rows' => $data['rows'],
@@ -93,7 +93,7 @@ class DataController extends Controller
         //Checks for disabled publishing
         if ( $model->getProperty('editable') == false )
         {
-            Ajax::error( 'Tento záznam nie je možné upravovať.' );
+            Ajax::error( trans('admin::admin.cannot-edit') );
         }
 
         $row = $model->findOrFail( request()->get('_id') );
@@ -133,7 +133,7 @@ class DataController extends Controller
             $row->onUpdate($row);
 
         //Checks for upload errors
-        $message = $this->responseMessage('Záznam bol úspešne uložený');
+        $message = $this->responseMessage(trans('admin::admin.success-save'));
 
         Ajax::message( $message, null, $this->responseType(), [
             'row' => $row->getAdminAttributes(),
@@ -191,7 +191,7 @@ class DataController extends Controller
     protected function responseMessage($sentense)
     {
         if ( count($this->getRequestErrors()) )
-            return $sentense.' s nasledujúcimi chybami:<br>' . join($this->getRequestErrors(), '<br>');
+            return $sentense.' '.trans('admin::admin.with-errors').':<br>' . join($this->getRequestErrors(), '<br>');
 
         return $sentense.'.';
     }
@@ -272,7 +272,7 @@ class DataController extends Controller
 
         if ( $row->canDelete($row) !== true || $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() || $model->getProperty('deletable') == false )
         {
-            Ajax::error( 'Tento záznam nie je možné vymazať.', 'error' );
+            Ajax::error( trans('admin::admin.cannot-delete'), 'error' );
         }
 
         //Remove uploaded files
@@ -305,7 +305,7 @@ class DataController extends Controller
         //Checks for disabled publishing
         if ( $model->getProperty('publishable') == false )
         {
-            Ajax::error( 'Tento záznam nie je možné znepublikovať.' );
+            Ajax::error( trans('admin::admin.cannot-publicate') );
         }
 
         $row = $model->withUnpublished()->findOrFail( $request->get('id') );
@@ -366,7 +366,7 @@ class DataController extends Controller
         //Checks for disabled sorting rows
         if ( $model->getProperty('sortable') == false )
         {
-            Ajax::error( 'Tento záznam nie je možné presúvať.' );
+            Ajax::error( trans('admin::admin.cannot-sort') );
         }
 
         //Update rows and theirs orders

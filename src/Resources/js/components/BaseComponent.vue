@@ -23,6 +23,7 @@
                         requests: layout.requests,
                         user : layout.user,
                         models: layout.models,
+                        localization: layout.localization,
                         languages: layout.languages,
                         language_id : null,
                         languages_active : false,
@@ -74,7 +75,7 @@
                                 return permissions.join(', ');
                         }
 
-                        return 'Administrátor';
+                        return this.$root.trans('admin-user');
                     }
                 },
 
@@ -108,7 +109,7 @@
                             callback.call(this);
                     },
                     arrorAlert(callback){
-                        this.openAlert('Upozornenie', 'Nastala nečakana chyba, skúste neskôr prosím.', 'danger', null, callback ? callback : function(){});
+                        this.openAlert('Upozornenie', this.$root.trans('unknown-error'), 'danger', null, callback ? callback : function(){});
                     },
                     checkAlertEvents(){
                         var _this = this;
@@ -174,7 +175,7 @@
                         //If has been client logged off
                         if ( response.status == 401 )
                         {
-                            return this.$root.openAlert('Upozornenie!', 'Boli ste automatický odhlásený. Prosím, znova sa prihláste.', 'warning', null, function(){
+                            return this.$root.openAlert('Upozornenie!', this.$root.trans('auto-logout'), 'warning', null, function(){
                                 window.location.reload();
                             });
                         }
@@ -204,6 +205,15 @@
                         }
 
                         return model;
+                    },
+                    /*
+                     * Get translates
+                     */
+                    trans(key){
+                        if ( key in this.localization )
+                            return this.localization[key];
+
+                        return key;
                     }
                 }
             }

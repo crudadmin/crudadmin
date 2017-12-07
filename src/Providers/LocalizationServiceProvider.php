@@ -14,4 +14,9 @@ class LocalizationServiceProvider extends ServiceProvider {
     {
         $this->app->bind('localization', \Gogol\Admin\Helpers\Localization::class);
     }
+
+    public function boot()
+    {
+        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang_admin/', 'admin');
+    }
 }

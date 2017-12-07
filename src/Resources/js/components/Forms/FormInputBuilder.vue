@@ -46,7 +46,7 @@
         <input v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
         <input v-if="!field.value && file_will_remove == true" type="hidden" name="$remove_{{ key }}" value="1">
 
-        <button v-if="field.value && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" data-original-title="Vymazať súbor"><i class="fa fa-remove"></i></button>
+        <button v-if="field.value && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
 
         <div v-show="isMultiple && !isMultirows && getFiles.length > 0">
           <select v-bind:id="getId + '_multipleFile'" v-bind:name="(isMultiple && !isMultirows && getFiles.length > 0) ? '$uploaded_'+key+'[]' : ''" data-placeholder=" " multiple>
@@ -70,7 +70,7 @@
     <div class="form-group" v-if="isSelect">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <select v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
-        <option v-if="!isMultiple" value="">Vyberte jednu z možností</option>
+        <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
         <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="data in field.options | languageOptions" v-bind:selected="selectIndex(hasValue(data[0], value, isMultiple) || (!row && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
       </select>
@@ -83,7 +83,7 @@
         <div class="radio" v-if="!isRequired">
           <label>
             <input type="radio" v-bind:name="key" value="">
-            Žiadna možnosť
+            {{ trans('no-option') }}
           </label>
         </div>
 
@@ -282,6 +282,9 @@
           {
             fake_select.append($('<option></option>').attr('selected', true).attr('value', values[i]).text(values[i]));
           }
+        },
+        trans(key){
+          return this.$root.trans(key);
         }
       },
 
@@ -301,7 +304,7 @@
         {
           if ( this.isConfirmation )
           {
-            return this.field.name + ' (overenie znova)';
+            return this.field.name + ' ('+this.trans('confirmation')+')';
           }
 
           return this.field.name;

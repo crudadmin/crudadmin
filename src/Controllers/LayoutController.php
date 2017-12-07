@@ -25,6 +25,7 @@ class LayoutController extends BaseController
             'user' => auth()->guard('web')->user()->getAdminUser(),
             'models' => $this->getAppTree(),
             'languages' => $this->getLanguages(),
+            'localization' => trans('admin::admin'),
             'requests' => [
                 'show' => action('\Gogol\Admin\Controllers\DataController@show', [':model', ':id', ':subid']),
                 'store' => action('\Gogol\Admin\Controllers\DataController@store'),

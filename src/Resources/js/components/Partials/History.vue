@@ -10,16 +10,16 @@
                 <button type="button" class="close" @click="closeHistory" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">×</span>
                 </button>
-                <h4 class="modal-title">História zmien</h4>
+                <h4 class="modal-title">{{ trans('history.changes') }}</h4>
               </div>
               <div class="modal-body">
                   <table class="table data-table table-bordered table-striped">
                     <thead>
                       <tr>
                         <th class="td-id">Č.</th>
-                        <th>Zmeny vykonal</th>
-                        <th>Počet zmien</th>
-                        <th>Dátum zmeny</th>
+                        <th>{{ trans('history.who') }}</th>
+                        <th>{{ trans('history.count') }}</th>
+                        <th>{{ trans('history.date') }}</th>
                         <th class="th-history-buttons"></th>
                       </tr>
                     </thead>
@@ -39,7 +39,7 @@
                   </table>
               </div>
               <div class="modal-footer">
-                <button type="button" @click="closeHistory" class="btn btn-primary">Zatvoriť</button>
+                <button type="button" @click="closeHistory" class="btn btn-primary">{{ trans('close') }}</button>
               </div>
             </div>
             <!-- /.modal-content -->
@@ -100,6 +100,9 @@
           }
 
           return changes.join(', ');
+        },
+        trans(key){
+          return this.$root.trans(key);
         }
       },
   }

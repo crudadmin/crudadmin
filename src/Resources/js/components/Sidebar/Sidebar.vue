@@ -1,8 +1,8 @@
 <template>
     <ul class="sidebar-menu">
         <li class="header">
-            {{ hasLanguages && isActive ? 'Jazykova verzia' : 'Navigácia' }}
-            <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" data-original-title="Zmena jazykovej mutácie. Pozor! Zmena jazyka môže zahodiť Vaše aktuálne rozpísane zmeny.">
+            {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
+            <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
                 <select v-model="langid" class="form-control">
                     <option v-for="language in languages" value="{{ language.id }}">{{ language.name }}</option>
                 </select>
@@ -48,6 +48,12 @@
 
             if ( owner.hasClass('treeview') )
                 owner.addClass('active');
+        },
+
+        methods: {
+            trans(key){
+              return this.$root.trans(key);
+            }
         }
     }
 </script>

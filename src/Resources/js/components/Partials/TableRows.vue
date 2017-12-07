@@ -21,15 +21,15 @@
           </td>
 
           <td class="buttons-options" v-bind:class="[ 'additional-' + buttonsCount(item) ]">
-            <div><button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" data-original-title="Upraviť"><i class="fa fa-pencil"></i></button></div>
-            <div><button type="button" v-if="isEnabledHistory" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" data-original-title="História zmien"><i class="fa fa-history"></i></button></div>
-            <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" data-original-title="Informácie o zázname"><i class="fa fa-info"></i></button></div>
+            <div><button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" :data-original-title="trans('edit')"><i class="fa fa-pencil"></i></button></div>
+            <div><button type="button" v-if="isEnabledHistory" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
+            <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('row-info')"><i class="fa fa-info"></i></button></div>
 
             <div v-for="(button_key, button) in getButtonsForRow(item)">
               <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button.icon]"></i></button>
             </div>
-            <div><button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? 'Skryť' : 'Zobraziť' }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
-          <div><button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" data-toggle="tooltip" title="" data-original-title="Vymazat"><i class="fa fa-remove"></i></button></div>
+            <div><button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? trans('hide') : trans('show') }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
+          <div><button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" data-toggle="tooltip" title="" :data-original-title="trans('delete')"><i class="fa fa-remove"></i></button></div>
           </td>
         </tr>
       </tbody>
@@ -282,7 +282,7 @@
                 return 'Č.';
                 break;
               case 'created_at':
-                return 'Vytvorené';
+                return this.$root.trans('created');
                 break;
               default:
                 return key;
@@ -382,15 +382,15 @@
           var data = '';
 
           if ( row.created_at != null )
-            data += 'Vytvorené dňa: <strong>' + this.$root.timeFormat( row.created_at ) + '</strong><br>';
+            data += this.$root.trans('created_at') + ': <strong>' + this.$root.timeFormat( row.created_at ) + '</strong><br>';
 
           if ( row.updated_at != null && this.model.editable != false )
-            data += 'Posledná zmena: <strong>' + this.$root.timeFormat( row.updated_at ) + '</strong><br>';
+            data += this.$root.trans('last-change') + ': <strong>' + this.$root.timeFormat( row.updated_at ) + '</strong><br>';
 
           if ( row.published_at != null )
-            data += 'Publikované dňa: <strong>' + this.$root.timeFormat( row.published_at ) + '</strong>';
+            data += this.$root.trans('published-at') + ': <strong>' + this.$root.timeFormat( row.published_at ) + '</strong>';
 
-          this.$root.openAlert('Informácie o zázname č. ' + row.id, data, 'primary', null, function(){});
+          this.$root.openAlert(this.$root.trans('row-info-n')+' ' + row.id, data, 'primary', null, function(){});
         },
         showHistory(row){
           this.$http.get( this.$root.requests.getHistory, {
@@ -402,7 +402,7 @@
             var data = response.data;
 
             if ( data.length <= 1 )
-              return this.$root.openAlert('Informácia', 'V aktuálnom zázname neboli vykonané žiadné zmeny.', 'warning');
+              return this.$root.openAlert(this.$root.trans('info'), this.$root.trans('no-changes'), 'warning');
 
             this.history.id = row.id;
             this.history.rows = data;
@@ -490,7 +490,7 @@
             });
           }.bind(this);
 
-          this.$root.openAlert('Upozornenie', 'Naozaj chcete vymazať dany záznam?', 'warning', success, true);
+          this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('delete-warning'), 'warning', success, true);
         },
         togglePublishedAt(row){
           var _this = this;
@@ -545,6 +545,9 @@
                 scrollTop: $("#form-" + this.model.slug).offset().top - 10
             }, 500);
           }.bind(this), 25);
+        },
+        trans(key){
+          return this.$root.trans(key);
         }
       },
   }

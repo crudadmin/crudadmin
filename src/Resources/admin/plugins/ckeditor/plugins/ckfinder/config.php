@@ -17,12 +17,19 @@ session_start();
 /*
  * Check for laravel path
  */
-if ( file_exists(__DIR__.'/../../../../../../../bootstrap/autoload.php') )
+if ( file_exists(__DIR__.'/../../../../../../../bootstrap') )
     $path = __DIR__.'/../../../../../../../bootstrap';
 else
     $path = __DIR__.'/../../../../../../laravel_app/bootstrap';
 
-require $path.'/autoload.php';
+//Laravel < 5.4
+if ( file_exists($path.'/autoload.php') )
+    require $path.'/autoload.php';
+
+//Laravel > 5.5
+elseif ( file_exists($path.'/../vendor/autoload.php') )
+    require $path.'/../vendor/autoload.php';
+
 $app = require_once $path.'/app.php';
 
 $app->make('Illuminate\Contracts\Http\Kernel')

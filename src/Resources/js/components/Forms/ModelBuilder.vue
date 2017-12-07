@@ -17,7 +17,7 @@
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
                 <span class="fa fa-caret-down"></span></button>
                 <ul class="dropdown-menu">
-                  <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">Hľadať všade</a></li>
+                  <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
                   <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
                   <li v-for="key in getSearchableFields" v-bind:class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
                 </ul>
@@ -27,13 +27,13 @@
             <!-- Search columns -->
             <input type="text" v-show="isSearch" placeholder="Vyhľadajte..." debounce="300" v-model="search.query" class="form-control">
             <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
-              <option value="0">Vypnuté</option>
-              <option value="1">Zapnuté</option>
+              <option value="0">{{ trans('off') }}</option>
+              <option value="1">{{ trans('on') }}</option>
             </select>
 
             <div class="select" v-show="isSelect">
-              <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId" data-placeholder="Vyberte hodnotu">
-                <option value="">Zobraziť všetko</option>
+              <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId" :data-placeholder="trans('get-value')">
+                <option value="">{{ trans('show-all') }}</option>
                 <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions" v-bind:value="data[0]">{{ data[1] }}</option>
               </select>
             </div>
@@ -42,7 +42,7 @@
         </div>
 
 
-        <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" data-original-title="Upravte šírku zobrazenia formulára pre prehľadnejšie zobrazenie záznamov">
+        <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" :data-original-title="trans('edit-size')">
           <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
         </ul>
       </div>
@@ -273,6 +273,9 @@
     },
 
     methods : {
+      trans(key){
+        return this.$root.trans(key);
+      },
       initSearchSelectboxes(){
         window.js_date_event = document.createEvent('HTMLEvents');
         var dispached = false;

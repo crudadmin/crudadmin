@@ -3,7 +3,7 @@
     <div class="box-header box-limit">
       <h3 class="box-title">{{ title }} <small>({{ rows.count }})</small></h3>
 
-      <div class="form-group pull-right" v-if="isPaginationEnabled" title="Počet záznamov v tabuľke">
+      <div class="form-group pull-right" v-if="isPaginationEnabled" :title="trans('rows-count')">
         <select @change="changeLimit" class="form-control" v-model="pagination.limit">
           <option v-for="count in pagination.limits">{{ count }}</option>
         </select>
@@ -235,6 +235,9 @@
     },
 
     methods: {
+      trans(key){
+        return this.$root.trans(key);
+      },
       reloadRows(){
         this.row = null;
         this.loadRows();

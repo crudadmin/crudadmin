@@ -4,7 +4,7 @@
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
       <div class="box-header with-border">
-        <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" data-original-title="Tento záznam je viacjazyčný" class="fa fa-globe"></span> {{ title }}</h3>
+        <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="row && canaddrow" v-on:click.prevent="row=null" type="button" class="pull-right btn btn-default btn-sm">{{ newRowTitle }}</button>
       </div>
 
@@ -18,8 +18,8 @@
       </div>
 
       <div class="box-footer">
-          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ row ? 'Ukladá' : 'Odosiela' }} sa</button>
-          <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]">{{ row ? 'Uložiť' : 'Odoslať' }}</button>
+          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ row ? trans('saving') : trans('sending') }}</button>
+          <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]">{{ row ? trans('save') : trans('send') }}</button>
       </div>
 
     </div>
@@ -86,14 +86,14 @@
             return title;
           }
 
-          return 'Upraviť záznam č. ' + this.row.id;
+          return this.trans('edit-row-n')+' ' + this.row.id;
         }
 
         //Insert title
         if ( title = this.$root.getModelProperty(this.model, 'settings.title.insert') )
           return title;
 
-        return 'Nový záznam';
+        return this.trans('new-row');
       },
       newRowTitle(){
         var title;
@@ -101,7 +101,7 @@
         if ( title = this.$root.getModelProperty(this.model, 'settings.buttons.insert') )
           return title;
 
-        return 'nový záznam';
+        return this.trans('new-row');
       },
       chunkGroups(){
         var groups = this.model.fields_groups,
@@ -403,6 +403,9 @@
               scrollTop: $("#form-" + this.model.slug).offset().top - 10
           }, 500);
         }.bind(this), 400);
+      },
+      trans(key){
+        return this.$root.trans(key);
       }
     },
 

@@ -3,10 +3,10 @@
   <section class="content-header">
     <h1>
       Dashboard
-      <small>Vitajte v administrácii</small>
+      <small>{{ trans('welcome') }}</small>
     </h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Administrácia</a></li>
+      <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
       <li class="active">Dashboard</li>
     </ol>
   </section>
@@ -48,5 +48,10 @@
       created() {
         this.user = this.$root.user;
       },
+      methods: {
+        trans(key){
+          return this.$root.trans(key);
+        }
+      }
     }
 </script>

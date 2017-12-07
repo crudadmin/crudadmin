@@ -1,10 +1,10 @@
 <template>
-  <a v-if="isImage(file) && image != true" href="{{ path }}" data-lightbox="gallery" title="">Zobraziť obrázok</a>
+  <a v-if="isImage(file) && image != true" href="{{ path }}" data-lightbox="gallery" title="">{{ trans('show-image') }}</a>
   <a v-if="isImage(file) && image == true" href="{{ path }}" data-lightbox="gallery" title=""><img v-bind:src="imagePath" alt=""></a>
-  <a v-if="isPdf(file)" href="{{ path }}" target="_blank" title="">Zobraziť pdf</a>
-  <a v-if="isZip(file)" href="{{ downloadPath }}" target="_blank" title="">Stiahnuť ZIP</a>
-  <a v-if="isDoc(file)" href="{{ downloadPath }}" target="_blank" title="">Stiahnuť dokument</a>
-  <a v-if="isOther(file)" href="{{ downloadPath }}" target="_blank" target="_blank" title="">Stiahnuť súbor</a>
+  <a v-if="isPdf(file)" href="{{ path }}" target="_blank" title="">{{ trans('show') }} PDF</a>
+  <a v-if="isZip(file)" href="{{ downloadPath }}" target="_blank" title="">{{ trans('download') }} ZIP</a>
+  <a v-if="isDoc(file)" href="{{ downloadPath }}" target="_blank" title="">{{ trans('download-document') }}</a>
+  <a v-if="isOther(file)" href="{{ downloadPath }}" target="_blank" target="_blank" title="">{{ trans('download-file') }}</a>
 </template>
 
 <script>
@@ -39,6 +39,9 @@
             isOther(path)
             {
               return !(this.isImage(path) || this.isPdf(path) || this.isZip(path) || this.isDoc(path));
+            },
+            trans(key){
+              return this.$root.trans(key);
             }
         },
         computed : {

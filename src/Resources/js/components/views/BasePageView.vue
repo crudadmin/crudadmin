@@ -6,8 +6,8 @@
       <small>{{{ model.title }}}</small>
     </h1>
     <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Administrácia</a></li>
-      <li v-if="getGroup">{{ getGroup.name}}</li>
+      <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
+      <li v-if="getGroup">{{ getGroup.name }}</li>
       <li class="active"><a class="active"><i v-bind:class="['fa', model.icon]"></i> {{ model.name }}</a></li>
     </ol>
   </section>
@@ -33,7 +33,8 @@
       props : ['langid'],
 
       ready(){
-        ga('send', 'pageview', 'auto');
+        if ( typeof ga == 'function' )
+          ga('send', 'pageview', 'auto');
       },
 
       computed: {
@@ -51,6 +52,12 @@
         }
       },
 
-      components : { ModelBuilder }
+      components : { ModelBuilder },
+
+      methods : {
+        trans(key){
+          return this.$root.trans(key);
+        }
+      }
   }
 </script>
