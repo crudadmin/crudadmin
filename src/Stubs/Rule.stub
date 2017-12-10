@@ -1,0 +1,40 @@
+<?php
+
+namespace DummyNamespace;
+
+use Gogol\Admin\Models\Model as AdminModel;
+use Admin;
+use Ajax;
+
+class DummyRule
+{
+    //On all events
+    public function __construct(AdminModel $row)
+    {
+        //... some action
+    }
+
+    /*
+     * Firing callback on create row
+     */
+    public function create(AdminModel $row)
+    {
+        //return Ajax::error('You cannot create row!');
+    }
+
+    /*
+     * Firing callback on update row
+     */
+    public function update(AdminModel $row)
+    {
+        //...
+    }
+
+    /*
+     * Firing callback on delete row
+     */
+    public function delete(AdminModel $row)
+    {
+        //...
+    }
+}

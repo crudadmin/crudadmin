@@ -4,6 +4,7 @@ namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Exceptions\AjaxException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Admin;
 use Log;
 
 class Ajax {
@@ -43,6 +44,14 @@ class Ajax {
 
 
         throw new AjaxException( response()->json($array, $code), $code );
+    }
+
+    /*
+     * Push warning message into admin request errors
+     */
+    static function warning($message)
+    {
+        Admin::push('errors', $message);
     }
 
     static function permissionsError()

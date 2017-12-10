@@ -270,6 +270,9 @@ class DataController extends Controller
 
         $row = $model->findOrFail( $request->get('id') );
 
+        //Add on delete rule validation
+        $row->checkForModelRules(['delete']);
+
         if ( $row->canDelete($row) !== true || $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() || $model->getProperty('deletable') == false )
         {
             Ajax::error( trans('admin::admin.cannot-delete'), 'error' );
