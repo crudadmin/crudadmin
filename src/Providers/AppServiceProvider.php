@@ -54,6 +54,11 @@ class AppServiceProvider extends ServiceProvider
         $this->bootProviders([
             RouteServiceProvider::class
         ]);
+
+        //Set admin locale
+        if ( \Admin::isAdmin() === true ){
+            app()->setLocale( config('admin.locale', 'sk') );
+        }
     }
 
     /**

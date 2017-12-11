@@ -135,6 +135,30 @@ trait AdminModelTrait
     }
 
     /*
+     * Validate admin rules, on update, delete, create
+     */
+    public function checkForModelRules($rules = ['create', 'update'])
+    {
+        if ( $this->rules && is_array($this->rules) )
+        {
+            foreach ($this->rules as $class)
+            {
+                $rule = new $class($this);
+
+                if ( method_exists($rule, 'create') && ! $this->exists )
+                    $rule->create($this);
+
+                if ( method_exists($rule, 'update') && $this->exists )
+                    $rule->update($this);
+
+                if ( method_exists($rule, 'delete') && in_array('delete', $rules) )
+                    $rule->delete($this);
+            }
+
+        }
+    }
+
+    /*
      * Update model data before saving
      *
      * @see Illuminate\Database\Eloquent\Model
@@ -162,6 +186,9 @@ trait AdminModelTrait
                 $this->attributes['published_at'] = Carbon::now()->toDateTimeString();
             }
         }
+
+        //Check for model rules
+        $this->checkForModelRules();
 
         //Save model
         return parent::save($options);

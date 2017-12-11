@@ -9,7 +9,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="csrf-token" content="<?php echo csrf_token() ?>">
   <meta name="root" content="<?php echo asset('admin') ?>">
-  <title><?php echo config('admin.name') ?> - Administrácia</title>
+  <title><?php echo config('admin.name') ?> - <?php echo trans('admin::admin.admin') ?></title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.5 -->
@@ -41,7 +41,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
 </head>
-
 <body class="hold-transition skin-blue sidebar-mini" id="app">
     <div class="wrapper">
 
@@ -91,7 +90,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <!-- Menu Footer-->
                   <li class="user-footer">
                     <div class="pull-right">
-                      <a href="<?php echo action('\Gogol\Admin\Controllers\Auth\LoginController@logout'); ?>" class="btn btn-default btn-flat">Odhlásiť</a>
+                      <a href="<?php echo action('\Gogol\Admin\Controllers\Auth\LoginController@logout'); ?>" class="btn btn-default btn-flat"><?php echo trans('admin::admin.logout') ?></a>
                     </div>
                   </li>
                 </ul>
@@ -136,8 +135,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <p>{{{ alert.message }}}</p>
               </div>
               <div class="modal-footer">
-                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type!='success' && !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal">Zrušiť</button>
-                <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success || alert.type=='success' && !alert.close && !alert.success" class="btn btn-outline">Potvrdiť</button>
+                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type!='success' && !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal"><?php echo trans('admin::admin.close') ?></button>
+                <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success || alert.type=='success' && !alert.close && !alert.success" class="btn btn-outline"><?php echo trans('admin::admin.accept') ?></button>
               </div>
             </div>
             <!-- /.modal-content -->
@@ -165,9 +164,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <!-- Default to the left -->
         <strong>
-          &copy; <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> <a href="http://crudadmin.com" target="_blank">CrudAdmin</a>
+          &copy; <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?> <a href="<?php echo config('admin.author.url', 'http://marekgogol.sk') ?>" target="_blank"><?php echo config('admin.author.name', 'CrudAdmin') ?></a>
           <?php if ( config('admin.author', true) !== false ){ ?>
-          system by <a href="http://marekgogol.sk" target="_blank">Marek Gogoľ</a>.
+          system by <a href="<?php echo config('admin.author.url', 'http://marekgogol.sk') ?>" target="_blank"><?php echo config('admin.author.copyright', 'Marek Gogoľ') ?></a>.
           <?php } ?>
         </strong>
       </footer>
@@ -179,9 +178,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- REQUIRED JS SCRIPTS -->
     <div id="loader" v-bind:class="{ hidenloader : true }">
         <div class="spinner">
-            <h2><strong>CrudAdmin</strong> <span>&copy;</span> <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?>
+            <h2><strong><?php echo config('admin.author.name', 'CrudAdmin') ?></strong> <span>&copy;</span> <?php echo date('Y') > 2016 ? '2016 - '.date('Y') : date('Y') ?>
             <?php if ( config('admin.author', true) !== false ){ ?>
-            by Marek Gogoľ
+            by <?php echo config('admin.author.copyright', 'Marek Gogoľ') ?>
             <?php } ?></h2>
             <div class="bounce1"></div>
             <div class="bounce2"></div>

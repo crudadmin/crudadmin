@@ -28,9 +28,9 @@ class Admin
     /*
      * Save property, if is not in administration interface
      */
-    public function bind($key, $data, $call = true)
+    public function bind($key, $data, $call = true, $force = false)
     {
-        if ( ! $this->isAdmin() )
+        if ( ! $this->isAdmin() || $force === true )
         {
             //If is passed data callable function
             if ( is_callable($data) && $call == true )
@@ -78,6 +78,17 @@ class Admin
             return $this->buffer[ $key ];
         else
             return $default;
+    }
+
+    /*
+     * Cache into array if does not exists
+     */
+    public function cache($key, $data, $force = true)
+    {
+        if ( $this->has($key) )
+            return $this->get($key);
+
+        return $this->bind($key, $data, true, $force);
     }
 
     /*

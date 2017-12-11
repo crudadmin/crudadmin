@@ -4,6 +4,7 @@ namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Exceptions\AjaxException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Admin;
 use Log;
 
 class Ajax {
@@ -11,7 +12,7 @@ class Ajax {
     static function success($message = null, $title = null, $data = null, $code = 200)
     {
         return self::message(
-            $message ? $message : _('Zmeny boli úspešne uložené.'),
+            $message ? $message : trans('admin::admin.success-save'),
             $title,
             'success',
             $data,
@@ -22,8 +23,8 @@ class Ajax {
     static function error($message = null, $title = null, $data = null, $code = 200)
     {
         return self::message(
-            $message ? $message : _('Nastala nečakana chyba, skúste neskôr prosím.'),
-            $title ? $title : _('Upozornenie'),
+            $message ? $message : trans('admin::admin.unknown-error'),
+            $title ? $title : trans('admin::admin.warning'),
             'error',
             $data,
             $code
@@ -34,7 +35,7 @@ class Ajax {
     {
         $array = [
             'type' => $type,
-            'title' => $title ? $title : _('Informácia'),
+            'title' => $title ? $title : trans('admin::admin.info'),
             'message' => $message,
         ];
 
@@ -45,9 +46,17 @@ class Ajax {
         throw new AjaxException( response()->json($array, $code), $code );
     }
 
+    /*
+     * Push warning message into admin request errors
+     */
+    static function warning($message)
+    {
+        Admin::push('errors', $message);
+    }
+
     static function permissionsError()
     {
-        return self::error( 'Nemate právomoc k pristúpeniu do tejto sekcie.', null, null, 401 );
+        return self::error( trans('admin::admin.no-permissions'), null, null, 401 );
     }
 
     /*
@@ -59,9 +68,9 @@ class Ajax {
         Log::error( $e );
 
         if ( env('APP_DEBUG') == true )
-            Ajax::error('Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:<br><strong>php artisan admin:migrate</strong><br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
+            Ajax::error(trans('admin::admin.migrate-error').'<br><strong>php artisan admin:migrate</strong><br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
 
-        return Ajax::error('Nastala nečakaná chyba. Váš administrátor pravdepodobne zabudol aktualizovať databázu. Ak táto chyba pretrváva, kontaktujte ho.<br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
+        return Ajax::error(trans('admin::admin.db-error').'<br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
     }
 
 }
