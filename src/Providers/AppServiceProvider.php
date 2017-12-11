@@ -56,8 +56,9 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         //Set admin locale
-        if ( \Admin::isAdmin() === true )
+        if ( \Admin::isAdmin() === true ){
             app()->setLocale( config('admin.locale', 'sk') );
+        }
     }
 
     /**

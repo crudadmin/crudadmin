@@ -1,9 +1,9 @@
-@extends('admin::auth.layout');
+@extends('admin::auth.layout')
 
 @section('content')
 <!-- /.login-logo -->
 <div class="login-box-body">
-  <p class="login-box-msg">Žiadosť o reset hesla</p>
+  <p class="login-box-msg">{{ trans('admin::admin.password-reset') }}</p>
 
   <form action="{{ action('\Gogol\Admin\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail') }}" method="post">
     {!! csrf_field() !!}
@@ -20,7 +20,7 @@
 
     <div class="row">
       <div class="col-lg-12">
-        <button type="submit" class="btn btn-primary btn-block btn-flat">Odoslať potvrdzovací link na email</button>
+        <button type="submit" class="btn btn-primary btn-block btn-flat">{{ trans('admin::admin.send-password') }}</button>
       </div>
         @if (session('status'))
       <div class="col-lg-12">

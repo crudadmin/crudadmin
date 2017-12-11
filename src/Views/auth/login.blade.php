@@ -3,7 +3,7 @@
 @section('content')
 <!-- /.login-logo -->
 <div class="login-box-body">
-  <p class="login-box-msg">{{ config('admin.authentication.login.title', 'Prosím, prihláste sa pomocou emailu a hesla') }}</p>
+  <p class="login-box-msg">{{ config('admin.authentication.login.title', trans('admin::admin.login-with')) }}</p>
 
   <form action="" method="post">
     {!! csrf_field() !!}
@@ -18,7 +18,7 @@
       @endif
     </div>
     <div class="form-group has-feedback">
-      <input type="password" name="password" class="form-control" value="{{ old('password') }}" placeholder="Heslo">
+      <input type="password" name="password" class="form-control" value="{{ old('password') }}" placeholder="{{ trans('admin::admin.password') }}">
       <span class="glyphicon glyphicon-lock form-control-feedback"></span>
 
       @if ($errors->has('password'))
@@ -31,20 +31,20 @@
       <div class="col-xs-8">
         <div class="checkbox icheck">
           <label>
-            <input type="checkbox" name="remember"> Zapamätať si
+            <input type="checkbox" name="remember"> {{ trans('admin::admin.remember-password') }}
           </label>
         </div>
       </div>
       <!-- /.col -->
       <div class="col-xs-4">
-        <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+        <button type="submit" class="btn btn-primary btn-block btn-flat">{{ trans('admin::admin.login') }}</button>
       </div>
       <!-- /.col -->
     </div>
   </form>
 
 
-  <a href="{{ action('\Gogol\Admin\Controllers\Auth\ForgotPasswordController@showLinkRequestForm') }}">Zabudol som heslo</a><br>
+  <a href="{{ action('\Gogol\Admin\Controllers\Auth\ForgotPasswordController@showLinkRequestForm') }}">{{ trans('admin::admin.forgot-password') }}</a><br>
 </div>
 <!-- /.login-box-body -->
 @stop

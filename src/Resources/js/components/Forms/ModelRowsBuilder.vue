@@ -194,7 +194,7 @@
           return title;
         }
 
-        return 'Záznamy';
+        return this.trans('rows');
       },
       isPaginationEnabled(){
         return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false;

@@ -382,7 +382,7 @@
           var data = '';
 
           if ( row.created_at != null )
-            data += this.$root.trans('created_at') + ': <strong>' + this.$root.timeFormat( row.created_at ) + '</strong><br>';
+            data += this.$root.trans('created-at') + ': <strong>' + this.$root.timeFormat( row.created_at ) + '</strong><br>';
 
           if ( row.updated_at != null && this.model.editable != false )
             data += this.$root.trans('last-change') + ': <strong>' + this.$root.timeFormat( row.updated_at ) + '</strong><br>';

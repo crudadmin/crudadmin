@@ -3,7 +3,7 @@
   <section class="content-header">
     <h1>
       Dashboard
-      <small>{{ trans('welcome') }}</small>
+      <small>{{ trans('welcome-in-admin') }}</small>
     </h1>
     <ol class="breadcrumb">
       <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
@@ -22,7 +22,7 @@
 
 
           <div class="box-body">
-            <h2>Vitajte {{ user.username }}</h2>
+            <h2>{{ trans('welcome') }} {{ user.username }}</h2>
           </div>
 
 
