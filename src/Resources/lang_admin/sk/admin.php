@@ -58,6 +58,7 @@ return [
     'sending' => 'Odosiela sa',
     'edit-row-n' => 'Upraviť záznam č.',
     'new-row' => 'Nový záznam',
+    'number' => 'č.',
 
     'edit' => 'Upraviť',
     'show' => 'Zobraziť',
@@ -65,13 +66,17 @@ return [
     'delete' => 'Vymazať',
     'delete-file' => 'Vymazať súbor',
     'select-option' => 'Vyberte jednu z možností',
+    'select-option-multi' => 'Vyberte zo zoznamu možností',
     'no-option' => 'Žiadna možnosť',
 
     'edit-size' => 'Upravte šírku zobrazenia formulára pre prehľadnejšie zobrazenie záznamov',
+    'search' => 'Vyhľadajte',
     'search-all' => 'Hľadať všade',
     'get-value' => 'Vyberte hodnotu',
     'on' => 'Vypnuté',
     'off' => 'Zapnuté',
+    'yes' => 'Áno',
+    'no' => 'Nie',
 
     'rows-count' => 'Počet záznamov v tabuľke',
     'show-all' => 'Zobraziť všetko',
@@ -81,6 +86,7 @@ return [
     'no-permissions' => 'Nemate právomoc k pristúpeniu do tejto sekcie.',
     'migrate-error' => 'Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:',
     'db-error' => 'Nastala nečakaná chyba. Váš administrátor pravdepodobne zabudol aktualizovať databázu. Ak táto chyba pretrváva, kontaktujte ho.',
+    'row-error' => 'Záznam neexistuje, pravdepodobne už bol vymazaný.',
 
     'login' => 'Prihlásiť sa',
     'password' => 'Heslo',

@@ -109,7 +109,7 @@
                             callback.call(this);
                     },
                     arrorAlert(callback){
-                        this.openAlert('Upozornenie', this.$root.trans('unknown-error'), 'danger', null, callback ? callback : function(){});
+                        this.openAlert(this.$root.trans('warning'), this.$root.trans('unknown-error'), 'danger', null, callback ? callback : function(){});
                     },
                     checkAlertEvents(){
                         var _this = this;
@@ -169,13 +169,13 @@
 
                         if ( response.status == 404 )
                         {
-                            return this.$root.openAlert('Upozornenie!', 'Záznam neexistuje, pravdepodobne už bol vymazaný.', 'warning');
+                            return this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('row-error'), 'warning');
                         }
 
                         //If has been client logged off
                         if ( response.status == 401 )
                         {
-                            return this.$root.openAlert('Upozornenie!', this.$root.trans('auto-logout'), 'warning', null, function(){
+                            return this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('auto-logout'), 'warning', null, function(){
                                 window.location.reload();
                             });
                         }

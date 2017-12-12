@@ -58,6 +58,7 @@ return [
     'sending' => 'Sending',
     'edit-row-n' => 'Edit Record No.',
     'new-row' => 'New row',
+    'number' => 'No.',
 
     'edit' => 'Edit',
     'show' => 'Show',
@@ -65,13 +66,17 @@ return [
     'delete' => 'Delete',
     'delete-file' => 'Delete file',
     'select-option' => 'Select one of the options',
+    'select-option-multi' => 'Select from list of options',
     'no-option' => 'No option',
 
     'edit-size' => 'Adjust the width of the form view for a more readable display of records',
+    'search' => 'Search',
     'search-all' => 'Search everywhere',
     'get-value' => 'Select value',
     'on' => 'Off',
     'off' => 'On',
+    'yes' => 'Yes',
+    'no' => 'No',
 
     'rows-count' => 'Number of records in a table',
     'show-all' => 'Show all',
@@ -81,6 +86,7 @@ return [
     'no-permissions' => 'You have no authority to access this section.',
     'migrate-error' => 'An unexpected error has occurred, you probably did not trigger the migration of the models with the command:',
     'db-error' => 'Unexpected error occurred. Your administrator may have forgotten to update the database. If this error persists, please contact him / her.',
+    'row-error' => 'The record does not exist, probably has already been deleted.',
 
     'login' => 'Login',
     'password' => 'Password',

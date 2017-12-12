@@ -69,7 +69,7 @@
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : 'Vyberte zo zoznamu možností'" v-bind:multiple="isMultiple" class="form-control">
+      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
         <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="data in field.options | languageOptions" v-bind:selected="selectIndex(hasValue(data[0], value, isMultiple) || (!row && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>

@@ -106,7 +106,7 @@ export default {
             }
           } else if ( this.model.fields[field].type == 'checkbox' )
           {
-            return row[field] == 1 ? 'Áno' : 'Nie';
+            return row[field] == 1 ? this.trans('yes') : this.trans('no');
           }
         }
 
@@ -152,6 +152,9 @@ export default {
         } else {
           return this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.limit', defaultLimit);
         }
+      },
+      trans(key){
+        return this.$root.trans(key);
       }
     }
 }

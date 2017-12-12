@@ -25,7 +25,7 @@
             <!-- /btn-group -->
 
             <!-- Search columns -->
-            <input type="text" v-show="isSearch" placeholder="Vyhľadajte..." debounce="300" v-model="search.query" class="form-control">
+            <input type="text" v-show="isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
             <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
               <option value="0">{{ trans('off') }}</option>
               <option value="1">{{ trans('on') }}</option>
@@ -426,10 +426,10 @@
       },
       getSearchingColumnName(column){
         if ( column == 'id' )
-          return 'ID. (č.)';
+          return 'ID. ('+this.trans('number')+')';
 
         if ( ! column || !(column in this.model.fields) )
-          return 'Hľadať všade';
+          return this.trans('search-all');
 
         var field = this.model.fields[column],
             name = field.name.length > 20 ? field.name.substr(0, 20) + '...' : field.name;
