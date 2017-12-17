@@ -89,21 +89,9 @@ class LayoutController extends BaseController
             {
                 $data = [];
 
-                //Also for multilanguages
-                if ( is_array(reset($field['options'])) )
+                foreach ($field['options'] as $k => $v)
                 {
-                    foreach ($field['options'] as $lang_id => $lang_data)
-                    {
-                        foreach ($lang_data as $k => $v)
-                        {
-                            $data[$lang_id][] = [$k, $v];
-                        }
-                    }
-                } else {
-                    foreach ($field['options'] as $k => $v)
-                    {
-                        $data[] = [$k, $v];
-                    }
+                    $data[] = [$k, $v];
                 }
 
                 $fields[$key]['options'] = $data;

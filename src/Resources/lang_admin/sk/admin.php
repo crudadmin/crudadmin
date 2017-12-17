@@ -11,7 +11,17 @@ return [
     'unknown-error' => 'Nastala nečakana chyba, skúste neskôr prosím.',
 
     'navigation' => 'Navigácia',
-    'language-mutation' => 'Jazykova verzia',
+    'language-mutation' => 'Jazyková verzia',
+    'language-title' => 'Upravte si nastavenia jazykových mutácii. Taktiež si nastavte predvolený jazyk umiestnením jazyka na prvú pozíciu.',
+    'languages-add-new' => 'Pridať nový jazyk',
+    'languages-update' => 'Upravujete jazyk :name',
+    'languages-name' => 'Názov jazyka',
+    'languages-title' => 'Zadajte názov jazyka',
+    'languages-prefix' => 'Skratka jazyka',
+    'languages-prefix-title' => 'Zadajte skrátku jazyka (en, sk, de, cz)...',
+    'languages-po-name' => 'Preklad .po súboru pre poedit',
+    'languages-mo-name' => 'Preklad .mo súboru pre poedit',
+    'languages' => 'Jazyková mutácia',
     'change-language' => 'Zmena jazykovej mutácie. Pozor! Zmena jazyka môže zahodiť Vaše aktuálne rozpísane zmeny.',
 
     'show' => 'Zobraziť',
@@ -82,7 +92,7 @@ return [
     'show-all' => 'Zobraziť všetko',
     'confirmation' => 'overenie znova',
 
-    'success-save' => 'Zmeny boli úspešne uložené.',
+    'success-save' => 'Zmeny boli úspešne uložené',
     'no-permissions' => 'Nemate právomoc k pristúpeniu do tejto sekcie.',
     'migrate-error' => 'Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:',
     'db-error' => 'Nastala nečakaná chyba. Váš administrátor pravdepodobne zabudol aktualizovať databázu. Ak táto chyba pretrváva, kontaktujte ho.',

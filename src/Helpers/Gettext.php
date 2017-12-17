@@ -135,7 +135,7 @@ class Gettext
         //Create new directory if not exists
         if ( ! $this->filesystem->isDirectory($locale_path) )
         {
-            $this->filesystem->makeDirectory( $locale_path, 0755, true);
+            $this->filesystem->makeDirectory( $locale_path, 0775, true);
 
             //Create gitignore
             if ( ! file_exists( $this->getGettextPath('.gitignore') ) )

@@ -17,13 +17,13 @@ class Language extends Model
     /*
      * Template name
      */
-    protected $name = 'Jazyková mutácia';
+    protected $name = 'admin::admin.languages';
 
     /*
      * Template title
      * Default ''
      */
-    protected $title = 'Upravte si nastavenia jazykových mutácii. Taktiež si nastavte predvolený jazyk umiestnením jazyka na prvú pozíciu.';
+    protected $title = 'admin::admin.languages-title';
 
     /*
      * Group
@@ -51,10 +51,13 @@ class Language extends Model
      */
     protected $delete_files = false;
 
-    protected $settings = [
-        'title.insert' => 'Pridať nový jazyk',
-        'title.update' => 'Upravujete jazyk :name',
-    ];
+    public function settings()
+    {
+        return [
+            'title.insert' => trans('admin::admin.languages-add-new'),
+            'title.update' => trans('admin::admin.languages-update'),
+        ];
+    }
 
     /*
      * Automatic form and database generation
@@ -62,8 +65,8 @@ class Language extends Model
     protected function fields($row)
     {
         $rules = [
-            'name' => 'name:Názov jazyka|placeholder:Zadajte názov jazyka|required|max:25',
-            'slug' => 'name:Skratka jazyka|placeholder:Zadajte skrátku jazyka (en, sk, de, cz)...|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
+            'name' => 'name:admin::admin.languages-name|placeholder:admin::admin.languages-title|required|max:25',
+            'slug' => 'name:admin::admin.languages-prefix|placeholder:admin::admin.languages-prefix-title|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
         ];
 
         /*
@@ -71,8 +74,8 @@ class Language extends Model
          */
         if ( config('admin.gettext') === true )
         {
-            $rules['poedit_po'] = 'name:Preklad .po súboru pre poedit|type:file|max:1024|extensions:po|required_with:poedit_mo';
-            $rules['poedit_mo'] = 'name:Preložený .mo súbor|type:file|max:1024|hidden|extensions:mo|required_with:poedit_po';
+            $rules['poedit_po'] = 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|required_with:poedit_mo';
+            $rules['poedit_mo'] = 'name:admin::admin.languages-mo-name|type:file|max:1024|hidden|extensions:mo|required_with:poedit_po';
         }
 
         return $rules;

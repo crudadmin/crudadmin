@@ -12,7 +12,17 @@ return [
 
     'navigation' => 'Navigation',
     'language-mutation' => 'Language version',
-    'change-language' => 'Change language mutation. WARNING! Changing your language may discard your currently delineated changes.',
+    'language-title' => 'Modify language mutation settings. Also, set your default language by placing your language in the first position. ',
+    'languages-add-new' => 'Add new language',
+    'languages-update' => 'You are editing language: name',
+    'languages-name' => 'Language name',
+    'languages-title' => 'Enter the name of the language',
+    'languages-prefix' => 'Language abbreviation',
+    'languages-prefix-title' => 'Enter your language (en, sk, de, cz) ...',
+    'languages-po-name' => 'Translation .po file for poedit',
+    'languages-mo-name' => 'Translation .mo file for poedit',
+    'languages' => 'Language mutation',
+    'change-language' => 'Change language mutation. WARNING! Changing your language may discard your currently delineated changes. ',
 
     'show' => 'Show',
     'show-image' => 'Show image',
