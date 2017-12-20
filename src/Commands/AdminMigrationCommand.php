@@ -706,7 +706,13 @@ class AdminMigrationCommand extends Command
         $column = $table->string('slug', $model->getFieldLength($slugcolumn));
 
         if ( $updating == true )
+        {
             $column->after( $slugcolumn );
+        }
+
+        //If is creating new table or when slug index is missing
+        if ( $updating == false || ! $this->hasIndex($model, 'slug', 'index') )
+            $column->index();
 
         //If is field required
         if( ! $model->hasFieldParam( $slugcolumn , 'required') )
