@@ -12,7 +12,17 @@ return [
 
     'navigation' => 'Navigation',
     'language-mutation' => 'Language version',
-    'change-language' => 'Change language mutation. WARNING! Changing your language may discard your currently delineated changes.',
+    'language-title' => 'Modify language mutation settings. Also, set your default language by placing your language in the first position. ',
+    'languages-add-new' => 'Add new language',
+    'languages-update' => 'You are editing language: name',
+    'languages-name' => 'Language name',
+    'languages-title' => 'Enter the name of the language',
+    'languages-prefix' => 'Language abbreviation',
+    'languages-prefix-title' => 'Enter your language (en, sk, de, cz) ...',
+    'languages-po-name' => 'Translation .po file for poedit',
+    'languages-mo-name' => 'Translation .mo file for poedit',
+    'languages' => 'Language mutation',
+    'change-language' => 'Change language mutation. WARNING! Changing your language may discard your currently delineated changes. ',
 
     'show' => 'Show',
     'show-image' => 'Show image',
@@ -58,6 +68,7 @@ return [
     'sending' => 'Sending',
     'edit-row-n' => 'Edit Record No.',
     'new-row' => 'New row',
+    'number' => 'No.',
 
     'edit' => 'Edit',
     'show' => 'Show',
@@ -65,13 +76,17 @@ return [
     'delete' => 'Delete',
     'delete-file' => 'Delete file',
     'select-option' => 'Select one of the options',
+    'select-option-multi' => 'Select from list of options',
     'no-option' => 'No option',
 
     'edit-size' => 'Adjust the width of the form view for a more readable display of records',
+    'search' => 'Search',
     'search-all' => 'Search everywhere',
     'get-value' => 'Select value',
     'on' => 'Off',
     'off' => 'On',
+    'yes' => 'Yes',
+    'no' => 'No',
 
     'rows-count' => 'Number of records in a table',
     'show-all' => 'Show all',
@@ -81,6 +96,7 @@ return [
     'no-permissions' => 'You have no authority to access this section.',
     'migrate-error' => 'An unexpected error has occurred, you probably did not trigger the migration of the models with the command:',
     'db-error' => 'Unexpected error occurred. Your administrator may have forgotten to update the database. If this error persists, please contact him / her.',
+    'row-error' => 'The record does not exist, probably has already been deleted.',
 
     'login' => 'Login',
     'password' => 'Password',

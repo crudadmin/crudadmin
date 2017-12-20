@@ -4,9 +4,11 @@
  */
 
 CKEDITOR.editorConfig = function( config ) {
+    var lang = $('html').attr('lang')||'sk';
+
     // Define changes to default configuration here. For example:
-    config.language = 'sk';
-    config.defaultLanguage = 'sk';
+    config.language = lang;
+    config.defaultLanguage = lang;
 
     var basedir = '/assets/admin';
 

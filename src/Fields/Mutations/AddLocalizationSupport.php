@@ -22,8 +22,23 @@ class AddLocalizationSupport
 
         }
 
-
         return $add;
+    }
+
+    public function update( $field )
+    {
+        /*
+         * Translate name, title and placeholders
+         */
+        foreach (['name', 'title', 'placeholder'] as $key) {
+            if ( array_key_exists($key, $field) )
+            {
+                if ( $translate = trans($field[$key]) )
+                    $field[$key] = $translate;
+            }
+        }
+
+        return $field;
     }
 
     public function remove($field, $key)

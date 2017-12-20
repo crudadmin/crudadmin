@@ -229,7 +229,7 @@ class File
     {
         if ( ! file_exists($path) )
         {
-            BaseFile::makeDirectory( $path, 0755, true);
+            BaseFile::makeDirectory( $path, 0775, true);
         }
     }
 

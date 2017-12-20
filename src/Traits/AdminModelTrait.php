@@ -145,6 +145,9 @@ trait AdminModelTrait
             {
                 $rule = new $class($this);
 
+                if ( method_exists($rule, 'fire') )
+                    $rule->fire($this);
+
                 if ( method_exists($rule, 'create') && ! $this->exists )
                     $rule->create($this);
 
@@ -651,8 +654,12 @@ trait AdminModelTrait
      */
     public function getProperty($property, $row = null)
     {
+        //Translates
+        if ( in_array($property, ['name', 'title']) && $translate = trans($this->{$property}) )
+            return $translate;
+
         //Object / Array
-        if (in_array($property, ['fields', 'options', 'settings', 'buttons', 'insertable', 'editable', 'deletable', 'layouts'])) {
+        elseif (in_array($property, ['fields', 'options', 'settings', 'buttons', 'insertable', 'editable', 'deletable', 'layouts'])) {
 
             if ( method_exists($this, $property) )
                 return $this->{$property}($row);
