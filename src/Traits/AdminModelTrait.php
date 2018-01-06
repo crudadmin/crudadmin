@@ -739,6 +739,19 @@ trait AdminModelTrait
         return $attributes;
     }
 
+    /**
+     * Convert the model instance to an array.
+     * In admin, do not convert end-point model by developer into array, without his modifications
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        if ( Admin::isAdmin() )
+            return array_merge(parent::attributesToArray(), $this->relationsToArray());
+
+        return array_merge($this->attributesToArray(), $this->relationsToArray());
+    }
 
     //Returns schema with correct connection
     public function getSchema()
