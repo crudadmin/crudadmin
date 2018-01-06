@@ -292,11 +292,11 @@
         }
 
         this.$http.get(this.$root.requests.rows, query).then(function(response){
-
           //If has been component destroyed, and request is delivered... and some conditions
           if ( this.dragging === true || this.progress === true || !this.$root ){
             return;
           }
+
 
           if ( typeof response.data == 'string' ){
             customErrorAlert.call(this, response);
@@ -341,7 +341,6 @@
           this.initTimeout(false);
         })
         .catch(function(response){
-          console.log('error', response)
           //If has been component destroyed, and request is delivered...
           if ( !this.$root )
             return;
@@ -350,8 +349,8 @@
           this.initTimeout(false, true);
 
           //On first error
-          if ( response.status == 500 && this.refresh.count == 0 ){
-            customErrorAlert.call(this, response);
+          if ( response.status == 500 && this.refresh.count == 0 && 'message' in response ){
+            this.$root.errorResponseLayer(response, null);
           }
 
           //Show error alert at first request
