@@ -5,6 +5,7 @@ var VueRouter = require('vue-router');
 require('jquery-form/jquery.form.js');
 
 window.moment = require('moment');
+window._ = require('lodash');
 
 //Uses
 Vue.use(require('vue-resource'));

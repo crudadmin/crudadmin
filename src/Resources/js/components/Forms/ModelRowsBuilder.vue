@@ -292,6 +292,7 @@
         }
 
         this.$http.get(this.$root.requests.rows, query).then(function(response){
+
           //If has been component destroyed, and request is delivered... and some conditions
           if ( this.dragging === true || this.progress === true || !this.$root ){
             return;
@@ -340,6 +341,7 @@
           this.initTimeout(false);
         })
         .catch(function(response){
+          console.log('error', response)
           //If has been component destroyed, and request is delivered...
           if ( !this.$root )
             return;
@@ -484,7 +486,10 @@
         {
           for ( var k in data[i] )
           {
-            if ( this.rows.data[i][k] != data[i][k] )
+            var isArray = $.isArray(data[i][k]);
+
+            //Compare also arrays
+            if ( isArray && !_.isEqual(this.rows.data[i][k], data[i][k]) || !isArray && this.rows.data[i][k] != data[i][k] )
             {
               this.rows.data[i][k] = data[i][k];
             }

@@ -41,6 +41,52 @@ class AddSelectSupport
         return false;
     }
 
+    /*
+     * Get columns by regex prefix
+     */
+    private function getColumnsByProperties($properties, $columns = ['id'])
+    {
+        preg_match_all('/(?<!\\\\)[\:^]([0-9,a-z,A-Z$_]+)+/', $properties[1], $matches);
+
+        if ( count($matches[1]) == 0 )
+            $columns[] = $properties[1];
+        else
+            $columns = array_merge($matches[1], $columns);
+
+        return $columns;
+    }
+
+    /*
+     * Build options value
+     */
+    private function makeValueByProperty($row, $value, $load_columns)
+    {
+        //If is symple one column
+        if ( in_array($value, $load_columns) )
+            return $row[$value];
+
+        //If is dynamic columns
+        foreach ($load_columns as $column ) {
+            $value = str_replace(':'.$column, $row[$column], $value);
+        }
+
+        return str_replace('\:', ':', $value);
+    }
+
+    /*
+     * Check if column exists in array
+     */
+    private function existsColumn($column, $load_columns, $option)
+    {
+        if ( !$option || !Admin::isAdmin() )
+            return;
+
+        if ( count($load_columns) == 2 && strpos($column, ':') === false && !array_key_exists($column, $option) )
+        {
+            Ajax::error('Nie je možné načítať tabuľku, keďže stĺpec <strong>'.$properties[1].'</strong> v tabuľke <strong>'.$properties[0].'</strong> neexistuje.', null, null, 500);
+        }
+    }
+
     public function update( $field, $key, $model )
     {
         if ( $field['type'] == 'select' || $field['type'] == 'radio' )
@@ -74,7 +120,7 @@ class AddSelectSupport
             /*
              * If options are defined in method od $options property
              */
-            if ( array_key_exists($key, $options) || array_key_exists(($key = rtrim($key, '_id')), $options) )
+            if ( (array_key_exists($key, $options) || array_key_exists(($key = rtrim($key, '_id')), $options)) && !is_string($options[$key]) )
             {
                 $field['options'] = $options[$key];
 
@@ -87,7 +133,7 @@ class AddSelectSupport
             }
 
             /*
-             * If options are defined in field
+             * If options are defined in field for static multiselect
              */
             else if ( array_key_exists('options', $field) ){
                 $field['options'] = is_string($field['options']) ? explode(',', $field['options']) : $field['options'];
@@ -101,19 +147,25 @@ class AddSelectSupport
 
                 $rows = [];
 
+                //Override options from function into property field 1
+                if ( array_key_exists($key, $options) && is_string($options[$key]) )
+                    $properties[1] = $options[$key];
+
                 //When is defined column which will be in selectbox
                 if ( count($properties) >= 2 && strtolower($properties[1]) != 'null' )
                 {
-                    //Get data from table, and bind them info buffer for better performance
-                    $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model ) {
-                        if ($model = Admin::getModelByTable($properties[0]))
-                        {
-                            return $model->all()->toArray();
-                        }
+                    $load_columns = $this->getColumnsByProperties($properties);
 
-                        return DB::table($properties[0])->whereNull('deleted_at')->get();
+                    //Get data from table, and bind them info buffer for better performance
+                    $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {
+                        if ($model = Admin::getModelByTable($properties[0]))
+                            return $model->select($load_columns)->get()->toArray();
+
+                        return DB::table($properties[0])->select($load_columns)->whereNull('deleted_at')->get();
                     });
 
+                    //If is unknown belongs to column
+                    $this->existsColumn($properties[1], $load_columns, $options[0]);
 
                     if ( $options !== false )
                     {
@@ -125,16 +177,9 @@ class AddSelectSupport
 
                             if ( array_key_exists('language_id', $option) )
                             {
-                                $rows[ $option['language_id'] ][ $option[$key] ] = $option[$properties[1]];
+                                $rows[ $option['language_id'] ][ $option[$key] ] = $this->makeValueByProperty($option, $properties[1], $load_columns);
                             } else {
-
-                                //If is unknown belongs to column
-                                if ( ! array_key_exists($properties[1], $option) && Admin::isAdmin() )
-                                {
-                                    Ajax::error('Nie je možné načítať tabuľku, keďže stĺpec <strong>'.$properties[1].'</strong> v tabuľke <strong>'.$properties[0].'</strong> neexistuje.', null, null, 500);
-                                }
-
-                                $rows[ $option[$key] ] = $option[$properties[1]];
+                                $rows[ $option[$key] ] = $this->makeValueByProperty($option, $properties[1], $load_columns);
                             }
                         }
                     }
