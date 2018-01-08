@@ -165,7 +165,8 @@ class AddSelectSupport
                     });
 
                     //If is unknown belongs to column
-                    $this->existsColumn($properties[1], $load_columns, $options[0]);
+                    if ( count($options) > 0 )
+                        $this->existsColumn($properties[1], $load_columns, $options[0]);
 
                     if ( $options !== false )
                     {
