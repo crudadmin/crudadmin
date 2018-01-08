@@ -156,6 +156,8 @@ class DataController extends Controller
 
             $this->updateBelongsToMany($model, $row);
 
+            $this->insertUnsavedChilds($row, $request);
+
             /*
              * Save into hustory
              */
@@ -175,6 +177,22 @@ class DataController extends Controller
             'rows' => $rows,
             'buttons' => (new AdminRows($model))->generateButtonsProperties($models),
         ];
+    }
+
+    /*
+     * Connect all unsaved items with parent row what has been added
+     */
+    private function insertUnsavedChilds($row, $request)
+    {
+        if ( $request->has('_save_children') )
+        {
+            foreach ($request->_save_children as $item)
+            {
+                $model = $this->getModel($item['table']);
+
+                $model->getConnection()->table($model->getTable())->where('id', $item['id'])->update([ $item['column'] => $row->getKey() ]);
+            }
+        }
     }
 
     /*

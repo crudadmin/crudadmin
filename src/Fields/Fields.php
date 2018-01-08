@@ -203,6 +203,13 @@ class Fields
     {
         $mutation = new $namespace;
 
+        if ( $mutation instanceof \Gogol\Admin\Fields\Mutations\MutationRule )
+        {
+            $mutation->setFields($this->fields[ $model->getTable() ]);
+            $mutation->setField($field);
+            $mutation->setKey($key);
+        }
+
         //Updating field
         if ( method_exists($mutation, 'update') )
         {

@@ -829,17 +829,11 @@ class AdminMigrationCommand extends Command
         if ( ! $model->isEnabledLanguageForeign() )
             return $table;
 
-        //Get last key of fields
-        $fields = $model->getFields();
-
-        if ( $updating == true && count($fields) > 0 )
-            end($fields);
-
         $_table = $table->integer('language_id')->unsigned()->nullable();
 
-        if ( $updating == true && $last = key($fields) )
+        if ( $updating == true )
         {
-            $_table->after( $last );
+            $_table->after('id');
         }
 
         $table->foreign('language_id')->references('id')->on('languages');
@@ -873,7 +867,7 @@ class AdminMigrationCommand extends Command
             $column = $table->integer( $foreign_column )->unsigned();
 
             //If parent belongs to more models...
-            if ( count($belongsToModel) > 1 )
+            if ( count($belongsToModel) > 1 || $model->getProperty('withoutParent') == true )
                 $column->nullable();
 
             //If foreign key does not exists in table

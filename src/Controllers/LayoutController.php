@@ -170,6 +170,7 @@ class LayoutController extends BaseController
             'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
             'foreign_column' => $model->getForeignColumn(),
+            'without_parent' => $model->getProperty('withoutParent') ?: false,
             'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),
             'minimum' => $model->getProperty('minimum'),
