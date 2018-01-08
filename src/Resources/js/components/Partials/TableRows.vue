@@ -430,7 +430,8 @@
               row[key] = response[key];
             }
 
-            this.row = row;
+            //Clone row item
+            this.row = _.clone(row, true);
 
             this.$parent.$parent.closeHistory(history_id ? true : false);
 

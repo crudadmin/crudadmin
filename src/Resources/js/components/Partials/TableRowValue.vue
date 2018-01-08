@@ -116,7 +116,9 @@ export default {
 
     methods: {
       getLanguageSelectOptions(array){
-        return this.$parent.$parent.$parent.$options.filters.languageOptions(array, this.$root.language_id);
+        return this.$parent.$parent.$parent.$options.filters.languageOptions(array, this.model.fields[this.field], this.model.localization ? {
+          language_id : this.$root.language_id,
+        } : {});
       },
       isFile(field){
 

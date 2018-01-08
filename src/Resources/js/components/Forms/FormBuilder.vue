@@ -5,21 +5,29 @@
 
       <div class="box-header with-border">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
-        <button v-if="row && canaddrow" v-on:click.prevent="row=null" type="button" class="pull-right btn btn-default btn-sm">{{ newRowTitle }}</button>
+        <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="pull-right btn btn-default btn-sm">{{ newRowTitle }}</button>
       </div>
 
       <div class="box-body">
         <div class="row" v-for="groups in chunkGroups">
             <div v-bind:class="getGroupClass(group)" v-for="group in groups">
-              <h4 class="group-title" v-if="canShowGroupName(group)">{{ group.name }}</h4>
-              <form-input-builder v-for="field_key in group.fields" v-if="canShowField(model.fields[field_key])" :history="history"  :model="model" :row="row" :index="$index" :key="field_key" :field="model.fields[field_key]"></form-input-builder>
+              <h4 class="group-title" v-if="canShowGroupName(group)">{{{ group.name }}}</h4>
+              <form-input-builder
+                v-for="field_key in group.fields"
+                v-if="canShowField(model.fields[field_key])"
+                :history="history"
+                :model="model"
+                :row="row"
+                :index="$index"
+                :key="field_key"
+                :field="model.fields[field_key]"></form-input-builder>
             </div>
         </div>
       </div>
 
       <div class="box-footer">
-          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ row ? trans('saving') : trans('sending') }}</button>
-          <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( row ? 'success' : 'primary')]">{{ row ? trans('save') : trans('send') }}</button>
+          <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
+          <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? trans('save') : trans('send') }}</button>
       </div>
 
     </div>
@@ -58,23 +66,28 @@
       row : {
         handler : function (row, oldRow) {
           //Form cannot be resetted if data has been synced from db
-          var canResetForm = !row || ! oldRow || row.id != oldRow.id;
+          var canResetForm = !this.isOpenedRow || ! oldRow || row.id != oldRow.id;
 
-          this.initForm(row, canResetForm);
+          //Init new form after change row
+          if ( !row || !oldRow || (row.id != oldRow.id ) )
+            this.initForm(row, canResetForm);
         },
         deep: true,
       },
       //On change language reset editing form
       // langid(langid){
-      //   this.row = null;
+      //   this.row = {};
       // },
     },
 
     computed: {
+      isOpenedRow(){
+        return this.row && 'id' in this.row;
+      },
       title(){
         var title;
 
-        if ( this.row )
+        if ( this.isOpenedRow )
         {
           //Update title
           if ( title = this.$root.getModelProperty(this.model, 'settings.title.update') )
@@ -132,6 +145,9 @@
     },
 
     methods: {
+      resetForm(){
+        this.row = {};
+      },
       //Return group class
       getGroupClass(group){
         if ( group.width == 'half' )
@@ -156,10 +172,13 @@
 
         this.resetErrors();
 
+        if ( !row || !('id' in row) )
+          this.row = {}
+
         //Checks if form can be editable
         if ( row && this.canaddrow && this.model.editable == false && this.$parent.hasChilds() == 0 )
         {
-          this.row = null;
+          this.row = {};
           return;
         }
 
@@ -222,6 +241,10 @@
           //Check if is enabled language
           if ( this.$root.language_id != null )
             data['language_id'] = this.$root.language_id;
+
+          //Push saved childs without actual parent row
+          if ( this.$parent.rows.save_children.length > 0 )
+            data['_save_children'] = this.$parent.rows.save_children;
         }
 
         this.resetErrors();
@@ -343,7 +366,7 @@
       saveForm(e)
       {
         //Devide if is updating or creating form
-        var action = this.row == null ? 'store' : 'update';
+        var action = ! this.isOpenedRow ? 'store' : 'update';
 
         this.sendForm(e, action, function(response){
           if ( ! response.data )
@@ -352,11 +375,25 @@
           //Push new row
           if ( action == 'store' )
           {
+            //Reset actual items buffer
+            this.$parent.rows.save_children = [];
+
+            //If actual row has no parent, and need to ba saved when parent will be saved
+            if ( this.$parent.isWithoutParentRow() )
+            {
+              for ( var i = 0; i < response.data.rows.length; i++ )
+                this.$parent.$parent.rows.save_children.push({
+                  table : this.model.slug,
+                  id : response.data.rows[i].id,
+                  column : this.model.foreign_column[this.$parent.getParentTableName(true)],
+                });
+            }
+
             //Bind values for input builder
             this.$broadcast('onSubmit', response.data.rows[0]);
 
             //Send notification about new row
-            this.$dispatch('proxy', 'onCreate', response.data);
+            this.$dispatch('proxy', 'onCreate', [this.model.slug, response.data]);
 
             //If form has disabled autoreseting
             var autoreset = this.$root.getModelProperty(this.model, 'settings.autoreset');
@@ -393,7 +430,6 @@
               }
             }
           }
-
         }.bind(this));
 
       },

@@ -225,26 +225,31 @@ class AdminRows
     public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null, $id = false)
     {
         try {
-            $paginated_rows_data = $this->getRowsData($subid, $langid, function($query) use ( $limit, $page, $count, $id ) {
+            $without_parent = $parent_table && (int)$subid == 0;
 
-                //Get specific id
-                if ( $id !== false )
-                    $query->where('id', $id);
+            if ( ! $without_parent )
+            {
+                $paginated_rows_data = $this->getRowsData($subid, $langid, function($query) use ( $limit, $page, $count, $id ) {
 
-                //Search in rows
-                $this->checkForSearching($query, $this->model);
+                    //Get specific id
+                    if ( $id !== false )
+                        $query->where('id', $id);
 
-                //Paginate rows
-                $this->paginateRecords($query, $limit, $page, $count);
-            }, $parent_table );
+                    //Search in rows
+                    $this->checkForSearching($query, $this->model);
 
-            $all_rows_data = $this->model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
+                    //Paginate rows
+                    $this->paginateRecords($query, $limit, $page, $count);
+                }, $parent_table );
+
+                $all_rows_data = $this->model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
+            }
 
             $data = [
-                'rows' => $this->getBaseRows( $paginated_rows_data ),
-                'count' => $this->checkForSearching( $all_rows_data )->count(),
+                'rows' => $without_parent ? [] : $this->getBaseRows( $paginated_rows_data ),
+                'count' => $without_parent ? 0 : $this->checkForSearching( $all_rows_data )->count(),
                 'page' => $page,
-                'buttons' => $this->generateButtonsProperties($paginated_rows_data),
+                'buttons' => $without_parent ? [] : $this->generateButtonsProperties($paginated_rows_data),
                 'layouts' => $this->getLayouts($count),
             ];
         } catch (\Illuminate\Database\QueryException $e) {

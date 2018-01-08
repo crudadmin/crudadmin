@@ -96,6 +96,11 @@
        * When row is added, then push it into table
        */
       onCreate(array){
+        if ( array[0] != this.model.slug )
+          return;
+
+        array = array[1];
+
         var pages = Math.ceil(this.rows.count / this.pagination.limit);
 
         //If last page is full, and need to add new page
@@ -239,7 +244,7 @@
         return this.$root.trans(key);
       },
       reloadRows(){
-        this.row = null;
+        this.row = {};
         this.loadRows();
 
         return true;
@@ -259,6 +264,10 @@
         return row.id;
       },
       loadRows(indicator){
+        //On first time allow reload rows without parent, for field options...
+        if ( this.$parent.isWithoutParentRow() && indicator == false)
+            return false;
+
         if ( indicator !== false )
           this.pagination.refreshing = true;
 
@@ -267,7 +276,7 @@
 
         var query = {
           model : this.model.slug,
-          parent : this.$parent.getParentTableName(),
+          parent : this.$parent.getParentTableName(this.model.without_parent),
           subid : this.getParentRowId(),
           langid : this.model.localization === true ? this.langid : 0,
           limit : this.isPaginationEnabled ? this.pagination.limit : 0,
@@ -296,7 +305,6 @@
           if ( this.dragging === true || this.progress === true || !this.$root ){
             return;
           }
-
 
           if ( typeof response.data == 'string' ){
             customErrorAlert.call(this, response);
@@ -381,15 +389,15 @@
           //Update fields from database, for dynamic selectbox values
           for ( var key in fields )
           {
-            if ( 'options' in this.model.fields[ key ] && Object.keys(fields[ key ].options).length > 0 )
-            {
+            if ( 'options' in this.model.fields[ key ] && Object.keys(fields[ key ].options).length > 0 ){
               this.model.fields[ key ].options = fields[ key ].options;
             }
           }
 
           //Update fields options in selectbar for choosenjs
           setTimeout(function(){
-            this.$parent.reloadSearchBarSelect();
+            if ( this.$parent && this.$parent.reloadSearchBarSelect )
+              this.$parent.reloadSearchBarSelect();
           }.bind(this), 100);
       },
       isNumericValue(key){

@@ -3,21 +3,21 @@
     <!-- STRING INPUT -->
     <div class="form-group" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATETIME INPUT -->
     <div class="form-group" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
@@ -25,7 +25,7 @@
     <div class="form-group" v-if="isCheckbox">
       <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-        <input type="checkbox" v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
+        <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
         <div><div></div></div>
       </label>
       <small>{{ field.title }}</small>
@@ -34,7 +34,7 @@
     <!-- TEXT INPUT -->
     <div class="form-group" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
+      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
@@ -64,15 +64,23 @@
     </div>
 
     <!-- Row Confirmation -->
-    <form-input-builder v-if="field.confirmed == true && !isConfirmation" :model="model" :history="history" :field="field" :index="index" :key="key + '_confirmation'" :row="row" :confirmation="true"></form-input-builder>
+    <form-input-builder
+      v-if="field.confirmed == true && !isConfirmation"
+      :model="model"
+      :history="history"
+      :field="field"
+      :index="index"
+      :key="key + '_confirmation'"
+      :row="row"
+      :confirmation="true"></form-input-builder>
 
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" name="{{ isMultiple ? key + '[]' : key }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
+      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
         <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
-        <option v-for="data in field.options | languageOptions" v-bind:selected="selectIndex(hasValue(data[0], value, isMultiple) || (!row && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
+        <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple || (!this.isOpenedRow && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
       </select>
       <small>{{ field.title }}</small>
     </div>
@@ -89,7 +97,7 @@
 
         <div class="radio" v-for="data in field.options">
           <label>
-            <input type="radio" v-bind:name="key" v-bind:checked="hasValue(data[0], value)" v-bind:value="data[0]">
+            <input type="radio" @change="changeValue" v-bind:name="key" v-bind:checked="hasValue(data[0], value)" v-bind:value="data[0]">
 
             {{ data[1] }}
           </label>
@@ -111,43 +119,15 @@
         return {
           file_will_remove : false,
           file_from_server : true,
-          updateSelect : false,
+          filterBy : null,
         };
-      },
-
-      watch : {
-        field : {
-          deep : true,
-          handler : function(field){
-            this.updateField(field);
-          }
-        }
-      },
-
-      filters: {
-        languageOptions(array){
-          //For rebuilding select with no options (when changing language)
-          this.selectIndex();
-
-          return this.$parent.$parent.$options.filters.languageOptions(array, this.getLangageId);
-        }
       },
 
       ready()
       {
-        if ( this.isDatepicker )
-        {
-          jQuery.datetimepicker.setLocale('sk');
+        this.bindDatepickers();
 
-          //Add datepickers
-          $('#' + this.getId).datetimepicker({
-            lang: 'sk',
-            format: this.getDateFormat,
-            timepicker: this.field.type != 'date',
-            datepicker: this.field.type != 'time',
-            scrollInput: false,
-          });
-        }
+        this.bindFilters();
 
         this.onChangeSelect();
       },
@@ -170,6 +150,73 @@
       },
 
       methods : {
+        bindDatepickers(){
+          if ( ! this.isDatepicker )
+            return;
+
+          jQuery.datetimepicker.setLocale('sk');
+
+          //Add datepickers
+          $('#' + this.getId).datetimepicker({
+            lang: 'sk',
+            format: this.getDateFormat,
+            timepicker: this.field.type != 'date',
+            datepicker: this.field.type != 'time',
+            scrollInput: false,
+          });
+        },
+        /*
+         * If field has filters, then check of other fields values for filtrating
+         */
+        bindFilters(){
+          if ( !this.isSelect && !this.isRadio )
+            return;
+
+          if ( !this.getFilterBy )
+            return;
+
+          this.$watch('row.'+this.getFilterBy[0], function(value){
+            this.filterBy = value;
+          })
+        },
+        /*
+         * Apply event on changed value
+         */
+        changeValue(e, value){
+          var value = e ? e.target.value : value;
+
+          if ( this.field.type == 'checkbox' )
+            value = e.target.checked;
+
+          //Update field values
+          this.field.value = value;
+          this.$set('row.' + this.key, value)
+        },
+        /*
+         * Apply on change events into selectbox
+         */
+        onChangeSelect(){
+          if ( this.isSelect )
+          {
+            var select = $('#' + this.getId),
+                _this = this;
+
+            select.change(function(e){
+              if ( _this.isMultiple ){
+                //Chosen need to be updated after delay for correct selection order
+                setTimeout(function(){
+                  //Send values in correct order
+                  _this.changeValue(null, $(this).getSelectionOrder());
+
+                  //Update fake select on change value
+                  _this.rebuildSelect();
+                }.bind(this), 50);
+              } else {
+                _this.changeValue(null, $(this).val());
+              }
+            })
+          }
+        },
         updateField(field){
           //After change value, update same value in ckeditor
           if ( field.type == 'editor'){
@@ -185,25 +232,34 @@
           if (field.type == 'file')
             this.file_from_server = true;
 
-          if ( this.isSelect )
-          {
-            var select = $('#' + this.getId).chosen({disable_search_threshold: 10}).trigger("chosen:updated");
-
-            //Choosen throws error when order is set first time
-            if ( field.value && this.isSelect && this.isMultiple)
+          //When VueJs DOM has been rendered
+          this.$nextTick(function () {
+            //If is select
+            if ( this.isSelect )
             {
-              try {
-                select.setSelectionOrder(field.value);
-              } catch(e){
+              var select = $('#' + this.getId).chosen({disable_search_threshold: 10}).trigger("chosen:updated");
 
+              //Rebuild multiple order into fake select which will send data into request
+              if ( this.isMultiple ){
+
+                //Set selection order into multiple select
+                if ( field.value ){
+                  //Error exception when is some options missing, or filtrated by filters
+                  try {
+                    select.setSelectionOrder(field.value);
+                  } catch(e){
+
+                  }
+                }
+
+                this.rebuildSelect();
               }
             }
-          }
 
-          if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows )
-          {
-            $('#' + this.getId+'_multipleFile').chosen({disable_search_threshold: 10}).trigger("chosen:updated");
-          }
+            //Update multiple files upload
+            if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows )
+              $('#' + this.getId+'_multipleFile').chosen({disable_search_threshold: 10}).trigger("chosen:updated");
+          })
         },
         removeFile(){
           if ( ! this.isMultiple )
@@ -229,48 +285,15 @@
 
           return false;
         },
-        selectIndex(select, index)
-        {
-          this.updateSelect = true;
-
-          if ( this.updateSelectTimeout )
-            clearTimeout(this.updateSelectTimeout);
-
-          this.updateSelectTimeout = setTimeout(function(){
-            var select = $('#'+this.getId).trigger("chosen:updated");
-
-            if ( this.isSelect && this.isMultiple )
-            {
-              if ( this.value )
-                select.setSelectionOrder(this.value);
-
-              this.rebuildSelect();
-            }
-          }.bind(this), 50);
-
-          return select;
-        },
-        onChangeSelect(){
-          if ( this.isSelect && this.isMultiple )
-          {
-            var select = $('#' + this.getId),
-                _this = this;
-
-            select.attr('name', null).change(function(){
-              setTimeout(function(){
-                _this.rebuildSelect();
-              }, 50);
-            });
-          }
-        },
         rebuildSelect(){
           //If is not multiple select
           if ( !(this.isSelect && this.isMultiple) )
             return;
 
           var select = $('#' + this.getId),
-              fake_select = select.prev(),
-              values = select.getSelectionOrder();
+              fake_select = select.prev();
+
+          var values = select.getSelectionOrder();
 
           if ( ! fake_select.is('select') )
             fake_select = select.before('<select name="'+this.key+'[]" multiple="multiple" style="display: none"></select>').prev();
@@ -279,26 +302,58 @@
           fake_select.find('option').remove();
 
           for ( var i = 0; i < values.length; i++ )
-          {
             fake_select.append($('<option></option>').attr('selected', true).attr('value', values[i]).text(values[i]));
-          }
         },
         trans(key){
           return this.$root.trans(key);
-        }
+        },
+        getFilter(options){
+          var filter = {};
+
+          if ( (options && options[0] && typeof options[0][1] == 'object' && options[0][1] !== null) && ('language_id' in options[0][1]) == true )
+            filter['language_id'] = this.getLangageId;
+
+          if ( this.getFilterBy )
+            filter[this.getFilterBy[1]] = this.filterBy;
+
+          return filter;
+        },
       },
 
       computed : {
+        isOpenedRow(){
+          return this.row && 'id' in this.row;
+        },
+        fieldOptions(){
+          //On change fields options rebuild select
+          this.updateField(this.field);
+
+          return this.$parent.$parent.$options.filters.languageOptions(this.field.options, this.field, this.getFilter(this.field.options));
+        },
         getId()
         {
           var parent = 'getParentTableName' in this.$parent.$parent ?
-            this.$parent.$parent.getParentTableName() : this.$parent.$parent.$parent.getParentTableName();
+            this.$parent.$parent.getParentTableName(true) : this.$parent.$parent.$parent.getParentTableName();
 
           return 'id-' + this.model.slug + '-' + parent + '-' + this.index + '-' + this.key;
         },
         getFieldKey()
         {
           return this.model.slug + '-' + this.key;
+        },
+        getFilterBy(){
+          if ( !('filterBy' in this.field) )
+            return null;
+
+          var filterBy = this.field.filterBy.split(','),
+              column;
+
+          //Get column of relation field
+          this.model.fields[column = filterBy[0]+'_id']||this.model.fields[column = filterBy[0]]
+
+          filterBy[0] = column;
+
+          return filterBy;
         },
         getName()
         {
@@ -371,7 +426,7 @@
         },
         isMultipleUpload()
         {
-          return (this.isMultirows && !this.row) || this.isMultiple;
+          return (this.isMultirows && !this.isOpenedRow) || this.isMultiple;
         },
         getDateFormat()
         {
@@ -379,10 +434,8 @@
         },
         getValueOrDefault()
         {
-          if ( ! this.row )
-          {
+          if ( ! this.isOpenedRow )
             return this.field.default;
-          }
 
           return this.field.value;
         },
@@ -429,13 +482,13 @@
          then select options from language of selected row
          */
         getLangageId(){
-          return this.row && 'language_id' in this.row ? this.row.language_id : this.$root.language_id;
+          return this.isOpenedRow && 'language_id' in this.row ? this.row.language_id : this.$root.language_id;
         },
         missingValueInSelectOptions(){
-          if ( !this.row )
+          if ( !this.isOpenedRow )
             return [];
 
-          var options = this.$parent.$parent.$options.filters.languageOptions(this.field.options, this.getLangageId),
+          var options = this.fieldOptions,
               missing = [];
 
           //For multiple selects
@@ -449,8 +502,10 @@
                   return item[0] == this.field.value[i];
                 }.bind(this));
 
-                if (searched.length == 0)
+                //Add missing values, when is filter off
+                if (searched.length == 0 && !this.filterBy){
                   missing.push(this.field.value[i]);
+                }
               }
             }
           }
@@ -464,7 +519,7 @@
                 return [];
             }
 
-            return [this.field.value];
+            return this.filterBy ? [] : [this.field.value];
           }
 
           return missing;

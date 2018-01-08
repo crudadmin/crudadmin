@@ -34,7 +34,7 @@
             <div class="select" v-show="isSelect">
               <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId" :data-placeholder="trans('get-value')">
                 <option value="">{{ trans('show-all') }}</option>
-                <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions" v-bind:value="data[0]">{{ data[1] }}</option>
+                <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]" v-bind:value="data[0]">{{ data[1] }}</option>
               </select>
             </div>
             <!-- Search columns -->
@@ -83,7 +83,7 @@
       </div>
 
       <model-builder
-        v-if="row"
+        v-if="isOpenedRow || child.without_parent == true"
         v-for="child in model.childs"
         :langid="langid"
         :ischild="true"
@@ -117,7 +117,7 @@
 
         activeSize : null,
 
-        row : null,
+        row : {},
 
         /*
          * Search engine
@@ -136,6 +136,7 @@
           buttons : {},
           count : 0,
           loaded : false,
+          save_children : [],
         },
 
         /*
@@ -194,8 +195,11 @@
           this.reloadSearchBarSelect();
         },
       },
-      parentrow(row){
-        this.$children[1].reloadRows();
+      parentrow(row, oldrow){
+        //When parent row has been changed, then load children rows
+        if ( ! _.isEqual(row, oldrow) ){
+          this.$children[1].reloadRows();
+        }
       },
       layouts(layouts){
         var Vue = this;
@@ -236,21 +240,47 @@
       /*
        * Returns correct values into multilangual select
        */
-      languageOptions(array, langid){
+      languageOptions(array, field, filter){
+        var key,
+            relation,
+            field_key,
+            matched_keys,
+            items = [],
+            hasFilter = filter && Object.keys(filter).length > 0;
 
-        //Checks if values are devided by language
-        var localization = false;
-
-        for ( var key in array )
-        {
-          if (array[key][1] !== null && typeof array[key][1] === 'object')
-          {
-            localization = true;
-            break;
-          }
+        if ( field && (relation = field['belongsTo']||field['belongsToMany']) && (field_key = relation.split(',')[1]) ){
+          matched_keys = field_key.match(new RegExp(/(?<!\\)[\:^]([0-9,a-z,A-Z$_]+)+/, 'g'));
         }
 
-        return localization ? array[ langid||this.$root.language_id ] : array;
+        loop1:
+        for ( var key in array )
+        {
+          //If select has filters
+          if ( hasFilter )
+            for ( var k in filter ){
+              if ( array[key][1][k] != filter[k] )
+                continue loop1;
+            }
+
+          //Build value from multiple columns
+          if ( matched_keys )
+          {
+            var value = field_key.replace(/\\:/g, ':');
+
+            for ( var i = 0; i < matched_keys.length; i++ )
+              value = value.replace(new RegExp(matched_keys[i], 'g'), array[key][1][matched_keys[i].substr(1)]);
+          }
+
+          //Simple value by one column
+          else {
+            //Get value of multiarray or simple array
+            var value = typeof array[key][1] == 'object' && array[key][1]!==null ? array[key][1][field_key] : array[key][1];
+          }
+
+          items.push([array[key][0], value]);
+        }
+
+        return items;
       },
 
       /*
@@ -292,10 +322,10 @@
             }
         });
       },
-      getParentTableName(){
+      getParentTableName(force){
         var row = this.$parent.row;
 
-        if ( !row || !( 'id' in row ))
+        if ( force !== true && (!row || !( 'id' in row )))
           return 0;
 
         return this.$parent.model.slug;
@@ -451,10 +481,19 @@
           this.history.fields = [];
           this.history.history_id = null;
         }
+      },
+      /*
+       * Return if acutal model can be added without parent row, and if parent row is not selected
+       */
+      isWithoutParentRow(){
+        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true;
       }
     },
 
     computed: {
+      isOpenedRow(){
+        return this.row && 'id' in this.row;
+      },
       getFilterSelectId(){
         return 'js_chosen_filter' + this.getModelKey;
       },

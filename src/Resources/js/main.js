@@ -4,6 +4,7 @@ var VueRouter = require('vue-router');
 
 require('jquery-form/jquery.form.js');
 
+window._ = require('lodash');
 window.moment = require('moment');
 window._ = require('lodash');
 

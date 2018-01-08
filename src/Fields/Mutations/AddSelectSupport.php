@@ -4,13 +4,14 @@ namespace Gogol\Admin\Fields\Mutations;
 use DB;
 use Admin;
 use Localization;
+use Gogol\Admin\Fields\Mutations\MutationRule;
 use Gogol\Admin\Helpers\Helper;
 use Illuminate\Support\Collection;
 use Ajax;
 
-class AddSelectSupport
+class AddSelectSupport extends MutationRule
 {
-    public $attributes = ['options', 'multiple', 'default'];
+    public $attributes = ['options', 'multiple', 'default', 'filterBy'];
 
     /*
      * If has key in admin buffer, returns data from buffer, if has not, then get data from database and save into buffer
@@ -41,36 +42,51 @@ class AddSelectSupport
         return false;
     }
 
+    private function getFilterBy($field)
+    {
+        if ( array_key_exists('filterBy', $field) )
+        {
+            $filterBy = explode(',', $field['filterBy']);
+
+            //Get relationship foreign column separator
+            if ( ! array_key_exists(1, $filterBy) ){
+                //If field has been matched in previous fields, then get table name from belongsTo property
+                if ( array_key_exists($filterBy[0], $this->fields) ){
+                    $table = $this->getBelongsToProperties($this->fields[$filterBy[0]])[0];
+
+                    $filterBy[1] = str_singular($table) . '_id';
+                } else {
+                    $filterBy[1] = substr($filterBy[0], -3) == '_id' ? $filterBy[0] : ($filterBy[0] . '_id');
+                }
+            }
+
+            return $filterBy;
+        }
+
+        return [];
+    }
+
     /*
      * Get columns by regex prefix
      */
-    private function getColumnsByProperties($properties, $columns = ['id'])
+    private function getColumnsByProperties($properties, $field, $columns = [])
     {
         preg_match_all('/(?<!\\\\)[\:^]([0-9,a-z,A-Z$_]+)+/', $properties[1], $matches);
+
+        //Get foreign column from relationship table which will be loaded into selectbox
+        if ( count($filterBy = $this->getFilterBy($field)) > 0 )
+            $columns[] = $filterBy[1];
 
         if ( count($matches[1]) == 0 )
             $columns[] = $properties[1];
         else
             $columns = array_merge($matches[1], $columns);
 
+        //If relationship table has localizations
+        if (($model = Admin::getModelByTable($properties[0])) && $model->isEnabledLanguageForeign())
+            $columns[] = 'language_id';
+
         return $columns;
-    }
-
-    /*
-     * Build options value
-     */
-    private function makeValueByProperty($row, $value, $load_columns)
-    {
-        //If is symple one column
-        if ( in_array($value, $load_columns) )
-            return $row[$value];
-
-        //If is dynamic columns
-        foreach ($load_columns as $column ) {
-            $value = str_replace(':'.$column, $row[$column], $value);
-        }
-
-        return str_replace('\:', ':', $value);
     }
 
     /*
@@ -87,10 +103,19 @@ class AddSelectSupport
         }
     }
 
+    private function getBelongsToProperties($field)
+    {
+        return explode(',', array_key_exists('belongsTo', $field) ? $field['belongsTo'] : $field['belongsToMany']);
+    }
+
     public function update( $field, $key, $model )
     {
         if ( $field['type'] == 'select' || $field['type'] == 'radio' )
         {
+            //Update filter by property
+            if ( count($filterBy = $this->getFilterBy($field)) > 0 )
+                $field['filterBy'] = implode(',', $filterBy);
+
             //Get allowed options
             $with_options = in_array($key, $model->withOptions());
 
@@ -143,7 +168,7 @@ class AddSelectSupport
              * If options are in db as relationship
              */
             else if ( array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field) ) {
-                $properties = explode(',', array_key_exists('belongsTo', $field) ? $field['belongsTo'] : $field['belongsToMany']);
+                $properties = $this->getBelongsToProperties($field);
 
                 $rows = [];
 
@@ -154,10 +179,13 @@ class AddSelectSupport
                 //When is defined column which will be in selectbox
                 if ( count($properties) >= 2 && strtolower($properties[1]) != 'null' )
                 {
-                    $load_columns = $this->getColumnsByProperties($properties);
+                    $load_columns = $this->getColumnsByProperties($properties, $field);
 
                     //Get data from table, and bind them info buffer for better performance
                     $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {
+
+                        $load_columns[] = 'id';
+
                         if ($model = Admin::getModelByTable($properties[0]))
                             return $model->select($load_columns)->get()->toArray();
 
@@ -170,17 +198,14 @@ class AddSelectSupport
 
                     if ( $options !== false )
                     {
+                        $key = isset($properties[2]) ? $properties[2] : 'id';
+
                         foreach ($options as $option)
                         {
                             $option = (array)$option;
 
-                            $key = isset($properties[2]) ? $properties[2] : 'id';
-
-                            if ( array_key_exists('language_id', $option) )
-                            {
-                                $rows[ $option['language_id'] ][ $option[$key] ] = $this->makeValueByProperty($option, $properties[1], $load_columns);
-                            } else {
-                                $rows[ $option[$key] ] = $this->makeValueByProperty($option, $properties[1], $load_columns);
+                            foreach ($load_columns as $column) {
+                                $rows[ $option[$key] ][$column] = $option[$column];
                             }
                         }
                     }
