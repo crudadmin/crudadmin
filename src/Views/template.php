@@ -13,26 +13,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.5 -->
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/bootstrap/css/bootstrap.min.css') ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/bootstrap/css/bootstrap.min.css') ?>">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datatables/dataTables.bootstrap.css') ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/chosen/chosen.css?v=').Admin::getAssetsVersion() ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/plugins/datetimepicker/jquery.datetimepicker.css?v=').Admin::getAssetsVersion() ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/AdminLTE.css?v=').Admin::getAssetsVersion() ?>">
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/css/style.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/plugins/lightbox/lightbox.min.css') ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/plugins/datatables/dataTables.bootstrap.css') ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/plugins/chosen/chosen.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/plugins/datetimepicker/jquery.datetimepicker.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/dist/css/AdminLTE.css?v=').Admin::getAssetsVersion() ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/css/style.css?v=').Admin::getAssetsVersion() ?>">
   <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect.
   -->
-  <link rel="stylesheet" href="<?php echo asset('/assets/admin/dist/css/skins/skin-blue.min.css') ?>">
+  <link rel="stylesheet" href="<?php echo admin_asset('/dist/css/skins/skin-blue.min.css') ?>">
 
-  <?php if ( ($customCssPath = '/assets/admin/css/custom.css') && file_exists( public_path($customCssPath) ) ){ ?>
-  <link rel="stylesheet" type="text/css" href="<?php echo asset($customCssPath) ?>">
+  <?php foreach(array_merge((array)config('admin.styles', []), ((($customCssPath = public_path('/assets/admin/css/custom.css')) && file_exists($customCssPath)) ? [ $customCssPath ] : [])) as $css){ ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo admin_asset($css) ?>">
   <?php } ?>
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -189,27 +189,34 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </div>
 
     <!-- jQuery 2.1.4 -->
-    <script src="<?php echo asset('/assets/admin/plugins/jQuery/jQuery-2.1.4.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/plugins/jQueryUI/jquery-ui.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/plugins/jQuery/jQuery-2.1.4.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/plugins/jQueryUI/jquery-ui.min.js') ?>"></script>
 
     <!-- Bootstrap 3.3.5 -->
-    <script src="<?php echo asset('/assets/admin/bootstrap/js/bootstrap.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/bootstrap/js/bootstrap.min.js') ?>"></script>
 
     <!-- AdminLTE App -->
-    <script src="<?php echo asset('/assets/admin/plugins/datetimepicker/jquery.datetimepicker.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/plugins/lightbox/lightbox.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/plugins/ckeditor/ckeditor.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/plugins/chosen/chosen.jquery.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/plugins/chosen-order/chosen.order.jquery.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/dist/js/app.min.js') ?>"></script>
-    <script src="<?php echo asset('/assets/admin/dist/js/main.js?v=').Admin::getAssetsVersion() ?>">"></script>
+    <script src="<?php echo admin_asset('/plugins/datetimepicker/jquery.datetimepicker.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/plugins/lightbox/lightbox.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/plugins/ckeditor/ckeditor.js') ?>"></script>
+    <script src="<?php echo admin_asset('/plugins/chosen/chosen.jquery.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/plugins/chosen-order/chosen.order.jquery.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/dist/js/app.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/dist/js/main.js?v=').Admin::getAssetsVersion() ?>">"></script>
 
     <?php foreach((array)config('admin.scripts', []) as $script){ ?>
-    <script type="text/javascript" src="<?php echo $script ?>"></script>
+    <script type="text/javascript" src="<?php echo admin_asset($script) ?>"></script>
     <?php } ?>
 
     <!-- APP JS -->
-    <script src="<?php echo asset('/assets/admin/js/main.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
+    <script src="<?php echo admin_asset('/js/main.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
+
+    <!-- Admin variables -->
+    <script type="text/javascript">
+      window.crudadmin = {
+        path : '<?php echo Admin::getAdminAssetsPath() ?>',
+      };
+    </script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-42935841-6"></script>

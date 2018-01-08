@@ -416,11 +416,19 @@ class Admin
     }
 
     /*
+     * Return path of admin assets
+     */
+    public function getAdminAssetsPath()
+    {
+        return 'vendor/crudadmin';
+    }
+
+    /*
      * Return directory for version file
      */
     public function getAssetsVersionPath( $file = null )
     {
-        return public_path('assets/admin/dist/version/' . $file);
+        return public_path($this->getAdminAssetsPath().'/dist/version/' . $file);
     }
 
     /*
@@ -452,6 +460,20 @@ class Admin
 
         if ( ! file_exists($htaccess) )
             $this->files->put($htaccess, 'deny from all');
+
+        $this->addGitignoreFiles();
+    }
+
+    public function addGitignoreFiles()
+    {
+        $gitignore = "*\n!.gitignore";
+
+        foreach ([public_path(Admin::getAdminAssetsPath()), public_path('uploads')] as $dir)
+        {
+            File::makeDirs($dir);
+
+            file_put_contents($dir . '/.gitignore', $gitignore);
+        }
     }
 }
 ?>

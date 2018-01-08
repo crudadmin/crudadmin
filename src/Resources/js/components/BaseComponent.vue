@@ -59,7 +59,7 @@
                     },
                     getAvatar()
                     {
-                        return this.user.avatar != null ? this.user.avatar : this.$http.options.root + '/../assets/admin/dist/img/avatar5.png';
+                        return this.user.avatar != null ? this.user.avatar : this.$http.options.root + '/../'+window.crudadmin.path+'/dist/img/avatar5.png';
                     },
                     getPermissions()
                     {
