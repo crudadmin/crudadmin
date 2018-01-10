@@ -107,4 +107,5 @@ return [
     'send-password' => 'Odeslat potvrzovací link na email',
     'password-reset' => 'Žádost o reset hesla',
     'password-reset-button' => 'Resetovat heslo',
+    'tab-error' => 'Záložka nemá vyplněné povinné údaje.'
 ];

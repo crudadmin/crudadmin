@@ -22,12 +22,20 @@ class Group
 
     /*
      * Make full group
+     * size in 12 cells grid
      */
-    public static function fields(array $fields)
+    public static function fields(array $fields, $size = 'full')
     {
-        return (new static($fields))->width('full')->type('own');
+        return (new static($fields))->width($size)->type('group');
     }
 
+    /*
+     * Make group with full with
+     */
+    public static function tab(array $fields)
+    {
+        return (new static($fields))->width('full')->type('tab');
+    }
 
     /*
      * Make group with full with
@@ -58,7 +66,7 @@ class Group
     /*
      * Set type of group
      */
-    public function type($type = 'own')
+    public function type($type = 'group')
     {
         $this->type = $type;
 
@@ -86,90 +94,16 @@ class Group
     }
 
     /*
-     * Return if is key in inserted group
-     */
-    private static function isFieldInGroup($key, $group, $field)
-    {
-        //If is field in group fields list
-        if ( array_key_exists($key, $group->fields) )
-            return true;
-
-        //If fiels is belongsTo relation, and exists in field list
-        if ( array_key_exists(substr($key, 0, -3), $group->fields) )
-            return true;
-
-        //if is localization field and exists in field group
-        if ( array_key_exists('localization', $field) && array_key_exists(implode(' ', array_slice(explode('_', $key), 0, -1)), $group->fields) )
-            return true;
-    }
-
-    /*
      * Returns groups of fields with correct order
      */
     public static function build( $model )
     {
-        $data = [];
+        return \Fields::getFieldsGroups( $model );
+    }
 
-        if ( $groups = \Fields::getFieldsGroups( $model ) )
-        {
-            foreach ($model->getFields() as $key => $field)
-            {
-                //If columns is hidden from form
-                if ( array_key_exists('removeFromForm', $field) )
-                    continue;
-
-                foreach ($groups as $group)
-                {
-                    //If field is in group,
-                    //or field with relationship, or field with localization support
-                    if ( self::isFieldInGroup($key, $group, $field) )
-                    {
-                        //If group does not exists
-                        if ( !array_key_exists($group->name, $data) )
-                        {
-                            $data[ $group->name ] = [
-                                'type' => $group->type,
-                                'width' => $group->width,
-                                'fields' => []
-                            ];
-                        }
-
-                      $data[ $group->name ]['fields'][] = $key;
-
-                      continue 2;
-                    }
-                }
-
-                //If column does not exists in any group
-                $group = last($data);
-
-                if ( ! $group || $group['type'] != 'default' )
-                {
-                    $data[] = [
-                        'type' => 'default',
-                        'fields' => [],
-                    ];
-                }
-
-                //Add column into last added group
-                $data[key( array_slice( $data, -1, 1, TRUE ) )]['fields'][] = $key;
-            }
-        } else {
-            $data[] = [
-                'type' => 'default',
-                'fields' => array_keys( $model->getFields() ),
-            ];
-        }
-
-        //Returns groups as non assiociative array
-        //becuase javascript does not know order of keys
-        $groups = [];
-        foreach ($data as $name => $group)
-        {
-            $groups[] = array_merge($group, ['name' => $name]);
-        }
-
-        return $groups;
+    public function isTab()
+    {
+        return $this->type == 'tab';
     }
 }
 ?>

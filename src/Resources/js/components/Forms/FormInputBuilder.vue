@@ -328,12 +328,15 @@
           //On change fields options rebuild select
           this.updateField(this.field);
 
-          return this.$parent.$parent.$options.filters.languageOptions(this.field.options, this.field, this.getFilter(this.field.options));
+          return this.$root.languageOptions(this.field.options, this.field, this.getFilter(this.field.options));
         },
         getId()
         {
-          var parent = 'getParentTableName' in this.$parent.$parent ?
-            this.$parent.$parent.getParentTableName(true) : this.$parent.$parent.$parent.getParentTableName();
+          var parent = this.$parent;
+          while(!('getParentTableName' in parent))
+            parent = parent.$parent;
+
+          parent = parent.getParentTableName(this.model.withoutParent == true);
 
           return 'id-' + this.model.slug + '-' + parent + '-' + this.index + '-' + this.key;
         },

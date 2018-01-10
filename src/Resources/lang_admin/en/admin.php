@@ -107,4 +107,5 @@ return [
     'send-password' => 'Send confirmation link to email',
     'password-reset' => 'Password reset request',
     'password-reset-button' => 'Reset password',
+    'tab-error' => 'The tab has no filled all required information.',
 ];

@@ -1,6 +1,6 @@
 //Requires
-var Vue = require('vue');
-var VueRouter = require('vue-router');
+window.Vue = require('vue');
+window.VueRouter = require('vue-router');
 
 require('jquery-form/jquery.form.js');
 

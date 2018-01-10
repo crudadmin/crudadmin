@@ -241,46 +241,7 @@
        * Returns correct values into multilangual select
        */
       languageOptions(array, field, filter){
-        var key,
-            relation,
-            field_key,
-            matched_keys,
-            items = [],
-            hasFilter = filter && Object.keys(filter).length > 0;
-
-        if ( field && (relation = field['belongsTo']||field['belongsToMany']) && (field_key = relation.split(',')[1]) ){
-          matched_keys = field_key.match(new RegExp(/(?<!\\)[\:^]([0-9,a-z,A-Z$_]+)+/, 'g'));
-        }
-
-        loop1:
-        for ( var key in array )
-        {
-          //If select has filters
-          if ( hasFilter )
-            for ( var k in filter ){
-              if ( array[key][1][k] != filter[k] )
-                continue loop1;
-            }
-
-          //Build value from multiple columns
-          if ( matched_keys )
-          {
-            var value = field_key.replace(/\\:/g, ':');
-
-            for ( var i = 0; i < matched_keys.length; i++ )
-              value = value.replace(new RegExp(matched_keys[i], 'g'), array[key][1][matched_keys[i].substr(1)]);
-          }
-
-          //Simple value by one column
-          else {
-            //Get value of multiarray or simple array
-            var value = typeof array[key][1] == 'object' && array[key][1]!==null ? array[key][1][field_key] : array[key][1];
-          }
-
-          items.push([array[key][0], value]);
-        }
-
-        return items;
+        this.$root.languageOptions(array, field, filter);
       },
 
       /*

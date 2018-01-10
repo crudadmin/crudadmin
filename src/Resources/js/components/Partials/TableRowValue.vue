@@ -116,7 +116,7 @@ export default {
 
     methods: {
       getLanguageSelectOptions(array){
-        return this.$parent.$parent.$parent.$options.filters.languageOptions(array, this.model.fields[this.field], this.model.localization ? {
+        return this.$root.languageOptions(array, this.model.fields[this.field], this.model.localization ? {
           language_id : this.$root.language_id,
         } : {});
       },

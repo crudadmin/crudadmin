@@ -9,20 +9,11 @@
       </div>
 
       <div class="box-body">
-        <div class="row" v-for="groups in chunkGroups">
-            <div v-bind:class="getGroupClass(group)" v-for="group in groups">
-              <h4 class="group-title" v-if="canShowGroupName(group)">{{{ group.name }}}</h4>
-              <form-input-builder
-                v-for="field_key in group.fields"
-                v-if="canShowField(model.fields[field_key])"
-                :history="history"
-                :model="model"
-                :row="row"
-                :index="$index"
-                :key="field_key"
-                :field="model.fields[field_key]"></form-input-builder>
-            </div>
-        </div>
+        <form-tabs-builder
+          :model="model"
+          :row="row"
+          :history="history">
+        </form-tabs-builder>
       </div>
 
       <div class="box-footer">
@@ -35,10 +26,12 @@
   <!-- /.box -->
 </template>
 <script>
-  import FormInputBuilder from '../Forms/FormInputBuilder.vue';
+  import FormTabsBuilder from '../Forms/FormTabsBuilder.vue';
   export default {
 
     props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history'],
+
+    components: { FormTabsBuilder },
 
     data(){
       return {
@@ -116,50 +109,11 @@
 
         return this.trans('new-row');
       },
-      chunkGroups(){
-        var groups = this.model.fields_groups,
-            chunkSize = 2,
-            offset = 0,
-            data = [],
-            chunk;
-
-        for (var i = 0; i < groups.length - offset; i += chunkSize)
-        {
-          chunk = groups.slice(i + offset, i + offset + chunkSize);
-
-          if ( chunk.length > 0 && (chunk[0].type == 'default' || chunk[0].width == 'full') )
-          {
-            offset--;
-            data.push([chunk[0]]);
-          } else if ( chunk[1] && (chunk[1].type == 'default' || chunk[1].width == 'full') ){
-            data.push([chunk[0]]);
-            data.push([chunk[1]]);
-          } else {
-            data.push(chunk);
-          }
-
-        }
-
-        return data;
-      },
     },
 
     methods: {
       resetForm(){
         this.row = {};
-      },
-      //Return group class
-      getGroupClass(group){
-        if ( group.width == 'half' )
-          return 'col-md-6';
-
-        return 'col-md-12';
-      },
-      canShowGroupName(group){
-        return !$.isNumeric(group.name) && group.type!='default';
-      },
-      canShowField(field){
-        return !('removeFromForm' in field);
       },
       //Resets form values and errors
       initForm(row, reset){
@@ -204,6 +158,7 @@
       resetErrors(){
         this.form.find('.form-group.has-error').removeClass('has-error').find('.help-block').remove();
         this.form.find('.fa.fa-times-circle-o').remove();
+        this.form.find('.nav-tabs li.has-error').removeAttr('data-toggle').removeAttr('data-original-title').tooltip("destroy").removeClass('has-error').find('a > .fa').remove();
         this.progress = false;
       },
       sendForm(e, action, callback)
@@ -331,6 +286,9 @@
                     _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).each(function(){
                         var where = $(this);
 
+                        //Colorize tabs
+                        _this.colorizeTab($(this));
+
                         if ( $(this).is('select') || $(this).is('textarea') ){
                           where = where.parent().children().last().prev();
                         }
@@ -433,6 +391,20 @@
         }.bind(this));
 
       },
+      colorizeTab(input){
+        var _this = this;
+
+        input.parents('.tab-pane').each(function(){
+          var index = $(this).index();
+
+          $(this).parent().prev().find('li:not(.active)').eq(index).each(function(){
+            if ( ! $(this).hasClass('has-error') )
+              $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).addClass('has-error').one('click', function(){
+                $(this).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa').remove();
+              }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
+          })
+        });
+      },
       scrollToForm(){
         setTimeout(function(){
           $('html, body').animate({
@@ -444,7 +416,5 @@
         return this.$root.trans(key);
       }
     },
-
-    components : { FormInputBuilder }
   }
 </script>
