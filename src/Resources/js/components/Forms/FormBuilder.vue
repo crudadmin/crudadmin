@@ -397,7 +397,7 @@
         input.parents('.tab-pane').each(function(){
           var index = $(this).index();
 
-          $(this).parent().prev().find('li:not(.active)').eq(index).each(function(){
+          $(this).parent().prev().find('li').eq(index).each(function(){
             if ( ! $(this).hasClass('has-error') )
               $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).addClass('has-error').one('click', function(){
                 $(this).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa').remove();
