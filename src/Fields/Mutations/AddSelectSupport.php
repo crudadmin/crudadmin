@@ -50,13 +50,17 @@ class AddSelectSupport extends MutationRule
 
             //Get relationship foreign column separator
             if ( ! array_key_exists(1, $filterBy) ){
-                //If field has been matched in previous fields, then get table name from belongsTo property
-                if ( array_key_exists($filterBy[0], $this->fields) ){
-                    $table = $this->getBelongsToProperties($this->fields[$filterBy[0]])[0];
+                foreach ([$filterBy[0], $filterBy[0] . '_id'] as $key) {
+                    //If field has been matched in previous fields, then get table name from belongsTo property
+                    if ( array_key_exists($key, $this->fields) ){
+                        $table = $this->getBelongsToProperties($this->fields[$key])[0];
 
-                    $filterBy[1] = str_singular($table) . '_id';
-                } else {
-                    $filterBy[1] = substr($filterBy[0], -3) == '_id' ? $filterBy[0] : ($filterBy[0] . '_id');
+                        $filterBy[1] = str_singular($table) . '_id';
+
+                        break;
+                    } else {
+                        $filterBy[1] = $key;
+                    }
                 }
             }
 
