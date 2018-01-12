@@ -57,10 +57,20 @@ class AdminUpdateCommand extends Command
      */
     public function removeOldVendor()
     {
+        $admin_path = Admin::getAdminAssetsPath();
+
         $remove = [
-            'assets/admin/js',
-            'assets/admin/plugins',
+            $admin_path.'/js',
+            $admin_path.'/plugins',
+            $admin_path.'/css',
+
+            //Also vendor from old crudadmin version 1.1
+            'assets/admin/bootstrap/',
             'assets/admin/css/style.css',
+            'assets/admin/js',
+            'assets/admin/local',
+            'assets/admin/plugins',
+            'assets/admin/dist',
         ];
 
         foreach ($remove as $file)

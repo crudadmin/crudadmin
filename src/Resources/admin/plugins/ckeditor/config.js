@@ -10,7 +10,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.language = lang;
     config.defaultLanguage = lang;
 
-    var basedir = '/assets/admin';
+    var basedir = '/' + window.crudadmin.path;
 
     //CKFinder
     config.filebrowserBrowseUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/ckfinder.html';

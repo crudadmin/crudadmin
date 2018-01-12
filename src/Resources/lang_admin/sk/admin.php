@@ -68,6 +68,7 @@ return [
     'sending' => 'Odosiela sa',
     'edit-row-n' => 'Upraviť záznam č.',
     'new-row' => 'Nový záznam',
+    'general-tab' => 'Všeobecné',
     'number' => 'č.',
 
     'edit' => 'Upraviť',
@@ -107,4 +108,5 @@ return [
     'send-password' => 'Odoslať potvrdzovací link na email',
     'password-reset' => 'Žiadosť o reset hesla',
     'password-reset-button' => 'Resetovať heslo',
+    'tab-error' => 'Záložka nemá vyplnené povinné údaje.'
 ];

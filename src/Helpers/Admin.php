@@ -14,11 +14,21 @@ class Admin
      */
     protected $booted = false;
 
+    /*
+     * Model paths
+     */
+    protected $model_paths = [];
+
     public $buffer = [
         'namespaces' => [],
         'modelnames' => [],
         'models' => [],
     ];
+
+    /*
+     *
+     */
+    protected $models = [];
 
     public function __construct()
     {
@@ -113,28 +123,48 @@ class Admin
     }
 
     /*
+     * Add model path reader
+     */
+    public function addModelPath($namespace, $path)
+    {
+        $this->model_paths[$path] = $namespace;
+    }
+
+    /*
      * Get all files from paths which can has admin models
      */
     protected function getModelFiles()
     {
-        $paths = [ app_path() ];
+        $app_namespace = 'App';
 
-        foreach (config('admin.models', []) as $path)
+        //Add default app namespace
+        $paths = array_merge($this->model_paths, [
+            app_path() => $app_namespace,
+        ]);
+
+        foreach (config('admin.models', []) as $namespace => $path)
         {
+            //If is not set namespace, then use default laravel App namespace.
+            if ( ! is_string($namespace) )
+                $namespace = $app_namespace;
+
             $path = rtrim( $path, '/' );
 
             if ( substr($path, 0, 1) != '/' )
                 $path = base_path( $path );
 
             if ( ! in_array($path, $paths) )
-                $paths[] = $path;
+                $paths[$path] = $namespace;
         }
 
         $files = [];
 
-        foreach ($paths as $path)
+        foreach ($paths as $path => $namespace)
         {
-            $files = array_merge($files, $this->files->files( $path ));
+            $files[$namespace] = [
+                'path' => $path,
+                'files' => $this->files->files( $path )
+            ];
 
             //If is enabled recursive listing of folder
             if ( substr($path, -1) == '*' )
@@ -142,7 +172,8 @@ class Admin
                 $path = rtrim(substr($path, 0, -1), '/');
 
                 if ( file_exists($path) )
-                    $files = array_merge($files, $this->files->files( $path ));
+                    foreach( $this->files->files( $path ) as $file)
+                        $files[$namespace]['files'][] = $file;
             }
         }
 
@@ -152,15 +183,16 @@ class Admin
     /*
      * Raplaces file path to namespace
      */
-    protected function fromPathToNamespace($path)
+    protected function fromPathToNamespace($path, $source, $namespace)
     {
-        $path = str_replace_first(base_path(), '', $path);
+        $source = rtrim($source, '*');
+
+        $path = str_replace_first($source, '', $path);
         $path = str_replace('/', '\\', $path);
-        $path = str_replace_first('app\\', 'App\\', $path);
         $path = str_replace('.php', '', $path);
         $path = trim($path, '\\');
 
-        return $path;
+        return $namespace . '\\' .$path;
     }
 
     /*
@@ -211,15 +243,18 @@ class Admin
 
         $files = $this->getModelFiles();
 
-        foreach ($files as $key => $class)
+        foreach ($files as $namespace => $models)
         {
-            $files[$key] = $this->fromPathToNamespace( $class );
+            foreach ($models['files'] as $key => $class)
+            {
+                $models[$key] = $this->fromPathToNamespace( (string)$class, $models['path'], $namespace );
 
-            //If is not same class with filename
-            if ( ! class_exists($files[$key]) )
-                continue;
+                //If is not same class with filename
+                if ( ! class_exists($models[$key]) )
+                    continue;
 
-            $this->addModel( $files[$key], false );
+                $this->addModel( $models[$key], false );
+            }
         }
 
         /*
@@ -416,11 +451,19 @@ class Admin
     }
 
     /*
+     * Return path of admin assets
+     */
+    public function getAdminAssetsPath()
+    {
+        return 'vendor/crudadmin';
+    }
+
+    /*
      * Return directory for version file
      */
     public function getAssetsVersionPath( $file = null )
     {
-        return public_path('assets/admin/dist/version/' . $file);
+        return public_path($this->getAdminAssetsPath().'/dist/version/' . $file);
     }
 
     /*
@@ -452,6 +495,20 @@ class Admin
 
         if ( ! file_exists($htaccess) )
             $this->files->put($htaccess, 'deny from all');
+
+        $this->addGitignoreFiles();
+    }
+
+    public function addGitignoreFiles()
+    {
+        $gitignore = "*\n!.gitignore";
+
+        foreach ([public_path(Admin::getAdminAssetsPath()), public_path('uploads')] as $dir)
+        {
+            File::makeDirs($dir);
+
+            file_put_contents($dir . '/.gitignore', $gitignore);
+        }
     }
 }
 ?>

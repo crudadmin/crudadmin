@@ -68,6 +68,7 @@ return [
     'sending' => 'Sending',
     'edit-row-n' => 'Edit Record No.',
     'new-row' => 'New row',
+    'general-tab' => 'General',
     'number' => 'No.',
 
     'edit' => 'Edit',
@@ -107,4 +108,5 @@ return [
     'send-password' => 'Send confirmation link to email',
     'password-reset' => 'Password reset request',
     'password-reset-button' => 'Reset password',
+    'tab-error' => 'The tab has no filled all required information.',
 ];

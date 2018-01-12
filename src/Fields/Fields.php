@@ -115,45 +115,75 @@ class Fields
 
         //Resets buffer
         $this->fields[ $table ] = [];
+        $this->groups[ $table ] = [];
         $this->remove[ $table ] = [];
 
         //Fields from model
         $fields = $model->getProperty('fields', $param);
 
+        //Register fields from groups
         foreach ($fields as $key => $field)
-        {
-            //If is group
-            if ( $group = $this->isFieldGroup($field) )
-            {
-                //If group name is not set
-                if ( ! $group->name )
-                    $group->name($key);
-
-                //Register groups into buffer
-                $this->registerGroup( $group, $model );
-
-                foreach ($group->fields as $field_key => $field_from_group)
-                {
-                    if ( count($group->add) > 0 )
-                        $field_from_group = $this->pushParams( $field_from_group, $group->add );
-
-                    //Create mutation on field
-                    $this->registerField( $field_from_group, str_slug( $field_key, '_' ), $model );
-                }
-            } else {
-                //Create mutation on field
-                $this->registerField( $field, str_slug( $key, '_' ), $model );
-            }
-        }
-
-        //Remove fields from mutations
-        foreach ($this->remove[ $table ] as $key)
-        {
-            if ( array_key_exists($key, $this->fields[ $table ]) )
-                unset($this->fields[ $table ][$key]);
-        }
+            $this->manageGroupFields($model, $key, $field);
 
         return $this->fields[ $table ];
+    }
+
+    /*
+     * Register fields from all groups and infinite level of sub groups or tabs
+     * Also rewrite mutated fields into groups
+     */
+    private function manageGroupFields($model, $key, $field, $parent_group = null)
+    {
+        //If is group
+        if ( $group = $this->isFieldGroup($field) )
+        {
+            //If group name is not set
+            if ( ! $group->name )
+                $group->name($key);
+
+            $fields = [];
+
+            //Register sub groups or sub fields
+            foreach ($group->fields as $field_key => $field_from_group)
+            {
+                $mutation_previous = isset($mutation_previous) ? $mutation_previous : $this->fields[$model->getTable()];
+
+                $mutation = $this->manageGroupFields($model, $field_key, $field_from_group, $group);
+
+                //If is group in fields list
+                if ( $mutation instanceof Group ){
+                    $fields[] = $mutation;
+
+                    $mutation_previous = $this->fields[$model->getTable()];
+                }
+
+                //Add new fields into group
+                else {
+                    foreach (array_diff_key($mutation, $mutation_previous) as $key => $field) {
+                        $fields[] = $key;
+                    }
+
+                    $mutation_previous = $mutation;
+                }
+
+
+            }
+
+            $group->fields = $fields;
+
+            //Register group into buffer
+            if ( ! $parent_group )
+                $this->registerGroup( $group, $model );
+
+            return $group;
+        } else {
+            if ( $parent_group && count($parent_group->add) > 0 ){
+                $field = $this->pushParams( $field, $parent_group->add );
+            }
+
+            //Create mutation on field
+            return $this->registerField( $field, str_slug( $key, '_' ), $model );
+        }
     }
 
     public function getFieldsGroups($model)
@@ -182,6 +212,8 @@ class Fields
      */
     protected function registerField( $field, $key, $model, $skip = [] )
     {
+        $table = $model->getTable();
+
         //Field mutations
         foreach ($this->mutations as $namespace)
         {
@@ -190,13 +222,17 @@ class Fields
                 continue;
 
             if ( $response = $this->mutate($namespace, $field, $key, $model) )
-            {
                 $field = $response;
-            }
 
             //Update and register field
-            $this->fields[ $model->getTable() ][ $key ] = $field;
+            $this->fields[ $table ][ $key ] = $field;
         }
+
+        //If field need to be removed
+        if ( in_array($key, (array)$this->remove[$table]) )
+            unset($this->fields[ $table ][ $key ]);
+
+        return $this->fields[ $table ];
     }
 
     public function mutate( $namespace, $field, $key = null, $model = null )
@@ -223,7 +259,7 @@ class Fields
         //Updating field
         $this->removeFields($mutation, $field, $key, $model);
 
-        //Register attributes into mutation
+        //Register attributes from mutation
         $this->registerProperties($mutation);
 
         return $field;

@@ -5,6 +5,7 @@ namespace Gogol\Admin\Commands;
 use Illuminate\Console\Command;
 use Admin;
 use App\User;
+use Gogol\Admin\Helpers\File;
 use Gogol\Admin\Models\User as BaseUser;
 use Illuminate\Console\ConfirmableTrait;
 use Artisan;
