@@ -15,6 +15,8 @@ class Group
 
     public $width = 'full';
 
+    public $icon = null;
+
     public function __construct(array $fields)
     {
         $this->fields = $fields;
@@ -53,6 +55,16 @@ class Group
         return (new static($fields))->width('half')->type();
     }
 
+    public function icon($icon)
+    {
+        if ( substr($icon, 0, 3) != 'fa-' )
+            $icon = 'fa-'.$icon;
+
+        $this->icon = $icon;
+
+        return $this;
+    }
+
     /*
      * Set width of group
      */
@@ -61,6 +73,14 @@ class Group
         $this->width = $width;
 
         return $this;
+    }
+
+    /*
+     * Set width of group
+     */
+    public function grid($width)
+    {
+        return $this->width($width);
     }
 
     /*

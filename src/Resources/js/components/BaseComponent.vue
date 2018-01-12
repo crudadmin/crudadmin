@@ -227,7 +227,7 @@
                             hasFilter = filter && Object.keys(filter).length > 0;
 
                         if ( field && (relation = field['belongsTo']||field['belongsToMany']) && (field_key = relation.split(',')[1]) ){
-                          matched_keys = field_key.match(new RegExp(/(?<!\\)[\:^]([0-9,a-z,A-Z$_]+)+/, 'g'));
+                          matched_keys = field_key.replace(/\\:/g, '').match(new RegExp(/[\:^]([0-9,a-z,A-Z$_]+)+/, 'g'));
                         }
 
                         loop1:

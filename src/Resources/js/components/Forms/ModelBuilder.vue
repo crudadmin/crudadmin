@@ -11,6 +11,8 @@
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
       <div class="pull-right" v-if="!isSingle">
+        <!-- <button type="button" v-if="isOpenedRow && canAddRow" v-on:click.prevent="resetForm"  class="pull-left add-row-btn btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle() }}</button> -->
+
         <div class="search-bar" v-show="canShowSearchBar">
           <div class="input-group input-group-sm">
             <div class="input-group-btn">
@@ -41,7 +43,6 @@
           </div>
         </div>
 
-
         <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" :data-original-title="trans('edit-size')">
           <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
         </ul>
@@ -53,7 +54,7 @@
       <div v-bind:class="{ 'row' : true, 'flex-table' : activeSize == 0 }">
 
         <!-- left column -->
-        <div class="col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm">
+        <div class="col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm" v-if="activetab!==false">
           <form-builder
             :progress.sync="progress"
             :rows.sync="rows"
@@ -83,7 +84,7 @@
       </div>
 
       <model-builder
-        v-if="isOpenedRow || child.without_parent == true"
+        v-if="(isOpenedRow || child.without_parent == true) && child.in_tab !== true"
         v-for="child in model.childs"
         :langid="langid"
         :ischild="true"
@@ -104,7 +105,7 @@
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
 
   export default {
-    props : ['model', 'langid', 'ischild', 'parentrow'],
+    props : ['model', 'langid', 'ischild', 'parentrow', 'activetab'],
     name : 'model-builder',
     data : function(){
       return {
@@ -198,7 +199,17 @@
       parentrow(row, oldrow){
         //When parent row has been changed, then load children rows
         if ( ! _.isEqual(row, oldrow) ){
-          this.$children[1].reloadRows();
+          var children = null;
+
+          //Get rows builder child
+          for ( var i = 0; i < this.$children.length; i++ )
+            if ( 'reloadRows' in this.$children[i] ){
+              children = this.$children[i];
+              break;
+            }
+
+          if ( children )
+            children.reloadRows();
         }
       },
       layouts(layouts){
@@ -448,6 +459,17 @@
        */
       isWithoutParentRow(){
         return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true;
+      },
+      newRowTitle(){
+        var title;
+
+        if ( title = this.$root.getModelProperty(this.model, 'settings.buttons.insert') )
+          return title;
+
+        return this.trans('new-row');
+      },
+      resetForm(){
+        this.row = {};
       }
     },
 

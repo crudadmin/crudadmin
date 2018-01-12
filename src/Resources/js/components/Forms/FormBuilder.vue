@@ -5,18 +5,21 @@
 
       <div class="box-header with-border">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
-        <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="pull-right btn btn-default btn-sm">{{ newRowTitle }}</button>
+        <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
       </div>
 
-      <div class="box-body">
+      <div class="box-body" :class="{ cantadd : !cansave }">
         <form-tabs-builder
           :model="model"
+          :childs="true"
+          :langid="langid"
           :row="row"
+          :cansave.sync="cansave"
           :history="history">
         </form-tabs-builder>
       </div>
 
-      <div class="box-footer">
+      <div class="box-footer" v-if="cansave">
           <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
           <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? trans('save') : trans('send') }}</button>
       </div>
@@ -37,6 +40,7 @@
       return {
         submit : false,
         isActive : true,
+        cansave : true,
         form : null,
       };
     },
@@ -102,18 +106,13 @@
         return this.trans('new-row');
       },
       newRowTitle(){
-        var title;
-
-        if ( title = this.$root.getModelProperty(this.model, 'settings.buttons.insert') )
-          return title;
-
-        return this.trans('new-row');
+        return this.$parent.newRowTitle();
       },
     },
 
     methods: {
       resetForm(){
-        this.row = {};
+        this.$parent.resetForm();
       },
       //Resets form values and errors
       initForm(row, reset){
@@ -158,7 +157,7 @@
       resetErrors(){
         this.form.find('.form-group.has-error').removeClass('has-error').find('.help-block').remove();
         this.form.find('.fa.fa-times-circle-o').remove();
-        this.form.find('.nav-tabs li.has-error').removeAttr('data-toggle').removeAttr('data-original-title').tooltip("destroy").removeClass('has-error').find('a > .fa').remove();
+        this.form.find('.nav-tabs li.has-error').removeAttr('data-toggle').removeAttr('data-original-title').tooltip("destroy").removeClass('has-error').find('a > .fa.fa-exclamation-triangle').remove();
         this.progress = false;
       },
       sendForm(e, action, callback)
@@ -340,11 +339,15 @@
             if ( this.$parent.isWithoutParentRow() )
             {
               for ( var i = 0; i < response.data.rows.length; i++ )
-                this.$parent.$parent.rows.save_children.push({
+              {
+                var parent = 'rows' in this.$parent.$parent ? this.$parent.$parent : this.$parent.$parent.$parent;
+
+                parent.rows.save_children.push({
                   table : this.model.slug,
                   id : response.data.rows[i].id,
                   column : this.model.foreign_column[this.$parent.getParentTableName(true)],
                 });
+              }
             }
 
             //Bind values for input builder
@@ -400,7 +403,10 @@
           $(this).parent().prev().find('li').eq(index).each(function(){
             if ( ! $(this).hasClass('has-error') )
               $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).addClass('has-error').one('click', function(){
-                $(this).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa').remove();
+
+                var active = $(this).parent().find('li.has-error').not($(this)).length == 0 ? $(this).parents('.nav-tabs-custom').find('li.active.has-error') : [];
+
+                $(this).extend(active).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
               }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
           })
         });

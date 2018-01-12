@@ -68,6 +68,7 @@ return [
     'sending' => 'Odosiela sa',
     'edit-row-n' => 'Upraviť záznam č.',
     'new-row' => 'Nový záznam',
+    'general-tab' => 'Všeobecné',
     'number' => 'č.',
 
     'edit' => 'Upraviť',

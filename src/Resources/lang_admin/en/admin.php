@@ -68,6 +68,7 @@ return [
     'sending' => 'Sending',
     'edit-row-n' => 'Edit Record No.',
     'new-row' => 'New row',
+    'general-tab' => 'General',
     'number' => 'No.',
 
     'edit' => 'Edit',
