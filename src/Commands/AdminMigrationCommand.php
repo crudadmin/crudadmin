@@ -187,6 +187,14 @@ class AdminMigrationCommand extends Command
         }
     }
 
+    /*
+     * Skip creating of preddefined columns
+     */
+    private function skipAddingField($key)
+    {
+        return in_array($key, ['_order', 'created_at', 'published_at', 'updated_at', 'slug']);
+    }
+
     /**
      * Create table from model
      * @return void
@@ -203,6 +211,9 @@ class AdminMigrationCommand extends Command
 
             foreach ($model->getFields() as $key => $value)
             {
+                if ( $this->skipAddingField($key) )
+                    continue;
+
                 $this->setColumn( $table, $model, $key );
 
                 //Sluggable column
