@@ -3,21 +3,21 @@
     <!-- STRING INPUT -->
     <div class="form-group" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATETIME INPUT -->
     <div class="form-group" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
@@ -25,7 +25,7 @@
     <div class="form-group" v-if="isCheckbox">
       <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-        <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
+        <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
         <div><div></div></div>
       </label>
       <small>{{ field.title }}</small>
@@ -34,7 +34,7 @@
     <!-- TEXT INPUT -->
     <div class="form-group" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:readonly="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
+      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
@@ -43,7 +43,7 @@
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="form-group file-group">
-        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
+        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
         <input v-if="!field.value && file_will_remove == true" type="hidden" name="$remove_{{ key }}" value="1">
 
         <button v-if="field.value && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
@@ -77,7 +77,7 @@
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:readonly="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
+      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
         <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
         <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
         <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple || (!this.isOpenedRow && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>

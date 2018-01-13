@@ -521,7 +521,7 @@
         return true;
       },
       canShowForm(){
-        if ( !this.row && !this.canAddRow || this.row && this.model.editable == false)
+        if ( !this.isOpenedRow && !this.canAddRow || this.isOpenedRow && this.model.editable == false)
         {
           return false;
         }

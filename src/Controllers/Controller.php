@@ -29,7 +29,7 @@ class Controller extends BaseController
                 $key = $validation_key;
 
             //If field is hidden
-            if ( $model->hasFieldParam($key, 'removeFromForm', true) && $model->hasFieldParam($key, 'required', true) )
+            if ( ($model->hasFieldParam($key, 'removeFromForm', true) || $model->hasFieldParam($key, 'disabled', true)) && $model->hasFieldParam($key, 'required', true) )
             {
                 unset($data[array_search('required', $data)]);
             }

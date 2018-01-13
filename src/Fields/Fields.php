@@ -138,7 +138,7 @@ class Fields
         if ( $group = $this->isFieldGroup($field) )
         {
             //If group name is not set
-            if ( ! $group->name )
+            if ( ! $group->name && !is_numeric($key) )
                 $group->name($key);
 
             $fields = [];
