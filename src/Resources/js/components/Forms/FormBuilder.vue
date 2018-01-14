@@ -50,8 +50,10 @@
       //Initialize form
       this.form = $('form#form-' + this.model.slug);
 
-      //Enable ckeditors
-      this.form.find('.js_editor').ckEditors();
+      //Enable ckeditors, after content is successfuly loaded
+      this.$nextTick(function () {
+        this.form.find('.js_editor').ckEditors();
+      });
 
       //Reset form
       this.initForm(null);
@@ -336,7 +338,7 @@
             this.$parent.rows.save_children = [];
 
             //If actual row has no parent, and need to ba saved when parent will be saved
-            if ( this.$parent.isWithoutParentRow() )
+            if ( this.$parent.isWithoutParentRow )
             {
               for ( var i = 0; i < response.data.rows.length; i++ )
               {

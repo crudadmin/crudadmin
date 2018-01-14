@@ -76,6 +76,7 @@
             :langid="langid"
             :progress.sync="progress"
             :search="search"
+            :iswithoutparent="isWithoutParentRow"
             :history="history">
           </model-rows-builder>
         </div>
@@ -454,12 +455,6 @@
           this.history.history_id = null;
         }
       },
-      /*
-       * Return if acutal model can be added without parent row, and if parent row is not selected
-       */
-      isWithoutParentRow(){
-        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true;
-      },
       newRowTitle(){
         var title;
 
@@ -476,6 +471,12 @@
     computed: {
       isOpenedRow(){
         return this.row && 'id' in this.row;
+      },
+      /*
+       * Return if acutal model can be added without parent row, and if parent row is not selected
+       */
+      isWithoutParentRow(){
+        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true;
       },
       getFilterSelectId(){
         return 'js_chosen_filter' + this.getModelKey;

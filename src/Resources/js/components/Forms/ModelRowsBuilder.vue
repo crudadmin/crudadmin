@@ -43,14 +43,13 @@
   import TableRows from '../Partials/TableRows.vue';
 
   export default {
-    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history'],
+    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'iswithoutparent'],
 
     components : { Refreshing, TableRows },
 
     data : function(){
-
       //Load pagination limit from localStorage
-      var limit = 'limit' in localStorage ? localStorage.limit : this.$root.getModelProperty(this.model, 'settings.pagination.limit', 10);
+      var limit = this.iswithoutparent ? 500 : ('limit' in localStorage ? localStorage.limit : this.$root.getModelProperty(this.model, 'settings.pagination.limit', 10));
 
       return {
         table : null,
@@ -104,17 +103,17 @@
         var pages = Math.ceil(this.rows.count / this.pagination.limit);
 
         //If last page is full, and need to add new page
-        if ( this.isReversed(true) && pages == this.rows.count / this.pagination.limit ){
-          this.setPosition( pages + 1 );
+        if ( this.isReversed(true) && this.rows.count > 0 && !this.$parent.isWithoutParentRow && pages == this.rows.count / this.pagination.limit ){
+          this.setPosition( pages + 1, this.$parent.isWithoutParentRow ? true : null );
         }
 
         //If user is not on lage page, then change page into last, for see added rows
-        else if ( this.isReversed(true) && this.pagination.position < pages ){
+        else if ( this.isReversed(true) && this.pagination.position < pages && !this.$parent.isWithoutParentRow ){
           this.setPosition( pages );
         }
 
         //If row can be pushed without reloading rows into first or last page
-        else if ( this.pagination.position == 1 || this.isReversed(true) && this.pagination.position == pages )
+        else if ( this.pagination.position == 1 || (this.isReversed(true) && this.pagination.position == pages || this.$parent.isWithoutParentRow) )
         {
           var rows = array.rows.concat( this.rows.data );
 
@@ -202,7 +201,7 @@
         return this.trans('rows');
       },
       isPaginationEnabled(){
-        return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false;
+        return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false && !this.iswithoutparent;
       },
       rowsData(){
         return this.rows.data.sort(function(a, b){
@@ -265,7 +264,7 @@
       },
       loadRows(indicator){
         //On first time allow reload rows without parent, for field options...
-        if ( this.$parent.isWithoutParentRow() && indicator == false)
+        if ( this.$parent.isWithoutParentRow && indicator == false)
             return false;
 
         if ( indicator !== false )

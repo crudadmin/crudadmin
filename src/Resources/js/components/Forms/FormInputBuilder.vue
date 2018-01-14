@@ -218,22 +218,24 @@
           }
         },
         updateField(field){
-          //After change value, update same value in ckeditor
-          if ( field.type == 'editor'){
-            var editor = CKEDITOR.instances[this.getId];
-
-            //If is editor not ready yet, then wait for ready state
-            editor.setData( field.value ? field.value : '' );
-            editor.on('instanceReady', function(){
-              editor.setData( field.value ? field.value : '' );
-            });
-          }
-
           if (field.type == 'file')
             this.file_from_server = true;
 
           //When VueJs DOM has been rendered
           this.$nextTick(function () {
+            //After change value, update same value in ckeditor
+            if ( field.type == 'editor'){
+              var editor = CKEDITOR.instances[this.getId];
+
+              console.log('set data ckeditor');
+
+              //If is editor not ready yet, then wait for ready state
+              editor.setData( field.value ? field.value : '' );
+              editor.on('instanceReady', function(){
+                editor.setData( field.value ? field.value : '' );
+              });
+            }
+
             //If is select
             if ( this.isSelect )
             {

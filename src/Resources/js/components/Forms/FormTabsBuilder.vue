@@ -111,7 +111,7 @@
         {
           for ( var key in this.model.childs )
           {
-            if ( this.model.childs[key].in_tab == true )
+            if ( this.model.childs[key].in_tab == true && ( this.isOpenedRow || this.model.childs[key].without_parent == true ) )
             {
               tabs.push({
                 name : this.model.childs[key].name,
