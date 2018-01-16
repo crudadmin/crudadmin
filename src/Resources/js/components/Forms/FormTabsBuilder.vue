@@ -14,6 +14,7 @@
               :tabs="tab.fields | tabs"
               :model="model"
               :row="row"
+              :hasparentmodel="hasparentmodel"
               :history="history">
             </form-tabs-builder>
 
@@ -32,6 +33,8 @@
             v-if="isGroup(item) && !isTab(item)"
             :group="item"
             :model="model"
+            :hasparentmodel="hasparentmodel"
+            :langid="langid"
             :row="row"
             :history="history"
           ></form-group>
@@ -48,7 +51,7 @@
   export default {
     name : 'form-tabs-builder',
 
-    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'cansave'],
+    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'cansave', 'hasparentmodel'],
 
     components : { FormGroup },
 
@@ -111,7 +114,7 @@
         {
           for ( var key in this.model.childs )
           {
-            if ( this.model.childs[key].in_tab == true && ( this.isOpenedRow || this.model.childs[key].without_parent == true ) )
+            if ( this.model.childs[key].in_tab == true && ( this.model.childs[key].without_parent == true || this.isOpenedRow ) )
             {
               tabs.push({
                 name : this.model.childs[key].name,

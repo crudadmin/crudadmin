@@ -454,9 +454,9 @@
         removeRow(row){
           var success = function (){
 
-            var data = {
+            var requestData = {
               model : this.model.slug,
-              parent : this.$parent.$parent.getParentTableName(),
+              parent : this.$parent.$parent.getParentTableName(this.model.without_parent),
               id : row.id,
               subid : this.$parent.getParentRowId(),
               limit : this.$parent.pagination.limit,
@@ -466,9 +466,9 @@
 
             //Check if is enabled language
             if ( this.$root.language_id != null )
-              data['language_id'] = parseInt(this.$root.language_id);
+              requestData['language_id'] = parseInt(this.$root.language_id);
 
-            this.$http.post( this.$root.requests.delete, data)
+            this.$http.post( this.$root.requests.delete, requestData)
             .then(function(response){
               var data = response.data;
 
@@ -478,15 +478,31 @@
               }
 
               //Load rows into array
-              this.$parent.updateRowsData(data.data.rows.rows);
-              this.rows.count = data.data.rows.count;
+              if ( this.isWithoutParentRow ){
+                this.$parent.updateRowsData(data.data.rows.rows);
+                this.rows.count = data.data.rows.count;
 
-              this.$parent.pagination.position = data.data.rows.page;
+                this.$parent.pagination.position = data.data.rows.page;
+              } else {
+                //Remove row
+                for ( var key in this.rows.data )
+                  if ( this.rows.data[key].id == requestData.id )
+                  {
+                    this.rows.data.splice(key, 1);
+                    break;
+                  }
+              }
 
               if ( this.row && this.row.id == row.id )
                 this.row = null;
+
+              //Remove row from options
+              if ( this.$parent.$parent.hasparentmodel !== true ){
+                this.$parent.$parent.$parent.pushOption(requestData.id, 'delete');
+              }
             })
             .catch(function(response){
+              console.log(response);
               this.$root.errorResponseLayer(response);
             });
           }.bind(this);

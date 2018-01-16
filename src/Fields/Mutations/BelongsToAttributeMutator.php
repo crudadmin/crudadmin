@@ -5,7 +5,7 @@ use Fields;
 
 class BelongsToAttributeMutator
 {
-    public $attributes = ['belongsTo', 'belongsToMany'];
+    public $attributes = ['belongsTo', 'belongsToMany', 'canAdd'];
 
     public function create( $field, $key )
     {

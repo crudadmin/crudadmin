@@ -62,6 +62,7 @@
             :model="model"
             :langid="langid"
             :canaddrow="canAddRow"
+            :hasparentmodel="hasparentmodel"
             :row.sync="row"
           ></form-builder>
         </div>
@@ -87,9 +88,11 @@
       <model-builder
         v-if="(isOpenedRow || child.without_parent == true) && child.in_tab !== true"
         v-for="child in model.childs"
+        :hasparentmodel="hasparentmodel"
         :langid="langid"
         :ischild="true"
         :model="child"
+        :activetab="activetab"
         :parentrow="row">
       </model-builder>
     </div>
@@ -106,7 +109,7 @@
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
 
   export default {
-    props : ['model', 'langid', 'ischild', 'parentrow', 'activetab'],
+    props : ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
     name : 'model-builder',
     data : function(){
       return {
@@ -163,12 +166,23 @@
     created() {
       //For file paths
       this.root = this.$root.$http.$options.root;
+
+      //If model builder model parent
+      if ( [null, undefined].indexOf(this.hasparentmodel) > -1 )
+        this.hasparentmodel = true;
     },
 
     ready() {
       this.checkIfCanShowLanguages();
 
       this.initSearchSelectboxes();
+
+      //On change column reset input
+      this.$watch('search.column', function(column, prevcolumn){
+        //Reset searched value if previous column was select or option
+        if ( prevcolumn && prevcolumn in this.model.fields && ['select', 'option'].indexOf(this.model.fields[prevcolumn].type) !== -1 )
+          this.search.query = null;
+      })
     },
 
     watch : {
@@ -192,7 +206,7 @@
       },
       search : {
         deep : true,
-        handler(search){
+        handler(search, oldsearch){
           //Update select
           this.reloadSearchBarSelect();
         },
@@ -252,8 +266,8 @@
       /*
        * Returns correct values into multilangual select
        */
-      languageOptions(array, field, filter){
-        this.$root.languageOptions(array, field, filter);
+      languageOptions(array, field){
+        return this.$root.languageOptions(array, field);
       },
 
       /*
@@ -298,7 +312,11 @@
       getParentTableName(force){
         var row = this.$parent.row;
 
-        if ( force !== true && (!row || !( 'id' in row )))
+        //if is model loaded in field, and has parent row, then load model of that parent
+        if ( this.hasparentmodel && typeof this.hasparentmodel == 'object' && 'slug' in this.hasparentmodel )
+          return this.hasparentmodel.slug;
+
+        if ( force !== true && ((!row || !( 'id' in row )) || this.hasparentmodel === false) )
           return 0;
 
         return this.$parent.model.slug;
@@ -456,12 +474,7 @@
         }
       },
       newRowTitle(){
-        var title;
-
-        if ( title = this.$root.getModelProperty(this.model, 'settings.buttons.insert') )
-          return title;
-
-        return this.trans('new-row');
+        return this.$root.getModelProperty(this.model, 'settings.buttons.insert', this.trans('new-row'));
       },
       resetForm(){
         this.row = {};
@@ -476,7 +489,7 @@
        * Return if acutal model can be added without parent row, and if parent row is not selected
        */
       isWithoutParentRow(){
-        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true;
+        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true && this.hasparentmodel == true;
       },
       getFilterSelectId(){
         return 'js_chosen_filter' + this.getModelKey;
@@ -581,7 +594,7 @@
       isSelect(){
         var column = this.search.column;
 
-        return column && column in this.model.fields && this.model.fields[column].type == 'select' ? true : false;
+        return column && column in this.model.fields && (['select', 'radio'].indexOf(this.model.fields[column].type) > -1) ? true : false;
       },
       isSearching(){
         return this.search.used == true;

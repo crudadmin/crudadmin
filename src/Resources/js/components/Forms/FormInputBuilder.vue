@@ -77,12 +77,35 @@
     <!-- SELECT INPUT -->
     <div class="form-group" v-if="isSelect">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <select v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
-        <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
-        <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
-        <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple || (!this.isOpenedRow && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
-      </select>
+      <div :class="{ 'can-add-select' : canAddRow }">
+        <select v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
+          <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
+          <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
+          <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple || (!this.isOpenedRow && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
+        </select>
+        <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
+      </div>
       <small>{{ field.title }}</small>
+
+      <!-- Modal for adding relation -->
+      <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">&nbsp;</h4>
+            </div>
+            <div class="modal-body">
+              <model-builder
+                :langid="langid"
+                :hasparentmodel="getRelationModelParent"
+                :parentrow="getRelationRow"
+                :model="getRelationModel">
+              </model-builder>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
     </div>
 
     <!-- RADIO INPUT -->
@@ -110,17 +133,28 @@
 
 <script>
   import File from '../Partials/File.vue';
+  import ModelBuilder from './ModelBuilder.vue';
 
   export default {
       name: 'form-input-builder',
-      props: ['model', 'field', 'index', 'key', 'row', 'confirmation', 'history'],
+      props: ['model', 'field', 'index', 'key', 'row', 'confirmation', 'history', 'langid', 'hasparentmodel'],
+
+      components: { File },
 
       data(){
         return {
           file_will_remove : false,
           file_from_server : true,
           filterBy : null,
+          allowRelation : false,
         };
+      },
+
+      created(){
+        /*
+         * Fix for double recursion in VueJS
+         */
+        this.$options.components['model-builder'] = Vue.extend(ModelBuilder);
       },
 
       ready()
@@ -131,7 +165,6 @@
 
         this.onChangeSelect();
       },
-
       events : {
         onSubmit(row){
           if ( this.file_from_server == true && row != null )
@@ -150,6 +183,9 @@
       },
 
       methods : {
+        newTitleRow(){
+          return this.$root.getModelProperty(this.getRelationModel, 'settings.title.insert', this.trans('new-row'));
+        },
         bindDatepickers(){
           if ( ! this.isDatepicker )
             return;
@@ -182,14 +218,16 @@
         /*
          * Apply event on changed value
          */
-        changeValue(e, value){
+        changeValue(e, value, no_field){
           var value = e ? e.target.value : value;
 
           if ( this.field.type == 'checkbox' )
-            value = e.target.checked;
+            value = e ? e.target.checked : value;
 
           //Update field values
-          this.field.value = value;
+          if ( no_field != true )
+            this.field.value = value;
+
           this.$set('row.' + this.key, value)
         },
         /*
@@ -226,8 +264,6 @@
             //After change value, update same value in ckeditor
             if ( field.type == 'editor'){
               var editor = CKEDITOR.instances[this.getId];
-
-              console.log('set data ckeditor');
 
               //If is editor not ready yet, then wait for ready state
               editor.setData( field.value ? field.value : '' );
@@ -320,9 +356,93 @@
 
           return filter;
         },
+        pushOption(row, action){
+          //Store or update option field
+          if ( action == 'store' )
+          {
+            var filterBy = this.getFilterBy;
+
+            //Add relation into added row
+            if ( filterBy && this.row[filterBy[0]] )
+              row[filterBy[1]] = this.row[filterBy[0]];
+
+            //Push added option into array
+            this.field.options.unshift([row.id, row]);
+
+            //Set multiple values or one value
+            if ( this.isMultiple ){
+              if ( ! this.field.value )
+                this.field.value = [row.id];
+              else
+                this.field.value.push(row.id);
+
+              this.changeValue(null, this.field.value, false);
+            } else {
+              this.changeValue(null, row.id);
+            }
+          } else if ( action == 'update' ) {
+            for ( var i = 0; i < this.field.options.length; i++ )
+              if ( this.field.options[i][0] == row.id ){
+                for ( var key in row )
+                  this.field.options[i][1][key] = row[key];
+              }
+          } else if ( action == 'delete' ) {
+            //Remove value also from field values
+            if ( this.isMultiple ){
+              if ( $.isArray(this.field.value) ){
+                this.field.value.splice(this.field.value.indexOf(row), 1);
+
+                this.changeValue(null, this.field.value, false);
+              }
+            } else if ( this.field.value == row ) {
+              this.changeValue(null, null);
+            }
+
+            //Remove deleted field from options
+            for ( var key in this.field.options ){
+              if ( this.field.options[key][0] == row ){
+                this.field.options.splice(key, 1)
+
+                break;
+              }
+            }
+          }
+        },
       },
 
       computed : {
+        getRelationRow(){
+          var filterBy = this.getFilterBy;
+
+          if ( ! filterBy || ! this.row[filterBy[0]] )
+            return {};
+
+          return {
+            id : this.row[filterBy[0]],
+          }
+        },
+        getRelationModel(){
+          if ( ! this.canAddRow )
+            return;
+
+          var relationTable = (this.field.belongsTo||this.field.belongsToMany).split(',')[0];
+
+          return this.$root.models_list[relationTable];
+        },
+        /*
+         * Return model of parent filtration field
+         */
+        getRelationModelParent(){
+          var filterBy = this.getFilterBy;
+
+          if ( ! filterBy || ! this.row[filterBy[0]] )
+            return false;
+
+          var field = this.model.fields[filterBy[0]],
+              relationTable = (field.belongsTo||field.belongsToMany).split(',')[0];
+
+          return this.$root.models_list[relationTable];
+        },
         isOpenedRow(){
           return this.row && 'id' in this.row;
         },
@@ -341,6 +461,9 @@
           parent = parent.getParentTableName(this.model.withoutParent == true);
 
           return 'id-' + this.model.slug + '-' + parent + '-' + this.index + '-' + this.key;
+        },
+        getModalId(){
+          return 'form-relation-modal-'+this.getId;
         },
         getFieldKey()
         {
@@ -530,10 +653,18 @@
           return missing;
         },
         isChangedFromHistory(){
+          if ( ! this.history )
+            return false;
+
           return this.history.fields.indexOf(this.key) > -1;
         },
+        /*
+         * Can show adding row just for first level of forms (not when user click to add new row in form),
+         * and also when is filter activated, then show just when is filter also selected
+         */
+        canAddRow(){
+          return this.field.canAdd === true && this.hasparentmodel !== false && (!this.getFilterBy || this.filterBy);
+        },
       },
-
-      components: { File },
   }
 </script>

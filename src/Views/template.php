@@ -121,7 +121,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </aside>
 
       <!-- MODAL -->
-      <div class="example-modal" v-if="canShowAlert">
+      <div class="example-modal message-modal" v-if="canShowAlert">
         <div class="modal modal-{{ alert.type }}" v-bind:style="{ display : canShowAlert ? 'block' : 'none' }">
           <div class="modal-dialog">
             <div class="modal-content">

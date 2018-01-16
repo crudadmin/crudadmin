@@ -4,7 +4,7 @@
     import CheckAssetsVersion from './Partials/CheckAssetsVersion.vue';
 
     export default {
-        init(layout){
+        init(layout, models_list){
             //Replace requests paths
             var replace = ['model', 'parent', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
 
@@ -23,6 +23,7 @@
                         requests: layout.requests,
                         user : layout.user,
                         models: layout.models,
+                        models_list : this.getRecursiveModels(models_list),
                         localization: layout.localization,
                         languages: layout.languages,
                         language_id : null,
@@ -236,7 +237,7 @@
                           //If select has filters
                           if ( hasFilter )
                             for ( var k in filter ){
-                              if ( array[key][1][k] != filter[k] )
+                              if ( array[key][1][k] != filter[k] || array[key][1][k] == null )
                                 continue loop1;
                             }
 
@@ -259,6 +260,19 @@
                         }
 
                         return items;
+                    },
+                    getRecursiveModels(models){
+                        var data = {};
+
+                        for ( var key in models )
+                        {
+                            data[models[key].slug] = models[key];
+
+                            if ( Object.keys(models[key].childs).length > 0 )
+                                data = _.merge(data, this.getRecursiveModels(models[key].childs));
+                        }
+
+                        return data;
                     }
                 }
             }

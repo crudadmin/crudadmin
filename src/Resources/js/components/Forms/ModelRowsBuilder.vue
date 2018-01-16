@@ -25,7 +25,7 @@
       </table-row>
     </div>
 
-    <div class="box-header" v-if="isPaginationEnabled && rows.count>pagination.limit">
+    <div class="box-footer" v-if="isPaginationEnabled && rows.count>pagination.limit">
       <ul class="pagination pagination-sm no-margin pull-right">
         <li v-if="pagination.position>1"><a v-on:click.prevent="setPosition(pagination.position - 1)" href="#">«</a></li>
         <li v-bind:class="{ active : pagination.position == i + 1 }" v-if="showLimit(i)" v-for="i in Math.ceil(rows.count / pagination.limit)"><a href="#" @click.prevent="setPosition(i + 1)">{{ i + 1 }}</a></li>
@@ -173,7 +173,7 @@
           var query = search.query,
               was_searching = this.searching;
 
-          this.searching = (query && (query.length >= 3 || (search.column && $.isNumeric(query)))) ? true : false;
+          this.searching = (query && (query.length >= 3 || (search.column && ((search.column in this.model.fields && ['select', 'option'].indexOf(this.model.fields[search.column].type) > -1) || $.isNumeric(query))))) ? true : false;
 
           this.search.used = true;
 
@@ -255,9 +255,9 @@
         this.setPosition(1);
       },
       getParentRowId(){
-        var row = this.$parent.$parent.row;
+        var row = this.$parent.parentrow;
 
-        if ( !row || !( 'id' in row ))
+        if ( !row || !( 'id' in row ) )
           return 0;
 
         return row.id;

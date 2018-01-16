@@ -10,6 +10,7 @@
                     :tabs="group.fields | tabs"
                     :model="model"
                     :row="row"
+                    :hasparentmodel="hasparentmodel"
                     :history="history">
                 </form-tabs-builder>
               </div>
@@ -19,9 +20,11 @@
                         <form-input-builder
                             :history="history"
                             :model="model"
+                            :langid="langid"
                             :row="row"
                             :index="$index"
                             :key="item"
+                            :hasparentmodel="hasparentmodel"
                             :field="model.fields[item]">
                         </form-input-builder>
                     </div>
@@ -31,6 +34,7 @@
                         :group="item"
                         :model="model"
                         :row="row"
+                        :hasparentmodel="hasparentmodel"
                         :history="history">
                     </form-group>
                 </div>
@@ -47,7 +51,7 @@ import FormInputBuilder from './FormInputBuilder.vue';
 export default {
     name : 'form-group',
 
-    props : ['model', 'row', 'history', 'group'],
+    props : ['model', 'row', 'history', 'group', 'langid', 'hasparentmodel'],
 
     components : { FormInputBuilder, FormTabsBuilder },
 

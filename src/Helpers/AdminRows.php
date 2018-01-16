@@ -14,6 +14,27 @@ class AdminRows
         $this->model = $model;
     }
 
+    private function isPrimaryKey($column, $columns)
+    {
+        if ( in_array($column, ['id']) )
+            return true;
+
+        //If is correct relationship id
+        if ( count($columns) == 1 && $this->model->hasFieldParam($column, 'belongsTo') )
+            return true;
+
+        //If is select, but not multiple
+        if ( $this->isSelectColumn($column) )
+            return true;
+
+        return false;
+    }
+
+    private function isSelectColumn($column)
+    {
+        return $column && $this->model->isFieldType($column, ['select', 'radio']) && ! $this->model->hasFieldParam($column, 'multiple');
+    }
+
     /*
      * Apply multi-text search scope for given query
      */
@@ -24,7 +45,7 @@ class AdminRows
             $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query'))));
 
             //If is more than 3 chars for searching
-            if ( strlen($search) >= 3 || is_numeric($search) )
+            if ( strlen($search) >= 3 || ($this->isSelectColumn(request('column')) || is_numeric($search)) )
             {
                 $columns = array_merge(array_keys($this->model->getFields()), [ 'id' ]);
                 $queries = explode(' ', $search);
@@ -35,7 +56,7 @@ class AdminRows
                     $columns = [ request('column') ];
                 }
 
-                //Remove fake column
+                //Remove multi relationship column
                 foreach ($columns as $key => $column)
                 {
                     if ( $this->model->hasFieldParam($column, 'belongsToMany') )
@@ -44,15 +65,37 @@ class AdminRows
 
                 //Search scope
                 $query->where(function($builder) use ( $columns, $queries ) {
-                    foreach ($columns as $column)
+                    foreach ($columns as $key => $column)
                     {
                         //Search in all columns
-                        $builder->orWhere(function($builder) use ( $column, $queries ) {
+                        $builder->{ $key == 0 ? 'where' : 'orWhere' }(function($builder) use ( $columns, $column, $queries ) {
+                            //Find exact id, value
+                            if ( $this->isPrimaryKey($column, $columns) ){
+                                foreach ($queries as $query)
+                                    $builder->where($column, $query);
+                            }
 
-                            //Search for all inserted words
-                            foreach ($queries as $query)
-                            {
-                                $builder->where($column, 'like', '%'.$query.'%');
+                            //Find by data in relation
+                            else if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
+                                $relation = explode(',', $this->model->getField($column)['belongsTo']);
+
+                                $builder->orWhereHas(rtrim($column, '_id'), function($builder) use( $relation, $queries ) {
+                                    foreach ($queries as $query){
+                                        foreach ($this->model->getRelationshipNameBuilder($relation[1]) as $key => $selector) {
+                                            if ( $selector == 'id' )
+                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($selector, $query);
+                                            else
+                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($selector, 'like', '%'.$query.'%');
+                                        }
+                                    }
+                                });
+                            }
+
+                            //Find by fulltext in query string
+                            else {
+                                //Search for all inserted words
+                                foreach ($queries as $query)
+                                    $builder->where($column, 'like', '%'.$query.'%');
                             }
 
                         });
@@ -244,6 +287,7 @@ class AdminRows
 
                 $all_rows_data = $this->model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
             }
+
 
             $data = [
                 'rows' => $without_parent ? [] : $this->getBaseRows( $paginated_rows_data ),

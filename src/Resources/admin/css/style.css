@@ -16,18 +16,13 @@
 .box-info { background: #fafeff }
 .box-warning { background: #fffdfa }
 .data-table td {line-height: 198% !important;}
-.modal-dialog a { color: white; font-weight: 600; text-decoration: underline; }
-.modal-dialog a:hover { color: white; text-decoration: none; }
-@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
-@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
-@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+.table { margin-bottom: 6px; }
 
-.updating {
-    -webkit-animation:spin 2s linear infinite;
-    -moz-animation:spin 2s linear infinite;
-    animation:spin 2s linear infinite;
-    margin-right: 6px
-}
+
+/* Modal links, for exports etc, from buttons response... */
+.message-modal > .modal { z-index: 99999999999; }
+.message-modal .modal-dialog .modal-body p > a, .message-modal .modal-dialog .modal-body > a { color: white; font-weight: 600; text-decoration: underline; }
+.message-modal modal-dialog .modal-body p > a:hover, .message-modal .modal-dialog .modal-body > a:hover { color: white; text-decoration: none; }
 
 .flex-table { display: flex; flex-wrap: wrap;}
 .flex-table .col-rows { overflow-x: auto; }
@@ -280,38 +275,24 @@ select[multiple] {height: 34px;color: white;}
 .file-group .chosen-container-multi .chosen-choices { background: none; border: none; padding: 2px 0; }
 .file-group .chosen-container-multi .chosen-drop { border: none; }
 .file-group .chosen-container-active .chosen-choices { box-shadow: none !important }
-.form-group.has-error > .chosen-container > .chosen-single,
-.form-group.has-error > .chosen-container > .chosen-choices { border-color: #dd4b39; box-shadow: none; }
+.form-group.has-error .chosen-container > .chosen-single,
+.form-group.has-error .chosen-container > .chosen-choices { border-color: #dd4b39; box-shadow: none; }
+.form-group .can-add-select { width: 100%; position: relative; }
+.form-group .can-add-select > div.chosen-container { width: calc(100% - 35px) !important; min-width: calc(100% - 35px) !important; }
+.form-group .can-add-select > button { float: right; height: 100%; width: 35px; position: absolute;}
+
+/* Form in modal settings */
+@media screen and (min-width: 768px) {
+    .form-group .modal .modal-dialog { width: 80%; }
+}
+.form-group .modal > .modal-dialog > .modal-content > .modal-body > .box {box-shadow: none;border: 0;margin-bottom: 0}
+.form-group .modal > .modal-dialog > .modal-content > .modal-body > .box > .box-header {padding: 0;position: absolute;right: 45px;top: -59px;}
+.form-group .modal > .modal-dialog > .modal-content > .modal-body > .box > .box-body {padding: 0;margin-bottom: -15px;}
 
 .th-id { width: 50px; text-align: center; }
 .td-id { text-align: center; }
 
-.refreshing {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(60, 141, 188, 0.55);
-}
-.refreshing .loading {
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    display: table;
-}
-
-.refreshing .loading .middle {
-    vertical-align: middle;
-    display: table-cell;
-}
-
-.refreshing .loading p {color: white;font-size: 18px;font-weight: 600;margin-top: 10px;}
-.refreshing .loading i {
-    color: white;
-    font-size: 50px;
-    margin-top: 10px;
-}
+.box .overlay > p { position: absolute;top: calc(50% + 28px);text-align: center;width: 100%;font-weight: bold;}
 
 .search-bar {
     max-width: 280px;
@@ -341,15 +322,14 @@ form label span.required { color: red; position: relative; top: 2px }
  */
 form .is-changed-from-history label { color: #b900e2; }
 form .is-changed-from-history .form-control,
-form .is-changed-from-history .form-group > .chosen-container > .chosen-choices,
-form .is-changed-from-history .form-group > .chosen-container > .chosen-single { border: 1px solid #b900e2; }
+form .is-changed-from-history .form-group .chosen-container > .chosen-choices,
+form .is-changed-from-history .form-group .chosen-container > .chosen-single { border: 1px solid #b900e2; }
 button.enabled-history { background: #b900e2; color: white !important; border: 1px solid #80009c !important; }
 button.enabled-history:hover, button.enabled-history:focus, button.enabled-history:active, button.enabled-history:visited { background: #80009c !important }
 
 /*
  * Tabs
  */
-.nav-tabs-custom > .nav-tabs li > a {cursor: pointer;}
 .nav-tabs-custom > .nav-tabs > li.has-error {border-top-color: #dd4939;}
 .nav-tabs-custom > .nav-tabs > li.has-error i {margin-left: -1px;}
 .nav-tabs-custom > .nav-tabs > li.has-error i.fa-exclamation-triangle ~ i {display: none}

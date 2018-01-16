@@ -15,6 +15,7 @@
           :langid="langid"
           :row="row"
           :cansave.sync="cansave"
+          :hasparentmodel="hasparentmodel"
           :history="history">
         </form-tabs-builder>
       </div>
@@ -31,8 +32,9 @@
 <script>
   import FormTabsBuilder from '../Forms/FormTabsBuilder.vue';
   export default {
+    name : 'form-builder',
 
-    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history'],
+    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel'],
 
     components: { FormTabsBuilder },
 
@@ -68,8 +70,9 @@
           var canResetForm = !this.isOpenedRow || ! oldRow || row.id != oldRow.id;
 
           //Init new form after change row
-          if ( !row || !oldRow || (row.id != oldRow.id ) )
+          if ( !row || !oldRow || row.id != oldRow.id || this.history.history_id ){
             this.initForm(row, canResetForm);
+          }
         },
         deep: true,
       },
@@ -148,10 +151,11 @@
         }
 
         //Set box color
-        if (!row) {
+        if (!row || !('id' in row)) {
           this.isActive = true;
 
-          this.$parent.closeHistory();
+          if ( this.hasParentModel() )
+            this.$parent.closeHistory();
         } else {
           this.isActive = row.published_at == null;
         }
@@ -159,7 +163,7 @@
       resetErrors(){
         this.form.find('.form-group.has-error').removeClass('has-error').find('.help-block').remove();
         this.form.find('.fa.fa-times-circle-o').remove();
-        this.form.find('.nav-tabs li.has-error').removeAttr('data-toggle').removeAttr('data-original-title').tooltip("destroy").removeClass('has-error').find('a > .fa.fa-exclamation-triangle').remove();
+        this.removeActiveTab(this.form.find('.nav-tabs li.has-error'));
         this.progress = false;
       },
       sendForm(e, action, callback)
@@ -185,7 +189,7 @@
         //Check if form belongs to other form
         if ( this.model.foreign_column != null )
         {
-          data[this.model.foreign_column[this.$parent.getParentTableName()]] = this.$parent.$parent.row.id;
+          data[this.model.foreign_column[this.$parent.getParentTableName()]] = this.$parent.parentrow.id;
         }
 
         //If is updating, then add row ID
@@ -199,7 +203,7 @@
             data['language_id'] = this.$root.language_id;
 
           //Push saved childs without actual parent row
-          if ( this.$parent.rows.save_children.length > 0 )
+          if ( this.hasParentModel() && this.$parent.rows.save_children.length > 0 )
             data['_save_children'] = this.$parent.rows.save_children;
         }
 
@@ -290,12 +294,15 @@
                         //Colorize tabs
                         _this.colorizeTab($(this));
 
-                        if ( $(this).is('select') || $(this).is('textarea') ){
+                        if ( $(this).is('select') ){
+                          where = where.parent().parent().children().last().prev();
+                        }
+
+                        else if ( $(this).is('textarea') ){
                           where = where.parent().children().last().prev();
                         }
 
-                        else if ( $(this).is('input:radio') )
-                        {
+                        else if ( $(this).is('input:radio') ){
                           where = where.parent().parent().parent();
 
                           if ( where.find('.help-block').length == 0 )
@@ -335,22 +342,8 @@
           if ( action == 'store' )
           {
             //Reset actual items buffer
-            this.$parent.rows.save_children = [];
-
-            //If actual row has no parent, and need to ba saved when parent will be saved
-            if ( this.$parent.isWithoutParentRow )
-            {
-              for ( var i = 0; i < response.data.rows.length; i++ )
-              {
-                var parent = 'rows' in this.$parent.$parent ? this.$parent.$parent : this.$parent.$parent.$parent;
-
-                parent.rows.save_children.push({
-                  table : this.model.slug,
-                  id : response.data.rows[i].id,
-                  column : this.model.foreign_column[this.$parent.getParentTableName(true)],
-                });
-              }
-            }
+            if ( this.hasParentModel() )
+              this.saveParentChilds(response);
 
             //Bind values for input builder
             this.$broadcast('onSubmit', response.data.rows[0]);
@@ -393,8 +386,15 @@
               }
             }
           }
+
+          //Add or update select options
+          if ( this.hasparentmodel !== true )
+            this.$parent.$parent.pushOption(action == 'store' ? response.data.rows[0] : response.data.row, action);
         }.bind(this));
 
+      },
+      removeActiveTab(tab){
+        tab.removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
       },
       colorizeTab(input){
         var _this = this;
@@ -402,13 +402,19 @@
         input.parents('.tab-pane').each(function(){
           var index = $(this).index();
 
+          //On button click, remove tabs alerts in actual tree, if tab has no more recursive errors
+          $(this).one('click', function(){
+            if ( $(this).find('.nav-tabs-custom:not(.default) li.has-error').length == 0 )
+              _this.removeActiveTab($(this).parent().prev().find('li').eq($(this).index()));
+          });
+
           $(this).parent().prev().find('li').eq(index).each(function(){
             if ( ! $(this).hasClass('has-error') )
               $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).addClass('has-error').one('click', function(){
 
                 var active = $(this).parent().find('li.has-error').not($(this)).length == 0 ? $(this).parents('.nav-tabs-custom').find('li.active.has-error') : [];
 
-                $(this).extend(active).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
+                _this.removeActiveTab($(this).extend(active));
               }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
           })
         });
@@ -419,6 +425,27 @@
               scrollTop: $("#form-" + this.model.slug).offset().top - 10
           }, 500);
         }.bind(this), 400);
+      },
+      hasParentModel(){
+        return this.$parent.$options.name == 'model-builder';
+      },
+      saveParentChilds(response){
+        this.$parent.rows.save_children = [];
+
+        //If actual row has no parent, and need to ba saved when parent will be saved
+        if ( this.$parent.isWithoutParentRow )
+        {
+          var parent = 'rows' in this.$parent.$parent ? this.$parent.$parent : this.$parent.$parent.$parent;
+
+          for ( var i = 0; i < response.data.rows.length; i++ )
+          {
+            parent.rows.save_children.push({
+              table : this.model.slug,
+              id : response.data.rows[i].id,
+              column : this.model.foreign_column[this.$parent.getParentTableName(true)],
+            });
+          }
+        }
       },
       trans(key){
         return this.$root.trans(key);

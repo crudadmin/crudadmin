@@ -53,7 +53,8 @@ var router = new VueRouter();
 Vue.http.get( 'api/layout' ).then(function(response){
 
     var routes = {},
-        layout = response.data;
+        layout = response.data,
+        models_list = [];
 
     for ( var key in layout.models )
     {
@@ -97,6 +98,8 @@ Vue.http.get( 'api/layout' ).then(function(response){
                 },
             }
         }
+
+        models_list = models_list.concat(models);
     }
 
     routes['*'] = {
@@ -107,7 +110,7 @@ Vue.http.get( 'api/layout' ).then(function(response){
     router.map( routes );
 
     //Initialize custom componenets
-    var app = Vue.extend( BaseComponent.init( layout ) );
+    var app = Vue.extend( BaseComponent.init( layout, models_list ) );
 
     //Init app
     router.start(app, '#app');

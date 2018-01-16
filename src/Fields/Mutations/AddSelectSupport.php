@@ -75,16 +75,9 @@ class AddSelectSupport extends MutationRule
      */
     private function getColumnsByProperties($properties, $field, $columns = [])
     {
-        preg_match_all('/(?<!\\\\)[\:^]([0-9,a-z,A-Z$_]+)+/', $properties[1], $matches);
-
         //Get foreign column from relationship table which will be loaded into selectbox
         if ( count($filterBy = $this->getFilterBy($field)) > 0 )
             $columns[] = $filterBy[1];
-
-        if ( count($matches[1]) == 0 )
-            $columns[] = $properties[1];
-        else
-            $columns = array_merge($matches[1], $columns);
 
         //If relationship table has localizations
         if (($model = Admin::getModelByTable($properties[0])) && $model->isEnabledLanguageForeign())
@@ -183,7 +176,7 @@ class AddSelectSupport extends MutationRule
                 //When is defined column which will be in selectbox
                 if ( count($properties) >= 2 && strtolower($properties[1]) != 'null' )
                 {
-                    $load_columns = $this->getColumnsByProperties($properties, $field);
+                    $load_columns = $this->getColumnsByProperties($properties, $field, $model->getRelationshipNameBuilder($properties[1]));
 
                     //Get data from table, and bind them info buffer for better performance
                     $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {

@@ -347,4 +347,16 @@ trait ModelRelationships
     {
         return $relation === true ? null : $relation;
     }
+
+    public function getRelationshipNameBuilder($selector)
+    {
+        preg_match_all('/(?<!\\\\)[\:^]([0-9,a-z,A-Z$_]+)+/', $selector, $matches);
+
+        if ( count($matches[1]) == 0 )
+            $columns[] = $selector;
+        else
+            $columns = $matches[1];
+
+        return $columns;
+    }
 }

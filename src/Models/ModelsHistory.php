@@ -69,7 +69,7 @@ class ModelsHistory extends Model
      */
     private function canSkipFieldInHistory($model, $key)
     {
-        return ! $model->getField($key);
+        return ! $model->getField($key) || $model->hasFieldParam($key, 'disabled', true);
     }
 
     /*
@@ -96,7 +96,13 @@ class ModelsHistory extends Model
 
         //Push empty values into missing keys in actual request
         foreach (array_diff_key($old_data, $data) as $key => $value)
-            $changes[$key] = is_array($value) ? [] : '';
+        {
+            if ( $this->canSkipFieldInHistory($model, $key) ){
+                unset($changes[$key]);
+            } else {
+                $changes[$key] = is_array($value) ? [] : '';
+            }
+        }
 
         return $changes;
     }
@@ -131,7 +137,7 @@ class ModelsHistory extends Model
         ]);
     }
 
-    public function attributesToArray()
+    public function toArray()
     {
         $attributes = parent::attributesToArray();
 
@@ -139,6 +145,6 @@ class ModelsHistory extends Model
 
         unset($attributes['data']);
 
-        return $attributes;
+        return array_merge($attributes, $this->relationsToArray());
     }
 }
