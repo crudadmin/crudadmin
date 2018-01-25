@@ -62,15 +62,10 @@ trait ModelLayoutBuilder
             if ( ! $model->belongsToModel )
                 continue;
 
-            $belongsToModel = is_array($model->belongsToModel) ? $model->belongsToModel : [ $model->belongsToModel ];
-
-            //Get only names from belongsToModel list
-            $model_names = array_map(function($item){
-                return class_basename($item);
-            }, $belongsToModel);
+            $belongsToModel = $model->getBelongsToRelation(true);
 
             //If some of eached models has actual model name in belongsToModel relationship, then add this model as child for actual model
-            if ( in_array($classname, $model_names) )
+            if ( in_array($classname, $belongsToModel) )
                 $childs[] = $model;
         }
 

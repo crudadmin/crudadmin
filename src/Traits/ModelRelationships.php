@@ -184,11 +184,14 @@ trait ModelRelationships
                     }
                 }
 
-                $modelBelongsToModel = is_array($model->getProperty('belongsToModel')) ? $model->getProperty('belongsToModel') : [ $model->getProperty('belongsToModel') ];
-                $thisBelongsToModel = is_array($this->getProperty('belongsToModel')) ? $this->getProperty('belongsToModel') : [ $this->getProperty('belongsToModel') ];
+                $modelBelongsToModel = $model->getBelongsToRelation(true);
+                $thisBelongsToModel = $this->getBelongsToRelation(true);
 
                 //Check if called model belongs to caller
-                if ( !($isBelongsTo = in_array(get_class($model), $thisBelongsToModel)) && ! in_array(get_class($this), $modelBelongsToModel) )
+                if (
+                    !($isBelongsTo = in_array(class_basename(get_class($model)), $thisBelongsToModel)) &&
+                    ! in_array(class_basename(get_class($this)), $modelBelongsToModel)
+                )
                     break;
 
                 $relationType = $isBelongsTo ? 'belongsTo' : 'hasMany';
@@ -202,6 +205,23 @@ trait ModelRelationships
         }
 
         return false;
+    }
+
+    /*
+     * Return belongsToModel property in right format
+     */
+    public function getBelongsToRelation($base_name = false)
+    {
+        $items = array_filter(is_array($this->belongsToModel) ?
+             $this->belongsToModel : [ $this->belongsToModel ]);
+
+        if ( $base_name !== true )
+            return $items;
+
+        return array_map(function($item){
+            if ( $item )
+                return class_basename($item);
+        }, $items);
     }
 
     /*

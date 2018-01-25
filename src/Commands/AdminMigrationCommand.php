@@ -857,14 +857,11 @@ class AdminMigrationCommand extends Command
      */
     public function addRelationships($table, $model, $updating = false)
     {
-        $belongsToModel = $model->getProperty('belongsToModel');
+        $belongsToModel = $model->getBelongsToRelation();
 
         //Model without parent
         if ( $belongsToModel == null )
             return;
-
-        if ( !is_array($belongsToModel) )
-            $belongsToModel = [ $belongsToModel ];
 
         if ( $updating === true )
             $belongsToModel = array_reverse($belongsToModel);
