@@ -157,6 +157,26 @@ trait ModelRelationships
     }
 
     /*
+     * Return relation by belongsToModel property in model
+     * find all parent in actual model, and check if actual child is not calling some of parents, if yes, then return relationship.
+     */
+    private function returnByBelongsToModel($method, $get)
+    {
+        foreach ($this->getBelongsToRelation() as $namespace) {
+            $basename = class_basename($namespace);
+
+            //If needed method is matched with end of parent model from belongsToModel relation
+            if ( last(explode('_', snake_case($basename))) == $method ){
+                return $this->relationResponse($method, 'belongsTo', $namespace, $get, [
+                    4 => $this->getForeignColumn( (new $namespace)->getTable() )
+                ]);
+            }
+        }
+
+        return false;
+    }
+
+    /*
      * Return relations by fields from actual admin model
      */
     private function returnByFieldsRelations($method, $get, $models, $method_snake, $method_lowercase)
@@ -167,6 +187,10 @@ trait ModelRelationships
 
         //Belongs to
         if ( ($relation = $this->returnByBelongsTo($method, $get, $models, $method_snake)) !== false )
+            return $relation;
+
+        //Find relation by parent of actual model
+        if ( ($relation = $this->returnByBelongsToModel($method, $get)) !== false )
             return $relation;
 
         return false;
@@ -196,6 +220,8 @@ trait ModelRelationships
          */
         if ( ($relation = $this->returnByFieldsRelations($method, $get, $models, $method_snake, $method_lowercase)) !== false )
             return $relation;
+
+        $this_basename = class_basename(get_class($this));
 
         /*
          * Return relation from other way... search in all models, if some fields or models are note connected with actual model
@@ -239,12 +265,13 @@ trait ModelRelationships
 
                 //Check if called model belongs to caller
                 if (
-                    !($isBelongsTo = in_array(class_basename(get_class($model)), $thisBelongsToModel)) &&
-                    ! in_array(class_basename(get_class($this)), $modelBelongsToModel)
-                )
+                    ! ($isBelongsTo = in_array(class_basename(get_class($model)), $thisBelongsToModel)) &&
+                    ! in_array($this_basename, $modelBelongsToModel)
+                ) {
                     break;
+                }
 
-                $relationType = $isBelongsTo ? 'belongsTo' : 'hasMany';
+                $relationType = 'hasMany';
 
                 //If relationship can has only one child
                 if ( $relationType == 'hasMany' && $model->maximum == 1 )

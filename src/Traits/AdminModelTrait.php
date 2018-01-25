@@ -34,7 +34,7 @@ trait AdminModelTrait
     public function __call($method, $parameters)
     {
         //Check if called method is not property, method of actual model or new query model
-        if (!method_exists($this, $method) && !method_exists(parent::newQuery(), $method))
+        if (!method_exists($this, $method) && !$parameters && !method_exists(parent::newQuery(), $method))
         {
             //Checks for db relationship of childrens into actual model
             if ( ($relation = $this->checkForChildrenModels($method)) || ($relation = $this->returnAdminRelationship($method)) )
@@ -42,6 +42,7 @@ trait AdminModelTrait
                 return $this->checkIfIsRelationNull($relation);
             }
         }
+
         return parent::__call($method, $parameters);
     }
 
@@ -131,6 +132,7 @@ trait AdminModelTrait
                 return $this->checkIfIsRelationNull($relation);
             }
         }
+
         return parent::__get($key);
     }
 

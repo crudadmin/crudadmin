@@ -135,6 +135,21 @@ class Model extends BaseModel
     protected $delete_files = true;
 
     /*
+     * Show sub-childs in tabs
+     */
+    protected $inTab = true;
+
+    /*
+     * If child model can be added without parent model
+     */
+    protected $withoutParent = false;
+
+    /*
+     * Which id's will be reserved and can not be removed
+     */
+    protected $reserved = [];
+
+    /*
      * Model icon
      */
     protected $icon = null;
