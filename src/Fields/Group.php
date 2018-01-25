@@ -26,9 +26,9 @@ class Group
      * Make full group
      * size in 12 cells grid
      */
-    public static function fields(array $fields, $size = 'full')
+    public static function fields(array $fields, $size = null, $type = 'default')
     {
-        return (new static($fields))->width($size)->type('group');
+        return (new static($fields))->width($size ?: 'full')->type($type);
     }
 
     /*

@@ -577,57 +577,6 @@ trait AdminModelTrait
     }
 
     /*
-     * Returns if model has group in administration submenu
-     */
-    public function hasGroup()
-    {
-        return is_string( $this->group ) && !empty($this->group);
-    }
-
-    /*
-     * Returns group for submenu
-     */
-    public function getGroup()
-    {
-        $config_groups = config('admin.groups');
-
-        $group_name = $this->group;
-
-        //Get group from config
-        if ( $config_groups && array_key_exists($group_name, $config_groups) )
-            $group_name = $config_groups[$group_name];
-
-        return $group_name;
-    }
-
-    /*
-     * Return all database relationship childs, models which actual model owns
-     */
-    public function getChilds()
-    {
-        $childs = [];
-
-        $classname = get_class($this);
-
-        $models = Admin::getAdminModels();
-
-        foreach ($models as $model)
-        {
-            if ( ! $model->belongsToModel )
-                continue;
-
-            $belongsToModel = is_array($model->belongsToModel) ? $model->belongsToModel : [ $model->belongsToModel ];
-
-            if ( in_array($classname, $belongsToModel) )
-            {
-                $childs[] = $model;
-            }
-        }
-
-        return $childs;
-    }
-
-    /*
      * Returns migration date
      */
     public function getMigrationDate()

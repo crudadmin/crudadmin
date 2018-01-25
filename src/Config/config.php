@@ -14,7 +14,7 @@ return [
      * Administration groups names
      */
     'groups' => [
-        'settings' => 'Nastavenia',
+        'settings' => ['Nastavenia', 'fa-gear'],
     ],
 
     /*

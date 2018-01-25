@@ -7,7 +7,7 @@
   <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
 
-    <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-if="ischild || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
+    <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-if="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
       <div class="pull-right" v-if="!isSingle">
@@ -116,7 +116,7 @@
         sizes : [
           { size : 8, key : 'small', name : 'Small', active : false, disabled : false },
           { size : 6, key : 'medium', name : 'Medium', active : false, disabled : false },
-          { size : 3, key : 'big', name : 'Big', active : false, disabled : false },
+          { size : 4, key : 'big', name : 'Big', active : false, disabled : false },
           { size : 0, key : 'full', name : 'Full width', active : false, disabled : false },
         ],
 
@@ -353,7 +353,7 @@
             defaultValue = this.$root.getModelProperty(this.model, 'settings.grid.default');
 
         //Full screen
-        if ( ! this.canShowForm )
+        if ( ! this.canShowForm || this.isSingle )
         {
           return this.enableOnlyFullScreen();
         }
@@ -499,7 +499,7 @@
       },
       //Checks if is enabled grid system
       isEnabledGrid(){
-        if ( this.$root.getModelProperty(this.model, 'settings.grid.enabled') === false )
+        if ( this.$root.getModelProperty(this.model, 'settings.grid.enabled') === false || this.$root.getModelProperty(this.model, 'settings.grid.disabled') === true )
           return false;
 
         return true;

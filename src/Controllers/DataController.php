@@ -280,6 +280,28 @@ class DataController extends Controller
     }
 
     /*
+     * Check if row can be deleted
+     */
+    private function canDeleteRow($model, $row, $request)
+    {
+        if ( $row->canDelete($row) !== true )
+            return false;
+
+        if ( $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() )
+            return false;
+
+        if ( $model->getProperty('deletable') == false )
+            return false;
+
+        $reserved = $model->getProperty('reserved');
+
+        if ( is_array($reserved) && in_array($row->getKey(), $reserved) )
+            return false;
+
+        return true;
+    }
+
+    /*
      * Deleting row from db
      */
     public function delete(Request $request)
@@ -291,9 +313,9 @@ class DataController extends Controller
         //Add on delete rule validation
         $row->checkForModelRules(['delete']);
 
-        if ( $row->canDelete($row) !== true || $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() || $model->getProperty('deletable') == false )
+        if ( ! $this->canDeleteRow($model, $row, $request) )
         {
-            Ajax::error( trans('admin::admin.cannot-delete'), 'error' );
+            Ajax::error( trans('admin::admin.cannot-delete') );
         }
 
         //Remove uploaded files

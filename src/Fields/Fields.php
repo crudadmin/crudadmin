@@ -121,18 +121,78 @@ class Fields
         //Fields from model
         $fields = $model->getProperty('fields', $param);
 
+        //Put fields into group, if are represented as array
+        $fields = is_array($fields) ? Group::fields($fields, null, 'default') : $fields;
+
+        //Get actual model mutation
+        $mutation = $this->addFieldsMutationIntoModel($model, $param);
+
         //Register fields from groups
-        foreach ($fields as $key => $field)
-            $this->manageGroupFields($model, $key, $field);
+        $this->manageGroupFields($model, 0, $fields, null, $mutation);
 
         return $this->fields[ $table ];
+    }
+
+    /*
+     * Register mutations of fields in actual model
+     */
+    private function addFieldsMutationIntoModel($model, $param)
+    {
+        $builder = new FieldsMutationBuilder;
+
+        if ( method_exists($model, 'mutateFields') )
+            $model->mutateFields($builder, $param);
+
+        return $builder;
+    }
+
+    /*
+     * Add before/after new field or remove fields for overriden admin model
+     */
+    private function mutateGroupFields($items, $mutation, $parent_group = null)
+    {
+        $fields = [];
+
+        foreach ($items as $key => $field)
+        {
+            //Add before field
+            foreach ($mutation->before as $before_key => $add_before) {
+                if ( $key == $before_key ){
+                    foreach ($add_before as $add_key => $add_field)
+                        $fields[$add_key] = $add_field;
+                }
+            }
+
+            //Add if is not removed
+            if ( ! in_array($key, $mutation->remove) )
+                $fields[$key] = $field;
+
+            //Add after field
+            foreach ($mutation->after as $after_key => $add_after) {
+                if ( $key == $after_key ){
+                    foreach ($add_after as $add_key => $add_field)
+                        $fields[$add_key] = $add_field;
+                }
+            }
+        }
+
+        //Push new fields, groups... or replace existing fields. Into first level of fields
+        if ( ! $parent_group )
+            foreach ($mutation->push as $key => $field) {
+                if ( $this->isFieldGroup($field) && is_numeric($key) )
+                    $fields[] = $field;
+                else
+                    $fields[$key] = $field;
+            }
+
+        return $fields;
     }
 
     /*
      * Register fields from all groups and infinite level of sub groups or tabs
      * Also rewrite mutated fields into groups
      */
-    private function manageGroupFields($model, $key, $field, $parent_group = null)
+    private function manageGroupFields($model, $key, $field, $parent_group = null, FieldsMutationBuilder $mutationBuilder)
     {
         //If is group
         if ( $group = $this->isFieldGroup($field) )
@@ -143,12 +203,16 @@ class Fields
 
             $fields = [];
 
+            //Actual group will inherit parent groups add-ons
+            if ( $parent_group && count($parent_group->add) > 0 )
+                $group->add = array_merge($group->add, $parent_group->add);
+
             //Register sub groups or sub fields
-            foreach ($group->fields as $field_key => $field_from_group)
+            foreach ($this->mutateGroupFields($group->fields, $mutationBuilder, $parent_group) as $field_key => $field_from_group)
             {
                 $mutation_previous = isset($mutation_previous) ? $mutation_previous : $this->fields[$model->getTable()];
 
-                $mutation = $this->manageGroupFields($model, $field_key, $field_from_group, $group);
+                $mutation = $this->manageGroupFields($model, $field_key, $field_from_group, $group, $mutationBuilder);
 
                 //If is group in fields list
                 if ( $mutation instanceof Group ){
@@ -157,7 +221,7 @@ class Fields
                     $mutation_previous = $this->fields[$model->getTable()];
                 }
 
-                //Add new fields into group
+                //Add new fields into group from fields mutations
                 else {
                     foreach (array_diff_key($mutation, $mutation_previous) as $key => $field) {
                         $fields[] = $key;
@@ -165,8 +229,6 @@ class Fields
 
                     $mutation_previous = $mutation;
                 }
-
-
             }
 
             $group->fields = $fields;

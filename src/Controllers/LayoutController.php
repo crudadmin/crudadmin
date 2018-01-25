@@ -101,6 +101,23 @@ class LayoutController extends BaseController
         return $fields;
     }
 
+    private function skipModelInTree($model)
+    {
+        if ( $model->getProperty('belongsToModel') != null )
+            return true;
+
+        //Check if user has allowed model
+        if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
+            return true;
+
+        return false;
+    }
+
+    private function groupPrefix($key)
+    {
+        return '#$_' . $key;
+    }
+
     /**
      * Returns full app tree
      * @return [array]
@@ -116,28 +133,42 @@ class LayoutController extends BaseController
         //Bind pages into groups
         foreach ($models as $model)
         {
-            if ( $model->getProperty('belongsToModel') != null )
-                continue;
-
-            //Check if user has allowed model
-            if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
-                continue;
-
-            //If is deactivated model
-            if ( $model->getProperty('active') === false )
+            if ( $this->skipModelInTree($model) )
                 continue;
 
             $page = $this->makePage($model);
 
-            $group_name = $model->hasGroup() ? $model->getGroup() : '_root';
+            if ( $model->hasModelGroup() )
+            {
+                $tree = $model->getModelGroupsTree();
+                $count = count($tree);
 
-            //Create and add rows into group
-            if ( $model->hasGroup() ){
-                $groups[ '$' . str_slug($group_name) ]['name'] = $group_name;
-                $groups[ '$' . str_slug($group_name) ]['submenu'][ $model->getTable() ] = $page;
+                $reference =& $groups;
+
+                foreach ($tree as $i => $group) {
+                    $group_key = $group['key'];
+
+                    //If groups does not exist into x-dimensional array
+                    if ( ! array_key_exists($this->groupPrefix($group_key), $reference) )
+                        $reference[ $this->groupPrefix($group_key) ] = [
+                            'name' => $group['name'],
+                            'icon' => $group['icon'],
+                            'submenu' => [],
+                        ];
+
+                    $reference =& $reference[$this->groupPrefix($group_key)]['submenu'];
+
+                    //If is last group in array, then push model into group list
+                    if ( $i + 1 >= $count ){
+                        $reference[ $model->getTable() ] = $page;
+                    }
+                }
+
+                unset($reference);
             } else {
                 $groups[ $model->getTable() ] = $page;
             }
+
         }
 
         return $this->addSlugPath( $groups );
@@ -145,7 +176,7 @@ class LayoutController extends BaseController
 
     protected function makePage($model, $data = null, $withChilds = true)
     {
-        $childs_models = $model->getChilds();
+        $childs_models = $model->getModelChilds();
 
         $childs = [];
 
@@ -158,10 +189,6 @@ class LayoutController extends BaseController
             if ( ! auth()->guard('web')->user()->hasAccess( $child_model ) )
                 continue;
 
-            //If is deactivated model
-            if ( $child_model->getProperty('active') === false )
-                continue;
-
             $childs[ $child_model->getTable() ] = $this->makePage($child_model);
         }
 
@@ -169,9 +196,11 @@ class LayoutController extends BaseController
             'name' => $model->getProperty('name'),
             'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
+            'active' => $model->getProperty('active'),
             'foreign_column' => $model->getForeignColumn(),
             'without_parent' => $model->getProperty('withoutParent') ?: false,
             'in_tab' => $model->getProperty('inTab') ?: false,
+            'reserved' => $model->getProperty('reserved') ?: false,
             'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),
             'minimum' => $model->getProperty('minimum'),

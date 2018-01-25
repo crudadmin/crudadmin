@@ -42,7 +42,7 @@
     <div class="form-group" v-if="isFile">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
-      <div class="form-group file-group">
+      <div class="file-group">
         <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
         <input v-if="!field.value && file_will_remove == true" type="hidden" name="$remove_{{ key }}" value="1">
 

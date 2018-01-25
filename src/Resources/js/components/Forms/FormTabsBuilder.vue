@@ -2,7 +2,7 @@
   <div class="nav-tabs-custom" v-bind:class="{ default : hasNoTabs }">
     <ul class="nav nav-tabs">
       <li v-for="tab in getTabs" v-bind:class="{ active : activetab == $index }" @click="activetab = $index">
-        <a data-toggle="tab" aria-expanded="true"><i v-if="tab.icon" :class="['fa', tab.icon]"></i> {{ tab.name }}</a>
+        <a data-toggle="tab" aria-expanded="true"><i v-if="tab.icon" :class="['fa', tab.icon]"></i> {{ tab.name||trans('general-tab') }}</a>
       </li>
     </ul>
     <div class="tab-content">
@@ -94,20 +94,24 @@
 
     computed: {
       getTabs(){
-        var model_fields = this.model.fields_groups.length > 0 ? this.model.fields_groups : Object.keys(this.model.fields),
+        var model_fields = this.model.fields_groups.length == 1 && this.model.fields_groups[0].type == 'default' ? this.model.fields_groups[0].fields : this.model.fields_groups,
             items = this.tabs||(this.group ? this.group.fields : model_fields),
             tabs = items.filter(function(group) {
               return this.isTab(group);
             }.bind(this));
 
-        if ( tabs.length == 0 ){
+        if ( tabs.length == 0 || tabs.length > 0 && tabs.length != items.length ){
+          items = items.filter(function(group) {
+            return ! this.isTab(group);
+          }.bind(this));
+
           tabs = [{
             name : this.group ? this.group.name : this.trans('general-tab'),
             icon : this.group ? this.group.icon : this.model.icon,
             fields : items,
             type : 'tab',
             default : true,
-          }];
+          }].concat(tabs);
         }
 
         if ( this.childs == true )

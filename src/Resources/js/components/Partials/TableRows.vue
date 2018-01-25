@@ -29,7 +29,7 @@
               <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button.icon]"></i></button>
             </div>
             <div><button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? trans('hide') : trans('show') }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
-          <div><button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" data-toggle="tooltip" title="" :data-original-title="trans('delete')"><i class="fa fa-remove"></i></button></div>
+            <div><button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" :class="{ disabled : isReservedRow(item) }" data-toggle="tooltip" title="" :data-original-title="trans('delete')"><i class="fa fa-remove"></i></button></div>
           </td>
         </tr>
       </tbody>
@@ -169,6 +169,12 @@
       },
 
       methods: {
+        isReservedRow(row){
+          if ( this.model.reserved && this.model.reserved.indexOf(row.id) > -1 )
+            return true;
+
+          return false;
+        },
         buttonsCount(item){
           var buttons = this.getButtonsForRow(item);
 
@@ -506,6 +512,10 @@
               this.$root.errorResponseLayer(response);
             });
           }.bind(this);
+
+          //Check if is row can be deleted
+          if ( this.isReservedRow(row) )
+            return this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('cannot-delete'), 'warning');
 
           this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('delete-warning'), 'warning', success, true);
         },

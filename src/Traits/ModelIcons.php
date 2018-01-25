@@ -64,6 +64,9 @@ trait ModelIcons
             'invoice' => 'fa-file-text-o',
             'proform' => 'fa-file-text-o',
             'export' => 'fa-download',
+            'manufacturer' => 'fa-building-o',
+            'contractor' => 'fa-handshake-o',
+            'pricing' => 'fa-sliders',
         ];
     }
 

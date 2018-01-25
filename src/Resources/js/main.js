@@ -54,22 +54,32 @@ Vue.http.get( 'api/layout' ).then(function(response){
 
     var routes = {},
         layout = response.data,
-        models_list = [];
+        models_list = [],
+        groups_prefix = '#$_';
+
+    //Ges all models, also from groups
+    var getRecursiveModels = function(key, model){
+        var models = [];
+
+        if ( key.substr(0, groups_prefix.length) == groups_prefix )
+        {
+            for ( var subkey in model.submenu )
+            {
+                if ( subkey.substr(0, groups_prefix.length) == groups_prefix )
+                    models = models.concat(getRecursiveModels(subkey, model.submenu[subkey]));
+                else
+                    models.push( model.submenu[subkey] );
+            }
+        } else {
+            models.push( model );
+        }
+
+        return models;
+    }
 
     for ( var key in layout.models )
     {
-        var models = [];
-
-        //Ges all models, also from group
-        if ( key.substr(0, 1) == '$' )
-        {
-            for ( var subkey in layout.models[key].submenu )
-            {
-                models.push( layout.models[key].submenu[subkey] );
-            }
-        } else {
-            models.push( layout.models[key] );
-        }
+        var models = getRecursiveModels(key, layout.models[key]);
 
         //Register models
         for ( var i = 0; i < models.length; i++ ){
@@ -110,7 +120,7 @@ Vue.http.get( 'api/layout' ).then(function(response){
     router.map( routes );
 
     //Initialize custom componenets
-    var app = Vue.extend( BaseComponent.init( layout, models_list ) );
+    var app = Vue.extend( BaseComponent.init( layout, models_list, groups_prefix ) );
 
     //Init app
     router.start(app, '#app');

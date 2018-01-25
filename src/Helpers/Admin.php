@@ -151,9 +151,9 @@ class Admin
     protected function getModelFiles()
     {
         //Add default app namespace
-        $paths = array_merge($this->model_paths, [
+        $paths = [
             app_path() => 'App',
-        ]);
+        ];
 
         foreach (config('admin.models', []) as $namespace => $path)
         {
@@ -169,6 +169,9 @@ class Admin
             if ( ! in_array($path, $paths) )
                 $paths[$path] = $namespace;
         }
+
+        //Merge default paths, paths from config, and path from 3rd extension in correct order for overiding.
+        $paths = $paths + $this->model_paths;
 
         $files = [];
 
@@ -232,6 +235,11 @@ class Admin
         //If model with migration date already exists
         if ( array_key_exists($model->getMigrationDate(), $this->buffer['namespaces']) )
         {
+            //If duplicite model which is actual loaded is extented parent of loaded child, then just skip adding this model
+            if ( $this->buffer['models'][$model->getMigrationDate()] instanceof $model ){
+                return;
+            }
+
             abort(500, 'Model name '.$model->getTable().' has migration date which '.$model->getMigrationDate().' already exists in other model '.$this->buffer['models'][$model->getMigrationDate()]->getTable().'.');
         }
 
@@ -330,6 +338,24 @@ class Admin
         {
             if ( $model->getTable() == $table )
                 return $model;
+        }
+    }
+
+    /*
+     * Returns model by model name
+     */
+    public function getModel($model)
+    {
+        $paths = $this->getAdminModelsPaths();
+
+        $model = strtolower($model);
+
+        foreach ($paths as $path)
+        {
+            $model_name = class_basename($path);
+
+            if ( strtolower($model_name) == $model )
+                return new $path;
         }
     }
 

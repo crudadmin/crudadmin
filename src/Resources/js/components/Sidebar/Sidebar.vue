@@ -44,10 +44,13 @@
         },
 
         ready(){
-            var owner = $('.sidebar li[data-slug="'+this.$router._currentTransition.to.name+'"]').parent().parent();
+            var owner = $('.sidebar li[data-slug="'+this.$router._currentTransition.to.name+'"]');
 
-            if ( owner.hasClass('treeview') )
-                owner.addClass('active');
+            owner.parent().addClass('menu-open').css('display', 'block').parents('.treeview').addClass('active');
+
+            $('.sidebar .treeview-menu a').click(function(){
+                $(this).parent().siblings('.active').removeClass('active').find('.menu-open').slideUp();
+            });
         },
 
         methods: {

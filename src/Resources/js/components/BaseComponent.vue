@@ -4,7 +4,7 @@
     import CheckAssetsVersion from './Partials/CheckAssetsVersion.vue';
 
     export default {
-        init(layout, models_list){
+        init(layout, models_list, groups_prefix){
             //Replace requests paths
             var replace = ['model', 'parent', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
 
@@ -28,6 +28,7 @@
                         languages: layout.languages,
                         language_id : null,
                         languages_active : false,
+                        groups_prefix : groups_prefix,
                         alert: {
                             type : null, // success,danger,warning...
                             title : null,
