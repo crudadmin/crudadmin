@@ -55,66 +55,62 @@ trait ModelRelationships
     }
 
     /*
-     * Returns relationship for sibling model
+     * Returns relation from cache
      */
-    protected function returnAdminRelationship($method, $get = false)
+    private function returnRelationFromCache($method, $get)
     {
-        $method_lowercase = strtolower( $method );
-        $method_snake = Str::snake($method);
+        $relation = $this->getRelationFromCache($method);
 
-        //Checks laravel buffer for relations
-        if ( $this->isAdminRelationLoaded($method) )
+        //If is in relation buffer saved collection and not admin relation object
+        if ( !is_array($relation) || !array_key_exists('type', $relation))
         {
-            $relation = $this->getRelationFromCache($method);
+            //If is saved collection, and requested is also collection
+            if ( !(($is_collection = $relation instanceof Collection) && $get === false) )
+                return $relation;
 
-            //If is in relation buffer saved collection and not admin relation object
-            if ( !is_array($relation) || !array_key_exists('type', $relation))
-            {
-                //If is saved collection, and requested is also collection
-                if ( !(($is_collection = $relation instanceof Collection) && $get === false) )
-                    return $relation;
-
-                //If is saved collection, but requested is object, then save old collection and return new relation object
-                else if ( $is_collection )
-                    $this->save_collection = $relation;
-            }
-
-            //If is in relation buffer saved admin relation object
-            else {
-                //Returns relationship builder
-                if ( $get === false || (!$this->exists && !parent::relationLoaded($method)) )
-                {
-                    //Save old collection when is generating new object
-                    if ( $relation['relation'] instanceof Collection )
-                        $this->save_collection = $relation['relation'];
-
-                    return $this->relationResponse(
-                        $method,
-                        $relation['type'],
-                        $relation['path'],
-                        $get === false ? false : true,
-                        $relation['properties'],
-                        $relation['relation']
-                    );
-                }
-
-                //Returns items from already loaded relationship
-                if ( $get == true && $relation['get'] == true )
-                {
-                    if ( $relation['relation'] instanceof Collection || $relation['relation'] instanceof BaseModel ){
-                        return $relation['relation'];
-                    } else {
-                        return $this->returnRelationItems($relation);
-                    }
-                }
-            }
-
+            //If is saved collection, but requested is object, then save old collection and return new relation object
+            else if ( $is_collection )
+                $this->save_collection = $relation;
         }
 
-        //Get all admin modules
-        $models = Admin::getAdminModelsPaths();
+        //If is in relation buffer saved admin relation object
+        else {
+            //Returns relationship builder
+            if ( $get === false || (!$this->exists && !parent::relationLoaded($method)) )
+            {
+                //Save old collection when is generating new object
+                if ( $relation['relation'] instanceof Collection )
+                    $this->save_collection = $relation['relation'];
 
-        //Belongs to many relation
+                return $this->relationResponse(
+                    $method,
+                    $relation['type'],
+                    $relation['path'],
+                    $get === false ? false : true,
+                    $relation['properties'],
+                    $relation['relation']
+                );
+            }
+
+            //Returns items from already loaded relationship
+            if ( $get == true && $relation['get'] == true )
+            {
+                if ( $relation['relation'] instanceof Collection || $relation['relation'] instanceof BaseModel ){
+                    return $relation['relation'];
+                } else {
+                    return $this->returnRelationItems($relation);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /*
+     * Return relation by belongsToMany field property
+     */
+    private function returnByBelongsToMany($method, $get, $models, $method_snake, $method_lowercase)
+    {
         if ( $this->hasFieldParam($method_snake, 'belongsToMany') )
         {
             $properties = $this->getRelationProperty($method_snake, 'belongsToMany');
@@ -129,7 +125,14 @@ trait ModelRelationships
             }
         }
 
-        //Belongs to
+        return false;
+    }
+
+    /*
+     * Return relation by belongsTo field property
+     */
+    private function returnByBelongsTo($method, $get, $models, $method_snake)
+    {
         if ( $this->hasFieldParam($method_snake . '_id', 'belongsTo') )
         {
             //Get edited field key
@@ -150,6 +153,53 @@ trait ModelRelationships
             }
         }
 
+        return false;
+    }
+
+    /*
+     * Return relations by fields from actual admin model
+     */
+    private function returnByFieldsRelations($method, $get, $models, $method_snake, $method_lowercase)
+    {
+        //Belongs to many relation
+        if ( ($relation = $this->returnByBelongsToMany($method, $get, $models, $method_snake, $method_lowercase)) !== false )
+            return $relation;
+
+        //Belongs to
+        if ( ($relation = $this->returnByBelongsTo($method, $get, $models, $method_snake)) !== false )
+            return $relation;
+
+        return false;
+    }
+
+    /*
+     * Returns relationship for sibling model
+     */
+    protected function returnAdminRelationship($method, $get = false, $models = false)
+    {
+        $method_lowercase = strtolower( $method );
+        $method_snake = Str::snake($method);
+
+        //Checks laravel buffer for relations
+        if ( $this->isAdminRelationLoaded($method) )
+        {
+            if ( ($cache = $this->returnRelationFromCache($method, $get)) !== false )
+                return $cache;
+        }
+
+        //Get all admin modules
+        if ( ! $models )
+            $models = Admin::getAdminModelsPaths();
+
+        /*
+         * Return relations by defined fields in actual model
+         */
+        if ( ($relation = $this->returnByFieldsRelations($method, $get, $models, $method_snake, $method_lowercase)) !== false )
+            return $relation;
+
+        /*
+         * Return relation from other way... search in all models, if some fields or models are note connected with actual model
+         */
         foreach ($models as $path)
         {
             $classname = strtolower( class_basename($path) );

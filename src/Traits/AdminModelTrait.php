@@ -33,8 +33,8 @@ trait AdminModelTrait
      */
     public function __call($method, $parameters)
     {
-        //Checks for relationships
-        if (!method_exists($this, $method))
+        //Check if called method is not property, method of actual model or new query model
+        if (!method_exists($this, $method) && !method_exists(parent::newQuery(), $method))
         {
             //Checks for db relationship of childrens into actual model
             if ( ($relation = $this->checkForChildrenModels($method)) || ($relation = $this->returnAdminRelationship($method)) )
