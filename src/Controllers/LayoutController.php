@@ -182,7 +182,7 @@ class LayoutController extends BaseController
 
         foreach ($childs_models as $child_model)
         {
-            if ( $withChilds === false )
+            if ( $withChilds === false || $child_model === $model )
                 continue;
 
             //Check if user has allowed model
