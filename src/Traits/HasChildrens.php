@@ -27,11 +27,13 @@ trait HasChildrens
         $method = strtolower( str_singular($method) );
 
         //Check by last model convention name
-        foreach (Admin::getAdminModelsPaths() as $migration_date => $modelname) {
+        foreach (Admin::getAdminModelsPaths() as $migration_date => $modelname)
+        {
             $basename = class_basename($modelname);
 
             //Check if model ends with needed relation name
-            if ( last(explode('_', snake_case($basename))) == $method ){
+            if ( last(explode('_', snake_case($basename))) == $method )
+            {
                 return $this->returnAdminRelationship($basename, $get, [
                     $migration_date => $modelname,
                 ]);
