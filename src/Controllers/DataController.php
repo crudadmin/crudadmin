@@ -326,7 +326,7 @@ class DataController extends Controller
 
         //Fire on delete event
         if ( method_exists($model, 'onDelete') )
-            $model->onDelete($row);
+            $row->onDelete($row);
 
         $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
 

@@ -13,18 +13,20 @@ trait HasChildrens
     {
         $basename_class = class_basename( get_class($this) );
 
+        $method_singular = strtolower( str_singular($method) );
+
         //Child model name
-        $child_model_name = strtolower( str_plural( $basename_class ) . str_singular($method));
+        $child_model_name = strtolower( str_plural( $basename_class ) . $method_singular);
 
         //Check if exists child with model name
         $relation = Admin::hasAdminModel($child_model_name, function( $classname ) use ( $get ) {
             return $this->returnAdminRelationship($classname, $get);
         });
 
-        if ( $relation )
-            return $relation;
 
-        $method = strtolower( str_singular($method) );
+        //If is found relation, or if is called relation in singular mode, that means, we don't need hasMany, bud belongsTo relation
+        if ( $relation || $method == $method_singular )
+            return $relation;
 
         //Check by last model convention name
         foreach (Admin::getAdminModelsPaths() as $migration_date => $modelname)
@@ -32,9 +34,9 @@ trait HasChildrens
             $basename = class_basename($modelname);
 
             //Check if model ends with needed relation name
-            if ( last(explode('_', snake_case($basename))) == $method )
+            if ( last(explode('_', snake_case($basename))) == $method_singular )
             {
-                return $this->returnAdminRelationship($basename, $get, [
+                return $this->returnAdminRelationship($method, $get, [
                     $migration_date => $modelname,
                 ]);
             }

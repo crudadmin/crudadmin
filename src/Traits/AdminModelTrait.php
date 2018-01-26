@@ -153,7 +153,7 @@ trait AdminModelTrait
                 if ( method_exists($rule, 'create') && ! $this->exists )
                     $rule->create($this);
 
-                if ( method_exists($rule, 'update') && $this->exists )
+                if ( method_exists($rule, 'update') && in_array('update', $rules) && $this->exists )
                     $rule->update($this);
 
                 if ( method_exists($rule, 'delete') && in_array('delete', $rules) )
