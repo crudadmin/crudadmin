@@ -255,7 +255,7 @@ trait ModelRelationships
 
                         if ( $properties[0] == $this->getTable() )
                         {
-                            return $this->relationResponse($method, 'hasMany', $path, $get);
+                            return $this->relationResponse($method, 'hasMany', $path, $get, $properties);
                         }
                     }
                 }
@@ -315,7 +315,7 @@ trait ModelRelationships
         } else if ( $relationType == 'hasOne' )
             $relation = $this->hasOne( $path );
         else if ( $relationType == 'hasMany' )
-            $relation = $this->hasMany( $path );
+            $relation = $this->hasMany( $path, $properties[4] );
         else if ( $relationType == 'manyToMany' )
             $relation = $this->belongsToMany( $path, $properties[3], $properties[7], $properties[6] );
 
