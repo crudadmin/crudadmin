@@ -247,6 +247,7 @@ trait ModelRelationships
                 }
 
                 //Checks all fields in model if has belongsTo relationship
+                //if yes, check if called actual model name is same with field key and match relationships
                 foreach ( $model->getFields() as $key => $field )
                 {
                     if ( array_key_exists('belongsTo', $field) )
@@ -255,7 +256,11 @@ trait ModelRelationships
 
                         if ( $properties[0] == $this->getTable() )
                         {
-                            return $this->relationResponse($method, 'hasMany', $path, $get, $properties);
+                            $key_lower = strtolower(str_replace('_', '', rtrim($key, '_id')));
+
+                            //Check if actual model name is same with property name in singular mode, but compare just last model convention name
+                            if ( substr(strtolower($this_basename), - strlen($key_lower)) == $key_lower )
+                                return $this->relationResponse($method, 'hasMany', $path, $get, $properties);
                         }
                     }
                 }
@@ -271,7 +276,7 @@ trait ModelRelationships
                     break;
                 }
 
-                $relationType = 'hasMany';
+                $relationType = $isBelongsTo ? 'belongsTo' : 'hasMany';
 
                 //If relationship can has only one child
                 if ( $relationType == 'hasMany' && $model->maximum == 1 )
