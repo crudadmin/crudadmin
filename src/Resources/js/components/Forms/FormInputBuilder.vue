@@ -164,6 +164,10 @@
         this.bindFilters();
 
         this.onChangeSelect();
+
+        this.$nextTick(function(){
+          $('#'+this.getId).ckEditors();
+        });
       },
       events : {
         onSubmit(row){

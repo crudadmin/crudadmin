@@ -52,15 +52,9 @@
       //Initialize form
       this.form = $('form#form-' + this.model.slug);
 
-      //Enable ckeditors, after content is successfuly loaded
-      this.$nextTick(function () {
-        this.form.find('.js_editor').ckEditors();
-      });
-
       //Reset form
-      this.initForm(null);
+      this.initForm(this.row);
     },
-
 
     watch: {
       //After click on edit button, push data into form values
@@ -161,9 +155,9 @@
         }
       },
       resetErrors(){
-        this.form.find('.form-group.has-error').removeClass('has-error').find('.help-block').remove();
-        this.form.find('.fa.fa-times-circle-o').remove();
-        this.removeActiveTab(this.form.find('.nav-tabs li.has-error'));
+        this.form.find('.form-group.has-error').firstLevelForm(this.form[0]).removeClass('has-error').find('.help-block').remove();
+        this.form.find('.fa.fa-times-circle-o').firstLevelForm(this.form[0]).remove();
+        this.removeActiveTab(this.form.find('.nav-tabs li.has-error').firstLevelForm(this.form[0]));
         this.progress = false;
       },
       sendForm(e, action, callback)
@@ -288,39 +282,39 @@
                     var key = key.replace('.0', ''),
                         key = a == 0 ? key : key + '[]';
 
-                    _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).each(function(){
-                        var where = $(this);
+                    _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).firstLevelForm(_this.form[0]).each(function(){
+                      var where = $(this);
 
-                        //Colorize tabs
-                        _this.colorizeTab($(this));
+                      //Colorize tabs
+                      _this.colorizeTab($(this));
 
-                        if ( $(this).is('select') ){
-                          where = where.parent().parent().children().last().prev();
-                        }
+                      if ( $(this).is('select') ){
+                        where = where.parent().parent().children().last().prev();
+                      }
 
-                        else if ( $(this).is('textarea') ){
-                          where = where.parent().children().last().prev();
-                        }
+                      else if ( $(this).is('textarea') ){
+                        where = where.parent().children().last().prev();
+                      }
 
-                        else if ( $(this).is('input:radio') ){
-                          where = where.parent().parent().parent();
+                      else if ( $(this).is('input:radio') ){
+                        where = where.parent().parent().parent();
 
-                          if ( where.find('.help-block').length == 0 )
-                            where = where.children().last().prev();
-                          else
-                            where = null;
-                        }
+                        if ( where.find('.help-block').length == 0 )
+                          where = where.children().last().prev();
+                        else
+                          where = null;
+                      }
 
-                        if ( where )
-                          where.after( '<span class="help-block">'+array[i]+'</span>' );
+                      if ( where )
+                        where.after( '<span class="help-block">'+array[i]+'</span>' );
 
-                        //On first error
-                        if ( i == 0 ){
-                          var label = $(this).closest('div.form-group').addClass('has-error').find('> label');
+                      //On first error
+                      if ( i == 0 ){
+                        var label = $(this).closest('div.form-group').addClass('has-error').find('> label');
 
-                          if ( label.find('.fa-times-circle-o').length == 0 )
-                            label.prepend('<i class="fa fa-times-circle-o"></i> ');
-                        }
+                        if ( label.find('.fa-times-circle-o').length == 0 )
+                          label.prepend('<i class="fa fa-times-circle-o"></i> ');
+                      }
                     });
                   }
                 }
@@ -393,8 +387,10 @@
         }.bind(this));
 
       },
-      removeActiveTab(tab){
-        tab.removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
+      removeActiveTab(tab, all){
+        tab.filter(function(){
+          return all === true || ! $(this).hasClass('model-tab');
+        }).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
       },
       colorizeTab(input){
         var _this = this;
@@ -405,7 +401,7 @@
           //On button click, remove tabs alerts in actual tree, if tab has no more recursive errors
           $(this).one('click', function(){
             if ( $(this).find('.nav-tabs-custom:not(.default) li.has-error').length == 0 )
-              _this.removeActiveTab($(this).parent().prev().find('li').eq($(this).index()));
+              _this.removeActiveTab($(this).parent().prev().find('li').eq($(this).index()), true);
           });
 
           $(this).parent().prev().find('li').eq(index).each(function(){
@@ -414,7 +410,7 @@
 
                 var active = $(this).parent().find('li.has-error').not($(this)).length == 0 ? $(this).parents('.nav-tabs-custom').find('li.active.has-error') : [];
 
-                _this.removeActiveTab($(this).extend(active));
+                _this.removeActiveTab($(this).extend(active), true);
               }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
           })
         });

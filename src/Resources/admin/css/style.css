@@ -90,6 +90,7 @@
 
 .model-info { color: #888 }
 .form-group input.js_date { background: white }
+.form-group textarea.js_editor { display: block;min-height: 321px;width: 100%;opacity: 0.2;padding: 10px; }
 .form-group small { color: #555; }
 
 table.table.sortable tr[draggable="true"] { cursor: move; }

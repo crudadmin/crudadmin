@@ -1,7 +1,7 @@
 <template>
   <div class="nav-tabs-custom" v-bind:class="{ default : hasNoTabs }">
     <ul class="nav nav-tabs">
-      <li v-for="tab in getTabs" v-bind:class="{ active : activetab == $index }" @click="activetab = $index">
+      <li v-for="tab in getTabs" v-if="isTab(tab) || isModel(tab)" v-bind:class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
         <a data-toggle="tab" aria-expanded="true"><i v-if="tab.icon" :class="['fa', tab.icon]"></i> {{ tab.name||trans('general-tab') }}</a>
       </li>
     </ul>
@@ -23,7 +23,7 @@
               :langid="langid"
               :ischild="true"
               :model="tab.model"
-              :activetab="activetab == $index"
+              :activetab="isLoadedModel(tab.model, activetab == $index)"
               :parentrow="row">
             </model-builder>
           </div>
@@ -58,6 +58,9 @@
     data(){
       return {
         activetab : 0,
+
+        //Which child models has been loaded
+        loaded_models : [],
       };
     },
 
@@ -71,11 +74,9 @@
       //Reset tabs on change id
       this.$watch('row.id', function(){
         this.activetab = 0;
+
+        this.loaded_models = [];
       });
-    },
-
-    ready(){
-
     },
 
     watch: {
@@ -114,12 +115,12 @@
           }].concat(tabs);
         }
 
+
+        //Add models into tabs if neccesary
         if ( this.childs == true )
-        {
           for ( var key in this.model.childs )
           {
-            if ( this.model.childs[key].in_tab == true && ( this.model.childs[key].without_parent == true || this.isOpenedRow ) )
-            {
+            if ( this.model.childs[key].in_tab == true )
               tabs.push({
                 name : this.model.childs[key].name,
                 fields : [],
@@ -127,14 +128,15 @@
                 model : _.clone(this.model.childs[key]),
                 icon : this.model.childs[key].icon
               });
-            }
           }
-        }
+
 
         return tabs;
       },
       hasNoTabs(){
-        return this.getTabs.length == 1 && this.getTabs[0].default === true;
+        return this.getTabs.filter(function(item){
+          return this.isTab(item) || this.isModel(item);
+        }.bind(this)).length == 1 && this.getTabs[0].default === true;
       },
       isOpenedRow(){
         return this.row && 'id' in this.row;
@@ -202,6 +204,12 @@
 
         return items;
       },
+      isLoadedModel(model, active){
+        if ( active === true && this.loaded_models.indexOf(model.slug) === -1 )
+          this.loaded_models.push(model.slug);
+
+        return this.loaded_models.indexOf(model.slug) > -1;
+      }
     }
   }
 </script>

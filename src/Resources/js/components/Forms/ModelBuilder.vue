@@ -223,8 +223,9 @@
               break;
             }
 
-          if ( children )
+          if ( children ){
             children.reloadRows();
+          }
         }
       },
       layouts(layouts){
@@ -509,9 +510,9 @@
         return this.model.minimum == 1 && this.model.maximum == 1;
       },
       canShowRows(){
-        if ( this.isSingle )
-        {
+        if ( this.isSingle ){
           this.row = this.rows.data[0];
+          this.row;
 
           this.enableOnlyFullScreen();
 
@@ -536,9 +537,7 @@
       },
       canShowForm(){
         if ( !this.isOpenedRow && !this.canAddRow || this.isOpenedRow && this.model.editable == false)
-        {
           return false;
-        }
 
         return true;
 

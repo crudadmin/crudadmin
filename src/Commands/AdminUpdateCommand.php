@@ -61,6 +61,7 @@ class AdminUpdateCommand extends Command
 
         $remove = [
             $admin_path.'/js',
+            $admin_path.'/dist/js',
             $admin_path.'/plugins',
             $admin_path.'/css',
 
