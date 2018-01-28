@@ -69,6 +69,7 @@ class AdminRows
                     {
                         //Search in all columns
                         $builder->{ $key == 0 ? 'where' : 'orWhere' }(function($builder) use ( $columns, $column, $queries ) {
+
                             //Find exact id, value
                             if ( $this->isPrimaryKey($column, $columns) ){
                                 foreach ($queries as $query)
@@ -76,7 +77,7 @@ class AdminRows
                             }
 
                             //Find by data in relation
-                            else if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
+                            if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
                                 $relation = explode(',', $this->model->getField($column)['belongsTo']);
 
                                 $builder->orWhereHas(rtrim($column, '_id'), function($builder) use( $relation, $queries ) {
