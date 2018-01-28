@@ -193,7 +193,8 @@ trait AdminModelTrait
         }
 
         //Check for model rules
-        $this->checkForModelRules();
+        if ( Admin::isAdmin() )
+            $this->checkForModelRules();
 
         //Save model
         return parent::save($options);
