@@ -20,12 +20,15 @@ class AdminRows
             return true;
 
         //If is correct relationship id
-        if ( count($columns) == 1 && $this->model->hasFieldParam($column, 'belongsTo') )
-            return true;
+        if ( count($columns) == 1  )
+        {
+            if ( $this->model->hasFieldParam($column, 'belongsTo') )
+                return true;
 
-        //If is select, but not multiple
-        if ( $this->isSelectColumn($column) )
-            return true;
+            //If is select, but not multiple
+            if ( $this->isSelectColumn($column) )
+                return true;
+        }
 
         return false;
     }
@@ -77,7 +80,7 @@ class AdminRows
                             }
 
                             //Find by data in relation
-                            if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
+                            else if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
                                 $relation = explode(',', $this->model->getField($column)['belongsTo']);
 
                                 $builder->orWhereHas(rtrim($column, '_id'), function($builder) use( $relation, $queries ) {
