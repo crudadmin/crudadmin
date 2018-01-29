@@ -36,7 +36,7 @@ trait HasChildrens
             //Check if model ends with needed relation name
             if ( last(explode('_', snake_case($basename))) == $method_singular )
             {
-                return $this->returnAdminRelationship($method, $get, [
+                return $this->returnAdminRelationship(str_plural($basename), $get, [
                     $migration_date => $modelname,
                 ]);
             }
