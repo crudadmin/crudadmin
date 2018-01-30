@@ -651,7 +651,7 @@
                 return [];
             }
 
-            return this.filterBy ? [] : [this.field.value];
+            return this.filterBy || this.field.value === null ? [] : [this.field.value];
           }
 
           return missing;

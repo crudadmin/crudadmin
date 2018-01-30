@@ -32,6 +32,7 @@ trait ModelIcons
             'hour' => 'fa-clock-o',
             'product' => 'fa-shopping-basket',
             'basket' => 'fa-shopping-basket',
+            'store' => 'fa-shopping-cart',
             'order' => 'fa-credit-card',
             'payment' => 'fa-credit-card',
             'song' => 'fa-music',
@@ -67,6 +68,7 @@ trait ModelIcons
             'manufacturer' => 'fa-building-o',
             'contractor' => 'fa-handshake-o',
             'pricing' => 'fa-sliders',
+            'country' => 'fa-flag',
         ];
     }
 

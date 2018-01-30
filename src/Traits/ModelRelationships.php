@@ -222,6 +222,7 @@ trait ModelRelationships
             return $relation;
 
         $this_basename = class_basename(get_class($this));
+        $this_table_last_prefix = last(explode('_', snake_case($this->getTable())));
 
         /*
          * Return relation from other way... search in all models, if some fields or models are note connected with actual model
@@ -236,13 +237,14 @@ trait ModelRelationships
                 $model = new $path;
 
                 //If has belongs to many relation
-                if ( $field = $model->getField( $this->getTable() ) )
+                if ( ($field = $model->getField( $field_key = $this->getTable() )) || ($field = $model->getField( $field_key = $this_table_last_prefix)) )
                 {
                     if ( array_key_exists('belongsToMany', $field) )
                     {
-                        $properties = $model->getRelationProperty($this->getTable(), 'belongsToMany');
+                        $properties = $model->getRelationProperty($field_key, 'belongsToMany');
 
-                        return $this->relationResponse($method, 'manyToMany', $path, $get, $properties);
+                        if ( $properties[0] == $this->getTable() )
+                            return $this->relationResponse($method, 'manyToMany', $path, $get, $properties);
                     }
                 }
 

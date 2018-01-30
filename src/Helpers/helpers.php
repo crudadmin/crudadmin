@@ -11,4 +11,11 @@ if ( ! function_exists('admin_asset') )
     }
 }
 
+if ( ! function_exists('isActiveController') )
+{
+    function isActiveController($controller, $text = null)
+    {
+        return \Gogol\Admin\Helpers\Helper::isActive($controller, $text);
+    }
+}
 ?>
