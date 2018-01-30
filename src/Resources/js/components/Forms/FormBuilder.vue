@@ -138,7 +138,11 @@
         {
           if ( ! row || this.model.fields[key].value != row[key] )
           {
-            this.model.fields[key].value = row ? row[key] : null;
+            var value = row ? row[key] : null;
+
+            //Set value and default value of field from database
+            this.model.fields[key].value = value;
+            this.$set('model.fields.'+key+'.$original_value', value);
 
             this.$broadcast('updateField', [key, this.model.fields[key]]);
           }

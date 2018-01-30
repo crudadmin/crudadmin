@@ -80,8 +80,8 @@
       <div :class="{ 'can-add-select' : canAddRow }">
         <select v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
           <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
-          <option v-for="value in missingValueInSelectOptions" v-bind:value="value" selected="selected">{{ value }}</option>
-          <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple || (!this.isOpenedRow && data[0] == field.default), data[0])" v-bind:value="data[0]">{{ data[1] }}</option>
+          <option v-for="mvalue in missingValueInSelectOptions" v-bind:value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
+          <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple) || (!this.isOpenedRow && data[0] == field.default)" v-bind:value="data[0]">{{ data[1] }}</option>
         </select>
         <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
       </div>
@@ -621,22 +621,23 @@
             return [];
 
           var options = this.fieldOptions,
-              missing = [];
+              missing = [],
+              original_value = this.field.$original_value;
 
           //For multiple selects
           if ( this.isMultiple )
           {
-            if ( this.field.value )
+            if ( original_value )
             {
-              for (var i = 0; i < this.field.value.length; i++)
+              for (var i = 0; i < original_value.length; i++)
               {
                 var searched = options.filter(function(item){
-                  return item[0] == this.field.value[i];
+                  return item[0] == original_value[i];
                 }.bind(this));
 
                 //Add missing values, when is filter off
                 if (searched.length == 0 && !this.filterBy){
-                  missing.push(this.field.value[i]);
+                  missing.push(original_value[i]);
                 }
               }
             }
@@ -647,11 +648,11 @@
             //Check if is value in options
             for ( var i = 0; i < options.length; i++ )
             {
-              if ( options[i][0] == this.field.value )
+              if ( options[i][0] == original_value )
                 return [];
             }
 
-            return this.filterBy || this.field.value === null ? [] : [this.field.value];
+            return this.filterBy || original_value === null ? [] : [original_value];
           }
 
           return missing;
