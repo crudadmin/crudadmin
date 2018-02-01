@@ -15,9 +15,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- Bootstrap 3.3.5 -->
   <link rel="stylesheet" href="<?php echo admin_asset('/bootstrap/css/bootstrap.min.css') ?>">
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="<?php echo admin_asset('/plugins/font-awesome/css/font-awesome.min.css') ?>">
   <!-- Theme style -->
   <link rel="stylesheet" href="<?php echo admin_asset('/plugins/lightbox/lightbox.min.css') ?>">
   <link rel="stylesheet" href="<?php echo admin_asset('/plugins/datatables/dataTables.bootstrap.css') ?>">
@@ -188,6 +186,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
     </div>
 
+    <!-- Admin variables -->
+    <script type="text/javascript">
+      window.crudadmin = {
+        path : '<?php echo Admin::getAdminAssetsPath() ?>',
+        dev : <?php echo env('APP_DEBUG') ? 'true' : 'false' ?>
+      };
+    </script>
+
     <!-- jQuery 2.1.4 -->
     <script src="<?php echo admin_asset('/plugins/jQuery/jQuery-2.1.4.min.js') ?>"></script>
     <script src="<?php echo admin_asset('/plugins/jQueryUI/jquery-ui.min.js') ?>"></script>
@@ -210,13 +216,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     <!-- APP JS -->
     <script src="<?php echo admin_asset('/js/main.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
-
-    <!-- Admin variables -->
-    <script type="text/javascript">
-      window.crudadmin = {
-        path : '<?php echo Admin::getAdminAssetsPath() ?>',
-      };
-    </script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-42935841-6"></script>

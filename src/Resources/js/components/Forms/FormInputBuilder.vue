@@ -566,8 +566,16 @@
         },
         getValueOrDefault()
         {
-          if ( ! this.isOpenedRow )
-            return this.field.default;
+          if ( ! this.isOpenedRow ){
+            var default_value = this.field.default;
+
+            //If is current date value in datepicker
+            if ( this.isDatepicker && default_value && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' ){
+              default_value = moment().format(this.$root.fromPHPFormatToMoment(this.field.date_format));
+            }
+
+            return default_value;
+          }
 
           return this.field.value;
         },
@@ -652,7 +660,7 @@
                 return [];
             }
 
-            return this.filterBy || original_value === null ? [] : [original_value];
+            return this.filterBy || [null, undefined].indexOf(original_value) > -1 ? [] : [original_value];
           }
 
           return missing;

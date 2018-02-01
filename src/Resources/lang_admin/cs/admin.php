@@ -40,9 +40,9 @@ return [
     'loading' => 'Načítám data ...',
 
     'created' => 'Vytvořeno',
-    'created-at' => 'Vytvořené dne',
+    'created-at' => 'Vytvořeno dne',
     'last-change' => 'Poslední změna',
-    'published-at' => 'Publikované dne',
+    'published-at' => 'Publikováno dne',
 
     'info' => 'Informace',
     'warning' => 'Upozornění',

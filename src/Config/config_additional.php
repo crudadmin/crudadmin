@@ -49,9 +49,4 @@ return [
         'datetime' => 'date_format:d.m.Y H:i|nullable',
         'time' => 'date_format:H:i|nullable',
     ],
-
-    /*
-     * Set admin locale
-     */
-    'locale' => 'sk',
 ];

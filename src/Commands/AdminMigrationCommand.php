@@ -815,20 +815,33 @@ class AdminMigrationCommand extends Command
                 !$model->getSchema()->hasTable( $model->getTable() ) ||
                 !$this->hasIndex($model, $key, 'index')
             )
-        )
-        {
+        ){
             $column->index();
         }
 
         //If is field required
-        if( $model->hasFieldParam($key, 'default') )
+        if( $this->canSetDefault($model, $key) )
         {
-            $column->default( $model->getFieldParam($key, 'default') );
+            $default = $model->getFieldParam($key, 'default');
+
+            //Set default timestamp
+            if ( $default && $model->isFieldType($key, ['date', 'datetime', 'time']) && strtoupper($default) == 'CURRENT_TIMESTAMP' )
+                $default = DB::raw('CURRENT_TIMESTAMP');
+
+            $column->default( $default );
         } else {
             $column->default(NULL);
         }
 
         return $column;
+    }
+
+    /*
+     * If default value can be set in db
+     */
+    private function canSetDefault($model, $key)
+    {
+        return $model->hasFieldParam($key, 'default') && ! $model->isFieldType($key, ['belongsTo', 'belongsToMany']);
     }
 
     /*

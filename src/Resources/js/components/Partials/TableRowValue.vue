@@ -110,7 +110,10 @@ export default {
           }
         }
 
-        return row[field];
+        var add_before = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_before'),
+            add_after = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_after');
+
+        return row[field] || row[field] == 0 ? ((add_before||'') + row[field] + (add_after||'')) : null;
       },
     },
 

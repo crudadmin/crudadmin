@@ -130,18 +130,6 @@
 
                         })
                     },
-                    timeFormat(time){
-                        var t = time.split(/[- :]/);
-
-                        // Apply each element to the Date function
-                        var d = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
-
-                        var pad = function pad(d) {
-                            return (d < 10) ? '0' + d.toString() : d.toString();
-                        };
-
-                        return pad( d.getDate() ) + '.' + pad ( d.getMonth() ) + '.' + pad( d.getFullYear() ) + ' ' + pad( d.getHours() ) + ':' + pad( d.getMinutes() ) + ':' + pad( d.getSeconds() );
-                    },
                     bootLanguages(){
                         if ( this.languages.length == 0 )
                             return;
@@ -274,6 +262,21 @@
                         }
 
                         return data;
+                    },
+                    /*
+                     * Replace datetime format from PHP to momentjs
+                     */
+                    fromPHPFormatToMoment(format){
+                        var mapObj = { 'd' : 'DD', 'D' : 'ddd', 'j' : 'D', 'l' : 'dddd', 'N' : 'E', 'S' : 'o', 'w' : 'e', 'z' : 'DDD', 'W' : 'W', 'F' : 'MMMM', 'm' : 'MM', 'M' : 'MMM', 'n' : 'M', 't' : '', 'L' : '', 'o' : 'YYYY', 'Y' : 'YYYY', 'y' : 'YY', 'a' : 'a', 'A' : 'A', 'B' : '', 'g' : 'h', 'G' : 'H', 'h' : 'hh', 'H' : 'HH', 'i' : 'mm', 's' : 'ss', 'u' : 'SSS', 'e' : 'zz', 'I' : '', 'O' : '', 'P' : '', 'T' : '', 'Z' : '', 'c' : '', 'r' : '', 'U' : 'X' };
+
+                        var re = new RegExp(Object.keys(mapObj).join("|"),"gi");
+
+                        return format.replace(re, function(match){
+                            if ( match in mapObj )
+                                return mapObj[match];
+
+                            return match;
+                        });
                     }
                 }
             }

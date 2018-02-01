@@ -73,6 +73,39 @@ class ModelsHistory extends Model
     }
 
     /*
+     * Compare multidimensional array
+     */
+    private function array_diff_recursive($array1, $array2) {
+        $aReturn = array();
+
+        foreach ($array1 as $mKey => $mValue) {
+            if (array_key_exists($mKey, $array2)) {
+                if (is_array($mValue)) {
+                    $aRecursiveDiff = $this->array_diff_recursive($mValue, $array2[$mKey]);
+
+                    if (count($aRecursiveDiff)) {
+                        $aReturn[$mKey] = $aRecursiveDiff;
+                    }
+                } else {
+                    if ($mValue != $array2[$mKey]) {
+                        $aReturn[$mKey] = $mValue;
+                    }
+                }
+            } else {
+                $aReturn[$mKey] = $mValue;
+            }
+        }
+
+        //Add missing values from second array
+        foreach ($array2 as $key => $value) {
+            if ( ! array_key_exists($key, $array1) )
+                $aReturn[$key] = $value;
+        }
+
+        return $aReturn;
+    }
+
+    /*
      * Compare by last change
      */
     public function checkChanges($model, $data)
@@ -82,7 +115,7 @@ class ModelsHistory extends Model
         $changes = [];
 
         //Get also modified field by mutators, which are not in request
-        $data = array_merge($data, array_diff($model->attributes, $data));
+        $data = array_merge($data, $this->array_diff_recursive($model->attributes, $data));
 
         //Compare changes
         foreach ($data as $key => $value)

@@ -126,7 +126,8 @@ Vue.http.get( 'api/layout' ).then(function(response){
     router.start(app, '#app');
 
 }).catch(function(e){
-    alert("app error, maybe forgot\nphp artisan admin:update ?");
+    if ( window.crudadmin.dev === true )
+        alert("app error, maybe forgot\nphp artisan admin:update ?");
 
     console.log(e);
 });

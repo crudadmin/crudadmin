@@ -384,19 +384,25 @@
             this.enableDraggind();
           });
         },
+        getDateByField(row, key){
+          if ( key in this.model.fields )
+            return row[key];
+
+          return moment(row[key]).format('DD.MM.Y HH:mm');
+        },
         showInfo(row){
           var data = '';
 
           if ( row.created_at != null )
-            data += this.$root.trans('created-at') + ': <strong>' + this.$root.timeFormat( row.created_at ) + '</strong><br>';
+            data += this.$root.trans('created-at') + ': <strong>' + this.getDateByField(row, 'created_at') + '</strong><br>';
 
           if ( row.updated_at != null && this.model.editable != false )
-            data += this.$root.trans('last-change') + ': <strong>' + this.$root.timeFormat( row.updated_at ) + '</strong><br>';
+            data += this.$root.trans('last-change') + ': <strong>' + this.getDateByField(row, 'updated_at') + '</strong><br>';
 
           if ( row.published_at != null )
-            data += this.$root.trans('published-at') + ': <strong>' + this.$root.timeFormat( row.published_at ) + '</strong>';
+            data += this.$root.trans('published-at') + ': <strong>' + this.getDateByField(row, 'published_at') + '</strong>';
 
-          this.$root.openAlert(this.$root.trans('row-info-n')+' ' + row.id, data, 'primary', null, function(){});
+          this.$root.openAlert(this.$root.trans('row-info-n') + ' ' + row.id, data, 'primary', null, function(){});
         },
         showHistory(row){
           this.$http.get( this.$root.requests.getHistory, {
