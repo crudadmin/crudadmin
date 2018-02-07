@@ -349,3 +349,7 @@ button.enabled-history:hover, button.enabled-history:focus, button.enabled-histo
 .nav-tabs-custom .tab-pane > .row .model > .box.single-mode > .box-header { display: none; }
 .nav-tabs-custom .tab-pane > .row .model > .box.single-mode > .box-body > .row > .col > form > .box > .box-body { padding: 0; background: white; }
 .nav-tabs-custom .tab-pane > .row .model > .box.single-mode > .box-body > .row > .col > form > .box > .box-footer { padding-left: 0; padding-bottom: 0; }
+.nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box { box-shadow: none;border: none;padding: 0; }
+.nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box > .box-body, .nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box > .box-header { padding: 0; }
+.nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box > .box-header > h3 { display: none }
+.nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box.single-mode > .box-header { display: none }
