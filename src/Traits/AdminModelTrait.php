@@ -53,13 +53,13 @@ trait AdminModelTrait
      */
     public function __get($key)
     {
-        return $this->getValue($key);
+        return $this->getValue($key, false);
     }
 
     /*
      * Returns modified called property
      */
-    public function getValue($key)
+    public function getValue($key, $force = true)
     {
         $force_check_relation = false;
 
@@ -113,7 +113,7 @@ trait AdminModelTrait
         }
 
         //If is fields called from outside of class, then try to search relationship
-        if ( in_array($key, ['fields']) )
+        if ( in_array($key, ['fields']) || $force == true )
         {
             $force_check_relation = true;
         }

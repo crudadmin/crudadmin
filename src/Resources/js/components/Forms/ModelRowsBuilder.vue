@@ -43,7 +43,7 @@
   import TableRows from '../Partials/TableRows.vue';
 
   export default {
-    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'iswithoutparent'],
+    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'iswithoutparent', 'activetab'],
 
     components : { Refreshing, TableRows },
 
@@ -166,6 +166,10 @@
       langid(langid){
         this.setPosition(1);
       },
+      activetab(value){
+        if ( value == true )
+          this.initTimeout(false);
+      },
       search : {
         deep : true,
         handler : function(search){
@@ -264,8 +268,9 @@
       },
       loadRows(indicator){
         //On first time allow reload rows without parent, for field options...
-        if ( this.$parent.isWithoutParentRow && indicator == false)
-            return false;
+        if ( (this.$parent.isWithoutParentRow || this.activetab === false) && indicator == false ){
+          return false;
+        }
 
         if ( indicator !== false )
           this.pagination.refreshing = true;
@@ -377,7 +382,7 @@
         var limit = this.isPaginationEnabled ? this.pagination.limit : 0;
 
         //Disable autorefreshing when is one row
-        if ( (this.rows.count > 0 && this.model.maximum === 1 || parseInt(limit) > 50) && force !== true )
+        if ( (this.rows.count > 0 && this.model.maximum === 1 || this.rows.count > 50 && parseInt(limit) > 50) && force !== true )
           return;
 
         this.updateTimeout = setTimeout(function(){
@@ -495,7 +500,7 @@
             var isArray = $.isArray(data[i][k]);
 
             //Compare also arrays
-            if ( isArray && !_.isEqual(this.rows.data[i][k], data[i][k]) || !isArray && this.rows.data[i][k] != data[i][k] )
+            if ( isArray && !_.isEqual(this.rows.data[i][k], data[i][k]) || !isArray )
             {
               this.rows.data[i][k] = data[i][k];
             }

@@ -2,13 +2,13 @@
   <div class="nav-tabs-custom" v-bind:class="{ default : hasNoTabs }">
     <ul class="nav nav-tabs">
       <li v-for="tab in getTabs" v-if="isTab(tab) || isModel(tab)" v-bind:class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
-        <a data-toggle="tab" aria-expanded="true"><i v-if="tab.icon" :class="['fa', tab.icon]"></i> {{ tab.name||trans('general-tab') }}</a>
+        <a data-toggle="tab" aria-expanded="true"><i v-if="getTabIcon(tab)" :class="['fa', getTabIcon(tab)]"></i> {{ getTabName(tab)||trans('general-tab') }}</a>
       </li>
     </ul>
     <div class="tab-content">
       <div v-for="tab in getTabs" class="tab-pane" v-bind:class="{ active : activetab == $index }">
         <div class="row">
-          <div v-if="hasTabs(tab.fields) || isModel(tab)" :class="{ model : tab.type == 'model' }" class="col-lg-12">
+          <div v-if="hasTabs(tab.fields) || isModel(tab)" :class="{ model : isModel(tab) }" class="col-lg-12">
             <form-tabs-builder
               v-if="hasTabs(tab.fields)"
               :tabs="tab.fields | tabs"
@@ -22,8 +22,8 @@
               v-if="isModel(tab)"
               :langid="langid"
               :ischild="true"
-              :model="tab.model"
-              :activetab="isLoadedModel(tab.model, activetab == $index)"
+              :model="getModel(tab.model)"
+              :activetab="isLoadedModel(getModel(tab.model), activetab == $index)"
               :parentrow="row">
             </model-builder>
           </div>
@@ -115,19 +115,20 @@
           }].concat(tabs);
         }
 
-
         //Add models into tabs if neccesary
         if ( this.childs == true )
           for ( var key in this.model.childs )
           {
             if ( this.model.childs[key].in_tab == true )
-              tabs.push({
-                name : this.model.childs[key].name,
-                fields : [],
-                type : 'model',
-                model : _.clone(this.model.childs[key]),
-                icon : this.model.childs[key].icon
-              });
+            {
+              //Check if model is not in fields group
+              if ( ! this.isModelInFields(model_fields, this.model.childs[key].slug) )
+                tabs.push({
+                  fields : [],
+                  type : 'tab',
+                  model : this.model.childs[key].slug,
+                });
+            }
           }
 
 
@@ -144,11 +145,65 @@
     },
 
     methods: {
+      /*
+       * Return model from childs by model table
+       */
+      getModel(model){
+        return this.model.childs[model];
+      },
+      /*
+       * Return tab name
+       */
+      getTabName(tab){
+        if ( this.isModel(tab) )
+          return tab.name||this.getModel(tab.model).name;
+
+        return tab.name;
+      },
+      /*
+       * Return tab icon
+       */
+      getTabIcon(tab){
+        if ( this.isModel(tab) )
+          return tab.icon||this.getModel(tab.model).icon;
+
+        return tab.icon;
+      },
+      /*
+       * Check if can be model child added into table list
+       * if child model is in other tab or group, then we cant add model into end of tabs.
+       */
+      isModelInFields(childs, model){
+        for ( var i = 0 ; i < childs.length; i++ )
+        {
+          //Check if group field is tab
+          if ( this.isTab(childs[i]) )
+          {
+            //If tab is needed model
+            if ( childs[i].model == model ){
+              return true;
+            }
+
+            //If tab has other childs, then check recursive
+            if ( childs[i].fields.length > 0 )
+              if ( this.isModelInFields(childs[i].fields, model) )
+                return true;
+          }
+        }
+
+        return false;
+      },
+      /*
+       * Check if tabs is model type
+       */
+      isModel(tab){
+        if ( !(tab.type == 'tab' && tab.model) )
+          return false;
+
+        return this.isOpenedRow || this.getModel(tab.model).without_parent == true;
+      },
       trans(key){
         return this.$root.trans(key);
-      },
-      isModel(tab){
-        return tab.type == 'model' && (this.isOpenedRow || tab.model.without_parent == true);
       },
       isField(field){
         return typeof field == 'string' && field in this.model.fields;

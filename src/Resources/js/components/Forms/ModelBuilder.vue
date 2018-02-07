@@ -78,6 +78,7 @@
             :progress.sync="progress"
             :search="search"
             :iswithoutparent="isWithoutParentRow"
+            :activetab="activetab"
             :history="history">
           </model-rows-builder>
         </div>

@@ -435,7 +435,10 @@
         //If actual row has no parent, and need to ba saved when parent will be saved
         if ( this.$parent.isWithoutParentRow )
         {
-          var parent = 'rows' in this.$parent.$parent ? this.$parent.$parent : this.$parent.$parent.$parent;
+          var parent = this.$parent.$parent;
+
+          while(!('rows' in parent))
+            parent = parent.$parent;
 
           for ( var i = 0; i < response.data.rows.length; i++ )
           {

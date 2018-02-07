@@ -120,7 +120,7 @@
 
         <div class="radio" v-for="data in field.options">
           <label>
-            <input type="radio" @change="changeValue" v-bind:name="key" v-bind:checked="hasValue(data[0], value)" v-bind:value="data[0]">
+            <input type="radio" @change="changeValue" v-bind:name="key" v-bind:checked="hasValue(data[0], getValueOrDefault)" v-bind:value="data[0]">
 
             {{ data[1] }}
           </label>

@@ -17,7 +17,9 @@ class Group
 
     public $icon = null;
 
-    public function __construct(array $fields)
+    public $model = null;
+
+    public function __construct(array $fields = [])
     {
         $this->fields = $fields;
     }
@@ -26,7 +28,7 @@ class Group
      * Make full group
      * size in 12 cells grid
      */
-    public static function fields(array $fields, $size = null, $type = 'default')
+    public static function fields(array $fields = [], $size = null, $type = 'default')
     {
         return (new static($fields))->width($size ?: 'full')->type($type);
     }
@@ -34,9 +36,18 @@ class Group
     /*
      * Make group with full with
      */
-    public static function tab(array $fields)
+    public static function tab($fields = [])
     {
-        return (new static($fields))->width('full')->type('tab');
+        $is_fields = is_array($fields);
+
+        $tab = (new static($is_fields ? $fields : []))->width('full')->type('tab');
+
+        //If tab is relation admin model child
+        if ( is_string($fields) ){
+            $tab->model($fields);
+        }
+
+        return $tab;
     }
 
     /*
@@ -109,6 +120,16 @@ class Group
     public function add($params)
     {
         $this->add[] = $params;
+
+        return $this;
+    }
+
+    /*
+     * Set model
+     */
+    public function model($model)
+    {
+        $this->model = (new $model)->getTable();
 
         return $this;
     }
