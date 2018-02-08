@@ -104,8 +104,9 @@ class DataController extends Controller
         $request->applyMutators($row);
 
         //Save original values
-        $original = $row['original'];
+        $original = $row->getOriginal();
 
+        //get mutated data from request
         $changes = $request->allWithMutators()[0];
 
         //Remove overridden files
@@ -126,7 +127,7 @@ class DataController extends Controller
         $this->updateBelongsToMany($model, $row);
 
         //Restore original values
-        $row['original'] = $original;
+        $row->setProperty('original', $original);
 
         //Fire on update event
         if ( method_exists($model, 'onUpdate') )

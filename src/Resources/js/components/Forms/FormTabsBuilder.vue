@@ -131,12 +131,17 @@
             }
           }
 
-
         return tabs;
       },
       hasNoTabs(){
         return this.getTabs.filter(function(item){
-          return this.isTab(item) || this.isModel(item);
+          if ( ! this.isTab(item) )
+            return false;
+
+          if ( item.model && ! this.isModel(item) )
+            return false;
+
+          return true;
         }.bind(this)).length == 1 && this.getTabs[0].default === true;
       },
       isOpenedRow(){

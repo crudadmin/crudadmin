@@ -94,7 +94,7 @@ trait AdminModelTrait
             }
 
             //If field has not relationship, then return field value... This condition is here for better framework performance
-            else if ( !array_key_exists('belongsTo', $field) && !array_key_exists('belongsToMany', $field) ){
+            else if ( !array_key_exists('belongsTo', $field) && !array_key_exists('belongsToMany', $field) || substr($key, -3) == '_id' ){
                 return parent::__get($key);
             } else {
                 $force_check_relation = true;
@@ -159,7 +159,6 @@ trait AdminModelTrait
                 if ( method_exists($rule, 'delete') && in_array('delete', $rules) )
                     $rule->delete($this);
             }
-
         }
     }
 
