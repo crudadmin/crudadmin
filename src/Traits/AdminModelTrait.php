@@ -356,7 +356,7 @@ trait AdminModelTrait
         //If is turned of sorting of rows
         if ( ! $this->isSortable() && $this->orderBy[0] == '_order' )
         {
-            $this->orderBy[0] = 'id';
+            $this->orderBy[0] = $this->getTable().'.id';
         }
 
         if ( ! array_key_exists(1, $this->orderBy) )
