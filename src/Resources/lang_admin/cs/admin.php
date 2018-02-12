@@ -49,14 +49,14 @@ return [
     'row-info' => 'Informace o záznamu',
     'row-info-n' => 'Informace o záznamu č.',
     'no-changes' => 'V aktuálním záznamu nebyly provedeny žádné změny.',
-    'delete-warning' => 'Opravdu chcete vymazat dany záznam?',
+    'delete-warning' => 'Opravdu chcete smazat dany záznam?',
 
     'cannot-create' => 'Nelze přidat nový záznam.',
     'cannot-edit' => 'Tento záznam nelze upravovat.',
-    'cannot-delete' => 'Tento záznam nelze vymazat.',
+    'cannot-delete' => 'Tento záznam nelze smazat.',
     'cannot-publish' => 'Tento záznam nelze znepublikovať.',
     'cannot-sort' => 'Tento záznam nelze přesouvat.',
-    'success-created' => 'Záznam byl úspěšně přidán',
+    'success-created' => 'Záznam byl úspěšně přidaný.',
     'success-save' => 'Záznam byl úspěšně uložen',
     'with-errors' => 's následujícími chybami',
 
