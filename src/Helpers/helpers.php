@@ -18,4 +18,17 @@ if ( ! function_exists('isActiveController') )
         return \Gogol\Admin\Helpers\Helper::isActive($controller, $text);
     }
 }
+
+if ( ! function_exists('admin') ) {
+    function admin()
+    {
+        $guard = auth()->guard('web');
+
+        //Check if is student logged
+        if( ! $guard->check() )
+            return false;
+
+        return $guard->user();
+    }
+}
 ?>
