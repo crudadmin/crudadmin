@@ -259,6 +259,12 @@
             })
           }
         },
+        chosenOptions(){
+          return {
+            disable_search_threshold: 10,
+            search_contains : true
+          };
+        },
         updateField(field){
           if (field.type == 'file')
             this.file_from_server = true;
@@ -279,7 +285,7 @@
             //If is select
             if ( this.isSelect )
             {
-              var select = $('#' + this.getId).chosen({disable_search_threshold: 10}).trigger("chosen:updated");
+              var select = $('#' + this.getId).chosen(this.chosenOptions()).trigger("chosen:updated");
 
               //Rebuild multiple order into fake select which will send data into request
               if ( this.isMultiple ){
@@ -300,7 +306,7 @@
 
             //Update multiple files upload
             if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows )
-              $('#' + this.getId+'_multipleFile').chosen({disable_search_threshold: 10}).trigger("chosen:updated");
+              $('#' + this.getId+'_multipleFile').chosen(this.chosenOptions()).trigger("chosen:updated");
           })
         },
         removeFile(){

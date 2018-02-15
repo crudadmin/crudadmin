@@ -610,7 +610,7 @@ trait AdminModelTrait
             return $translate;
 
         //Object / Array
-        elseif (in_array($property, ['fields', 'active', 'options', 'settings', 'buttons', 'insertable', 'editable', 'deletable', 'layouts'])) {
+        elseif (in_array($property, ['fields', 'active', 'options', 'settings', 'buttons', 'reserved', 'insertable', 'editable', 'deletable', 'layouts'])) {
 
             if ( method_exists($this, $property) )
                 return $this->{$property}($row);

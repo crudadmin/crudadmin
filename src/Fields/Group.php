@@ -19,6 +19,8 @@ class Group
 
     public $model = null;
 
+    public $id = null;
+
     public function __construct(array $fields = [])
     {
         $this->fields = $fields;
@@ -64,6 +66,16 @@ class Group
     public static function half(array $fields)
     {
         return (new static($fields))->width('half')->type();
+    }
+
+    /*
+     * Set id of group
+     */
+    public function id($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function icon($icon)

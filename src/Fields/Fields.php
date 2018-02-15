@@ -147,6 +147,53 @@ class Fields
     }
 
     /*
+     * Modify group by id
+     */
+    private function mutateGroup($group, $mutation)
+    {
+        if ( ! $group->id || count($mutation->groups) == 0 || !array_key_exists($group->id, $mutation->groups) )
+            return $group;
+
+        $mutation->groups[$group->id]($group);
+
+        return $group;
+    }
+
+    /*
+     * Insert field/group on position
+     */
+    private function insertInto($where, $key, $fields, $mutation)
+    {
+        foreach ($mutation->{$where} as $position_key => $add_before) {
+            if ( $key === $position_key ){
+                foreach ($add_before as $add_key => $add_field)
+                    $fields = $this->pushFieldOrGroup($fields, $add_key, $add_field, $mutation);
+            }
+        }
+
+        return $fields;
+    }
+
+    /*
+     * Add field, or modified group into fields list
+     */
+    private function pushFieldOrGroup($fields, $key, $field, $mutation)
+    {
+        if ( $this->isFieldGroup($field) ){
+            $group = $this->mutateGroup($field, $mutation, $mutation);
+
+            if ( is_numeric($key) )
+                $fields[] = $group;
+            else
+                $fields[$key] = $group;
+        } else {
+            $fields[$key] = $field;
+        }
+
+        return $fields;
+    }
+
+    /*
      * Add before/after new field or remove fields for overriden admin model
      */
     private function mutateGroupFields($items, $mutation, $parent_group = null)
@@ -156,34 +203,23 @@ class Fields
         foreach ($items as $key => $field)
         {
             //Add before field
-            foreach ($mutation->before as $before_key => $add_before) {
-                if ( $key == $before_key ){
-                    foreach ($add_before as $add_key => $add_field)
-                        $fields[$add_key] = $add_field;
-                }
-            }
+            $fields = $this->insertInto('before', $key, $fields, $mutation);
 
             //Add if is not removed
             if ( ! in_array($key, $mutation->remove) )
-                $fields[$key] = $field;
+                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutation);
 
             //Add after field
-            foreach ($mutation->after as $after_key => $add_after) {
-                if ( $key == $after_key ){
-                    foreach ($add_after as $add_key => $add_field)
-                        $fields[$add_key] = $add_field;
-                }
-            }
+            $fields = $this->insertInto('after', $key, $fields, $mutation);
         }
 
         //Push new fields, groups... or replace existing fields. Into first level of fields
         if ( ! $parent_group )
+        {
             foreach ($mutation->push as $key => $field) {
-                if ( $this->isFieldGroup($field) && is_numeric($key) )
-                    $fields[] = $field;
-                else
-                    $fields[$key] = $field;
+                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutation);
             }
+        }
 
         return $fields;
     }

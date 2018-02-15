@@ -119,10 +119,10 @@ trait Sluggable
         return redirect( action( '\\'.$current_controller, $binding ) );
     }
 
-    private function redirectWithWrongSlug($slug, $id, $key = null)
+    private function redirectWithWrongSlug($slug, $id, $key = null, $row)
     {
         //If is definer row where is slug saved
-        if ( is_numeric($id) )
+        if ( is_numeric($id) && $row->slug != $slug )
         {
             $row = $this->where($this->getKeyName(), $id)->first();
 
@@ -165,7 +165,7 @@ trait Sluggable
 
         $row = ($query ?: new static)->whereSlug($slug, $id, $key, $key)->first($columns);
 
-        (new static)->redirectWithWrongSlug($slug, $id, $key);
+        (new static)->redirectWithWrongSlug($slug, $id, $key, $row);
 
         return $row;
     }
