@@ -192,13 +192,15 @@ class SEO
             '<title>'.e(SEO::getTitle()).'</title>',
             '<meta name="description" content="'.e(SEO::getDescription()).'">',
             '<meta name="keywords" content="'.e(SEO::getKeywords()).'">',
-            '<meta name="author" content="'.e($this->getDefault('author')).'">',
-            "",
-            '<meta property="og:title" content="'.e(SEO::getDescription()).'">',
+            '',
+            '<!-- Hello, -->',
+            '<meta name="author" content="'.e($this->getDefault('author', 'Marek Gogoľ - marekgogol.sk')).'">',
+            '',
+            '<meta property="og:title" content="'.e(SEO::getTitle()).'">',
             '<meta property="og:description" content="'.e(SEO::getDescription()).'">',
             '<meta property="og:locale" content="'.Gettext::getLocale(app()->getLocale()).'" />',
             '<meta property="og:type" content="website">',
-            '<meta property="og:site_name" content="Paul Lange - Oslany">',
+            '<meta property="og:site_name" content="'.e(env('APP_NAME')).'">',
         ];
 
         //Push images into meta tags
