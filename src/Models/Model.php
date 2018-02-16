@@ -11,6 +11,7 @@ use Gogol\Admin\Traits\FieldProperties;
 use Gogol\Admin\Traits\AdminModelTrait;
 use Gogol\Admin\Traits\Sluggable;
 use Gogol\Admin\Traits\HasChildrens;
+use Gogol\Admin\Traits\HasAttributes;
 use Gogol\Admin\Traits\ModelIcons;
 use Gogol\Admin\Traits\Uploadable;
 use Gogol\Admin\Traits\Validation;
@@ -25,6 +26,7 @@ class Model extends BaseModel
         FieldProperties,
         AdminModelTrait,
         HasChildrens,
+        HasAttributes,
         Uploadable,
         Validation,
         ModelIcons,
