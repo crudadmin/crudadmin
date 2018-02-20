@@ -168,15 +168,23 @@
         this.$nextTick(function(){
           $('#'+this.getId).ckEditors();
         });
+
+        this.addMultipleFilesSupport();
       },
       events : {
         onSubmit(row){
-          if ( this.file_from_server == true && row != null )
-            return;
+          if ( this.isFile )
+          {
+            if ( this.file_from_server == true && row != null )
+              return;
 
-          this.file_from_server = row ? true : false;
+            this.file_from_server = row ? true : false;
 
-          this.field.value = row ? row[this.key] : '';
+            this.field.value = row ? row[this.key] : '';
+
+            //Reset input value after file has been sent
+            $('#' + this.getId).val('');
+          }
         },
         updateField(data){
           if ( data[0] != this.key )
@@ -304,10 +312,13 @@
               }
             }
 
-            //Update multiple files upload
+            this.addMultipleFilesSupport();
+          })
+        },
+        addMultipleFilesSupport(){
+          //Update multiple files upload
             if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows )
               $('#' + this.getId+'_multipleFile').chosen(this.chosenOptions()).trigger("chosen:updated");
-          })
         },
         removeFile(){
           if ( ! this.isMultiple )
