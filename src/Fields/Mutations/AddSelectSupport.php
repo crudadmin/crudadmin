@@ -134,9 +134,7 @@ class AddSelectSupport extends MutationRule
 
             //Get options from model, and cache them
             $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {
-                $options = $model->getProperty('options');
-
-                return (array)$model->getProperty('options');
+                return (array)$model->getProperty('options', $model->getModelParentRow());
             });
 
             /*

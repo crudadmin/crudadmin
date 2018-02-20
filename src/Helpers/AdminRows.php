@@ -292,7 +292,6 @@ class AdminRows
                 $all_rows_data = $this->model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
             }
 
-
             $data = [
                 'rows' => $without_parent ? [] : $this->getBaseRows( $paginated_rows_data ),
                 'count' => $without_parent ? 0 : $this->checkForSearching( $all_rows_data )->count(),

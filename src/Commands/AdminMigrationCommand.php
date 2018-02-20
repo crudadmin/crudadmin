@@ -126,6 +126,7 @@ class AdminMigrationCommand extends Command
                 $this->generateMigration($model);
             };
 
+            //Check if migration is out of date from cache
             if ( $this->isOutOfDate($model, $migration) )
                 continue;
 
@@ -872,8 +873,10 @@ class AdminMigrationCommand extends Command
     {
         $belongsToModel = $model->getBelongsToRelation();
 
+        $count = count($belongsToModel);
+
         //Model without parent
-        if ( $belongsToModel == null )
+        if ( $count == 0 )
             return;
 
         if ( $updating === true )
@@ -881,14 +884,18 @@ class AdminMigrationCommand extends Command
 
         foreach ($belongsToModel as $parent)
         {
-            $parent = new $parent;
+            $is_recursive = class_basename(get_class($model)) == class_basename($parent);
+
+            //If is recursive model, then do not create new same instance, because of bug when parent model
+            //is overidded and has relationship on itself in package with other namespace
+            $parent = $is_recursive ? $model : new $parent;
 
             $foreign_column = $model->getForeignColumn( $parent->getTable() );
 
             $column = $table->integer( $foreign_column )->unsigned();
 
-            //If parent belongs to more models...
-            if ( count($belongsToModel) > 1 || $model->getProperty('withoutParent') == true )
+            //If parent belongs to more models, or just itself
+            if ( count($belongsToModel) > 1 || $model->getProperty('withoutParent') == true || $is_recursive )
                 $column->nullable();
 
             //If foreign key does not exists in table

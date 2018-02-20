@@ -236,7 +236,11 @@
                             var value = field_key.replace(/\\:/g, ':');
 
                             for ( var i = 0; i < matched_keys.length; i++ )
-                              value = value.replace(new RegExp(matched_keys[i], 'g'), array[key][1][matched_keys[i].substr(1)]||'');
+                            {
+                                var option_value = array[key][1][matched_keys[i].substr(1)];
+
+                                value = value.replace(new RegExp(matched_keys[i], 'g'), !option_value && option_value !== 0 ? '' : option_value);
+                            }
                           }
 
                           //Simple value by one column
@@ -255,6 +259,9 @@
 
                         for ( var key in models )
                         {
+                            if ( typeof models[key] != 'object' )
+                                continue;
+
                             data[models[key].slug] = models[key];
 
                             if ( Object.keys(models[key].childs).length > 0 )

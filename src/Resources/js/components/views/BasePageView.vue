@@ -23,6 +23,8 @@
   import ModelBuilder from '../Forms/ModelBuilder.vue';
 
   export default {
+      name : 'base-page-view',
+
       data : function(){
         return {
           //Passing model data from parent

@@ -5,7 +5,7 @@ namespace Gogol\Admin\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Gogol\Admin\Models\ModelsHistory;
 use Gogol\Admin\Helpers\File;
-use Carbon\Carnon;
+use Carbon\Carbon;
 use Localization;
 use Fields;
 use Admin;
@@ -554,6 +554,12 @@ trait AdminModelTrait
             }
 
             $query->where($column, $subid);
+        }
+
+        //If is not parent table, but rows can be related into recursive relation
+        if ( ! $parent_table && (int)$subid == 0 ){
+            if ( in_array(class_basename(get_class($this)), $this->getBelongsToRelation(true)) )
+                $query->whereNull($this->getForeignColumn($this->getTable()));
         }
 
     }

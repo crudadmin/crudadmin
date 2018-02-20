@@ -30,7 +30,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="<?php echo admin_asset('/dist/css/skins/skin-blue.min.css') ?>">
 
   <?php foreach(array_merge((array)config('admin.styles', []), ((($customCssPath = public_path('/assets/admin/css/custom.css')) && file_exists($customCssPath)) ? [ asset('/assets/admin/css/custom.css') ] : [])) as $css){ ?>
-  <link rel="stylesheet" type="text/css" href="<?php echo admin_asset($css) ?>">
+  <link rel="stylesheet" type="text/css" href="<?php echo admin_asset($css, true) ?>">
   <?php } ?>
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

@@ -1,6 +1,6 @@
 <template>
   <!-- Horizontal Form -->
-  <form method="post" action="" v-bind:id="'form-'+model.slug" v-on:submit.prevent="saveForm">
+  <form method="post" action="" v-bind:id="formID" :data-form="model.slug" v-on:submit.prevent="saveForm">
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
       <div class="box-header with-border">
@@ -50,7 +50,7 @@
     ready()
     {
       //Initialize form
-      this.form = $('form#form-' + this.model.slug);
+      this.form = $('#'+this.formID);
 
       //Reset form
       this.initForm(this.row);
@@ -77,6 +77,9 @@
     },
 
     computed: {
+      formID(){
+        return 'form-' + this.$parent.depth_level + '-' + this.model.slug;
+      },
       isOpenedRow(){
         return this.row && 'id' in this.row;
       },
@@ -185,7 +188,7 @@
         };
 
         //Check if form belongs to other form
-        if ( this.model.foreign_column != null )
+        if ( this.model.foreign_column != null && this.$parent.parentrow )
         {
           data[this.model.foreign_column[this.$parent.getParentTableName()]] = this.$parent.parentrow.id;
         }
@@ -422,7 +425,7 @@
       scrollToForm(){
         setTimeout(function(){
           $('html, body').animate({
-              scrollTop: $("#form-" + this.model.slug).offset().top - 10
+              scrollTop: $('#'+this.formID).offset().top - 10
           }, 500);
         }.bind(this), 400);
       },

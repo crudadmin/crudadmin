@@ -60,6 +60,12 @@ class LayoutController extends BaseController
 
         if ( $parent_table == '0' )
             $parent_table = null;
+        else {
+            //Set parent row into model
+            $parent_row = Admin::getModelByTable($parent_table)->withoutGlobalScopes()->find($subid);
+
+            $model->withModelParentRow($parent_row);
+        }
 
         $data = (new AdminRows($model))->returnModelData( $parent_table, $subid, $langid, $limit, $page, $count );
 
@@ -103,7 +109,18 @@ class LayoutController extends BaseController
 
     private function skipModelInTree($model)
     {
-        if ( $model->getProperty('belongsToModel') != null )
+        //Get basename relations
+        $belongsToModel = $model->getBelongsToRelation(true);
+
+        $count = count($belongsToModel);
+
+        //If is model related recursive to itself
+        if ( $count == 1 && in_array(class_basename(get_class($model)), $belongsToModel) ){
+            return false;
+        }
+
+        //If model is some child, or
+        if ( $count > 0 )
             return true;
 
         //Check if user has allowed model
@@ -182,15 +199,18 @@ class LayoutController extends BaseController
 
         foreach ($childs_models as $child_model)
         {
-            if ( $withChilds === false || $child_model === $model )
+            if ( $withChilds === false )
                 continue;
 
-            //Check if user has allowed model
+            // Check if user has allowed model
             if ( ! auth()->guard('web')->user()->hasAccess( $child_model ) )
                 continue;
 
-            $childs[ $child_model->getTable() ] = $this->makePage($child_model);
+            $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
+
+            $childs[ $child_model->getTable() ] = $child;
         }
+
 
         return array_merge((array)$data, [
             'name' => $model->getProperty('name'),
@@ -230,6 +250,10 @@ class LayoutController extends BaseController
         foreach ($pages as $key => $page)
         {
             $data[$key] = $page;
+
+            if ( ! is_array($page) )
+                continue;
+
             $data[$key]['slug'] = $key;
 
             foreach (['submenu', 'childs'] as $subkey)

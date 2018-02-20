@@ -2,12 +2,12 @@
 
 if ( ! function_exists('admin_asset') )
 {
-    function admin_asset($path)
+    function admin_asset($path, $root = false)
     {
         if (substr($path, 0, 7) == 'http://' || substr($path, 0, 8) == 'https://')
             return $path;
 
-        return asset(Admin::getAdminAssetsPath(). '/' . trim($path, '/'));
+        return asset(($root == false ? Admin::getAdminAssetsPath() : '') . '/' . trim($path, '/'));
     }
 }
 

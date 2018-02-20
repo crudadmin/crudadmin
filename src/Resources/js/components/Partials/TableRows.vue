@@ -166,6 +166,9 @@
         isEnabledHistory(){
           return this.model.history == true;
         },
+        formID(){
+          return 'form-' + this.$parent.$parent.depth_level + '-' + this.model.slug;
+        },
       },
 
       methods: {
@@ -575,7 +578,7 @@
 
           setTimeout(function(){
             $('html, body').animate({
-                scrollTop: $("#form-" + this.model.slug).offset().top - 10
+                scrollTop: $('#' + this.formID).offset().top - 10
             }, 500);
           }.bind(this), 25);
         },

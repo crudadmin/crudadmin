@@ -10,6 +10,11 @@ trait FieldProperties
     private $withOptions = [];
 
     /*
+     * Save admin parent row into model
+     */
+    private $withParentRow = null;
+
+    /*
      * Returns just base fields in getAdminAttributes
      */
     private $justBaseFields = false;
@@ -59,5 +64,21 @@ trait FieldProperties
             $this->justBaseFields = $set;
 
         return $this->justBaseFields;
+    }
+
+    /*
+     * Save admin parent row into model
+     */
+    public function withModelParentRow($row)
+    {
+        $this->withParentRow = $row;
+    }
+
+    /*
+     * Get admin parent row
+     */
+    public function getModelParentRow()
+    {
+        return $this->withParentRow;
     }
 }

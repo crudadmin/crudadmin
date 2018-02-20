@@ -92,7 +92,7 @@
         :hasparentmodel="hasparentmodel"
         :langid="langid"
         :ischild="true"
-        :model="child"
+        :model="getModel(child)"
         :activetab="activetab"
         :parentrow="row">
       </model-builder>
@@ -161,6 +161,8 @@
         language_id : null,
 
         progress : false,
+
+        depth_level : 0,
       };
     },
 
@@ -171,6 +173,9 @@
       //If model builder model parent
       if ( [null, undefined].indexOf(this.hasparentmodel) > -1 )
         this.hasparentmodel = true;
+
+      //Set deep level of models
+      this.setDeepLevel();
     },
 
     ready() {
@@ -183,7 +188,7 @@
         //Reset searched value if previous column was select or option
         if ( prevcolumn && prevcolumn in this.model.fields && ['select', 'option'].indexOf(this.model.fields[prevcolumn].type) !== -1 )
           this.search.query = null;
-      })
+      });
     },
 
     watch : {
@@ -292,6 +297,20 @@
     },
 
     methods : {
+      setDeepLevel(){
+        var parent = this.$parent,
+            depth = 0;
+
+        while(parent.$options.name != 'base-page-view')
+        {
+          if ( parent.$options.name == 'model-builder' )
+            depth++;
+
+          parent = parent.$parent;
+        }
+
+        this.depth_level = depth;
+      },
       trans(key){
         return this.$root.trans(key);
       },
@@ -480,7 +499,15 @@
       },
       resetForm(){
         this.row = {};
-      }
+      },
+      getModel(model){
+        //if is recursive model
+        if ( typeof model === 'string' ){
+          return _.cloneDeep(this.model);
+        }
+
+        return model;
+      },
     },
 
     computed: {

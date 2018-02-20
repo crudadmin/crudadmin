@@ -464,13 +464,14 @@
         },
         getId()
         {
-          var parent = this.$parent;
-          while(!('getParentTableName' in parent))
-            parent = parent.$parent;
+          //Get parent model builder
+          var modelBuilder = this.$parent;
+          while(modelBuilder.$options.name != 'model-builder')
+            modelBuilder = modelBuilder.$parent;
 
-          parent = parent.getParentTableName(this.model.withoutParent == true);
+          parent = modelBuilder.getParentTableName(this.model.withoutParent == true);
 
-          return 'id-' + this.model.slug + '-' + parent + '-' + this.index + '-' + this.key;
+          return 'id-' + this.model.slug + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.key;
         },
         getModalId(){
           return 'form-relation-modal-'+this.getId;
