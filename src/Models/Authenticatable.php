@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Notifications\Notifiable;
 use Schema;
 use Admin;
 
@@ -17,7 +18,7 @@ class Authenticatable extends Model implements
     AuthorizableContract,
     CanResetPasswordContract
 {
-    use BaseAuthenticatable, Authorizable, CanResetPassword;
+    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable;
 
     /*
      * Skipping dropping columns

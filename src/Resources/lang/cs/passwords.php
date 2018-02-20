@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'password' => 'Heslo musí obsahovat alespoň 6 znaků a musí odpovídat.',
+    'password' => 'Heslo musí obsahovat alespoň 6 znaků a musí se zhodovat.',
     'reset'    => 'Heslo bylo obnoveno!',
     'sent'     => 'Odkaz na změnu hesla byl odeslán.',
     'token'    => 'Klíč pro obnovu hesla je nesprávný.',
@@ -24,6 +24,6 @@ return [
      */
     'email.subject' => 'Změna hesla',
     'email.button' => 'Změniť heslo',
-    'email.intro' => 'Práve ste zažiadali o obnovenie hesla pre Váš účet.',
-    'email.info' => 'Ak ste o zmenu hesla nezažiadali, prosím tento email ignorujte.',
+    'email.intro' => 'Právě jste požádali o obnovení hesla pro Váš účet.',
+    'email.info' => 'Pokud jste o změnu hesla nežádaly, prosím tento email ignorujte.',
 ];
