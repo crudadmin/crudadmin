@@ -55,9 +55,17 @@ class Admin
     /*
      * Save property with value into buffer
      */
-    public function save($key, $data)
+    public function set($key, $data)
     {
         return $this->buffer[$key] = $data;
+    }
+
+    /*
+     * Save property with value into buffer
+     */
+    public function save($key, $data)
+    {
+        return $this->set($key, $data);
     }
 
     /*

@@ -532,7 +532,7 @@
         },
         isEditor()
         {
-          return this.field.type == 'editor';
+          return this.field.type == 'editor'  || this.field.type == 'longeditor';
         },
         isFile()
         {

@@ -43,6 +43,7 @@ return [
         'decimal' => 'numeric',
         'file' => 'max:10240|file|nullable',
         'editor' => 'hidden',
+        'longeditor' => 'hidden',
         'password' => 'hidden',
         'checkbox' => 'boolean',
         'date' => 'date_format:d.m.Y|nullable',

@@ -476,7 +476,7 @@ class AdminMigrationCommand extends Command
     protected function longtextColumn($table, $model, $key)
     {
         //Text columns
-        if ( $model->isFieldType($key, ['longtext']) )
+        if ( $model->isFieldType($key, ['longtext', 'longeditor']) )
         {
             return $table->longText($key);
         }
