@@ -22,6 +22,9 @@ class AdminRows
         //If is correct relationship id
         if ( count($columns) == 1  )
         {
+            if ( $this->model->hasFieldParam($column, 'belongsToMany') )
+                return false;
+
             if ( $this->model->hasFieldParam($column, 'belongsTo') )
                 return true;
 
@@ -59,12 +62,6 @@ class AdminRows
                     $columns = [ request('column') ];
                 }
 
-                //Remove multi relationship column
-                foreach ($columns as $key => $column)
-                {
-                    if ( $this->model->hasFieldParam($column, 'belongsToMany') )
-                        unset($columns[$key]);
-                }
 
                 //Search scope
                 $query->where(function($builder) use ( $columns, $queries ) {
@@ -83,13 +80,28 @@ class AdminRows
                             else if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
                                 $relation = explode(',', $this->model->getField($column)['belongsTo']);
 
-                                $builder->orWhereHas(rtrim($column, '_id'), function($builder) use( $relation, $queries ) {
+                                $builder->orWhereHas(trim_end($column, '_id'), function($builder) use( $relation, $queries ) {
                                     foreach ($queries as $query){
-                                        foreach ($this->model->getRelationshipNameBuilder($relation[1]) as $key => $selector) {
+                                        foreach ($this->getNamesBuilder($relation) as $key => $selector) {
                                             if ( $selector == 'id' )
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($selector, $query);
+                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
                                             else
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($selector, 'like', '%'.$query.'%');
+                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
+                                        }
+                                    }
+                                });
+                            }
+
+                             else if ( $this->model->hasFieldParam($column, 'belongsToMany') ) {
+                                $relation = explode(',', $this->model->getField($column)['belongsToMany']);
+
+                                $builder->orWhereHas(trim_end($column, '_id'), function($builder) use( $relation, $queries ) {
+                                    foreach ($queries as $query){
+                                        foreach ($this->getNamesBuilder($relation) as $key => $selector) {
+                                            if ( $selector == 'id' )
+                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
+                                            else
+                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
                                         }
                                     }
                                 });
@@ -109,6 +121,17 @@ class AdminRows
         }
 
         return $query;
+    }
+
+    /*
+     * Get all columns from foreign relationships
+     */
+    private function getNamesBuilder($relation)
+    {
+        if ( array_key_exists(1, $relation) )
+            return $this->model->getRelationshipNameBuilder($relation[1]);
+        else
+            return ['id'];
     }
 
     /*

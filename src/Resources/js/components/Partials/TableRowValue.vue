@@ -35,7 +35,7 @@ export default {
         var isReal = this.isRealField(key);
 
         //Check if column can be encoded
-        if ( isReal || this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) == true )
+        if ( isReal && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) == true )
         {
           string = $(document.createElement('div')).text(string).html();
         }

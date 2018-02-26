@@ -31,4 +31,11 @@ if ( ! function_exists('admin') ) {
         return $guard->user();
     }
 }
+
+if ( ! function_exists('trim_end') ) {
+    function trim_end($string, $trim)
+    {
+        return substr($string, -strlen($trim)) == $trim ? substr($string, 0, -strlen($trim)) : $string;
+    }
+}
 ?>

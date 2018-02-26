@@ -258,7 +258,7 @@ trait ModelRelationships
 
                         if ( $properties[0] == $this->getTable() )
                         {
-                            $key_lower = substr($key, -3) == '_id' ? substr($key, 0, -3) : $key;
+                            $key_lower = trim_end($key, '_id');
                             $key_lower = strtolower(str_replace('_', '', $key_lower));
 
                             //Check if actual model name is same with property name in singular mode, but compare just last model convention name
