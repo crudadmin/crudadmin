@@ -598,7 +598,7 @@
         {
           var field = this.model.fields[key];
 
-          if ( 'belongToMany' in field || 'multiple' in field || ( 'removeFromForm' in field && 'hidden' in field ))
+          if ( 'belongToMany' in field || 'multiple' in field || ( 'removeFromForm' in field && 'hidden' in field ) || field.type == 'password' )
             continue;
 
           keys.push(key);

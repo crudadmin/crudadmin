@@ -15,13 +15,13 @@ class AdminsGroup extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Používateľské skupiny';
+    protected $name = 'admin::admin.user-groups';
 
     /*
      * Template title
      * Default ''
      */
-    protected $title = 'Upravte používateľské skupiny do ktorých budu následne priradený administrátori';
+    protected $title = 'admin::admin.user-groups-title';
 
     /*
      * Group
@@ -51,8 +51,8 @@ class AdminsGroup extends AdminModel
      * ... other validation methods from laravel
      */
     protected $fields = [
-        'name' => 'name:Názov skupiny|placeholder:Zadajte názov skupiny|type:string|required|max:90',
-        'models' => 'name:Povolené moduly|type:select|multiple|limit:40',
+        'name' => 'name:admin::admin.user-groups-name|placeholder:admin::admin.user-groups-placeholder|type:string|required|max:90',
+        'models' => 'name:admin::admin.user-groups-modules|type:select|multiple|limit:40',
     ];
 
     public function options()

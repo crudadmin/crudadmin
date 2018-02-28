@@ -24,6 +24,12 @@ return [
     'languages' => 'Jazyková mutácia',
     'change-language' => 'Zmena jazykovej mutácie. Pozor! Zmena jazyka môže zahodiť Vaše aktuálne rozpísane zmeny.',
 
+    'user-groups' => 'Používateľské skupiny',
+    'user-groups-title' => 'Upravte používateľské skupiny a ich obmedzenie, do ktorých budú následne priradený useristrátori',
+    'user-groups-name' => 'Názov skupiny',
+    'user-groups-placeholder' => 'Zadajte názov skupiny',
+    'user-groups-modules' => 'Povolené moduly',
+
     'show' => 'Zobraziť',
     'show-image' => 'Zobraziť obrázok',
     'download' => 'Stiahnuť',

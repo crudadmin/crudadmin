@@ -7,12 +7,12 @@ return [
     'welcome-in-admin' => 'Vítejte v administraci',
 
     'admin-user' => 'Administrátor',
-    'auto-logout' => 'Byli jste automatický odhlášeni. Prosím, znovu se přihlaste.',
+    'auto-logout' => 'Byli jste automaticky odhlášeni. Prosím, přihlaste se znovu.',
     'unknown-error' => 'Nastala nečekaná chyba, zkuste později prosím.',
 
     'navigation' => 'Navigace',
     'language-mutation' => 'Jazykové verze',
-    'language-title' => 'Upravte si nastavení jazykových mutaci. Také si nastavte výchozí jazyk umístěním jazyka na první pozici.',
+    'language-title' => 'Upravte si nastavení jazykových mutací. Také si nastavte výchozí jazyk umístěním jazyka na první pozici.',
     'languages-add-new' => 'Přidat nový jazyk',
     'languages-update' => 'Editujete jazyk: name',
     'languages-name' => 'Název jazyka',
@@ -23,6 +23,12 @@ return [
     'languages-mo-name' => 'Překlad .mo souboru pro Poedit',
     'languages' => 'Jazykové mutace',
     'change-language' => 'Změna jazykové mutace. Pozor! Změna jazyka může zahodit Vaše aktuální rozepsané změny.',
+
+    'user-groups' => 'Uživatelské skupiny',
+    'user-groups-title' => 'Upravte uživatelské skupiny a jejich omezení',
+    'user-groups-name' => 'Název skupiny',
+    'user-groups-placeholder' => 'Zadejte název skupiny',
+    'user-groups-modules' => 'Povolené moduly',
 
     'show' => 'Zobrazit',
     'show-image' => 'Zobrazit obrázek',
@@ -49,14 +55,14 @@ return [
     'row-info' => 'Informace o záznamu',
     'row-info-n' => 'Informace o záznamu č.',
     'no-changes' => 'V aktuálním záznamu nebyly provedeny žádné změny.',
-    'delete-warning' => 'Opravdu chcete smazat dany záznam?',
+    'delete-warning' => 'Opravdu chcete smazat vybraný záznam?',
 
     'cannot-create' => 'Nelze přidat nový záznam.',
-    'cannot-edit' => 'Tento záznam nelze upravovat.',
+    'cannot-edit' => 'Tento záznam nelze upravit.',
     'cannot-delete' => 'Tento záznam nelze smazat.',
-    'cannot-publish' => 'Tento záznam nelze znepublikovať.',
-    'cannot-sort' => 'Tento záznam nelze přesouvat.',
-    'success-created' => 'Záznam byl úspěšně přidaný.',
+    'cannot-publish' => 'Tomunto záznamu nelze zrušit publikování.',
+    'cannot-sort' => 'Tento záznam nelze přesunout.',
+    'success-created' => 'Záznam byl úspěšně přidán.',
     'success-save' => 'Záznam byl úspěšně uložen',
     'with-errors' => 's následujícími chybami',
 
@@ -81,7 +87,7 @@ return [
     'no-option' => 'Žádná možnost',
 
     'edit-size' => 'Upravte šířku zobrazení formuláře pro přehlednější zobrazení záznamů',
-    'search' => 'Vyhledejte',
+    'search' => 'Vyhledat',
     'search-all' => 'Hledat všude',
     'get-value' => 'Vyberte hodnotu',
     'on' => 'Vypnuto',
@@ -91,12 +97,12 @@ return [
 
     'rows-count' => 'Počet záznamů v tabulce',
     'show-all' => 'Zobrazit vše',
-    'confirmation' => 'Ověření znovu',
+    'confirmation' => 'Znovu ověření',
 
     'success-save' => 'Změny byly úspěšně uloženy',
-    'no-permissions' => 'nemá pravomoc na přistoupení do te sekcím.',
-    'migrate-error' => 'Nastala Nečekané chyba, pravděpodobně jste nespustili migracím Modelové pomocí příkazu:',
-    'db-error' => 'Nastala Nečekané chyba. Váš administrátor pravděpodobně zapomněl aktualizovat databázi. Pokud tato chyba přetrvává, kontaktujte ho. ',
+    'no-permissions' => 'Pro přístup do tohoto modulu nemáte dostatečné oprávnění.',
+    'migrate-error' => 'Nastala neočekávaná chyba, pravděpodobně jste nespustili migracím Modelové pomocí příkazu:',
+    'db-error' => 'Nastala neočekávaná chyba. Váš administrátor pravděpodobně zapomněl aktualizovat databázi. Pokud tato chyba přetrvává, kontaktujte ho. ',
     'row-error' => 'Záznam neexistuje, pravděpodobně již byl vymazán.',
 
     'login' => 'Přihlásit se',
