@@ -214,7 +214,7 @@ class File
         }
 
         //Save image into cache folder
-        $image->save( $filepath );
+        $image->save( $filepath, 70 );
 
         if ( $return_object )
             return $image;

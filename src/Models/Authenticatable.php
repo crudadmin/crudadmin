@@ -40,7 +40,7 @@ class Authenticatable extends Model implements
     protected $sortable = false;
 
     /*
-     * Enable publishing rows
+     * Disable publishing rows
      */
     protected $publishable = false;
 
@@ -48,6 +48,14 @@ class Authenticatable extends Model implements
      * Guard for authentification model
      */
     protected $guard = 'web';
+
+    public function __construct(array $attributes = [])
+    {
+        if ( Admin::isFrontend() )
+            $this->publishable = false;
+
+        parent::__construct($attributes);
+    }
 
     /*
      * Get all allowed models from all groups which user owns

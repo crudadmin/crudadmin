@@ -61,7 +61,7 @@ trait AdminModelTrait
     {
         $force_check_relation = false;
 
-        //If is called field type file, then return file wrapper
+        // //If is called field type file, then return file wrapper
         if ( ($field = $this->getField($key)) || ($field = $this->getField($key . '_id')) )
         {
             //Register file type response
@@ -99,8 +99,8 @@ trait AdminModelTrait
             }
         }
 
-        //Register this offen called properties for better performance
-        else if ( in_array($key, ['id', 'slug', 'created_at', 'published_at', 'deleted_at']) ) {
+        // //Register this offen called properties for better performance
+        else if ( in_array($key, ['id', 'slug', 'created_at', 'published_at', 'deleted_at', 'pivot']) ) {
             if ( $key != 'slug' || $this->sluggable == true && $key == 'slug' )
                 return parent::__get($key);
         }
@@ -116,7 +116,7 @@ trait AdminModelTrait
             $force_check_relation = true;
         }
 
-        //Checks for relationship
+        // //Checks for relationship
         if ($force_check_relation === true || !property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) )
         {
             //If relations has been in buffer, but returns nullable value
