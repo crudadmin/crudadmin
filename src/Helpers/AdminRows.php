@@ -80,9 +80,9 @@ class AdminRows
                             else if ( $this->model->hasFieldParam($column, 'belongsTo') ) {
                                 $relation = explode(',', $this->model->getField($column)['belongsTo']);
 
-                                $builder->orWhereHas(trim_end($column, '_id'), function($builder) use( $relation, $queries ) {
+                                $builder->orWhereHas(trim_end($column, '_id'), function($builder) use( $columns, $relation, $queries ) {
                                     foreach ($queries as $query){
-                                        foreach ($this->getNamesBuilder($relation) as $key => $selector) {
+                                        foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
                                             if ( $selector == 'id' )
                                                 $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
                                             else
@@ -95,9 +95,9 @@ class AdminRows
                              else if ( $this->model->hasFieldParam($column, 'belongsToMany') ) {
                                 $relation = explode(',', $this->model->getField($column)['belongsToMany']);
 
-                                $builder->orWhereHas(trim_end($column, '_id'), function($builder) use( $relation, $queries ) {
+                                $builder->orWhereHas(trim_end($column, '_id'), function($builder) use( $columns, $relation, $queries ) {
                                     foreach ($queries as $query){
-                                        foreach ($this->getNamesBuilder($relation) as $key => $selector) {
+                                        foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
                                             if ( $selector == 'id' )
                                                 $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
                                             else
@@ -126,9 +126,9 @@ class AdminRows
     /*
      * Get all columns from foreign relationships
      */
-    private function getNamesBuilder($relation)
+    private function getNamesBuilder($relation, $columns = [])
     {
-        if ( array_key_exists(1, $relation) )
+        if ( array_key_exists(1, $relation) && count($columns) > 1 )
             return $this->model->getRelationshipNameBuilder($relation[1]);
         else
             return ['id'];

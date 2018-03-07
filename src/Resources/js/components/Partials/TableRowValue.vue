@@ -107,8 +107,7 @@ export default {
           } else if ( this.model.fields[field].type == 'checkbox' )
           {
             return row[field] == 1 ? this.trans('yes') : this.trans('no');
-          } else if ( this.model.fields[field].type )
-            return row[field];
+          }
         }
 
         var add_before = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_before'),

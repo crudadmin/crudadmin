@@ -202,7 +202,7 @@
        * Check if tabs is model type
        */
       isModel(tab){
-        if ( !(tab.type == 'tab' && tab.model) )
+        if ( !(tab.type == 'tab' && tab.model && this.getModel(tab.model).active == true) )
           return false;
 
         return this.isOpenedRow || this.getModel(tab.model).without_parent == true;

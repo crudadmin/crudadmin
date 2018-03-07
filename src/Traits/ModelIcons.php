@@ -69,6 +69,7 @@ trait ModelIcons
             'contractor' => 'fa-handshake-o',
             'pricing' => 'fa-sliders',
             'country' => 'fa-flag',
+            'review' => 'fa-commenting-o',
         ];
     }
 

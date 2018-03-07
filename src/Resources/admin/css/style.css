@@ -92,7 +92,9 @@
 .form-group input.js_date { background: white }
 .form-group textarea.js_editor { display: block;min-height: 321px;width: 100%;opacity: 0.2;padding: 10px; }
 .form-group small { color: #555; }
+.form-group.disabled > label { opacity: 0.5; }
 
+table.table.sortable tr { user-select: auto; }
 table.table.sortable tr[draggable="true"] { cursor: move; }
 table.table td.image_field {padding: 0 1px;}
 table.table td.image_field img {height: 46px;transition: 0.2s all ease-in-out;}

@@ -458,10 +458,29 @@
         if ( i == 0 || i == max )
           return true;
 
-        var offset = this.pagination.position < (this.pagination.maxpages/2) ? (this.pagination.maxpages/2) - this.pagination.position : 0,
-            offset = max - this.pagination.position < ( this.pagination.maxpages / 2 ) ? (this.pagination.maxpages/2) - (max - this.pagination.position) : offset;
+        //Middle range
+        var radius = 3,
+            interval = [[100, 0.3], [100, 0.7], [1000, 0.1], [1000, 0.85]],
+            in_middle_active = 0;
 
-        if ( this.pagination.position - offset >= i + (this.pagination.maxpages/2) || this.pagination.position <= i - (this.pagination.maxpages/2) - offset)
+        for (var a = 0; a < interval.length; a++) {
+          if ( max > interval[a][0] )
+          {
+            var level = parseInt(max * interval[a][1]);
+            if ( i >= level && i <= level + radius )
+              return true;
+
+            in_middle_active++;
+          }
+        }
+
+        var maxpages = this.pagination.maxpages - (in_middle_active * radius),
+            maxpages = maxpages < 6 ? 6 : maxpages;
+
+        var offset = this.pagination.position < (maxpages/2) ? (maxpages/2) - this.pagination.position : 0,
+            offset = max - this.pagination.position < ( maxpages / 2 ) ? (maxpages/2) - (max - this.pagination.position) : offset;
+
+        if ( this.pagination.position - offset >= i + (maxpages/2) || this.pagination.position <= i - (maxpages/2) - offset)
           return false;
 
         return true;

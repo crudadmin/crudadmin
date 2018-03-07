@@ -1,28 +1,28 @@
 <template>
   <div v-bind:class="{ 'is-changed-from-history' : isChangedFromHistory }">
     <!-- STRING INPUT -->
-    <div class="form-group" v-if="isString || isPassword">
+    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
-    <div class="form-group" v-if="isInteger">
+    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATETIME INPUT -->
-    <div class="form-group" v-if="isDatepicker">
+    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- Checkbox INPUT -->
-    <div class="form-group" v-if="isCheckbox">
+    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
       <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
         <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
@@ -32,14 +32,14 @@
     </div>
 
     <!-- TEXT INPUT -->
-    <div class="form-group" v-if="isText || isEditor">
+    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
       <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
     <!-- FILE INPUT -->
-    <div class="form-group" v-if="isFile">
+    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="file-group">
@@ -75,8 +75,8 @@
       :confirmation="true"></form-input-builder>
 
     <!-- SELECT INPUT -->
-    <div class="form-group" v-if="isSelect">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+    <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
+      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
       <div :class="{ 'can-add-select' : canAddRow }">
         <select v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
           <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
@@ -86,6 +86,8 @@
         <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
       </div>
       <small>{{ field.title }}</small>
+      <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+key" value="1">
+
 
       <!-- Modal for adding relation -->
       <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
@@ -633,7 +635,11 @@
           return [ value ];
         },
         isRequired(){
-            return 'required' in this.field && this.field.required == true;
+          return 'required' in this.field && this.field.required == true;
+        },
+        isRequiredIfHasValues()
+        {
+          return 'required_with_values' in this.field && this.field.required_with_values == true;
         },
         /*
          If is selected row, which not belongs to selected language,
@@ -696,6 +702,9 @@
         canAddRow(){
           return this.field.canAdd === true && this.hasparentmodel !== false && (!this.getFilterBy || this.filterBy);
         },
+        hasNoFilterValues(){
+          return this.getFilterBy && (!this.filterBy || this.fieldOptions.length == 0);
+        }
       },
   }
 </script>

@@ -55,6 +55,28 @@ class AdminsGroup extends AdminModel
         'models' => 'name:admin::admin.user-groups-modules|type:select|multiple|limit:40',
     ];
 
+    /*
+     * Build models tree by relationship parents
+     */
+    private function buildModelTree($model, $tree = [])
+    {
+        $parents = $model->getBelongsToRelation();
+        $parents_basename = $model->getBelongsToRelation(true);
+
+        //If has no more levels, or is recursive model
+        if ( count($parents) == 0 || in_array(class_basename(get_class($model)), $parents_basename) ){
+            $tree[] = $model->getProperty('name');
+
+            return implode(' > ', array_reverse($tree));
+        }
+
+        $parent = new $parents[0];
+
+        $tree[] = $model->getProperty('name');
+
+        return $this->buildModelTree($parent, $tree);
+    }
+
     public function options()
     {
         $models = Admin::getAdminModelsPaths();
@@ -66,8 +88,12 @@ class AdminsGroup extends AdminModel
             $model = new $path;
 
             if ( $model->getProperty('active') === true )
-                $options[ $path ] = $model->getProperty('name');
+                $options[ $path ] = $this->buildModelTree($model, []);
         }
+
+        setlocale(LC_COLLATE, 'sk_SK.utf8');
+
+        uasort($options, 'strcoll');
 
         return [
             'models' => $options,

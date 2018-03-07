@@ -11,7 +11,7 @@ use Ajax;
 
 class AddSelectSupport extends MutationRule
 {
-    public $attributes = ['options', 'multiple', 'default', 'filterBy'];
+    public $attributes = ['options', 'multiple', 'default', 'filterBy', 'required_with_values'];
 
     /*
      * If has key in admin buffer, returns data from buffer, if has not, then get data from database and save into buffer

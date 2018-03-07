@@ -14,7 +14,7 @@ return [
     'language-mutation' => 'Jazykové verze',
     'language-title' => 'Upravte si nastavení jazykových mutací. Také si nastavte výchozí jazyk umístěním jazyka na první pozici.',
     'languages-add-new' => 'Přidat nový jazyk',
-    'languages-update' => 'Editujete jazyk: name',
+    'languages-update' => 'Editujete jazyk :name',
     'languages-name' => 'Název jazyka',
     'languages-title' => 'Zadejte název jazyka',
     'languages-prefix' => 'Zkratka jazyka',
