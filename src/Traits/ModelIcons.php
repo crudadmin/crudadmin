@@ -70,6 +70,7 @@ trait ModelIcons
             'pricing' => 'fa-sliders',
             'country' => 'fa-flag',
             'review' => 'fa-commenting-o',
+            'office' => 'fa-building',
         ];
     }
 

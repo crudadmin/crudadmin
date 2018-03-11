@@ -14,7 +14,7 @@
         </tr>
       </thead>
       <tbody data-model="{{ model.slug }}">
-        <tr v-for="(key, item) in rowsdata" data-index="{{ item.id }}" v-bind:v-drag-and-drop="model.sortable === true" drag-start="beforeUpdateOrder" drop="updateOrder">
+        <tr v-for="(key, item) in rowsdata" data-index="{{ item.id }}" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
 
           <td v-for="(field, name) in columns" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
             <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
@@ -154,6 +154,10 @@
               }
             }
           }
+
+          //Remove increments
+          if ( this.$root.getModelProperty(this.model, 'settings.increments') === false && 'id' in data )
+            delete data['id'];
 
           return data;
         },
