@@ -24,9 +24,8 @@
             <div><button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" :data-original-title="trans('edit')"><i class="fa fa-pencil"></i></button></div>
             <div><button type="button" v-if="isEnabledHistory" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
             <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('row-info')"><i class="fa fa-info"></i></button></div>
-
             <div v-for="(button_key, button) in getButtonsForRow(item)">
-              <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button.icon]"></i></button>
+              <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]"></i></button>
             </div>
             <div><button type="button" v-if="model.publishable" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" data-original-title="{{ item.published_at ? trans('hide') : trans('show') }}"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
             <div><button type="button" v-if="model.deletable && count > model.minimum" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" :class="{ disabled : isReservedRow(item) }" data-toggle="tooltip" title="" :data-original-title="trans('delete')"><i class="fa fa-remove"></i></button></div>
@@ -50,6 +49,7 @@
         return {
           hidden: ['language_id', '_order', 'slug', 'published_at', 'updated_at', 'created_at'],
           autoSize : false,
+          button_loading : false,
         };
       },
 
@@ -195,8 +195,13 @@
             return this.rows.buttons[item.id];
           }
         },
+        getButtonKey(id, key){
+          return id + '-' + key;
+        },
         buttonAction(key, button, row){
           var _this = this;
+
+          this.button_loading = this.getButtonKey(row.id, key);
 
           this.$http.post( this.$root.requests.buttonAction, {
               model : this.model.slug,
@@ -208,6 +213,8 @@
               language_id : this.model.localization === true ? this.$parent.langid : 0,
               button_id : key,
           }).then(function(response){
+            this.button_loading = false;
+
             var data = response.data;
 
             //Load rows into array
@@ -232,6 +239,8 @@
               return this.$root.openAlert(data.title, data.message, data.type);
             }
           }).catch(function(response){
+            this.button_loading = false;
+
             console.log(response);
             this.$root.errorResponseLayer(response);
           });

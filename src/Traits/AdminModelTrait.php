@@ -767,9 +767,9 @@ trait AdminModelTrait
     /*
      * Save actual model row into history
      */
-    public function historySnapshot($request)
+    public function historySnapshot($request, $original = null)
     {
-        return (new ModelsHistory)->pushChanges($this, $request);
+        return (new ModelsHistory)->pushChanges($this, $request, $original);
     }
 
 

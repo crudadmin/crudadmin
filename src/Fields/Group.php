@@ -69,6 +69,14 @@ class Group
     }
 
     /*
+     * Make group with half of width in grid
+     */
+    public static function third(array $fields)
+    {
+        return (new static($fields))->width(4)->type();
+    }
+
+    /*
      * Set id of group
      */
     public function id($id)

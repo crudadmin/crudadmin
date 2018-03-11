@@ -122,7 +122,7 @@ class DataController extends Controller
          * Save into hustory
          */
         if ( $model->getProperty('history') === true )
-            $row->historySnapshot($changes);
+            $row->historySnapshot($changes, $original);
 
         $this->updateBelongsToMany($model, $row);
 

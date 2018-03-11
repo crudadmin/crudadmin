@@ -108,9 +108,16 @@ class ModelsHistory extends Model
     /*
      * Compare by last change
      */
-    public function checkChanges($model, $data)
+    public function checkChanges($model, $data, $original = null)
     {
         $old_data = $model->getHistorySnapshot();
+
+        //If row is editted, but does not exists in db history, then create his initial/original value, and changed value
+        if ( is_array($original) && count($old_data) == 0 ){
+            $model->historySnapshot($original);
+
+            $old_data = $original;
+        }
 
         $changes = [];
 
@@ -143,7 +150,7 @@ class ModelsHistory extends Model
     /*
      * Save changes into history
      */
-    public function pushChanges($model, $data)
+    public function pushChanges($model, $data, $original = null)
     {
         foreach (['_id', '_order', '_method', '_model', 'language_id'] as $key) {
             if ( array_key_exists($key, $data) )
@@ -154,7 +161,7 @@ class ModelsHistory extends Model
         $data = $this->convertData($model, $data);
 
         //Compare and get new changes
-        $data = $this->checkChanges($model, $data);
+        $data = $this->checkChanges($model, $data, $original);
 
         //If no changes
         if ( count($data) == 0 )

@@ -309,7 +309,8 @@ class AdminRows
                     $this->checkForSearching($query, $this->model);
 
                     //Paginate rows
-                    $this->paginateRecords($query, $limit, $page, $count);
+                    if ( $id == false )
+                        $this->paginateRecords($query, $limit, $page, $count);
                 }, $parent_table );
 
                 $all_rows_data = $this->model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
