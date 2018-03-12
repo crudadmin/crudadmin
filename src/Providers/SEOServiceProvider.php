@@ -34,7 +34,7 @@ class SEOServiceProvider extends ServiceProvider {
         /*
          * Create directives for setting an SEO property
          */
-        foreach (['title', 'description', 'keywords', 'image'] as $key)
+        foreach (['title', 'description', 'keywords', 'image', 'author'] as $key)
         {
             Blade::directive($key, function ($value) use ($key) {
                 return "<?php SEO::set('$key', $value) ?>";

@@ -131,6 +131,18 @@ class SEO
     }
 
     /*
+     * Return page title
+     */
+    public function getAuthor($default = null)
+    {
+        $author = $this->getDefault('author', $default);
+
+        $author = $this->get('author', $author);
+
+        return $author;
+    }
+
+    /*
      * Return page description
      */
     public function getDescription()
@@ -194,7 +206,7 @@ class SEO
             '<meta name="keywords" content="'.e(SEO::getKeywords()).'">',
             '',
             '<!-- Hello, -->',
-            '<meta name="author" content="'.e($this->getDefault('author', 'Marek Gogoľ - marekgogol.sk')).'">',
+            '<meta name="author" content="'.e(SEO::getAuthor('Marek Gogoľ - marekgogol.sk')).'">',
             '',
             '<meta property="og:title" content="'.e(SEO::getTitle()).'">',
             '<meta property="og:description" content="'.e(SEO::getDescription()).'">',
