@@ -40,6 +40,7 @@ return [
     'history.who' => 'Changes done',
     'history.count' => 'Number of Changes',
     'history.date' => 'Change date',
+    'history.system' => 'System',
 
     'close' => 'Close',
     'accept' => 'Confirm',

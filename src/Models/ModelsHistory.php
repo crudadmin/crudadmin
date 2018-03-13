@@ -114,7 +114,7 @@ class ModelsHistory extends Model
 
         //If row is editted, but does not exists in db history, then create his initial/original value, and changed value
         if ( is_array($original) && count($old_data) == 0 ){
-            $model->historySnapshot($original);
+            $this->pushChanges($model, $original, null, true);
 
             $old_data = $original;
         }
@@ -150,7 +150,7 @@ class ModelsHistory extends Model
     /*
      * Save changes into history
      */
-    public function pushChanges($model, $data, $original = null)
+    public function pushChanges($model, $data, $original = null, $initial = false)
     {
         foreach (['_id', '_order', '_method', '_model', 'language_id'] as $key) {
             if ( array_key_exists($key, $data) )
@@ -167,14 +167,24 @@ class ModelsHistory extends Model
         if ( count($data) == 0 )
             return;
 
-        $user = auth()->guard('web')->user();
+        if ( $initial === false )
+            $user = auth()->guard('web')->user();
 
-        return $this->create([
-            'user_id' => $user ? $user->getKey() : null,
+        $snap = [
+            'user_id' => ! $initial && $user ? $user->getKey() : null,
             'table' => $model->getTable(),
             'row_id' => $model->getKey(),
             'data' => json_encode($data),
-        ]);
+        ];
+
+        //If is initial value
+        if ( $initial === true )
+            $snap += [ 'created_at' => $model->created_at ];
+
+        $row = $this->newInstance()->forceFill($snap);
+        $row->save();
+
+        return $row;
     }
 
     public function toArray()

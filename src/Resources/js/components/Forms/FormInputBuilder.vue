@@ -242,7 +242,7 @@
           if ( no_field != true )
             this.field.value = value;
 
-          this.$set('row.' + this.key, value)
+          this.$set('row.' + this.key, value);
         },
         /*
          * Apply on change events into selectbox

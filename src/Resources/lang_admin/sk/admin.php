@@ -40,6 +40,7 @@ return [
     'history.who' => 'Zmeny vykonal',
     'history.count' => 'Počet zmien',
     'history.date' => 'Dátum zmeny',
+    'history.system' => 'Systém',
 
     'close' => 'Zatvoriť',
     'accept' => 'Potvrdiť',

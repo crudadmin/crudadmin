@@ -22,7 +22,7 @@
 
       <div class="box-footer" v-if="cansave">
         <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
-        <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? trans('save') : trans('send') }}</button>
+        <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? saveButton : sendButton }}</button>
       </div>
 
     </div>
@@ -110,6 +110,12 @@
       newRowTitle(){
         return this.$parent.newRowTitle();
       },
+      saveButton(){
+        return this.$root.getModelProperty(this.model, 'settings.buttons.update') || this.trans('save');
+      },
+      sendButton(){
+        return this.$root.getModelProperty(this.model, 'settings.buttons.create') || this.trans('send');
+      }
     },
 
     methods: {

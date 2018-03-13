@@ -26,7 +26,7 @@
                     <tbody>
                       <tr v-for="item in history.rows | orderBy 'id' -1">
                         <td class="td-id">{{ history.rows.length - $index }}</td>
-                        <td>{{ item.user ? item.user.username : 'Anonym' }}</td>
+                        <td>{{ item.user ? item.user.username : trans('history.system') }}</td>
                         <td>
                           <span data-toggle="tooltip" title="" :data-original-title="changedFields(item)">{{ item.changed_fields.length }} <i class="fa fa-eye"></i></span>
                         </td>
