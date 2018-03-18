@@ -50,4 +50,10 @@ return [
         'datetime' => 'date_format:d.m.Y H:i|nullable',
         'time' => 'date_format:H:i|nullable',
     ],
+
+    /*
+     * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel
+     * Default none, for feature laravel HashServiceProvider need's to be replaced instead of admin provider...
+     */
+    'passwords' => [],
 ];

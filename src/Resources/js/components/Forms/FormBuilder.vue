@@ -125,10 +125,14 @@
       //Resets form values and errors
       initForm(row, reset){
         //Resets document values of elements
-        //can be reseted just when ich changed row for other, or inserting new row
+        //can be reseted just when is changed row for other, or inserting new row
         if ( reset !== false )
         {
           this.form.resetForm();
+
+          for ( var key in this.model.fields ){
+            this.$set('model.fields.'+key+'.value', null);
+          }
         }
 
         this.resetErrors();
@@ -145,7 +149,7 @@
 
         for ( var key in this.model.fields )
         {
-          if ( ! row || this.model.fields[key].value != row[key] )
+          if ( ! row || this.model.fields[key].value != row[key] || reset )
           {
             var value = row ? row[key] : null;
 

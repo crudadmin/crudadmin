@@ -94,6 +94,7 @@
 .form-group small { color: #555; }
 .form-group.disabled > label { opacity: 0.5; }
 
+table.table th:not(.th-options-buttons) { cursor: pointer; }
 table.table.sortable tr { user-select: auto; }
 table.table.sortable tr[draggable="true"] { cursor: move; }
 table.table td.image_field {padding: 0 1px;}
@@ -333,6 +334,7 @@ button.enabled-history:hover, button.enabled-history:focus, button.enabled-histo
 /*
  * Tabs
  */
+.nav-tabs-custom > .nav-tabs > li > a {cursor: pointer;}
 .nav-tabs-custom > .nav-tabs > li.has-error {border-top-color: #dd4939;}
 .nav-tabs-custom > .nav-tabs > li.has-error i {margin-left: -1px;}
 .nav-tabs-custom > .nav-tabs > li.has-error i.fa-exclamation-triangle ~ i {display: none}

@@ -1,0 +1,36 @@
+<template>
+    <div class="form-group">
+        <label>{{ field.name }}</label>
+
+        <input type="text" :name="key" v-model="value" placeholder="Wohoo,,, this is my first custom component field!!" class="form-control">
+
+        <ul>
+            <li>This is my first custom component for field <strong>{{ field.name }}</strong>, with <strong>{{ value || 'empty' }}</strong> value.</li>
+            <li>Is this field required? <strong>{{ field.required ? 'Yes' : 'No' }}</strong></li>
+            <li>For other field properties check <strong>field</strong> property</li>
+        </ul>
+    </div>
+</template>
+
+<script type="text/javascript">
+export default {
+    props : ['key', 'value', 'field', 'row'],
+
+    data(){
+        return {
+
+        }
+    },
+
+    ready(){
+        console.log('Your field component is ready!!', this.key, this.row, this.field);
+
+        /*
+         * You can watch actual field value, or other form fields in row variable
+         */
+        this.$watch('row.' + this.key, function(value){
+            console.log(value);
+        });
+    }
+}
+</script>

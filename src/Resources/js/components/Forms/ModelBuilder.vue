@@ -155,8 +155,9 @@
           fields : [],
         },
 
-        //Additional layouts for model
+        //Additional layouts/components for model
         layouts : [],
+        components : [],
 
         language_id : null,
 

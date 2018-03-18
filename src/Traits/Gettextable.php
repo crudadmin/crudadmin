@@ -58,4 +58,21 @@ trait Gettextable
         else if ( $this->original['slug'] != $value )
             Admin::push('errors', 'Skratku jazyka nie je možné po jej vytvorení premenovať.');
     }
+
+    /*
+     * Add additional conditional fields
+     */
+    public function mutateFields($fields)
+    {
+        /*
+         * Checks for gettext support
+         */
+        if ( config('admin.gettext') !== true )
+            return;
+
+        $fields->push([
+            'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|required_with:poedit_mo',
+            'poedit_mo' => 'name:admin::admin.languages-mo-name|type:file|max:1024|hidden|extensions:mo|required_with:poedit_po',
+        ]);
+    }
 }

@@ -24,6 +24,8 @@ return [
     'languages' => 'Jazykové mutace',
     'change-language' => 'Změna jazykové mutace. Pozor! Změna jazyka může zahodit Vaše aktuální rozepsané změny.',
 
+    'super-admin' => 'Super administrátor',
+    'admin-group' => 'Administrátorska skupina',
     'user-groups' => 'Uživatelské skupiny',
     'user-groups-title' => 'Upravte uživatelské skupiny a jejich omezení',
     'user-groups-name' => 'Název skupiny',
@@ -105,6 +107,7 @@ return [
     'migrate-error' => 'Nastala neočekávaná chyba, pravděpodobně jste nespustili migracím Modelové pomocí příkazu:',
     'db-error' => 'Nastala neočekávaná chyba. Váš administrátor pravděpodobně zapomněl aktualizovat databázi. Pokud tato chyba přetrvává, kontaktujte ho. ',
     'row-error' => 'Záznam neexistuje, pravděpodobně již byl vymazán.',
+    'component-missing' => 'Komponenta s názvem <strong>%s</strong> pro vstup <strong>%s</strong> nebyl nalezen.',
 
     'login' => 'Přihlásit se',
     'password' => 'Heslo',

@@ -45,23 +45,12 @@ class User extends Authenticatable
      */
     protected function fields($row)
     {
-        $fields = [
+        return [
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
             'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:30|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
             'password' => 'name:Heslo|type:password|confirmed|min:4|max:40'.( ! isset($row) ? '|required' : '|nullable' ),
             'avatar' => 'name:Profilová fotografia|type:file|image',
             'enabled' => 'name:Aktívny|type:checkbox|default:1',
         ];
-
-        /*
-         * If is enabled admin groups
-         */
-        if ( config('admin.admin_groups') === true )
-        {
-            $fields['permissions'] = 'name:Super administrátor|type:checkbox|default:0';
-            $fields['admins_groups'] = 'name:Administrátorska skupina|belongsToMany:admins_groups,name';
-        }
-
-        return $fields;
     }
 }

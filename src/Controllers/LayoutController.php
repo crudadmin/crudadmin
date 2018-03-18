@@ -23,7 +23,7 @@ class LayoutController extends BaseController
             'version_assets' => Admin::getAssetsVersion(),
             'license_key' => config('admin.license_key'),
             'user' => auth()->guard('web')->user()->getAdminUser(),
-            'models' => $this->getAppTree(),
+            'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
             'localization' => trans('admin::admin'),
             'requests' => [
@@ -139,7 +139,7 @@ class LayoutController extends BaseController
      * Returns full app tree
      * @return [array]
      */
-    public function getAppTree()
+    public function getAppTree($initial_request = false)
     {
         $models = Admin::getAdminModels();
 
@@ -153,7 +153,7 @@ class LayoutController extends BaseController
             if ( $this->skipModelInTree($model) )
                 continue;
 
-            $page = $this->makePage($model);
+            $page = $this->makePage($model, null, true, $initial_request);
 
             if ( $model->hasModelGroup() )
             {
@@ -191,7 +191,15 @@ class LayoutController extends BaseController
         return $this->addSlugPath( $groups );
     }
 
-    protected function makePage($model, $data = null, $withChilds = true)
+    /**
+     * Return build model JSON instance
+     * @param  object  $model          model instance
+     * @param  object  $data           additional data for request
+     * @param  boolean $withChilds     return all model childs
+     * @param  boolean $layout_request if is first request for admin boot
+     * @return json
+     */
+    protected function makePage($model, $data = null, $withChilds = true, $initial_request = false)
     {
         $childs_models = $model->getModelChilds();
 
@@ -232,10 +240,11 @@ class LayoutController extends BaseController
             'sortable' => $model->isSortable(),
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
-            'fields' => $this->getModelFields( $model ),
+            'fields' => $this->getModelFields($model),
             'fields_groups' => Group::build($model),
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
+            'components' => $model->getFieldsComponents($initial_request),
             'submenu' => [],
         ]);
     }

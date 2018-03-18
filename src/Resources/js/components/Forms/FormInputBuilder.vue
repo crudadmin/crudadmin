@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="{ 'is-changed-from-history' : isChangedFromHistory }">
+  <div v-if="!hasComponent" v-bind:class="{ 'is-changed-from-history' : isChangedFromHistory }">
     <!-- STRING INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
@@ -131,9 +131,22 @@
       <small>{{ field.title }}</small>
     </div>
   </div>
+
+  <component
+    v-else
+    :model="model"
+    :field="field"
+    :history_changed="isChangedFromHistory"
+    :row="row"
+    :key="key"
+    :value.sync="field.value"
+    :is="componentName">
+  </component>
 </template>
 
 <script>
+  var Vue = require('vue');
+
   import File from '../Partials/File.vue';
   import ModelBuilder from './ModelBuilder.vue';
 
@@ -157,10 +170,20 @@
          * Fix for double recursion in VueJS
          */
         this.$options.components['model-builder'] = Vue.extend(ModelBuilder);
+
+        this.registerComponents();
       },
 
       ready()
       {
+        //If this field has own component
+        if ( this.hasComponent ){
+
+          this.updateValueOnChange();
+
+          return;
+        }
+
         this.bindDatepickers();
 
         this.bindFilters();
@@ -197,6 +220,26 @@
       },
 
       methods : {
+        updateValueOnChange(){
+          this.$watch('field.value', function(value){
+            this.$set('row.' + this.key, value);
+          });
+        },
+        registerComponents(){
+          if ( !('component' in this.field) )
+            return;
+
+          var data = this.model.components[this.componentName];
+
+          try {
+              var obj = (new Function('return '+data))();
+          } catch(error){
+            console.error('Syntax error in component ' + this.componentName + '.Vue' + "\n", error);
+            return;
+          }
+
+          Vue.component(this.componentName, obj);
+        },
         newTitleRow(){
           return this.$root.getModelProperty(this.getRelationModel, 'settings.title.insert', this.trans('new-row'));
         },
@@ -431,6 +474,15 @@
             }
           }
         },
+        //Get parent model builder
+        getModelBuilder(){
+          var modelBuilder = this.$parent;
+
+          while(modelBuilder.$options.name != 'model-builder')
+            modelBuilder = modelBuilder.$parent;
+
+          return modelBuilder;
+        },
       },
 
       computed : {
@@ -478,9 +530,7 @@
         getId()
         {
           //Get parent model builder
-          var modelBuilder = this.$parent;
-          while(modelBuilder.$options.name != 'model-builder')
-            modelBuilder = modelBuilder.$parent;
+          var modelBuilder = this.getModelBuilder();
 
           parent = modelBuilder.getParentTableName(this.model.withoutParent == true);
 
@@ -583,6 +633,15 @@
         getDateFormat()
         {
           return this.field.date_format;
+        },
+        hasComponent(){
+          return 'component' in this.field && this.field.component;
+        },
+        componentName(){
+          if ( ! this.hasComponent )
+            return;
+
+          return this.field.component.toLowerCase();
         },
         getValueOrDefault()
         {

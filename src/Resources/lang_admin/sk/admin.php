@@ -24,6 +24,8 @@ return [
     'languages' => 'Jazyková mutácia',
     'change-language' => 'Zmena jazykovej mutácie. Pozor! Zmena jazyka môže zahodiť Vaše aktuálne rozpísane zmeny.',
 
+    'super-admin' => 'Super administrátor',
+    'admin-group' => 'Administrátorska skupina',
     'user-groups' => 'Používateľské skupiny',
     'user-groups-title' => 'Upravte používateľské skupiny a ich obmedzenie, do ktorých budú následne priradený useristrátori',
     'user-groups-name' => 'Názov skupiny',
@@ -105,6 +107,7 @@ return [
     'migrate-error' => 'Nastala nečakaná chyba, pravdepodobne ste nespústili migráciu modelov pomocou príkazu:',
     'db-error' => 'Nastala nečakaná chyba. Váš administrátor pravdepodobne zabudol aktualizovať databázu. Ak táto chyba pretrváva, kontaktujte ho.',
     'row-error' => 'Záznam neexistuje, pravdepodobne už bol vymazaný.',
+    'component-missing' => 'Komponenta s názvom <strong>%s</strong> pre vstup <strong>%s</strong> nebol nájdený.',
 
     'login' => 'Prihlásiť sa',
     'password' => 'Heslo',

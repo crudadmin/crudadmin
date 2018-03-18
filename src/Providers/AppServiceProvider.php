@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
         PublishServiceProvider::class,
         FieldsServiceProvider::class,
         SEOServiceProvider::class,
+        HashServiceProvider::class,
         \Intervention\Image\ImageServiceProvider::class,
     ];
 

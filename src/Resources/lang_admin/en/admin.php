@@ -24,8 +24,10 @@ return [
     'languages' => 'Language mutation',
     'change-language' => 'Change language mutation. WARNING! Changing your language may discard your currently delineated changes.',
 
-    'admin-groups' => 'Admin groups',
-    'admin-groups-title' => 'Change group permissions',
+    'super-admin' => 'Super Admin',
+    'admin-group' => 'Allowed admin models',
+    'user-groups' => 'Admin groups',
+    'user-groups-title' => 'Change group permissions',
     'user-groups-name' => 'Group name',
     'user-groups-placeholder' => 'Fill group name',
     'user-groups-modules' => 'Allowed modules',
@@ -105,6 +107,7 @@ return [
     'migrate-error' => 'An unexpected error has occurred, you probably did not trigger the migration of the models with the command:',
     'db-error' => 'Unexpected error occurred. Your administrator may have forgotten to update the database. If this error persists, please contact him / her.',
     'row-error' => 'The record does not exist, probably has already been deleted.',
+    'component-missing' => 'Component <strong>%s</ strong> for <strong>%s</ strong> field was not found.',
 
     'login' => 'Login',
     'password' => 'Password',

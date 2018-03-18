@@ -185,4 +185,24 @@ class Authenticatable extends Model implements
                 $column->after('avatar');
         }
     }
+
+    /*
+     * Add additional fields
+     */
+    public function mutateFields($fields)
+    {
+        if ( !class_exists('\App\User') || !($this instanceof \App\User) )
+            return;
+
+        /*
+         * If is enabled admin groups
+         */
+        if ( config('admin.admin_groups') === true )
+        {
+            $fields->push([
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',
+                'admins_groups' => 'name:admin::admin.admin-group|belongsToMany:admins_groups,name',
+            ]);
+        }
+    }
 }

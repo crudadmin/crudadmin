@@ -22,7 +22,7 @@ class Admin
     public $buffer = [
         'namespaces' => [],
         'modelnames' => [],
-        'models' => [],
+        'components' => [],
     ];
 
     /*
@@ -154,6 +154,19 @@ class Admin
     }
 
     /*
+     * Return private or absulute app basename path
+     */
+    private function getDirecotoryPath($path)
+    {
+        $path = trim_end( $path, '/' );
+
+        if ( substr($path, 0, 1) != '/' )
+            $path = base_path( $path );
+
+        return $path;
+    }
+
+    /*
      * Get all files from paths which can has admin models
      */
     protected function getModelFiles()
@@ -169,10 +182,7 @@ class Admin
             if ( ! is_string($namespace) )
                 $namespace = $this->getNamespaceByPath($path);
 
-            $path = rtrim( $path, '/' );
-
-            if ( substr($path, 0, 1) != '/' )
-                $path = base_path( $path );
+            $path = $this->getDirecotoryPath($path);
 
             if ( ! in_array($path, $paths) )
                 $paths[$path] = $namespace;
@@ -556,6 +566,45 @@ class Admin
 
             file_put_contents($dir . '/.gitignore', $gitignore);
         }
+    }
+
+    /*
+     * Return all components templates for fields
+     */
+    public function getComponentsTemplates()
+    {
+        return $this->cache('fields_components', function(){
+            $components = [];
+
+            //Get components path and add absolute app path if is needed
+            $config_paths = array_map(function($path){
+                return $this->getDirecotoryPath($path);
+            }, config('admin.components', []));
+
+            //Merge config paths, with default admin path
+            $paths = array_merge(
+                $config_paths,
+                [ resource_path('views/admin/components') ]
+            );
+
+            //Get all components
+            foreach ($paths as $path)
+            {
+                if ( ! file_exists($path) )
+                    continue;
+
+                $files = $this->files->allFiles($path);
+
+                foreach ($files as $file)
+                {
+                    $filename = array_slice(explode('.', basename($file)), 0, -1)[0];
+
+                    $components[strtolower($filename)] = (string)$file;
+                }
+            }
+
+            return $components;
+        });
     }
 }
 ?>

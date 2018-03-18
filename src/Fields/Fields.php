@@ -25,7 +25,7 @@ class Fields
     protected $attributes = [
          'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled',
          'orderBy', 'limit', 'removeFromForm', 'multirows', 'phone', 'unique_db',
-         'index', 'invisible', 'unsigned'
+         'index', 'invisible', 'unsigned', 'component',
     ];
 
     /*

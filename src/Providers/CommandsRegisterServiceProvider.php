@@ -30,6 +30,8 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
 
         $this->app->bind('gogol::admin.layout', \Gogol\Admin\Commands\AdminLayoutCommand::class);
 
+        $this->app->bind('gogol::admin.component', \Gogol\Admin\Commands\AdminComponentCommand::class);
+
         $this->commands([
             'gogol::admin.install',
             'gogol::admin.update',
@@ -38,6 +40,7 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
             'gogol::admin.button',
             'gogol::admin.rule',
             'gogol::admin.layout',
+            'gogol::admin.component',
         ]);
     }
 }

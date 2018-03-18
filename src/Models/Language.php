@@ -64,20 +64,9 @@ class Language extends Model
      */
     protected function fields($row)
     {
-        $rules = [
+        return [
             'name' => 'name:admin::admin.languages-name|placeholder:admin::admin.languages-title|required|max:25',
             'slug' => 'name:admin::admin.languages-prefix|placeholder:admin::admin.languages-prefix-title|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
         ];
-
-        /*
-         * Checks for gettext support
-         */
-        if ( config('admin.gettext') === true )
-        {
-            $rules['poedit_po'] = 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|required_with:poedit_mo';
-            $rules['poedit_mo'] = 'name:admin::admin.languages-mo-name|type:file|max:1024|hidden|extensions:mo|required_with:poedit_po';
-        }
-
-        return $rules;
     }
 }
