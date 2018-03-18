@@ -6,6 +6,17 @@
       <div class="box-header with-border">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
+
+        <div class="dropdown pull-right multi-languages" v-if="hasLocalFields">
+          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <i class="fa fa-globe"></i> <span class="text">{{ selectedLanguage.name }}</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selected_language_id = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ lang.name }}</a></li>
+          </ul>
+        </div>
+
       </div>
 
       <div class="box-body" :class="{ cantadd : !cansave }">
@@ -13,6 +24,7 @@
           :model="model"
           :childs="true"
           :langid="langid"
+          :inputlang="selectedLanguage"
           :row="row"
           :cansave.sync="cansave"
           :hasparentmodel="hasparentmodel"
@@ -44,6 +56,7 @@
         isActive : true,
         cansave : true,
         form : null,
+        selected_language_id : null,
       };
     },
 
@@ -115,7 +128,27 @@
       },
       sendButton(){
         return this.$root.getModelProperty(this.model, 'settings.buttons.create') || this.trans('send');
-      }
+      },
+      hasLocalFields(){
+        for ( var key in this.model.fields )
+          if ( this.model.fields[key].locale == true )
+            return true;
+
+        return false;
+      },
+      languages(){
+        return this.$root.languages;
+      },
+      selectedLanguage(){
+        if ( ! this.selected_language_id )
+          return this.languages[0];
+
+        for ( var key in this.languages )
+          if ( this.languages[key].id == this.selected_language_id )
+            return this.languages[key];
+
+        return this.languages[0];
+      },
     },
 
     methods: {
@@ -174,6 +207,7 @@
       resetErrors(){
         this.form.find('.form-group.has-error').firstLevelForm(this.form[0]).removeClass('has-error').find('.help-block').remove();
         this.form.find('.fa.fa-times-circle-o').firstLevelForm(this.form[0]).remove();
+        this.form.find('.multi-languages .has-error').firstLevelForm(this.form[0]).removeClass('has-error');
         this.removeActiveTab(this.form.find('.nav-tabs li.has-error').firstLevelForm(this.form[0]));
         this.progress = false;
       },
@@ -296,14 +330,26 @@
                 for (var i = 0; i < array.length; i++){
                   for ( var a = 0; a <= 1; a++ )
                   {
-                    var key = key.replace('.0', ''),
-                        key = a == 0 ? key : key + '[]';
+                    var key = key.split('.').map(function(item, i){
+                      if ( i == 0 )
+                        return item;
+
+                      if ( i == 0 && item == 0 )
+                        return '[]';
+
+                      return '['+item+']';
+                    }).join('');
+
+                    //Also for multiple fields...
+                    key = a == 0 ? key : key + '[]';
 
                     _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).firstLevelForm(_this.form[0]).each(function(){
                       var where = $(this);
 
                       //Colorize tabs
                       _this.colorizeTab($(this));
+
+                      _this.colorizeLangDropdown($(this));
 
                       if ( $(this).is('select') ){
                         where = where.parent().parent().children().last().prev();
@@ -352,12 +398,14 @@
           //Push new row
           if ( action == 'store' )
           {
+            var clonedRow = _.cloneDeep(response.data.rows[0]);
+
             //Reset actual items buffer
             if ( this.hasParentModel() )
               this.saveParentChilds(response);
 
             //Bind values for input builder
-            this.$broadcast('onSubmit', response.data.rows[0]);
+            this.$broadcast('onSubmit', clonedRow);
 
             //Send notification about new row
             this.$dispatch('proxy', 'onCreate', [this.model.slug, response.data]);
@@ -372,7 +420,7 @@
 
             //If is disabled autoreseting form, then select inserted row
             } else if ( autoreset === false ){
-              this.row = response.data.rows[0];
+              this.row = clonedRow;
 
               this.scrollToForm();
             }
@@ -380,11 +428,13 @@
 
           //Update existing row
           else if ( action == 'update' ) {
+            var clonedRow = _.cloneDeep(response.data.row);
+
             //Bind values for input builder
-            this.$broadcast('onSubmit', response.data.row);
+            this.$broadcast('onSubmit', clonedRow);
 
             //Send notification about updated row
-            this.$dispatch('proxy', 'onUpdate', [this.model.slug, response.data.row]);
+            this.$dispatch('proxy', 'onUpdate', [this.model.slug, clonedRow]);
 
             for ( var key in response.data.row )
             {
@@ -431,6 +481,24 @@
               }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
           })
         });
+      },
+      colorizeLangDropdown(input){
+        var field_key = input.parents('.field-wrapper').attr('data-field');
+
+        if ( ! field_key )
+          return;
+
+        var field = this.model.fields[field_key];
+
+        if ( field.locale != true || this.languages[0].id == this.selectedLanguage.id )
+          return;
+
+        var dropdown = this.form.find('.multi-languages .dropdown-toggle');
+
+        dropdown.addClass('has-error');
+        dropdown.next().find('li[data-slug="'+this.languages[0].slug+'"]').addClass('has-error');
+
+        this.$root.openAlert(this.trans('warning'), this.trans('lang-error'), 'warning');
       },
       scrollToForm(){
         setTimeout(function(){

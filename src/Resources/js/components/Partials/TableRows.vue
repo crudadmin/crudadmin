@@ -459,7 +459,7 @@
             }
 
             //Clone row item
-            this.row = _.clone(row, true);
+            this.row = _.cloneDeep(row, true);
 
             this.$parent.$parent.closeHistory(history_id ? true : false);
 

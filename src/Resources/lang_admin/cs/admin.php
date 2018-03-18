@@ -108,6 +108,7 @@ return [
     'db-error' => 'Nastala neočekávaná chyba. Váš administrátor pravděpodobně zapomněl aktualizovat databázi. Pokud tato chyba přetrvává, kontaktujte ho. ',
     'row-error' => 'Záznam neexistuje, pravděpodobně již byl vymazán.',
     'component-missing' => 'Komponenta s názvem <strong>%s</strong> pro vstup <strong>%s</strong> nebyl nalezen.',
+    'lang-error' => 'Hodnoty výchozího jazyka jsou povinné. Prosíme, zkontrolujte vyplněné hodnoty.',
 
     'login' => 'Přihlásit se',
     'password' => 'Heslo',

@@ -93,6 +93,28 @@ trait AdminModelTrait
 
             //If field has not relationship, then return field value... This condition is here for better framework performance
             else if ( !array_key_exists('belongsTo', $field) && !array_key_exists('belongsToMany', $field) || substr($key, -3) == '_id' ){
+
+                if ( array_key_exists('locale', $field) && $field['locale'] === true ) {
+
+                    $slug = Localization::get()->slug;
+                    $object = parent::__get($key);
+
+                    if ( ! $object || ! is_array($object) )
+                        return null;
+
+                    //If row has saved default value
+                    if ( array_key_exists($slug, $object) && (!empty($object[$slug]) || $object[$slug] === 0) ){
+                        return $object[$slug];
+                    }
+
+                    foreach ($object as $value) {
+                        if ( !empty($value) || $value === 0 )
+                            return $value;
+                    }
+
+                    return null;
+                }
+
                 return parent::__get($key);
             } else {
                 $force_check_relation = true;
@@ -106,7 +128,11 @@ trait AdminModelTrait
         }
 
         //If is called property with localization attribute, then add into called property language prefix
-        else if ( Localization::isEnabled() && ($localization = Localization::get()) && ($slug = $localization->slug) && $field = $this->getField($key.'_'.$slug) ) {
+        else if (
+            Localization::isEnabled()
+            && ($localization = Localization::get())
+            && ($slug = $localization->slug) && $field = $this->getField($key.'_'.$slug)
+        ) {
             $key = $key.'_'.$slug;
         }
 
@@ -293,7 +319,10 @@ trait AdminModelTrait
         foreach ($this->getFields() as $key => $field)
         {
             //Add cast attribute for fields with multiple select
-            if ( $this->isFieldType($key, ['select', 'file']) && $this->hasFieldParam($key, 'multiple') )
+            if ( $this->isFieldType($key, ['select', 'file']) && $this->hasFieldParam($key, 'multiple')
+                 || $this->isFieldType($key, 'json')
+                 || $this->hasFieldParam($key, 'locale')
+             )
                 $this->casts[$key] = 'json';
 
             else if ( $this->isFieldType($key, 'checkbox') )
@@ -450,21 +479,25 @@ trait AdminModelTrait
     /*
      * Returns if field has required
      */
-    public function hasFieldParam($key, $paramName, $paramValue = null)
+    public function hasFieldParam($key, $params, $paramValue = null)
     {
         if (!$field = $this->getField($key))
             return false;
 
-        if ( array_key_exists($paramName, $field) )
-        {
-            if ( $paramValue !== null )
+        foreach (array_wrap($params) as $paramName) {
+            if ( array_key_exists($paramName, $field) )
             {
-                return $field[$paramName] === $paramValue;
+                if ( $paramValue !== null )
+                {
+                    if ( $field[$paramName] === $paramValue )
+                        return true;
+                } else {
+                    return true;
+                }
             }
+        }
 
-            return true;
-        } else
-            return false;
+        return false;
     }
 
     /*

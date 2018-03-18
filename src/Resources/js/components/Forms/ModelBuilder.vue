@@ -11,7 +11,7 @@
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
       <div class="pull-right" v-if="!isSingle">
-        <!-- <button type="button" v-if="isOpenedRow && canAddRow" v-on:click.prevent="resetForm"  class="pull-left add-row-btn btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle() }}</button> -->
+      <!-- <button type="button" v-if="isOpenedRow && canAddRow" v-on:click.prevent="resetForm"  class="pull-left add-row-btn btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle() }}</button> -->
 
         <div class="search-bar" v-show="canShowSearchBar">
           <div class="input-group input-group-sm">

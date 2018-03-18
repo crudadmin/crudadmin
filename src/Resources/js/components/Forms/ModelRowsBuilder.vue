@@ -301,7 +301,7 @@
           for ( var key in response.request.params )
             url = url.replace('{'+key+'}', response.request.params[key]);
 
-          this.$root.openAlert('Upozornenie', 'Nastala nečakana chyba, skúste neskôr prosím.<br><br>Príčinu zlyhania požiadavky môžete zistiť na tejto adrese:<br> <a target="_blank" href="'+url+'">'+url+'</a>', 'error');
+          this.$root.openAlert(this.trans('warning'), 'Nastala nečakana chyba, skúste neskôr prosím.<br><br>Príčinu zlyhania požiadavky môžete zistiť na tejto adrese:<br> <a target="_blank" href="'+url+'">'+url+'</a>', 'error');
         }
 
         this.$http.get(this.$root.requests.rows, query).then(function(response){

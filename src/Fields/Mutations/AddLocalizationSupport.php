@@ -5,12 +5,19 @@ use Localization;
 
 class AddLocalizationSupport
 {
-    public $attributes = 'localization';
+    /*
+     * Localization for old localization support feature (with static columns in DB)
+     * Locale for new localizations support feature (with JSON columns in DB, unnecessary migrations when new language is added)
+     */
+    public $attributes = ['localization', 'locale'];
 
     public function create( $field, $key )
     {
         $add = [];
 
+        /*
+         * Old version
+         */
         if ( array_key_exists('localization', $field) )
         {
             $languages = Localization::getLanguages( true );

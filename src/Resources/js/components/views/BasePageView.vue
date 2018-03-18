@@ -28,7 +28,7 @@
       data : function(){
         return {
           //Passing model data from parent
-          model : this.$parent.model,
+          model : this.mutateModel(this.$parent.model),
         };
       },
 
@@ -59,7 +59,10 @@
       methods : {
         trans(key){
           return this.$root.trans(key);
-        }
+        },
+        mutateModel(model){
+          return model;
+        },
       }
   }
 </script>

@@ -14,6 +14,8 @@
               :tabs="tab.fields | tabs"
               :model="model"
               :row="row"
+              :langid="langid"
+              :inputlang="inputlang"
               :hasparentmodel="hasparentmodel"
               :history="history">
             </form-tabs-builder>
@@ -35,6 +37,7 @@
             :model="model"
             :hasparentmodel="hasparentmodel"
             :langid="langid"
+            :inputlang="inputlang"
             :row="row"
             :history="history"
           ></form-group>
@@ -51,7 +54,7 @@
   export default {
     name : 'form-tabs-builder',
 
-    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'cansave', 'hasparentmodel'],
+    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'inputlang', 'cansave', 'hasparentmodel'],
 
     components : { FormGroup },
 

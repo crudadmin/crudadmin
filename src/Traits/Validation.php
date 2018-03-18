@@ -4,6 +4,7 @@ namespace Gogol\Admin\Traits;
 
 use Validator;
 use Gogol\Admin\Exceptions\ValidationException;
+use Localization;
 use Fields;
 
 trait Validation {
@@ -57,13 +58,16 @@ trait Validation {
 
         $data = [];
 
+        $default_language = Localization::getDefaultLanguage();
+
         foreach ($fields as $key => $field)
         {
+            $orig_key = $key;
+
             if ($this->isFieldType($key, 'file'))
             {
                 //If is multiple file uploading
-                if ( $this->hasFieldParam($key, 'multiple', true)
-                    || $this->hasFieldParam($key, 'multirows', true) )
+                if ( $this->hasFieldParam($key, ['multiple', 'multirows'], true) )
                 {
                     foreach (['multiple', 'multirows', 'array'] as $param)
                     {
@@ -78,8 +82,16 @@ trait Validation {
                 }
             }
 
+             if ( $this->hasFieldParam($key, 'locale') )
+             {
+                if ( $default_language )
+                    $key = $key . '.' . $default_language->slug;
+                else
+                    $key = $key . '.*';
+             }
+
             //If field is not required
-            if (!$this->hasFieldParam($key, 'required'))
+            if ( !$this->hasFieldParam($orig_key, 'required') )
             {
                 $field['nullable'] = true;
             }

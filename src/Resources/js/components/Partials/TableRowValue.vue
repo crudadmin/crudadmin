@@ -64,21 +64,22 @@ export default {
     computed: {
       fieldValue()
       {
-        var field = this.field,
-            row = this.item;
+        var field = this.field in this.model.fields ? this.model.fields[this.field] : null,
+            row = this.item,
+            rowValue = this.field in row ? this.getMutatedValue(row[this.field], field) : '';
 
         //Get select original value
-        if ( ( field in this.model.fields ) )
+        if ( field )
         {
-          var isRadio = this.model.fields[field].type == 'radio';
+          var isRadio = field.type == 'radio';
 
-          if ( this.model.fields[field].type == 'select' || isRadio )
+          if ( field.type == 'select' || isRadio )
           {
-            if ( 'multiple' in this.model.fields[field] && this.model.fields[field].multiple == true && $.isArray(row[field]) && !isRadio )
+            if ( 'multiple' in field && field.multiple == true && $.isArray(rowValue) && !isRadio )
             {
               var values = [],
-                  rows = row[field],
-                  options = this.getLanguageSelectOptions( this.model.fields[field].options );
+                  rows = rowValue,
+                  options = this.getLanguageSelectOptions( field.options );
 
               for ( var i = 0; i < rows.length; i++ )
               {
@@ -92,32 +93,61 @@ export default {
 
               return values.join(', ');
             } else {
-              var options = isRadio ? this.model.fields[field].options : this.getLanguageSelectOptions( this.model.fields[field].options );
+              var options = isRadio ? field.options : this.getLanguageSelectOptions( field.options );
 
               //Check if key exists in options
               if ( ! options )
-                return row[field];
+                return rowValue;
 
               for ( var i = 0; i < options.length; i++ )
               {
-                if ( row[field] == options[i][0] )
+                if ( rowValue == options[i][0] )
                   return options[i][1];
               }
             }
-          } else if ( this.model.fields[field].type == 'checkbox' )
+          } else if ( field.type == 'checkbox' )
           {
-            return row[field] == 1 ? this.trans('yes') : this.trans('no');
+            return rowValue == 1 ? this.trans('yes') : this.trans('no');
           }
         }
 
         var add_before = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_before'),
             add_after = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_after');
 
-        return row[field] || row[field] == 0 ? ((add_before||'') + row[field] + (add_after||'')) : null;
+        return rowValue || rowValue == 0 ? ((add_before||'') + rowValue + (add_after||'')) : null;
       },
     },
 
     methods: {
+      getMutatedValue(value, field){
+        if ( field && 'locale' in field )
+        {
+          //Get default language
+          var dslug = this.$root.languages[0].slug;
+
+          if ( value && typeof value === 'object' )
+          {
+            //Get default language value
+            if ( dslug in value && (value[dslug] || value[dslug] == 0) ){
+              value = value[dslug];
+            }
+
+            //Get other available language
+            else for ( var key in value ) {
+              if ( value[key] || value[key] === 0 )
+              {
+                value = value[key]
+                break;
+              }
+            }
+
+            if ( typeof value == 'object' )
+              value = '';
+          }
+        }
+
+        return value||'';
+      },
       getLanguageSelectOptions(array){
         return this.$root.languageOptions(array, this.model.fields[this.field], this.model.localization ? {
           language_id : this.$root.language_id,

@@ -3,21 +3,21 @@
     <!-- STRING INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" v-bind:name="key" class="form-control" maxlength="{{ field.max }}" value="{{ !isPassword ? getValueOrDefault: '' }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" :name="getFieldName" class="form-control" maxlength="{{ field.max }}" :value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" v-bind:name="key" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" :name="getFieldName" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATETIME INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" v-bind:name="key" class="form-control" value="{{ getValueOrDefault }}" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" :name="getFieldName" class="form-control" :value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
       <small>{{ field.title }}</small>
     </div>
 
@@ -25,7 +25,7 @@
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
       <label v-bind:for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-        <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" v-bind:name="key">
+        <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
         <div><div></div></div>
       </label>
       <small>{{ field.title }}</small>
@@ -34,7 +34,7 @@
     <!-- TEXT INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:name="key" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
+      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :name="getFieldName" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
@@ -115,14 +115,14 @@
       <label>{{ getName }} <span v-if="isRequired" class="required">*</span></label>
         <div class="radio" v-if="!isRequired">
           <label>
-            <input type="radio" v-bind:name="key" value="">
+            <input type="radio" :name="getFieldName" value="">
             {{ trans('no-option') }}
           </label>
         </div>
 
         <div class="radio" v-for="data in field.options">
           <label>
-            <input type="radio" @change="changeValue" v-bind:name="key" v-bind:checked="hasValue(data[0], getValueOrDefault)" v-bind:value="data[0]">
+            <input type="radio" @change="changeValue" :name="getFieldName" v-bind:checked="hasValue(data[0], getValueOrDefault)" v-bind:value="data[0]">
 
             {{ data[1] }}
           </label>
@@ -152,7 +152,7 @@
 
   export default {
       name: 'form-input-builder',
-      props: ['model', 'field', 'index', 'key', 'row', 'confirmation', 'history', 'langid', 'hasparentmodel'],
+      props: ['model', 'field', 'index', 'key', 'row', 'confirmation', 'history', 'langid', 'hasparentmodel', 'langslug'],
 
       components: { File },
 
@@ -280,6 +280,20 @@
 
           if ( this.field.type == 'checkbox' )
             value = e ? e.target.checked : value;
+
+          //Update specific language field
+          if ( this.hasLocale ){
+            var obj_value = typeof this.field.value === 'object' ? this.field.value||{} : {};
+                obj_value[this.langslug] = value;
+
+            //Update field values
+            if ( no_field != true )
+              this.field.value = obj_value;
+
+            //Update specific row language value
+            this.$set('row.' + this.key + '.' + this.langslug, value);
+            return;
+          }
 
           //Update field values
           if ( no_field != true )
@@ -534,7 +548,7 @@
 
           parent = modelBuilder.getParentTableName(this.model.withoutParent == true);
 
-          return 'id-' + this.model.slug + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.key;
+          return 'id-' + this.model.slug + this.key + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.langslug;
         },
         getModalId(){
           return 'form-relation-modal-'+this.getId;
@@ -542,6 +556,13 @@
         getFieldKey()
         {
           return this.model.slug + '-' + this.key;
+        },
+        getFieldName()
+        {
+          if ( this.hasLocale )
+            return this.key+'['+this.langslug+']';
+
+          return this.key;
         },
         getFilterBy(){
           if ( !('filterBy' in this.field) )
@@ -645,6 +666,10 @@
         },
         getValueOrDefault()
         {
+          //If is password, return none value
+          if ( this.isPassword )
+            return '';
+
           if ( ! this.isOpenedRow ){
             var default_value = this.field.default;
 
@@ -654,6 +679,15 @@
             }
 
             return default_value;
+          }
+
+          //Localization field
+          if ( this.hasLocale )
+          {
+            if ( this.field.value && this.langslug in this.field.value )
+              return this.field.value[this.langslug];
+
+            return this.field.default||'';
           }
 
           return this.field.value;
@@ -699,6 +733,9 @@
         isRequiredIfHasValues()
         {
           return 'required_with_values' in this.field && this.field.required_with_values == true;
+        },
+        hasLocale(){
+          return 'locale' in this.field;
         },
         /*
          If is selected row, which not belongs to selected language,

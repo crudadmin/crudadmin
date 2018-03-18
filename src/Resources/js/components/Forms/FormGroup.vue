@@ -15,17 +15,18 @@
                 </form-tabs-builder>
               </div>
 
-                <div v-for="item in group.fields">
-                    <div v-if="isField(item) && canShowField(model.fields[item])" class="col-lg-12">
+                <div v-for="(index, item) in group.fields">
+                    <div :data-field="item" v-if="isField(item) && canShowField(model.fields[item])" v-for="langslug in getFieldLangs(model.fields[item])" v-show="canShowLanguageField(this.model.fields[item], langslug, inputlang)" class="col-lg-12 field-wrapper">
                         <form-input-builder
-                            :history="history"
-                            :model="model"
-                            :langid="langid"
-                            :row="row"
-                            :index="$index"
-                            :key="item"
-                            :hasparentmodel="hasparentmodel"
-                            :field="model.fields[item]">
+                          :history="history"
+                          :model="model"
+                          :langid="langid"
+                          :langslug="langslug"
+                          :row="row"
+                          :index="index"
+                          :key="item"
+                          :hasparentmodel="hasparentmodel"
+                          :field="model.fields[item]">
                         </form-input-builder>
                     </div>
 
@@ -51,7 +52,7 @@ import FormInputBuilder from './FormInputBuilder.vue';
 export default {
     name : 'form-group',
 
-    props : ['model', 'row', 'history', 'group', 'langid', 'hasparentmodel'],
+    props : ['model', 'row', 'history', 'group', 'langid', 'inputlang', 'hasparentmodel'],
 
     components : { FormInputBuilder, FormTabsBuilder },
 
@@ -100,6 +101,18 @@ export default {
       },
       hasTabs(fields){
         return this.$parent.hasTabs(fields);
+      },
+      getFieldLangs(field){
+        if ( !('locale' in field) )
+          return 1;
+
+        return _.map(this.$root.languages, 'slug');
+      },
+      canShowLanguageField(field, slug, inputlang){
+        if ( !('locale' in field) )
+          return true;
+
+        return inputlang.slug == slug;
       },
     },
 }

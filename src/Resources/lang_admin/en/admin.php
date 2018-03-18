@@ -108,6 +108,7 @@ return [
     'db-error' => 'Unexpected error occurred. Your administrator may have forgotten to update the database. If this error persists, please contact him / her.',
     'row-error' => 'The record does not exist, probably has already been deleted.',
     'component-missing' => 'Component <strong>%s</ strong> for <strong>%s</ strong> field was not found.',
+    'lang-error' => 'Please check default language values. Some of them are required.',
 
     'login' => 'Login',
     'password' => 'Password',

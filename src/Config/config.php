@@ -25,7 +25,7 @@ return [
     /*
      * Removes default language segment from url
      */
-    'localization_remove_default' => false,
+    'localization_remove_default' => true,
 
     /*
      * Gettext support

@@ -191,9 +191,15 @@ class AdminMigrationCommand extends Command
     /*
      * Skip creating of preddefined columns
      */
-    private function skipAddingField($key)
+    private function skipAddingField($key, $model = null)
     {
-        return in_array($key, ['_order', 'created_at', 'published_at', 'updated_at', 'slug']);
+        $columns = ['_order', 'created_at', 'published_at', 'updated_at'];
+
+        //When slug is allowed
+        if ( $model && $model->getProperty('sluggable') != null )
+            $columns[] = 'slug';
+
+        return in_array($key, $columns);
     }
 
     /**
@@ -453,6 +459,14 @@ class AdminMigrationCommand extends Command
             }
 
             return $table->string($key, $model->getFieldLength($key));
+        }
+    }
+
+    protected function jsonColumn($table, $model, $key)
+    {
+        if ( $model->isFieldType($key, ['json']) || $model->hasFieldParam($key, 'locale') )
+        {
+            return $table->json($key);
         }
     }
 
@@ -780,6 +794,7 @@ class AdminMigrationCommand extends Command
         $types = [
             'belongsTo',
             'belongsToMany',
+            'jsonColumn',
             'stringColumn',
             'textColumn',
             'longtextColumn',
