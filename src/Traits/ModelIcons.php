@@ -10,6 +10,7 @@ trait ModelIcons
     {
         return [
             'article' => 'fa-file-text',
+            'blog' => 'fa-file-text',
             'gallery' => 'fa-picture-o',
             'photo' => 'fa-picture-o',
             'form' => 'fa-wpforms',
@@ -45,6 +46,7 @@ trait ModelIcons
             'department' => 'fa-bars',
             'about' => 'fa-info',
             'student' => 'fa-users',
+            'team' => 'fa-users',
             'grade' => 'fa-graduation-cap',
             'college' => 'fa-graduation-cap',
             'faculty' => 'fa-graduation-cap',
@@ -58,6 +60,7 @@ trait ModelIcons
             'curriculum' => 'fa-book',
             'download' => 'fa-download',
             'work' => 'fa-briefcase',
+            'faq' => 'fa-question-circle-o',
             'vote' => 'fa-question-circle-o',
             'pool' => 'fa-question-circle-o',
             'subject' => 'fa-tasks',
@@ -71,6 +74,7 @@ trait ModelIcons
             'country' => 'fa-flag',
             'review' => 'fa-commenting-o',
             'office' => 'fa-building',
+            'param' => 'fa-gear',
         ];
     }
 

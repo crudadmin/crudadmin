@@ -3,7 +3,7 @@
   <form method="post" action="" v-bind:id="formID" :data-form="model.slug" v-on:submit.prevent="saveForm">
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
-      <div class="box-header with-border">
+      <div class="box-header with-border" :class="{ visible : hasLocalFields }">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
 

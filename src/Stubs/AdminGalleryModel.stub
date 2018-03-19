@@ -39,4 +39,7 @@ class DummyClass extends AdminModel
         'image' => 'name:Obrázok|type:file|required|image|multirows',
     ];
 
+    protected $settings = [
+        'increments' => false,
+    ];
 }

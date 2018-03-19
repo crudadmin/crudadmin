@@ -7,6 +7,7 @@ use Gogol\Admin\Middleware as Middleware;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Http\Kernel;
+use Admin;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //Boot admin models and other dependencies
+        Admin::boot();
+
         /*
          * Bind variable to admin views path
          */

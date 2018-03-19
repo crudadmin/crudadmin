@@ -8,6 +8,7 @@ use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Schema\Blueprint;
 use Symfony\Component\Console\Input\InputOption;
 use \Doctrine\DBAL\Types\Type as DBType;
+use Localization;
 use Admin;
 use Schema;
 use Cache;
@@ -722,14 +723,18 @@ class AdminMigrationCommand extends Command
     {
         $slugcolumn = $model->getProperty('sluggable');
 
-        if ( ! $model->getField($slugcolumn) )
+        if ( ! ($field = $model->getField($slugcolumn)) )
         {
             $this->line('<comment>+ Unknown slug column for</comment> <error>'.$slugcolumn.'</error> <comment>column</comment>');
 
             return;
         }
 
-        $column = $table->string('slug', $model->getFieldLength($slugcolumn));
+        //Set locale slug or normal
+        if ( $has_locale = $model->hasFieldParam($slugcolumn, 'locale', true) )
+            $column = $table->json('slug');
+        else
+            $column = $table->string('slug', $model->getFieldLength($slugcolumn));
 
         if ( $updating == true )
         {
@@ -737,7 +742,7 @@ class AdminMigrationCommand extends Command
         }
 
         //If is creating new table or when slug index is missing
-        if ( $updating == false || ! $this->hasIndex($model, 'slug', 'index') )
+        if ( !$has_locale && ($updating == false || ! $this->hasIndex($model, 'slug', 'index')) )
             $column->index();
 
         //If is field required
@@ -757,13 +762,38 @@ class AdminMigrationCommand extends Command
     protected function updateSlugs($model)
     {
         $this->buffer_after[ $model->getTable() ][] = function() use ($model) {
-            //If has empty slugs
-            if ( ($rows = $model->whereNull('slug')->orWhere('slug', ''))->count() > 0 )
-            {
-                foreach ($rows->get() as $row)
+
+            //Get empty slugs
+            $empty_slugs = $model->where(function($query) use ($model) {
+                //If some of localized slug value is empty
+                if ( $model->hasLocalizedSlug() )
                 {
-                    $row->save();
+                    $languages = Localization::getLanguages(true);
+
+                    //Check all available languages slugs
+                    foreach ($languages as $key => $lang)
+                    {
+                        $query->{ $key == 0 ? 'where' : 'orWhere' }(function($query) use($model, $lang) {
+                            //If row has defined localized value, but slug is missing
+                            $query->whereNull('slug->'.$lang->slug)
+                                  ->whereNotNull($model->getProperty('sluggable').'->'.$lang->slug);
+                        });
+                    }
                 }
+
+                //If simple slug is empty
+                else {
+                    $query->whereNull('slug')->orWhere('slug', '');
+                }
+
+            })->orWhere('slug', null);
+
+            //If has been found some empty slugs
+            if ( $empty_slugs->count() > 0 )
+            {
+                //Re-save models, and regenerate new slugs
+                foreach ($empty_slugs->select([$model->getKeyName(), 'slug', $model->getProperty('sluggable')])->get() as $row)
+                    $row->save();
             }
         };
     }

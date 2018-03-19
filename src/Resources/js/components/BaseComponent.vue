@@ -212,6 +212,7 @@
                         var key,
                             relation,
                             field_key,
+                            related_field,
                             matched_keys,
                             items = [],
                             hasFilter = filter && Object.keys(filter).length > 0;
@@ -237,7 +238,8 @@
 
                             for ( var i = 0; i < matched_keys.length; i++ )
                             {
-                                var option_value = array[key][1][matched_keys[i].substr(1)];
+                                var related_field = this.models_list[relation.split(',')[0]].fields[matched_keys[i].substr(1)],
+                                    option_value = this.getLangValue(array[key][1][matched_keys[i].substr(1)], related_field);
 
                                 value = value.replace(new RegExp(matched_keys[i], 'g'), !option_value && option_value !== 0 ? '' : option_value);
                             }
@@ -245,14 +247,34 @@
 
                           //Simple value by one column
                           else {
+                            if ( field_key )
+                                related_field = this.models_list[relation.split(',')[0]].fields[field_key];
+
                             //Get value of multiarray or simple array
-                            var value = typeof array[key][1] == 'object' && array[key][1]!==null ? array[key][1][field_key] : array[key][1];
+                            var value = typeof array[key][1] == 'object' && array[key][1]!==null ? this.getLangValue(array[key][1][field_key], related_field) : array[key][1];
                           }
 
                           items.push([array[key][0], value]);
                         }
 
                         return items;
+                    },
+                    getLangValue(value, field){
+                        if ( field && value && typeof value == 'object' && 'locale' in field )
+                        {
+                            if ( this.languages[0].slug in value && (value[this.languages[0].slug] || value[this.languages[0].slug] == 0) )
+                                return value[this.languages[0].slug];
+
+                            for ( var key in value )
+                            {
+                                if ( value[key] || value[key] == 0 )
+                                    return value[key];
+                            }
+
+                            return null;
+                        }
+
+                        return value;
                     },
                     getRecursiveModels(models){
                         var data = {};
