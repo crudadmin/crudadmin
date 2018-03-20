@@ -439,6 +439,16 @@ class AdminMigrationCommand extends Command
     }
 
     /*
+     * Set json column, also check mysql version
+     */
+    private function setJsonColumn($table, $key, $model)
+    {
+        $this->checkForCorrectMysqlVersion($model, 'file');
+
+        return $table->json($key)->platformOptions([]);
+    }
+
+    /*
      * Drops foreign key in table
      */
     protected function dropIndex($model, $key)
@@ -452,22 +462,15 @@ class AdminMigrationCommand extends Command
     {
         if ( $model->isFieldType($key, 'file') )
         {
-            if ( $model->hasFieldParam($key, 'multiple') )
-            {
-                $this->checkForCorrectMysqlVersion($model, 'file');
-
-                return $table->json($key);
-            }
-
             return $table->string($key, $model->getFieldLength($key));
         }
     }
 
     protected function jsonColumn($table, $model, $key)
     {
-        if ( $model->isFieldType($key, ['json']) || $model->hasFieldParam($key, 'locale') )
+        if ( $model->isFieldType($key, ['json']) || $model->hasFieldParam($key, ['locale', 'multiple']) )
         {
-            return $table->json($key);
+            return $this->setJsonColumn($table, $key, $model);
         }
     }
 
@@ -552,14 +555,7 @@ class AdminMigrationCommand extends Command
     {
         if ( $model->isFieldType($key, 'select') )
         {
-            if ( $model->hasFieldParam($key, 'multiple') )
-            {
-                $this->checkForCorrectMysqlVersion($model, 'select');
-
-                return $table->json($key);
-            } else {
-                return $table->string($key, $model->getFieldLength($key));
-            }
+            return $table->string($key, $model->getFieldLength($key));
         }
     }
 
@@ -732,7 +728,7 @@ class AdminMigrationCommand extends Command
 
         //Set locale slug or normal
         if ( $has_locale = $model->hasFieldParam($slugcolumn, 'locale', true) )
-            $column = $table->json('slug');
+            $column = $this->setJsonColumn($table, 'slug', $model);
         else
             $column = $table->string('slug', $model->getFieldLength($slugcolumn));
 
