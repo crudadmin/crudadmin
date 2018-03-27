@@ -51,7 +51,7 @@ trait Sluggable
     {
         $new_slug = implode('-', $without_index );
 
-        $column = $this->hasLocalizedSlug() ? 'slug->'.$key : 'slug';
+        $column = $this->hasLocalizedSlug() ?  'JSON_EXTRACT(slug, "$.'.$key.'")' : 'slug';
 
         $i = 1;
 
@@ -63,7 +63,7 @@ trait Sluggable
         } while($this->where(function($query){
             if ( $this->exists )
                 $query->where($this->getKeyName(), '!=', $this->getKey());
-        })->where($column, $slugs[$key])->count() > 0);
+        })->whereRaw($column . ' = ?', $slugs[$key])->count() > 0);
     }
 
     /**
@@ -145,7 +145,7 @@ trait Sluggable
                     if ( ! $value )
                         continue;
 
-                    $query->{ $i == 0 ? 'where' : 'orWhere' }('slug->'.$key, $value);
+                    $query->{ $i == 0 ? 'whereRaw' : 'orWhereRaw' }('JSON_EXTRACT(slug, "$.'.$key.'") = ?', $value);
                     $i++;
                 }
             }
@@ -275,14 +275,14 @@ trait Sluggable
         $default = Localization::getDefaultLanguage();
 
         //Find slug from selected language
-        $scope->where('slug->'.$lang->slug, $slug_value);
+        $scope->whereRaw('JSON_EXTRACT(slug, "$.'.$lang->slug.'") = ?', $slug_value);
 
         //If selected language is other than default
         if ( $lang->getKey() != $default->getKey() )
         {
             //Then search also values in default language
             $scope->orWhere(function($query) use($lang, $default, $slug_value) {
-                $query->whereNull('slug->'.$lang->slug)->where('slug->'.$default->slug, $slug_value);
+                $query->whereRaw('JSON_EXTRACT(slug, "$.'.$lang->slug.'") is NULL')->whereRaw('JSON_EXTRACT(slug, "$.'.$default->slug.'") = ?', $slug_value);
             });
         }
     }

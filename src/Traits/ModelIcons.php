@@ -75,6 +75,7 @@ trait ModelIcons
             'review' => 'fa-commenting-o',
             'office' => 'fa-building',
             'param' => 'fa-gear',
+            'report' => 'fa-table',
         ];
     }
 

@@ -445,6 +445,9 @@ class AdminMigrationCommand extends Command
     {
         $this->checkForCorrectMysqlVersion($model, 'file');
 
+        //Set json column, with resetted collations with platformOptions
+        //Doctrine\DBAL\Schema\MySqlSchemaManager
+
         return $table->json($key)->platformOptions([]);
     }
 
@@ -869,6 +872,8 @@ class AdminMigrationCommand extends Command
             //Set default timestamp
             if ( $default && $model->isFieldType($key, ['date', 'datetime', 'time']) && strtoupper($default) == 'CURRENT_TIMESTAMP' )
                 $default = DB::raw('CURRENT_TIMESTAMP');
+            else
+                $default = null;
 
             $column->default( $default );
         } else {

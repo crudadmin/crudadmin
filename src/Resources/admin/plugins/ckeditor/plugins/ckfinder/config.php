@@ -123,7 +123,7 @@ gets scaled down proportionally. Set to 0 to disable this feature.
 */
 $config['Images'] = Array(
         'maxWidth' => 1600,
-        'maxHeight' => 1200,
+        'maxHeight' => 2500,
         'quality' => 80);
 
 /*

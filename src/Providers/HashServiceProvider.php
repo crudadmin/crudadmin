@@ -25,9 +25,10 @@ class HashServiceProvider extends ServiceProvider
             return;
 
         $this->app->extend('hash', function ($hashManager, $app) {
-            //Support for Laravel 5.4 and lower
             if ( class_exists('Illuminate\Hashing\HashManager') )
                 return new \Gogol\Admin\Hashing\HashManager($app);
+
+            //Support for Laravel 5.4 and lower
             else
                 return new \Gogol\Admin\Hashing\BcryptHasher;
         });

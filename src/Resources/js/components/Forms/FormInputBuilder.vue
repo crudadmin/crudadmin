@@ -3,21 +3,21 @@
     <!-- STRING INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="{{ isPassword ? 'password' : 'text' }}" :name="getFieldName" class="form-control" maxlength="{{ field.max }}" :value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :type="isPassword ? 'password' : 'text'" :name="getFieldName" class="form-control" :maxlength="field.max" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isInteger">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" :name="getFieldName" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" :name="getFieldName" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" :placeholder="field.placeholder || getName">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATETIME INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" :name="getFieldName" class="form-control" :value="getValueOrDefault" placeholder="{{ field.placeholder || getName }}">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" :name="getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
       <small>{{ field.title }}</small>
     </div>
 
@@ -34,7 +34,7 @@
     <!-- TEXT INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :name="getFieldName" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" placeholder="{{ field.placeholder || getName }}">{{ getValueOrDefault }}</textarea>
+      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :name="getFieldName" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName" v-model="getValueOrDefault"></textarea>
       <small>{{ field.title }}</small>
     </div>
 
@@ -43,7 +43,7 @@
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="file-group">
-        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" placeholder="{{ field.placeholder || getName }}">
+        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" :placeholder="field.placeholder || getName">
         <input v-if="!field.value && file_will_remove == true" type="hidden" name="$remove_{{ key }}" value="1">
 
         <button v-if="field.value && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>

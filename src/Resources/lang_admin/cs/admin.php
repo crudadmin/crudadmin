@@ -25,7 +25,7 @@ return [
     'change-language' => 'Změna jazykové mutace. Pozor! Změna jazyka může zahodit Vaše aktuální rozepsané změny.',
 
     'super-admin' => 'Super administrátor',
-    'admin-group' => 'Administrátorska skupina',
+    'admin-group' => 'Administrátorská skupina',
     'user-groups' => 'Uživatelské skupiny',
     'user-groups-title' => 'Upravte uživatelské skupiny a jejich omezení',
     'user-groups-name' => 'Název skupiny',
