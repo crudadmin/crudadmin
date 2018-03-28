@@ -60,7 +60,8 @@
             :rows.sync="rows"
             :history="history"
             :model="model"
-            :langid="langid"
+            :langid="selected_language_id ? selected_language_id : langid"
+            :selectedlangid.sync="selected_language_id"
             :canaddrow="canAddRow"
             :hasparentmodel="hasparentmodel"
             :row.sync="row"
@@ -74,7 +75,7 @@
             :model.sync="model"
             :rows.sync="rows"
             :row.sync="row"
-            :langid="langid"
+            :langid="selected_language_id ? selected_language_id : langid"
             :progress.sync="progress"
             :search="search"
             :iswithoutparent="isWithoutParentRow"
@@ -160,6 +161,7 @@
         components : [],
 
         language_id : null,
+        selected_language_id : null,
 
         progress : false,
 

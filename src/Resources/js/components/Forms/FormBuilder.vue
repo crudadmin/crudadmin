@@ -13,7 +13,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selected_language_id = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ lang.name }}</a></li>
+            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selectedlangid = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ lang.name }}</a></li>
           </ul>
         </div>
 
@@ -46,7 +46,7 @@
   export default {
     name : 'form-builder',
 
-    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel'],
+    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid'],
 
     components: { FormTabsBuilder },
 
@@ -56,7 +56,6 @@
         isActive : true,
         cansave : true,
         form : null,
-        selected_language_id : null,
       };
     },
 
@@ -140,11 +139,11 @@
         return this.$root.languages;
       },
       selectedLanguage(){
-        if ( ! this.selected_language_id )
+        if ( ! this.selectedlangid )
           return this.languages[0];
 
         for ( var key in this.languages )
-          if ( this.languages[key].id == this.selected_language_id )
+          if ( this.languages[key].id == this.selectedlangid )
             return this.languages[key];
 
         return this.languages[0];

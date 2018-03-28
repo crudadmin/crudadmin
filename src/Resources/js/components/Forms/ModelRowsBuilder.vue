@@ -164,7 +164,8 @@
           this.initTimeout(false);
       },
       langid(langid){
-        this.setPosition(1);
+        if ( this.model.localization == true )
+          this.setPosition(1);
       },
       activetab(value){
         if ( value == true )

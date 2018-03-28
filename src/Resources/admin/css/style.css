@@ -91,7 +91,7 @@
 .content .box-body.cantadd { margin-bottom: 0px }
 
 .language_select {padding: 10px 0 0 0;margin: 0;border-radius: 0px;}
-.language_select select {border-radius: 0px !important;background: #0b0d0e;color: #888;border: 1px solid black;height: 22px;font-size: 12px;}
+.language_select select {border-radius: 0px !important;background: #0b0d0e;color: #888;border: 1px solid black;font-size: 12px;}
 
 .sidebar-menu, .main-sidebar .user-panel, .sidebar-menu > li.header { overflow: visible; }
 

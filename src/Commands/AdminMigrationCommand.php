@@ -774,8 +774,8 @@ class AdminMigrationCommand extends Command
                     {
                         $query->{ $key == 0 ? 'where' : 'orWhere' }(function($query) use($model, $lang) {
                             //If row has defined localized value, but slug is missing
-                            $query->whereNull('slug->'.$lang->slug)
-                                  ->whereNotNull($model->getProperty('sluggable').'->'.$lang->slug);
+                            $query->whereRaw('JSON_EXTRACT(slug, "$.'.$lang->slug.'") is NULL')
+                                  ->whereRaw('JSON_EXTRACT('.$model->getProperty('sluggable').', "$.'.$lang->slug.'") is NOT NULL');
                         });
                     }
                 }
