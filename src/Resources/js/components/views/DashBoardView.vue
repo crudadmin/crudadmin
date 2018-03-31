@@ -22,10 +22,9 @@
 
 
           <div class="box-body">
-            <h2>{{ trans('welcome') }} {{ user.username }}</h2>
+            <h2 v-if="!layout">{{ trans('welcome') }} {{ user.username }}</h2>
+            {{{ layout }}}
           </div>
-
-
         </div>
         <!-- /.box -->
 
@@ -42,11 +41,12 @@
       props : ['langid'],
       data(){
         return {
-          user : {},
+          user : this.$root.user,
+          layout : this.$root.dashboard||'',
         }
       },
       created() {
-        this.user = this.$root.user;
+
       },
       methods: {
         trans(key){

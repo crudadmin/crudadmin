@@ -34,7 +34,7 @@
     <!-- TEXT INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :name="getFieldName" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName" v-model="getValueOrDefault"></textarea>
+      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :name="getFieldName" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 

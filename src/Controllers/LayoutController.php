@@ -26,6 +26,7 @@ class LayoutController extends BaseController
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
             'localization' => trans('admin::admin'),
+            'dashboard' => $this->getDashBoard(),
             'requests' => [
                 'show' => action('\Gogol\Admin\Controllers\DataController@show', [':model', ':id', ':subid']),
                 'store' => action('\Gogol\Admin\Controllers\DataController@store'),
@@ -40,6 +41,19 @@ class LayoutController extends BaseController
             ],
         ];
 
+    }
+
+    /*
+     * Return dashboard content
+     */
+    private function getDashBoard()
+    {
+        $path = config('admin.dashboard', resource_path('views/admin/dashboard.blade.php'));
+
+        if ( ! file_exists($path) )
+            return '';
+
+        return view()->file($path)->render();
     }
 
     /*

@@ -19,6 +19,7 @@
                     return {
                         version : layout.version,
                         version_assets : layout.version_assets,
+                        dashboard : layout.dashboard,
                         license_key : layout.license_key,
                         requests: layout.requests,
                         user : layout.user,
