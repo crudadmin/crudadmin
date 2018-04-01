@@ -139,7 +139,6 @@
     :history_changed="isChangedFromHistory"
     :row="row"
     :key="key"
-    :value.sync="field.value"
     :is="componentName">
   </component>
 </template>

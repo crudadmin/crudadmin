@@ -186,12 +186,9 @@
 
       this.initSearchSelectboxes();
 
-      //On change column reset input
-      this.$watch('search.column', function(column, prevcolumn){
-        //Reset searched value if previous column was select or option
-        if ( prevcolumn && prevcolumn in this.model.fields && ['select', 'option'].indexOf(this.model.fields[prevcolumn].type) !== -1 )
-          this.search.query = null;
-      });
+      this.resetSearchBar();
+
+      this.updateParentChildData();
     },
 
     watch : {
@@ -300,6 +297,28 @@
     },
 
     methods : {
+      /*
+       * Send into parent model all actual row and data changes
+       */
+      updateParentChildData(){
+        this.$watch('rows.data', function(data){
+          this.$dispatch('proxy', 'rows-changed', {
+            model : this.model.slug,
+            rows : this.rows.data,
+            count : this.rows.count,
+          });
+        });
+      },
+      resetSearchBar(){
+        //On change column reset input
+        this.$watch('search.column', function(column, prevcolumn){
+
+          //Reset searched value if previous column was select or option
+          if ( prevcolumn && prevcolumn in this.model.fields && ['select', 'option'].indexOf(this.model.fields[prevcolumn].type) !== -1 )
+            this.search.query = null;
+
+        });
+      },
       setDeepLevel(){
         var parent = this.$parent,
             depth = 0;
