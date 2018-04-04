@@ -294,6 +294,17 @@
         this.$broadcast(name, param);
       },
 
+      //Send into all childs parent row data
+      sendParentRow(name){
+        this.$broadcast('getParentRow', {
+          model : this.model,
+          row : this.row,
+          component : this,
+        });
+
+        return true;
+      },
+
     },
 
     methods : {
@@ -303,7 +314,8 @@
       updateParentChildData(){
         this.$watch('rows.data', function(data){
           this.$dispatch('proxy', 'rows-changed', {
-            model : this.model.slug,
+            slug : this.model.slug,
+            model : this.model,
             rows : this.rows.data,
             count : this.rows.count,
           });

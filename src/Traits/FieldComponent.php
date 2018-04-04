@@ -10,7 +10,9 @@ trait FieldComponent
 {
     private function getTextBetweenTags($string, $tagname)
     {
-        preg_match("/\<$tagname.*?\>(.*)\<\/$tagname\>/", $string, $matches);
+        $string = trim($string);
+
+        preg_match("/\<$tagname.*?\>(.*?)\<\/$tagname\>/s", $string, $matches);
 
         return trim($matches[1]);
     }
@@ -19,9 +21,10 @@ trait FieldComponent
     private function renderFieldComponent($path)
     {
         $content = file_get_contents($path);
-        $content = str_replace("\n", '', $content);
+        $content = preg_replace('#^\s*//.+$#m', '', $content);
 
         $template = $this->getTextBetweenTags($content, 'template');
+        $template = str_replace("\n", "", $template);
 
         $script = $this->getTextBetweenTags($content, 'script');
         $script = trim(str_replace_first('export default', '', $script));

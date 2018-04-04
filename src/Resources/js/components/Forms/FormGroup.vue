@@ -103,7 +103,7 @@ export default {
         return this.$parent.hasTabs(fields);
       },
       getFieldLangs(field){
-        if ( !('locale' in field) )
+        if ( ! field || !('locale' in field) )
           return 1;
 
         return _.map(this.$root.languages, 'slug');
