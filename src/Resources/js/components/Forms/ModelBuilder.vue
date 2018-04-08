@@ -17,7 +17,7 @@
           <div class="input-group input-group-sm">
             <div class="input-group-btn">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
-                <span class="fa fa-caret-down"></span></button>
+                <span class="caret"></span></button>
                 <ul class="dropdown-menu">
                   <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
                   <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>

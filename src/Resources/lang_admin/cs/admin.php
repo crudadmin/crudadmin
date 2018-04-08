@@ -79,6 +79,8 @@ return [
     'new-row' => 'Nový záznam',
     'general-tab' => 'Obecné',
     'number' => 'č.',
+    'rows-list' => 'Seznam stlpcu',
+    'default' => 'Výchozi',
 
     'edit' => 'Upravit',
     'show' => 'Zobrazit',

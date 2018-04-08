@@ -570,6 +570,10 @@ trait AdminModelTrait
             $fields[] = 'deleted_at';
         }
 
+        //Push also additional needed columns
+        if ( request()->has('enabled_columns') )
+            $fields = array_merge($fields, array_diff(explode(';', request('enabled_columns', '')), $fields));
+
         return $fields;
     }
 

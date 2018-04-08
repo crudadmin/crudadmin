@@ -18,6 +18,11 @@
 .data-table td {line-height: 198% !important;}
 .table { margin-bottom: 6px; }
 
+button.dropdown-toggle > span.caret { margin-left: 5px; }
+.dropdown.fields-list { margin-right: 5px; float: right; }
+.dropdown.fields-list .dropdown-menu li label {cursor: pointer; padding: 0 10px; font-weight: 400; color: #777 }
+.dropdown.fields-list .dropdown-menu li input { margin-right: 5px }
+.search-bar .dropdown-menu, .dropdown.fields-list .dropdown-menu {max-height: 400px !important;overflow: auto;}
 
 /* Modal links, for exports etc, from buttons response... */
 .message-modal > .modal { z-index: 99999999999; }

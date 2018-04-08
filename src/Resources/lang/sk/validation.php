@@ -28,7 +28,7 @@ return [
         'array'   => ':attribute musí mať rozsah :min - :max prvkov.',
     ],
     'boolean'              => ':attribute musí byť pravda alebo nepravda.',
-    'confirmed'            => 'Zadané hesla sa nezdouju.',
+    'confirmed'            => 'Zadané hesla sa nezhoduju.',
     'date'                 => ':attribute má neplatný dátum.',
     'date_format'          => ':attribute sa nezhoduje s formátom :format.',
     'different'            => ':attribute a :other musia byť odlišné.',

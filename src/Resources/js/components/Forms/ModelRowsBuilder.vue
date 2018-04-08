@@ -8,6 +8,18 @@
           <option v-for="count in pagination.limits">{{ count }}</option>
         </select>
       </div>
+
+      <div class="dropdown fields-list">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          {{ trans('rows-list') }}
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu menu-left dropdown-menu-right" aria-labelledby="dropdownMenu1">
+          <li @click="$event.stopPropagation()" v-for="(key, column) in enabled_columns" v-if="canShowColumn(column, key)"><label><input type="checkbox" v-model="column.enabled"> {{ column.name }}</label></li>
+          <li role="separator" class="divider"></li>
+          <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
+        </ul>
+      </div>
     </div>
 
     <div class="box-body box-table-body">
@@ -19,6 +31,7 @@
         :history="history"
         :rows="rows"
         :rowsdata.sync="rowsData"
+        :enabledcolumns.sync="enabled_columns"
         :item="$row"
         :dragging.sync="dragging"
         :orderby.sync="orderBy">
@@ -72,6 +85,10 @@
           count : 0,
           interval : this.getRefreshInterval(),
         },
+
+        //Receive value from tablerows component
+        default_columns : [],
+        enabled_columns : null,
       };
     },
 
@@ -192,6 +209,16 @@
           }
         },
       },
+      //On change enabled columns, reload full table with newer data
+      enabled_columns : {
+        deep : true,
+        handler : function(columns, old){
+          if ( ! old || ! columns )
+            return;
+
+          this.loadRows(true);
+        },
+      }
     },
 
     computed: {
@@ -241,9 +268,27 @@
           }
         }.bind(this));
       },
+      enabledColumnsList(){
+        var allowed = [];
+
+        for ( var key in this.enabled_columns||{} )
+          if ( this.enabled_columns[key].enabled == true && this.default_columns.indexOf(key) == -1 )
+            allowed.push(key);
+
+        return allowed;
+      }
     },
 
     methods: {
+      canShowColumn(column, key){
+        if ( ! column.name )
+          return false;
+
+        if ( key in this.model.fields && this.model.fields[key].type == 'password' )
+          return false;
+
+        return true;
+      },
       trans(key){
         return this.$root.trans(key);
       },
@@ -295,6 +340,10 @@
           query.column = this.search.column;
         }
 
+        //Add additional columns
+        if ( this.enabledColumnsList.length > 0 )
+          query.enabled_columns = this.enabledColumnsList.join(';');
+
         //My error
         function customErrorAlert(response){
           var url = response.request.url;
@@ -320,7 +369,7 @@
           this.pagination.refreshing = false;
 
           //Load rows into array
-          this.updateRowsData(response.data.rows);
+          this.updateRowsData(response.data.rows, this.enabledColumnsList.length == 0 ? null : 1);
           this.rows.count = response.data.count;
 
           //Bind additional buttons for rows
@@ -506,7 +555,7 @@
        */
       updateRowsData(data, update){
         //This update rows just in table, not in forms
-        if ( update !== true && (this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id) )
+        if ( update !== true && (this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id || update === 1) )
         {
           this.rows.data = data;
           return;

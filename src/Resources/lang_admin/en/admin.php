@@ -79,6 +79,8 @@ return [
     'new-row' => 'New row',
     'general-tab' => 'General',
     'number' => 'No.',
+    'rows-list' => 'Columns list',
+    'default' => 'Default',
 
     'edit' => 'Edit',
     'show' => 'Show',

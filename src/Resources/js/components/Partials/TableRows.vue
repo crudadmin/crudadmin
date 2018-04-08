@@ -41,7 +41,7 @@
   import History from './History.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'model', 'orderby', 'dragging', 'history'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history'],
 
       components: { TableRowValue, History },
 
@@ -71,7 +71,7 @@
       },
 
       computed: {
-        columns(){
+        defaultColumns(){
           var data = {},
               key;
 
@@ -159,7 +159,26 @@
           if ( this.$root.getModelProperty(this.model, 'settings.increments') === false && 'id' in data )
             delete data['id'];
 
+          this.$parent.default_columns = Object.keys(data);
+
           return data;
+        },
+        columns(){
+          var columns = _.cloneDeep(this.defaultColumns);
+
+          //If enabled columns has not been set yet
+          if ( ! this.enabledcolumns )
+            this.resetAllowedFields(columns)
+          else {
+            //Disable changed fields
+            for ( var key in this.enabledcolumns )
+              if ( this.enabledcolumns[key].enabled == false && key in columns )
+                delete columns[key];
+              else if ( this.enabledcolumns[key].enabled == true && !(key in columns) )
+                columns[key] = this.fieldName(key);
+          }
+
+          return columns;
         },
         avaliableColumns(){
           return ['id'].concat( Object.keys( this.model.fields ) );
@@ -176,6 +195,26 @@
       },
 
       methods: {
+        resetAllowedFields(columns){
+          var enabled = {};
+
+          //Add allowed keys
+          for ( var key in columns )
+            enabled[key] = {
+              name : columns[key],
+              enabled : true,
+            };
+
+          //After allowed keys, add all hidden
+          for ( var key in this.model.fields )
+            if ( !(key in enabled) )
+              enabled[key] = {
+                name : this.fieldName( key ),
+                enabled : false,
+              };
+
+          this.$parent.$set('enabled_columns', enabled);
+        },
         isReservedRow(row){
           if ( this.model.reserved && this.model.reserved.indexOf(row.id) > -1 )
             return true;
@@ -305,6 +344,9 @@
                 break;
               case 'created_at':
                 return this.$root.trans('created');
+                break;
+              case 'updated_at':
+                return this.$root.trans('updated');
                 break;
               default:
                 return key;

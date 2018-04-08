@@ -79,6 +79,8 @@ return [
     'new-row' => 'Nový záznam',
     'general-tab' => 'Všeobecné',
     'number' => 'č.',
+    'rows-list' => 'Zoznam stĺpcov',
+    'default' => 'Predvolené',
 
     'edit' => 'Upraviť',
     'show' => 'Zobraziť',
