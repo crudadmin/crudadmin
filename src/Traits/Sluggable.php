@@ -307,9 +307,8 @@ trait Sluggable
         else if ( ! is_string($id) )
             $id = null;
 
-        $row = ($query ?: new static)->whereSlug($slug, $id, $key, $key)->first($columns);
-
-        (new static)->redirectWithWrongSlug($slug, $id, $key, $row);
+        if ( $row = ($query ?: new static)->whereSlug($slug, $id, $key, $key)->first($columns) )
+            (new static)->redirectWithWrongSlug($slug, $id, $key, $row);
 
         return $row;
     }
