@@ -383,7 +383,7 @@ trait AdminModelTrait
         //If is turned of sorting of rows
         if ( ! $this->isSortable() && $this->orderBy[0] == '_order' )
         {
-            $this->orderBy[0] = $this->getTable().'.id';
+            $this->orderBy[0] = 'id';
         }
 
         if ( ! array_key_exists(1, $this->orderBy) )
@@ -790,10 +790,15 @@ trait AdminModelTrait
      */
     public function scopeAddSorting($query)
     {
+        $column = $this->orderBy[0];
+
+        if ( count(explode('.', $column)) == 1 )
+            $column = $this->getTable() . '.' . $this->orderBy[0];
+
         /**
          * Add global scope for ordering
          */
-        $query->orderBy($this->orderBy[0], $this->orderBy[1]);
+        $query->orderBy($column, $this->orderBy[1]);
     }
 
     public function scopeWithPublished($query)
