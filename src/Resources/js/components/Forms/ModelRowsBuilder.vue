@@ -561,7 +561,6 @@
         //This update rows just in table, not in forms
         if ( update !== true && (this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id || update === 1) )
         {
-          console.log('force');
           this.rows.data = data;
           return;
         }
