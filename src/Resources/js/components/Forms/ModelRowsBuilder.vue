@@ -192,7 +192,7 @@
         deep : true,
         handler : function(search){
 
-          var query = search.query,
+          var query = search.query||search.query_to,
               was_searching = this.searching;
 
           this.searching = (query && (query.length >= 3 || (search.column && ((search.column in this.model.fields && ['select', 'option'].indexOf(this.model.fields[search.column].type) > -1) || $.isNumeric(query))))) ? true : false;
@@ -337,6 +337,10 @@
         //If is enabled searching
         if ( this.searching == true ){
           query.query = this.search.query;
+
+          if ( this.search.interval === true )
+            query.query_to = this.search.query_to;
+
           query.column = this.search.column;
         }
 

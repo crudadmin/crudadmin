@@ -246,11 +246,9 @@
           if ( ! this.isDatepicker )
             return;
 
-          jQuery.datetimepicker.setLocale('sk');
-
           //Add datepickers
           $('#' + this.getId).datetimepicker({
-            lang: 'sk',
+            lang: this.$root.locale,
             format: this.getDateFormat,
             timepicker: this.field.type != 'date',
             datepicker: this.field.type != 'time',

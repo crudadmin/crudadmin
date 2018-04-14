@@ -19,6 +19,7 @@
                     return {
                         version : layout.version,
                         version_assets : layout.version_assets,
+                        locale : layout.locale,
                         dashboard : layout.dashboard,
                         license_key : layout.license_key,
                         requests: layout.requests,
@@ -50,6 +51,9 @@
 
                 created(){
                     this.bootLanguages();
+
+                    //Set datepickers language
+                    jQuery.datetimepicker.setLocale(this.locale);
                 },
 
                 ready(){

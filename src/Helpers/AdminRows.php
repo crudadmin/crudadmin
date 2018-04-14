@@ -4,6 +4,7 @@ namespace Gogol\Admin\Helpers;
 
 use Ajax;
 use Gogol\Admin\Models\Model as AdminModel;
+use Carbon\Carbon;
 
 class AdminRows
 {
@@ -41,37 +42,85 @@ class AdminRows
         return $column && $this->model->isFieldType($column, ['select', 'radio']) && ! $this->model->hasFieldParam($column, 'multiple');
     }
 
+    private function isDateColumn($column)
+    {
+        if ( in_array($column, ['created_at']) )
+            return true;
+
+        return $column && $this->model->isFieldType($column, ['date', 'datetime', 'time']);
+    }
+
+    private function getDateFormat($column, $value)
+    {
+        try {
+            return Carbon::createFromFormat($this->model->getField($column)['date_format'] ?: 'd.m.Y', $value);
+        } catch(\Exeption $e){
+            return null;
+        }
+    }
+
     /*
      * Apply multi-text search scope for given query
      */
     protected function checkForSearching($query)
     {
-        if ( request()->has('query') )
+        if ( request()->has('query') || request()->has('query_to') )
         {
             $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query'))));
+            $search_to = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query_to'))));
+            $column = request('column');
+
+            if ( $this->isDateColumn($column) )
+            {
+                if ( request('query') )
+                    $date = $this->getDateFormat($column, $search);
+
+                if ( request('query_to') )
+                    $date_to = $this->getDateFormat($column, $search_to);
+
+                if ( isset($date) && !isset($date_to) )
+                    $query->whereDate($column, $date->format('Y-m-d'));
+
+                if ( !isset($date) && isset($date_to) )
+                    $query->whereDate($column, '<=', $date_to->format('Y-m-d'));
+
+                if ( isset($date) && isset($date_to) )
+                    $query->whereDate($column, '>=', $date->format('Y-m-d'))
+                          ->whereDate($column, '<=', $date_to->format('Y-m-d'));
+            }
 
             //If is more than 3 chars for searching
-            if ( strlen($search) >= 3 || ($this->isSelectColumn(request('column')) || is_numeric($search)) )
+            else if ( strlen($search) >= 3 || ($this->isSelectColumn($column) || is_numeric($search)) || $search_to )
             {
                 $columns = array_merge(array_keys($this->model->getFields()), [ 'id' ]);
                 $queries = explode(' ', $search);
 
                 //If is valid column
-                if ( in_array(request('column'), $columns) )
-                {
-                    $columns = [ request('column') ];
-                }
-
+                if ( in_array($column, $columns) )
+                    $columns = [ $column ];
 
                 //Search scope
-                $query->where(function($builder) use ( $columns, $queries ) {
+                $query->where(function($builder) use ( $columns, $queries, $search, $search_to ) {
                     foreach ($columns as $key => $column)
                     {
                         //Search in all columns
-                        $builder->{ $key == 0 ? 'where' : 'orWhere' }(function($builder) use ( $columns, $column, $queries ) {
+                        $builder->{ $key == 0 ? 'where' : 'orWhere' }(function($builder) use ( $columns, $column, $queries, $search, $search_to ) {
+
+                            if ( $search_to )
+                            {
+                                $builder->where(function($builder) use($column, $search, $search_to) {
+                                    if ( !isset($search) && isset($search_to) )
+                                        $builder->where($column, '<=', $search_to);
+
+                                    if ( isset($search) && isset($search_to) )
+                                        $builder->where($column, '>=', $search)
+                                                ->where($column, '<=', $search_to);
+                                });
+
+                            }
 
                             //Find exact id, value
-                            if ( $this->isPrimaryKey($column, $columns) ){
+                            else if ( $this->isPrimaryKey($column, $columns) ){
                                 foreach ($queries as $query)
                                     $builder->where($column, $query);
                             }

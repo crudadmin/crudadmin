@@ -25,6 +25,7 @@ class LayoutController extends BaseController
             'user' => auth()->guard('web')->user()->getAdminUser(),
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
+            'locale' => config('admin.locale'),
             'localization' => trans('admin::admin'),
             'dashboard' => $this->getDashBoard(),
             'requests' => [

@@ -7,13 +7,11 @@
   <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
 
-    <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-if="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
+    <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
       <div class="pull-right" v-if="!isSingle">
-      <!-- <button type="button" v-if="isOpenedRow && canAddRow" v-on:click.prevent="resetForm"  class="pull-left add-row-btn btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle() }}</button> -->
-
-        <div class="search-bar" v-show="canShowSearchBar">
+        <div class="search-bar" :class="{ interval : search.interval }" v-bind:id="getFilterId" v-show="canShowSearchBar">
           <div class="input-group input-group-sm">
             <div class="input-group-btn">
               <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
@@ -22,24 +20,36 @@
                   <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
                   <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
                   <li v-for="key in getSearchableFields" v-bind:class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
+                  <li v-bind:class="{ active : search.column == 'created_at' }"><a href="#" @click.prevent="search.column = 'created_at'">{{ getSearchingColumnName('created_at') }}</a></li>
                 </ul>
             </div>
             <!-- /btn-group -->
 
             <!-- Search columns -->
             <input type="text" v-show="isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
+
+            <input type="text" v-show="isDate" v-model="search.query" class="form-control js_date">
+
             <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
               <option value="0">{{ trans('off') }}</option>
               <option value="1">{{ trans('on') }}</option>
             </select>
 
             <div class="select" v-show="isSelect">
-              <select type="text" v-model="search.query" class="form-control" v-bind:id="getFilterSelectId" :data-placeholder="trans('get-value')">
+              <select type="text" v-model="search.query" class="form-control js_chosen" :data-placeholder="trans('get-value')">
                 <option value="">{{ trans('show-all') }}</option>
                 <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]" v-bind:value="data[0]">{{ data[1] }}</option>
               </select>
             </div>
             <!-- Search columns -->
+
+            <div class="interval" v-if="canBeInterval" data-toggle="tooltip" data-original-title="Interval">
+              <button class="btn" @click="search.interval = !search.interval" :class="{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }"><i class="fa fa-arrows-h"></i></button>
+            </div>
+
+            <input type="text" v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
+
+            <input type="text" v-show="search.interval && isDate" v-model="search.query_to" class="form-control js_date">
           </div>
         </div>
 
@@ -132,7 +142,9 @@
         search : {
           column : this.$root.getModelProperty(this.model, 'settings.search.column', null),
           query : null,
+          query_to : null,
           used : false,
+          interval : false,
         },
 
         /*
@@ -329,6 +341,9 @@
           if ( prevcolumn && prevcolumn in this.model.fields && ['select', 'option'].indexOf(this.model.fields[prevcolumn].type) !== -1 )
             this.search.query = null;
 
+          this.search.interval = false;
+
+          this.reloadDatetimeSearch();
         });
       },
       setDeepLevel(){
@@ -350,11 +365,12 @@
       },
       initSearchSelectboxes(){
         window.js_date_event = document.createEvent('HTMLEvents');
+
         var dispached = false;
 
         js_date_event.initEvent('change', true, true);
 
-        $('#'+this.getFilterSelectId).chosen({disable_search_threshold: 5}).on('change', function(){
+        $('#'+this.getFilterId+' .js_chosen').chosen({disable_search_threshold: 5}).on('change', function(){
             if ( dispached == false )
             {
                 dispached = true;
@@ -362,6 +378,23 @@
             } else {
                 dispached = false;
             }
+        });
+      },
+      reloadDatetimeSearch(){
+        if ( ! this.isDate )
+          return;
+
+        var column = this.search.column;
+
+        console.log('reset dates');
+
+        //Add datepickers
+        $('#'+this.getFilterId+' .js_date').datetimepicker({
+          lang: this.$root.locale,
+          format: column == 'created_at' ? 'd.m.Y' : this.model.fields[column].date_format,
+          timepicker: column == 'created_at' ? false : this.model.fields[column].type != 'date',
+          datepicker: column == 'created_at' ? true : this.model.fields[column].type != 'time',
+          scrollInput: false,
         });
       },
       getParentTableName(force){
@@ -504,6 +537,9 @@
         if ( column == 'id' )
           return 'ID. ('+this.trans('number')+')';
 
+        if ( column == 'created_at' )
+          return this.$root.trans('created-at');
+
         if ( ! column || !(column in this.model.fields) )
           return this.trans('search-all');
 
@@ -513,7 +549,7 @@
         return name;
       },
       reloadSearchBarSelect(){
-        $('#'+this.getFilterSelectId).trigger("chosen:updated");
+        $('#'+this.getFilterId+' .js_chosen').trigger("chosen:updated");
       },
       /*
        * Close history rows
@@ -545,6 +581,14 @@
     },
 
     computed: {
+      canBeInterval(){
+        var column = this.search.column;
+
+        if ( ! column || ['created_at', 'id'].indexOf(column) > -1 )
+          return true;
+
+        return column in this.model.fields && (['integer', 'decimal', 'date', 'datetime', 'time'].indexOf(this.model.fields[column].type) > -1) ? true : false;
+      },
       isOpenedRow(){
         return this.row && 'id' in this.row;
       },
@@ -554,8 +598,8 @@
       isWithoutParentRow(){
         return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true && this.hasparentmodel == true;
       },
-      getFilterSelectId(){
-        return 'js_chosen_filter' + this.getModelKey;
+      getFilterId(){
+        return 'js_filter' + this.getModelKey;
       },
       getModelKey(){
         return this.model.slug + '-' + this.getParentTableName();
@@ -645,12 +689,20 @@
        * Search columns
        */
       isSearch(){
-        return (this.isCheckbox || this.isSelect) ? false : true;
+        return (this.isCheckbox || this.isDate || this.isSelect) ? false : true;
       },
       isCheckbox(){
         var column = this.search.column;
 
         return column && column in this.model.fields && this.model.fields[column].type == 'checkbox' ? true : false;
+      },
+      isDate(){
+        var column = this.search.column;
+
+        if ( column == 'created_at' )
+          return true;
+
+        return column && column in this.model.fields && (['date', 'datetime', 'time'].indexOf(this.model.fields[column].type) > -1) ? true : false;
       },
       isSelect(){
         var column = this.search.column;
