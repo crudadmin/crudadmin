@@ -161,7 +161,8 @@ class ModelsHistory extends Model
         $data = $this->convertData($model, $data);
 
         //Compare and get new changes
-        $data = $this->checkChanges($model, $data, $original);
+        if ( $initial !== true )
+            $data = $this->checkChanges($model, $data, $original);
 
         //If no changes
         if ( count($data) == 0 )

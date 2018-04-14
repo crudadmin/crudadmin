@@ -146,6 +146,10 @@ export default {
           }
         }
 
+        //Return correct zero value
+        if ( value == 0 )
+          return 0;
+
         return value||'';
       },
       getLanguageSelectOptions(array){
