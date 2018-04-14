@@ -236,7 +236,7 @@
         return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false && !this.iswithoutparent;
       },
       rowsData(){
-        return this.rows.data.sort(function(a, b){
+        return this.rows.data.slice(0).sort(function(a, b){
           //If is null value
           if ( ! a || ! b )
             return false;
@@ -373,7 +373,7 @@
           this.pagination.refreshing = false;
 
           //Load rows into array
-          this.updateRowsData(response.data.rows);
+          this.updateRowsData(response.data.rows, this.enabledColumnsList.length == 0 ? null : 1);
           this.rows.count = response.data.count;
 
           //Bind additional buttons for rows
@@ -557,46 +557,28 @@
       /*
        * Change updated rows in db
        */
-      updateRowsData(data){
-
-        //Remove items from list
-        var removeIncrements = [];
-        dataDelete:
-        for ( var i = 0; i < this.rows.data.length; i++ )
+      updateRowsData(data, update){
+        //This update rows just in table, not in forms
+        if ( update !== true && (this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id || update === 1) )
         {
-          for ( var key in data )
-            if ( data[key].id == this.rows.data[i].id )
-              continue dataDelete;
-
-          removeIncrements.push(i);
+          console.log('force');
+          this.rows.data = data;
+          return;
         }
-        this.rows.data.splice(removeIncrements[0], removeIncrements.length);
 
-        dataFor:
-        for ( var key in data )
+        //Update changed data in vue object
+        for ( var i in this.rows.data )
         {
-          //Update existing row
-          for ( var i = 0; i < this.rows.data.length; i++ )
+          for ( var k in data[i] )
           {
-            //Update existing row in object
-            if ( this.rows.data[i].id == data[key].id )
+            var isArray = $.isArray(data[i][k]);
+
+            //Compare also arrays
+            if ( isArray && !_.isEqual(this.rows.data[i][k], data[i][k]) || !isArray )
             {
-              for ( var k in data[key] )
-              {
-                var isArray = $.isArray(data[key][k]);
-
-                //Compare also arrays
-                if ( isArray && !_.isEqual(this.rows.data[i][k], data[key][k]) || !isArray )
-                {
-                  this.rows.data[i][k] = data[key][k];
-                }
-              }
-
-              continue dataFor;
+              this.rows.data[i][k] = data[i][k];
             }
           }
-
-          this.rows.data.push(data[key]);
         }
       },
       /*
