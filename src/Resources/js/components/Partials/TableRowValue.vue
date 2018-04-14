@@ -9,7 +9,7 @@
     </div>
 
     <!-- Table value -->
-    <span v-else data-toggle="{{ fieldValue.length > 20 ? 'tooltip' : '' }}" data-original-title="{{ fieldValue | encodedTitle field }}">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
+    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue | encodedTitle field">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
 
   </div>
 </template>
@@ -147,7 +147,7 @@ export default {
         }
 
         //Return correct zero value
-        if ( value == 0 )
+        if ( value === 0 )
           return 0;
 
         return value||'';

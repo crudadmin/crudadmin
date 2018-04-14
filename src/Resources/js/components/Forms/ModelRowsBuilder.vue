@@ -369,7 +369,7 @@
           this.pagination.refreshing = false;
 
           //Load rows into array
-          this.updateRowsData(response.data.rows, this.enabledColumnsList.length == 0 ? null : 1);
+          this.updateRowsData(response.data.rows);
           this.rows.count = response.data.count;
 
           //Bind additional buttons for rows
@@ -553,27 +553,46 @@
       /*
        * Change updated rows in db
        */
-      updateRowsData(data, update){
-        //This update rows just in table, not in forms
-        if ( update !== true && (this.rows.data.length != data.length || this.rows.data.length == 0 || this.rows.data[0].id != data[0].id || update === 1) )
+      updateRowsData(data){
+
+        //Remove items from list
+        var removeIncrements = [];
+        dataDelete:
+        for ( var i = 0; i < this.rows.data.length; i++ )
         {
-          this.rows.data = data;
-          return;
+          for ( var key in data )
+            if ( data[key].id == this.rows.data[i].id )
+              continue dataDelete;
+
+          removeIncrements.push(i);
         }
+        this.rows.data.splice(removeIncrements[0], removeIncrements.length);
 
-        //Update changed data in vue object
-        for ( var i in this.rows.data )
+        dataFor:
+        for ( var key in data )
         {
-          for ( var k in data[i] )
+          //Update existing row
+          for ( var i = 0; i < this.rows.data.length; i++ )
           {
-            var isArray = $.isArray(data[i][k]);
-
-            //Compare also arrays
-            if ( isArray && !_.isEqual(this.rows.data[i][k], data[i][k]) || !isArray )
+            //Update existing row in object
+            if ( this.rows.data[i].id == data[key].id )
             {
-              this.rows.data[i][k] = data[i][k];
+              for ( var k in data[key] )
+              {
+                var isArray = $.isArray(data[key][k]);
+
+                //Compare also arrays
+                if ( isArray && !_.isEqual(this.rows.data[i][k], data[key][k]) || !isArray )
+                {
+                  this.rows.data[i][k] = data[key][k];
+                }
+              }
+
+              continue dataFor;
             }
           }
+
+          this.rows.data.push(data[key]);
         }
       },
       /*
