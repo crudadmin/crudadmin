@@ -95,6 +95,7 @@ return [
     'search' => 'Search',
     'search-all' => 'Search everywhere',
     'get-value' => 'Select value',
+    'reset' => 'Reset',
     'on' => 'Off',
     'off' => 'On',
     'yes' => 'Yes',

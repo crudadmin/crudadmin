@@ -50,6 +50,10 @@
             <input type="text" v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
 
             <input type="text" v-show="search.interval && isDate" v-model="search.query_to" class="form-control js_date">
+
+            <div class="interval" v-if="search.query || search.query_to" data-toggle="tooltip" :data-original-title="trans('reset')">
+              <button class="btn btn-default" @click="search.query = ''"><i class="fa fa-times"></i></button>
+            </div>
           </div>
         </div>
 
@@ -385,8 +389,6 @@
           return;
 
         var column = this.search.column;
-
-        console.log('reset dates');
 
         //Add datepickers
         $('#'+this.getFilterId+' .js_date').datetimepicker({

@@ -309,15 +309,19 @@ select[multiple] {height: 34px;color: white;}
 .td-id { text-align: center; }
 
 .box .overlay > p { position: absolute;top: calc(50% + 28px);text-align: center;width: 100%;font-weight: bold;}
+.pagination-sm>li>a { border-radius: 0 !important }
 
-.search-bar {
-    max-width: 280px;
-    display: inline-block;
-    margin: 0 5px;
-}
 
+.search-bar {max-width: 280px; display: inline-block; margin: 0 5px; }
+.search-bar.interval {max-width: 350px }
+.search-bar .input-group-btn { text-align: right; }
+.search-bar .input-group-btn button { margin-right: 0 !important; }
 .search-bar .chosen-single { height: 30px }
 .search-bar .chosen-container-single .chosen-single span { margin-top: 2px; font-size: 13px }
+.search-bar input {border-left: 0}
+.search-bar select {border-radius: 0;}
+.search-bar .interval {display: table-cell;white-space: nowrap;vertical-align: top;width: 25px;}
+.search-bar .interval button {padding: 4px;border-radius: 0;border-left: 0;width: 100%;}
 
 form label span.required { color: red; position: relative; top: 2px }
 

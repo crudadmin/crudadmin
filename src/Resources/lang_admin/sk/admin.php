@@ -95,6 +95,7 @@ return [
     'search' => 'Vyhľadajte',
     'search-all' => 'Hľadať všade',
     'get-value' => 'Vyberte hodnotu',
+    'reset' => 'Resetovať',
     'on' => 'Vypnuté',
     'off' => 'Zapnuté',
     'yes' => 'Áno',
