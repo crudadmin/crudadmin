@@ -133,7 +133,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <p>{{{ alert.message }}}</p>
               </div>
               <div class="modal-footer">
-                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type=='success' && !alert.close" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal"><?php echo trans('admin::admin.close') ?></button>
+                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type=='success' && !alert.close || !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal"><?php echo trans('admin::admin.close') ?></button>
                 <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success" class="btn btn-outline"><?php echo trans('admin::admin.accept') ?></button>
               </div>
             </div>
