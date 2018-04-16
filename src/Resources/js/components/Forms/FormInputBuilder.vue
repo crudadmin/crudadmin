@@ -336,7 +336,7 @@
           //When VueJs DOM has been rendered
           this.$nextTick(function () {
             //After change value, update same value in ckeditor
-            if ( field.type == 'editor'){
+            if ( ['editor', 'longeditor'].indexOf(field.type) > -1 ){
               var editor = CKEDITOR.instances[this.getId];
 
               //If is editor not ready yet, then wait for ready state
