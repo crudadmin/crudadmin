@@ -586,7 +586,7 @@
       canBeInterval(){
         var column = this.search.column;
 
-        if ( ! column || ['created_at', 'id'].indexOf(column) > -1 )
+        if ( ['created_at', 'id'].indexOf(column) > -1 )
           return true;
 
         return column in this.model.fields && (['integer', 'decimal', 'date', 'datetime', 'time'].indexOf(this.model.fields[column].type) > -1) ? true : false;

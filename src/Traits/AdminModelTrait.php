@@ -803,7 +803,7 @@ trait AdminModelTrait
 
     public function scopeWithPublished($query)
     {
-        $query->where('published_at', '!=', null);
+        $query->where('published_at', '!=', null)->whereRAW('published_at <= NOW()');
     }
 
     /*

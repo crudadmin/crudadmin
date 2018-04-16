@@ -32,7 +32,7 @@
                         </td>
                         <td>{{ date(item.created_at) }}</td>
                         <td>
-                          <div><button type="button" v-on:click="applyChanges(item)" class="btn btn-sm btn-success" v-bind:class="{ 'enabled-history' : history.history_id == item.id }" data-toggle="tooltip" title="Zobraziť zmeny" data-original-title="Zobraziť zmeny"><i class="fa fa-eye"></i></button></div>
+                          <div><button type="button" v-on:click="applyChanges(item)" class="btn btn-sm btn-success" v-bind:class="{ 'enabled-history' : history.history_id == item.id }" data-toggle="tooltip" :title="trans('history.show-changes')" :data-original-title="trans('history.show-changes')"><i class="fa fa-eye"></i></button></div>
                         </td>
                       </tr>
                     </tbody>

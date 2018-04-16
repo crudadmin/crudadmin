@@ -43,6 +43,7 @@ return [
     'history.count' => 'Počet zmien',
     'history.date' => 'Dátum zmeny',
     'history.system' => 'Systém',
+    'history.show' => 'Zobraziť zmeny',
 
     'close' => 'Zatvoriť',
     'accept' => 'Potvrdiť',

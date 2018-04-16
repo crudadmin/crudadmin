@@ -43,6 +43,7 @@ return [
     'history.count' => 'Number of Changes',
     'history.date' => 'Change date',
     'history.system' => 'System',
+    'history.show' => 'Show changes',
 
     'close' => 'Close',
     'accept' => 'Confirm',

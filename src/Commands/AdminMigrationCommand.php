@@ -870,10 +870,13 @@ class AdminMigrationCommand extends Command
             $default = $model->getFieldParam($key, 'default');
 
             //Set default timestamp
-            if ( $default && $model->isFieldType($key, ['date', 'datetime', 'time']) && strtoupper($default) == 'CURRENT_TIMESTAMP' )
-                $default = DB::raw('CURRENT_TIMESTAMP');
-            else
-                $default = null;
+            if ( $default && $model->isFieldType($key, ['date', 'datetime', 'time']) )
+            {
+                if ( strtoupper($default) == 'CURRENT_TIMESTAMP' )
+                    $default = DB::raw('CURRENT_TIMESTAMP');
+                else
+                    $default = null;
+            }
 
             $column->default( $default );
         } else {
