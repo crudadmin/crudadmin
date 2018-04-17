@@ -138,7 +138,7 @@
 
         activeSize : null,
 
-        row : {},
+        row : this.emptyRowInstance(),
 
         /*
          * Search engine
@@ -570,7 +570,15 @@
         return this.$root.getModelProperty(this.model, 'settings.buttons.insert', this.trans('new-row'));
       },
       resetForm(){
-        this.row = {};
+        this.row = this.emptyRowInstance();
+      },
+      emptyRowInstance(){
+        var row = {};
+
+        if ( this.model.foreign_column != null && this.parentrow )
+          row[this.model.foreign_column[this.getParentTableName()]] = this.parentrow.id;
+
+        return row;
       },
       getModel(model){
         //if is recursive model

@@ -84,7 +84,7 @@
       },
       //On change language reset editing form
       // langid(langid){
-      //   this.row = {};
+      //   this.$parent.resetForm();
       // },
     },
 
@@ -170,12 +170,12 @@
         this.resetErrors();
 
         if ( !row || !('id' in row) )
-          this.row = {}
+          this.$parent.resetForm();
 
         //Checks if form can be editable
         if ( row && this.canaddrow && this.model.editable == false && this.$parent.hasChilds() == 0 )
         {
-          this.row = {};
+          this.$parent.resetForm();
           return;
         }
 
@@ -232,9 +232,7 @@
 
         //Check if form belongs to other form
         if ( this.model.foreign_column != null && this.$parent.parentrow )
-        {
           data[this.model.foreign_column[this.$parent.getParentTableName()]] = this.$parent.parentrow.id;
-        }
 
         //If is updating, then add row ID
         if ( action == 'update' )

@@ -429,7 +429,7 @@
             filter['language_id'] = this.getLangageId;
 
           if ( this.getFilterBy )
-            filter[this.getFilterBy[1]] = this.filterBy;
+            filter[this.getFilterBy[1]] = this.isStaticFilterColumn ? this.row[this.getFilterBy[0]] : this.filterBy;
 
           return filter;
         },
@@ -795,7 +795,14 @@
         canAddRow(){
           return this.field.canAdd === true && this.hasparentmodel !== false && (!this.getFilterBy || this.filterBy);
         },
+        isStaticFilterColumn(){
+          return this.getFilterBy && !(this.getFilterBy[0] in this.model.fields);
+        },
         hasNoFilterValues(){
+          //If foreign key identificator is not field, bud static foreign key column
+          if ( this.isStaticFilterColumn )
+            return false;
+
           return this.getFilterBy && (!this.filterBy || this.fieldOptions.length == 0);
         }
       },
