@@ -77,6 +77,14 @@ class Group
     }
 
     /*
+     * Make group with auto inline grid style
+     */
+    public static function inline(array $fields)
+    {
+        return (new static($fields))->width('inline')->type();
+    }
+
+    /*
      * Set id of group
      */
     public function id($id)

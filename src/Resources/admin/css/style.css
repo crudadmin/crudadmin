@@ -297,6 +297,14 @@ select[multiple] {height: 34px;color: white;}
 .form-group .can-add-select > div.chosen-container { width: calc(100% - 35px) !important; min-width: calc(100% - 35px) !important; }
 .form-group .can-add-select > button { float: right; height: 100%; width: 35px; position: absolute;}
 
+.fields-group.inline-col > div > .tab-content > .row > div > div { display: inline-block; }
+.fields-group.inline-col[data-fields="2"] > div > .tab-content > .row > div > div { width: calc(100% / 2) }
+.fields-group.inline-col[data-fields="3"] > div > .tab-content > .row > div > div { width: calc(100% / 3) }
+.fields-group.inline-col[data-fields="4"] > div > .tab-content > .row > div > div { width: calc(100% / 4) }
+.fields-group.inline-col[data-fields="5"] > div > .tab-content > .row > div > div { width: calc(100% / 5) }
+.fields-group.inline-col[data-fields="6"] > div > .tab-content > .row > div > div { width: calc(100% / 6) }
+.fields-group.inline-col[data-fields="7"] > div > .tab-content > .row > div > div { width: calc(100% / 7) }
+
 /* Form in modal settings */
 @media screen and (min-width: 768px) {
     .form-group .modal .modal-dialog { width: 80%; }

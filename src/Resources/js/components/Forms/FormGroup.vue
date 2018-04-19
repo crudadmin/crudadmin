@@ -1,5 +1,5 @@
 <template>
-<div class="fields-group" v-bind:class="getGroupClass(group)">
+<div class="fields-group" v-bind:class="getGroupClass(group)" :data-fields="group.fields.length">
     <div :class="{ 'nav-tabs-custom' : canShowGroupName(group) }">
         <h4 v-if="canShowGroupName(group)"><i v-if="group.icon" :class="['fa', group.icon]"></i> {{{ group.name }}}</h4>
 
@@ -81,6 +81,9 @@ export default {
       getGroupClass(group){
         if ( group.width == 'half' )
           return 'col-md-6';
+
+        if ( group.width == 'inline' )
+          return 'col-md-12 inline-col';
 
         if ( $.isNumeric(group.width) )
           return 'col-md-' + group.width;
