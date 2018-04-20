@@ -79,14 +79,20 @@ export default {
       },
       //Return group class
       getGroupClass(group){
-        if ( group.width == 'half' )
-          return 'col-md-6';
+        var width = (group.width+'').split('-');
 
-        if ( group.width == 'inline' )
-          return 'col-md-12 inline-col';
+        if ( width[0] == 'half' )
+          width[0] = 6;
+        else if ( width[0] == 'full' )
+          width[0] = 12;
+        else if ( width[0] == 'third' )
+          width[0] = 4;
 
-        if ( $.isNumeric(group.width) )
-          return 'col-md-' + group.width;
+        if ( width.length == 2 && width[1] == 'inline' )
+          return 'col-md-'+width[0]+' inline-col';
+
+        if ( $.isNumeric(width[0]) )
+          return 'col-md-' + width[0];
 
         return 'col-md-12';
       },

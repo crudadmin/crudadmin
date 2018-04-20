@@ -79,9 +79,11 @@ class Group
     /*
      * Make group with auto inline grid style
      */
-    public static function inline(array $fields)
+    public function inline()
     {
-        return (new static($fields))->width('inline')->type();
+        $this->width = $this->width . '-inline';
+
+        return $this;
     }
 
     /*
