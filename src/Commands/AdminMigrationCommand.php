@@ -192,7 +192,7 @@ class AdminMigrationCommand extends Command
     /*
      * Skip creating of preddefined columns
      */
-    private function skipAddingField($key, $model = null)
+    private function skipField($key, $model = null)
     {
         $columns = ['_order', 'created_at', 'published_at', 'updated_at'];
 
@@ -219,7 +219,7 @@ class AdminMigrationCommand extends Command
 
             foreach ($model->getFields() as $key => $value)
             {
-                if ( $this->skipAddingField($key) )
+                if ( $this->skipField($key) )
                     continue;
 
                 $this->setColumn( $table, $model, $key );
@@ -272,6 +272,9 @@ class AdminMigrationCommand extends Command
 
             foreach ($model->getFields() as $key => $value)
             {
+                if ( $this->skipField($key) )
+                    continue;
+
                 //Checks if table has column and update it if can...
                 if ( $model->getSchema()->hasColumn($model->getTable(), $key) ){
                     if ( $column = $this->setColumn( $table, $model, $key, true ) )
