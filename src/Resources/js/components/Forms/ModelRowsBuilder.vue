@@ -15,7 +15,7 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu menu-left dropdown-menu-right" aria-labelledby="dropdownMenu1">
-          <li @click="$event.stopPropagation()" v-for="(key, column) in enabled_columns" v-if="canShowColumn(column, key)"><label><input type="checkbox" v-model="column.enabled"> {{ column.name }}</label></li>
+          <li @click="$event.stopPropagation()" v-for="(key, column) in enabled_columns" v-if="canShowColumn(column, key)"><label><input type="checkbox" v-model="column.enabled"> {{ columnName(key, column.name) }}</label></li>
           <li role="separator" class="divider"></li>
           <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
         </ul>
@@ -280,6 +280,9 @@
     },
 
     methods: {
+      columnName(key, name){
+        return this.$parent.getSearchingColumnName(key);
+      },
       canShowColumn(column, key){
         if ( ! column.name )
           return false;

@@ -195,40 +195,47 @@ class SEO
         return $items;
     }
 
+    private function secure($string)
+    {
+        $string = strip_tags($string);
+
+        return e($string);
+    }
+
     /*
      * Return meta tags
      */
     public function getMetaTags()
     {
         $lines = [
-            '<title>'.e(SEO::getTitle()).'</title>',
-            '<meta name="description" content="'.e(SEO::getDescription()).'">',
-            '<meta name="keywords" content="'.e(SEO::getKeywords()).'">',
+            '<title>'.$this->secure(SEO::getTitle()).'</title>',
+            '<meta name="description" content="'.$this->secure(SEO::getDescription()).'">',
+            '<meta name="keywords" content="'.$this->secure(SEO::getKeywords()).'">',
             '',
             '<!-- Hello, -->',
-            '<meta name="author" content="'.e(SEO::getAuthor('Marek Gogoľ - marekgogol.sk')).'">',
+            '<meta name="author" content="'.$this->secure(SEO::getAuthor('Marek Gogoľ - marekgogol.sk')).'">',
             '',
-            '<meta property="og:title" content="'.e(SEO::getTitle()).'">',
-            '<meta property="og:description" content="'.e(SEO::getDescription()).'">',
+            '<meta property="og:title" content="'.$this->secure(SEO::getTitle()).'">',
+            '<meta property="og:description" content="'.$this->secure(SEO::getDescription()).'">',
             '<meta property="og:locale" content="'.Gettext::getLocale(app()->getLocale()).'" />',
             '<meta property="og:type" content="website">',
-            '<meta property="og:site_name" content="'.e(env('APP_NAME')).'">',
+            '<meta property="og:site_name" content="'.$this->secure(env('APP_NAME')).'">',
         ];
 
         //Push images into meta tags
         foreach ($this->getImages() as $image)
-            $lines[] = '<meta property="og:image" content="'.e($image).'">';
+            $lines[] = '<meta property="og:image" content="'.$this->secure($image).'">';
 
         /*
          * Twitter tags
          */
         $lines = array_merge($lines, [
-            '<meta name="twitter:title" content="'.e(SEO::getTitle()).'" />',
-            '<meta name="twitter:description" content="'.e(SEO::getDescription()).'" />',
+            '<meta name="twitter:title" content="'.$this->secure(SEO::getTitle()).'" />',
+            '<meta name="twitter:description" content="'.$this->secure(SEO::getDescription()).'" />',
         ]);
 
         foreach ($this->getImages() as $image)
-            $lines[] = '<meta name="twitter:image" content="'.e($image).'">';
+            $lines[] = '<meta name="twitter:image" content="'.$this->secure($image).'">';
 
         return $lines;
     }

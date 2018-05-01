@@ -57,7 +57,7 @@ return [
     'info' => 'Informace',
     'warning' => 'Upozornění',
     'row-info' => 'Informace o záznamu',
-    'row-info-n' => 'Informace o záznamu č.',
+    'row-info-n' => 'Informace o záznamu ID',
     'no-changes' => 'V aktuálním záznamu nebyly provedeny žádné změny.',
     'delete-warning' => 'Opravdu chcete smazat vybraný záznam?',
 
@@ -76,10 +76,10 @@ return [
     'save' => 'Uložit',
     'send' => 'Odeslat',
     'sending' => 'Odesílání',
-    'edit-row-n' => 'Upravit záznam č.',
+    'edit-row-n' => 'Upravit záznam ID',
     'new-row' => 'Nový záznam',
     'general-tab' => 'Obecné',
-    'number' => 'č.',
+    'number' => 'ID',
     'rows-list' => 'Seznam sloupců',
     'default' => 'Výchozí',
 

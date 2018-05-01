@@ -233,6 +233,10 @@
           this.reloadSearchBarSelect();
         },
       },
+      activetab(value){
+        if ( value === true )
+          this.sendRowsData();
+      },
       parentrow(row, oldrow){
         //When parent row has been changed, then load children rows
         if ( ! _.isEqual(row, oldrow) ){
@@ -311,10 +315,13 @@
       },
 
       //Send into all childs parent row data
-      sendParentRow(name){
+      sendParentRow(){
         this.$broadcast('getParentRow', {
           model : this.model,
+          slug : this.model.slug,
           row : this.row,
+          rows : this.rows.data,
+          count : this.rows.count,
           component : this,
         });
 
@@ -329,13 +336,16 @@
        */
       updateParentChildData(){
         this.$watch('rows.data', function(data){
-          this.$dispatch('proxy', 'rows-changed', {
+          this.sendRowsData();
+        });
+      },
+      sendRowsData(){
+        this.$broadcast('rows-changed', {
             slug : this.model.slug,
             model : this.model,
             rows : this.rows.data,
             count : this.rows.count,
-          });
-        });
+          }, true);
       },
       resetSearchBar(){
         //On change column reset input
@@ -537,7 +547,7 @@
       },
       getSearchingColumnName(column){
         if ( column == 'id' )
-          return 'ID. ('+this.trans('number')+')';
+          return this.$root.trans('number');
 
         if ( column == 'created_at' )
           return this.$root.trans('created-at');

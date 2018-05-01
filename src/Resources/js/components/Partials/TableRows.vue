@@ -340,7 +340,7 @@
             switch( key )
             {
               case 'id':
-                return 'Č.';
+                return this.$root.trans('number');
                 break;
               case 'created_at':
                 return this.$root.trans('created');
