@@ -104,12 +104,17 @@ class Localization
             return $language;
         }
 
-        return $this->languages->first();
+        return $this->getFirstLanguage();
     }
 
     public function setDefaultLocale($prefix)
     {
         $this->default_localization = $prefix;
+    }
+
+    public function getFirstLanguage()
+    {
+        return $this->languages->first();
     }
 
     public function isValid($segment)

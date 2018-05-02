@@ -340,15 +340,21 @@ trait Sluggable
 
             $lang = Localization::get();
 
-            $default = Localization::getDefaultLanguage();
-
             //Return selected language slug
             if ( array_key_exists($lang->slug, $slug) && $slug[$lang->slug] )
                 return $slug[$lang->slug];
 
+            $default = Localization::getFirstLanguage();
+
             //Return default slug value
             if ( $default->getKey() != $lang->getKey() && array_key_exists($default->slug, $slug) && $slug[$default->slug] )
                 return $slug[$default->slug];
+
+            //Return one of set slug from any language
+            foreach (Localization::getLanguages() as $lang) {
+                if ( array_key_exists($lang->slug, $slug) && $slug[$lang->slug] )
+                    return $slug[$lang->slug];
+            }
 
             return null;
         }
