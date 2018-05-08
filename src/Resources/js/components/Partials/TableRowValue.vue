@@ -46,7 +46,7 @@ export default {
         }
 
         //Is phone number
-        if ( this.isRealField(key) && this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key]))
+        if ( this.isRealField(key) && this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key] || 'phone_link' in this.model.fields[key]) )
         {
           return '<a href="tel:'+string+'">'+string+'</a>';
         }
