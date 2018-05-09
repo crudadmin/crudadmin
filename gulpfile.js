@@ -12,7 +12,7 @@ elixir.config.production = config.production;
 
 elixir(function(mix) {
 
-    if ( config.production === true )
+    if ( config.paths.length == 0 )
     {
         mix.browserify('src/Resources/js/main.js', 'src/Resources/admin/js', './')
     } else {

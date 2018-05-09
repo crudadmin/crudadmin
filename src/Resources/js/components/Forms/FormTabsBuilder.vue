@@ -110,7 +110,7 @@
           }.bind(this));
 
           tabs = [{
-            name : this.group ? this.group.name : this.trans('general-tab'),
+            name : this.group ? this.group.name : this.$root.getModelProperty(this.model, 'settings.title.tab', this.trans('general-tab')),
             icon : this.group ? this.group.icon : this.model.icon,
             fields : items,
             type : 'tab',
@@ -122,14 +122,16 @@
         if ( this.childs == true )
           for ( var key in this.model.childs )
           {
-            if ( this.model.childs[key].in_tab == true )
+            var child_model = typeof this.model.childs[key] === 'string' ? this.model : this.model.childs[key];
+
+            if ( child_model.in_tab == true )
             {
               //Check if model is not in fields group
               if ( ! this.isModelInFields(model_fields, this.model.childs[key].slug) )
                 tabs.push({
                   fields : [],
                   type : 'tab',
-                  model : this.model.childs[key].slug,
+                  model : child_model.slug,
                 });
             }
           }
@@ -157,6 +159,9 @@
        * Return model from childs by model table
        */
       getModel(model){
+        if ( typeof this.model.childs[model] == 'string' )
+          return _.cloneDeep(this.model);
+
         return this.model.childs[model];
       },
       /*
