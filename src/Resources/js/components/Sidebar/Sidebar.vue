@@ -29,8 +29,18 @@
         components: { SidebarRow },
 
         filters: {
-            groups(array){
-                return array;
+            groups(groups){
+                for ( var key in groups )
+                {
+                    //Is allowed module
+                    if ( groups[key].active === true )
+                        continue;
+
+                    if ( groups[key].active === false || ! this.hasActiveModule(groups[key].submenu) )
+                        delete groups[key];
+                }
+
+                return groups;
             }
         },
 
@@ -54,6 +64,19 @@
         },
 
         methods: {
+            hasActiveModule(modules){
+                for ( var key in modules )
+                {
+                    if ( modules[key].active === true )
+                        return true;
+
+                    if ( modules[key].submenu && this.hasActiveModule(modules[key].submenu) ){
+                        return true;
+                    }
+                }
+
+                return false;
+            },
             trans(key){
               return this.$root.trans(key);
             }

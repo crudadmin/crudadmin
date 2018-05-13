@@ -138,10 +138,6 @@ class LayoutController extends BaseController
         if ( $count > 0 )
             return true;
 
-        //Check if user has allowed model
-        if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
-            return true;
-
         return false;
     }
 
@@ -167,6 +163,10 @@ class LayoutController extends BaseController
         {
             if ( $this->skipModelInTree($model) )
                 continue;
+
+            //Check if user has allowed model
+            if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
+                $model->setProperty('active', false);
 
             $page = $this->makePage($model, null, true, $initial_request);
 
@@ -227,7 +227,7 @@ class LayoutController extends BaseController
 
             // Check if user has allowed model
             if ( ! auth()->guard('web')->user()->hasAccess( $child_model ) )
-                continue;
+                $child_model->setProperty('active', false);
 
             $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
 

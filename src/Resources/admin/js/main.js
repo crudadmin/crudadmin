@@ -40493,7 +40493,7 @@ exports.default = {
         }.bind(this));
 
         tabs = [{
-          name: this.group ? this.group.name : this.trans('general-tab'),
+          name: this.group ? this.group.name : this.$root.getModelProperty(this.model, 'settings.title.tab', this.trans('general-tab')),
           icon: this.group ? this.group.icon : this.model.icon,
           fields: items,
           type: 'tab',
@@ -42823,8 +42823,15 @@ exports.default = {
     components: { SidebarRow: _SidebarRow2.default },
 
     filters: {
-        groups: function groups(array) {
-            return array;
+        groups: function groups(_groups) {
+            for (var key in _groups) {
+                //Is allowed module
+                if (_groups[key].active === true) continue;
+
+                if (_groups[key].active === false || !this.hasActiveModule(_groups[key].submenu)) delete _groups[key];
+            }
+
+            return _groups;
         }
     },
 
@@ -42849,6 +42856,17 @@ exports.default = {
 
 
     methods: {
+        hasActiveModule: function hasActiveModule(modules) {
+            for (var key in modules) {
+                if (modules[key].active === true) return true;
+
+                if (modules[key].submenu && this.hasActiveModule(modules[key].submenu)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
         trans: function trans(key) {
             return this.$root.trans(key);
         }
