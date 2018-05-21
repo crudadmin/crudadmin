@@ -114,7 +114,7 @@
               if ( field_key in modifiedData )
                 delete modifiedData[field_key];
 
-              modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].name;
+              modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].column_name||this.model.fields[field_key].name;
             }
 
             return modifiedData;
@@ -150,7 +150,7 @@
               {
                 var field_key = this.getColumnRightKey(key);
 
-                data[key] = columns[key].name||columns[key].title||this.model.fields[field_key].name;
+                data[key] = columns[key].name||columns[key].title||this.model.fields[field_key].column_name||this.model.fields[field_key].name;
               }
             }
           }
@@ -335,7 +335,7 @@
         },
         fieldName(key){
           if ( key in this.model.fields )
-            return this.model.fields[key].name;
+            return this.model.fields[key].column_name||this.model.fields[key].name;
           else {
             switch( key )
             {

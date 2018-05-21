@@ -42093,7 +42093,7 @@ exports.default = {
     stringLimit: function stringLimit(string, key) {
       var limit = this.getFieldLimit(key, (0, _keys2.default)(this.$parent.columns).length < 5 ? 40 : 20);
 
-      if (limit != 0 && string.length > limit) return string.substr(0, limit) + '...';
+      if (limit != 0 && string.length > limit && this.$root.getModelProperty(this.model, 'settings.columns.' + key + '.encode', true) !== false) return string.substr(0, limit) + '...';
 
       return string;
     },
@@ -42332,7 +42332,7 @@ exports.default = {
 
           if (field_key in modifiedData) delete modifiedData[field_key];
 
-          modifiedData[field_key] = columns[k].name || columns[k].title || this.model.fields[field_key].name;
+          modifiedData[field_key] = columns[k].name || columns[k].title || this.model.fields[field_key].column_name || this.model.fields[field_key].name;
         }
 
         return modifiedData;
@@ -42362,7 +42362,7 @@ exports.default = {
           if (!(key in data) && columns[key].hidden != true) {
             var field_key = this.getColumnRightKey(key);
 
-            data[key] = columns[key].name || columns[key].title || this.model.fields[field_key].name;
+            data[key] = columns[key].name || columns[key].title || this.model.fields[field_key].column_name || this.model.fields[field_key].name;
           }
         }
       }
@@ -42522,7 +42522,7 @@ exports.default = {
       this.orderby = [key, order];
     },
     fieldName: function fieldName(key) {
-      if (key in this.model.fields) return this.model.fields[key].name;else {
+      if (key in this.model.fields) return this.model.fields[key].column_name || this.model.fields[key].name;else {
         switch (key) {
           case 'id':
             return this.$root.trans('number');
