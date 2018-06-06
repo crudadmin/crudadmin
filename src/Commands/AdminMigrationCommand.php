@@ -947,7 +947,12 @@ class AdminMigrationCommand extends Command
             $column = $table->integer( $foreign_column )->unsigned();
 
             //If parent belongs to more models, or just itself
-            if ( count($belongsToModel) > 1 || $model->getProperty('withoutParent') == true || $is_recursive )
+            if (
+                count($belongsToModel) > 1
+                || $model->getProperty('withoutParent') === true
+                || $model->getProperty('nullableRelation') === true
+                || $is_recursive
+            )
                 $column->nullable();
 
             //If foreign key does not exists in table

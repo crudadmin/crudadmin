@@ -149,6 +149,11 @@ class Model extends BaseModel
     protected $withoutParent = false;
 
     /*
+     * Allow nullable relation for belongsToModel
+     */
+    protected $nullableRelation = false;
+
+    /*
      * Which id's will be reserved and can not be removed
      */
     protected $reserved = [];
