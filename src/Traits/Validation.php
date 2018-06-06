@@ -96,9 +96,12 @@ trait Validation {
                 $field['nullable'] = true;
             }
 
+            //If is existing row an required image already exists
+            if ( $row && !empty($row[$orig_key]) && $this->hasFieldParam($orig_key, 'required') )
+                $field['required'] = false;
+
             //Removes admin properties in field from request
             $data[$key] = $this->removeAdminProperties($field);
-
         }
 
         return $data;

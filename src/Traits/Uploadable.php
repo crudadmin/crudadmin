@@ -300,6 +300,7 @@ trait Uploadable
             }
         }
 
+        return $this;
     }
 }
 ?>

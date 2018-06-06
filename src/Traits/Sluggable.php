@@ -249,9 +249,9 @@ trait Sluggable
     private function redirectWithWrongSlug($slug, $id, $key = null, $row)
     {
         //If is definer row where is slug saved
-        if ( is_numeric($id) && $row->slug != $slug )
+        if ( is_numeric($id) )
         {
-            $row = $this->where($this->getKeyName(), $id)->first();
+            $row = $this->where($this->getKeyName(), $id)->select(['slug'])->first();
 
             //Compare given slug and slug from db
             if ($row && $row->slug != $slug)
@@ -307,7 +307,9 @@ trait Sluggable
         else if ( ! is_string($id) )
             $id = null;
 
-        if ( $row = ($query ?: new static)->whereSlug($slug, $id, $key, $key)->first($columns) )
+        $row = ($query ?: new static)->whereSlug($slug, $id, $key, $key)->first($columns);
+
+        if ( ! $row )
             (new static)->redirectWithWrongSlug($slug, $id, $key, $row);
 
         return $row;
