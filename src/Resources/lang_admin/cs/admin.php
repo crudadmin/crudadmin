@@ -97,8 +97,8 @@ return [
     'search-all' => 'Hledat všude',
     'get-value' => 'Vyberte hodnotu',
     'reset' => 'Resetovat',
-    'on' => 'Vypnuto',
-    'off' => 'Zapnuto',
+    'on' => 'Zapnuto',
+    'off' => 'Vypnuto',
     'yes' => 'Ano',
     'no' => 'Ne',
 

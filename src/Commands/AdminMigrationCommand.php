@@ -422,7 +422,7 @@ class AdminMigrationCommand extends Command
     /*
      * Returns foreign key name
      */
-    protected function getForeignKeyName($model, $key, $prefix = null)
+    protected function getIndexName($model, $key, $prefix = null)
     {
         return $model->getTable().'_'.$key.'_'.($prefix ? : 'foreign');
     }
@@ -436,20 +436,48 @@ class AdminMigrationCommand extends Command
             DB::raw(
                 'SHOW KEYS
                 FROM '.$model->getTable().'
-                WHERE Key_name=\''. $this->getForeignKeyName($model, $key, $prefix) . '\''
+                WHERE Key_name=\''. $this->getIndexName($model, $key, $prefix) . '\''
             )
         ) );
+    }
+
+    private function updateToJsonColumn($model, $key)
+    {
+        //Check if exists row in table,
+        if ( $model->getConnection()->table( $model->getTable() )->count() === 0 )
+            return;
+
+        if ( ! $this->confirm('You are updating '.$key.' column from non-json type to json type for translates purposes. Would you like to update this non-json values to translated format of JSON values? If you select NO, you may catch mysql error.') )
+            return;
+
+        $languages = Localization::getLanguages(true);
+
+        if ( $languages->count() === 0 )
+            $this->line('<error>You have no inserted languages to update '.$key.' column.</error>');
+
+        $prefix = $languages->first()->slug;
+
+        $model->getConnection()->table( $model->getTable() )->update([
+            $key => DB::raw( 'CONCAT("{\"'.$prefix.'\": \"", '.$key.', "\"}")' )
+        ]);
     }
 
     /*
      * Set json column, also check mysql version
      */
-    private function setJsonColumn($table, $key, $model)
+    private function setJsonColumn($table, $key, $model, $update = false)
     {
         $this->checkForCorrectMysqlVersion($model, 'file');
 
-        //Set json column, with resetted collations with platformOptions
-        //Doctrine\DBAL\Schema\MySqlSchemaManager
+        //If is updating column and previous value is not json
+        if ( $update === true && $model->getSchema()->hasColumn($model->getTable(), $key) )
+        {
+            $type = $model->getConnection()->getDoctrineColumn($model->getTable(), $key)->getType()->getName();
+
+            if ( ! in_array($type, ['json', 'json_array']) ){
+                $this->updateToJsonColumn($model, $key);
+            }
+        }
 
         return $table->json($key)->platformOptions([]);
     }
@@ -457,10 +485,10 @@ class AdminMigrationCommand extends Command
     /*
      * Drops foreign key in table
      */
-    protected function dropIndex($model, $key)
+    protected function dropIndex($model, $key, $prefix = null)
     {
         return $model->getConnection()->select(
-            DB::raw( 'alter table `'.$model->getTable().'` drop foreign key `'.$this->getForeignKeyName($model, $key) .'`' )
+            DB::raw( 'alter table `'.$model->getTable().'` drop '.($prefix ?: 'foreign key').' `'.$this->getIndexName($model, $key, $prefix) .'`' )
         );
     }
 
@@ -472,11 +500,11 @@ class AdminMigrationCommand extends Command
         }
     }
 
-    protected function jsonColumn($table, $model, $key)
+    protected function jsonColumn($table, $model, $key, $update)
     {
         if ( $model->isFieldType($key, ['json']) || $model->hasFieldParam($key, ['locale', 'multiple']) )
         {
-            return $this->setJsonColumn($table, $key, $model);
+            return $this->setJsonColumn($table, $key, $model, $update);
         }
     }
 
@@ -547,7 +575,10 @@ class AdminMigrationCommand extends Command
                 $type = $model->getConnection()->getDoctrineColumn($model->getTable(), $key)->getType()->getName();
 
                 //If previoius column has not been datetime and has some value
-                if ( $type != 'datetime' )
+                if (
+                    ! in_array($type, ['date', 'datetime', 'time'])
+                    && $this->confirm('You are updating '.$key.' column from non-date "'.$type.'" type to datetime type. Would you like to update this non-date values to null values?')
+                ){
                     $model->getConnection()->table($model->getTable())->update([ $key => null ]);
             }
 
@@ -734,7 +765,7 @@ class AdminMigrationCommand extends Command
 
         //Set locale slug or normal
         if ( $has_locale = $model->hasFieldParam($slugcolumn, 'locale', true) )
-            $column = $this->setJsonColumn($table, 'slug', $model);
+            $column = $this->setJsonColumn($table, 'slug', $model, $updating);
         else
             $column = $table->string('slug', $model->getFieldLength($slugcolumn));
 
@@ -744,8 +775,11 @@ class AdminMigrationCommand extends Command
         }
 
         //If is creating new table or when slug index is missing
-        if ( !$has_locale && ($updating == false || ! $this->hasIndex($model, 'slug', 'index')) )
+        if ( !$has_locale && ($updating === false || ! $this->hasIndex($model, 'slug', 'index')) )
             $column->index();
+
+        if ( $has_locale && $updating === true && $this->hasIndex($model, 'slug', 'index') )
+            $this->dropIndex($model, 'slug', 'index');
 
         //If is field required
         if( ! $model->hasFieldParam( $slugcolumn , 'required') )
