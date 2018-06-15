@@ -580,6 +580,7 @@ class AdminMigrationCommand extends Command
                     && $this->confirm('You are updating '.$key.' column from non-date "'.$type.'" type to datetime type. Would you like to update this non-date values to null values?')
                 ){
                     $model->getConnection()->table($model->getTable())->update([ $key => null ]);
+                }
             }
 
             $column = $table->datetime($key)->nullable();
