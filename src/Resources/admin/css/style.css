@@ -105,6 +105,9 @@ button.dropdown-toggle > span.caret { margin-left: 5px; }
 .form-group textarea.js_editor { display: block;min-height: 321px;width: 100%;opacity: 0.2;padding: 10px; }
 .form-group small { color: #555; }
 .form-group.disabled > label { opacity: 0.5; }
+.form-group.multiple-date label { display: block; }
+.multiple-dates .multiple-selected { background: #f39c12 !important; color: white !important; font-weight: bold !important; box-shadow: none !important }
+.multiple-dates .xdsoft_current:not(.multiple-selected) { background: #f6f5f6 !important; box-shadow: none !important; color: #555 !important; font-weight: normal !important; }
 
 table.table th:not(.th-options-buttons) { cursor: pointer; }
 table.table > tbody > tr { user-select: auto; }
