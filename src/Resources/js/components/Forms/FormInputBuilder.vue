@@ -15,9 +15,10 @@
     </div>
 
     <!-- DATETIME INPUT -->
-    <div class="form-group" :class="{ disabled : isDisabled }" v-if="isDatepicker">
+    <div class="form-group" :class="{ disabled : isDisabled, 'multiple-date' : isMultipleDatepicker }" v-if="isDatepicker">
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" :name="getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
+      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" :name="isMultipleDatepicker ? '' : getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
+      <input type="hidden" name="closed[]" v-for="date in getMultiDates" :value="getMultiDateValue(date)">
       <small>{{ field.title }}</small>
     </div>
 
@@ -243,6 +244,8 @@
           return this.$root.getModelProperty(this.getRelationModel, 'settings.title.insert', this.trans('new-row'));
         },
         bindDatepickers(){
+          var _this = this;
+
           if ( ! this.isDatepicker )
             return;
 
@@ -253,7 +256,47 @@
             timepicker: this.field.type != 'date',
             datepicker: this.field.type != 'time',
             scrollInput: false,
+            timepickerScrollbar: false,
+            step : this.field.date_step||30,
+            scrollMonth: false,
+            scrollYear: false,
+            inline : this.isMultipleDatepicker,
+            onGenerate: ! this.isMultipleDatepicker ? null : function( ct ){
+              $(this).addClass('multiple-dates');
+
+              var values = _this.getMultiDates;
+
+              for ( var i = 0; i < values.length; i++ )
+              {
+                var date = _this.field.type == 'time' ? values[i].split(':') : new Date(values[i]);
+
+                var selector = _this.field.type == 'time'
+                                  ? 'div[data-hour="'+parseInt(date[0])+'"][data-minute="'+parseInt(date[1])+'"]'
+                                  : 'td[data-date="'+date.getDate()+'"][data-month="'+date.getMonth()+'"][data-year="'+date.getFullYear()+'"]';
+
+                $(this).find(selector).addClass('multiple-selected');
+              }
+            },
+            onChangeDateTime: ! this.isMultipleDatepicker ? null : function(current_date_time) {
+                var pickedDate = moment(current_date_time).format(this.field.type == 'time' ? 'HH:mm' : 'YYYY-MM-DD');
+
+                var value = this.getMultiDates,
+                    index = value.indexOf(pickedDate);
+
+                if ( index > -1 )
+                  value.splice(index, 1);
+                else
+                  value.push(pickedDate);
+
+                this.changeValue(null, value);
+            }.bind(this)
           });
+        },
+        getMultiDateValue(time){
+          if ( this.field.type == 'time' && time.length == 5 && time[2] == ':' )
+            return time;
+
+          return moment(time).format('YYYY-MM-DD');
         },
         /*
          * If field has filters, then check of other fields values for filtrating
@@ -345,6 +388,9 @@
                 editor.setData( field.value ? field.value : '' );
               });
             }
+
+            //Update datepickers
+            this.bindDatepickers();
 
             //If is select
             if ( this.isSelect )
@@ -497,6 +543,19 @@
       },
 
       computed : {
+        getMultiDates(){
+          var value = this.field.value||[];
+
+          if ( ! $.isArray(value) )
+            value = [];
+
+          //Check correct inputs values
+          var val = _.cloneDeep(value).filter(function(item){
+              return item.length == (this.field.type == 'time' ? 5 : 10);
+          }.bind(this));
+
+          return val;
+        },
         getRelationRow(){
           var filterBy = this.getFilterBy;
 
@@ -628,6 +687,10 @@
         {
           return this.field.type == 'date' || this.field.type == 'datetime' || this.field.type == 'time';
         },
+        isMultipleDatepicker()
+        {
+          return this.field.multiple == true && this.isDatepicker;
+        },
         isCheckbox()
         {
           return this.field.type == 'checkbox';
@@ -666,6 +729,9 @@
           //If is password, return none value
           if ( this.isPassword )
             return '';
+
+          if ( this.isMultipleDatepicker )
+            return JSON.stringify(this.field.value||[]);
 
           if ( ! this.isOpenedRow ){
             var default_value = this.field.default;

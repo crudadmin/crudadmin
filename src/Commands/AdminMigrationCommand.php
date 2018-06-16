@@ -465,7 +465,7 @@ class AdminMigrationCommand extends Command
     /*
      * Set json column, also check mysql version
      */
-    private function setJsonColumn($table, $key, $model, $update = false)
+    private function setJsonColumn($table, $key, $model, $update = false, $localized = false)
     {
         $this->checkForCorrectMysqlVersion($model, 'file');
 
@@ -474,7 +474,7 @@ class AdminMigrationCommand extends Command
         {
             $type = $model->getConnection()->getDoctrineColumn($model->getTable(), $key)->getType()->getName();
 
-            if ( ! in_array($type, ['json', 'json_array']) ){
+            if ( ! in_array($type, ['json', 'json_array']) && $localized === true ){
                 $this->updateToJsonColumn($model, $key);
             }
         }
@@ -504,7 +504,7 @@ class AdminMigrationCommand extends Command
     {
         if ( $model->isFieldType($key, ['json']) || $model->hasFieldParam($key, ['locale', 'multiple']) )
         {
-            return $this->setJsonColumn($table, $key, $model, $update);
+            return $this->setJsonColumn($table, $key, $model, $update, $model->hasFieldParam($key, ['locale']));
         }
     }
 
@@ -766,7 +766,7 @@ class AdminMigrationCommand extends Command
 
         //Set locale slug or normal
         if ( $has_locale = $model->hasFieldParam($slugcolumn, 'locale', true) )
-            $column = $this->setJsonColumn($table, 'slug', $model, $updating);
+            $column = $this->setJsonColumn($table, 'slug', $model, $updating, true);
         else
             $column = $table->string('slug', $model->getFieldLength($slugcolumn));
 

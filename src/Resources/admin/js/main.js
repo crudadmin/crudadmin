@@ -39796,6 +39796,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
@@ -39900,6 +39904,8 @@ exports.default = {
       return this.$root.getModelProperty(this.getRelationModel, 'settings.title.insert', this.trans('new-row'));
     },
     bindDatepickers: function bindDatepickers() {
+      var _this = this;
+
       if (!this.isDatepicker) return;
 
       //Add datepickers
@@ -39908,8 +39914,41 @@ exports.default = {
         format: this.getDateFormat,
         timepicker: this.field.type != 'date',
         datepicker: this.field.type != 'time',
-        scrollInput: false
+        scrollInput: false,
+        timepickerScrollbar: false,
+        step: this.field.date_step || 30,
+        scrollMonth: false,
+        scrollYear: false,
+        inline: this.isMultipleDatepicker,
+        onGenerate: !this.isMultipleDatepicker ? null : function (ct) {
+          $(this).addClass('multiple-dates');
+
+          var values = _this.getMultiDates;
+
+          for (var i = 0; i < values.length; i++) {
+            var date = _this.field.type == 'time' ? values[i].split(':') : new Date(values[i]);
+
+            var selector = _this.field.type == 'time' ? 'div[data-hour="' + parseInt(date[0]) + '"][data-minute="' + parseInt(date[1]) + '"]' : 'td[data-date="' + date.getDate() + '"][data-month="' + date.getMonth() + '"][data-year="' + date.getFullYear() + '"]';
+
+            $(this).find(selector).addClass('multiple-selected');
+          }
+        },
+        onChangeDateTime: !this.isMultipleDatepicker ? null : function (current_date_time) {
+          var pickedDate = moment(current_date_time).format(this.field.type == 'time' ? 'HH:mm' : 'YYYY-MM-DD');
+
+          var value = this.getMultiDates,
+              index = value.indexOf(pickedDate);
+
+          if (index > -1) value.splice(index, 1);else value.push(pickedDate);
+
+          this.changeValue(null, value);
+        }.bind(this)
       });
+    },
+    getMultiDateValue: function getMultiDateValue(time) {
+      if (this.field.type == 'time' && time.length == 5 && time[2] == ':') return time;
+
+      return moment(time).format('YYYY-MM-DD');
     },
 
     /*
@@ -39997,6 +40036,9 @@ exports.default = {
             editor.setData(field.value ? field.value : '');
           });
         }
+
+        //Update datepickers
+        this.bindDatepickers();
 
         //If is select
         if (this.isSelect) {
@@ -40135,6 +40177,18 @@ exports.default = {
   },
 
   computed: {
+    getMultiDates: function getMultiDates() {
+      var value = this.field.value || [];
+
+      if (!$.isArray(value)) value = [];
+
+      //Check correct inputs values
+      var val = _.cloneDeep(value).filter(function (item) {
+        return item.length == (this.field.type == 'time' ? 5 : 10);
+      }.bind(this));
+
+      return val;
+    },
     getRelationRow: function getRelationRow() {
       var filterBy = this.getFilterBy;
 
@@ -40246,6 +40300,9 @@ exports.default = {
     isDatepicker: function isDatepicker() {
       return this.field.type == 'date' || this.field.type == 'datetime' || this.field.type == 'time';
     },
+    isMultipleDatepicker: function isMultipleDatepicker() {
+      return this.field.multiple == true && this.isDatepicker;
+    },
     isCheckbox: function isCheckbox() {
       return this.field.type == 'checkbox';
     },
@@ -40275,6 +40332,8 @@ exports.default = {
     getValueOrDefault: function getValueOrDefault() {
       //If is password, return none value
       if (this.isPassword) return '';
+
+      if (this.isMultipleDatepicker) return (0, _stringify2.default)(this.field.value || []);
 
       if (!this.isOpenedRow) {
         var default_value = this.field.default;
@@ -40403,7 +40462,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div v-if=\"!hasComponent\" v-bind:class=\"{ 'is-changed-from-history' : isChangedFromHistory }\">\n  <!-- STRING INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isString || isPassword\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <input v-bind:id=\"getId\" @keyup=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" :type=\"isPassword ? 'password' : 'text'\" :name=\"getFieldName\" class=\"form-control\" :maxlength=\"field.max\" :value=\"getValueOrDefault\" :placeholder=\"field.placeholder || getName\">\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- NUMBER/DECIMAL INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isInteger\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <input v-bind:id=\"getId\" @keyup=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" type=\"number\" :name=\"getFieldName\" class=\"form-control\" v-bind:step=\"isDecimal ? '0.01' : ''\" v-bind:value=\"getValueOrDefault\" :placeholder=\"field.placeholder || getName\">\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- DATETIME INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isDatepicker\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <input v-bind:id=\"getId\" @keyup=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" type=\"text\" :name=\"getFieldName\" class=\"form-control\" :value=\"getValueOrDefault\" :placeholder=\"field.placeholder || getName\">\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- Checkbox INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isCheckbox\">\n    <label v-bind:for=\"getId\" class=\"checkbox\">\n      {{ getName }} <span v-if=\"field.placeholder\">{{ field.placeholder }}</span>\n      <input type=\"checkbox\" @change=\"changeValue\" v-bind:id=\"getId\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" v-bind:checked=\"getValueOrDefault == 1\" value=\"1\" class=\"ios-switch green\" :name=\"getFieldName\">\n      <div><div></div></div>\n    </label>\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- TEXT INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isText || isEditor\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <textarea v-bind:id=\"getId\" @change=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" :name=\"getFieldName\" v-bind:class=\"{ 'form-control' : isText, 'js_editor' : isEditor }\" rows=\"5\" :placeholder=\"field.placeholder || getName\">{{ getValueOrDefault }}</textarea>\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- FILE INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isFile\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n\n    <div class=\"file-group\">\n      <input v-bind:id=\"getId\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" type=\"file\" v-bind:multiple=\"isMultipleUpload\" v-bind:name=\"isMultipleUpload ? key + '[]' : key\" @change=\"addFile\" class=\"form-control\" :placeholder=\"field.placeholder || getName\">\n      <input v-if=\"!field.value &amp;&amp; file_will_remove == true\" type=\"hidden\" name=\"$remove_{{ key }}\" value=\"1\">\n\n      <button v-if=\"field.value &amp;&amp; !isMultipleUpload || !file_from_server\" @click.prevent=\"removeFile\" type=\"button\" class=\"btn btn-danger btn-md\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('delete-file')\"><i class=\"fa fa-remove\"></i></button>\n\n      <div v-show=\"isMultiple &amp;&amp; !isMultirows &amp;&amp; getFiles.length > 0\">\n        <select v-bind:id=\"getId + '_multipleFile'\" v-bind:name=\"(isMultiple &amp;&amp; !isMultirows &amp;&amp; getFiles.length > 0) ? '$uploaded_'+key+'[]' : ''\" data-placeholder=\" \" multiple=\"\">\n          <option selected=\"\" v-for=\"file in getFiles\">{{ file }}</option>\n        </select>\n      </div>\n\n      <small v-show=\"uploadSelectPluginAfterLoad\">{{ field.title }}</small>\n\n      <span v-if=\"field.value &amp;&amp; !hasMultipleFilesValue &amp;&amp; file_from_server &amp;&amp; !isMultiple\">\n        <file :file=\"field.value\" :field=\"key\" :model=\"model\"></file>\n      </span>\n\n    </div>\n  </div>\n\n  <!-- Row Confirmation -->\n  <form-input-builder v-if=\"field.confirmed == true &amp;&amp; !isConfirmation\" :model=\"model\" :history=\"history\" :field=\"field\" :index=\"index\" :key=\"key + '_confirmation'\" :row=\"row\" :confirmation=\"true\"></form-input-builder>\n\n  <!-- SELECT INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled || hasNoFilterValues }\" v-show=\"isRequired || !hasNoFilterValues\" v-if=\"isSelect\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired || isRequiredIfHasValues\" class=\"required\">*</span></label>\n    <div :class=\"{ 'can-add-select' : canAddRow }\">\n      <select v-bind:id=\"getId\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" name=\"{{ !isMultiple ? key : '' }}\" v-bind:data-placeholder=\"field.placeholder ? field.placeholder : trans('select-option-multi')\" v-bind:multiple=\"isMultiple\" class=\"form-control\">\n        <option v-if=\"!isMultiple\" value=\"\">{{ trans('select-option') }}</option>\n        <option v-for=\"mvalue in missingValueInSelectOptions\" v-bind:value=\"mvalue\" :selected=\"hasValue(mvalue, value, isMultiple)\">{{ mvalue }}</option>\n        <option v-for=\"data in fieldOptions\" v-bind:selected=\"hasValue(data[0], value, isMultiple) || (!this.isOpenedRow &amp;&amp; data[0] == field.default)\" v-bind:value=\"data[0]\">{{ data[1] }}</option>\n      </select>\n      <button v-if=\"canAddRow\" @click=\"allowRelation = true\" type=\"button\" :data-target=\"'#'+getModalId\" data-toggle=\"modal\" class=\"btn-success\"><i class=\"fa fa-plus\"></i></button>\n    </div>\n    <small>{{ field.title }}</small>\n    <input v-if=\"!hasNoFilterValues &amp;&amp; isRequiredIfHasValues\" type=\"hidden\" :name=\"'$required_'+key\" value=\"1\">\n\n\n    <!-- Modal for adding relation -->\n    <div class=\"modal fade\" v-if=\"canAddRow &amp;&amp; allowRelation\" :id=\"getModalId\" tabindex=\"-1\" role=\"dialog\">\n      <div class=\"modal-dialog\" role=\"document\">\n        <div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">×</span></button>\n            <h4 class=\"modal-title\">&nbsp;</h4>\n          </div>\n          <div class=\"modal-body\">\n            <model-builder :langid=\"langid\" :hasparentmodel=\"getRelationModelParent\" :parentrow=\"getRelationRow\" :model=\"getRelationModel\">\n            </model-builder>\n          </div>\n        </div><!-- /.modal-content -->\n      </div><!-- /.modal-dialog -->\n    </div><!-- /.modal -->\n  </div>\n\n  <!-- RADIO INPUT -->\n  <div class=\"form-group radio-group\" v-if=\"isRadio\">\n    <label>{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n      <div class=\"radio\" v-if=\"!isRequired\">\n        <label>\n          <input type=\"radio\" :name=\"getFieldName\" value=\"\">\n          {{ trans('no-option') }}\n        </label>\n      </div>\n\n      <div class=\"radio\" v-for=\"data in field.options\">\n        <label>\n          <input type=\"radio\" @change=\"changeValue\" :name=\"getFieldName\" v-bind:checked=\"hasValue(data[0], getValueOrDefault)\" v-bind:value=\"data[0]\">\n\n          {{ data[1] }}\n        </label>\n      </div>\n    \n    <small>{{ field.title }}</small>\n  </div>\n</div>\n\n<component v-else=\"\" :model=\"model\" :field=\"field\" :history_changed=\"isChangedFromHistory\" :row=\"row\" :key=\"key\" :is=\"componentName\">\n</component>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div v-if=\"!hasComponent\" v-bind:class=\"{ 'is-changed-from-history' : isChangedFromHistory }\">\n  <!-- STRING INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isString || isPassword\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <input v-bind:id=\"getId\" @keyup=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" :type=\"isPassword ? 'password' : 'text'\" :name=\"getFieldName\" class=\"form-control\" :maxlength=\"field.max\" :value=\"getValueOrDefault\" :placeholder=\"field.placeholder || getName\">\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- NUMBER/DECIMAL INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isInteger\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <input v-bind:id=\"getId\" @keyup=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" type=\"number\" :name=\"getFieldName\" class=\"form-control\" v-bind:step=\"isDecimal ? '0.01' : ''\" v-bind:value=\"getValueOrDefault\" :placeholder=\"field.placeholder || getName\">\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- DATETIME INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled, 'multiple-date' : isMultipleDatepicker }\" v-if=\"isDatepicker\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <input v-bind:id=\"getId\" @keyup=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" type=\"text\" :name=\"isMultipleDatepicker ? '' : getFieldName\" class=\"form-control\" :value=\"getValueOrDefault\" :placeholder=\"field.placeholder || getName\">\n    <input type=\"hidden\" name=\"closed[]\" v-for=\"date in getMultiDates\" :value=\"getMultiDateValue(date)\">\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- Checkbox INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isCheckbox\">\n    <label v-bind:for=\"getId\" class=\"checkbox\">\n      {{ getName }} <span v-if=\"field.placeholder\">{{ field.placeholder }}</span>\n      <input type=\"checkbox\" @change=\"changeValue\" v-bind:id=\"getId\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" v-bind:checked=\"getValueOrDefault == 1\" value=\"1\" class=\"ios-switch green\" :name=\"getFieldName\">\n      <div><div></div></div>\n    </label>\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- TEXT INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isText || isEditor\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n    <textarea v-bind:id=\"getId\" @change=\"changeValue\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" :name=\"getFieldName\" v-bind:class=\"{ 'form-control' : isText, 'js_editor' : isEditor }\" rows=\"5\" :placeholder=\"field.placeholder || getName\">{{ getValueOrDefault }}</textarea>\n    <small>{{ field.title }}</small>\n  </div>\n\n  <!-- FILE INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled }\" v-if=\"isFile\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n\n    <div class=\"file-group\">\n      <input v-bind:id=\"getId\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" type=\"file\" v-bind:multiple=\"isMultipleUpload\" v-bind:name=\"isMultipleUpload ? key + '[]' : key\" @change=\"addFile\" class=\"form-control\" :placeholder=\"field.placeholder || getName\">\n      <input v-if=\"!field.value &amp;&amp; file_will_remove == true\" type=\"hidden\" name=\"$remove_{{ key }}\" value=\"1\">\n\n      <button v-if=\"field.value &amp;&amp; !isMultipleUpload || !file_from_server\" @click.prevent=\"removeFile\" type=\"button\" class=\"btn btn-danger btn-md\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('delete-file')\"><i class=\"fa fa-remove\"></i></button>\n\n      <div v-show=\"isMultiple &amp;&amp; !isMultirows &amp;&amp; getFiles.length > 0\">\n        <select v-bind:id=\"getId + '_multipleFile'\" v-bind:name=\"(isMultiple &amp;&amp; !isMultirows &amp;&amp; getFiles.length > 0) ? '$uploaded_'+key+'[]' : ''\" data-placeholder=\" \" multiple=\"\">\n          <option selected=\"\" v-for=\"file in getFiles\">{{ file }}</option>\n        </select>\n      </div>\n\n      <small v-show=\"uploadSelectPluginAfterLoad\">{{ field.title }}</small>\n\n      <span v-if=\"field.value &amp;&amp; !hasMultipleFilesValue &amp;&amp; file_from_server &amp;&amp; !isMultiple\">\n        <file :file=\"field.value\" :field=\"key\" :model=\"model\"></file>\n      </span>\n\n    </div>\n  </div>\n\n  <!-- Row Confirmation -->\n  <form-input-builder v-if=\"field.confirmed == true &amp;&amp; !isConfirmation\" :model=\"model\" :history=\"history\" :field=\"field\" :index=\"index\" :key=\"key + '_confirmation'\" :row=\"row\" :confirmation=\"true\"></form-input-builder>\n\n  <!-- SELECT INPUT -->\n  <div class=\"form-group\" :class=\"{ disabled : isDisabled || hasNoFilterValues }\" v-show=\"isRequired || !hasNoFilterValues\" v-if=\"isSelect\">\n    <label v-bind:for=\"getId\">{{ getName }} <span v-if=\"isRequired || isRequiredIfHasValues\" class=\"required\">*</span></label>\n    <div :class=\"{ 'can-add-select' : canAddRow }\">\n      <select v-bind:id=\"getId\" :data-field=\"getFieldKey\" v-bind:disabled=\"isDisabled\" name=\"{{ !isMultiple ? key : '' }}\" v-bind:data-placeholder=\"field.placeholder ? field.placeholder : trans('select-option-multi')\" v-bind:multiple=\"isMultiple\" class=\"form-control\">\n        <option v-if=\"!isMultiple\" value=\"\">{{ trans('select-option') }}</option>\n        <option v-for=\"mvalue in missingValueInSelectOptions\" v-bind:value=\"mvalue\" :selected=\"hasValue(mvalue, value, isMultiple)\">{{ mvalue }}</option>\n        <option v-for=\"data in fieldOptions\" v-bind:selected=\"hasValue(data[0], value, isMultiple) || (!this.isOpenedRow &amp;&amp; data[0] == field.default)\" v-bind:value=\"data[0]\">{{ data[1] }}</option>\n      </select>\n      <button v-if=\"canAddRow\" @click=\"allowRelation = true\" type=\"button\" :data-target=\"'#'+getModalId\" data-toggle=\"modal\" class=\"btn-success\"><i class=\"fa fa-plus\"></i></button>\n    </div>\n    <small>{{ field.title }}</small>\n    <input v-if=\"!hasNoFilterValues &amp;&amp; isRequiredIfHasValues\" type=\"hidden\" :name=\"'$required_'+key\" value=\"1\">\n\n\n    <!-- Modal for adding relation -->\n    <div class=\"modal fade\" v-if=\"canAddRow &amp;&amp; allowRelation\" :id=\"getModalId\" tabindex=\"-1\" role=\"dialog\">\n      <div class=\"modal-dialog\" role=\"document\">\n        <div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">×</span></button>\n            <h4 class=\"modal-title\">&nbsp;</h4>\n          </div>\n          <div class=\"modal-body\">\n            <model-builder :langid=\"langid\" :hasparentmodel=\"getRelationModelParent\" :parentrow=\"getRelationRow\" :model=\"getRelationModel\">\n            </model-builder>\n          </div>\n        </div><!-- /.modal-content -->\n      </div><!-- /.modal-dialog -->\n    </div><!-- /.modal -->\n  </div>\n\n  <!-- RADIO INPUT -->\n  <div class=\"form-group radio-group\" v-if=\"isRadio\">\n    <label>{{ getName }} <span v-if=\"isRequired\" class=\"required\">*</span></label>\n      <div class=\"radio\" v-if=\"!isRequired\">\n        <label>\n          <input type=\"radio\" :name=\"getFieldName\" value=\"\">\n          {{ trans('no-option') }}\n        </label>\n      </div>\n\n      <div class=\"radio\" v-for=\"data in field.options\">\n        <label>\n          <input type=\"radio\" @change=\"changeValue\" :name=\"getFieldName\" v-bind:checked=\"hasValue(data[0], getValueOrDefault)\" v-bind:value=\"data[0]\">\n\n          {{ data[1] }}\n        </label>\n      </div>\n    \n    <small>{{ field.title }}</small>\n  </div>\n</div>\n\n<component v-else=\"\" :model=\"model\" :field=\"field\" :history_changed=\"isChangedFromHistory\" :row=\"row\" :key=\"key\" :is=\"componentName\">\n</component>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -40414,7 +40473,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-6468daa2", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../Partials/File.vue":114,"./ModelBuilder.vue":111,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],110:[function(require,module,exports){
+},{"../Partials/File.vue":114,"./ModelBuilder.vue":111,"babel-runtime/core-js/json/stringify":1,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],110:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -42161,6 +42220,20 @@ exports.default = {
         } else if (field.type == 'checkbox') {
           return rowValue == 1 ? this.trans('yes') : this.trans('no');
         }
+
+        //Multi date format values
+        else if (field.type == 'date' && field.multiple === true) {
+            rowValue = (rowValue || []).map(function (item) {
+              var date = moment(item);
+
+              return date._isValid ? date.format('DD.MM.YYYY') : item;
+            }).join(', ');
+          }
+
+          //Multi time format values
+          else if (field.type == 'time' && field.multiple === true) {
+              rowValue = (rowValue || []).join(', ');
+            }
       }
 
       var add_before = this.$root.getModelProperty(this.model, 'settings.columns.' + this.field + '.add_before'),

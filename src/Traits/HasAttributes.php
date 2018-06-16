@@ -94,7 +94,7 @@ trait HasAttributes
             /*
              * Update to correct datetime format
              */
-            if ( in_array($field['type'], ['date', 'datetime', 'time']) && array_key_exists($key, $attributes) )
+            if ( in_array($field['type'], ['date', 'datetime', 'time']) && array_key_exists($key, $attributes) && ! $this->hasFieldParam($key, 'multiple', true) )
             {
                 $attributes[$key] = $attributes[$key] ? (new Carbon($attributes[$key]))->format( $field['date_format'] ) : null;
             }

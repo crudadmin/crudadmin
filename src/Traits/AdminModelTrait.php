@@ -302,7 +302,7 @@ trait AdminModelTrait
     {
         foreach ($this->getFields() as $key => $field)
         {
-            if ( $this->isFieldType($key, ['date', 'datetime', 'time']) )
+            if ( $this->isFieldType($key, ['date', 'datetime', 'time']) && ! $this->hasFieldParam($key, 'multiple', true) )
                 $this->dates[] = $key;
         }
 
@@ -319,7 +319,7 @@ trait AdminModelTrait
         foreach ($this->getFields() as $key => $field)
         {
             //Add cast attribute for fields with multiple select
-            if ( $this->isFieldType($key, ['select', 'file']) && $this->hasFieldParam($key, 'multiple')
+            if ( $this->isFieldType($key, ['select', 'file', 'date', 'time']) && $this->hasFieldParam($key, 'multiple', true)
                  || $this->isFieldType($key, 'json')
                  || $this->hasFieldParam($key, 'locale')
              )

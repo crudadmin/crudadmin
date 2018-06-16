@@ -105,9 +105,25 @@ export default {
                   return options[i][1];
               }
             }
-          } else if ( field.type == 'checkbox' )
+          }
+
+          else if ( field.type == 'checkbox' )
           {
             return rowValue == 1 ? this.trans('yes') : this.trans('no');
+          }
+
+          //Multi date format values
+          else if ( field.type == 'date' && field.multiple === true ) {
+            rowValue = (rowValue||[]).map(item => {
+              var date = moment(item);
+
+              return date._isValid ? date.format('DD.MM.YYYY') : item;
+            }).join(', ');
+          }
+
+          //Multi time format values
+          else if ( field.type == 'time' && field.multiple === true ) {
+            rowValue = (rowValue||[]).join(', ');
           }
         }
 

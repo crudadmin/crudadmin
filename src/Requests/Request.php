@@ -145,7 +145,7 @@ abstract class Request extends FormRequest
         {
             if ( $this->model->isFieldType($key, ['date', 'datetime', 'time']) )
             {
-                if ( $this->has( $key ) && ! empty( $this->get($key) ) )
+                if ( $this->has( $key ) && ! empty( $this->get($key) ) && ! $this->model->hasFieldParam($key, 'multiple', true) )
                 {
                     $date = Carbon::createFromFormat( $field['date_format'], $this->get($key) );
 

@@ -64,7 +64,7 @@ trait Validation {
         {
             $orig_key = $key;
 
-            if ($this->isFieldType($key, 'file'))
+            if ($this->isFieldType($key, 'file') || $this->isFieldType($key, ['date', 'time']))
             {
                 //If is multiple file uploading
                 if ( $this->hasFieldParam($key, ['multiple', 'multirows'], true) )
