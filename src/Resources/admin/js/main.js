@@ -39343,6 +39343,11 @@ exports.default = {
       for (var key in this.languages) {
         if (this.languages[key].id == this.selectedlangid) return this.languages[key];
       }return this.languages[0];
+    },
+    canUpdateForm: function canUpdateForm() {
+      if (this.isOpenedRow && this.$root.getModelProperty(this.model, 'settings.editable') == false) return false;
+
+      return this.cansave;
     }
   },
 
@@ -39680,7 +39685,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- Horizontal Form -->\n<form method=\"post\" action=\"\" v-bind:id=\"formID\" :data-form=\"model.slug\" v-on:submit.prevent=\"saveForm\">\n  <div v-bind:class=\"['box', { 'box-info' : isActive, 'box-warning' : !isActive }]\">\n\n    <div class=\"box-header with-border\" :class=\"{ visible : hasLocalFields }\">\n      <h3 class=\"box-title\"><span v-if=\"model.localization\" data-toggle=\"tooltip\" :data-original-title=\"trans('multilanguages')\" class=\"fa fa-globe\"></span> {{ title }}</h3>\n      <button v-if=\"isOpenedRow &amp;&amp; canaddrow\" v-on:click.prevent=\"resetForm\" type=\"button\" class=\"add-row-btn pull-right btn btn-default btn-sm\"><i class=\"fa fa-plus\"></i> {{ newRowTitle }}</button>\n\n      <div class=\"dropdown pull-right multi-languages\" v-if=\"hasLocalFields\">\n        <button class=\"btn btn-default dropdown-toggle\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n          <i class=\"fa fa-globe\"></i> <span class=\"text\">{{ selectedLanguage.name }}</span>\n          <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n          <li v-for=\"lang in languages\" v-if=\"selectedLanguage.id != lang.id\" :data-slug=\"lang.slug\"><a href=\"#\" @click.prevent=\"selectedlangid = lang.id\"><i class=\"fa fa-exclamation-triangle\"></i>{{ lang.name }}</a></li>\n        </ul>\n      </div>\n\n    </div>\n\n    <div class=\"box-body\" :class=\"{ cantadd : !cansave }\">\n      <form-tabs-builder :model=\"model\" :childs=\"true\" :langid=\"langid\" :inputlang=\"selectedLanguage\" :row=\"row\" :cansave.sync=\"cansave\" :hasparentmodel=\"hasparentmodel\" :history=\"history\">\n      </form-tabs-builder>\n    </div>\n\n    <div class=\"box-footer\" v-if=\"cansave\">\n      <button v-if=\"progress\" type=\"button\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\"><i class=\"fa updating fa-refresh\"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>\n      <button v-if=\"!progress\" type=\"submit\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\">{{ isOpenedRow ? saveButton : sendButton }}</button>\n    </div>\n\n  </div>\n</form>\n<!-- /.box -->\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- Horizontal Form -->\n<form method=\"post\" action=\"\" v-bind:id=\"formID\" :data-form=\"model.slug\" v-on:submit.prevent=\"saveForm\">\n  <div v-bind:class=\"['box', { 'box-info' : isActive, 'box-warning' : !isActive }]\">\n\n    <div class=\"box-header with-border\" :class=\"{ visible : hasLocalFields }\">\n      <h3 class=\"box-title\"><span v-if=\"model.localization\" data-toggle=\"tooltip\" :data-original-title=\"trans('multilanguages')\" class=\"fa fa-globe\"></span> {{ title }}</h3>\n      <button v-if=\"isOpenedRow &amp;&amp; canaddrow\" v-on:click.prevent=\"resetForm\" type=\"button\" class=\"add-row-btn pull-right btn btn-default btn-sm\"><i class=\"fa fa-plus\"></i> {{ newRowTitle }}</button>\n\n      <div class=\"dropdown pull-right multi-languages\" v-if=\"hasLocalFields\">\n        <button class=\"btn btn-default dropdown-toggle\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n          <i class=\"fa fa-globe\"></i> <span class=\"text\">{{ selectedLanguage.name }}</span>\n          <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n          <li v-for=\"lang in languages\" v-if=\"selectedLanguage.id != lang.id\" :data-slug=\"lang.slug\"><a href=\"#\" @click.prevent=\"selectedlangid = lang.id\"><i class=\"fa fa-exclamation-triangle\"></i>{{ lang.name }}</a></li>\n        </ul>\n      </div>\n\n    </div>\n\n    <div class=\"box-body\" :class=\"{ cantadd : !cansave }\">\n      <form-tabs-builder :model=\"model\" :childs=\"true\" :langid=\"langid\" :inputlang=\"selectedLanguage\" :row=\"row\" :cansave.sync=\"cansave\" :hasparentmodel=\"hasparentmodel\" :history=\"history\">\n      </form-tabs-builder>\n    </div>\n\n    <div class=\"box-footer\" v-if=\"canUpdateForm\">\n      <button v-if=\"progress\" type=\"button\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\"><i class=\"fa updating fa-refresh\"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>\n      <button v-if=\"!progress\" type=\"submit\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\">{{ isOpenedRow ? saveButton : sendButton }}</button>\n    </div>\n\n  </div>\n</form>\n<!-- /.box -->\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -41223,7 +41228,7 @@ exports.default = {
     },
     canShowRows: function canShowRows() {
       if (this.isSingle) {
-        this.row = this.rows.data[0];
+        this.row = this.rows.data[0] || {};
         this.row;
 
         this.enableOnlyFullScreen();
@@ -41563,6 +41568,10 @@ exports.default = {
     },
     reloadRows: function reloadRows() {
       this.row = {};
+      this.rows.data = [];
+      this.rows.count = [];
+      this.rows.save_children = [];
+
       this.loadRows();
 
       return true;

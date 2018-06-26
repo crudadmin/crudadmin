@@ -637,7 +637,7 @@
       },
       canShowRows(){
         if ( this.isSingle ){
-          this.row = this.rows.data[0];
+          this.row = this.rows.data[0]||{};
           this.row;
 
           this.enableOnlyFullScreen();
