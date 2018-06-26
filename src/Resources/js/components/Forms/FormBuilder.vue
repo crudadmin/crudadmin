@@ -32,7 +32,7 @@
         </form-tabs-builder>
       </div>
 
-      <div class="box-footer" v-if="cansave">
+      <div class="box-footer" v-if="canUpdateForm">
         <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
         <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? saveButton : sendButton }}</button>
       </div>
@@ -147,6 +147,12 @@
             return this.languages[key];
 
         return this.languages[0];
+      },
+      canUpdateForm(){
+        if ( this.isOpenedRow && this.$root.getModelProperty(this.model, 'settings.editable') == false )
+          return false;
+
+        return this.cansave;
       },
     },
 
