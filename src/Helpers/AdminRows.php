@@ -284,7 +284,7 @@ class AdminRows
 
                 if ( $button->active === true )
                 {
-                    $data[] = [
+                    $data[$key] = [
                         'name' => $button->name,
                         'class' => $button->class,
                         'icon' => $button->icon,

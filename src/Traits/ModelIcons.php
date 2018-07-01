@@ -76,6 +76,8 @@ trait ModelIcons
             'office' => 'fa-building',
             'param' => 'fa-gear',
             'report' => 'fa-table',
+            'stopwatch' => 'fa-clock-o',
+            'watch' => 'fa-clock-o',
         ];
     }
 

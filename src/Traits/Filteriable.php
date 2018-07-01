@@ -13,7 +13,7 @@ trait Filteriable
     public function scopeDateRange( $query, $parameter, $column, $date_format = 'd.m.Y' )
     {
         //Date range filter
-        if ( request()->has($parameter) )
+        if ( request()->has($parameter) && request()->get($parameter) )
         {
             $range = explode('-', request()->get($parameter));
 
@@ -59,7 +59,7 @@ trait Filteriable
 
         unset($params[0]);
 
-        if ( request()->has($column) )
+        if ( request()->has($column) && request()->get($column) )
         {
             $params[] = request()->get($column);
             call_user_func_array([$query, 'where'], $params);
@@ -69,7 +69,7 @@ trait Filteriable
 
     public function scopeSearch($query, $search, $columns = null)
     {
-        if ( request()->has($search) )
+        if ( request()->has($search) && request()->get($search) )
         {
             if ( $columns == null )
                 $columns = [ $search ];
