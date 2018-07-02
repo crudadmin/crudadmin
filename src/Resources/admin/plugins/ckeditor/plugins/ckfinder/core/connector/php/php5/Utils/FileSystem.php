@@ -710,20 +710,24 @@ class CKFinder_Connector_Utils_FileSystem
      */
     public static function autoRename( $filePath, $fileName )
     {
-      $sFileNameOrginal = $fileName;
+      $extension = CKFinder_Connector_Utils_FileSystem::getExtension($fileName, false);
+
+      $sFileNameOrginal = str_slug(CKFinder_Connector_Utils_FileSystem::getFileNameWithoutExtension($fileName, false)).'.'.$extension;
+
       $iCounter = 0;
       while (true)
       {
         $sFilePath = CKFinder_Connector_Utils_FileSystem::combinePaths($filePath, $fileName);
         if ( file_exists($sFilePath) ){
           $iCounter++;
-          $fileName = CKFinder_Connector_Utils_FileSystem::getFileNameWithoutExtension($sFileNameOrginal, false) . "(" . $iCounter . ")" . "." .CKFinder_Connector_Utils_FileSystem::getExtension($sFileNameOrginal, false);
+          $fileName = CKFinder_Connector_Utils_FileSystem::getFileNameWithoutExtension($sFileNameOrginal, false) . "-" . $iCounter . "." .$extension;
         }
         else
         {
           break;
         }
       }
+
       return $fileName;
     }
 
