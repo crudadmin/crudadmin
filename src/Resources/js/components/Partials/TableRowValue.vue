@@ -9,7 +9,7 @@
     </div>
 
     <!-- Table value -->
-    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue | encodedTitle field">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
+    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue | encodedTitle field true">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
 
   </div>
 </template>
@@ -31,7 +31,7 @@ export default {
 
         return string;
       },
-      encodeValue(string, key){
+      encodeValue(string, key, is_title){
         var isReal = this.isRealField(key);
 
         //Check if column can be encoded
@@ -39,6 +39,9 @@ export default {
         {
           string = $(document.createElement('div')).text(string).html();
         }
+
+        if ( is_title && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
+          return '';
 
         if ( this.isRealField(key) && this.model.fields[key].type == 'text' && parseInt(this.model.fields[key].limit) === 0)
         {
@@ -199,6 +202,9 @@ export default {
         return key in this.model.fields;
       },
       getFieldLimit(key, defaultLimit){
+        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
+          return 0;
+
         if ( this.isRealField(key) )
         {
           var field = this.model.fields[key];
