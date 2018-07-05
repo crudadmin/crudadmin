@@ -85,6 +85,7 @@ return [
      */
     'extensions'            => 'Pole musí byť súbor s koncovkou :values.',
     'iban'                  => 'Zadajte správny IBAN formát.',
+    'phone'                 => 'Pole musí být v tvaru tel. čísla.',
 
     /*
     |--------------------------------------------------------------------------
