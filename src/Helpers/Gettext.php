@@ -84,7 +84,7 @@ class Gettext
 
     protected function poTemplate($locale)
     {
-        $contents = $this->filesystem->get( \Admin::stub('gettext') );
+        $contents = $this->filesystem->get( \Admin::stub('Gettext') );
 
         $contents = str_replace('{locale}', $locale, $contents);
         $contents = str_replace('{timestamp}', date('Y-m-d H:iO'), $contents);
