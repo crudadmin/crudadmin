@@ -23,6 +23,7 @@
           <td class="buttons-options" v-bind:class="[ 'additional-' + buttonsCount(item) ]">
             <div><button type="button" v-if="isEditable" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" :data-original-title="trans('edit')"><i class="fa fa-pencil"></i></button></div>
             <div><button type="button" v-if="isEnabledHistory" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
+            <div><button type="button" v-if="canShowGettext" v-on:click="openGettextEditor(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('gettext-update')"><i class="fa fa-globe"></i></button></div>
             <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('row-info')"><i class="fa fa-info"></i></button></div>
             <div v-for="(button_key, button) in getButtonsForRow(item)">
               <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]"></i></button>
@@ -41,7 +42,7 @@
   import History from './History.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history'],
 
       components: { TableRowValue, History },
 
@@ -189,6 +190,12 @@
         isEnabledHistory(){
           return this.model.history == true;
         },
+        canShowGettext(){
+          if ( this.model.slug == 'languages' && this.$root.gettext == true )
+            return true;
+
+          return false;
+        },
         formID(){
           return 'form-' + this.$parent.$parent.depth_level + '-' + this.model.slug;
         },
@@ -227,7 +234,7 @@
           if ( ! buttons )
             buttons = { length : 0 };
 
-          return buttons.length + (this.isEnabledHistory ? 1 : 0);
+          return buttons.length + (this.isEnabledHistory ? 1 : 0) + (this.canShowGettext ? 1 : 0);
         },
         getButtonsForRow(item){
           if ( ! this.rows.buttons )
@@ -461,6 +468,9 @@
             data += this.$root.trans('published-at') + ': <strong>' + this.getDateByField(row, 'published_at') + '</strong>';
 
           this.$root.openAlert(this.$root.trans('row-info-n') + ' ' + row.id, data, 'primary', null, function(){});
+        },
+        openGettextEditor(item){
+          this.gettext_editor = item;
         },
         showHistory(row){
           this.$http.get( this.$root.requests.getHistory, {

@@ -6,7 +6,6 @@
 
   <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
-
     <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
       <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
 
@@ -78,6 +77,7 @@
             :selectedlangid.sync="selected_language_id"
             :canaddrow="canAddRow"
             :hasparentmodel="hasparentmodel"
+            :gettext_editor.sync="gettext_editor"
             :row.sync="row"
           ></form-builder>
         </div>
@@ -94,6 +94,7 @@
             :search="search"
             :iswithoutparent="isWithoutParentRow"
             :activetab="activetab"
+            :gettext_editor.sync="gettext_editor"
             :history="history">
           </model-rows-builder>
         </div>
@@ -118,16 +119,24 @@
   <div v-for="layout in layouts | positionLayout 'bottom'">
     {{{ layout.view }}}
   </div>
+
+  <gettext-extension v-if="gettext_editor" :gettext_editor.sync="gettext_editor"></gettext-extension>
 </template>
 
 <script>
   import FormBuilder from './FormBuilder.vue';
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
+  import GettextExtension from '../Partials/GettextExtension.vue';
 
   export default {
     props : ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
+
     name : 'model-builder',
+
+    components : { FormBuilder, ModelRowsBuilder, GettextExtension },
+
     data : function(){
+
       return {
         sizes : [
           { size : 8, key : 'small', name : 'Small', active : false, disabled : false },
@@ -182,6 +191,7 @@
         progress : false,
 
         depth_level : 0,
+        gettext_editor: null,
       };
     },
 
@@ -733,7 +743,5 @@
         return this.search.used == true;
       },
     },
-
-    components : { FormBuilder, ModelRowsBuilder }
   }
 </script>

@@ -29,6 +29,7 @@
         :buttons="rows.buttons"
         :count="rows.count"
         :history="history"
+        :gettext_editor.sync="gettext_editor"
         :rows="rows"
         :rowsdata.sync="rowsData"
         :enabledcolumns.sync="enabled_columns"
@@ -56,7 +57,7 @@
   import TableRows from '../Partials/TableRows.vue';
 
   export default {
-    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'iswithoutparent', 'activetab'],
+    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'gettext_editor', 'iswithoutparent', 'activetab'],
 
     components : { Refreshing, TableRows },
 

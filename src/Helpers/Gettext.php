@@ -5,7 +5,11 @@ use \App\Core\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\BladeCompiler;
+use Gogol\Admin\Helpers\File;
+use Gettext\Translations;
+use Gettext\Extractors\PhpCode;
 use Storage;
+use Cache;
 
 class Gettext
 {
@@ -39,7 +43,7 @@ class Gettext
 
     public function getSourcePaths($add = true)
     {
-        $paths = config('admin.gettext_source_paths');
+        $paths = config('admin.gettext_source_paths', []);
 
         if ( $add == true )
             $paths[] = $this->basepath . '/' .$this->cachepath;
@@ -93,6 +97,8 @@ class Gettext
             $contents .= "\n".'"X-Poedit-SearchPath-'.$key.': '.$path.'\n"';
         }
 
+        $contents .= "\n";
+
         return $contents;
     }
 
@@ -132,17 +138,20 @@ class Gettext
 
         $locale_path = $this->getLocalePath( $locale );
 
+        $po_path = $po_path = $this->getLocalePath( $locale, $locale . '.po' );
+
         //Create new directory if not exists
-        if ( ! $this->filesystem->isDirectory($locale_path) )
+        if ( ! $this->filesystem->isDirectory($locale_path) || ! file_exists($po_path) )
         {
-            $this->filesystem->makeDirectory( $locale_path, 0775, true);
+            if ( ! $this->filesystem->isDirectory($locale_path) )
+                $this->filesystem->makeDirectory( $locale_path, 0775, true);
 
             //Create gitignore
             if ( ! file_exists( $this->getGettextPath('.gitignore') ) )
                 $this->filesystem->put( $this->getGettextPath('.gitignore'), '*.mo' );
 
             //Create new template file
-            $this->filesystem->put( $this->getLocalePath( $locale, $locale . '.po' ), $this->poTemplate($locale));
+            $this->filesystem->put( $po_path, $this->poTemplate($locale));
 
             return true;
         }
@@ -172,9 +181,9 @@ class Gettext
         return true;
     }
 
-    public function renderView()
+    public function renderView($force = false)
     {
-        if ( env('APP_DEBUG') == false && env('APP_ENV') != 'production')
+        if ( $force !== true && env('APP_DEBUG') == false && env('APP_ENV') != 'production')
         {
             return false;
         }
@@ -277,6 +286,219 @@ class Gettext
         {
             $this->filesystem->copy($uploaded_path_po, $locale_po_file);
         }
+    }
+
+    /*
+     * Change filename po mo files,
+     * because .mo files need to be unique
+     */
+    public function getMoFilename()
+    {
+        return date('d-m-Y-h-i-s') . '.mo';
+    }
+
+    private function translationsToArray($translations)
+    {
+        $strings = [];
+
+        foreach ($translations as $translation) {
+            $strings[$translation->getOriginal()] = $translation->getTranslation();
+        }
+
+        return $strings;
+    }
+
+    public function getTranslations($language)
+    {
+        $locale = $this->getLocale($language->slug);
+
+        $po_path = $this->getLocalePath( $locale, $locale . '.po' );
+
+        //If file does not exists, then sync and generate translations
+        if ( ! file_exists($po_path) || $this->needReloadTranslates() ){
+            $this->syncTranslates($language);
+        }
+
+        $translations = Translations::fromPoFile($po_path);
+
+        return $this->translationsToArray($translations);
+    }
+
+    /*
+     * Update translations for specific language from array of changes
+     */
+    public function updateTranslations($language, $changes)
+    {
+        $locale = $this->getLocale($language->slug);
+
+        $po_path = $this->getLocalePath( $locale, $locale . '.po' );
+
+        $translations = Translations::fromPoFile($po_path);
+
+        foreach ($changes as $key => $value)
+        {
+            //Update existing translation
+            if ( $translation = $translations->find(null, $key) )
+                $translation->setTranslation($value);
+        }
+
+        $this->rebuildGettextFiles($language, $translations);
+
+        return true;
+    }
+
+    /*
+     * Rebuild po/mo files from translations source and update uploaded files of specific language
+     */
+    public function rebuildGettextFiles($language, $translations)
+    {
+        $locale = $this->getLocale($language->slug);
+
+        $mo_filename = $this->getMoFilename();
+        $po_filename = $locale . '-' . date('d-m-Y-h-i-s') . '.po';
+
+        $mo_path = $this->getLocalePath($locale, $mo_filename);
+        $po_path = $this->getLocalePath($locale, $locale . '.po');
+
+        //Make missing directories
+        File::makeDirs($this->getLocalePath($locale));
+        File::makeDirs($language->filePath('poedit_mo'));
+        File::makeDirs($language->filePath('poedit_po'));
+
+        //Save into mo file
+        $translations->toMoFile($mo_path);
+        $translations->toPoFile($po_path);
+
+        //Copy generated mo into uploads folder for avaiable download mo file
+        copy($mo_path, $language->filePath('poedit_mo', $mo_filename));
+        copy($po_path, $language->filePath('poedit_po', $po_filename));
+
+        $this->removeOldMoFiles($locale, $mo_filename);
+
+        $language->update([ 'poedit_mo' => $mo_filename, 'poedit_po' => $po_filename ]);
+    }
+
+    /*
+     * Remove all old mo files from gettext storage directory
+     */
+    public function removeOldMoFiles($locale, $except = null)
+    {
+        $files = scandir($this->getLocalePath( $locale ));
+
+        foreach ($files as $file) {
+            if ( last(explode('.', $file)) == 'mo' && $file != $except )
+                unlink($this->getLocalePath( $locale, $file ));
+        }
+    }
+
+    /*
+     * Return modified options for adding _ parser
+     */
+    private function getDecoderOptions()
+    {
+        return [
+            'functions' => PhpCode::$options['functions'] + [ '_' => 'gettext' ],
+        ];
+    }
+
+    /*
+     * Add sources from directories into translation class
+     */
+    private function mergeDirectoryTranslations($path, $translations)
+    {
+        $path = base_path( $path );
+
+        if ( ! file_exists($path) )
+            return;
+
+        //Foreach all files and merge translations
+        foreach ($this->filesystem->allFiles( $path ) as $file)
+        {
+            $sources = Translations::fromPhpCodeFile((string)$file, $this->getDecoderOptions());
+
+            $translations->mergeWith($sources);
+        }
+    }
+
+    /*
+     * Return modification timestamp of last modified file
+     */
+    private function getLastModifiedResource()
+    {
+        $views_paths = $this->getSourcePaths(false);
+
+        //Get list of modified files
+        $modified = [];
+
+        foreach ($views_paths as $path) {
+            $path = base_path( $path );
+
+            foreach ($this->filesystem->allFiles( $path ) as $file)
+            {
+                $modified[filemtime($file)] = (string)$file;
+            }
+        }
+
+        ksort($modified);
+
+        return last(array_keys($modified));
+    }
+
+    /*
+     * Check if some gettext files has been changed in resources
+     */
+    public function needReloadTranslates()
+    {
+        $last_modification = $this->getLastModifiedResource();
+
+        $cache_key = 'last_modification';
+
+        //If no modify time is in cache
+        $has_in_cache = Cache::has($cache_key);
+
+        //Get modification date from cache
+        $last_modification_cache = Cache::rememberForever($cache_key, function() use($last_modification){
+            return $last_modification;
+        });
+
+        //If modification date was not in cache, or modification dates are not matching, then reload gettext resources
+        if ( $last_modification != $last_modification_cache || ! $has_in_cache ){
+            Cache::forget($cache_key);
+            Cache::forever($cache_key, $last_modification);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /*
+     * Collect all translations in application and merge them with existing/new translation files
+     */
+    public function syncTranslates($language)
+    {
+        $locale = $this->getLocale($language->slug);
+
+        $po_path = $this->getLocalePath( $locale, $locale . '.po' );
+
+        if ( ! file_exists($po_path) )
+            $this->createLocale($language->slug);
+
+        $this->renderView(true);
+
+        $translations = Translations::fromPoFile($po_path);
+
+        $views_paths = $this->getSourcePaths();
+
+        //Foreach all gettext source directories
+        foreach ($views_paths as $path)
+        {
+            $this->mergeDirectoryTranslations($path, $translations);
+        }
+
+        $this->rebuildGettextFiles($language, $translations);
+
+        return $this->translationsToArray($translations);
     }
 }
 ?>

@@ -18,6 +18,7 @@ trait Gettextable
                 $row->poedit_po ? $row->poedit_po->path : null,
                 $row->poedit_mo ? $row->poedit_mo->path : null
             ]);
+            Gettext::syncTranslates($row);
         }
     }
 

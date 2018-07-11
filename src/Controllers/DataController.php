@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Gogol\Admin\Requests\DataRequest;
 use Gogol\Admin\Helpers\AdminRows;
 use Gogol\Admin\Models\ModelsHistory;
-use Admin;
 use Carbon\Carbon;
+use Gettext;
+use Admin;
 use Ajax;
 use DB;
 
@@ -438,5 +439,27 @@ class DataController extends Controller
                             ->get(['id', 'data', 'user_id', 'created_at']);
 
         return $rows;
+    }
+
+    /*
+     * Return all translations for specifics language
+     */
+    public function getTranslations($id)
+    {
+        $language = Admin::getModel('Language')->findOrFail($id);
+
+        return Gettext::getTranslations($language);
+    }
+
+    /*
+     * Update translations for specific language
+     */
+    public function updateTranslations($id)
+    {
+        $language = Admin::getModel('Language')->findOrFail($id);
+
+        $changes = json_decode(request('changes'));
+
+        Gettext::updateTranslations($language, $changes);
     }
 }

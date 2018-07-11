@@ -123,5 +123,15 @@ return [
     'send-password' => 'Odoslať potvrdzovací link na email',
     'password-reset' => 'Žiadosť o reset hesla',
     'password-reset-button' => 'Resetovať heslo',
-    'tab-error' => 'Záložka nemá vyplnené povinné údaje.'
+    'tab-error' => 'Záložka nemá vyplnené povinné údaje.',
+
+    'gettext-open' => 'Upraviť jazykové mutácie',
+    'gettext-update' => 'Upraviť preklady',
+    'gettext-search' => 'Vyhľadajte pomocou výrazu',
+    'gettext-no-match' => 'V prekladoch nebola nájdená žiadna zhoda.',
+    'gettext-source' => 'Základny text',
+    'gettext-translation' => 'Preklad',
+    'gettext-count' => 'Zobraziť všetky preklady',
+    'gettext-loading' => 'Preklady sa načitávajú, prosím počkajte.',
+    'gettext-save' => 'Uložiť a zatvoriť',
 ];

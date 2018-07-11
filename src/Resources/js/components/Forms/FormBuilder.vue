@@ -5,6 +5,7 @@
 
       <div class="box-header with-border" :class="{ visible : hasLocalFields }">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
+        <button v-if="isOpenedRow && canShowGettext" @click="openGettextEditor()" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-globe"></i> {{ trans('gettext-open') }}</button>
         <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
 
         <div class="dropdown pull-right multi-languages" v-if="hasLocalFields">
@@ -46,7 +47,7 @@
   export default {
     name : 'form-builder',
 
-    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid'],
+    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid', 'gettext_editor'],
 
     components: { FormTabsBuilder },
 
@@ -153,6 +154,12 @@
           return false;
 
         return this.cansave;
+      },
+      canShowGettext(){
+        if ( this.model.slug == 'languages' && this.$root.gettext )
+          return true;
+
+        return false;
       },
     },
 
@@ -536,6 +543,9 @@
       },
       trans(key){
         return this.$root.trans(key);
+      },
+      openGettextEditor(){
+        this.gettext_editor = this.row;
       }
     },
   }

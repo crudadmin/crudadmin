@@ -25,6 +25,7 @@ class LayoutController extends BaseController
             'user' => auth()->guard('web')->user()->getAdminUser(),
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
+            'gettext' => config('admin.gettext', false),
             'locale' => config('admin.locale', app()->getLocale()),
             'localization' => trans('admin::admin'),
             'dashboard' => $this->getDashBoard(),
@@ -39,6 +40,8 @@ class LayoutController extends BaseController
                 'buttonAction' => action('\Gogol\Admin\Controllers\DataController@buttonAction'),
                 'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),
                 'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
+                'translations' => action('\Gogol\Admin\Controllers\DataController@getTranslations', [':id']),
+                'update_translations' => action('\Gogol\Admin\Controllers\DataController@updateTranslations', [':id']),
             ],
         ];
 

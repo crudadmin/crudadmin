@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -31,8 +30,6 @@ Route::get('/admin/download/file', 'DownloadController@index');
 Route::get('/uploads/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
 Route::get('/uploads/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
 
-
-
 /*
  * Admin routes
  */
@@ -52,5 +49,7 @@ Route::group(['middleware' => 'admin'], function(){
     Route::post('/admin/api/togglePublishedAt', 'DataController@togglePublishedAt');
     Route::post('/admin/api/updateOrder', 'DataController@updateOrder');
     Route::get('/admin/api/getHistory/{model}/{id}', 'DataController@getHistory');
+    Route::get('/admin/api/getTranslations/{id}', 'DataController@getTranslations');
+    Route::post('/admin/api/updateTranslations/{id}', 'DataController@updateTranslations');
     Route::delete('/admin/api/delete', 'DataController@delete');
 });
