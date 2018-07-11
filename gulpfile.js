@@ -8,7 +8,7 @@ var config = require('./config.js');
 
 //Gulp watch for browserify
 elixir.config.js.browserify.watchify.options.poll = true;
-elixir.config.production = config.production;
+elixir.config.production = config.paths.length == 0;
 
 elixir(function(mix) {
 
