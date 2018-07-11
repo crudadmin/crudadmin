@@ -315,7 +315,7 @@ class Gettext
         $po_path = $this->getLocalePath( $locale, $locale . '.po' );
 
         //If file does not exists, then sync and generate translations
-        if ( ! file_exists($po_path) || $this->needReloadTranslates() ){
+        if ( ! file_exists($po_path) || $this->needReloadTranslates($locale) ){
             $this->syncTranslates($language);
         }
 
@@ -447,11 +447,11 @@ class Gettext
     /*
      * Check if some gettext files has been changed in resources
      */
-    public function needReloadTranslates()
+    public function needReloadTranslates($locale)
     {
         $last_modification = $this->getLastModifiedResource();
 
-        $cache_key = 'last_modification';
+        $cache_key = 'last_modification.'.$locale;
 
         //If no modify time is in cache
         $has_in_cache = Cache::has($cache_key);
