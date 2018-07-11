@@ -38963,6 +38963,7 @@ exports.default = {
                 return {
                     version: layout.version,
                     version_assets: layout.version_assets,
+                    gettext: layout.gettext,
                     locale: layout.locale,
                     dashboard: layout.dashboard,
                     license_key: layout.license_key,
@@ -39236,7 +39237,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-35028b7c", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./Partials/CheckAssetsVersion.vue":113,"./Partials/License.vue":116,"./Sidebar/Sidebar.vue":120,"babel-runtime/core-js/object/keys":2,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],107:[function(require,module,exports){
+},{"./Partials/CheckAssetsVersion.vue":113,"./Partials/License.vue":117,"./Sidebar/Sidebar.vue":121,"babel-runtime/core-js/object/keys":2,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],107:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -39252,7 +39253,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = {
   name: 'form-builder',
 
-  props: ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid'],
+  props: ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid', 'gettext_editor'],
 
   components: { FormTabsBuilder: _FormTabsBuilder2.default },
 
@@ -39348,6 +39349,11 @@ exports.default = {
       if (this.isOpenedRow && this.$root.getModelProperty(this.model, 'settings.editable') == false) return false;
 
       return this.cansave;
+    },
+    canShowGettext: function canShowGettext() {
+      if (this.model.slug == 'languages' && this.$root.gettext) return true;
+
+      return false;
     }
   },
 
@@ -39681,11 +39687,14 @@ exports.default = {
     },
     trans: function trans(key) {
       return this.$root.trans(key);
+    },
+    openGettextEditor: function openGettextEditor() {
+      this.gettext_editor = this.row;
     }
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- Horizontal Form -->\n<form method=\"post\" action=\"\" v-bind:id=\"formID\" :data-form=\"model.slug\" v-on:submit.prevent=\"saveForm\">\n  <div v-bind:class=\"['box', { 'box-info' : isActive, 'box-warning' : !isActive }]\">\n\n    <div class=\"box-header with-border\" :class=\"{ visible : hasLocalFields }\">\n      <h3 class=\"box-title\"><span v-if=\"model.localization\" data-toggle=\"tooltip\" :data-original-title=\"trans('multilanguages')\" class=\"fa fa-globe\"></span> {{ title }}</h3>\n      <button v-if=\"isOpenedRow &amp;&amp; canaddrow\" v-on:click.prevent=\"resetForm\" type=\"button\" class=\"add-row-btn pull-right btn btn-default btn-sm\"><i class=\"fa fa-plus\"></i> {{ newRowTitle }}</button>\n\n      <div class=\"dropdown pull-right multi-languages\" v-if=\"hasLocalFields\">\n        <button class=\"btn btn-default dropdown-toggle\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n          <i class=\"fa fa-globe\"></i> <span class=\"text\">{{ selectedLanguage.name }}</span>\n          <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n          <li v-for=\"lang in languages\" v-if=\"selectedLanguage.id != lang.id\" :data-slug=\"lang.slug\"><a href=\"#\" @click.prevent=\"selectedlangid = lang.id\"><i class=\"fa fa-exclamation-triangle\"></i>{{ lang.name }}</a></li>\n        </ul>\n      </div>\n\n    </div>\n\n    <div class=\"box-body\" :class=\"{ cantadd : !cansave }\">\n      <form-tabs-builder :model=\"model\" :childs=\"true\" :langid=\"langid\" :inputlang=\"selectedLanguage\" :row=\"row\" :cansave.sync=\"cansave\" :hasparentmodel=\"hasparentmodel\" :history=\"history\">\n      </form-tabs-builder>\n    </div>\n\n    <div class=\"box-footer\" v-if=\"canUpdateForm\">\n      <button v-if=\"progress\" type=\"button\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\"><i class=\"fa updating fa-refresh\"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>\n      <button v-if=\"!progress\" type=\"submit\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\">{{ isOpenedRow ? saveButton : sendButton }}</button>\n    </div>\n\n  </div>\n</form>\n<!-- /.box -->\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- Horizontal Form -->\n<form method=\"post\" action=\"\" v-bind:id=\"formID\" :data-form=\"model.slug\" v-on:submit.prevent=\"saveForm\">\n  <div v-bind:class=\"['box', { 'box-info' : isActive, 'box-warning' : !isActive }]\">\n\n    <div class=\"box-header with-border\" :class=\"{ visible : hasLocalFields }\">\n      <h3 class=\"box-title\"><span v-if=\"model.localization\" data-toggle=\"tooltip\" :data-original-title=\"trans('multilanguages')\" class=\"fa fa-globe\"></span> {{ title }}</h3>\n      <button v-if=\"isOpenedRow &amp;&amp; canShowGettext\" @click=\"openGettextEditor()\" type=\"button\" class=\"add-row-btn pull-right btn btn-default btn-sm\"><i class=\"fa fa-globe\"></i> {{ trans('gettext-open') }}</button>\n      <button v-if=\"isOpenedRow &amp;&amp; canaddrow\" v-on:click.prevent=\"resetForm\" type=\"button\" class=\"add-row-btn pull-right btn btn-default btn-sm\"><i class=\"fa fa-plus\"></i> {{ newRowTitle }}</button>\n\n      <div class=\"dropdown pull-right multi-languages\" v-if=\"hasLocalFields\">\n        <button class=\"btn btn-default dropdown-toggle\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n          <i class=\"fa fa-globe\"></i> <span class=\"text\">{{ selectedLanguage.name }}</span>\n          <span class=\"caret\"></span>\n        </button>\n        <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n          <li v-for=\"lang in languages\" v-if=\"selectedLanguage.id != lang.id\" :data-slug=\"lang.slug\"><a href=\"#\" @click.prevent=\"selectedlangid = lang.id\"><i class=\"fa fa-exclamation-triangle\"></i>{{ lang.name }}</a></li>\n        </ul>\n      </div>\n\n    </div>\n\n    <div class=\"box-body\" :class=\"{ cantadd : !cansave }\">\n      <form-tabs-builder :model=\"model\" :childs=\"true\" :langid=\"langid\" :inputlang=\"selectedLanguage\" :row=\"row\" :cansave.sync=\"cansave\" :hasparentmodel=\"hasparentmodel\" :history=\"history\">\n      </form-tabs-builder>\n    </div>\n\n    <div class=\"box-footer\" v-if=\"canUpdateForm\">\n      <button v-if=\"progress\" type=\"button\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\"><i class=\"fa updating fa-refresh\"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>\n      <button v-if=\"!progress\" type=\"submit\" name=\"submit\" v-bind:class=\"['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]\">{{ isOpenedRow ? saveButton : sendButton }}</button>\n    </div>\n\n  </div>\n</form>\n<!-- /.box -->\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -40747,12 +40756,21 @@ var _ModelRowsBuilder = require('./ModelRowsBuilder.vue');
 
 var _ModelRowsBuilder2 = _interopRequireDefault(_ModelRowsBuilder);
 
+var _GettextExtension = require('../Partials/GettextExtension.vue');
+
+var _GettextExtension2 = _interopRequireDefault(_GettextExtension);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
   props: ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
+
   name: 'model-builder',
+
+  components: { FormBuilder: _FormBuilder2.default, ModelRowsBuilder: _ModelRowsBuilder2.default, GettextExtension: _GettextExtension2.default },
+
   data: function data() {
+
     return {
       sizes: [{ size: 8, key: 'small', name: 'Small', active: false, disabled: false }, { size: 6, key: 'medium', name: 'Medium', active: false, disabled: false }, { size: 4, key: 'big', name: 'Big', active: false, disabled: false }, { size: 0, key: 'full', name: 'Full width', active: false, disabled: false }],
 
@@ -40801,7 +40819,8 @@ exports.default = {
 
       progress: false,
 
-      depth_level: 0
+      depth_level: 0,
+      gettext_editor: null
     };
   },
 
@@ -41313,12 +41332,10 @@ exports.default = {
     isSearching: function isSearching() {
       return this.search.used == true;
     }
-  },
-
-  components: { FormBuilder: _FormBuilder2.default, ModelRowsBuilder: _ModelRowsBuilder2.default }
+  }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- Additional top layouts -->\n<div v-for=\"layout in layouts | positionLayout 'top'\">\n  {{{ layout.view }}}\n</div>\n\n<div v-bind:class=\"[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]\" v-show=\"canShowForm || (hasRows &amp;&amp; canShowRows || isSearching)\">\n\n\n  <div class=\"box-header\" v-bind:class=\"{ 'with-border' : isSingle }\" v-show=\"ischild &amp;&amp; (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle &amp;&amp; (isEnabledGrid || canShowSearchBar))\">\n    <h3 v-if=\"ischild\" class=\"box-title\">{{ model.name }}</h3> <span class=\"model-info\" v-if=\"model.title &amp;&amp; ischild\">{{{ model.title }}}</span>\n\n    <div class=\"pull-right\" v-if=\"!isSingle\">\n      <div class=\"search-bar\" :class=\"{ interval : search.interval }\" v-bind:id=\"getFilterId\" v-show=\"canShowSearchBar\">\n        <div class=\"input-group input-group-sm\">\n          <div class=\"input-group-btn\">\n            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">{{ getSearchingColumnName(search.column) }}\n              <span class=\"caret\"></span></button>\n              <ul class=\"dropdown-menu\">\n                <li v-bind:class=\"{ active : !search.column }\"><a href=\"#\" @click.prevent=\"search.column = null\">{{ trans('search-all') }}</a></li>\n                <li v-bind:class=\"{ active : search.column == 'id' }\"><a href=\"#\" @click.prevent=\"search.column = 'id'\">{{ getSearchingColumnName('id') }}</a></li>\n                <li v-for=\"key in getSearchableFields\" v-bind:class=\"{ active : search.column == key }\"><a href=\"#\" @click.prevent=\"search.column = key\">{{ getSearchingColumnName(key) }}</a></li>\n                <li v-bind:class=\"{ active : search.column == 'created_at' }\"><a href=\"#\" @click.prevent=\"search.column = 'created_at'\">{{ getSearchingColumnName('created_at') }}</a></li>\n              </ul>\n          </div>\n          <!-- /btn-group -->\n\n          <!-- Search columns -->\n          <input type=\"text\" v-show=\"isSearch\" :placeholder=\"trans('search')+'...'\" debounce=\"300\" v-model=\"search.query\" class=\"form-control\">\n\n          <input type=\"text\" v-show=\"isDate\" v-model=\"search.query\" class=\"form-control js_date\">\n\n          <select type=\"text\" v-show=\"isCheckbox\" v-model=\"search.query\" class=\"form-control\">\n            <option value=\"0\">{{ trans('off') }}</option>\n            <option value=\"1\">{{ trans('on') }}</option>\n          </select>\n\n          <div class=\"select\" v-show=\"isSelect\">\n            <select type=\"text\" v-model=\"search.query\" class=\"form-control js_chosen\" :data-placeholder=\"trans('get-value')\">\n              <option value=\"\">{{ trans('show-all') }}</option>\n              <option v-for=\"data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]\" v-bind:value=\"data[0]\">{{ data[1] }}</option>\n            </select>\n          </div>\n          <!-- Search columns -->\n\n          <div class=\"interval\" v-if=\"canBeInterval\" data-toggle=\"tooltip\" data-original-title=\"Interval\">\n            <button class=\"btn\" @click=\"search.interval = !search.interval\" :class=\"{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }\"><i class=\"fa fa-arrows-h\"></i></button>\n          </div>\n\n          <input type=\"text\" v-show=\"search.interval &amp;&amp; isSearch\" :placeholder=\"trans('search')+'...'\" debounce=\"300\" v-model=\"search.query_to\" class=\"form-control\">\n\n          <input type=\"text\" v-show=\"search.interval &amp;&amp; isDate\" v-model=\"search.query_to\" class=\"form-control js_date\">\n\n          <div class=\"interval\" v-if=\"search.query || search.query_to\" data-toggle=\"tooltip\" :data-original-title=\"trans('reset')\">\n            <button class=\"btn btn-default\" @click=\"search.query = ''\"><i class=\"fa fa-times\"></i></button>\n          </div>\n        </div>\n      </div>\n\n      <ul class=\"pagination pagination-sm no-margin\" v-if=\"isEnabledGrid\" data-toggle=\"tooltip\" :data-original-title=\"trans('edit-size')\">\n        <li v-for=\"size in sizes\" v-bind:class=\"{ 'active' : size.active, 'disabled' : size.disabled }\"><a href=\"#\" @click.prevent=\"changeSize(size)\" title=\"\">{{ size.name }}</a></li>\n      </ul>\n    </div>\n  </div>\n\n  <div class=\"box-body\">\n\n    <div v-bind:class=\"{ 'row' : true, 'flex-table' : activeSize == 0 }\">\n\n      <!-- left column -->\n      <div class=\"col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12\" v-show=\"canShowForm\" v-if=\"activetab!==false\">\n        <form-builder :progress.sync=\"progress\" :rows.sync=\"rows\" :history=\"history\" :model=\"model\" :langid=\"selected_language_id ? selected_language_id : langid\" :selectedlangid.sync=\"selected_language_id\" :canaddrow=\"canAddRow\" :hasparentmodel=\"hasparentmodel\" :row.sync=\"row\"></form-builder>\n      </div>\n      <!--/.col (left) -->\n\n      <!-- right column -->\n      <div class=\"col col-rows col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12\" v-show=\"hasRows &amp;&amp; canShowRows\">\n        <model-rows-builder :model.sync=\"model\" :rows.sync=\"rows\" :row.sync=\"row\" :langid=\"selected_language_id ? selected_language_id : langid\" :progress.sync=\"progress\" :search=\"search\" :iswithoutparent=\"isWithoutParentRow\" :activetab=\"activetab\" :history=\"history\">\n        </model-rows-builder>\n      </div>\n      <!--/.col (right) -->\n\n    </div>\n\n    <model-builder v-if=\"(isOpenedRow || child.without_parent == true) &amp;&amp; child.in_tab !== true\" v-for=\"child in model.childs\" :hasparentmodel=\"hasparentmodel\" :langid=\"langid\" :ischild=\"true\" :model=\"getModel(child)\" :activetab=\"activetab\" :parentrow=\"row\">\n    </model-builder>\n  </div>\n</div>\n\n<!-- Additional bottom layouts -->\n<div v-for=\"layout in layouts | positionLayout 'bottom'\">\n  {{{ layout.view }}}\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<!-- Additional top layouts -->\n<div v-for=\"layout in layouts | positionLayout 'top'\">\n  {{{ layout.view }}}\n</div>\n\n<div v-bind:class=\"[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]\" v-show=\"canShowForm || (hasRows &amp;&amp; canShowRows || isSearching)\">\n\n  <div class=\"box-header\" v-bind:class=\"{ 'with-border' : isSingle }\" v-show=\"ischild &amp;&amp; (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle &amp;&amp; (isEnabledGrid || canShowSearchBar))\">\n    <h3 v-if=\"ischild\" class=\"box-title\">{{ model.name }}</h3> <span class=\"model-info\" v-if=\"model.title &amp;&amp; ischild\">{{{ model.title }}}</span>\n\n    <div class=\"pull-right\" v-if=\"!isSingle\">\n      <div class=\"search-bar\" :class=\"{ interval : search.interval }\" v-bind:id=\"getFilterId\" v-show=\"canShowSearchBar\">\n        <div class=\"input-group input-group-sm\">\n          <div class=\"input-group-btn\">\n            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">{{ getSearchingColumnName(search.column) }}\n              <span class=\"caret\"></span></button>\n              <ul class=\"dropdown-menu\">\n                <li v-bind:class=\"{ active : !search.column }\"><a href=\"#\" @click.prevent=\"search.column = null\">{{ trans('search-all') }}</a></li>\n                <li v-bind:class=\"{ active : search.column == 'id' }\"><a href=\"#\" @click.prevent=\"search.column = 'id'\">{{ getSearchingColumnName('id') }}</a></li>\n                <li v-for=\"key in getSearchableFields\" v-bind:class=\"{ active : search.column == key }\"><a href=\"#\" @click.prevent=\"search.column = key\">{{ getSearchingColumnName(key) }}</a></li>\n                <li v-bind:class=\"{ active : search.column == 'created_at' }\"><a href=\"#\" @click.prevent=\"search.column = 'created_at'\">{{ getSearchingColumnName('created_at') }}</a></li>\n              </ul>\n          </div>\n          <!-- /btn-group -->\n\n          <!-- Search columns -->\n          <input type=\"text\" v-show=\"isSearch\" :placeholder=\"trans('search')+'...'\" debounce=\"300\" v-model=\"search.query\" class=\"form-control\">\n\n          <input type=\"text\" v-show=\"isDate\" v-model=\"search.query\" class=\"form-control js_date\">\n\n          <select type=\"text\" v-show=\"isCheckbox\" v-model=\"search.query\" class=\"form-control\">\n            <option value=\"0\">{{ trans('off') }}</option>\n            <option value=\"1\">{{ trans('on') }}</option>\n          </select>\n\n          <div class=\"select\" v-show=\"isSelect\">\n            <select type=\"text\" v-model=\"search.query\" class=\"form-control js_chosen\" :data-placeholder=\"trans('get-value')\">\n              <option value=\"\">{{ trans('show-all') }}</option>\n              <option v-for=\"data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]\" v-bind:value=\"data[0]\">{{ data[1] }}</option>\n            </select>\n          </div>\n          <!-- Search columns -->\n\n          <div class=\"interval\" v-if=\"canBeInterval\" data-toggle=\"tooltip\" data-original-title=\"Interval\">\n            <button class=\"btn\" @click=\"search.interval = !search.interval\" :class=\"{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }\"><i class=\"fa fa-arrows-h\"></i></button>\n          </div>\n\n          <input type=\"text\" v-show=\"search.interval &amp;&amp; isSearch\" :placeholder=\"trans('search')+'...'\" debounce=\"300\" v-model=\"search.query_to\" class=\"form-control\">\n\n          <input type=\"text\" v-show=\"search.interval &amp;&amp; isDate\" v-model=\"search.query_to\" class=\"form-control js_date\">\n\n          <div class=\"interval\" v-if=\"search.query || search.query_to\" data-toggle=\"tooltip\" :data-original-title=\"trans('reset')\">\n            <button class=\"btn btn-default\" @click=\"search.query = ''\"><i class=\"fa fa-times\"></i></button>\n          </div>\n        </div>\n      </div>\n\n      <ul class=\"pagination pagination-sm no-margin\" v-if=\"isEnabledGrid\" data-toggle=\"tooltip\" :data-original-title=\"trans('edit-size')\">\n        <li v-for=\"size in sizes\" v-bind:class=\"{ 'active' : size.active, 'disabled' : size.disabled }\"><a href=\"#\" @click.prevent=\"changeSize(size)\" title=\"\">{{ size.name }}</a></li>\n      </ul>\n    </div>\n  </div>\n\n  <div class=\"box-body\">\n\n    <div v-bind:class=\"{ 'row' : true, 'flex-table' : activeSize == 0 }\">\n\n      <!-- left column -->\n      <div class=\"col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12\" v-show=\"canShowForm\" v-if=\"activetab!==false\">\n        <form-builder :progress.sync=\"progress\" :rows.sync=\"rows\" :history=\"history\" :model=\"model\" :langid=\"selected_language_id ? selected_language_id : langid\" :selectedlangid.sync=\"selected_language_id\" :canaddrow=\"canAddRow\" :hasparentmodel=\"hasparentmodel\" :gettext_editor.sync=\"gettext_editor\" :row.sync=\"row\"></form-builder>\n      </div>\n      <!--/.col (left) -->\n\n      <!-- right column -->\n      <div class=\"col col-rows col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12\" v-show=\"hasRows &amp;&amp; canShowRows\">\n        <model-rows-builder :model.sync=\"model\" :rows.sync=\"rows\" :row.sync=\"row\" :langid=\"selected_language_id ? selected_language_id : langid\" :progress.sync=\"progress\" :search=\"search\" :iswithoutparent=\"isWithoutParentRow\" :activetab=\"activetab\" :gettext_editor.sync=\"gettext_editor\" :history=\"history\">\n        </model-rows-builder>\n      </div>\n      <!--/.col (right) -->\n\n    </div>\n\n    <model-builder v-if=\"(isOpenedRow || child.without_parent == true) &amp;&amp; child.in_tab !== true\" v-for=\"child in model.childs\" :hasparentmodel=\"hasparentmodel\" :langid=\"langid\" :ischild=\"true\" :model=\"getModel(child)\" :activetab=\"activetab\" :parentrow=\"row\">\n    </model-builder>\n  </div>\n</div>\n\n<!-- Additional bottom layouts -->\n<div v-for=\"layout in layouts | positionLayout 'bottom'\">\n  {{{ layout.view }}}\n</div>\n\n<gettext-extension v-if=\"gettext_editor\" :gettext_editor.sync=\"gettext_editor\"></gettext-extension>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -41329,7 +41346,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-3ff7160c", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./FormBuilder.vue":107,"./ModelRowsBuilder.vue":112,"babel-runtime/core-js/json/stringify":1,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],112:[function(require,module,exports){
+},{"../Partials/GettextExtension.vue":115,"./FormBuilder.vue":107,"./ModelRowsBuilder.vue":112,"babel-runtime/core-js/json/stringify":1,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],112:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41351,7 +41368,7 @@ var _TableRows2 = _interopRequireDefault(_TableRows);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  props: ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'iswithoutparent', 'activetab'],
+  props: ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'gettext_editor', 'iswithoutparent', 'activetab'],
 
   components: { Refreshing: _Refreshing2.default, TableRows: _TableRows2.default },
 
@@ -41845,7 +41862,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"box\">\n  <div class=\"box-header box-limit\">\n    <h3 class=\"box-title\">{{ title }} <small>({{ rows.count }})</small></h3>\n\n    <div class=\"form-group pull-right\" v-if=\"isPaginationEnabled\" :title=\"trans('rows-count')\">\n      <select @change=\"changeLimit\" class=\"form-control\" v-model=\"pagination.limit\">\n        <option v-for=\"count in pagination.limits\">{{ count }}</option>\n      </select>\n    </div>\n\n    <div class=\"dropdown fields-list\">\n      <button class=\"btn btn-default dropdown-toggle\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n        {{ trans('rows-list') }}\n        <span class=\"caret\"></span>\n      </button>\n      <ul class=\"dropdown-menu menu-left dropdown-menu-right\" aria-labelledby=\"dropdownMenu1\">\n        <li @click=\"$event.stopPropagation()\" v-for=\"(key, column) in enabled_columns\" v-if=\"canShowColumn(column, key)\"><label><input type=\"checkbox\" v-model=\"column.enabled\"> {{ columnName(key, column.name) }}</label></li>\n        <li role=\"separator\" class=\"divider\"></li>\n        <li><a href=\"#\" @click.prevent=\"enabled_columns = null\">{{ trans('default') }}</a></li>\n      </ul>\n    </div>\n  </div>\n\n  <div class=\"box-body box-table-body\">\n    <table-rows :model=\"model\" :row.sync=\"row\" :buttons=\"rows.buttons\" :count=\"rows.count\" :history=\"history\" :rows=\"rows\" :rowsdata.sync=\"rowsData\" :enabledcolumns.sync=\"enabled_columns\" :item=\"$row\" :dragging.sync=\"dragging\" :orderby.sync=\"orderBy\">\n    \n  </table-rows></div>\n\n  <div class=\"box-footer\" v-if=\"isPaginationEnabled &amp;&amp; rows.count>pagination.limit\">\n    <ul class=\"pagination pagination-sm no-margin pull-right\">\n      <li v-if=\"pagination.position>1\"><a v-on:click.prevent=\"setPosition(pagination.position - 1)\" href=\"#\">«</a></li>\n      <li v-bind:class=\"{ active : pagination.position == i + 1 }\" v-if=\"showLimit(i)\" v-for=\"i in Math.ceil(rows.count / pagination.limit)\"><a href=\"#\" @click.prevent=\"setPosition(i + 1)\">{{ i + 1 }}</a></li>\n      <li v-if=\"pagination.position<rows.count/pagination.limit\"><a v-on:click.prevent=\"setPosition(pagination.position + 1)\" href=\"#\">»</a></li>\n    </ul>\n  </div>\n\n  <refreshing v-if=\"pagination.refreshing\"></refreshing>\n</div>\n<!-- /.box -->\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"box\">\n  <div class=\"box-header box-limit\">\n    <h3 class=\"box-title\">{{ title }} <small>({{ rows.count }})</small></h3>\n\n    <div class=\"form-group pull-right\" v-if=\"isPaginationEnabled\" :title=\"trans('rows-count')\">\n      <select @change=\"changeLimit\" class=\"form-control\" v-model=\"pagination.limit\">\n        <option v-for=\"count in pagination.limits\">{{ count }}</option>\n      </select>\n    </div>\n\n    <div class=\"dropdown fields-list\">\n      <button class=\"btn btn-default dropdown-toggle\" type=\"button\" id=\"dropdownMenu1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n        {{ trans('rows-list') }}\n        <span class=\"caret\"></span>\n      </button>\n      <ul class=\"dropdown-menu menu-left dropdown-menu-right\" aria-labelledby=\"dropdownMenu1\">\n        <li @click=\"$event.stopPropagation()\" v-for=\"(key, column) in enabled_columns\" v-if=\"canShowColumn(column, key)\"><label><input type=\"checkbox\" v-model=\"column.enabled\"> {{ columnName(key, column.name) }}</label></li>\n        <li role=\"separator\" class=\"divider\"></li>\n        <li><a href=\"#\" @click.prevent=\"enabled_columns = null\">{{ trans('default') }}</a></li>\n      </ul>\n    </div>\n  </div>\n\n  <div class=\"box-body box-table-body\">\n    <table-rows :model=\"model\" :row.sync=\"row\" :buttons=\"rows.buttons\" :count=\"rows.count\" :history=\"history\" :gettext_editor.sync=\"gettext_editor\" :rows=\"rows\" :rowsdata.sync=\"rowsData\" :enabledcolumns.sync=\"enabled_columns\" :item=\"$row\" :dragging.sync=\"dragging\" :orderby.sync=\"orderBy\">\n    \n  </table-rows></div>\n\n  <div class=\"box-footer\" v-if=\"isPaginationEnabled &amp;&amp; rows.count>pagination.limit\">\n    <ul class=\"pagination pagination-sm no-margin pull-right\">\n      <li v-if=\"pagination.position>1\"><a v-on:click.prevent=\"setPosition(pagination.position - 1)\" href=\"#\">«</a></li>\n      <li v-bind:class=\"{ active : pagination.position == i + 1 }\" v-if=\"showLimit(i)\" v-for=\"i in Math.ceil(rows.count / pagination.limit)\"><a href=\"#\" @click.prevent=\"setPosition(i + 1)\">{{ i + 1 }}</a></li>\n      <li v-if=\"pagination.position<rows.count/pagination.limit\"><a v-on:click.prevent=\"setPosition(pagination.position + 1)\" href=\"#\">»</a></li>\n    </ul>\n  </div>\n\n  <refreshing v-if=\"pagination.refreshing\"></refreshing>\n</div>\n<!-- /.box -->\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -41856,7 +41873,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-5751141a", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../Partials/Refreshing.vue":117,"../Partials/TableRows.vue":119,"babel-runtime/core-js/object/keys":2,"vue":105,"vue-hot-reload-api":79}],113:[function(require,module,exports){
+},{"../Partials/Refreshing.vue":118,"../Partials/TableRows.vue":120,"babel-runtime/core-js/object/keys":2,"vue":105,"vue-hot-reload-api":79}],113:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41955,6 +41972,109 @@ if (module.hot) {(function () {  module.hot.accept()
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  name: 'gettext-extension',
+
+  props: ['gettext_editor'],
+
+  data: function data() {
+    return {
+      translates: {},
+      query: null,
+      changes: {},
+      limit: 20,
+      loaded: false
+    };
+  },
+  created: function created() {},
+  ready: function ready() {
+    this.loadTranslations();
+  },
+
+
+  computed: {
+    filtratedTranslates: function filtratedTranslates() {
+      var obj = {},
+          query = (this.query + '').toLowerCase(),
+          i = 0;
+
+      for (var key in this.translates) {
+        //If is under limit, and if has query match
+        if ((this.limit == false || i < this.limit) && (!this.query || this.hasChange(key) || this.translates[key].toLowerCase().indexOf(query) > -1 || key.toLowerCase().indexOf(query) > -1)) {
+          obj[key] = this.translates[key];
+
+          i++;
+        }
+      }
+
+      return obj;
+    },
+    fullCount: function fullCount() {
+      return (0, _keys2.default)(this.translates).length;
+    },
+    resultLength: function resultLength() {
+      return (0, _keys2.default)(this.filtratedTranslates).length;
+    }
+  },
+
+  methods: {
+    trans: function trans(key) {
+      return this.$root.trans(key);
+    },
+    close: function close() {
+      this.gettext_editor = null;
+    },
+    loadTranslations: function loadTranslations() {
+      this.$http.get(this.$root.requests.translations.replace('{id}', this.gettext_editor.id)).then(function (response) {
+        this.translates = response.data;
+        this.loaded = true;
+      });
+    },
+    changeText: function changeText(e, src) {
+      this.translates[src] = e.target.value;
+      this.changes[src] = e.target.value;
+    },
+    saveAndClose: function saveAndClose() {
+      this.$http.post(this.$root.requests.update_translations.replace('{id}', this.gettext_editor.id), { changes: (0, _stringify2.default)(this.changes) }).then(function () {
+        this.close();
+      });
+    },
+
+    //Check if value has been changed
+    hasChange: function hasChange(key, value) {
+      return key in this.changes;
+    }
+  }
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"gettext-table modal-open\">\n\n  <!-- MODAL -->\n  <div class=\"example-modal\">\n    <div class=\"modal modal-default\" style=\"display: block\">\n      <div class=\"modal-dialog\">\n        <div class=\"modal-content\">\n          <div class=\"modal-header\">\n            <button type=\"button\" class=\"close\" @click=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n              <span aria-hidden=\"true\">×</span>\n            </button>\n            <h4 class=\"modal-title\">{{ trans('gettext-update') }} - {{ gettext_editor.name }}</h4>\n          </div>\n          <div class=\"modal-body\">\n              <label>{{ trans('search') }}</label>\n              <input type=\"text\" class=\"form-control\" placeholder=\"{{ trans('gettext-search') }}\" v-model=\"query\">\n\n              <hr>\n              <p v-if=\"loaded &amp;&amp; resultLength == 0\">{{ trans('gettext-no-match') }}</p>\n\n              <p v-if=\"!loaded\" class=\"loading\"><i class=\"fa fa-refresh fa-spin\"></i> {{ trans('gettext-loading') }}</p>\n\n              <table v-show=\"resultLength > 0\" class=\"table data-table table-bordered table-striped\">\n                <thead>\n                  <tr>\n                    <th>{{ trans('gettext-source') }}</th>\n                    <th>{{ trans('gettext-translation') }}</th>\n                  </tr>\n                </thead>\n                <tbody>\n                  <tr v-for=\"(key, value) in filtratedTranslates\">\n                    <td>{{ key }}</td>\n                    <td class=\"input\" :class=\"{ edited : hasChange(key, value) }\">\n                      <textarea :class=\"{ long : value.length > 80 }\" :value=\"value\" @keyup=\"changeText($event, key)\" class=\"form-control\"></textarea>\n                    </td>\n                  </tr>\n                </tbody>\n              </table>\n\n              <a @click=\"limit = false\" v-if=\"limit != false &amp;&amp; fullCount > limit\" class=\"all-translates\">{{ trans('gettext-count') }} ({{ fullCount }})</a>\n          </div>\n          <div class=\"modal-footer\">\n            <button type=\"button\" @click=\"saveAndClose\" class=\"btn btn-primary\">{{ trans('gettext-save') }}</button>\n          </div>\n        </div>\n        <!-- /.modal-content -->\n      </div>\n      <!-- /.modal-dialog -->\n    </div>\n    <!-- /.modal -->\n  </div>\n</div>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  if (!module.hot.data) {
+    hotAPI.createRecord("_v-7aff190f", module.exports)
+  } else {
+    hotAPI.update("_v-7aff190f", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"babel-runtime/core-js/json/stringify":1,"babel-runtime/core-js/object/keys":2,"vue":105,"vue-hot-reload-api":79}],116:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.default = {
   props: ['history'],
 
@@ -42008,7 +42128,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-6c43af5e", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":105,"vue-hot-reload-api":79}],116:[function(require,module,exports){
+},{"vue":105,"vue-hot-reload-api":79}],117:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42106,7 +42226,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-e2a5ad04", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"babel-runtime/core-js/json/stringify":1,"vue":105,"vue-hot-reload-api":79}],117:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":1,"vue":105,"vue-hot-reload-api":79}],118:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42131,7 +42251,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-648310fa", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":105,"vue-hot-reload-api":79}],118:[function(require,module,exports){
+},{"vue":105,"vue-hot-reload-api":79}],119:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -42165,13 +42285,15 @@ exports.default = {
 
       return string;
     },
-    encodeValue: function encodeValue(string, key) {
+    encodeValue: function encodeValue(string, key, is_title) {
       var isReal = this.isRealField(key);
 
       //Check if column can be encoded
       if (isReal && this.$root.getModelProperty(this.model, 'settings.columns.' + key + '.encode', true) == true) {
         string = $(document.createElement('div')).text(string).html();
       }
+
+      if (is_title && this.$root.getModelProperty(this.model, 'settings.columns.' + key + '.encode', true) === false) return '';
 
       if (this.isRealField(key) && this.model.fields[key].type == 'text' && parseInt(this.model.fields[key].limit) === 0) {
         return string.replace(/\n/g, '<br>');
@@ -42307,6 +42429,8 @@ exports.default = {
       return key in this.model.fields;
     },
     getFieldLimit: function getFieldLimit(key, defaultLimit) {
+      if (this.$root.getModelProperty(this.model, 'settings.columns.' + key + '.encode', true) === false) return 0;
+
       if (this.isRealField(key)) {
         var field = this.model.fields[key];
 
@@ -42321,7 +42445,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div v-if=\"fieldValue != null\">\n\n  <!-- File -->\n  <div v-if=\"isFile(field)\" class=\"filesList\">\n    <div v-for=\"file in getFiles(item, field)\">\n      <file :file=\"file\" :field=\"field\" :model=\"model\" :image=\"image\"></file> <span>, </span>\n    </div>\n  </div>\n\n  <!-- Table value -->\n  <span v-else=\"\" :data-toggle=\"fieldValue.length > 20 ? 'tooltip' : ''\" :data-original-title=\"fieldValue | encodedTitle field\">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>\n\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div v-if=\"fieldValue != null\">\n\n  <!-- File -->\n  <div v-if=\"isFile(field)\" class=\"filesList\">\n    <div v-for=\"file in getFiles(item, field)\">\n      <file :file=\"file\" :field=\"field\" :model=\"model\" :image=\"image\"></file> <span>, </span>\n    </div>\n  </div>\n\n  <!-- Table value -->\n  <span v-else=\"\" :data-toggle=\"fieldValue.length > 20 ? 'tooltip' : ''\" :data-original-title=\"fieldValue | encodedTitle field true\">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>\n\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -42332,7 +42456,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-00829522", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../Partials/File.vue":114,"babel-runtime/core-js/object/keys":2,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],119:[function(require,module,exports){
+},{"../Partials/File.vue":114,"babel-runtime/core-js/object/keys":2,"babel-runtime/helpers/typeof":5,"vue":105,"vue-hot-reload-api":79}],120:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -42354,7 +42478,7 @@ var _History2 = _interopRequireDefault(_History);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  props: ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history'],
+  props: ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history'],
 
   components: { TableRowValue: _TableRowValue2.default, History: _History2.default },
 
@@ -42478,6 +42602,11 @@ exports.default = {
     isEnabledHistory: function isEnabledHistory() {
       return this.model.history == true;
     },
+    canShowGettext: function canShowGettext() {
+      if (this.model.slug == 'languages' && this.$root.gettext == true) return true;
+
+      return false;
+    },
     formID: function formID() {
       return 'form-' + this.$parent.$parent.depth_level + '-' + this.model.slug;
     }
@@ -42511,7 +42640,7 @@ exports.default = {
 
       if (!buttons) buttons = { length: 0 };
 
-      return buttons.length + (this.isEnabledHistory ? 1 : 0);
+      return buttons.length + (this.isEnabledHistory ? 1 : 0) + (this.canShowGettext ? 1 : 0);
     },
     getButtonsForRow: function getButtonsForRow(item) {
       if (!this.rows.buttons) return [];
@@ -42716,6 +42845,9 @@ exports.default = {
 
       this.$root.openAlert(this.$root.trans('row-info-n') + ' ' + row.id, data, 'primary', null, function () {});
     },
+    openGettextEditor: function openGettextEditor(item) {
+      this.gettext_editor = item;
+    },
     showHistory: function showHistory(row) {
       this.$http.get(this.$root.requests.getHistory, {
         model: this.model.slug,
@@ -42875,7 +43007,7 @@ exports.default = {
   }
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div>\n  <history v-if=\"history.id\" :history=\"history\"></history>\n\n  <table v-bind:id=\"'table-'+model.slug\" v-bind:class=\"['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable &amp;&amp; orderby[0] == '_order' }]\">\n    <thead>\n      <tr>\n        <th v-for=\"(field, name) in columns\" v-bind:class=\"'th-'+field\" v-on:click=\"toggleSorting(field)\">\n          <i class=\"arrow-sorting fa fa-arrow-up\" v-if=\"orderby[0] == field &amp;&amp; orderby[1] == 0\"></i>\n          <i class=\"arrow-sorting fa fa-arrow-down\" v-if=\"orderby[0] == field &amp;&amp; orderby[1] == 1\"></i>\n          {{ name }}\n        </th>\n        <th class=\"th-options-buttons\"></th>\n      </tr>\n    </thead>\n    <tbody data-model=\"{{ model.slug }}\">\n      <tr v-for=\"(key, item) in rowsdata\" :data-index=\"item.id\" v-drag-and-drop=\"\" drag-start=\"beforeUpdateOrder\" drop=\"updateOrder\">\n\n        <td v-for=\"(field, name) in columns\" v-bind:class=\"['td-'+field, { image_field : isImageField(field) } ]\">\n          <table-row-value :field=\"field\" :name=\"name\" :item=\"item\" :model=\"model\" :image=\"isImageField(field)\"></table-row-value>\n        </td>\n\n        <td class=\"buttons-options\" v-bind:class=\"[ 'additional-' + buttonsCount(item) ]\">\n          <div><button type=\"button\" v-if=\"isEditable\" v-on:click=\"selectRow(item)\" v-bind:class=\"['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('edit')\"><i class=\"fa fa-pencil\"></i></button></div>\n          <div><button type=\"button\" v-if=\"isEnabledHistory\" v-on:click=\"showHistory(item)\" class=\"btn btn-sm btn-default\" v-bind:class=\"{ 'enabled-history' : isActiveRow(item) &amp;&amp; history.history_id }\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('history.changes')\"><i class=\"fa fa-history\"></i></button></div>\n          <div><button type=\"button\" v-on:click=\"showInfo(item)\" class=\"btn btn-sm btn-default\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('row-info')\"><i class=\"fa fa-info\"></i></button></div>\n          <div v-for=\"(button_key, button) in getButtonsForRow(item)\">\n            <button type=\"button\" v-on:click=\"buttonAction(button_key, button, item)\" v-bind:class=\"['btn', 'btn-sm', button.class]\" data-toggle=\"tooltip\" title=\"\" v-bind:data-original-title=\"button.name\"><i v-bind:class=\"['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]\"></i></button>\n          </div>\n          <div><button type=\"button\" v-if=\"model.publishable\" v-on:click=\"togglePublishedAt(item)\" v-bind:class=\"['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"item.published_at ? trans('hide') : trans('show')\"><i v-bind:class=\"{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }\"></i></button></div>\n          <div><button type=\"button\" v-if=\"model.deletable &amp;&amp; count > model.minimum\" v-on:click=\"removeRow( item, key )\" class=\"btn btn-danger btn-sm\" :class=\"{ disabled : isReservedRow(item) }\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('delete')\"><i class=\"fa fa-remove\"></i></button></div>\n        </td>\n      </tr>\n    </tbody>\n  </table>\n</div>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div>\n  <history v-if=\"history.id\" :history=\"history\"></history>\n\n  <table v-bind:id=\"'table-'+model.slug\" v-bind:class=\"['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable &amp;&amp; orderby[0] == '_order' }]\">\n    <thead>\n      <tr>\n        <th v-for=\"(field, name) in columns\" v-bind:class=\"'th-'+field\" v-on:click=\"toggleSorting(field)\">\n          <i class=\"arrow-sorting fa fa-arrow-up\" v-if=\"orderby[0] == field &amp;&amp; orderby[1] == 0\"></i>\n          <i class=\"arrow-sorting fa fa-arrow-down\" v-if=\"orderby[0] == field &amp;&amp; orderby[1] == 1\"></i>\n          {{ name }}\n        </th>\n        <th class=\"th-options-buttons\"></th>\n      </tr>\n    </thead>\n    <tbody data-model=\"{{ model.slug }}\">\n      <tr v-for=\"(key, item) in rowsdata\" :data-index=\"item.id\" v-drag-and-drop=\"\" drag-start=\"beforeUpdateOrder\" drop=\"updateOrder\">\n\n        <td v-for=\"(field, name) in columns\" v-bind:class=\"['td-'+field, { image_field : isImageField(field) } ]\">\n          <table-row-value :field=\"field\" :name=\"name\" :item=\"item\" :model=\"model\" :image=\"isImageField(field)\"></table-row-value>\n        </td>\n\n        <td class=\"buttons-options\" v-bind:class=\"[ 'additional-' + buttonsCount(item) ]\">\n          <div><button type=\"button\" v-if=\"isEditable\" v-on:click=\"selectRow(item)\" v-bind:class=\"['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('edit')\"><i class=\"fa fa-pencil\"></i></button></div>\n          <div><button type=\"button\" v-if=\"isEnabledHistory\" v-on:click=\"showHistory(item)\" class=\"btn btn-sm btn-default\" v-bind:class=\"{ 'enabled-history' : isActiveRow(item) &amp;&amp; history.history_id }\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('history.changes')\"><i class=\"fa fa-history\"></i></button></div>\n          <div><button type=\"button\" v-if=\"canShowGettext\" v-on:click=\"openGettextEditor(item)\" class=\"btn btn-sm btn-default\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('gettext-update')\"><i class=\"fa fa-globe\"></i></button></div>\n          <div><button type=\"button\" v-on:click=\"showInfo(item)\" class=\"btn btn-sm btn-default\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('row-info')\"><i class=\"fa fa-info\"></i></button></div>\n          <div v-for=\"(button_key, button) in getButtonsForRow(item)\">\n            <button type=\"button\" v-on:click=\"buttonAction(button_key, button, item)\" v-bind:class=\"['btn', 'btn-sm', button.class]\" data-toggle=\"tooltip\" title=\"\" v-bind:data-original-title=\"button.name\"><i v-bind:class=\"['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]\"></i></button>\n          </div>\n          <div><button type=\"button\" v-if=\"model.publishable\" v-on:click=\"togglePublishedAt(item)\" v-bind:class=\"['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"item.published_at ? trans('hide') : trans('show')\"><i v-bind:class=\"{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }\"></i></button></div>\n          <div><button type=\"button\" v-if=\"model.deletable &amp;&amp; count > model.minimum\" v-on:click=\"removeRow( item, key )\" class=\"btn btn-danger btn-sm\" :class=\"{ disabled : isReservedRow(item) }\" data-toggle=\"tooltip\" title=\"\" :data-original-title=\"trans('delete')\"><i class=\"fa fa-remove\"></i></button></div>\n        </td>\n      </tr>\n    </tbody>\n  </table>\n</div>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -42886,7 +43018,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-4aef5078", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./History.vue":115,"./TableRowValue.vue":118,"babel-runtime/core-js/object/keys":2,"vue":105,"vue-hot-reload-api":79}],120:[function(require,module,exports){
+},{"./History.vue":116,"./TableRowValue.vue":119,"babel-runtime/core-js/object/keys":2,"vue":105,"vue-hot-reload-api":79}],121:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -42966,7 +43098,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-24669a9f", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"./SidebarRow.vue":121,"vue":105,"vue-hot-reload-api":79}],121:[function(require,module,exports){
+},{"./SidebarRow.vue":122,"vue":105,"vue-hot-reload-api":79}],122:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -43024,7 +43156,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-6496cdeb", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":105,"vue-hot-reload-api":79}],122:[function(require,module,exports){
+},{"vue":105,"vue-hot-reload-api":79}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -43089,7 +43221,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-9b8fc0c0", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"../Forms/ModelBuilder.vue":111,"vue":105,"vue-hot-reload-api":79}],123:[function(require,module,exports){
+},{"../Forms/ModelBuilder.vue":111,"vue":105,"vue-hot-reload-api":79}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -43123,7 +43255,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-15d26a0e", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":105,"vue-hot-reload-api":79}],124:[function(require,module,exports){
+},{"vue":105,"vue-hot-reload-api":79}],125:[function(require,module,exports){
 'use strict';
 
 var _BaseComponent = require('./components/BaseComponent.vue');
@@ -43263,6 +43395,6 @@ Vue.http.get('api/layout').then(function (response) {
     console.log(e);
 });
 
-},{"./components/BaseComponent.vue":106,"./components/views/BasePageView.vue":122,"./components/views/DashboardView.vue":123,"jquery-form/jquery.form.js":74,"lodash":76,"moment":77,"vue":105,"vue-drag-and-drop":78,"vue-resource":93,"vue-router":104}]},{},[124]);
+},{"./components/BaseComponent.vue":106,"./components/views/BasePageView.vue":123,"./components/views/DashboardView.vue":124,"jquery-form/jquery.form.js":74,"lodash":76,"moment":77,"vue":105,"vue-drag-and-drop":78,"vue-resource":93,"vue-router":104}]},{},[125]);
 
 //# sourceMappingURL=main.js.map
