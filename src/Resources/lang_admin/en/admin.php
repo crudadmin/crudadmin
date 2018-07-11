@@ -124,4 +124,14 @@ return [
     'password-reset' => 'Password reset request',
     'password-reset-button' => 'Reset password',
     'tab-error' => 'The tab has no filled all required information.',
+
+    'gettext-open' => 'Edit language mutations',
+    'gettext-update' => 'Edit Translations',
+    'gettext-search' => 'Find with the expression',
+    'gettext-no-match' => 'No matches found in translations.',
+    'gettext-source' => 'Source text',
+    'gettext-translation' => 'Translation',
+    'gettext-count' => 'Show all translations',
+    'gettext-loading' => 'The translations are loading, please wait.',
+    'gettext-save' => 'Save and close',
 ];
