@@ -103,7 +103,7 @@
       </div>
 
       <model-builder
-        v-if="(isOpenedRow || child.without_parent == true) && child.in_tab !== true"
+        v-if="(isOpenedRow || getModel(child).without_parent == true) && getModel(child).in_tab !== true"
         v-for="child in model.childs"
         :hasparentmodel="hasparentmodel"
         :langid="langid"
