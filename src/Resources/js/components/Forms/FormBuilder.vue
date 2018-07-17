@@ -29,12 +29,11 @@
           :row="row"
           :cansave.sync="cansave"
           :hasparentmodel="hasparentmodel"
-          :history="history"
-          :activetab.sync="activetab">
+          :history="history">
         </form-tabs-builder>
       </div>
 
-      <div class="box-footer" v-if="canUpdateForm && activetab == 0">
+      <div class="box-footer" v-if="canUpdateForm">
         <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
         <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? saveButton : sendButton }}</button>
       </div>
@@ -58,7 +57,6 @@
         isActive : true,
         cansave : true,
         form : null,
-        activetab : 0,
       };
     },
 

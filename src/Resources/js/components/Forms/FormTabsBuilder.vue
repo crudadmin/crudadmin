@@ -17,8 +17,7 @@
               :langid="langid"
               :inputlang="inputlang"
               :hasparentmodel="hasparentmodel"
-              :history="history"
-              activetab="0">
+              :history="history">
             </form-tabs-builder>
 
             <model-builder
@@ -55,7 +54,7 @@
   export default {
     name : 'form-tabs-builder',
 
-    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'inputlang', 'cansave', 'hasparentmodel', 'activetab'],
+    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'inputlang', 'cansave', 'hasparentmodel'],
 
     components : { FormGroup },
 
@@ -63,6 +62,8 @@
       return {
         //Which child models has been loaded
         loaded_models : [],
+
+        activetab : 0,
       };
     },
 
@@ -83,7 +84,7 @@
 
     watch: {
       activetab(tabid){
-        this.cansave = this.getTabs[tabid].type != 'model';
+        this.cansave = ! this.isModel(this.getTabs[tabid]);
       },
     },
 

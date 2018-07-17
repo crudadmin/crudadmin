@@ -11,8 +11,7 @@
                     :model="model"
                     :row="row"
                     :hasparentmodel="hasparentmodel"
-                    :history="history"
-                    activetab="0">
+                    :history="history">
                 </form-tabs-builder>
               </div>
 
