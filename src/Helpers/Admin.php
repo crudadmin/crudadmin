@@ -143,7 +143,7 @@ class Admin
      */
     private function getNamespaceByPath($path)
     {
-        $path = rtrim($path, '*');
+        $path = trim_end($path, '*');
         $path = str_replace('/', '\\', $path);
         $path = array_filter(explode('\\', $path));
         $path = array_map(function($item){
@@ -166,6 +166,37 @@ class Admin
         return $path;
     }
 
+    private function getPathFiles($path)
+    {
+        //Get all files from folder recursive
+        if ( substr($path, -1) == '*' )
+        {
+            $path = trim_end(trim_end($path, '*'), '/');
+
+            $files = array_map(function($item){
+                return $item->getPathName();
+            }, $this->files->allFiles( $path ));
+        }
+
+        //Get files from actual folder
+        else {
+            $files = $this->files->files($path);
+        }
+
+        return array_unique($files);
+    }
+
+    /*
+     * Make from path recursive path
+     */
+    private function makeRecursivePath($path)
+    {
+        $path = trim_end($path, '*');
+        $path = trim_end($path, '/');
+
+        return $path.'/*';
+    }
+
     /*
      * Get all files from paths which can has admin models
      */
@@ -183,6 +214,7 @@ class Admin
                 $namespace = $this->getNamespaceByPath($path);
 
             $path = $this->getDirecotoryPath($path);
+            $path = $this->makeRecursivePath($path);
 
             if ( ! in_array($path, $paths) )
                 $paths[$path] = $namespace;
@@ -197,18 +229,8 @@ class Admin
         {
             $files[$namespace] = [
                 'path' => $path,
-                'files' => $this->files->files( $path )
+                'files' => $this->getPathFiles($path),
             ];
-
-            //If is enabled recursive listing of folder
-            if ( substr($path, -1) == '*' )
-            {
-                $path = rtrim(substr($path, 0, -1), '/');
-
-                if ( file_exists($path) )
-                    foreach( $this->files->files( $path ) as $file)
-                        $files[$namespace]['files'][] = $file;
-            }
         }
 
         return $files;
@@ -219,7 +241,7 @@ class Admin
      */
     protected function fromPathToNamespace($path, $source, $namespace)
     {
-        $source = rtrim($source, '*');
+        $source = trim_end($source, '*');
 
         $path = str_replace_first($source, '', $path);
         $path = str_replace('/', '\\', $path);

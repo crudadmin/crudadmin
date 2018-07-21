@@ -35,7 +35,11 @@ if ( ! function_exists('admin') ) {
 if ( ! function_exists('trim_end') ) {
     function trim_end($string, $trim)
     {
-        return substr($string, -strlen($trim)) == $trim ? substr($string, 0, -strlen($trim)) : $string;
+        while (substr($string, -strlen($trim)) == $trim) {
+            $string = substr($string, 0, -strlen($trim));
+        }
+
+        return $string;
     }
 }
 ?>
