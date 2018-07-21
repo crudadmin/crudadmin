@@ -113,7 +113,7 @@
 
     <!-- RADIO INPUT -->
     <div class="form-group radio-group" v-if="isRadio">
-      <label>{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+        <label>{{ getName }} <span v-if="isRequired" class="required">*</span></label>
         <div class="radio" v-if="!isRequired">
           <label>
             <input type="radio" :name="getFieldName" value="">
@@ -128,8 +128,7 @@
             {{ data[1] }}
           </label>
         </div>
-      </select>
-      <small>{{ field.title }}</small>
+        <small>{{ field.title }}</small>
     </div>
   </div>
 
@@ -229,16 +228,34 @@
           if ( !('component' in this.field) )
             return;
 
-          var data = this.model.components[this.componentName];
+          var components = this.field.component.split(','),
+              component = null;
 
-          try {
-              var obj = (new Function('return '+data))();
-          } catch(error){
-            console.error('Syntax error in component ' + this.componentName + '.Vue' + "\n", error);
-            return;
+          for ( var i = 0; i < components.length; i++ )
+          {
+            var name = components[i].toLowerCase(),
+                data = this.model.components[name],
+                obj;
+
+            try {
+                obj = (new Function('return '+data))();
+            } catch(error){
+                console.error('Syntax error in component ' + components[i] + '.Vue' + "\n", error);
+                continue;
+            }
+
+            if ( ! component )
+              component = obj;
+            else {
+              if ( !('components' in component) )
+                component.components = {};
+
+              component.components[components[i]] = obj;
+            }
           }
 
-          Vue.component(this.componentName, obj);
+          if ( component )
+            Vue.component(this.componentName, component);
         },
         newTitleRow(){
           return this.$root.getModelProperty(this.getRelationModel, 'settings.title.insert', this.trans('new-row'));
@@ -305,7 +322,8 @@
           if ( !this.isSelect && !this.isRadio )
             return;
 
-          if ( !this.getFilterBy )
+          //If is filterer key is not from parent model
+          if ( !this.getFilterBy || this.isParentFilterColumn )
             return;
 
           this.$watch('row.'+this.getFilterBy[0], function(value){
@@ -475,7 +493,7 @@
             filter['language_id'] = this.getLangageId;
 
           if ( this.getFilterBy )
-            filter[this.getFilterBy[1]] = this.isStaticFilterColumn ? this.row[this.getFilterBy[0]] : this.filterBy;
+            filter[this.getFilterBy[1]] = this.isStaticFilterColumn ? this.getStaticFilterBy : this.filterBy;
 
           return filter;
         },
@@ -532,11 +550,17 @@
           }
         },
         //Get parent model builder
-        getModelBuilder(){
+        getModelBuilder(slug){
           var modelBuilder = this.$parent;
 
-          while(modelBuilder.$options.name != 'model-builder')
+          while(modelBuilder && (modelBuilder.$options.name != 'model-builder' || (slug && modelBuilder.model.slug != slug)))
             modelBuilder = modelBuilder.$parent;
+
+          if ( slug && (!modelBuilder || modelBuilder.model.slug != slug) ){
+            console.error('Model with table name "' + slug + '" does not exists in parents tree of models');
+
+            return null;
+          }
 
           return modelBuilder;
         },
@@ -634,6 +658,16 @@
 
           return filterBy;
         },
+        /*
+         * Return value of relation column from actual model or parent model by slug
+         */
+        getStaticFilterBy()
+        {
+          var column = this.getFilterBy[0].split('.'),
+              model = column.length == 2 ? this.getModelBuilder(column[0]) : this;
+
+          return model.row[column[column.length - 1]];
+        },
         getName()
         {
           if ( this.isConfirmation )
@@ -722,7 +756,7 @@
           if ( ! this.hasComponent )
             return;
 
-          return this.field.component.toLowerCase();
+          return this.field.component.split(',')[0].toLowerCase();
         },
         getValueOrDefault()
         {
@@ -863,6 +897,9 @@
         },
         isStaticFilterColumn(){
           return this.getFilterBy && !(this.getFilterBy[0] in this.model.fields);
+        },
+        isParentFilterColumn(){
+          return this.getFilterBy && this.getFilterBy[0].split('.').length > 1;
         },
         hasNoFilterValues(){
           //If foreign key identificator is not field, bud static foreign key column

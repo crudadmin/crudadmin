@@ -226,7 +226,9 @@
             if ( row.active == true )
             {
               var rows = this.getStorage();
-              rows[ this.model.slug ] = row.size;
+                  rows[ this.model.slug ] = row.size;
+                  rows[ this.model.slug + '_default' ] = this.$root.getModelProperty(this.model, 'settings.grid.default');
+
               localStorage.sizes = JSON.stringify( rows );
             }
 
@@ -469,7 +471,7 @@
         }
 
         //Select size from storage
-        if ( this.model.slug in data)
+        if ( this.model.slug in data && data[this.model.slug + '_default'] == defaultValue )
         {
           for ( var key in this.sizes )
             if ( this.sizes[key].size == data[ this.model.slug ] )
@@ -566,7 +568,7 @@
           return this.trans('search-all');
 
         var field = this.model.fields[column],
-            name = field.name.length > 20 ? field.name.substr(0, 20) + '...' : field.name;
+            name = field.name && field.name.length > 20 ? field.name.substr(0, 20) + '...' : field.name;
 
         return name;
       },

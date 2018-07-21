@@ -78,6 +78,7 @@ trait ModelIcons
             'report' => 'fa-table',
             'stopwatch' => 'fa-clock-o',
             'watch' => 'fa-clock-o',
+            'contract' => 'fa-file-text-o',
         ];
     }
 

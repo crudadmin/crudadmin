@@ -49,18 +49,21 @@ trait FieldComponent
             if ( ! array_key_exists('component', $field) )
                 continue;
 
-            $component_name = strtolower($field['component']);
+            $components_names = explode(',', strtolower($field['component']));
 
-            if ( ! array_key_exists($component_name, $loaded_components) )
+            foreach ($components_names as $component_name)
             {
-                //Disable throw error on initial admin boot request
-                if ( $initial_request === true )
-                    continue;
+                if ( ! array_key_exists($component_name, $loaded_components) )
+                {
+                    //Disable throw error on initial admin boot request
+                    if ( $initial_request === true )
+                        continue;
 
-                Ajax::error(sprintf(trans('admin::admin.component-missing'), $component_name, $key), null, null, 500);
+                    Ajax::error(sprintf(trans('admin::admin.component-missing'), $component_name, $key), null, null, 500);
+                }
+
+                $components[$component_name] = $this->renderFieldComponent( $loaded_components[$component_name] );
             }
-
-            $components[$component_name] = $this->renderFieldComponent( $loaded_components[$component_name] );
         }
 
         return $components;
