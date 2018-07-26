@@ -49,6 +49,7 @@ return [
         'date' => 'date_format:d.m.Y|nullable',
         'datetime' => 'date_format:d.m.Y H:i|nullable',
         'time' => 'date_format:H:i|nullable',
+        'json' => 'hidden',
     ],
 
     /*

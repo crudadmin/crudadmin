@@ -99,7 +99,7 @@ class DataController extends Controller
 
         $row = $model->findOrFail( request()->get('_id') );
 
-        $this->checkValidation($request, $row);
+        $this->checkValidation($request, $row, true);
 
         //Upload files with postprocess if are available
         $request->applyMutators($row);

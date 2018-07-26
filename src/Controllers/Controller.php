@@ -12,7 +12,7 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function checkValidation($request, $row = null)
+    public function checkValidation($request, $row = null, $update = false)
     {
         $model = Admin::getModelByTable( request('_model') );
 
@@ -66,6 +66,22 @@ class Controller extends BaseController
             $updated_rules[$key] = $data;
         }
 
+        //Check for additional validation mutator
+        $updated_rules = $this->mutateRequestByRules($model, $updated_rules, $update);
+
         $this->validate($request, $updated_rules);
+    }
+
+    /*
+     * Mutate admin validation request
+     */
+    public function mutateRequestByRules($model, $rules = [], $update = false)
+    {
+        $model->getAdminRules(function($rule) use ( &$rules, $update, $model ) {
+            if ( method_exists($rule, 'validate') )
+                $rules = $rule->validate($rules, $update, $model);
+        });
+
+        return $rules;
     }
 }

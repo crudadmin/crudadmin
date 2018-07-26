@@ -161,29 +161,51 @@ trait AdminModelTrait
     }
 
     /*
-     * Validate admin rules, on update, delete, create
+     * Returns cached admin rule class
      */
-    public function checkForModelRules($rules = ['create', 'update'])
+    protected function getCachedAdminRuleClass($class)
+    {
+        return Admin::cache($this->getTable() . $class, function() use ( $class ) {
+            return new $class;
+        });
+    }
+
+    /*
+     * Return and fire admin rules
+     */
+    public function getAdminRules($callback)
     {
         if ( $this->rules && is_array($this->rules) )
         {
             foreach ($this->rules as $class)
             {
-                $rule = new $class($this);
+                $rule = $this->getCachedAdminRuleClass($class);
 
-                if ( method_exists($rule, 'fire') )
-                    $rule->fire($this);
-
-                if ( method_exists($rule, 'create') && ! $this->exists )
-                    $rule->create($this);
-
-                if ( method_exists($rule, 'update') && in_array('update', $rules) && $this->exists )
-                    $rule->update($this);
-
-                if ( method_exists($rule, 'delete') && in_array('delete', $rules) )
-                    $rule->delete($this);
+                $callback($rule);
             }
         }
+
+        return null;
+    }
+
+    /*
+     * Validate admin rules, on update, delete, create
+     */
+    public function checkForModelRules($rules = ['create', 'update'])
+    {
+        $this->getAdminRules(function($rule) use($rules) {
+            if ( method_exists($rule, 'fire') )
+                $rule->fire($this);
+
+            if ( method_exists($rule, 'create') && in_array('create', $rules) && ! $this->exists )
+                $rule->create($this);
+
+            if ( method_exists($rule, 'update') && in_array('update', $rules) && $this->exists )
+                $rule->update($this);
+
+            if ( method_exists($rule, 'delete') && in_array('delete', $rules) )
+                $rule->delete($this);
+        });
     }
 
     /*

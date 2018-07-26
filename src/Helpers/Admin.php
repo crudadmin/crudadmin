@@ -38,9 +38,9 @@ class Admin
     /*
      * Save property, if is not in administration interface
      */
-    public function bind($key, $data, $call = true, $force = false)
+    public function bind($key, $data, $call = true, $cache_in_admin = false)
     {
-        if ( ! $this->isAdmin() || $force === true )
+        if ( ! $this->isAdmin() || $cache_in_admin === true )
         {
             //If is passed data callable function
             if ( is_callable($data) && $call == true )
@@ -100,13 +100,14 @@ class Admin
 
     /*
      * Cache into array if does not exists
+     * force parameter means cache also in administration page
      */
-    public function cache($key, $data, $force = true)
+    public function cache($key, $data, $save_in_admin = true)
     {
         if ( $this->has($key) )
             return $this->get($key);
 
-        return $this->bind($key, $data, true, $force);
+        return $this->bind($key, $data, true, $save_in_admin);
     }
 
     /*

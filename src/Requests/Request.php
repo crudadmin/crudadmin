@@ -261,6 +261,21 @@ abstract class Request extends FormRequest
     }
 
     /*
+     * Modify final value by admin rule modifier
+     */
+    private function mutateRowDataRule($data)
+    {
+        return array_map(function($item){
+            $this->model->getAdminRules(function($rule) use (&$item) {
+                if ( method_exists($rule, 'validate') )
+                    $item = $rule->fill($item);
+            });
+
+            return $item;
+        }, $data);
+    }
+
+    /*
      * Return form data with uploaded filename
      */
     public function allWithMutators(){
@@ -290,7 +305,7 @@ abstract class Request extends FormRequest
                             $array[] = $data;
                         }
 
-                        return $array;
+                        return $this->mutateRowDataRule($array);
                     } else {
                         $data[$key] = end($files);
                     }
@@ -310,6 +325,6 @@ abstract class Request extends FormRequest
             $data[$field] = null;
         }
 
-        return [ $data ];
+        return $this->mutateRowDataRule([ $data ]);
     }
 }
