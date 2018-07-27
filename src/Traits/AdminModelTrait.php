@@ -166,7 +166,7 @@ trait AdminModelTrait
     protected function getCachedAdminRuleClass($class)
     {
         return Admin::cache($this->getTable() . $class, function() use ( $class ) {
-            return new $class;
+            return new $class($this);
         });
     }
 
