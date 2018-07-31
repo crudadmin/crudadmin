@@ -435,7 +435,7 @@ class AdminMigrationCommand extends Command
         return count( $model->getConnection()->select(
             DB::raw(
                 'SHOW KEYS
-                FROM '.$model->getTable().'
+                FROM `'.$model->getTable().'`
                 WHERE Key_name=\''. $this->getIndexName($model, $key, $prefix) . '\''
             )
         ) );
