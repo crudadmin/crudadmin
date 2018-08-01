@@ -448,7 +448,9 @@ class DataController extends Controller
     {
         $language = Admin::getModel('Language')->findOrFail($id);
 
-        return Gettext::getTranslations($language);
+        $translations = Gettext::getTranslations($language);
+
+        return response()->json( $translations );
     }
 
     /*

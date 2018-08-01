@@ -29,10 +29,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(key, value) in filtratedTranslates">
+                      <tr v-for="(key, values) in filtratedTranslates">
                         <td>{{ key }}</td>
-                        <td class="input" :class="{ edited : hasChange(key, value) }">
-                          <textarea :class="{ long : value.length > 80 }" :value="value" @keyup="changeText($event, key)" class="form-control"></textarea>
+                        <td class="input" :class="{ edited : hasChange(key), plural : isPlural(key) }">
+                          <textarea v-for="i in getPluralLength(key)" :class="{ long : getValue(values, i).length > 80 }" :value="getValue(values, i)" :placeholder="getPluralsPlaceholder(key, i)" :title="getPluralsPlaceholder(key, i)" data-toggle="tooltip" @keyup="changeText($event, key, i)" class="form-control"></textarea>
                         </td>
                       </tr>
                     </tbody>
@@ -62,6 +62,8 @@
       data(){
         return {
           translates : {},
+          plurals : [],
+          plural_forms : '',
           query : null,
           changes : {},
           limit : 20,
@@ -88,7 +90,7 @@
             //If is under limit, and if has query match
             if (
               (this.limit == false || i < this.limit)
-              && (!this.query || this.hasChange(key) || this.translates[key].toLowerCase().indexOf(query) > -1 || key.toLowerCase().indexOf(query) > -1 )
+              && (!this.query || this.hasChange(key) || this.translates[key].join('').toLowerCase().indexOf(query) > -1 || key.toLowerCase().indexOf(query) > -1 )
             ){
               obj[key] = this.translates[key];
 
@@ -103,7 +105,51 @@
         },
         resultLength(){
           return Object.keys(this.filtratedTranslates).length;
-        }
+        },
+        pluralLength(){
+          var match = this.plural_forms.match(/nplurals\=(\d+)/);
+
+          return parseInt(match[1]||2);
+        },
+        getPluralsIntervals(){
+          var forms = this.plural_forms.split(';')[1].replace('plural=', ''),
+              plurals = [];
+
+          for ( var i = 0; i < this.pluralLength; i++ )
+          {
+            var start = null,
+                end = null;
+
+            for ( var a = 1; a < 100; a++ )
+            {
+              var statement = forms.replace(/n/g, a),
+                  result = parseInt(eval(statement));
+
+              if ( start === null && result === i )
+                start = a;
+
+              if ( start !== null && end === null && result != i ){
+                if ( i > 0 )
+                  end = a - 1;
+
+                break;
+              }
+            }
+
+            plurals.push([start, start == end ? null : end]);
+          }
+
+          plurals = plurals.map((items, i) => {
+            var items = items.filter(item => item);
+
+            if ( i + 1 == plurals.length && items.length == 1 )
+              return items[0] + '+';
+
+            return items.join(' - ');
+          });
+
+          return plurals;
+        },
       },
 
       methods: {
@@ -115,13 +161,58 @@
         },
         loadTranslations(){
           this.$http.get(this.$root.requests.translations.replace('{id}', this.gettext_editor.id)).then(function(response){
-            this.translates = response.data;
+            var messages = response.data.messages;
+
+            this.plurals = response.data.plurals;
+            this.plural_forms = response.data['plural-forms'];
+            this.translates = response.data.messages[Object.keys(messages)[0]];
+
             this.loaded = true;
           });
         },
-        changeText(e, src){
-          this.translates[src] = e.target.value;
-          this.changes[src] = e.target.value;
+        isPlural(text){
+          return this.plurals.indexOf(text) > -1;
+        },
+        getPluralLength(text){
+          return this.isPlural(text) ? this.pluralLength : 1;
+        },
+        getPluralsPlaceholder(text, i){
+          //If is no plural
+          if ( ! this.isPlural(text) )
+            return '';
+
+          if ( text.indexOf('%d') > -1 )
+            return text.replace('%d', this.getPluralsIntervals[i]);
+
+          return this.getPluralsIntervals[i];
+        },
+        getValue(value, i){
+          if ( ! value )
+            return '';
+
+          return value[i];
+        },
+        changeText(e, src, i){
+          var value = e.target.value;
+
+          //Plural forms translates
+          if ( this.isPlural(src) )
+          {
+            //Build plural forms array
+            if ( ! (src in this.changes) )
+              this.changes[src] = this.translates[src];
+
+            //Update specific plural form
+            this.changes[src][i] = value;
+          }
+
+          //Non plural forms
+          else {
+            this.changes[src] = value;
+          }
+
+          //Update core translates object
+          this.translates[src][i] = value;
         },
         saveAndClose(){
           this.$http.post(this.$root.requests.update_translations.replace('{id}', this.gettext_editor.id), { changes : JSON.stringify(this.changes) }).then(function(){
@@ -129,7 +220,7 @@
           });
         },
         //Check if value has been changed
-        hasChange(key, value){
+        hasChange(key){
           return key in this.changes;
         }
       },

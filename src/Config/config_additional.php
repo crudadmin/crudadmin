@@ -9,6 +9,7 @@ return [
         'app/Http/Controllers',
         'app/Http/Middleware',
         'routes',
+        'resources/assets/js',
     ],
 
     /*

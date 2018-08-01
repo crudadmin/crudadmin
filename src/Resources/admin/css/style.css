@@ -344,11 +344,12 @@ form label span.required { color: red; position: relative; top: 2px }
 .gettext-table .modal-dialog { width: 1000px }
 .gettext-table .modal-dialog table { max-width: none }
 .gettext-table .modal-dialog td { padding: 5px 5px; line-height: 155% !important; }
-.gettext-table .modal-dialog td.input { background: white }
+.gettext-table .modal-dialog td.input { background: white; padding: 0; }
 .gettext-table .modal-dialog td.input.edited { background: #ffe5e5 }
 .gettext-table .modal-dialog td .form-control { background: none; border: none; }
-.gettext-table .modal-dialog td textarea.form-control { padding: 2px 5px 0; width: 100% !important; resize: none; height: 25px; }
+.gettext-table .modal-dialog td textarea.form-control { padding: 7px 10px 0; width: 100% !important; resize: none; height: 35px; }
 .gettext-table .modal-dialog td textarea.form-control.long { resize: auto; height: auto }
+.gettext-table .modal-dialog td.plural textarea.form-control:not(:last-child) { border-bottom: 1px solid #f4f4f4; }
 .gettext-table .modal-dialog td:last-child { width: 50%; }
 .gettext-table .modal-dialog .all-translates { text-align: center;width: 100%;display: block;margin-top: 20px;cursor: pointer; }
 .gettext-table .modal-dialog .loading { text-align: center; }
