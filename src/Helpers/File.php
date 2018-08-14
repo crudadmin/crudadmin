@@ -29,6 +29,11 @@ class File
     public $path;
 
     /*
+     * full basepath
+     */
+    public $basepath;
+
+    /*
      * Absolute path to file
      */
     public $url;
@@ -40,6 +45,8 @@ class File
         $this->extension = $this->getExtension( $this->filename );
 
         $this->path = $path;
+
+        $this->basepath = public_path($path);
 
         $this->directory = str_replace(public_path(), '', implode('/', array_slice(explode('/', $this->path), 0, -1)));
 

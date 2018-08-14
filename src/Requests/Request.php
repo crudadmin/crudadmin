@@ -267,7 +267,7 @@ abstract class Request extends FormRequest
     {
         return array_map(function($item){
             $this->model->getAdminRules(function($rule) use (&$item) {
-                if ( method_exists($rule, 'validate') )
+                if ( method_exists($rule, 'fill') )
                     $item = $rule->fill($item);
             });
 

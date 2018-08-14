@@ -82,7 +82,7 @@ export default {
             {
               var values = [],
                   rows = rowValue,
-                  options = this.getLanguageSelectOptions( field.options );
+                  options = this.getLanguageSelectOptions( field.options, this.getRelatedModelTable(field) );
 
               for ( var i = 0; i < rows.length; i++ )
               {
@@ -96,7 +96,7 @@ export default {
 
               return values.join(', ');
             } else {
-              var options = isRadio ? field.options : this.getLanguageSelectOptions( field.options );
+              var options = isRadio ? field.options : this.getLanguageSelectOptions( field.options, this.getRelatedModelTable(field) );
 
               //Check if key exists in options
               if ( ! options )
@@ -138,6 +138,9 @@ export default {
     },
 
     methods: {
+      getRelatedModelTable(field){
+        return (field.belongsTo||field.belongsToMany).split(',')[0];
+      },
       getMutatedValue(value, field){
         if ( field && 'locale' in field )
         {
@@ -171,8 +174,10 @@ export default {
 
         return value||'';
       },
-      getLanguageSelectOptions(array){
-        return this.$root.languageOptions(array, this.model.fields[this.field], this.model.localization ? {
+      getLanguageSelectOptions(array, model){
+        model = this.$root.models_list[model];
+
+        return this.$root.languageOptions(array, this.model.fields[this.field], model && model.localization ? {
           language_id : this.$root.language_id,
         } : {});
       },
