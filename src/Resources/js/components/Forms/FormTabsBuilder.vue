@@ -199,7 +199,7 @@
           if ( this.isGroup(childs[i]) )
           {
             //If model is in recursive tabs or group
-            if ( childs[i].model == model ){
+            if ( childs[i].model === model ){
               return true;
             }
 
