@@ -441,23 +441,50 @@ class AdminMigrationCommand extends Command
         ) );
     }
 
-    private function updateToJsonColumn($model, $key)
+    private function hasUnvalidValues($model, $key)
+    {
+        $query = $model->getConnection()
+                      ->table( $model->getTable() )
+                      ->select([ $model->getKeyName(), $key ])
+                      ->whereNotNull($key)
+                      ->take(5);
+
+        return $query->whereRaw('NOT JSON_VALID('.$key.')')->pluck($key, $model->getKeyName());
+    }
+
+    private function updateToJsonColumn($model, $key, $type = null)
     {
         //Check if exists row in table,
         if ( $model->getConnection()->table( $model->getTable() )->count() === 0 )
             return;
 
-        if ( ! $this->confirm('You are updating '.$key.' column from non-json type to json type for translates purposes. Would you like to update this non-json values to translated format of JSON values? If you select NO, you may catch mysql error.') )
+        //Check if database has unvalid values for correct json type application
+        if ( ($update = $this->hasUnvalidValues($model, $key))->count() == 0 )
             return;
 
         $languages = Localization::getLanguages(true);
+
+        $slug = ($lang = $languages->first()) ? $lang->slug : 'en';
+
+        $this->line('<comment>- You are updating</comment> '.$key.' <comment>column from '.($type ?: 'non-json').' type to json type for translates purposes.</comment>');
+
+        foreach ($update as $id => $value) {
+            $value = str_limit($value, 30);
+            $this->line('<comment>'.$id.':</comment> '.$value.' <comment>=></comment> <info>{"'.$slug.'":"</info>'.$value.'<info>"}</info>');
+        }
+
+        if ( $update->count() == 5 )
+            $this->line('<comment>...</comment>');
+
+        if ( ! $this->confirm('Would you like to update this '.($type ?: 'non-json').' values in database to translated format of JSON values?', true) )
+            return;
 
         if ( $languages->count() === 0 )
             $this->line('<error>You have no inserted languages to update '.$key.' column.</error>');
 
         $prefix = $languages->first()->slug;
 
-        $model->getConnection()->table( $model->getTable() )->update([
+        $model->getConnection()->table( $model->getTable() )->whereRaw('NOT JSON_VALID('.$key.')')->update([
             $key => DB::raw( 'CONCAT("{\"'.$prefix.'\": \"", '.$key.', "\"}")' )
         ]);
     }
@@ -475,7 +502,7 @@ class AdminMigrationCommand extends Command
             $type = $model->getConnection()->getDoctrineColumn($model->getTable(), $key)->getType()->getName();
 
             if ( ! in_array($type, ['json', 'json_array']) && $localized === true ){
-                $this->updateToJsonColumn($model, $key);
+                $this->updateToJsonColumn($model, $key, $type);
             }
         }
 
