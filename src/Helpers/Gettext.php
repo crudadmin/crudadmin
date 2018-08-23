@@ -94,7 +94,7 @@ class Gettext
         if ( $language->poedit_mo == null )
             return false;
 
-        $domain = explode('.', $language->poedit_mo->filename);
+        $domain = explode('.', $language->poedit_mo);
         $domain = $domain[0];
 
         if ( ! ($locale = $this->getLocale($locale)) )
@@ -167,47 +167,34 @@ class Gettext
     /*
      * Copy translation file from uploads to laravel storage
      */
-    public function updateLanguage($locale, $paths)
+    public function generateMoFiles($locale, $row)
     {
         if ( ! ($locale = $this->getLocale($locale)) )
             return false;
 
-        if ( ! is_array($paths) || ! $paths[0] || ! $paths[1] )
+        if ( ! $row->poedit_po || ! $row->poedit_mo )
             return true;
 
         //Path to uploaded file by administrator
-        $uploaded_path_po = public_path( $paths[0] );
-        $uploaded_path_mo = public_path( $paths[1] );
-
-        //File name
-        $filename = basename( $uploaded_path_mo );
+        $uploaded_path_po = $row->poedit_po->basepath;
 
         //Path to moved file from uploads to storage
-        $locale_path = $this->getLocalePath($locale, $filename);
+        $locale_mo_path = $this->getLocalePath($locale, $row->poedit_mo);
 
-        //If uploaded file has not been moved
-        if ( ! file_exists( $locale_path ) )
+        $locale_po_path = $this->getLocalePath($locale, $locale . '.po');
+
+        // dd($locale_mo_path, $row->poedit_po, md5_file($uploaded_path_po) != md5_file($locale_po_path));
+
+        //If pofile has been changed, then generate new mo file and remove previous one
+        if ( !file_exists($locale_po_path) || md5_file($uploaded_path_po) != md5_file($locale_po_path))
         {
-            $files_to_remove = $this->filesystem->allFiles( $this->getLocalePath( $locale ) );
+            $this->filesystem->copy($uploaded_path_po, $locale_po_path);
 
-            //Removes previous version of translation file
-            foreach ($files_to_remove as $file)
-            {
-                if ( strlen( $file->getFileName() ) == 11 && is_numeric( substr( $file->getFileName(), 0, 8 ) ) )
-                {
-                    $this->filesystem->delete( $file );
-                }
-            }
+            $translations = Translations::fromPoFile($uploaded_path_po);
 
-            $this->filesystem->copy( $uploaded_path_mo, $locale_path);
-        }
+            $translations->toMoFile($locale_mo_path);
 
-        $locale_po_file = $this->getLocalePath($locale, $locale . '.po');
-
-        //Copy po file
-        if ( !file_exists($locale_po_file) || md5_file($uploaded_path_po) != md5_file($locale_po_file))
-        {
-            $this->filesystem->copy($uploaded_path_po, $locale_po_file);
+            $this->removeOldMoFiles($locale, $row->poedit_mo);
         }
     }
 
@@ -365,7 +352,6 @@ class Gettext
 
         //Make missing directories
         File::makeDirs($this->getLocalePath($locale));
-        File::makeDirs($language->filePath('poedit_mo'));
         File::makeDirs($language->filePath('poedit_po'));
 
         //Save into mo file
@@ -373,7 +359,6 @@ class Gettext
         $translations->toPoFile($po_path);
 
         //Copy generated mo into uploads folder for avaiable download mo file
-        copy($mo_path, $language->filePath('poedit_mo', $mo_filename));
         copy($po_path, $language->filePath('poedit_po', $po_filename));
 
         $this->removeOldMoFiles($locale, $mo_filename);

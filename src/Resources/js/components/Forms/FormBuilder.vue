@@ -9,11 +9,11 @@
         <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
 
         <div class="dropdown pull-right multi-languages" v-if="hasLocalFields">
-          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <button class="btn btn-default dropdown-toggle" type="button" id="languageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i class="fa fa-globe"></i> <span class="text">{{ selectedLanguage.name }}</span>
             <span class="caret"></span>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+          <ul class="dropdown-menu" aria-labelledby="languageDropdown">
             <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selectedlangid = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ lang.name }}</a></li>
           </ul>
         </div>
@@ -254,8 +254,8 @@
           data['_method'] = 'put';
         } else {
           //Check if is enabled language
-          if ( this.$root.language_id != null )
-            data['language_id'] = this.$root.language_id;
+          if ( this.langid )
+            data['language_id'] = this.langid;
 
           //Push saved childs without actual parent row
           if ( this.hasParentModel() && this.$parent.rows.save_children.length > 0 )

@@ -14,11 +14,10 @@ trait Gettextable
         if ( config('admin.gettext') === true )
         {
             Gettext::createLocale($row->slug);
-            Gettext::updateLanguage($row->slug, [
-                $row->poedit_po ? $row->poedit_po->path : null,
-                $row->poedit_mo ? $row->poedit_mo->path : null
-            ]);
+
             Gettext::syncTranslates($row);
+
+            Gettext::generateMoFiles($row->slug, $row);
         }
     }
 
@@ -28,10 +27,8 @@ trait Gettextable
         if ( config('admin.gettext') === true )
         {
             Gettext::renameLocale($row->original['slug'], $row->slug);
-            Gettext::updateLanguage($row->slug, [
-                $row->poedit_po ? $row->poedit_po->path : null,
-                $row->poedit_mo ? $row->poedit_mo->path : null
-            ]);
+
+            Gettext::generateMoFiles($row->slug, $row);
         }
     }
 
@@ -39,9 +36,15 @@ trait Gettextable
      * Change filename po mo files,
      * because .mo files need to be unique
      */
-    public function setPoeditMoFilename($filename)
+    public function setPoeditPoFilename($filename)
     {
-        return date('d-m-Y-h-i-s') . '.mo';
+        //Regenerate mo files from po files
+        if ( config('admin.gettext') === true )
+        {
+            $this->attributes['poedit_mo'] = date('d-m-Y-h-i-s') . '.mo';
+        }
+
+        return $filename;
     }
 
     /*
@@ -73,7 +76,7 @@ trait Gettextable
 
         $fields->push([
             'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|required_with:poedit_mo',
-            'poedit_mo' => 'name:admin::admin.languages-mo-name|type:file|max:1024|hidden|extensions:mo|required_with:poedit_po',
+            'poedit_mo' => 'name:admin::admin.languages-mo-name|type:string|max:30|invisible',
         ]);
     }
 }
