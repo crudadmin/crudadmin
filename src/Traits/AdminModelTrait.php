@@ -69,7 +69,12 @@ trait AdminModelTrait
             {
                 if ( $file = parent::__get($key) )
                 {
-                    if ( is_array($file) || $this->hasFieldParam($key, 'multiple', true) )
+                    //If is multilanguage file/s
+                    if ( $this->hasFieldParam($key, ['locale'], true) ){
+                        $file = $this->returnLocaleValue($file);
+                    }
+
+                    if ( is_array($file) || $this->hasFieldParam($key, ['multiple'], true) )
                     {
                         $files = [];
 
@@ -95,24 +100,9 @@ trait AdminModelTrait
             else if ( !array_key_exists('belongsTo', $field) && !array_key_exists('belongsToMany', $field) || substr($key, -3) == '_id' ){
 
                 if ( array_key_exists('locale', $field) && $field['locale'] === true ) {
-
-                    $slug = Localization::get()->slug;
                     $object = parent::__get($key);
 
-                    if ( ! $object || ! is_array($object) )
-                        return null;
-
-                    //If row has saved default value
-                    if ( array_key_exists($slug, $object) && (!empty($object[$slug]) || $object[$slug] === 0) ){
-                        return $object[$slug];
-                    }
-
-                    foreach ($object as $value) {
-                        if ( !empty($value) || $value === 0 )
-                            return $value;
-                    }
-
-                    return null;
+                    return $this->returnLocaleValue($object);
                 }
 
                 return parent::__get($key);

@@ -2,6 +2,8 @@
 
 namespace Gogol\Admin\Traits;
 
+use Localization;
+
 trait FieldProperties
 {
     /*
@@ -80,5 +82,30 @@ trait FieldProperties
     public function getModelParentRow()
     {
         return $this->withParentRow;
+    }
+
+    /*
+     * Return specific value in multi localization field by selected language
+     * if translations are missing, returns default, or first available language
+     */
+    public function returnLocaleValue($object, $lang = null)
+    {
+        $slug = $lang ?: Localization::get()->slug;
+
+        if ( ! $object || ! is_array($object) )
+            return null;
+
+        //If row has saved actual value
+        if ( array_key_exists($slug, $object) && (!empty($object[$slug]) || $object[$slug] === 0) ){
+            return $object[$slug];
+        }
+
+        //Return first available translated value in admin
+        foreach ($object as $value) {
+            if ( !empty($value) || $value === 0 )
+                return $value;
+        }
+
+        return null;
     }
 }
