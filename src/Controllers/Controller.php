@@ -20,11 +20,7 @@ class Controller extends BaseController
     {
         $slices = explode('.', $key);
 
-        //Return one part key
-        if ( count($slices) == 1 )
-            return $slices[0];
-
-        return implode('.', array_slice($slices, 0, -1));
+        return $slices[0];
     }
 
     /*
@@ -42,7 +38,7 @@ class Controller extends BaseController
     private function canRemoveNullable($model, $replaced_key, $key)
     {
         return ! $model->hasFieldParam($replaced_key, 'locale', true)
-               || last(explode('.', $key)) == Localization::getDefaultLanguage()->slug;
+               || last(explode('.', str_replace('.*', '', $key))) == Localization::getDefaultLanguage()->slug;
     }
 
     /*
@@ -51,7 +47,7 @@ class Controller extends BaseController
     private function addRequiredRuleForDeletedFiles(&$data, $model, $request, $key, $replaced_key)
     {
         //If field is required and has been removed, then remove nullable rule for a file requirement
-        if ( $request->has( '$remove_' . $key ) && ! $model->hasFieldParam($key, 'multiple', true) ) {
+        if ( $request->has( '$remove_' . $key ) && ! $model->hasFieldParam($replaced_key, 'multiple', true) ) {
             $request->merge( [ $key => null ] );
 
             if (
@@ -63,6 +59,19 @@ class Controller extends BaseController
 
                 $data[] = 'required';
             }
+        }
+
+        //Add required value for empty multi upload fields
+        if (
+            !$request->has('$uploaded_'.$replaced_key)
+            && $model->hasFieldParam($replaced_key, 'multiple', true)
+            && $this->canRemoveNullable($model, $replaced_key, $key)
+            && $model->hasFieldParam($replaced_key, 'required', true)
+            && ($k = array_search('nullable', $data)) !== false
+             ){
+            unset($data[$k]);
+
+            $data[] = 'required';
         }
     }
 

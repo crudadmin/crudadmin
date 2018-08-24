@@ -48,6 +48,26 @@ trait Validation {
         return $this->fieldToString($field);
     }
 
+    /*
+     * Remove uneccessary parameters from fields
+     */
+    private function removeMultiFields($key, &$field)
+    {
+        if ($this->isFieldType($key, 'file') || $this->isFieldType($key, ['date', 'time']))
+        {
+            //If is multiple file uploading
+            if ( $this->hasFieldParam($key, ['multiple', 'multirows'], true) )
+            {
+                foreach (['multiple', 'multirows', 'array'] as $param)
+                {
+                    if ( array_key_exists($param, $field) )
+                    {
+                        unset($field[$param]);
+                    }
+                }
+            }
+        }
+    }
 
     /*
      * Returns validation rules of model
@@ -64,31 +84,21 @@ trait Validation {
         {
             $orig_key = $key;
 
-            if ($this->isFieldType($key, 'file') || $this->isFieldType($key, ['date', 'time']))
+            $this->removeMultiFields($key, $field);
+
+            //If is available default locale, then set default key name, if
+            //language is not available, then apply for all langs...
+            if ( $has_locale = $this->hasFieldParam($orig_key, 'locale') )
             {
-                //If is multiple file uploading
-                if ( $this->hasFieldParam($key, ['multiple', 'multirows'], true) )
-                {
-                    foreach (['multiple', 'multirows', 'array'] as $param)
-                    {
-                        if ( array_key_exists($param, $field) )
-                        {
-                            unset($field[$param]);
-                        }
-                    }
-                    //Add multiple validation support
-                    if ( $this->hasFieldParam($key, 'array', true) )
-                        $key = $key . '.*';
-                }
+                if ( $default_language )
+                    $key = $orig_key . '.' . $default_language->slug;
+                else
+                    $key = $orig_key . '.*';
             }
 
-             if ( $has_locale = $this->hasFieldParam($key, 'locale') )
-             {
-                if ( $default_language )
-                    $key = $key . '.' . $default_language->slug;
-                else
-                    $key = $key . '.*';
-             }
+            //Add multiple validation support
+            if ( $is_multiple = $this->hasFieldParam($orig_key, 'array', true) )
+                $key = $key . '.*';
 
             //If field is not required
             if ( !$this->hasFieldParam($orig_key, 'required') )
@@ -96,7 +106,7 @@ trait Validation {
                 $field['nullable'] = true;
             }
 
-            //If is existing row an required image already exists
+            //If is existing row and required image already exists
             if ( $row && !empty($row[$orig_key]) && $this->hasFieldParam($orig_key, 'required') ){
                 $field['required'] = false;
             }
@@ -114,10 +124,15 @@ trait Validation {
                         $lang_rules = array_unique(array_merge($data[$key], ['nullable']));
 
                         //Remove required rule for other languages
-                        if ( ($k = array_search('required', $data)) !== false )
+                        if ( ($k = array_search('required', $lang_rules)) !== false )
                             unset($lang_rules[$k]);
 
-                        $data[$orig_key.'.'.$lang->slug] = $lang_rules;
+                        //Apply also for multiple files support
+                        $field_key = $is_multiple
+                                        ? $orig_key . '.'. $lang->slug . '.*'
+                                        : $orig_key . '.'. $lang->slug;
+
+                        $data[$field_key] = $lang_rules;
                     }
                 }
             }

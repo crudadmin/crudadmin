@@ -344,7 +344,7 @@
                       if ( i == 0 )
                         return item;
 
-                      if ( i == 0 && item == 0 )
+                      if ( item == 0 )
                         return '[]';
 
                       return '['+item+']';

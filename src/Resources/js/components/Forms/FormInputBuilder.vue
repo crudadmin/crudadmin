@@ -55,7 +55,7 @@
           </select>
         </div>
 
-        <small v-show="uploadSelectPluginAfterLoad">{{ field.title }}</small>
+        <small>{{ field.title }}</small>
 
         <span v-if="getValueOrDefault && !hasMultipleFilesValue && file_from_server && !isMultiple">
           <file :file="getValueOrDefault" :field="key" :model="model"></file>
@@ -192,7 +192,7 @@
           $('#'+this.getId).ckEditors();
         });
 
-        this.addMultipleFilesSupport();
+        this.addMultipleFilesSupport(true);
       },
       events : {
         onSubmit(row){
@@ -434,10 +434,21 @@
             this.addMultipleFilesSupport();
           })
         },
-        addMultipleFilesSupport(){
+        addMultipleFilesSupport(with_watcher){
           //Update multiple files upload
-            if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows )
-              $('#' + this.getId+'_multipleFile').chosen(this.chosenOptions()).trigger("chosen:updated");
+          if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows ){
+            $('#' + this.getId+'_multipleFile').chosen(this.chosenOptions()).trigger("chosen:updated");
+          }
+
+          //On update value
+          if ( with_watcher == true )
+          {
+            this.$watch('field.value', function(){
+              this.$nextTick(function(){
+                $('#' + this.getId + '_multipleFile').trigger("chosen:updated");
+              });
+            });
+          }
         },
         removeFile(){
           if ( ! this.isMultiple ){
@@ -792,13 +803,6 @@
           }
 
           return this.field.value;
-        },
-        uploadSelectPluginAfterLoad(){
-          this.field.value;
-
-          $('#' + this.getId + '_multipleFile').trigger("chosen:updated");
-
-          return true;
         },
         value(){
           var value = this.field.value;

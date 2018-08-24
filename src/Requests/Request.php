@@ -126,8 +126,13 @@ abstract class Request extends FormRequest
                             $now_uploaded = (array_key_exists($orig_key, $this->uploadedFiles))
                                             && ($has_locale ? array_key_exists($lang_slug, $this->uploadedFiles[$orig_key]) : true);
 
-                            //If files
-                            if ( $has_locale && ($now_uploaded || !$is_uploaded) && ! $is_multiple ){
+                            //Dont merge old uploaded files if is locale field with new uploaded file
+                            //Or if is field locale with no previous uploaded files
+                            //Or if is multiple locale upload, but with no previous uploads
+                            if (
+                                $has_locale && ($now_uploaded || !$is_uploaded)
+                                && ( ! $is_multiple || ! $is_uploaded )
+                            ){
                                 continue;
                             }
 
@@ -300,6 +305,17 @@ abstract class Request extends FormRequest
     }
 
     /*
+     * Bind files into array by locale type
+     */
+    private function bindFilesIntoArray(&$array, $key, $lang_slug, $has_locale, $files)
+    {
+        if ( $has_locale )
+            $array[$lang_slug] = $files;
+        else
+            $array = $files;
+    }
+
+    /*
      * Return form data with uploaded filename
      */
     public function allWithMutators(){
@@ -325,10 +341,7 @@ abstract class Request extends FormRequest
 
                 if ( $count == 1 )
                 {
-                    if ( $has_locale )
-                        $data[$key][$lang_slug] = $files[$lang_slug][0];
-                    else
-                        $data[$key] = $files[$lang_slug][0];
+                    $this->bindFilesIntoArray($data[$key], $key, $lang_slug, $has_locale, $files[$lang_slug][0]);
                 } else if ( $count > 1 ) {
 
                     //Returns one file as one db row
@@ -336,7 +349,7 @@ abstract class Request extends FormRequest
                     {
                         if ( $this->model->exists === false )
                         {
-                            foreach ($files as $file)
+                            foreach ($files[$lang_slug] as $file)
                             {
                                 $data[$key] = $file;
 
@@ -345,14 +358,14 @@ abstract class Request extends FormRequest
 
                             return $this->mutateRowDataRule($array);
                         } else {
-                            $data[$key] = end($files);
+                            $data[$key] = end($files[$lang_slug]);
                         }
                     }
 
                     //Bind files into file value
                     else if ( $this->model->hasFieldParam($key, 'multiple', true) )
                     {
-                        $data[$key] = $files;
+                        $this->bindFilesIntoArray($data[$key], $key, $lang_slug, $has_locale, $files[$lang_slug]);
                     }
                 }
             }
