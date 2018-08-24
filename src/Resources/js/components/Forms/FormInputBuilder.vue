@@ -44,21 +44,21 @@
       <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="file-group">
-        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? key + '[]' : key" @change="addFile" class="form-control" :placeholder="field.placeholder || getName">
-        <input v-if="!field.value && file_will_remove == true" type="hidden" name="$remove_{{ key }}" value="1">
+        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || getName">
+        <input v-if="!getValueOrDefault && file_will_remove == true" type="hidden" :name="'$remove_' + getFieldName" :value="1">
 
-        <button v-if="field.value && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
+        <button v-if="getValueOrDefault && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
 
-        <div v-show="isMultiple && !isMultirows && getFiles.length > 0">
-          <select v-bind:id="getId + '_multipleFile'" v-bind:name="(isMultiple && !isMultirows && getFiles.length > 0) ? '$uploaded_'+key+'[]' : ''" data-placeholder=" " multiple>
+        <div v-show="(isMultiple && !isMultirows) && getFiles.length > 0">
+          <select v-bind:id="getId + '_multipleFile'" v-bind:name="(hasLocale || (isMultiple && !isMultirows) && getFiles.length > 0) ? '$uploaded_'+getFieldName+'[]' : ''" data-placeholder=" " multiple>
             <option selected v-for="file in getFiles">{{ file }}</option>
           </select>
         </div>
 
         <small v-show="uploadSelectPluginAfterLoad">{{ field.title }}</small>
 
-        <span v-if="field.value && !hasMultipleFilesValue && file_from_server && !isMultiple">
-          <file :file="field.value" :field="key" :model="model"></file>
+        <span v-if="getValueOrDefault && !hasMultipleFilesValue && file_from_server && !isMultiple">
+          <file :file="getValueOrDefault" :field="key" :model="model"></file>
         </span>
 
       </div>
@@ -88,7 +88,6 @@
       </div>
       <small>{{ field.title }}</small>
       <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+key" value="1">
-
 
       <!-- Modal for adding relation -->
       <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
@@ -441,11 +440,16 @@
               $('#' + this.getId+'_multipleFile').chosen(this.chosenOptions()).trigger("chosen:updated");
         },
         removeFile(){
-          if ( ! this.isMultiple )
-            this.field.value = null;
+          if ( ! this.isMultiple ){
+            if ( this.hasLocale )
+              this.field.value[this.langslug] = null;
+            else
+              this.field.value = null;
+          }
 
           this.file_will_remove = true;
           this.file_from_server = true;
+
           $('#'+this.getId).val('');
         },
         addFile(e){
@@ -814,7 +818,7 @@
           return $.isArray(this.field.value);
         },
         getFiles(){
-          var value = this.field.value;
+          var value = this.getValueOrDefault;
 
           if ( ! value )
             return [];

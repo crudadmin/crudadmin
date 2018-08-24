@@ -82,7 +82,7 @@ trait Validation {
                 }
             }
 
-             if ( $this->hasFieldParam($key, 'locale') )
+             if ( $has_locale = $this->hasFieldParam($key, 'locale') )
              {
                 if ( $default_language )
                     $key = $key . '.' . $default_language->slug;
@@ -97,11 +97,30 @@ trait Validation {
             }
 
             //If is existing row an required image already exists
-            if ( $row && !empty($row[$orig_key]) && $this->hasFieldParam($orig_key, 'required') )
+            if ( $row && !empty($row[$orig_key]) && $this->hasFieldParam($orig_key, 'required') ){
                 $field['required'] = false;
+            }
 
             //Removes admin properties in field from request
             $data[$key] = $this->removeAdminProperties($field);
+
+            //If field has locales, then clone rules for specific locale
+            if ( $has_locale )
+            {
+                foreach (Localization::getLanguages() as $lang)
+                {
+                    if ( $lang->getKey() != $default_language->getKey() )
+                    {
+                        $lang_rules = array_unique(array_merge($data[$key], ['nullable']));
+
+                        //Remove required rule for other languages
+                        if ( ($k = array_search('required', $data)) !== false )
+                            unset($lang_rules[$k]);
+
+                        $data[$orig_key.'.'.$lang->slug] = $lang_rules;
+                    }
+                }
+            }
         }
 
         return $data;

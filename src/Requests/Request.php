@@ -2,11 +2,12 @@
 
 namespace Gogol\Admin\Requests;
 
+use Illuminate\Foundation\Http\FormRequest;
+use Carbon\Carbon;
+use Localization;
 use File;
 use Image;
 use Admin;
-use Illuminate\Foundation\Http\FormRequest;
-use Carbon\Carbon;
 
 abstract class Request extends FormRequest
 {
@@ -76,51 +77,74 @@ abstract class Request extends FormRequest
      */
     public function uploadFiles(array $fields = null )
     {
-        foreach ($fields as $key => $field)
+        foreach ($fields as $orig_key => $field)
         {
             if ( $field['type'] == 'file' )
             {
-                //If is File field empty, then remove this field for correct updating row in db
-                if ( $this->isEmptyFile( $key ) )
+                $has_locale = $this->model->hasFieldParam($orig_key, 'locale', true);
+
+                $languages = $has_locale ? Localization::getLanguages()->pluck('slug', 'id') : [ 0 ];
+
+                foreach ($languages as $lang_id => $lang_slug)
                 {
-                    $this->replace( $this->except( $key ) );
-                } else if ( $this->isFileUpload( $key ) ) {
-                    foreach ($this->getFilesInArray($key) as $file)
+                    $key = $has_locale ? $orig_key . '.' . $lang_slug : $orig_key;
+
+                    //If is File field empty, then remove this field for correct updating row in db
+                    if ( $this->isEmptyFile( $key ) )
                     {
-                        //Checks for upload errors
-                        if ( $fileObject = $this->model->upload($key, $file) )
-                        {
-                            $this->uploadedFiles[$key][] = $fileObject->filename;
-                        } else {
-                            Admin::push('errors.request', $this->errors[ $key ] = $this->model->getUploadError());
-                        }
-
-                        //If is not multiple upload
-                        if ( ! $this->model->hasFieldParam($key, 'array', true) )
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                /*
-                 * Get already uploaded files
-                 */
-                if ( Admin::isAdmin() && $this->model->hasFieldParam($key, 'multiple', true) )
-                {
-                    if ( $this->has('$uploaded_'.$key) )
-                    {
-                        $uploadedFiles = $this->get('$uploaded_'.$key);
-
-                        $fromBuffer = array_key_exists($key, $this->uploadedFiles) ? $this->uploadedFiles[$key] : [];
-
-                        $this->uploadedFiles[$key] = array_merge($uploadedFiles, $fromBuffer);
+                        $this->replace( $this->except( $key ) );
                     }
 
-                    //If is multiple file, and 0 files has been send into this field
-                    else if ( ! array_key_exists($key, $this->uploadedFiles) )
+                    else if ( $this->isFileUpload( $key ) ) {
+                        foreach ($this->getFilesInArray($key) as $file)
+                        {
+                            //Checks for upload errors
+                            if ( $fileObject = $this->model->upload($orig_key, $file) )
+                            {
+                                $this->uploadedFiles[$orig_key][$lang_slug][] = $fileObject->filename;
+                            } else {
+                                Admin::push('errors.request', $this->errors[ $key ] = $this->model->getUploadError());
+                            }
+
+                            //If is not multiple upload
+                            if ( ! $this->model->hasFieldParam($orig_key, 'array', true) )
+                                break;
+                        }
+                    }
+
+                    /*
+                     * Get already uploaded files
+                     */
+                    if ( Admin::isAdmin() && (($is_multiple = $this->model->hasFieldParam($orig_key, 'multiple', true)) || $has_locale) )
                     {
-                        $this->resetValuesInFields[] = $key;
+                        if ( $this->has('$uploaded_'.$orig_key) )
+                        {
+                            $uploadedFiles = $this->get('$uploaded_'.$orig_key);
+
+                            $is_uploaded = array_key_exists($lang_slug, $uploadedFiles);
+
+                            $now_uploaded = (array_key_exists($orig_key, $this->uploadedFiles))
+                                            && ($has_locale ? array_key_exists($lang_slug, $this->uploadedFiles[$orig_key]) : true);
+
+                            //If files
+                            if ( $has_locale && ($now_uploaded || !$is_uploaded) && ! $is_multiple ){
+                                continue;
+                            }
+
+                            //Get files from actual language
+                            if ( $has_locale )
+                                $uploadedFiles = $uploadedFiles[$lang_slug];
+
+                            $fromBuffer = $now_uploaded ? $this->uploadedFiles[$orig_key][$lang_slug] : [];
+
+                            $this->uploadedFiles[$orig_key][$lang_slug] = array_merge($uploadedFiles, $fromBuffer);
+                        }
+
+                        //If is multiple file, and 0 files has been send into this field
+                        else if ( ! array_key_exists($orig_key, $this->uploadedFiles) )
+                        {
+                            $this->resetValuesInFields[$lang_slug] = $orig_key;
+                        }
                     }
                 }
             }
@@ -286,35 +310,50 @@ abstract class Request extends FormRequest
         //Bing multiple files values as multiple rows
         foreach ((array)$this->uploadedFiles as $key => $files)
         {
-            $count = count($files);
+            $has_locale = $this->model->hasFieldParam($key, 'locale', true);
 
-            if ( $count == 1 )
+            $languages = $has_locale ? Localization::getLanguages()->pluck('slug', 'id') : [ 0 ];
+
+            foreach ($languages as $lang_key => $lang_slug)
             {
-                $data[$key] = $files[0];
-            } else if ( $count > 1 ) {
+                //If file has not been uploaded in locale field
+                if ( $has_locale && ! array_key_exists($lang_slug, $files) )
+                    continue;
 
-                //Returns one file as one db row
-                if ( $this->model->hasFieldParam($key, 'multirows', true) )
+                //Check if is multiple or signle upload
+                $count = count($files[$lang_slug]);
+
+                if ( $count == 1 )
                 {
-                    if ( $this->model->exists === false )
+                    if ( $has_locale )
+                        $data[$key][$lang_slug] = $files[$lang_slug][0];
+                    else
+                        $data[$key] = $files[$lang_slug][0];
+                } else if ( $count > 1 ) {
+
+                    //Returns one file as one db row
+                    if ( $this->model->hasFieldParam($key, 'multirows', true) )
                     {
-                        foreach ($files as $file)
+                        if ( $this->model->exists === false )
                         {
-                            $data[$key] = $file;
+                            foreach ($files as $file)
+                            {
+                                $data[$key] = $file;
 
-                            $array[] = $data;
+                                $array[] = $data;
+                            }
+
+                            return $this->mutateRowDataRule($array);
+                        } else {
+                            $data[$key] = end($files);
                         }
-
-                        return $this->mutateRowDataRule($array);
-                    } else {
-                        $data[$key] = end($files);
                     }
-                }
 
-                //Bind files into file value
-                else if ( $this->model->hasFieldParam($key, 'multiple', true) )
-                {
-                    $data[$key] = $files;
+                    //Bind files into file value
+                    else if ( $this->model->hasFieldParam($key, 'multiple', true) )
+                    {
+                        $data[$key] = $files;
+                    }
                 }
             }
         }

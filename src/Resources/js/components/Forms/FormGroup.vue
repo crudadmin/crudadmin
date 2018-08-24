@@ -16,7 +16,13 @@
               </div>
 
                 <div v-for="(index, item) in group.fields">
-                    <div :data-field="item" v-if="isField(item) && canShowField(model.fields[item])" v-for="langslug in getFieldLangs(model.fields[item])" v-show="canShowLanguageField(this.model.fields[item], langslug, inputlang)" class="col-lg-12 field-wrapper">
+                    <div
+                      :data-field="item"
+                      :data-lang="langslug"
+                      v-if="isField(item) && canShowField(model.fields[item])"
+                      v-for="langslug in getFieldLangs(model.fields[item])"
+                      v-show="canShowLanguageField(this.model.fields[item], langslug, inputlang)"
+                      class="col-lg-12 field-wrapper">
                         <form-input-builder
                           :history="history"
                           :model="model"

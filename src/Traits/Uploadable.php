@@ -248,7 +248,7 @@ trait Uploadable
     /*
      * Remove all uploaded files in existing field attribute
      */
-    public function deleteFiles($key)
+    public function deleteFiles($key, $new_files = null)
     {
         //Remove fixed thumbnails
         if ( ($file = $this->getValue($key)) && ! $this->hasFieldParam($key, 'multiple', true) )
@@ -274,9 +274,12 @@ trait Uploadable
                 }
 
                 $cache_path = AdminFile::adminModelCachePath($this->getTable() . '/' . $key );
+                $need_delete = $new_files === null
+                               || is_array($new_files) && ! in_array($file->filename, array_flatten($new_files))
+                               || is_string($new_files) && $file->filename != $new_files;
 
                 //Remove dynamicaly cached thumbnails
-                if ( file_exists($cache_path) )
+                if ( file_exists($cache_path) && $need_delete )
                 {
                     foreach ((array)scandir($cache_path) as $dir)
                     {
@@ -293,7 +296,7 @@ trait Uploadable
                 }
 
                 //Removing original files
-                if ( $is_allowed_deleting )
+                if ( $need_delete && $is_allowed_deleting )
                 {
                     $file->delete();
                 }

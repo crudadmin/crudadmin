@@ -276,7 +276,7 @@ class DataController extends Controller
         {
             if ( $model->isFieldType($key, 'file') && !$model->hasFieldParam($key, 'multiple', false) )
             {
-                $model->deleteFiles($key);
+                $model->deleteFiles($key, $changes[$key]);
             }
         }
     }

@@ -493,22 +493,25 @@
         });
       },
       colorizeLangDropdown(input){
-        var field_key = input.parents('.field-wrapper').attr('data-field');
+        var field_wrapper = input.parents('.field-wrapper'),
+            field_key = field_wrapper.attr('data-field'),
+            field_lang = field_wrapper.attr('data-lang');
 
         if ( ! field_key )
           return;
 
         var field = this.model.fields[field_key];
 
-        if ( field.locale != true || this.languages[0].id == this.selectedLanguage.id )
+        if ( field.locale != true || field_lang == this.selectedLanguage.slug )
           return;
 
         var dropdown = this.form.find('.multi-languages .dropdown-toggle');
 
         dropdown.addClass('has-error');
-        dropdown.next().find('li[data-slug="'+this.languages[0].slug+'"]').addClass('has-error');
+        dropdown.next().find('li[data-slug="'+field_lang+'"]').addClass('has-error');
 
-        this.$root.openAlert(this.trans('warning'), this.trans('lang-error'), 'warning');
+        if ( field_lang == this.languages[0].slug )
+          this.$root.openAlert(this.trans('warning'), this.trans('lang-error'), 'warning');
       },
       scrollToForm(){
         setTimeout(function(){
