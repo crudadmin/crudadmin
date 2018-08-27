@@ -96,8 +96,11 @@ trait Validation {
                     $key = $orig_key . '.*';
             }
 
-            //Add multiple validation support
-            if ( $is_multiple = $this->hasFieldParam($orig_key, 'array', true) )
+            //Add multiple validation support for files
+            if (
+                $is_multiple = $this->hasFieldParam($orig_key, 'array', true)
+                && $this->isFieldType($key, 'file')
+            )
                 $key = $key . '.*';
 
             //If field is not required
