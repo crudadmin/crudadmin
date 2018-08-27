@@ -139,8 +139,8 @@ class Controller extends BaseController
         foreach ($rules as $validation_key => $data)
         {
             //If is multirows with editing
-            if ( isset($row)
-                && ($replaced_key = $this->getDefaultKey($validation_key))
+            if ( ($replaced_key = $this->getDefaultKey($validation_key))
+                && isset($row)
                 && $model->hasFieldParam($replaced_key, ['multirows'])
             ) {
                 $key = $replaced_key;
