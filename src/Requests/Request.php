@@ -196,6 +196,23 @@ abstract class Request extends FormRequest
         }
     }
 
+    /*
+     * Return binded multilocale json values
+     */
+    private function getCheckboxNullValue($key)
+    {
+        $languages = Localization::getLanguages();
+
+        $data = [];
+
+        foreach ($languages as $language)
+        {
+            $data[$language->slug] = $this->has( $key . '.' . $language->slug ) ? 1 : 0;
+        }
+
+        return $data;
+    }
+
     //If is no value for checkbox, then automaticaly add zero value
     public function checkboxes(array $fields = null)
     {
@@ -203,8 +220,14 @@ abstract class Request extends FormRequest
         {
             if ( $this->model->isFieldType($key, 'checkbox') )
             {
-                if ( ! $this->has( $key ) )
-                    $this->merge( [ $key => 0 ] );
+                $has_locale = $this->model->hasFieldParam($key, 'locale');
+
+                $default_value = $has_locale
+                        ? $this->getCheckboxNullValue($key)
+                        : 0;
+
+                if ( ! $this->has( $key ) || $has_locale )
+                    $this->merge( [ $key => $default_value ] );
             }
         }
     }
