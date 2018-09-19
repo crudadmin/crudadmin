@@ -1,4 +1,5 @@
-var elixir = require('laravel-elixir');
+var elixir = require('laravel-elixir'),
+    gulp = require('gulp');
 
 //Elixir ueify
 require('laravel-elixir-vueify');
@@ -8,11 +9,14 @@ var config = require('./config.js');
 
 //Gulp watch for browserify
 elixir.config.js.browserify.watchify.options.poll = true;
-elixir.config.production = config.paths.length == 0;
+
+//Set production for no config paths
+if ( elixir.config.production === false && config.paths.length == 0 )
+    elixir.config.production = true;
 
 elixir(function(mix) {
 
-    if ( config.paths.length == 0 )
+    if ( elixir.config.production === true )
     {
         mix.browserify('src/Resources/js/main.js', 'src/Resources/admin/js', './')
     } else {
