@@ -2,21 +2,21 @@
 
 namespace DummyNamespace;
 
-class DummyLayout
+use \Gogol\Admin\Helpers\Layout;
+
+class DummyLayout extends Layout
 {
     /*
      * Layout position
-     * top/bottom
+     * top/bottom/form-top/form-bottom
      */
-    public $position = 'top';
+    public $position = 'form-top';
 
     /*
      * On build blade layour
      */
     public function build()
     {
-        //...
-
-        return view('admin.DummyBladeLayout');
+        return DummyResponse;
     }
 }

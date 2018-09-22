@@ -8,6 +8,13 @@
         <button v-if="isOpenedRow && canShowGettext" @click="openGettextEditor()" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-globe"></i> {{ trans('gettext-open') }}</button>
         <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
 
+        <component
+          v-for="name in getComponents('form-header')"
+          :model="model"
+          :row="row"
+          :is="name">
+        </component>
+
         <div class="dropdown pull-right multi-languages" v-if="hasLocalFields">
           <button class="btn btn-default dropdown-toggle" type="button" id="languageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i class="fa fa-globe"></i> <span class="text">{{ selectedLanguage.name }}</span>
@@ -21,6 +28,13 @@
       </div>
 
       <div class="box-body" :class="{ cantadd : !cansave }">
+        <component
+          v-for="name in getComponents('form-top')"
+          :model="model"
+          :row="row"
+          :is="name">
+        </component>
+
         <form-tabs-builder
           :model="model"
           :childs="true"
@@ -31,9 +45,23 @@
           :hasparentmodel="hasparentmodel"
           :history="history">
         </form-tabs-builder>
+
+        <component
+          v-for="name in getComponents('form-bottom')"
+          :model="model"
+          :row="row"
+          :is="name">
+        </component>
       </div>
 
       <div class="box-footer" v-if="canUpdateForm">
+        <component
+          v-for="name in getComponents('form-footer')"
+          :model="model"
+          :row="row"
+          :is="name">
+        </component>
+
         <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
         <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? saveButton : sendButton }}</button>
       </div>
@@ -164,6 +192,9 @@
     },
 
     methods: {
+      getComponents(type){
+        return this.$parent.getComponents(type);
+      },
       resetForm(){
         this.$parent.resetForm();
       },

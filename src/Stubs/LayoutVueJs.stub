@@ -1,0 +1,36 @@
+<template>
+    <div>
+        <h2>This is my vue template component</h2>
+    </div>
+</template>
+
+<script type="text/javascript">
+export default {
+    props : ['model', 'row'],
+
+    data(){
+        return {
+
+        }
+    },
+
+    ready(){
+        console.log('Your own layout is ready!!', this.key, this.row, this.field);
+
+        /*
+         * You can watch actual field value, or other form fields in row variable
+         */
+        this.$watch('row.' + this.key, function(value){
+            console.log(value);
+        });
+    },
+
+    computed : {
+
+    },
+
+    methods : {
+
+    }
+}
+</script>

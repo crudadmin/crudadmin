@@ -31,6 +31,8 @@ class AdminLayoutCommand extends GeneratorCommand
      */
     protected $type = 'Admin layout';
 
+    protected $template_type = null;
+
     /**
      * Create a new command instance.
      *
@@ -48,6 +50,8 @@ class AdminLayoutCommand extends GeneratorCommand
      */
     public function handle()
     {
+        $this->template_type = $this->choice('What type of component would you like?', ['vuejs', 'blade'], 0);
+
         $this->copyBladeLayout();
 
         //Laravel 5.4 support
@@ -61,13 +65,13 @@ class AdminLayoutCommand extends GeneratorCommand
     {
         $directory = resource_path('views/admin/');
 
-        $path = $directory . $this->getLayoutName() . '.blade.php';
+        $path = $directory . $this->getLayoutName() . ($this->template_type == 'blade' ? '.blade.php' : '.vue');
 
         File::makeDirs($directory);
 
         if ( ! file_exists($path) )
         {
-            $this->files->copy($this->getBladeStub(), $path);
+            $this->files->copy($this->getTemplateStub(), $path);
         }
     }
 
@@ -86,8 +90,11 @@ class AdminLayoutCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getBladeStub()
+    protected function getTemplateStub()
     {
+        if ( $this->template_type == 'vuejs' )
+            return __DIR__.'/../Stubs/LayoutVueJs.stub';
+
         return __DIR__.'/../Stubs/LayoutBlade.stub';
     }
 
@@ -109,7 +116,7 @@ class AdminLayoutCommand extends GeneratorCommand
         );
 
         $stub = str_replace(
-            'DummyBladeLayout', $this->getLayoutName(), $stub
+            'DummyResponse', $this->getLayoutResponse(), $stub
         );
 
         return $this;
@@ -135,6 +142,14 @@ class AdminLayoutCommand extends GeneratorCommand
         $name = $this->getNameInput();
 
         return strtolower($name[0]) . substr($name, 1);
+    }
+
+    protected function getLayoutResponse()
+    {
+        if ( $this->template_type == 'blade' )
+            return "view('admin.".$this->getLayoutName()."')";
+
+        return '$this->renderVueJs(\'admin/'.$this->getLayoutName().'.vue\')';
     }
 
     /**

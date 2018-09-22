@@ -329,11 +329,17 @@ class AdminRows
         {
             $layout = new $class;
 
-            if ( ($view = $layout->build()) instanceof \Illuminate\View\View )
+            $view = $layout->build();
+
+            if ( is_string($view) || $view instanceof \Illuminate\View\View )
             {
+                $is_blade = method_exists($view, 'render');
+
                 $layouts[] = [
+                    'name' => class_basename($class),
+                    'type' => $is_blade ? 'blade' : 'vuejs',
                     'position' => $layout->position,
-                    'view' => $view->render(),
+                    'view' => $is_blade ? $view->render() : $view,
                 ];
             }
         }

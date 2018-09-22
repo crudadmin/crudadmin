@@ -1,8 +1,11 @@
 <template>
   <!-- Additional top layouts -->
-  <div v-for="layout in layouts | positionLayout 'top'">
-    {{{ layout.view }}}
-  </div>
+  <component
+    v-for="name in getComponents('top')"
+    :model="model"
+    :row="row"
+    :is="name">
+  </component>
 
   <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
@@ -115,10 +118,12 @@
     </div>
   </div>
 
-  <!-- Additional bottom layouts -->
-  <div v-for="layout in layouts | positionLayout 'bottom'">
-    {{{ layout.view }}}
-  </div>
+  <component
+    v-for="name in getComponents('bottom')"
+    :model="model"
+    :row="row"
+    :is="name">
+  </component>
 
   <gettext-extension v-if="gettext_editor" :gettext_editor.sync="gettext_editor"></gettext-extension>
 </template>
@@ -183,7 +188,7 @@
 
         //Additional layouts/components for model
         layouts : [],
-        components : [],
+        registered_components : [],
 
         language_id : null,
         selected_language_id : null,
@@ -266,37 +271,20 @@
           }
         }
       },
+      /*
+       * Register all layout components
+       */
       layouts(layouts){
         var Vue = this;
-
-        /*
-         * Run all inline javascripts
-         */
         for ( var key in layouts )
         {
           var layout = layouts[key];
 
-          $('<div>'+layout.view+'</div>').find('script').each(function(){
-            //Run external js
-            if ( $(this).attr('src') ){
-              var js = document.createElement('script');
-                  js.src = $(this).attr('src');
-                  js.type = 'text/javascript';
+          this.registerComponents(layouts);
 
-              $('body').append(js);
-            }
-
-            //Run inline javascripts
-            else {
-              try {
-                var func = new Function($(this).html());
-
-                func.call(Vue);
-              } catch(e){
-                console.error(e);
-              }
-            }
-          });
+          if ( layout.type == 'blade' ){
+            this.runInlineScripts(layout);
+          }
         }
       }
     },
@@ -309,14 +297,6 @@
         return this.$root.languageOptions(array, field);
       },
 
-      /*
-       * Return layouts for correct position
-       */
-      positionLayout(array, position){
-        return array.filter(function(row){
-          return row.position == position;
-        })
-      }
     },
 
     events : {
@@ -343,6 +323,68 @@
     },
 
     methods : {
+      runInlineScripts(layout){
+        $('<div>'+layout.view+'</div>').find('script').each(function(){
+          //Run external js
+          if ( $(this).attr('src') ){
+            var js = document.createElement('script');
+                js.src = $(this).attr('src');
+                js.type = 'text/javascript';
+
+            $('body').append(js);
+          }
+
+          //Run inline javascripts
+          else {
+            try {
+              var func = new Function($(this).html());
+
+              func.call(Vue);
+            } catch(e){
+              console.error(e);
+            }
+          }
+        });
+      },
+      getComponents(type){
+        return this.layouts.filter(item => {
+          if ( this.registered_components.indexOf(item.name) === -1 )
+            return false;
+
+          return item.position == type;
+        }).map(item => {
+          return this.getComponentName(item.name);
+        });
+      },
+      registerComponents(layouts){
+        for ( var i = 0; i < layouts.length; i++ )
+        {
+          var name = layouts[i].name,
+              data = layouts[i].view,
+              obj;
+
+          if ( layouts[i].type == 'vuejs' )
+          {
+            try {
+                obj = (new Function('return '+data))();
+            } catch(error){
+                console.error('Syntax error in component ' + components[i] + '.Vue' + "\n", error);
+                continue;
+            }
+          } else {
+            obj = {
+              template: '<div class="my-component" data-component="'+name+'">'+data+'</div>',
+            };
+          }
+
+          this.registered_components.push(name);
+
+          Vue.component(this.getComponentName(name), obj);
+        }
+      },
+      getComponentName(name){
+        return 'custom-component-' + name;
+      },
       /*
        * Send into parent model all actual row and data changes
        */
