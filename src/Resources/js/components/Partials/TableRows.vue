@@ -229,12 +229,14 @@
           return false;
         },
         buttonsCount(item){
-          var buttons = this.getButtonsForRow(item);
+          var buttons = this.getButtonsForRow(item),
+              additional = 0;
 
-          if ( ! buttons )
-            buttons = { length : 0 };
+          additional += this.isEnabledHistory ? 1 : 0;
+          additional += this.canShowGettext ? 1 : 0;
+          additional -= !this.model.publishable ? 1 : 0;
 
-          return buttons.length + (this.isEnabledHistory ? 1 : 0) + (this.canShowGettext ? 1 : 0);
+          return Object.keys(buttons||{}).length + additional;
         },
         getButtonsForRow(item){
           if ( ! this.rows.buttons )
