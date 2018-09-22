@@ -243,6 +243,9 @@
             _model : this.model.slug,
         };
 
+        //Data at the end of request
+        var additional_data = {};
+
         //Check if form belongs to other form
         if ( this.model.foreign_column != null && this.$parent.parentrow )
           data[this.model.foreign_column[this.$parent.getParentTableName()]] = this.$parent.parentrow.id;
@@ -259,7 +262,7 @@
 
           //Push saved childs without actual parent row
           if ( this.hasParentModel() && this.$parent.rows.save_children.length > 0 )
-            data['_save_children'] = this.$parent.rows.save_children;
+            additional_data['_save_children'] = this.$parent.rows.save_children;
         }
 
         this.resetErrors();
@@ -283,7 +286,13 @@
 
           url : this.$root.requests[action],
 
-          data : data,
+          data : additional_data,
+
+          //Add additional data into top of request, because of correct order in relations setters in laravel
+          beforeSubmit(arr, $form, options) {
+            for ( var key in data )
+              arr.unshift({ name : key, value : data[key] });
+          },
 
           success(data){
 

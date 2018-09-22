@@ -1,5 +1,5 @@
 <template>
-<div class="fields-group" v-bind:class="getGroupClass(group)" :data-fields="group.fields.length">
+<div class="fields-group" v-bind:class="getGroupClass(group)" :data-fields="visibleFields.length">
     <div :class="{ 'nav-tabs-custom' : canShowGroupName(group) }">
         <h4 v-if="canShowGroupName(group)"><i v-if="group.icon" :class="['fa', group.icon]"></i> {{{ group.name }}}</h4>
 
@@ -76,6 +76,18 @@ export default {
         }.bind(this));
 
         return tabs;
+      },
+    },
+
+    computed: {
+      visibleFields(){
+        var fields = this.group.fields.filter(item => {
+          var field = this.model.fields[item];
+
+          return typeof item !== 'string' || !(field.invisible||field.removeFromForm);
+        });
+
+        return fields;
       },
     },
 
