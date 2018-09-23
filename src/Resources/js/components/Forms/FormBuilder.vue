@@ -12,6 +12,7 @@
           v-for="name in getComponents('form-header')"
           :model="model"
           :row="row"
+          :rows="rows.data"
           :is="name">
         </component>
 
@@ -32,6 +33,7 @@
           v-for="name in getComponents('form-top')"
           :model="model"
           :row="row"
+          :rows="rows.data"
           :is="name">
         </component>
 
@@ -50,6 +52,7 @@
           v-for="name in getComponents('form-bottom')"
           :model="model"
           :row="row"
+          :rows="rows.data"
           :is="name">
         </component>
       </div>
@@ -59,6 +62,7 @@
           v-for="name in getComponents('form-footer')"
           :model="model"
           :row="row"
+          :rows="rows.data"
           :is="name">
         </component>
 

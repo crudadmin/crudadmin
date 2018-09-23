@@ -20,6 +20,14 @@
           <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
         </ul>
       </div>
+
+      <component
+        v-for="name in getComponents('table-header')"
+        :model="model"
+        :row="row"
+        :rows="rows.data"
+        :is="name">
+      </component>
     </div>
 
     <div class="box-body box-table-body">
@@ -39,8 +47,16 @@
       </table-row>
     </div>
 
-    <div class="box-footer" v-if="isPaginationEnabled && rows.count>pagination.limit">
-      <ul class="pagination pagination-sm no-margin pull-right">
+    <div class="box-footer" v-if="isPaginationEnabled && rows.count>pagination.limit || getComponents('table-footer').length > 0">
+      <component
+        v-for="name in getComponents('table-footer')"
+        :model="model"
+        :row="row"
+        :rows="rows.data"
+        :is="name">
+      </component>
+
+      <ul v-if="isPaginationEnabled && rows.count>pagination.limit" class="pagination pagination-sm no-margin pull-right">
         <li v-if="pagination.position>1"><a v-on:click.prevent="setPosition(pagination.position - 1)" href="#">«</a></li>
         <li v-bind:class="{ active : pagination.position == i + 1 }" v-if="showLimit(i)" v-for="i in Math.ceil(rows.count / pagination.limit)"><a href="#" @click.prevent="setPosition(i + 1)">{{ i + 1 }}</a></li>
         <li v-if="pagination.position<rows.count/pagination.limit"><a v-on:click.prevent="setPosition(pagination.position + 1)" href="#">»</a></li>
@@ -237,12 +253,16 @@
         return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false && !this.iswithoutparent;
       },
       rowsData(){
+        var field = this.orderBy[0];
+
+        //If is date field, then receive correct date format of this field
+        if ( this.isDateValue( field ) && field in this.model.fields )
+          var format = this.$root.fromPHPFormatToMoment(this.model.fields[field].date_format);
+
         return this.rows.data.slice(0).sort(function(a, b){
           //If is null value
           if ( ! a || ! b )
             return false;
-
-          var field = this.orderBy[0];
 
           //Support for booleans
           if ( a[ field ] === true || a[ field ] === false )
@@ -261,7 +281,22 @@
               return b - a;
 
             return a - b;
-          } else {
+          }
+
+          else if ( this.isDateValue( field ) && format ){
+            var c = moment(a, format),
+                d = moment(b, format);
+
+            if ( !c.isValid() || !d.isValid() )
+              return 0;
+
+            if ( this.orderBy[1] == 1 )
+              return d - c;
+
+            return c - d;
+          }
+
+          else {
             if ( this.orderBy[1] == 1 )
               return b.toLowerCase().localeCompare(a.toLowerCase(), 'sk');
 
@@ -281,6 +316,9 @@
     },
 
     methods: {
+      getComponents(type){
+        return this.$parent.getComponents(type);
+      },
       columnName(key, name){
         return this.$parent.getSearchingColumnName(key);
       },
@@ -471,6 +509,15 @@
           return true;
 
         if ( key in this.model.fields && ['integer', 'decimal', 'checkbox'].indexOf( this.model.fields[ key ].type ) > -1 )
+          return true;
+
+        return false;
+      },
+      isDateValue(key){
+        if ( ['created_at', 'published_at', 'updated_at'].indexOf( key ) > -1)
+          return true;
+
+        if ( key in this.model.fields && ['date', 'datetime'].indexOf( this.model.fields[ key ].type ) > -1 )
           return true;
 
         return false;

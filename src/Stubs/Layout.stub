@@ -8,7 +8,7 @@ class DummyLayout extends Layout
 {
     /*
      * Layout position
-     * top/bottom/form-top/form-bottom
+     * top/bottom/form-top/form-bottom/form-header/form-footer/table-header/table-footer
      */
     public $position = 'form-top';
 

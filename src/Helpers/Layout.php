@@ -12,11 +12,18 @@ class Layout
      * Position of layour
      * top - before content table
      * bottom - after content table
-     * form-top - start of form
-     * form-bottom - end of form
+     * form-top - start of the form
+     * form-bottom - end of the form
+     * form-header - header of the form
+     * form-footer - footer of the form
+     * table-header - header of the table
+     * table-footer - footer of the table
      */
     public $position = 'top';
 
+    /*
+     * Parse vuejs template
+     */
     public function renderVueJs($template)
     {
         $path = resource_path('views/'.$template);

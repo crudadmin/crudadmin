@@ -4,6 +4,7 @@
     v-for="name in getComponents('top')"
     :model="model"
     :row="row"
+    :rows="rows.data"
     :is="name">
   </component>
 
@@ -122,6 +123,7 @@
     v-for="name in getComponents('bottom')"
     :model="model"
     :row="row"
+    :rows="rows.data"
     :is="name">
   </component>
 
@@ -383,7 +385,7 @@
         }
       },
       getComponentName(name){
-        return 'custom-component-' + name;
+        return name + 'Layout';
       },
       /*
        * Send into parent model all actual row and data changes
