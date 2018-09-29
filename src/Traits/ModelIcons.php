@@ -79,6 +79,7 @@ trait ModelIcons
             'stopwatch' => 'fa-clock-o',
             'watch' => 'fa-clock-o',
             'contract' => 'fa-file-text-o',
+            'place' => 'fa-map-marker',
         ];
     }
 
