@@ -485,7 +485,7 @@ class AdminMigrationCommand extends Command
         $prefix = $languages->first()->slug;
 
         $model->getConnection()->table( $model->getTable() )->whereRaw('NOT JSON_VALID('.$key.')')->update([
-            $key => DB::raw( 'CONCAT("{\"'.$prefix.'\": \"", '.$key.', "\"}")' )
+            $key => DB::raw( 'CONCAT("{\"'.$prefix.'\": \"", REPLACE(REPLACE(REPLACE('.$key.', \'"\', \'\\\\"\'), \'\r\', \'\'), \'\n\', \'\'), "\"}")' )
         ]);
     }
 
