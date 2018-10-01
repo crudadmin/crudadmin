@@ -61,7 +61,8 @@
     data(){
       return {
         //Which child models has been loaded
-        loaded_models : [],
+        models_loaded : [],
+        models_data : {},
 
         activetab : 0,
       };
@@ -78,7 +79,11 @@
       this.$watch('row.id', function(){
         this.activetab = 0;
 
-        this.loaded_models = [];
+        this.models_loaded = [];
+      });
+
+      this.$on('rows-changed', function(item){
+        this.$set('models_data.'+item.slug, item);
       });
     },
 
@@ -175,7 +180,13 @@
        */
       getTabName(tab){
         if ( this.isModel(tab) )
-          return tab.name||this.getModel(tab.model).name;
+        {
+          var model = this.getModel(tab.model),
+              name = tab.name||model.name,
+              data = this.models_data[model.slug];
+
+          return name + ' (' + (data ? parseInt(data.count||0) : '0') + ')';
+        }
 
         return tab.name;
       },
@@ -279,10 +290,10 @@
         return items;
       },
       isLoadedModel(model, active){
-        if ( active === true && this.loaded_models.indexOf(model.slug) === -1 )
-          this.loaded_models.push(model.slug);
+        if ( active === true && this.models_loaded.indexOf(model.slug) === -1 )
+          this.models_loaded.push(model.slug);
 
-        return this.loaded_models.indexOf(model.slug) > -1;
+        return this.models_loaded.indexOf(model.slug) > -1;
       }
     }
   }

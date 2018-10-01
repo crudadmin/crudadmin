@@ -396,12 +396,15 @@
         });
       },
       sendRowsData(){
-        this.$broadcast('rows-changed', {
-            slug : this.model.slug,
-            model : this.model,
-            rows : this.rows.data,
-            count : this.rows.count,
-          }, true);
+        var data = {
+          slug : this.model.slug,
+          model : this.model,
+          rows : this.rows.data,
+          count : this.rows.count,
+        };
+
+        this.$broadcast('rows-changed', data, true);
+        this.$dispatch('rows-changed', data, true);
       },
       resetSearchBar(){
         //On change column reset input

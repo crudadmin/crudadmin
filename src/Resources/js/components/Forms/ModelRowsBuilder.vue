@@ -337,7 +337,7 @@
       reloadRows(){
         this.row = {};
         this.rows.data = [];
-        this.rows.count = [];
+        this.rows.count = 0;
         this.rows.save_children = [];
 
         this.loadRows();
