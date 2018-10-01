@@ -137,6 +137,9 @@ class Admin
     public function addModelPath($namespace, $path)
     {
         $this->model_paths[$path] = $namespace;
+
+        //Load admin models again
+        $this->boot(true);
     }
 
     /*
@@ -297,10 +300,10 @@ class Admin
         }
     }
 
-    public function getAdminModelsPaths()
+    public function getAdminModelsPaths($force = false)
     {
         //Checks if is namespaces into buffer
-        if ( count( $this->get('namespaces', []) ) > 0 )
+        if ( $force === false && count( $this->get('namespaces', []) ) > 0 )
             return $this->get( 'namespaces' );
 
         $files = $this->getModelFiles();
@@ -467,9 +470,9 @@ class Admin
     /*
      * Force boot admin models
      */
-    public function boot()
+    public function boot($force = false)
     {
-        $this->getAdminModelsPaths();
+        $this->getAdminModelsPaths($force);
 
         return true;
     }
