@@ -22,6 +22,7 @@ return [
     'languages-po-name' => 'Preklad .po súboru pre poedit',
     'languages-mo-name' => 'Preklad .mo súboru pre poedit',
     'languages' => 'Jazyková mutácia',
+    'languages-missing' => 'V administrácii sa nenachádzaju žiadné jazykové mutácie, ku ktorým by mohli byť záznamy naviazané. Prosím, pridajte aspoň jeden jazyk.',
     'change-language' => 'Zmena jazykovej mutácie. Pozor! Zmena jazyka môže zahodiť Vaše aktuálne rozpísane zmeny.',
 
     'super-admin' => 'Super administrátor',

@@ -3,7 +3,7 @@
   <form method="post" action="" v-bind:id="formID" :data-form="model.slug" v-on:submit.prevent="saveForm">
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
-      <div class="box-header with-border" :class="{ visible : hasLocalFields || canShowGettext }">
+      <div class="box-header with-border" :class="{ visible : hasLocaleFields || canShowGettext }">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="isOpenedRow && canShowGettext" @click="openGettextEditor()" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-globe"></i> {{ trans('gettext-open') }}</button>
         <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
@@ -16,7 +16,7 @@
           :is="name">
         </component>
 
-        <div class="dropdown pull-right multi-languages" v-if="hasLocalFields">
+        <div class="dropdown pull-right multi-languages" v-if="hasLocaleFields && selectedLanguage">
           <button class="btn btn-default dropdown-toggle" type="button" id="languageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i class="fa fa-globe"></i> <span class="text">{{ selectedLanguage.name }}</span>
             <span class="caret"></span>
@@ -161,7 +161,7 @@
       sendButton(){
         return this.$root.getModelProperty(this.model, 'settings.buttons.create') || this.trans('send');
       },
-      hasLocalFields(){
+      hasLocaleFields(){
         for ( var key in this.model.fields )
           if ( this.model.fields[key].locale == true )
             return true;

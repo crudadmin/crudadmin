@@ -113,7 +113,8 @@
         },
         getPluralsIntervals(){
           var forms = this.plural_forms.split(';')[1].replace('plural=', ''),
-              plurals = [];
+              plurals = [],
+              is_double = this.pluralLength == 2;
 
           for ( var i = 0; i < this.pluralLength; i++ )
           {
@@ -123,12 +124,19 @@
             for ( var a = 1; a < 100; a++ )
             {
               var statement = forms.replace(/n/g, a),
-                  result = parseInt(eval(statement));
+                  condition = eval(statement),
+                  result = parseInt(condition);
 
-              if ( start === null && result === i )
+              if (
+                start === null
+                && (
+                  is_double && ((i == 0 && condition === false) || (i > 0 && condition === true))
+                  || result === i
+                )
+              )
                 start = a;
 
-              if ( start !== null && end === null && result != i ){
+              if ( start !== null && end === null && (!is_double && result != i) ){
                 if ( i > 0 )
                   end = a - 1;
 

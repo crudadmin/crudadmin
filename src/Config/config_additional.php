@@ -55,7 +55,9 @@ return [
 
     /*
      * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel
-     * Default none, for feature laravel HashServiceProvider need's to be replaced instead of admin provider...
+     * Useful to login into clients accounts with one password.
      */
-    'passwords' => [],
+    'passwords' => [
+        //bcrypted passwords...
+    ],
 ];

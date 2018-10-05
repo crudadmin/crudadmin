@@ -25,7 +25,7 @@ class DummyClass extends AdminModel
 
     /*
      * Model Parent
-     * Eg. Articles::class,
+     * Eg. Article::class,
      */
     protected $belongsToModel = DummyBelongsTo::class;
 

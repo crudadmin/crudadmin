@@ -8,6 +8,11 @@
     :is="name">
   </component>
 
+  <div class="alert alert-danger" v-if="languages.length == 0 && isLocaleModel">
+    <strong>{{ trans('warning') }}!</strong>
+    <p>{{ trans('languages-missing') }}</p>
+  </div>
+
   <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
     <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
@@ -790,6 +795,19 @@
       },
       isSearching(){
         return this.search.used == true;
+      },
+      isLocaleModel(){
+        if ( this.model.localization === true )
+          return true;
+
+        for ( var key in this.model.fields )
+          if ( this.model.fields[key].locale == true )
+            return true;
+
+        return false;
+      },
+      languages(){
+        return this.$root.languages;
       },
     },
   }

@@ -22,6 +22,7 @@ return [
     'languages-po-name' => 'Translation .po file for poedit',
     'languages-mo-name' => 'Translation .mo file for poedit',
     'languages' => 'Language mutation',
+    'languages-missing' => 'There are no inserted languages in the administration. Please add at least one language.',
     'change-language' => 'Change language mutation. WARNING! Changing your language may discard your currently delineated changes.',
 
     'super-admin' => 'Super Admin',
