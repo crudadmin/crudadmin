@@ -465,6 +465,9 @@ class Gettext
         foreach ($views_paths as $path) {
             $path = base_path( $path );
 
+            if ( ! file_exists($path) )
+                continue;
+
             foreach ($this->filesystem->allFiles( $path ) as $file)
             {
                 $modified[filemtime($file)] = (string)$file;

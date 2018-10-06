@@ -79,4 +79,20 @@ trait Gettextable
             'poedit_mo' => 'name:admin::admin.languages-mo-name|type:string|max:30|invisible',
         ]);
     }
+
+    /*
+     * Add columns
+     */
+    public function onMigrate($table, $schema)
+    {
+        if ($this->withUnpublished()->count() == 0)
+        {
+            $i = 0;
+            $languages = [];
+            $languages[] = [ 'name' => 'Slovenský', 'slug' => 'sk', '_order' => $i ];
+            $languages[] = [ 'name' => 'Anglický', 'slug' => 'en', '_order' => $i++ ];
+
+            $this->insert($languages);
+        }
+    }
 }
