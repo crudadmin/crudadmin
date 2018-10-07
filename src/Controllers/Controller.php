@@ -164,7 +164,7 @@ class Controller extends BaseController
             }
 
             //If field is required, then remove nullable rule
-            else {
+            else if ( $this->canRemoveNullable($model, $replaced_key, $key) ) {
                 $this->removeNullable($model, $replaced_key, $data);
             }
 
