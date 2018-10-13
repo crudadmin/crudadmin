@@ -13,7 +13,9 @@
       selectors = Object.keys(a.__proto__).concat(['_', 'Gettext']),
       getSelector = function(selector){
         return function(){
-          return a[(selector in a) ? selector : '__'].apply(this, arguments);
+          var s = (selector in a) ? selector : '__';
+
+          return a[s].apply(a, arguments);
         };
       };
 
