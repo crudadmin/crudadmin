@@ -69,7 +69,7 @@ class DataController extends Controller
 
         $model = $this->getModel( $model );
 
-        return $model->findOrFail($id)->getAdminAttributes();
+        return $model->findOrFail($id)->getMutatedAdminAttributes();
     }
 
     /*
@@ -81,7 +81,7 @@ class DataController extends Controller
 
         $row = $model->getHistorySnapshot($history_id, $id);
 
-        return $model->forceFill($row)->setProperty('skipBelongsToMany', true)->getAdminAttributes();
+        return $model->forceFill($row)->setProperty('skipBelongsToMany', true)->getMutatedAdminAttributes();
     }
 
     /*
@@ -138,7 +138,7 @@ class DataController extends Controller
         $message = $this->responseMessage(trans('admin::admin.success-save'));
 
         Ajax::message( $message, null, $this->responseType(), [
-            'row' => $row->getAdminAttributes(),
+            'row' => $row->getMutatedAdminAttributes(),
         ] );
     }
 
@@ -172,7 +172,7 @@ class DataController extends Controller
 
             $models[] = $row;
 
-            $rows[] = $row->getAdminAttributes();
+            $rows[] = $row->getMutatedAdminAttributes();
         }
 
         return [

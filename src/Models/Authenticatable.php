@@ -127,7 +127,9 @@ class Authenticatable extends Model implements
     {
         if ( $value && strlen($value) == 60)
             $this->attributes['password'] = $value;
-        elseif ( $value )
+        else if ( $value === null )
+            $this->attributes['password'] = null;
+        else if ( $value )
             $this->attributes['password'] = bcrypt($value);
     }
 

@@ -32,6 +32,8 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
 
         $this->app->bind('gogol::admin.component', \Gogol\Admin\Commands\AdminComponentCommand::class);
 
+        $this->app->bind('gogol::admin.queue', \Gogol\Admin\Commands\EnsureQueueListenerIsRunning::class);
+
         $this->commands([
             'gogol::admin.install',
             'gogol::admin.update',
@@ -41,6 +43,7 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
             'gogol::admin.rule',
             'gogol::admin.layout',
             'gogol::admin.component',
+            'gogol::admin.queue',
         ]);
     }
 }

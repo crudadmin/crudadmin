@@ -263,7 +263,7 @@ class AdminRows
             //Return just base fields
             $row->justBaseFields(true);
 
-            $rows[] = $row->getAdminAttributes();
+            $rows[] = $row->getMutatedAdminAttributes();
         };
 
         return $rows;

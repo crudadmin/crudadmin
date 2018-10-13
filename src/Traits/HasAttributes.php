@@ -108,4 +108,18 @@ trait HasAttributes
 
         return $attributes;
     }
+
+    /*
+     * Overide admin attributes
+     */
+    public function getMutatedAdminAttributes()
+    {
+        $attributes = $this->getAdminAttributes();
+
+        //Mutate attributes
+        if ( method_exists($this, 'setAdminAttributes') )
+            $attributes = $this->setAdminAttributes($attributes);
+
+        return $attributes;
+    }
 }
