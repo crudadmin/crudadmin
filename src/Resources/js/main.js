@@ -7,6 +7,7 @@ require('jquery-form/jquery.form.js');
 window._ = require('lodash');
 window.moment = require('moment');
 window._ = require('lodash');
+window.md5 = require('js-md5');
 
 //Uses
 Vue.use(require('vue-resource'));

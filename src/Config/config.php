@@ -8,7 +8,7 @@ return [
     /*
      * License key
      */
-    'license_key' => 'campaignunlimited2017',
+    'license_key' => 'campaign2019',
 
     /*
      * Administration groups names

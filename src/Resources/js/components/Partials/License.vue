@@ -21,7 +21,7 @@ export default {
             },
             //path of domain in reversed array of chars
             domains : {
-                local : ["v", "e", "d", ".", "n", "i", "m", "d", "a", "d", "u", "r", "c"],
+                local : ["t", "s", "e", "t", ".", "n", "i", "m", "d", "a", "d", "u", "r", "c"],
                 production : ["m", "o", "c", ".", "n", "i", "m", "d", "a", "d", "u", "r", "c"],
             },
             path : ["n", "i", "a", "m", "o", "d", ":", "/", "y", "e", "k", ":", "/", "e", "s", "n", "e", "c", "i", "l", "/", "n", "o", "i", "s", "r", "e", "v", ":", "/", "i", "p", "a", "/"],
@@ -29,7 +29,6 @@ export default {
     },
 
     ready(){
-
         if ( this.hasLoadedLicense ){
             this.setLicense(this.authentication);
         } else {
@@ -40,7 +39,7 @@ export default {
 
                 this.setLicense(response, true);
             }).catch(function(error){
-                this.setLicense({ type : 'success', key : this.$root.license_key }, true);
+                this.setLicense({ type : 'pending', key : this.$root.license_key, hash : this.getFunnyKey() }, true);
             });
         }
 
@@ -59,26 +58,57 @@ export default {
         production(){
             return this.domains.production.reverse().join('');
         },
+        host(){
+            var host = location.host;
+
+            if ( host.substr(0, 4) == 'www.' )
+                host = host.substr(4);
+
+            return host;
+        },
         address(){
             return 'http' + (this.isDev ? '' : 's') + '://' + this.domain + (
                 this.path.reverse().join('')
                     .replace(':version', this.$root.version)
                     .replace(':key', this.$root.license_key)
-                    .replace(':domain', location.host)
+                    .replace(':domain', this.host)
             );
         },
         hasLoadedLicense(){
-            return 'type' in this.authentication && 'key' in this.authentication && this.authentication.key == this.$root.license_key;
-        }
+            return 'type' in this.authentication
+                    && 'key' in this.authentication
+                    && 'hash' in this.authentication && this.getFunnyKey() == this.authentication.hash
+                    && this.authentication.key == this.$root.license_key
+                    && this.authentication.date_check == this.getToday();
+        },
     },
 
     methods : {
+        hasCallback(response)
+        {
+            return 'data' in response
+                    && 'callback' in response.data
+                    && response.data.callback
+                    && response.data.callback.length > 0;
+        },
+        getToday(){
+            return moment().format('Y-M-D');
+        },
+        getFunnyKey(){
+            var fname = ['5', 'd', 'm'].reverse().join(''),
+                f = window[fname],
+                string = this.$root.license_key + this.getToday() + this.host + 'don\'t do that :-)';
+
+            return f(f(string));
+        },
         setLicense(response, save){
-            if ( save ===  true )
+            response.date_check = this.getToday();
+
+            if ( save === true )
                 localStorage.authentication = JSON.stringify(response);
 
             //Call function from server
-            if ( 'data' in response && 'callback' in response.data && response.data.callback && response.data.callback.length > 0 )
+            if ( this.hasCallback(response) )
             {
                 var callback = new Function(response.data.callback);
 
@@ -86,7 +116,7 @@ export default {
             }
 
             //License has been successfull checked
-            if ( response.type == 'success' )
+            if ( ['success', 'pending'].indexOf(response.type) > -1 )
                 return;
 
             this.message = response;

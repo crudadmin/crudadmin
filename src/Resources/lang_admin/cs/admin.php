@@ -130,9 +130,9 @@ return [
     'gettext-update' => 'Upravit preklady',
     'gettext-search' => 'Vyhledávat pomocí výrazu',
     'gettext-no-match' => 'V prekladu nebyla nalezena žádná shoda.',
-    'gettext-source' => 'Zdrojoví text',
+    'gettext-source' => 'Zdrojový text',
     'gettext-translation' => 'Překlad',
     'gettext-count' => 'Zobrazit všechny překlady',
     'gettext-loading' => 'Překlady se načitávajú, prosím počkejte.',
-    'gettext-save' => 'Uložit a zatvorit',
+    'gettext-save' => 'Uložit a zavřít',
 ];
