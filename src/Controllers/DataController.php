@@ -310,30 +310,34 @@ class DataController extends Controller
     {
         $model = $this->getModel( $request->get('model') );
 
-        $row = $model->findOrFail( $request->get('id') );
+        $rows = $model->whereIn($model->getKeyName(), $request->get('id', []))->get();
 
-        //Add on delete rule validation
-        $row->checkForModelRules(['delete']);
-
-        if ( ! $this->canDeleteRow($model, $row, $request) )
+        foreach ($rows as $row )
         {
-            Ajax::error( trans('admin::admin.cannot-delete') );
+            //Add on delete rule validation
+            $row->checkForModelRules(['delete']);
+
+            if ( ! $this->canDeleteRow($model, $row, $request) )
+            {
+                Ajax::error( trans('admin::admin.cannot-delete') );
+            }
+
+            //Remove uploaded files
+            $this->removeFilesOnDelete($row);
+
+            //Remove row from db (softDeletes)
+            $row->delete();
+
+            //Fire on delete event
+            if ( method_exists($model, 'onDelete') )
+                $row->onDelete($row);
         }
-
-        //Remove uploaded files
-        $this->removeFilesOnDelete($row);
-
-        //Remove row from db (softDeletes)
-        $row->delete();
-
-        //Fire on delete event
-        if ( method_exists($model, 'onDelete') )
-            $row->onDelete($row);
 
         $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
 
         if ( count($rows['rows']) == 0 && request('page') > 1 )
             $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1, 0);
+
 
         Ajax::message( null, null, null, [
             'rows' => $rows,
@@ -353,18 +357,21 @@ class DataController extends Controller
             Ajax::error( trans('admin::admin.cannot-publicate') );
         }
 
-        $row = $model->withUnpublished()->findOrFail( $request->get('id') );
+        $rows = $model->withUnpublished()
+                      ->select(['id', 'published_at'])
+                      ->whereIn($model->getKeyName(), $request->get('id', []))
+                      ->get();
 
-        if ( $row->published_at == null )
-            $row->published_at = Carbon::now();
-        else
-            $row->published_at = null;
+        $data = [];
 
-        $row->save();
+        foreach ($rows as $row) {
+            $row->published_at = $row->published_at == null ? Carbon::now() : null;
+            $row->save();
 
-        return [
-            'published_at' => $row->published_at ? $row->published_at->toDateTimeString() : null
-        ];
+            $data[$row->getKey()] = $row->published_at ? $row->published_at->toDateTimeString() : null;
+        }
+
+        return $data;
     }
 
     /*

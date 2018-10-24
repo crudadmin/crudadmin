@@ -5,6 +5,9 @@
     <table v-bind:id="'table-'+model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
       <thead>
         <tr>
+          <th @click="toggleAllCheckboxes()" v-if="multipleCheckbox">
+            <i data-toggle="tooltip" :data-original-title="trans(isCheckedAll ? 'uncheck-all' : 'check-all')" :class="isCheckedAll ? 'fa-check-square-o' : 'fa-square-o'" class="fa"></i>
+          </th>
           <th v-for="(field, name) in columns" v-bind:class="'th-'+field" v-on:click="toggleSorting(field)">
             <i class="arrow-sorting fa fa-arrow-up" v-if="orderby[0] == field && orderby[1] == 0"></i>
             <i class="arrow-sorting fa fa-arrow-down" v-if="orderby[0] == field && orderby[1] == 1"></i>
@@ -15,8 +18,14 @@
       </thead>
       <tbody data-model="{{ model.slug }}">
         <tr v-for="(key, item) in rowsdata" :data-index="item.id" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
+          <td class="checkbox-td" v-if="multipleCheckbox">
+            <div class="checkbox-box" @click="checkRow(item.id)">
+              <input type="checkbox" :checked="checked.indexOf(item.id) > -1">
+              <span class="checkmark"></span>
+            </div>
+          </td>
 
-          <td v-for="(field, name) in columns" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
+          <td v-for="(field, name) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
             <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
           </td>
 
@@ -42,7 +51,7 @@
   import History from './History.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history', 'checked'],
 
       components: { TableRowValue, History },
 
@@ -72,6 +81,9 @@
       },
 
       computed: {
+        multipleCheckbox(){
+          return this.checked.length > 0;
+        },
         defaultColumns(){
           var data = {},
               key;
@@ -199,9 +211,37 @@
         formID(){
           return 'form-' + this.$parent.$parent.depth_level + '-' + this.model.slug;
         },
+        availableButtons(){
+          return this.$parent.availableButtons;
+        },
+        isCheckedAll(){
+          var ids = this.rows.data.map(item => item.id);
+
+          if ( this.checked.length == 0 )
+            return false;
+
+          return _.isEqual(ids, this.checked);
+        },
       },
 
       methods: {
+        toggleAllCheckboxes(){
+          var ids = this.rows.data.map(item => item.id);
+
+          this.checked = this.isCheckedAll ? [] : ids;
+        },
+        checkRow(id, field){
+          var checked = this.checked.indexOf(id);
+
+          //Disable checking on type of fields
+          if ( field in this.model.fields && ['file'].indexOf(this.model.fields[field].type) > -1 )
+            return;
+
+          if ( checked == -1 )
+            this.checked.push(id);
+          else
+            this.checked.splice(checked, 1);
+        },
         resetAllowedFields(columns){
           var enabled = {};
 
@@ -223,10 +263,7 @@
           this.$parent.$set('enabled_columns', enabled);
         },
         isReservedRow(row){
-          if ( this.model.reserved && this.model.reserved.indexOf(row.id) > -1 )
-            return true;
-
-          return false;
+          return this.$parent.isReservedRow(row.id);
         },
         buttonsCount(item){
           var buttons = this.getButtonsForRow(item),
@@ -534,88 +571,10 @@
 
         },
         removeRow(row){
-          var success = function (){
-
-            var requestData = {
-              model : this.model.slug,
-              parent : this.$parent.$parent.getParentTableName(this.model.without_parent),
-              id : row.id,
-              subid : this.$parent.getParentRowId(),
-              limit : this.$parent.pagination.limit,
-              page : this.$parent.pagination.position,
-              _method : 'delete',
-            };
-
-            //Check if is enabled language
-            if ( this.$root.language_id != null )
-              requestData['language_id'] = parseInt(this.$root.language_id);
-
-            this.$http.post( this.$root.requests.delete, requestData)
-            .then(function(response){
-              var data = response.data;
-
-              if ( data && 'type' in data && data.type == 'error' )
-              {
-                return this.$root.openAlert(data.title, data.message, 'danger');
-              }
-
-              //Load rows into array
-              if ( this.isWithoutParentRow ){
-                this.$parent.updateRowsData(data.data.rows.rows);
-                this.rows.count = data.data.rows.count;
-
-                this.$parent.pagination.position = data.data.rows.page;
-              } else {
-                //Remove row
-                for ( var key in this.rows.data )
-                  if ( this.rows.data[key].id == requestData.id )
-                  {
-                    this.rows.data.splice(key, 1);
-                    break;
-                  }
-              }
-
-              if ( this.row && this.row.id == row.id )
-                this.row = null;
-
-              //Remove row from options
-              if ( this.$parent.$parent.hasparentmodel !== true ){
-                this.$parent.$parent.$parent.pushOption(requestData.id, 'delete');
-              }
-            })
-            .catch(function(response){
-              console.log(response);
-              this.$root.errorResponseLayer(response);
-            });
-          }.bind(this);
-
-          //Check if is row can be deleted
-          if ( this.isReservedRow(row) )
-            return this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('cannot-delete'), 'warning');
-
-          this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('delete-warning'), 'warning', success, true);
+          this.$parent.removeRow(row);
         },
         togglePublishedAt(row){
-          var _this = this;
-
-          this.$root.$http.post( this.$root.requests.togglePublishedAt, {
-            model : this.model.slug,
-            id : row.id,
-          })
-          .then(function(response){
-
-            var data = response.data;
-
-            if ( data && 'type' in data )
-            {
-              return this.$root.openAlert(data.title, data.message, 'danger');
-            }
-
-            row.published_at = data.published_at;
-          })
-          .catch(function(response){
-            this.$root.errorResponseLayer(response);
-          });
+          this.$parent.togglePublishedAt(row);
         },
         isImageField(field){
           if ( field in this.model.fields )

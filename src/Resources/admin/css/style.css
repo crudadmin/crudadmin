@@ -19,6 +19,9 @@
 .table { margin-bottom: 6px; }
 
 button.dropdown-toggle > span.caret { margin-left: 5px; }
+.dropdown.actions-list { margin-right: 5px; float: right; }
+.dropdown.actions-list i { min-width: 15px;text-align: left; }
+.dropdown.actions-list a { cursor: pointer; }
 .dropdown.fields-list { margin-right: 5px; float: right; }
 .dropdown.fields-list .dropdown-menu li label {cursor: pointer; padding: 0 10px; font-weight: 400; color: #777 }
 .dropdown.fields-list .dropdown-menu li input { margin-right: 5px }
@@ -391,3 +394,75 @@ button.enabled-history:hover, button.enabled-history:focus, button.enabled-histo
 .nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box > .box-body, .nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box > .box-header { padding: 0; }
 .nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box > .box-header > h3 { display: none }
 .nav-tabs-custom .tab-pane > .row > .col-lg-12:first-child:last-child > .box.single-mode > .box-header { display: none }
+
+/* Checkboxes */
+.checkbox-td { position: relative; width: 25px; }
+
+/* Customize the label (the container) */
+.checkbox-box {
+  display: block;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.checkbox-box input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkbox-box .checkmark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: transparent;
+}
+
+/* On mouse-over, add a grey background color */
+.checkbox-box:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.checkbox-box input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkbox-box .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.checkbox-box input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.checkbox-box .checkmark:after {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}

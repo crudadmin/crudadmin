@@ -21,6 +21,19 @@
         </ul>
       </div>
 
+      <div class="dropdown actions-list fields-list" v-if="checked.length > 0">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          {{ trans('action') }}
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu menu-left dropdown-menu-right" aria-labelledby="dropdownMenu1">
+          <li v-if="model.deletable"><a @click.prevent="removeRow()"><i class="fa fa-remove"></i> {{ trans('delete') }}</a></li>
+          <li v-if="model.publishable"><a @click.prevent="togglePublishedAt()"><i class="fa fa-eye"></i> {{ trans('publish-toggle') }}</a></li>
+          <li role="separator" v-if="hasButtons" class="divider"></li>
+          <li v-for="button in availableButtons"><a><i class="fa" :class="button.icon"></i> {{ button.name }}</a></li>
+        </ul>
+      </div>
+
       <component
         v-for="name in getComponents('table-header')"
         :model="model"
@@ -42,6 +55,7 @@
         :rowsdata.sync="rowsData"
         :enabledcolumns.sync="enabled_columns"
         :item="$row"
+        :checked.sync="checked"
         :dragging.sync="dragging"
         :orderby.sync="orderBy">
       </table-row>
@@ -104,6 +118,7 @@
         },
 
         //Receive value from tablerows component
+        checked : [],
         default_columns : [],
         enabled_columns : null,
       };
@@ -239,6 +254,18 @@
     },
 
     computed: {
+      availableButtons(){
+        var buttons = {};
+
+        for ( var row_key in this.rows.buttons )
+          for ( var key in this.rows.buttons[row_key] )
+            buttons[key] = this.rows.buttons[row_key][key];
+
+        return buttons;
+      },
+      hasButtons(){
+        return Object.keys(this.availableButtons).length > 0;
+      },
       title(){
         var title;
 
@@ -634,6 +661,121 @@
             }
           }
         }
+      },
+      removeRow(row)
+      {
+        var ids = row ? [ row.id ] : this.checked;
+
+        var success = function (){
+          var requestData = {
+            model : this.model.slug,
+            parent : this.$parent.getParentTableName(this.model.without_parent),
+            id : ids,
+            subid : this.getParentRowId(),
+            limit : this.pagination.limit,
+            page : this.pagination.position,
+            _method : 'delete',
+          };
+
+          //Check if is enabled language
+          if ( this.$root.language_id != null )
+            requestData['language_id'] = parseInt(this.$root.language_id);
+
+          this.$http.post( this.$root.requests.delete, requestData)
+          .then(function(response){
+            var data = response.data;
+
+            if ( data && 'type' in data && data.type == 'error' )
+            {
+              return this.$root.openAlert(data.title, data.message, 'danger');
+            }
+
+            //Load rows into array
+            if ( this.$parent.isWithoutParentRow ){
+              this.updateRowsData(data.data.rows.rows);
+              this.rows.count = data.data.rows.count;
+
+              this.pagination.position = data.data.rows.page;
+            } else {
+              //Remove row
+              var remove = [];
+              for ( var key in this.rows.data )
+                if ( ids.indexOf(this.rows.data[key].id) > -1 )
+                  remove.push(key);
+
+              //Remove deleted keys from rows objects. For correct working we need remove items from end to start
+              for ( var i = 0; i < remove.sort((a, b) =>  (b - a)).length; i++ )
+                this.rows.data.splice(remove[i], 1);
+            }
+
+            if ( this.row && ids.indexOf(this.row.id) > -1 )
+              this.row = {};
+
+            //Remove row from options
+            if ( this.$parent.hasparentmodel !== true ){
+              this.$parent.$parent.pushOption(requestData.id, 'delete');
+            }
+
+            //After remove reset checkbox
+            this.checked = [];
+          })
+          .catch(function(response){
+            console.log(response);
+            this.$root.errorResponseLayer(response);
+          });
+        }.bind(this);
+
+        //Check if is row can be deleted
+        if ( this.isReservedRow(ids) )
+          return this.$root.openAlert(this.$root.trans('warning'), this.$root.trans(ids.length > 1 ? 'cannot-delete-multiple' : 'cannot-delete'), 'warning');
+
+        this.$root.openAlert(this.$root.trans('warning'), this.$root.trans('delete-warning'), 'warning', success, true);
+      },
+      togglePublishedAt(row)
+      {
+        var ids = row ? [ row.id ] : this.checked;
+
+        this.$http.post( this.$root.requests.togglePublishedAt, {
+          model : this.model.slug,
+          id : ids,
+        })
+        .then(function(response){
+          var data = response.data;
+
+          if ( data && 'type' in data )
+            return this.$root.openAlert(data.title, data.message, 'danger');
+
+          //Update multiple published at
+          for ( var key in this.rows.data )
+            if ( ids.indexOf(this.rows.data[key].id) > -1 )
+              this.rows.data[key].published_at = data[this.rows.data[key].id];
+        })
+        .catch(function(response){
+          this.$root.errorResponseLayer(response);
+        });
+
+        //Reset checkboxes after published
+        if ( ! row )
+          this.checked = [];
+      },
+      isReservedRow(id){
+        //check multiple input
+        if ( typeof id === 'object' && id.length && this.model.reserved )
+        {
+          for ( var i = 0; i < id.length; i++ )
+          {
+            if ( this.model.reserved.indexOf(id[i]) > -1 )
+              return true;
+          }
+
+          return false;
+        }
+
+        //check one row
+        if ( this.model.reserved && this.model.reserved.indexOf(id) > -1 )
+          return true;
+
+        return false;
       },
       /*
        * Return if model is in reversed mode
