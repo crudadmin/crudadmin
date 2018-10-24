@@ -51,7 +51,7 @@
   import History from './History.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history', 'checked'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
 
       components: { TableRowValue, History },
 
@@ -59,7 +59,6 @@
         return {
           hidden: ['language_id', '_order', 'slug', 'published_at', 'updated_at', 'created_at'],
           autoSize : false,
-          button_loading : false,
         };
       },
 
@@ -281,92 +280,16 @@
 
           if ( item.id in this.rows.buttons )
           {
-            return this.rows.buttons[item.id];
+            return _.filter(this.rows.buttons[item.id], item => {
+              return ['button', 'both', 'multiple'].indexOf(item.type) > -1;
+            });
           }
         },
         getButtonKey(id, key){
-          return id + '-' + key;
+          return this.$parent.getButtonKey(id, key);
         },
         buttonAction(key, button, row){
-          var _this = this;
-
-          this.button_loading = this.getButtonKey(row.id, key);
-
-          this.$http.post( this.$root.requests.buttonAction, {
-              model : this.model.slug,
-              parent : this.$parent.$parent.getParentTableName(),
-              id : row.id,
-              subid : this.$parent.getParentRowId(),
-              limit : this.$parent.pagination.limit,
-              page : this.$parent.pagination.position,
-              language_id : this.model.localization === true ? this.$parent.langid : 0,
-              button_id : key,
-          }).then(function(response){
-            this.button_loading = false;
-
-            var data = response.data;
-
-            //Load rows into array
-            if ( 'data' in data )
-            {
-              if ( 'rows' in data.data )
-              {
-                //Update received rows by button action
-                this.updateParentData(key, button, row, data);
-              }
-
-              //Redirect on page
-              if ( ('redirect' in data.data) && data.data.redirect )
-                if ( data.data.open == true )
-                  window.location.replace(data.data.redirect);
-                else
-                  window.open(data.data.redirect);
-            }
-
-            if ( data && 'type' in data )
-            {
-              return this.$root.openAlert(data.title, data.message, data.type);
-            }
-          }).catch(function(response){
-            this.button_loading = false;
-
-            console.log(response);
-            this.$root.errorResponseLayer(response);
-          });
-        },
-        updateParentData(key, button, row, data){
-          //Reload just one row which owns button
-          if ( button.reloadAll == false ){
-            if ( !(row.id in data.data.rows.buttons) ){
-              this.rows.buttons[row.id] = [];
-            } else {
-              this.rows.buttons[row.id] = data.data.rows.buttons[row.id];
-            }
-
-            //Update just selected row
-            for ( var i in this.rows.data )
-            {
-              if ( this.rows.data[i].id == data.data.rows.rows[0].id )
-              {
-                for ( var k in this.$parent.rows.data[i] )
-                {
-                  if ( this.$parent.rows.data[i][k] != data.data.rows.rows[0][k] )
-                  {
-
-                    this.$parent.rows.data[i][k] = data.data.rows.rows[0][k];
-                  }
-                }
-              }
-            }
-          }
-
-          //Reload all rows
-          else {
-            this.$parent.updateRowsData(data.data.rows.rows, false);
-
-            this.rows.count = data.data.rows.count;
-            this.rows.buttons = data.data.rows.buttons;
-          }
+          return this.$parent.buttonAction(key, button, row);
         },
         toggleSorting(key){
           var sortable = this.$root.getModelProperty(this.model, 'settings.sortable');

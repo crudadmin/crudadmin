@@ -27,6 +27,12 @@ class Button
     public $icon = 'fa-gift';
 
     /*
+     * Button type
+     * button|action|multiple
+     */
+    public $type = 'button';
+
+    /*
      * Redirect after action
      */
     public $redirect = null;
@@ -68,7 +74,16 @@ class Button
      */
     public function fire(AdminModel $row)
     {
+        return $this->error('Metóda <strong>fire</strong> nebola nájdená.');
+    }
 
+    /**
+     * Firing callback on press button for multiple items
+     * @param  collection $rows
+     */
+    public function fireMultiple($rows)
+    {
+        return $this->error('Metóda <strong>fireMultiple</strong> nebola nájdená.');
     }
 
     /*

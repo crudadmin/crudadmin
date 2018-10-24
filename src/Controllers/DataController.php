@@ -381,13 +381,19 @@ class DataController extends Controller
     {
         $model = $this->getModel( $request->get('model') );
 
-        $row = $model->findOrFail( $request->get('id') );
+        $multiple = request('multiple');
+
+        $rows = $model->whereIn($model->getKeyName(), $request->get('id', []))->get();
 
         $buttons = $model->getProperty('buttons');
 
-        $button = new $buttons[ $request->get('button_id') ]($row);
+        $button = new $buttons[ $request->get('button_id') ]($multiple ? null : $rows[0]);
 
-        $response = $button->fire($row);
+        if ( $multiple === true ){
+            $response = $button->fireMultiple($rows);
+        } else {
+            $response = $button->fire($rows[0]);
+        }
 
         //On redirect response
         if ( $response instanceof \Illuminate\Http\RedirectResponse )
@@ -402,7 +408,7 @@ class DataController extends Controller
             request('limit'),
             request('page'),
             0,
-            $button->reloadAll ? false : $row->getKey()
+            $button->reloadAll ? false : $rows->pluck($model->getKeyName())->toArray()
         );
 
         return Ajax::message( $button->message['message'], $button->message['title'], $button->message['type'], [

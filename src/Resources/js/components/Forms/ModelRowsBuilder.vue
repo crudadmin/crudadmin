@@ -30,7 +30,7 @@
           <li v-if="model.deletable"><a @click.prevent="removeRow()"><i class="fa fa-remove"></i> {{ trans('delete') }}</a></li>
           <li v-if="model.publishable"><a @click.prevent="togglePublishedAt()"><i class="fa fa-eye"></i> {{ trans('publish-toggle') }}</a></li>
           <li role="separator" v-if="hasButtons" class="divider"></li>
-          <li v-for="button in availableButtons"><a><i class="fa" :class="button.icon"></i> {{ button.name }}</a></li>
+          <li v-for="(button_key, button) in availableButtons"><a @click="buttonAction(button_key, button)"><i class="fa" :class="button.icon"></i> {{ button.name }}</a></li>
         </ul>
       </div>
 
@@ -55,6 +55,7 @@
         :rowsdata.sync="rowsData"
         :enabledcolumns.sync="enabled_columns"
         :item="$row"
+        :button_loading="button_loading"
         :checked.sync="checked"
         :dragging.sync="dragging"
         :orderby.sync="orderBy">
@@ -121,6 +122,7 @@
         checked : [],
         default_columns : [],
         enabled_columns : null,
+        button_loading : false,
       };
     },
 
@@ -259,7 +261,8 @@
 
         for ( var row_key in this.rows.buttons )
           for ( var key in this.rows.buttons[row_key] )
-            buttons[key] = this.rows.buttons[row_key][key];
+            if ( ['action', 'both', 'multiple'].indexOf(this.rows.buttons[row_key][key].type) > -1 )
+              buttons[key] = this.rows.buttons[row_key][key];
 
         return buttons;
       },
@@ -717,7 +720,8 @@
             }
 
             //After remove reset checkbox
-            this.checked = [];
+            if ( ! row )
+              this.checked = [];
           })
           .catch(function(response){
             console.log(response);
@@ -757,6 +761,99 @@
         //Reset checkboxes after published
         if ( ! row )
           this.checked = [];
+      },
+      getButtonKey(id, key){
+        return id + '-' + key;
+      },
+      buttonAction(key, button, row){
+        this.button_loading = row ? this.getButtonKey(row.id, key) : key;
+
+        var ids = row ? [ row.id ] : this.checked;
+
+        this.$http.post( this.$root.requests.buttonAction, {
+            model : this.model.slug,
+            parent : this.$parent.getParentTableName(),
+            id : ids,
+            multiple : row ? false : true,
+            subid : this.getParentRowId(),
+            limit : this.pagination.limit,
+            page : this.pagination.position,
+            language_id : this.model.localization === true ? this.langid : 0,
+            button_id : key,
+        }).then(function(response){
+          this.button_loading = false;
+
+          var data = response.data;
+
+          //Load rows into array
+          if ( 'data' in data )
+          {
+            if ( 'rows' in data.data )
+            {
+              //Update received rows by button action
+              this.updateParentData(key, button, row, data);
+            }
+
+            //Redirect on page
+            if ( ('redirect' in data.data) && data.data.redirect )
+              if ( data.data.open == true )
+                window.location.replace(data.data.redirect);
+              else
+                window.open(data.data.redirect);
+          }
+
+          //Uncheck all rows
+          if ( ! row )
+            this.checked = [];
+
+          //Alert message
+          if ( data && 'type' in data )
+            return this.$root.openAlert(data.title, data.message, data.type);
+        }).catch(function(response){
+          this.button_loading = false;
+
+          console.log(response);
+          this.$root.errorResponseLayer(response);
+        });
+      },
+      updateParentData(key, button, row, data){
+        //Reload just one row which owns button
+        if ( button.reloadAll == false ){
+
+          for ( var k in data.data.rows.rows )
+          {
+            var row = data.data.rows.rows[k];
+
+            if ( !(row.id in data.data.rows.buttons) ){
+              this.rows.buttons[row.id] = [];
+            } else {
+              this.rows.buttons[row.id] = data.data.rows.buttons[row.id];
+            }
+
+            //Update just selected row
+            for ( var i in this.rows.data )
+            {
+              if ( this.rows.data[i].id == row.id )
+              {
+                for ( var k in this.$parent.rows.data[i] )
+                {
+                  if ( this.$parent.rows.data[i][k] != row[k] )
+                  {
+                    this.$parent.rows.data[i][k] = row[k];
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        //Reload all rows
+        else {
+          this.updateRowsData(data.data.rows.rows, false);
+
+          this.rows.count = data.data.rows.count;
+          this.rows.buttons = data.data.rows.buttons;
+        }
       },
       isReservedRow(id){
         //check multiple input

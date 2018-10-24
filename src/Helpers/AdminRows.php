@@ -288,6 +288,7 @@ class AdminRows
                         'name' => $button->name,
                         'class' => $button->class,
                         'icon' => $button->icon,
+                        'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
                     ];
                 }
@@ -358,7 +359,12 @@ class AdminRows
 
                     //Get specific id
                     if ( $id !== false )
-                        $query->where('id', $id);
+                    {
+                        if ( is_numeric($id) )
+                            $query->where($this->model->getKeyName(), $id);
+                        else if ( is_array($id) )
+                            $query->whereIn($this->model->getKeyName(), $id);
+                    }
 
                     //Search in rows
                     $this->checkForSearching($query, $this->model);
