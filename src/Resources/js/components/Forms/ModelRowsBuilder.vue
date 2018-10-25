@@ -766,55 +766,89 @@
         return id + '-' + key;
       },
       buttonAction(key, button, row){
-        this.button_loading = row ? this.getButtonKey(row.id, key) : key;
-
         var ids = row ? [ row.id ] : this.checked;
+        var makeAction = function(ask, data){
+          this.button_loading = row ? this.getButtonKey(row.id, key) : key;
 
-        this.$http.post( this.$root.requests.buttonAction, {
-            model : this.model.slug,
-            parent : this.$parent.getParentTableName(),
-            id : ids,
-            multiple : row ? false : true,
-            subid : this.getParentRowId(),
-            limit : this.pagination.limit,
-            page : this.pagination.position,
-            language_id : this.model.localization === true ? this.langid : 0,
-            button_id : key,
-        }).then(function(response){
-          this.button_loading = false;
+          this.$http.post( this.$root.requests.buttonAction, _.merge(data||{}, {
+            _button : {
+              model : this.model.slug,
+              parent : this.$parent.getParentTableName(),
+              id : ids,
+              multiple : row ? false : true,
+              subid : this.getParentRowId(),
+              limit : this.pagination.limit,
+              page : this.pagination.position,
+              language_id : this.model.localization === true ? this.langid : 0,
+              button_id : key,
+              ask : ask ? true : false,
+            },
+          })).then(function(response){
+            this.button_loading = false;
 
-          var data = response.data;
+            var data = response.data,
+                hasData = 'data' in data,
+                ask = hasData && data.data.ask == true,
+                component = hasData && data.data.component ? data.data.component : null;
 
-          //Load rows into array
-          if ( 'data' in data )
-          {
-            if ( 'rows' in data.data )
+            //Load rows into array
+            if ( 'data' in data && ! ask )
             {
               //Update received rows by button action
-              this.updateParentData(key, button, row, data);
+              if ( 'rows' in data.data )
+                this.updateParentData(key, button, row, data);
+
+              //Redirect on page
+              if ( ('redirect' in data.data) && data.data.redirect )
+                if ( data.data.open == true )
+                  window.location.replace(data.data.redirect);
+                else
+                  window.open(data.data.redirect);
+
+              //Uncheck all rows
+              if ( ! row )
+                this.checked = [];
             }
 
-            //Redirect on page
-            if ( ('redirect' in data.data) && data.data.redirect )
-              if ( data.data.open == true )
-                window.location.replace(data.data.redirect);
-              else
-                window.open(data.data.redirect);
-          }
+            //Alert message
+            if ( data && 'type' in data )
+            {
+              var component_data = component ? {
+                name : button.key,
+                component : component,
+                model : this.model,
+                rows : this.rows.data.filter(item => ids.indexOf(item.id) > -1),
+                row : row,
+                request : {},
+              } : null;
 
-          //Uncheck all rows
-          if ( ! row )
-            this.checked = [];
+              var success_callback = function(){
+                var data = {};
 
-          //Alert message
-          if ( data && 'type' in data )
-            return this.$root.openAlert(data.title, data.message, data.type);
-        }).catch(function(response){
-          this.button_loading = false;
+                if ( this.alert.component && this.alert.component.request )
+                  data = _.clone(this.alert.component.request);
+                console.log(this.alert.component, data);
 
-          console.log(response);
-          this.$root.errorResponseLayer(response);
-        });
+                makeAction(null, data);
+              }
+
+              return this.$root.openAlert(
+                data.title,
+                data.message,
+                data.type,
+                ask ? success_callback : null,
+                ask ? true : null,
+                component_data
+              );
+            }
+          }).catch(function(response){
+            this.button_loading = false;
+
+            this.$root.errorResponseLayer(response);
+          });
+        }.bind(this);
+
+        makeAction(true);
       },
       updateParentData(key, button, row, data){
         //Reload just one row which owns button

@@ -285,11 +285,13 @@ class AdminRows
                 if ( $button->active === true )
                 {
                     $data[$key] = [
+                        'key' => class_basename($button),
                         'name' => $button->name,
                         'class' => $button->class,
                         'icon' => $button->icon,
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
+                        'ask' => method_exists($button, 'ask'),
                     ];
                 }
             }

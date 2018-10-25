@@ -3,9 +3,12 @@
 namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Models\Model as AdminModel;
+use Gogol\Admin\Traits\FieldComponent;
 
 class Button
 {
+    use FieldComponent;
+
     /*
      * Button row
      */
@@ -89,11 +92,23 @@ class Button
     /*
      * Set response message
      */
-    public function message($message, $title = null, $type = 'warning')
+    public function message($message, $title = null, $type = 'success')
     {
-        $this->message['title'] = $title;
+        if ( $title )
+            $this->message['title'] = $title;
+
         $this->message['message'] = $message;
         $this->message['type'] = $type;
+
+        return $this;
+    }
+
+    /*
+     * Set title separately
+     */
+    public function title($title)
+    {
+        $this->message['title'] = $title;
 
         return $this;
     }
@@ -132,6 +147,16 @@ class Button
         $this->redirect = $redirect;
 
         $this->open = true;
+
+        return $this;
+    }
+
+    /*
+     * Render VueJs template
+     */
+    public function component($template)
+    {
+        $this->message['component'] = $this->renderVuejs($template);
 
         return $this;
     }

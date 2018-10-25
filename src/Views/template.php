@@ -130,7 +130,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <h4 class="modal-title">{{ alert.title }}</h4>
               </div>
               <div class="modal-body">
-                <p>{{{ alert.message }}}</p>
+                <p v-if="alert.message">{{{ alert.message }}}</p>
+                <component
+                  v-if="alert.component"
+                  :model="alert.component.model"
+                  :rows="alert.component.rows"
+                  :row="alert.component.row"
+                  :request="alert.component.request"
+                  :is="getComponentName(alert.component.name)">
               </div>
               <div class="modal-footer">
                 <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type=='success' && !alert.close || !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal"><?php echo trans('admin::admin.close') ?></button>

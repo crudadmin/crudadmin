@@ -38,6 +38,7 @@
                             message : null,
                             success: null,
                             close: null,
+                            component: null,
                         }
                     }
                 },
@@ -63,7 +64,7 @@
 
                 computed : {
                     canShowAlert(){
-                        return this.alert.title != null && this.alert.message != null;
+                        return this.alert.title != null && this.alert.message != null || this.alert.component;
                     },
                     getAvatar()
                     {
@@ -88,7 +89,7 @@
                 },
 
                 methods : {
-                    openAlert(title, message, type, success, close){
+                    openAlert(title, message, type, success, close, component){
 
                         if ( !type )
                             type = 'success';
@@ -102,6 +103,8 @@
                         this.alert.success = success;
                         this.alert.close = close;
 
+                        this.bindAlertComponent(component);
+
                         //After opening alert focus close button of this alert for disabling sending form...
                         setTimeout(function(){
                             $('.modal .modal-footer button:last-child').focus();
@@ -109,32 +112,52 @@
 
                         return this.alert;
                     },
-                    closeAlert(callback){
-                        for ( var key in this.alert )
-                            this.alert[key] = null;
+                    getComponentName(name){
+                        return name + 'Alert';
+                    },
+                    bindAlertComponent(component){
+                        this.alert.component = component;
 
+                        if ( component ){
+                            var obj;
+
+                            try {
+                                obj = (new Function('return '+component.component))();
+
+                                Vue.component(this.getComponentName(component.name), obj);
+
+                                console.log('component registred', this.getComponentName(component.name), component);
+                            } catch(error){
+                                console.error('Syntax error in component button component.' + "\n", error);
+
+                                this.alert.component = null;
+                            }
+                        }
+                    },
+                    closeAlert(callback){
                         if ( typeof callback == 'function' )
                             callback.call(this);
+
+                        for ( var key in this.alert )
+                            this.alert[key] = null;
                     },
                     arrorAlert(callback){
                         this.openAlert(this.$root.trans('warning'), this.$root.trans('unknown-error'), 'danger', null, callback ? callback : function(){});
                     },
                     checkAlertEvents(){
-                        var _this = this;
-
                         $(window).keyup(function(e){
 
                             //If is opened alert
-                            if ( _this.canShowAlert !== true )
+                            if ( this.canShowAlert !== true )
                                 return;
 
                             if ( e.keyCode == 13 )
-                                _this.closeAlert( _this.alert.success || _this.alert.close );
+                                this.closeAlert( this.alert.success || this.alert.close );
 
                             if ( e.keyCode == 27 )
-                                _this.closeAlert( _this.alert.close );
+                                this.closeAlert( this.alert.close );
 
-                        })
+                        }.bind(this))
                     },
                     bootLanguages(){
                         if ( this.languages.length == 0 )

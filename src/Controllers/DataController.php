@@ -374,46 +374,58 @@ class DataController extends Controller
         return $data;
     }
 
+    private function getButtonResponse($button, $rows, $multiple, $ask)
+    {
+        if ( $ask ){
+            return $button->ask($multiple === true ? $rows : $rows[0]);
+        } if ( $multiple ){
+            return $button->fireMultiple($rows);
+        } else {
+            return $button->fire($rows[0]);
+        }
+    }
+
     /*
      * Event on button
      */
-    public function buttonAction(Request $request)
+    public function buttonAction()
     {
-        $model = $this->getModel( $request->get('model') );
+        $request = request('_button');
 
-        $multiple = request('multiple');
+        $model = $this->getModel( $request['model'] );
 
-        $rows = $model->whereIn($model->getKeyName(), $request->get('id', []))->get();
+        $multiple = $request['multiple'] === true;
+
+        $rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get();
 
         $buttons = $model->getProperty('buttons');
 
-        $button = new $buttons[ $request->get('button_id') ]($multiple ? null : $rows[0]);
+        $button = new $buttons[ $request['button_id'] ]($multiple ? null : $rows[0]);
 
-        if ( $multiple === true ){
-            $response = $button->fireMultiple($rows);
-        } else {
-            $response = $button->fire($rows[0]);
-        }
+        $ask = $request['ask'] === true && method_exists($button, 'ask');
+
+        $response = $this->getButtonResponse($button, $rows, $multiple, $ask);
 
         //On redirect response
         if ( $response instanceof \Illuminate\Http\RedirectResponse )
-        {
             $button->redirect = $response->getTargetUrl();
-        }
 
-        $rows = (new AdminRows($model))->returnModelData(
-            request('parent'),
-            request('subid'),
-            request('language_id'),
-            request('limit'),
-            request('page'),
+        //If is ask mode requesion, then does not return updated rows data
+        $rows = $ask ? [] : (new AdminRows($model))->returnModelData(
+            $request['parent'],
+            $request['subid'],
+            $request['language_id'],
+            $request['limit'],
+            $request['page'],
             0,
             $button->reloadAll ? false : $rows->pluck($model->getKeyName())->toArray()
         );
 
         return Ajax::message( $button->message['message'], $button->message['title'], $button->message['type'], [
+            'component' => isset($button->message['component']) ? $button->message['component'] : null,
             'rows' => $rows,
             'redirect' => $button->redirect,
+            'ask' => $ask,
         ] );
     }
 

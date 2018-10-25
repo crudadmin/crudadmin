@@ -42,7 +42,6 @@ class Ajax {
         if ( isset( $data ) )
             $array['data'] = $data;
 
-
         throw new AjaxException( response()->json($array, $code), $code );
     }
 

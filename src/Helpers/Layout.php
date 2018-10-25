@@ -20,16 +20,6 @@ class Layout
      * table-footer - footer of the table
      */
     public $position = 'top';
-
-    /*
-     * Parse vuejs template
-     */
-    public function renderVueJs($template)
-    {
-        $path = resource_path('views/'.$template);
-
-        return $this->renderFieldComponent($path);
-    }
 }
 
 ?>

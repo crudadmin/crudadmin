@@ -104,6 +104,7 @@ button.dropdown-toggle > span.caret { margin-left: 5px; }
 .sidebar-menu, .main-sidebar .user-panel, .sidebar-menu > li.header { overflow: visible; }
 
 .model-info { color: #888 }
+.xdsoft_datetimepicker { z-index: 99999999999 }
 .form-group input.js_date { background: white }
 .form-group textarea.js_editor { display: block;min-height: 321px;width: 100%;opacity: 0.2;padding: 10px; }
 .form-group small { color: #555; }

@@ -31,6 +31,12 @@ class AdminComponentCommand extends GeneratorCommand
     protected $type = 'Field component';
 
     /**
+     * Template type
+     * @var form-field/layout
+     */
+    protected $template_type = null;
+
+    /**
      * Create a new command instance.
      *
      * @return void
@@ -45,9 +51,15 @@ class AdminComponentCommand extends GeneratorCommand
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
-        parent::fire();
+        $this->template_type = $this->choice('What type of component would you like?', ['form field', 'layout', 'button'], 0);
+
+        //Laravel 5.4 support
+        if ( method_exists($this, 'fire') )
+            parent::fire();
+        else
+            parent::handle();
     }
 
     /**
@@ -57,7 +69,14 @@ class AdminComponentCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return __DIR__.'/../Stubs/Component.stub';
+        if ( $this->template_type == 'form field' )
+            $stub = 'Component';
+        elseif ( $this->template_type == 'layout' )
+            $stub = 'LayoutVueJs';
+        elseif ( $this->template_type == 'button' )
+            $stub = 'ButtonVuejsLayout';
+
+        return __DIR__.'/../Stubs/'.$stub.'.stub';
     }
 
     /**

@@ -68,4 +68,31 @@ trait FieldComponent
 
         return $components;
     }
+
+    /*
+     * Parse vuejs template
+     */
+    public function renderVueJs($template)
+    {
+        $filename = trim_end($template, '.vue');
+        $filename = str_replace('.', '/', $filename);
+
+        if ( ($path = resource_path('views/admin/components/'.$filename.'.vue')) && !file_exists($path) )
+            $path = resource_path('views/'.$filename.'.vue');
+
+        //Throw ajax error for button component render
+        if ($this instanceof \Gogol\Admin\Helpers\Button && ! file_exists($path) ){
+            Ajax::error(sprintf(trans('admin::admin.component-missing'), $filename, ''), null, null, 500);
+        }
+
+        return $this->renderFieldComponent($path);
+    }
+
+    /*
+     * Alias for parsing vuejs template
+     */
+    public function component($template)
+    {
+        return $this->renderVueJs($template);
+    }
 }

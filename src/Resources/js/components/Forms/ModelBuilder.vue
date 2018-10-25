@@ -378,7 +378,10 @@
                 console.error('Syntax error in component ' + components[i] + '.Vue' + "\n", error);
                 continue;
             }
-          } else {
+          }
+
+          //Create blade component
+          else {
             obj = {
               template: '<div class="my-component" data-component="'+name+'">'+data+'</div>',
             };
