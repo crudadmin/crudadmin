@@ -96,7 +96,11 @@
             if (this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.hidden'))
               continue;
 
-            if ( this.hidden.indexOf( key ) == -1 && this.avaliableColumns.indexOf( key ) > -1 )
+            if (
+              this.hidden.indexOf( key ) == -1
+              && this.avaliableColumns.indexOf( key ) > -1
+              && (!(key in this.model.fields) || this.model.fields[key].hidden != true)
+            )
             {
               data[ this.model.columns[i] ] = this.fieldName( this.model.columns[i] );
             }
@@ -154,7 +158,6 @@
 
               data = modifiedData;
             }
-
 
             for ( var key in columns )
             {
