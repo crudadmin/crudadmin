@@ -93,9 +93,14 @@ class File
     /*
      * Build directory path for caching resized images model
      */
-    public static function adminModelCachePath($path = null)
+    public static function adminModelCachePath($path = null, $absolute = true)
     {
-        return public_path('uploads/cache/'.$path);
+        $cache_path = 'uploads/cache';
+
+        if ( $absolute )
+            return public_path($cache_path.'/'.$path);
+
+        return $cache_path.'/'.$path;
     }
 
     public static function getHash( $path )
@@ -189,7 +194,9 @@ class File
         //If file exists
         if ( file_exists($filepath) )
         {
-            return new static($filepath);
+            $relative_filepath = self::adminModelCachePath($directory.'/'.$hash.'/'.$this->filename, false);
+
+            return new static($relative_filepath);
         }
 
         //If mutators file does not exists, and cannot be resized in actual request, then return path to resizing process
