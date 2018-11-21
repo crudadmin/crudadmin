@@ -47,7 +47,7 @@ class SEO
         $aliases = [
             'title' => ['name', 'username'],
             'description' => ['content'],
-            'images' => ['image'],
+            'images' => ['image', 'avatar'],
         ];
 
         $is_object = $this->model instanceof AdminModel;
