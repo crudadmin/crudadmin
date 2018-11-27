@@ -340,7 +340,7 @@ trait AdminModelTrait
             else if ( $this->isFieldType($key, 'checkbox') )
                 $this->casts[$key] = 'boolean';
 
-            else if ( $this->isFieldType($key, 'integer') )
+            else if ( $this->isFieldType($key, 'integer') || $this->hasFieldParam($key, 'belongsTo') )
                 $this->casts[$key] = 'integer';
 
             else if ( $this->isFieldType($key, 'decimal') )
