@@ -43,7 +43,7 @@ class ModelsHistory extends Model
      * ... other validation methods from laravel
      */
     protected $fields = [
-        'table' => 'name:Tabuľka',
+        'table' => 'name:Tabuľka|index',
         'row_id' => 'name:ID|type:integer|index|unsigned',
         'user' => 'name:Administrator|belongsTo:users,id',
         'data' => 'name:Data|type:text',

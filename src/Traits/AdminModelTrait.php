@@ -823,7 +823,7 @@ trait AdminModelTrait
      */
     public function historySnapshot($request, $original = null)
     {
-        return (new ModelsHistory)->pushChanges($this, $request, $original);
+        return Admin::getModel('ModelsHistory')->pushChanges($this, $request, $original);
     }
 
 
