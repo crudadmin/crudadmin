@@ -48,6 +48,9 @@
       created() {
 
       },
+      ready(){
+        this.$root.runInlineScripts(this.layout)
+      },
       methods: {
         trans(key){
           return this.$root.trans(key);

@@ -273,6 +273,21 @@ abstract class Request extends FormRequest
         }
     }
 
+    /*
+     * Remove empty passwords
+     */
+    protected function removeEmptyPassword($fields = null)
+    {
+        foreach ($fields as $key => $field)
+        {
+            if ( $key != 'password' )
+                continue;
+
+            if ( ($value = $this->get( $key )) === null )
+                $this->replace( $this->except( $key ) );
+        }
+    }
+
     protected function resetMultipleSelects($fields = null)
     {
         foreach ($fields as $key => $field)
@@ -300,6 +315,7 @@ abstract class Request extends FormRequest
         $this->removeEmptyForeign( $fields );
         $this->emptyStringsToNull( $fields );
         $this->resetMultipleSelects( $fields );
+        $this->removeEmptyPassword( $fields );
 
         return count($this->errors) == 0;
     }

@@ -335,6 +335,30 @@
 
                             return match;
                         });
+                    },
+                    runInlineScripts(layout)
+                    {
+                        $('<div>'+layout+'</div>').find('script').each(function(){
+                            //Run external js
+                            if ( $(this).attr('src') ){
+                                var js = document.createElement('script');
+                                    js.src = $(this).attr('src');
+                                    js.type = 'text/javascript';
+
+                                $('body').append(js);
+                            }
+
+                            //Run inline javascripts
+                            else {
+                                try {
+                                    var func = new Function($(this).html());
+
+                                    func.call(Vue);
+                                } catch(e){
+                                    console.error(e);
+                                }
+                            }
+                        });
                     }
                 }
             }
