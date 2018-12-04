@@ -12,12 +12,14 @@ class SEO
 
     private $default = [];
 
+    private $modified = [];
+
     /*
      * Set model for retreiving data for SEO
      */
     public function setModel($model)
     {
-        $this->model = $model;
+        $this->model = clone $model;
     }
 
     /*
@@ -47,7 +49,7 @@ class SEO
         $aliases = [
             'title' => ['name', 'username'],
             'description' => ['content'],
-            'images' => ['image', 'avatar'],
+            'image' => ['image', 'avatar'],
         ];
 
         $is_object = $this->model instanceof AdminModel;
@@ -81,15 +83,7 @@ class SEO
      */
     public function set($key, $value)
     {
-        //If model is already set
-        if ( $this->model )
-        {
-            $this->model[$key] = $value;
-        } else {
-            $this->model = [
-                $key => $value
-            ];
-        }
+        $this->modified[$key] = $value;
     }
 
     /*
@@ -97,11 +91,20 @@ class SEO
      */
     public function get($key, $default = null)
     {
-        if ( ! $this->model )
+        if ( ! $this->model && ! $this->modified )
             return $default;
 
-        if ( $this->model instanceof AdminModel && $this->model->seo && $value = $this->model->seo->getValue($key) )
+        //If model has seo model with specific value
+        if (
+            $this->model instanceof AdminModel
+            && $this->model->seo
+            && $value = $this->model->seo->getValue($key)
+        )
             return $value;
+
+        //Get modified changes
+        if ( array_key_exists($key, $this->modified) )
+            return $this->modified[$key];
 
         return $this->tryModelFields($key) ?: $default;
     }
@@ -171,7 +174,7 @@ class SEO
     {
         $image = $this->getDefault('image');
 
-        $image = $this->get('images', $image);
+        $image = $this->get('image', $image);
 
         $items = [];
 
@@ -179,15 +182,18 @@ class SEO
         if ( is_array($image) )
         {
             foreach ($image as $item)
+            {
                 if ( $item instanceof AdminFile )
                     $items[] = $item->resize(1200, 630);
                 else if ( is_string($item) )
                     $items[] = $item;
+            }
         }
 
         //If is single image
-        else if ( $image instanceof AdminFile )
+        else if ( $image instanceof AdminFile ){
             $items[] = $image->resize(1200, 630);
+        }
 
         else if ( is_string($image) )
             $items[] = $image;
