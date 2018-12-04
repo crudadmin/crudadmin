@@ -59,11 +59,11 @@ class SEO
             return $value;
 
         //Check for values into array
-        else if ( array_key_exists($key, $this->model) && $value = $this->model[$key] )
+        else if ( $this->model && array_key_exists($key, $this->model) && $value = $this->model[$key] )
             return $value;
 
         //Check for aliases values into model/array
-        if ( array_key_exists($key, $aliases) )
+        if ( $this->model && array_key_exists($key, $aliases) )
         {
             foreach ($aliases[$key] as $alias) {
                 if (
@@ -96,7 +96,8 @@ class SEO
 
         //If model has seo model with specific value
         if (
-            $this->model instanceof AdminModel
+            $this->model
+            && $this->model instanceof AdminModel
             && $this->model->seo
             && $value = $this->model->seo->getValue($key)
         )
