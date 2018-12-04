@@ -635,6 +635,19 @@ class AdminMigrationCommand extends Command
     }
 
     /*
+     * Check existing of foreign key from belongsToModel property
+     */
+    private function isForeignInBelongsToModel($table, $key)
+    {
+        $has_column = array_filter($table->getColumns(), function ($column) use ($key) {
+            return $column->name == $key;
+        });
+
+        //Check if relationship column has been already added from belongsToModelProperty
+        return count($has_column) > 0;
+    }
+
+    /*
      * Add relationship for column created by developer
      */
     public function belongsTo($table, $model, $key)
@@ -651,6 +664,10 @@ class AdminMigrationCommand extends Command
                 $this->line('<error>Table '.$properties[0].' does not exists.</error>');
                 die;
             }
+
+            //Skip adding new key if exists from belongsToModel property
+            if ( $this->isForeignInBelongsToModel($table, $key) )
+                return true;
 
             //If foreign key in table exists
             $keyExists = 0;
