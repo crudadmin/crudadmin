@@ -128,6 +128,7 @@ class AdminInstallCommand extends Command
         Artisan::call('admin:migrate', [
             '--force' => true,
             '--no-interaction' => true,
+            '--auto-drop' => true,
         ]);
 
         //Run other migrations

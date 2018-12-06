@@ -374,7 +374,9 @@ class AdminMigrationCommand extends Command
                 {
                     $this->line('<comment>+ Unknown column:</comment> '.$column);
 
-                    if ( $this->confirm('Do you want drop this column? [y|N]') )
+                    $auto_drop = $this->option('auto-drop', false);
+
+                    if ( $auto_drop === true || $this->confirm('Do you want drop this column? [y|N]') )
                     {
                         if ( $this->hasIndex($model, $column) )
                         {
@@ -1109,6 +1111,7 @@ class AdminMigrationCommand extends Command
     {
         return [
             ['force', 'f', InputOption::VALUE_NONE, 'Forced migration of all models'],
+            ['auto-drop', null, InputOption::VALUE_NONE, 'Automatically drop all unnecessary columns'],
         ];
     }
 }
