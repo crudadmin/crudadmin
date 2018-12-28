@@ -703,7 +703,7 @@
             }
 
             //Load rows into array
-            if ( this.$parent.isWithoutParentRow ){
+            if ( ! this.$parent.isWithoutParentRow ){
               this.updateRowsData(data.data.rows.rows);
               this.rows.count = data.data.rows.count;
 
