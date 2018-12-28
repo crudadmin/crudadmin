@@ -4,7 +4,6 @@ namespace Gogol\Admin\Helpers;
 use \App\Core\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\View\Compilers\BladeCompiler;
 use Gogol\Admin\Helpers\File;
 use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
@@ -386,6 +385,7 @@ class Gettext
     {
         return [
             'functions' => PhpCode::$options['functions'] + [ '_' => 'gettext' ],
+            'facade' => \Illuminate\Support\Facades\Blade::class,
         ];
     }
 

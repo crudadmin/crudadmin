@@ -9,7 +9,7 @@
         { "name": "Marek Gogoľ", "email": "info@marekgogol.sk" }
     ],
     "require": {
-        "php": ">=5.6.4",
+        "php": ">=7.0.13",
         "laravel/framework": "^5.4",
         "doctrine/dbal": "2.6.3",
         "intervention/image": "^2.3.0",

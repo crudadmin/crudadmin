@@ -283,7 +283,10 @@
         return this.$root.getModelProperty(this.model, 'settings.pagination.enabled') !== false && !this.iswithoutparent;
       },
       rowsData(){
-        var field = this.orderBy[0];
+        var field = this.orderBy[0],
+            is_numeric = this.isNumericValue( field ),
+            is_date = this.isDateValue( field ),
+            is_decoded = this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.encode', true) !== true;
 
         //If is date field, then receive correct date format of this field
         if ( this.isDateValue( field ) && field in this.model.fields )
@@ -301,11 +304,11 @@
           if ( b[ field ] === true || b[ field ] === false )
             b[ field ] = b[ field ] === true ? 1 : 0;
 
-          a = a[ field ]+'',
-          b = b[ field ]+'';
+          a = this.getEncodedValue(a[ field ], is_decoded),
+          b = this.getEncodedValue(b[ field ], is_decoded);
 
           //Sorting numbers
-          if ( this.isNumericValue( field ) )
+          if ( is_numeric )
           {
             if ( this.orderBy[1] == 1 )
               return b - a;
@@ -313,7 +316,7 @@
             return a - b;
           }
 
-          else if ( this.isDateValue( field ) && format ){
+          else if ( is_date && format ){
             var c = moment(a, format),
                 d = moment(b, format);
 
@@ -348,6 +351,9 @@
     methods: {
       getComponents(type){
         return this.$parent.getComponents(type);
+      },
+      getEncodedValue(value, is_decoded){
+        return (is_decoded ? $('<div>'+value+'</div>').text() : value) + '';
       },
       columnName(key, name){
         return this.$parent.getSearchingColumnName(key);
@@ -539,6 +545,9 @@
           return true;
 
         if ( key in this.model.fields && ['integer', 'decimal', 'checkbox'].indexOf( this.model.fields[ key ].type ) > -1 )
+          return true;
+
+        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.type') == 'integer' )
           return true;
 
         return false;
