@@ -37,6 +37,25 @@ class SluggableHistory extends Model
     protected $fields = [
         'table' => 'name:Tabuľka|index',
         'row_id' => 'name:ID|type:integer|index|unsigned',
-        'slug' => 'name:Slug',
+        'slug' => 'name:Slug|index',
+        'slug_localized' => 'name:Slug localized|type:json',
     ];
+
+    /*
+     * Save slug value from model
+     */
+    public static function snapshot($model)
+    {
+        $slug_column = 'slug' . ($model->hasLocalizedSlug() ? '_localized' : '');
+
+        $value = $model->hasLocalizedSlug()
+                    ? json_decode($model->attributes['slug'])
+                    : $model->attributes['slug'];
+
+        self::create([
+            'table' => $model->getTable(),
+            'row_id' => $model->getKey(),
+            $slug_column => $value,
+        ]);
+    }
 }

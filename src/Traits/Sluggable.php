@@ -4,6 +4,7 @@ namespace Gogol\Admin\Traits;
 
 use Illuminate\Contracts\Validation\Factory;
 use Gogol\Admin\Exceptions\SluggableException;
+use Gogol\Admin\Models\SluggableHistory;
 use Localization;
 use Route;
 
@@ -208,8 +209,22 @@ trait Sluggable
         //Set slug
         if ( array_key_exists($slugcolumn, $array) )
         {
-            $this->attributes['slug'] = $this->makeSlug($array[ $slugcolumn ]);
+            $slug = $this->makeSlug($array[ $slugcolumn ]);
+
+            //If slug has been changed, then save previous slug state
+            if ( str_replace('": "', '":"', $this->attributes['slug']) != $slug )
+                $this->slugSnapshot();
+
+            $this->attributes['slug'] = $slug;
         }
+    }
+
+    /*
+     * Save slug state
+     */
+    public function slugSnapshot()
+    {
+        SluggableHistory::snapshot($this);
     }
 
     /*
