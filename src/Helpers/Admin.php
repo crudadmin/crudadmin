@@ -300,6 +300,59 @@ class Admin
         }
     }
 
+    /*
+     * Register all models related to admin extensions
+     */
+    public function registerModelExtensions($extensions)
+    {
+        $model_names = $this->getAdminModelNames();
+
+        foreach ($extensions as $extension)
+        {
+            //If extension is allowed and if is not already registred
+            if (
+                $extension['condition']
+                && ! array_key_exists(strtolower(class_basename($extension['model'])), $model_names)
+            ) {
+                $this->addModel( $extension['model'], false );
+            }
+        }
+    }
+
+    /*
+     * Extension list
+     */
+    public function addModelExtensions()
+    {
+        $this->registerModelExtensions([
+            //When is first admin migration started, default User model from package will be included.
+            [
+                'condition' => count( $this->get('namespaces') ) == 0,
+                'model' => \Gogol\Admin\Models\User::class,
+            ],
+            // Localization
+            [
+                'condition' => $this->isEnabledMultiLanguages() === true,
+                'model' => \Gogol\Admin\Models\Language::class,
+            ],
+            //Admin groups
+            [
+                'condition' => config('admin.admin_groups') === true,
+                'model' => \Gogol\Admin\Models\AdminsGroup::class,
+            ],
+            //Models history
+            [
+                'condition' => config('admin.history') === true,
+                'model' => \Gogol\Admin\Models\ModelsHistory::class,
+            ],
+            //Models history
+            [
+                'condition' => config('admin.sluggable_history', true) === true,
+                'model' => \Gogol\Admin\Models\SluggableHistory::class,
+            ],
+        ]);
+    }
+
     public function getAdminModelsPaths($force = false)
     {
         //Checks if is namespaces into buffer
@@ -322,31 +375,8 @@ class Admin
             }
         }
 
-        /*
-         * When is first admin migration started, default User model from package will be included.
-         */
-        if ( count( $this->get('namespaces') ) == 0)
-        {
-            $this->addModel( \Gogol\Admin\Models\User::class, false );
-        }
-
-        //If is enabled language mutation and if not created Language model, then use default admin language model
-        if ( $this->isEnabledMultiLanguages() === true && !in_array('App\Language', $this->get('namespaces')) )
-        {
-            $this->addModel( \Gogol\Admin\Models\Language::class, false );
-        }
-
-        //If is enabled admin groups
-        if ( config('admin.admin_groups') === true && !in_array('App\AdminsGroup', $this->get('namespaces')) )
-        {
-            $this->addModel( \Gogol\Admin\Models\AdminsGroup::class, false );
-        }
-
-        //If is enabled admin groups
-        if ( config('admin.history') === true && !in_array('App\ModelsHistory', $this->get('namespaces')) )
-        {
-            $this->addModel( \Gogol\Admin\Models\ModelsHistory::class, false );
-        }
+        //Register model extensions
+        $this->addModelExtensions();
 
         //Sorting models
         $this->sortModels();
