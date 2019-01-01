@@ -258,7 +258,7 @@ trait Sluggable
         }
 
         //Returns redirect
-        return redirect( action( '\\'.$current_controller, $binding ) );
+        return redirect( action( '\\'.$current_controller, $binding ), 301 );
     }
 
     private function redirectWithWrongSlug($slug, $id, $key = null, $row)
@@ -274,30 +274,67 @@ trait Sluggable
                 throw new SluggableException( $this->buildFailedSlugResponse($row->slug, $slug, $id, $key) );
             }
         }
+
+        $this->redirectWithSlugFromHistory($slug, $id, $key);
+    }
+
+    private function redirectWithSlugFromHistory($slug, $id = null, $key)
+    {
+        $history_model = new SluggableHistory;
+        $history_model->has_localized_slug = $this->hasLocalizedSlug();
+
+        $history_row = $history_model
+                        ->where('table', $this->getTable())
+                        ->whereSlug($slug, $history_model->getTable() . '.' . $history_model->getSlugColumnName($this))
+                        ->whereExists(function ($query) use ($history_model) {
+                            $query->select(['id'])
+                                  ->from($this->getTable())
+                                  ->whereRaw($history_model->getTable().'.row_id = '.$this->getTable().'.id')
+                                  ->when($this->publishable, function($query){
+                                        $query->where('published_at', '!=', null)->whereRAW('published_at <= NOW()');
+                                  })
+                                  ->where('deleted_at', null);
+                        })
+                        ->leftJoin($this->getTable(), $history_model->getTable().'.row_id', '=', $this->getTable().'.id')
+                        ->select($this->getTable().'.slug')
+                        ->first();
+
+        if ( ! $history_row )
+            return;
+
+        $history_row->has_localized_slug = $this->hasLocalizedSlug();
+
+        $new_slug = $history_row->getSlug();
+
+        throw new SluggableException( $this->buildFailedSlugResponse($new_slug, $slug, $id, $key) );
     }
 
     /*
      * If is inserted also row of id, then will be compared slug from database and slug from url bar, if is different, automatically
      * redirect to correct route with correct and updated route
      */
-    public function scopeWhereSlug($scope, $slug_value)
+    public function scopeWhereSlug($scope, $slug_value, $column = null)
     {
+        if ( ! $column )
+            $column = 'slug';
+
         if ( ! $this->hasLocalizedSlug() )
-            return $scope->where('slug', $slug_value);
+            return $scope->where($column, $slug_value);
 
         $lang = Localization::get();
 
         $default = Localization::getDefaultLanguage();
 
         //Find slug from selected language
-        $scope->whereRaw('JSON_EXTRACT(slug, "$.'.$lang->slug.'") = ?', $slug_value);
+        $scope->whereRaw('JSON_EXTRACT('.$column.', "$.'.$lang->slug.'") = ?', $slug_value);
 
         //If selected language is other than default
         if ( $lang->getKey() != $default->getKey() )
         {
             //Then search also values in default language
-            $scope->orWhere(function($query) use($lang, $default, $slug_value) {
-                $query->whereRaw('JSON_EXTRACT(slug, "$.'.$lang->slug.'") is NULL')->whereRaw('JSON_EXTRACT(slug, "$.'.$default->slug.'") = ?', $slug_value);
+            $scope->orWhere(function($query) use($lang, $default, $slug_value, $column) {
+                $query->whereRaw('JSON_EXTRACT('.$column.', "$.'.$lang->slug.'") is NULL')
+                      ->whereRaw('JSON_EXTRACT('.$column.', "$.'.$default->slug.'") = ?', $slug_value);
             });
         }
     }

@@ -46,8 +46,6 @@ class SluggableHistory extends Model
      */
     public static function snapshot($model)
     {
-        $slug_column = 'slug' . ($model->hasLocalizedSlug() ? '_localized' : '');
-
         $value = $model->hasLocalizedSlug()
                     ? json_decode($model->attributes['slug'])
                     : $model->attributes['slug'];
@@ -55,7 +53,15 @@ class SluggableHistory extends Model
         self::create([
             'table' => $model->getTable(),
             'row_id' => $model->getKey(),
-            $slug_column => $value,
+            self::getSlugColumnName($model) => $value,
         ]);
+    }
+
+    /*
+     * Return used column by model slug localization
+     */
+    public static function getSlugColumnName($model)
+    {
+        return $model->hasLocalizedSlug() ? 'slug_localized' : 'slug';
     }
 }
