@@ -212,11 +212,20 @@ trait Sluggable
             $slug = $this->makeSlug($array[ $slugcolumn ]);
 
             //If slug has been changed, then save previous slug state
-            if ( str_replace('": "', '":"', $this->attributes['slug']) != $slug )
+            if ( $this->isAllowedHistorySlugs() && str_replace('": "', '":"', $this->attributes['slug']) != $slug )
                 $this->slugSnapshot();
 
             $this->attributes['slug'] = $slug;
         }
+    }
+
+    /*
+     * Check if history slugs are allowed
+     */
+    public function isAllowedHistorySlugs()
+    {
+        return config('admin.sluggable_history', false) === true
+               && $this->getProperty('sluggable_history') !== false;
     }
 
     /*
@@ -275,7 +284,8 @@ trait Sluggable
             }
         }
 
-        $this->redirectWithSlugFromHistory($slug, $id, $key);
+        if ( $this->isAllowedHistorySlugs() )
+            $this->redirectWithSlugFromHistory($slug, $id, $key);
     }
 
     private function redirectWithSlugFromHistory($slug, $id = null, $key)

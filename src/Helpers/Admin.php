@@ -347,7 +347,7 @@ class Admin
             ],
             //Models history
             [
-                'condition' => config('admin.sluggable_history', true) === true,
+                'condition' => config('admin.sluggable_history', false) === true,
                 'model' => \Gogol\Admin\Models\SluggableHistory::class,
             ],
         ]);

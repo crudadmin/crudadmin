@@ -23,6 +23,12 @@ return [
      */
     'reduce_space' => true,
 
+
+    /*
+     * Allow slug history table for 301 redirect from old slugs to new slugs
+     */
+    'sluggable_history' => false,
+
     /*
      * Custom rules aliases
      */
