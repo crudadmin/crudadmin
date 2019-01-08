@@ -212,7 +212,7 @@ trait Sluggable
             $slug = $this->makeSlug($array[ $slugcolumn ]);
 
             //If slug has been changed, then save previous slug state
-            if ( $this->isAllowedHistorySlugs() && str_replace('": "', '":"', $this->attributes['slug']) != $slug )
+            if ( $this->exists && $this->isAllowedHistorySlugs() && str_replace('": "', '":"', $this->attributes['slug']) != $slug )
                 $this->slugSnapshot();
 
             $this->attributes['slug'] = $slug;
