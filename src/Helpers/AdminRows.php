@@ -274,7 +274,7 @@ class AdminRows
      */
     protected function generateButton($row)
     {
-        if ( $buttons = array_filter($this->model->getProperty('buttons')) )
+        if ( $buttons = array_filter((array)$this->model->getProperty('buttons')) )
         {
             $data = [];
 
