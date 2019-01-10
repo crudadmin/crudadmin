@@ -180,6 +180,10 @@ class Fields
     private function pushFieldOrGroup($fields, $key, $field, $mutation)
     {
         if ( $this->isFieldGroup($field) ){
+            //If group is removed
+            if ( $field->id && in_array($field->id, $mutation->remove, true) )
+                return $fields;
+
             $group = $this->mutateGroup($field, $mutation, $mutation);
 
             if ( is_numeric($key) )
@@ -206,7 +210,7 @@ class Fields
             $fields = $this->insertInto('before', $key, $fields, $mutation);
 
             //Add if is not removed
-            if ( ! in_array($key, $mutation->remove) )
+            if ( ! in_array($key, $mutation->remove, true) )
                 $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutation);
 
             //Add after field
