@@ -44,6 +44,11 @@ class Fields
     protected $remove = [];
 
     /*
+     * Field mutator
+     */
+    protected $mutationBuilder = [];
+
+    /*
      * Returns field attributes which are not includes in request rules, and are used for mutations
      */
     public function getAttributes()
@@ -110,13 +115,14 @@ class Fields
         //Buffer
         if ( array_key_exists($table, $this->fields) && $force === false )
         {
-            return $this->fields[ $table ];
+            return $this->fields[$table];
         }
 
         //Resets buffer
-        $this->fields[ $table ] = [];
-        $this->groups[ $table ] = [];
-        $this->remove[ $table ] = [];
+        $this->fields[$table] = [];
+        $this->groups[$table] = [];
+        $this->remove[$table] = [];
+        $this->mutationBuilder[$table] = null;
 
         //Fields from model
         $fields = $model->getProperty('fields', $param);
@@ -125,12 +131,12 @@ class Fields
         $fields = is_array($fields) ? Group::fields($fields, null, 'default') : $fields;
 
         //Get actual model mutation
-        $mutation = $this->addFieldsMutationIntoModel($model, $param);
+        $this->mutationBuilder[$table] = $this->addFieldsMutationIntoModel($model, $param);
 
         //Register fields from groups
-        $this->manageGroupFields($model, 0, $fields, null, $mutation);
+        $this->manageGroupFields($model, 0, $fields, null);
 
-        return $this->fields[ $table ];
+        return $this->fields[$table];
     }
 
     /*
@@ -149,12 +155,16 @@ class Fields
     /*
      * Modify group by id
      */
-    private function mutateGroup($group, $mutation)
+    private function mutateGroup($group, $mutationBuilder)
     {
-        if ( ! $group->id || count($mutation->groups) == 0 || !array_key_exists($group->id, $mutation->groups) )
+        if (
+            ! $group->id
+            || count($mutationBuilder->groups) == 0
+            || !array_key_exists($group->id, $mutationBuilder->groups)
+        )
             return $group;
 
-        $mutation->groups[$group->id]($group);
+        $mutationBuilder->groups[$group->id]($group);
 
         return $group;
     }
@@ -162,12 +172,12 @@ class Fields
     /*
      * Insert field/group on position
      */
-    private function insertInto($where, $key, $fields, $mutation)
+    private function insertInto($where, $key, $fields, $mutationBuilder)
     {
-        foreach ($mutation->{$where} as $position_key => $add_before) {
+        foreach ($mutationBuilder->{$where} as $position_key => $add_before) {
             if ( $key === $position_key ){
                 foreach ($add_before as $add_key => $add_field)
-                    $fields = $this->pushFieldOrGroup($fields, $add_key, $add_field, $mutation);
+                    $fields = $this->pushFieldOrGroup($fields, $add_key, $add_field, $mutationBuilder);
             }
         }
 
@@ -177,14 +187,14 @@ class Fields
     /*
      * Add field, or modified group into fields list
      */
-    private function pushFieldOrGroup($fields, $key, $field, $mutation)
+    private function pushFieldOrGroup($fields, $key, $field, $mutationBuilder)
     {
         if ( $this->isFieldGroup($field) ){
             //If group is removed
-            if ( $field->id && in_array($field->id, $mutation->remove, true) )
+            if ( $field->id && in_array($field->id, $mutationBuilder->remove, true) )
                 return $fields;
 
-            $group = $this->mutateGroup($field, $mutation, $mutation);
+            $group = $this->mutateGroup($field, $mutationBuilder);
 
             if ( is_numeric($key) )
                 $fields[] = $group;
@@ -200,28 +210,30 @@ class Fields
     /*
      * Add before/after new field or remove fields for overriden admin model
      */
-    private function mutateGroupFields($items, $mutation, $parent_group = null)
+    private function mutateGroupFields($model, $items, $parent_group = null)
     {
         $fields = [];
+
+        $mutationBuilder = $this->mutationBuilder[$model->getTable()];
 
         foreach ($items as $key => $field)
         {
             //Add before field
-            $fields = $this->insertInto('before', $key, $fields, $mutation);
+            $fields = $this->insertInto('before', $key, $fields, $mutationBuilder);
 
             //Add if is not removed
-            if ( ! in_array($key, $mutation->remove, true) )
-                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutation);
+            if ( ! in_array($key, $mutationBuilder->remove, true) )
+                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutationBuilder);
 
             //Add after field
-            $fields = $this->insertInto('after', $key, $fields, $mutation);
+            $fields = $this->insertInto('after', $key, $fields, $mutationBuilder);
         }
 
         //Push new fields, groups... or replace existing fields. Into first level of fields
         if ( ! $parent_group )
         {
-            foreach ($mutation->push as $key => $field) {
-                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutation);
+            foreach ($mutationBuilder->push as $key => $field) {
+                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutationBuilder);
             }
         }
 
@@ -232,7 +244,7 @@ class Fields
      * Register fields from all groups and infinite level of sub groups or tabs
      * Also rewrite mutated fields into groups
      */
-    private function manageGroupFields($model, $key, $field, $parent_group = null, FieldsMutationBuilder $mutationBuilder)
+    private function manageGroupFields($model, $key, $field, $parent_group = null)
     {
         //If is group
         if ( $group = $this->isFieldGroup($field) )
@@ -247,12 +259,15 @@ class Fields
             if ( $parent_group && count($parent_group->add) > 0 )
                 $group->add = array_merge($group->add, $parent_group->add);
 
+            //Add/remove fields/groups
+            $mutated_groups = $this->mutateGroupFields($model, $group->fields, $parent_group);
+
             //Register sub groups or sub fields
-            foreach ($this->mutateGroupFields($group->fields, $mutationBuilder, $parent_group) as $field_key => $field_from_group)
+            foreach ($mutated_groups as $field_key => $field_from_group)
             {
                 $mutation_previous = isset($mutation_previous) ? $mutation_previous : $this->fields[$model->getTable()];
 
-                $mutation = $this->manageGroupFields($model, $field_key, $field_from_group, $group, $mutationBuilder);
+                $mutation = $this->manageGroupFields($model, $field_key, $field_from_group, $group);
 
                 //If is group in fields list
                 if ( $mutation instanceof Group ){
@@ -297,7 +312,7 @@ class Fields
             return false;
         }
 
-        return $this->groups[ $table ];
+        return $this->groups[$table];
     }
 
     /*
@@ -306,7 +321,7 @@ class Fields
     protected function registerGroup( $group, $model )
     {
         //Update and register field
-        $this->groups[ $model->getTable() ][] = $group;
+        $this->groups[$model->getTable()][] = $group;
     }
 
     /*
@@ -327,14 +342,37 @@ class Fields
                 $field = $response;
 
             //Update and register field
-            $this->fields[ $table ][ $key ] = $field;
+            $this->fields[$table][$key] = $field;
         }
+
+        //Mutate field from mutation builder
+        $this->mutateField($field, $key, $table);
 
         //If field need to be removed
         if ( in_array($key, (array)$this->remove[$table]) )
-            unset($this->fields[ $table ][ $key ]);
+            unset($this->fields[$table][$key]);
 
-        return $this->fields[ $table ];
+        return $this->fields[$table];
+    }
+
+    /*
+     * Convert field into stdClass and call muation callback
+     */
+    private function mutateField($field, $key, $table)
+    {
+        //Mutate field by mutation builder
+        if ( ! array_key_exists($key, $this->mutationBuilder[$table]->fields) )
+            return;
+
+        $field = new \StdClass();
+
+        //Clone field into stdt array
+        foreach ($this->fields[$table][$key] as $k => $value)
+            $field->{$k} = $value;
+
+        $this->mutationBuilder[$table]->fields[$key]($field);
+
+        $this->fields[$table][$key] = (array)$field;
     }
 
     public function mutate( $namespace, $field, $key = null, $model = null )
@@ -343,7 +381,7 @@ class Fields
 
         if ( $mutation instanceof \Gogol\Admin\Fields\Mutations\MutationRule )
         {
-            $mutation->setFields($this->fields[ $model->getTable() ]);
+            $mutation->setFields($this->fields[$model->getTable()]);
             $mutation->setField($field);
             $mutation->setKey($key);
         }
@@ -418,13 +456,13 @@ class Fields
 
             //Remove acutal key
             if ( $response === true )
-                $this->remove[ $table ][] = $key;
+                $this->remove[$table][] = $key;
             elseif ( is_string( $response ) )
-                $this->remove[ $table ][] = $response;
+                $this->remove[$table][] = $response;
             elseif ( is_array( $response ) ){
                 foreach ((array)$response as $key)
                 {
-                    $this->remove[ $table ][] = $key;
+                    $this->remove[$table][] = $key;
                 }
             }
 

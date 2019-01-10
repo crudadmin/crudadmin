@@ -30,6 +30,11 @@ class FieldsMutationBuilder
     public $groups = [];
 
     /*
+     * Modify fields
+     */
+    public $fields = [];
+
+    /*
      * Register adding fields after key
      */
     public function after($selector_key, $fields)
@@ -78,7 +83,15 @@ class FieldsMutationBuilder
      */
     public function remove($selector_key)
     {
-        $this->remove[] = $selector_key;
+        //Remove multiple fields/groups
+        if ( is_array($selector_key) )
+            foreach ($selector_key as $key)
+                $this->remove[] = $key;
+
+        //Remove single item
+        else {
+            $this->remove[] = $selector_key;
+        }
 
         return $this;
     }
@@ -103,13 +116,19 @@ class FieldsMutationBuilder
     }
 
     /*
-     * Add group modification callback
+     * Add group modification callback mutator
      */
-    public function group(string $id, $callback)
+    public function group($id, $callback)
     {
-        $this->groups[$id] = $callback;
+        return $this->applyMultipleCallbacks($this->groups, $id, $callback);
+    }
 
-        return $this;
+    /*
+     * Add field modification callback mutator
+     */
+    public function field($key, $callback)
+    {
+        return $this->applyMultipleCallbacks($this->fields, $key, $callback);
     }
 
     /*
@@ -133,6 +152,24 @@ class FieldsMutationBuilder
     public function addAfter($selector_key, $fields)
     {
         return $this->after($selector_key, $fields);
+    }
+
+    /*
+     * Apply single callback or multiple callback from multiple keys
+     */
+    private function applyMultipleCallbacks(&$property, $key, $callback)
+    {
+         //Remove multiple fields/groups
+        if ( is_array($key) )
+            foreach ($key as $k)
+                $property[$k] = $callback;
+
+        //Remove single item
+        else {
+            $property[$key] = $callback;
+        }
+
+        return $this;
     }
 }
 ?>

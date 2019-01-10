@@ -1,32 +1,32 @@
 <template>
-  <div v-if="!hasComponent" v-bind:class="{ 'is-changed-from-history' : isChangedFromHistory }">
+  <div v-if="!hasComponent" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
     <!-- STRING INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :type="isPassword ? 'password' : 'text'" :name="getFieldName" class="form-control" :maxlength="field.max" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
+      <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+      <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :type="isPassword ? 'password' : 'text'" :name="getFieldName" class="form-control" :maxlength="field.max" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- NUMBER/DECIMAL INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isInteger">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="number" :name="getFieldName" class="form-control" v-bind:step="isDecimal ? '0.01' : ''" v-bind:value="getValueOrDefault" :placeholder="field.placeholder || getName">
+      <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+      <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" type="number" :name="getFieldName" class="form-control" :step="isDecimal ? '0.01' : ''" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- DATETIME INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled, 'multiple-date' : isMultipleDatepicker }" v-if="isDatepicker">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <input v-bind:id="getId" @keyup="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="text" :name="isMultipleDatepicker ? '' : getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
+      <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+      <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" type="text" :name="isMultipleDatepicker ? '' : getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
       <input type="hidden" :name="getFieldName + '[]'" v-for="date in getMultiDates" :value="getMultiDateValue(date)">
       <small>{{ field.title }}</small>
     </div>
 
     <!-- Checkbox INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
-      <label v-bind:for="getId" class="checkbox">
+      <label :for="getId" class="checkbox">
         {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-        <input type="checkbox" @change="changeValue" v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" v-bind:checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
+        <input type="checkbox" @change="changeValue" :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
         <div><div></div></div>
       </label>
       <small>{{ field.title }}</small>
@@ -34,23 +34,23 @@
 
     <!-- TEXT INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-      <textarea v-bind:id="getId" @change="changeValue" :data-field="getFieldKey" v-bind:disabled="isDisabled" :name="getFieldName" v-bind:class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName">{{ getValueOrDefault }}</textarea>
+      <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+      <textarea :id="getId" @change="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName">{{ getValueOrDefault }}</textarea>
       <small>{{ field.title }}</small>
     </div>
 
     <!-- FILE INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+      <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
 
       <div class="file-group">
-        <input v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" type="file" v-bind:multiple="isMultipleUpload" v-bind:name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || getName">
+        <input :id="getId" :data-field="getFieldKey" :disabled="isDisabled" type="file" :multiple="isMultipleUpload" :name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || getName">
         <input v-if="!getValueOrDefault && file_will_remove == true" type="hidden" :name="'$remove_' + getFieldName" :value="1">
 
         <button v-if="getValueOrDefault && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
 
         <div v-show="(isMultiple && !isMultirows) && getFiles.length > 0">
-          <select v-bind:id="getId + '_multipleFile'" v-bind:name="(hasLocale || (isMultiple && !isMultirows) && getFiles.length > 0) ? '$uploaded_'+getFieldName+'[]' : ''" data-placeholder=" " multiple>
+          <select :id="getId + '_multipleFile'" :name="(hasLocale || (isMultiple && !isMultirows) && getFiles.length > 0) ? '$uploaded_'+getFieldName+'[]' : ''" data-placeholder=" " multiple>
             <option selected v-for="file in getFiles">{{ file }}</option>
           </select>
         </div>
@@ -77,12 +77,12 @@
 
     <!-- SELECT INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
-      <label v-bind:for="getId">{{ getName }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
+      <label :for="getId">{{ getName }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
       <div :class="{ 'can-add-select' : canAddRow }">
-        <select v-bind:id="getId" :data-field="getFieldKey" v-bind:disabled="isDisabled" name="{{ !isMultiple ? key : '' }}" v-bind:data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" v-bind:multiple="isMultiple" class="form-control">
+        <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? key : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
           <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
-          <option v-for="mvalue in missingValueInSelectOptions" v-bind:value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
-          <option v-for="data in fieldOptions" v-bind:selected="hasValue(data[0], value, isMultiple) || (!this.isOpenedRow && data[0] == field.default)" v-bind:value="data[0]">{{ data[1] }}</option>
+          <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
+          <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || (!this.isOpenedRow && data[0] == field.default)" :value="data[0]">{{ data[1] }}</option>
         </select>
         <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
       </div>
@@ -122,7 +122,7 @@
 
         <div class="radio" v-for="data in field.options">
           <label>
-            <input type="radio" @change="changeValue" :name="getFieldName" v-bind:checked="hasValue(data[0], getValueOrDefault)" v-bind:value="data[0]">
+            <input type="radio" @change="changeValue" :name="getFieldName" :checked="hasValue(data[0], getValueOrDefault)" :value="data[0]">
 
             {{ data[1] }}
           </label>
