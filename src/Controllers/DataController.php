@@ -398,7 +398,7 @@ class DataController extends Controller
 
         $rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get();
 
-        $buttons = $model->getProperty('buttons');
+        $buttons = array_values(array_filter((array)$model->getProperty('buttons')));
 
         $button = new $buttons[ $request['button_id'] ]($multiple ? null : $rows[0]);
 
