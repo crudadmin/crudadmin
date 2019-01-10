@@ -371,7 +371,7 @@
         return this.$root.trans(key);
       },
       reloadRows(){
-        this.row = {};
+        this.row = this.$parent.emptyRowInstance();
         this.rows.data = [];
         this.rows.count = 0;
         this.rows.save_children = [];

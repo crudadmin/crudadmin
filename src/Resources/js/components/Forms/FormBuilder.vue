@@ -470,7 +470,7 @@
             //Reseting form after new row
             if ( !(this.model.minimum == 1 && this.model.maximum == 1) && autoreset !== false)
             {
-              this.initForm(null);
+              this.initForm(this.$parent.emptyRowInstance());
 
             //If is disabled autoreseting form, then select inserted row
             } else if ( autoreset === false ){
