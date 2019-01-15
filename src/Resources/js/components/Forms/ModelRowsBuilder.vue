@@ -472,7 +472,7 @@
 
           if ( this.refresh.count == 0 ){
             //Update field options
-            this.updateFieldOptions(response.data.fields);
+            this.updateFieldOptions(response.data.fields, response.data);
 
             //Render additional layouts
             this.$parent.layouts = response.data.layouts;
@@ -525,12 +525,20 @@
           this.loadRows(indicator);
         }.bind(this), this.refresh.interval);
       },
-      updateFieldOptions(fields){
+      updateFieldOptions(fields, model){
           //Update fields from database, for dynamic selectbox values
           for ( var key in fields )
           {
-            if ( 'options' in this.model.fields[ key ] && Object.keys(fields[ key ].options).length > 0 ){
-              this.model.fields[ key ].options = fields[ key ].options;
+            //Update filterBy for each model
+            if ( 'filterBy' in (model.fields[key]||{}) && model.fields[key].filterBy ){
+              this.$set('model.fields.'+key+'.filterBy', model.fields[key].filterBy);
+            } else if ( 'filterBy' in this.model.fields[key]||{} ){
+              delete this.model.fields[key].filterBy;
+            }
+
+            //Update options
+            if ( 'options' in this.model.fields[key] && Object.keys(fields[key].options).length > 0 ){
+              this.model.fields[key].options = fields[key].options;
             }
           }
 
@@ -544,7 +552,7 @@
         if ( ['id', '_order'].indexOf( key ) > -1)
           return true;
 
-        if ( key in this.model.fields && ['integer', 'decimal', 'checkbox'].indexOf( this.model.fields[ key ].type ) > -1 )
+        if ( key in this.model.fields && ['integer', 'decimal', 'checkbox'].indexOf( this.model.fields[key].type ) > -1 )
           return true;
 
         if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.type') == 'integer' )
@@ -556,7 +564,7 @@
         if ( ['created_at', 'published_at', 'updated_at'].indexOf( key ) > -1)
           return true;
 
-        if ( key in this.model.fields && ['date', 'datetime'].indexOf( this.model.fields[ key ].type ) > -1 )
+        if ( key in this.model.fields && ['date', 'datetime'].indexOf( this.model.fields[key].type ) > -1 )
           return true;
 
         return false;
