@@ -105,7 +105,7 @@ class DataController extends Controller
         $request->applyMutators($row);
 
         //Save original values
-        $original = $row->getOriginal();
+        $original = $row->backupOriginalAttributes();
 
         //get mutated data from request
         $changes = $request->allWithMutators()[0];
@@ -128,11 +128,14 @@ class DataController extends Controller
         $this->updateBelongsToMany($model, $row);
 
         //Restore original values
-        $row->setProperty('original', $original);
+        $row->restoreOriginalAttributes();
 
         //Fire on update event
         if ( method_exists($model, 'onUpdate') )
             $row->onUpdate($row);
+
+        //Check for model rules after row is already updated
+        $row->checkForModelRules(['updated'], true);
 
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-save'));
@@ -169,6 +172,9 @@ class DataController extends Controller
             //Fire on create event
             if ( method_exists($model, 'onCreate') )
                 $row->onCreate($row);
+
+            //Check for model rules after row is already saved/created
+            $row->checkForModelRules(['created'], true);
 
             $models[] = $row;
 
@@ -328,9 +334,11 @@ class DataController extends Controller
             //Remove row from db (softDeletes)
             $row->delete();
 
-            //Fire on delete event
+            //Fire on delete events
             if ( method_exists($model, 'onDelete') )
                 $row->onDelete($row);
+
+            $row->checkForModelRules(['delete'], true);
         }
 
         $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);

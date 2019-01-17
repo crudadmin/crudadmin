@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Gogol\Admin\Traits\ModelLayoutBuilder;
 use Gogol\Admin\Traits\ModelRelationships;
+use Gogol\Admin\Traits\ModelRules;
 use Gogol\Admin\Traits\FieldComponent;
 use Gogol\Admin\Traits\FieldProperties;
 use Gogol\Admin\Traits\AdminModelTrait;
@@ -24,6 +25,7 @@ class Model extends BaseModel
     use SoftDeletes,
         ModelRelationships,
         ModelLayoutBuilder,
+        ModelRules,
         FieldComponent,
         FieldProperties,
         AdminModelTrait,

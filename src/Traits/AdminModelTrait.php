@@ -151,54 +151,6 @@ trait AdminModelTrait
     }
 
     /*
-     * Returns cached admin rule class
-     */
-    protected function getCachedAdminRuleClass($class)
-    {
-        return Admin::cache($this->getTable() . $class, function() use ( $class ) {
-            return new $class($this);
-        });
-    }
-
-    /*
-     * Return and fire admin rules
-     */
-    public function getAdminRules($callback)
-    {
-        if ( $this->rules && is_array($this->rules) )
-        {
-            foreach ($this->rules as $class)
-            {
-                $rule = $this->getCachedAdminRuleClass($class);
-
-                $callback($rule);
-            }
-        }
-
-        return null;
-    }
-
-    /*
-     * Validate admin rules, on update, delete, create
-     */
-    public function checkForModelRules($rules = ['create', 'update'])
-    {
-        $this->getAdminRules(function($rule) use($rules) {
-            if ( method_exists($rule, 'fire') )
-                $rule->fire($this);
-
-            if ( method_exists($rule, 'create') && in_array('create', $rules) && ! $this->exists )
-                $rule->create($this);
-
-            if ( method_exists($rule, 'update') && in_array('update', $rules) && $this->exists )
-                $rule->update($this);
-
-            if ( method_exists($rule, 'delete') && in_array('delete', $rules) )
-                $rule->delete($this);
-        });
-    }
-
-    /*
      * Update model data before saving
      *
      * @see Illuminate\Database\Eloquent\Model
@@ -228,11 +180,20 @@ trait AdminModelTrait
         }
 
         //Check for model rules
-        if ( Admin::isAdmin() )
-            $this->checkForModelRules();
+        $this->checkForModelRules(['creating', 'updating']);
+
+        //Save model state before save action
+        $this->backupExistsProperty();
 
         //Save model
-        return parent::save($options);
+        $instance = parent::save($options);
+
+        //Check for model rules after row is already saved/created for frontend/console situations
+        //for admin state events will be initialized in DataController after binding all relationships
+        if ( ! Admin::isAdmin() )
+            $this->checkForModelRules(['created', 'updated'], true);
+
+        return $instance;
     }
 
     //Add fillable and dates fields
