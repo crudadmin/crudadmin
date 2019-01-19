@@ -305,16 +305,16 @@ class Admin
      */
     public function registerModelExtensions($extensions)
     {
-        $model_names = array_map(function($item){
+        $model_names = array_values(array_map(function($item){
             return strtolower(class_basename($item));
-        }, $this->get('namespaces'));
+        }, $this->get('namespaces')));
 
         foreach ($extensions as $extension)
         {
             //If extension is allowed and if is not already registred
             if (
                 $extension['condition']
-                && ! array_key_exists(strtolower(class_basename($extension['model'])), $model_names)
+                && ! in_array(strtolower(class_basename($extension['model'])), $model_names)
             ) {
                 $this->addModel( $extension['model'], false );
             }
