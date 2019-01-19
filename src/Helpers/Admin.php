@@ -305,7 +305,9 @@ class Admin
      */
     public function registerModelExtensions($extensions)
     {
-        $model_names = $this->getAdminModelNames();
+        $model_names = array_map(function($item){
+            return strtolower(class_basename($item));
+        }, $this->get('namespaces'));
 
         foreach ($extensions as $extension)
         {
