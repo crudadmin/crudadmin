@@ -10,23 +10,25 @@
       </div>
 
       <div class="dropdown fields-list">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
           {{ trans('rows-list') }}
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu menu-left dropdown-menu-right" aria-labelledby="dropdownMenu1">
-          <li @click="$event.stopPropagation()" v-for="(key, column) in enabled_columns" v-if="canShowColumn(column, key)"><label><input type="checkbox" v-model="column.enabled"> {{ columnName(key, column.name) }}</label></li>
+        <ul class="dropdown-menu menu-left dropdown-menu-right">
+          <li @click="$event.stopPropagation()" v-for="(key, column) in enabled_columns" v-if="canShowColumn(column, key)">
+            <label><input type="checkbox" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
+          </li>
           <li role="separator" class="divider"></li>
           <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
         </ul>
       </div>
 
       <div class="dropdown actions-list fields-list" v-if="checked.length > 0">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
           {{ trans('action') }}
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu menu-left dropdown-menu-right" aria-labelledby="dropdownMenu1">
+        <ul class="dropdown-menu menu-left dropdown-menu-right">
           <li v-if="model.deletable"><a @click.prevent="removeRow()"><i class="fa fa-remove"></i> {{ trans('delete') }}</a></li>
           <li v-if="model.publishable"><a @click.prevent="togglePublishedAt()"><i class="fa fa-eye"></i> {{ trans('publish-toggle') }}</a></li>
           <li role="separator" v-if="hasButtons" class="divider"></li>

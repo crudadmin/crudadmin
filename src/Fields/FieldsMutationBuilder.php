@@ -20,9 +20,14 @@ class FieldsMutationBuilder
     public $remove = [];
 
     /*
-     * Add items after end
+     * Add items at the end
      */
     public $push = [];
+
+    /*
+     * Add items at the beggining
+     */
+    public $push_before = [];
 
     /*
      * Modify group settings
@@ -99,17 +104,17 @@ class FieldsMutationBuilder
     /*
      * Add fields into end of model
      */
-    public function push($fields)
+    public function push($fields, $type = 'push')
     {
         //Push group or fields
         if ( $fields instanceof Group )
         {
-            $this->push[] = $fields;
+            $this->{$type}[] = $fields;
         }
 
         //Push fields set
         else foreach ($fields as $key => $field) {
-            $this->push[$key] = $field;
+            $this->{$type}[$key] = $field;
         }
 
         return $this;
@@ -134,8 +139,11 @@ class FieldsMutationBuilder
     /*
      * Shortcuts, aliases
      */
-    public function pushBefore($selector_key, $fields)
+    public function pushBefore($selector_key, $fields = null)
     {
+        if ( is_null($fields) && (is_array($selector_key) || is_object($selector_key)) )
+            return $this->push($selector_key, 'push_before');
+
         return $this->before($selector_key, $fields);
     }
 

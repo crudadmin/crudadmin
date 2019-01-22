@@ -1,12 +1,12 @@
 <template>
   <div class="nav-tabs-custom" :class="{ default : hasNoTabs }">
     <ul class="nav nav-tabs">
-      <li v-for="tab in getTabs" v-if="isTab(tab) && !tab.model || isModel(tab)" :class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
+      <li v-for="tab in getTabs" v-if="isTab(tab) && !tab.model || isModel(tab)" :model-table="isModel(tab) && getModel(tab.model) ? getModel(tab.model).slug : ''" :class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
         <a data-toggle="tab" aria-expanded="true"><i v-if="getTabIcon(tab)" :class="['fa', getTabIcon(tab)]"></i> {{ getTabName(tab)||trans('general-tab') }}</a>
       </li>
     </ul>
     <div class="tab-content">
-      <div v-for="tab in getTabs" class="tab-pane" :class="{ active : activetab == $index }" :data-tab-model="isModel(tab) ? getModel(tab.model).slug : ''">
+      <div v-for="tab in getTabs" class="tab-pane" :class="{ active : activetab == $index }" :tab-model="isModel(tab) ? getModel(tab.model).slug : ''">
         <div class="row">
           <div v-if="hasTabs(tab.fields) || isModel(tab)" :class="{ model : isModel(tab) }" class="col-lg-12">
             <form-tabs-builder

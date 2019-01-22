@@ -783,7 +783,7 @@
             return JSON.stringify(this.field.value||[]);
 
           if ( ! this.isOpenedRow ){
-            var default_value = this.field.default;
+            var default_value = this.field.value||this.field.default;
 
             //If is current date value in datepicker
             if ( this.isDatepicker && default_value && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' ){

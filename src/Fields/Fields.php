@@ -25,7 +25,7 @@ class Fields
     protected $attributes = [
          'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled',
          'orderBy', 'limit', 'removeFromForm', 'multirows', 'phone_link', 'unique_db',
-         'index', 'invisible', 'unsigned', 'component', 'column_name',
+         'index', 'invisible', 'unsigned', 'component', 'column_name', 'imaginary',
     ];
 
     /*
@@ -216,6 +216,10 @@ class Fields
 
         $mutationBuilder = $this->mutationBuilder[$model->getTable()];
 
+        //Push new fields, groups... or replace existing fields. Into first level of fields
+        if ( ! $parent_group )
+            $fields = $this->pushFields($fields, $mutationBuilder, 'push_before');
+
         foreach ($items as $key => $field)
         {
             //Add before field
@@ -231,11 +235,15 @@ class Fields
 
         //Push new fields, groups... or replace existing fields. Into first level of fields
         if ( ! $parent_group )
-        {
-            foreach ($mutationBuilder->push as $key => $field) {
-                $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutationBuilder);
-            }
-        }
+            $fields = $this->pushFields($fields, $mutationBuilder);
+
+        return $fields;
+    }
+
+    private function pushFields($fields, $mutationBuilder, $type = 'push')
+    {
+        foreach ($mutationBuilder->{$type} as $key => $field)
+            $fields = $this->pushFieldOrGroup($fields, $key, $field, $mutationBuilder);
 
         return $fields;
     }

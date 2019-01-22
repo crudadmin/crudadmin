@@ -636,6 +636,12 @@ class AdminMigrationCommand extends Command
         }
     }
 
+    protected function imaginaryColumn($table, $model, $key)
+    {
+        if ( $model->isFieldType($key, 'imaginary') || $model->hasFieldParam($key, 'imaginary') )
+            return true;
+    }
+
     /*
      * Check existing of foreign key from belongsToModel property
      */
@@ -905,6 +911,7 @@ class AdminMigrationCommand extends Command
     {
         //Registred column types
         $types = [
+            'imaginaryColumn',
             'belongsTo',
             'belongsToMany',
             'jsonColumn',
