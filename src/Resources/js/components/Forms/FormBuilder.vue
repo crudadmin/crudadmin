@@ -204,6 +204,8 @@
       },
       //Resets form values and errors
       initForm(row, reset){
+        var is_row = row && 'id' in row;
+
         //Resets document values of elements
         //can be reseted just when is changed row for other, or inserting new row
         if ( reset !== false )
@@ -217,11 +219,11 @@
 
         this.resetErrors();
 
-        if ( !row || !('id' in row) )
+        if ( ! is_row )
           this.$parent.resetForm();
 
         //Checks if form can be editable
-        if ( row && this.canaddrow && this.model.editable == false && this.$parent.hasChilds() == 0 )
+        if ( is_row && this.canaddrow && this.model.editable == false && this.$parent.hasChilds() == 0 )
         {
           this.$parent.resetForm();
           return;
@@ -229,7 +231,7 @@
 
         for ( var key in this.model.fields )
         {
-          if ( ! row || this.model.fields[key].value != row[key] || reset )
+          if ( ! is_row || this.model.fields[key].value != row[key] || reset )
           {
             var value = row ? row[key] : null;
 
@@ -242,7 +244,7 @@
         }
 
         //Set box color
-        if (!row || !('id' in row)) {
+        if ( !is_row ) {
           this.isActive = true;
 
           if ( this.hasParentModel() )
