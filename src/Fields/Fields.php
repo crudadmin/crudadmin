@@ -26,6 +26,7 @@ class Fields
          'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled',
          'orderBy', 'limit', 'removeFromForm', 'multirows', 'phone_link', 'unique_db',
          'index', 'invisible', 'unsigned', 'component', 'column_name', 'imaginary',
+         'ifDoesntExists', 'ifExists'
     ];
 
     /*

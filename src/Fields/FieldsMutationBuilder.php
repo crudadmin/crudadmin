@@ -102,6 +102,14 @@ class FieldsMutationBuilder
     }
 
     /*
+     * Added alias for removing/deleting fields/groups
+     */
+    public function delete($selector_key)
+    {
+        return $this->remove($selector_key);
+    }
+
+    /*
      * Add fields into end of model
      */
     public function push($fields, $type = 'push')

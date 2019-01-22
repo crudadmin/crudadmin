@@ -130,8 +130,11 @@ class ModelsHistory extends Model
             if ( $this->canSkipFieldInHistory($model, $key) )
                 continue;
 
-            if ( !array_key_exists($key, $old_data) || $old_data[$key] != $value )
+            $exists = array_key_exists($key, $old_data);
+
+            if ( !$exists && ! is_null($value) || $exists && $old_data[$key] != $value ){
                 $changes[$key] = $value;
+            }
         }
 
         //Push empty values into missing keys in actual request

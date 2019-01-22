@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!hasComponent" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
+  <div v-if="!hasComponent" v-show="canShowField" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
     <!-- STRING INPUT -->
     <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
       <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
@@ -132,7 +132,7 @@
   </div>
 
   <component
-    v-else
+    v-if="hasComponent"
     :model="model"
     :field="field"
     :history_changed="isChangedFromHistory"
@@ -239,7 +239,7 @@
             try {
                 obj = (new Function('return '+data))();
             } catch(error){
-                console.error('Syntax error in component ' + components[i] + '.Vue' + "\n", error);
+                console.error('Syntax error in component ' + component[i] + '.Vue' + "\n", error);
                 continue;
             }
 
@@ -365,9 +365,12 @@
           if ( this.isSelect )
           {
             var select = $('#' + this.getId),
+                is_change = false,
                 _this = this;
 
             select.change(function(e){
+              is_change = true;
+
               if ( _this.isMultiple ){
                 //Chosen need to be updated after delay for correct selection order
                 setTimeout(function(){
@@ -380,7 +383,17 @@
               } else {
                 _this.changeValue(null, $(this).val());
               }
-            })
+            });
+
+            //If field value has been updated by setter and not by the user
+            this.$watch('field.value', function(value){
+              if ( is_change === true || ! value ){
+                is_change = false;
+                return;
+              }
+
+              $('#' + this.getId).chosen(this.chosenOptions()).trigger("chosen:updated")
+            });
           }
         },
         chosenOptions(){
@@ -582,6 +595,15 @@
       },
 
       computed : {
+        canShowField(){
+          if ( this.field.ifExists === true && ! this.isOpenedRow )
+            return false;
+
+          if ( this.field.ifDoesntExists === true && this.isOpenedRow )
+            return false;
+
+          return true;
+        },
         getMultiDates(){
           var value = this.field.value||[];
 

@@ -352,7 +352,7 @@
             try {
                 obj = (new Function('return '+data))();
             } catch(error){
-                console.error('Syntax error in component ' + components[i] + '.Vue' + "\n", error);
+                console.error('Syntax error in component ' + layouts[i].name + '.Vue' + "\n", error);
                 continue;
             }
           }
