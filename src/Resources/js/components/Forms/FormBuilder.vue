@@ -3,10 +3,11 @@
   <form method="post" action="" v-bind:id="formID" :data-form="model.slug" v-on:submit.prevent="saveForm">
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
-      <div class="box-header with-border" :class="{ visible : hasLocaleFields || canShowGettext }">
+      <div class="box-header with-border" :class="{ visible : (hasLocaleFields || canShowGettext || (isOpenedRow && model.history)) }">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="isOpenedRow && canShowGettext" @click="openGettextEditor()" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-globe"></i> {{ trans('gettext-open') }}</button>
-        <button v-if="isOpenedRow && canaddrow" v-on:click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
+        <button v-if="isOpenedRow && canaddrow && !isSingle" @click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
+        <button v-if="isOpenedRow && model.history && isSingle" type="button" @click="showHistory(row)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i> {{ trans('history.show') }}</button>
 
         <component
           v-for="name in getComponents('form-header')"
@@ -125,6 +126,9 @@
       formID(){
         return 'form-' + this.$parent.depth_level + '-' + this.model.slug;
       },
+      isSingle(){
+        return this.model.minimum == 1 && this.model.maximum == 1;
+      },
       isOpenedRow(){
         return this.row && 'id' in this.row;
       },
@@ -196,6 +200,9 @@
     },
 
     methods: {
+      showHistory(row){
+        this.$parent.showHistory(row);
+      },
       getComponents(type){
         return this.$parent.getComponents(type);
       },
@@ -231,7 +238,7 @@
 
         for ( var key in this.model.fields )
         {
-          if ( ! is_row || this.model.fields[key].value != row[key] || reset )
+          if ( ! row || this.model.fields[key].value != row[key] || reset )
           {
             var value = row ? row[key] : null;
 

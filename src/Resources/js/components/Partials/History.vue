@@ -32,7 +32,7 @@
                         </td>
                         <td>{{ date(item.created_at) }}</td>
                         <td>
-                          <div><button type="button" v-on:click="applyChanges(item)" class="btn btn-sm btn-success" v-bind:class="{ 'enabled-history' : history.history_id == item.id }" data-toggle="tooltip" :title="trans('history.show-changes')" :data-original-title="trans('history.show-changes')"><i class="fa fa-eye"></i></button></div>
+                          <div><button type="button" v-on:click="applyChanges(item)" class="btn btn-sm btn-success" v-bind:class="{ 'enabled-history' : history.history_id == item.id }" data-toggle="tooltip" :title="trans('history.show')" :data-original-title="trans('history.show-changes')"><i class="fa fa-eye"></i></button></div>
                         </td>
                       </tr>
                     </tbody>
@@ -78,13 +78,13 @@
             this.$parent.history.fields = item.changed_fields;
             this.$parent.history.history_id = item.id;
 
-            this.$parent.selectRow({ id : this.history.id }, null, null, item.id);
+            this.$dispatch('proxy', 'selectHistoryRow', [this.$parent.model.slug, this.$parent.history.id, item.id, this.$parent.row]);
         },
         date(date){
             return moment(date).format('D.M.Y H:mm');
         },
         closeHistory(){
-            this.$parent.$parent.$parent.closeHistory(true);
+            this.$parent.closeHistory(true);
         },
         changedFields(items){
           var changes = [];

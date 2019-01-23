@@ -132,6 +132,7 @@
     :is="name">
   </component>
 
+  <history v-if="history.id" :history="history"></history>
   <gettext-extension v-if="gettext_editor" :gettext_editor.sync="gettext_editor"></gettext-extension>
 </template>
 
@@ -139,13 +140,14 @@
   import FormBuilder from './FormBuilder.vue';
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
   import GettextExtension from '../Partials/GettextExtension.vue';
+  import History from '../Partials/History.vue';
 
   export default {
     props : ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
 
     name : 'model-builder',
 
-    components : { FormBuilder, ModelRowsBuilder, GettextExtension },
+    components : { FormBuilder, ModelRowsBuilder, GettextExtension, History },
 
     data : function(){
 
@@ -330,6 +332,25 @@
     },
 
     methods : {
+      showHistory(row){
+        this.$http.get( this.$root.requests.getHistory, {
+          model : this.model.slug,
+          id : row.id,
+        })
+        .then(function(response){
+
+          var data = response.data;
+
+          if ( data.length <= 1 )
+            return this.$root.openAlert(this.$root.trans('info'), this.$root.trans('no-changes'), 'warning');
+
+          this.history.id = row.id;
+          this.history.rows = data;
+        })
+        .catch(function(response){
+          this.$root.errorResponseLayer(response);
+        });
+      },
       getComponents(type){
         return this.layouts.filter(item => {
           if ( this.registered_components.indexOf(item.name) === -1 )

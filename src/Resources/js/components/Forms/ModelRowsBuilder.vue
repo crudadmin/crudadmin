@@ -846,7 +846,6 @@
 
                 if ( this.alert.component && this.alert.component.request )
                   data = _.clone(this.alert.component.request);
-                console.log(this.alert.component, data);
 
                 makeAction(null, data);
               }

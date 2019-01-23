@@ -1,7 +1,5 @@
 <template>
   <div>
-    <history v-if="history.id" :history="history"></history>
-
     <table v-bind:id="'table-'+model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
       <thead>
         <tr>
@@ -48,12 +46,11 @@
 
 <script>
   import TableRowValue from './TableRowValue.vue';
-  import History from './History.vue';
 
   export default {
       props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
 
-      components: { TableRowValue, History },
+      components: { TableRowValue },
 
       data(){
         return {
@@ -77,6 +74,15 @@
 
       ready() {
 
+      },
+
+      events: {
+        selectHistoryRow(history_data){
+          if ( this.model.slug != history_data[0] )
+            return;
+
+          this.selectRow({ id : history_data[1] }, null, null, history_data[2], history_data[3]);
+        }
       },
 
       computed: {
@@ -438,25 +444,9 @@
           this.gettext_editor = item;
         },
         showHistory(row){
-          this.$http.get( this.$root.requests.getHistory, {
-            model : this.model.slug,
-            id : row.id,
-          })
-          .then(function(response){
-
-            var data = response.data;
-
-            if ( data.length <= 1 )
-              return this.$root.openAlert(this.$root.trans('info'), this.$root.trans('no-changes'), 'warning');
-
-            this.history.id = row.id;
-            this.history.rows = data;
-          })
-          .catch(function(response){
-            this.$root.errorResponseLayer(response);
-          });
+          this.$parent.$parent.showHistory(row);
         },
-        selectRow(row, data, model, history_id){
+        selectRow(row, data, model, history_id, model_row){
           //If is selected same row
           if ( this.row && this.row.id == row.id && !history_id )
             return;
@@ -470,31 +460,35 @@
             return this.row = null;
 
           var render = function(response){
-            for ( var key in response )
-            {
+            for ( var key in response ){
               row[key] = response[key];
             }
 
-            //Clone row item
+            //Bind model data
             this.row = _.cloneDeep(row, true);
+
+            //Fix for single model with history support
+            if ( model_row ){
+              for ( var key in model_row )
+                model_row[key] = row[key];
+            }
 
             this.$parent.$parent.closeHistory(history_id ? true : false);
 
             this.scrollToForm();
-          };
+          }.bind(this);
 
           if ( data ) {
             render(data);
           } else {
             this.$http.get(this.$root.requests.show, { model : this.model.slug, id : row.id, subid : history_id })
             .then(function(response){
-              render.call(this, response.data );
+              render(response.data);
             })
             .catch(function(response){
               this.$root.errorResponseLayer(response);
             });
           }
-
         },
         removeRow(row){
           this.$parent.removeRow(row);
