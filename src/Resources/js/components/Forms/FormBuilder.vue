@@ -201,12 +201,7 @@
 
     methods: {
       getLangName(lang){
-        //If language table is also translatable
-        if ( typeof lang.name == 'object' ){
-          return lang.name[Object.keys(lang.name)[0]];
-        }
-
-        return lang.name;
+        return this.$root.getLangName(lang);
       },
       showHistory(row){
         this.$parent.showHistory(row);

@@ -4,7 +4,7 @@
             {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
             <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
                 <select v-model="langid" class="form-control">
-                    <option v-for="language in languages" value="{{ language.id }}">{{ language.name }}</option>
+                    <option v-for="language in languages" value="{{ language.id }}">{{ getLangName(language) }}</option>
                 </select>
             </div>
         </li>
@@ -64,6 +64,9 @@
         },
 
         methods: {
+            getLangName(lang){
+                return this.$root.getLangName(lang);
+            },
             hasActiveModule(modules){
                 for ( var key in modules )
                 {
