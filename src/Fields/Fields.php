@@ -50,6 +50,11 @@ class Fields
     protected $mutationBuilder = [];
 
     /*
+     * Update fields after rendering all attributes
+     */
+    protected $post_update = [];
+
+    /*
      * Returns field attributes which are not includes in request rules, and are used for mutations
      */
     public function getAttributes()
@@ -123,6 +128,7 @@ class Fields
         $this->fields[$table] = [];
         $this->groups[$table] = [];
         $this->remove[$table] = [];
+        $this->post_update[$table] = [];
         $this->mutationBuilder[$table] = null;
 
         //Fields from model
@@ -137,7 +143,29 @@ class Fields
         //Register fields from groups
         $this->manageGroupFields($model, 0, $fields, null);
 
+        $this->firePushUpdates($model, $table);
+
         return $this->fields[$table];
+    }
+
+    private function firePushUpdates($model, $table)
+    {
+        if (
+            ! isset($this->post_update[$table])
+            || count($updates = $this->post_update[$table]) == 0
+        )
+            return;
+
+        foreach ($updates as $update)
+        {
+            $key = $update['mutation']->getKey();
+
+            $field = $this->fields[$table][$key];
+
+            $field = $update['closure']($this->fields[$table], $field, $key, $model);
+
+            $this->fields[$table][$key] = $field;
+        }
     }
 
     /*
@@ -395,23 +423,39 @@ class Fields
             $mutation->setKey($key);
         }
 
-        //Updating field
-        if ( method_exists($mutation, 'update') )
-        {
-            if ( ($response = $mutation->update($field, $key, $model)) && is_array($response) )
-                $field = $response;
-        }
+        $this->updateFields($mutation, $field, $key, $model);
 
-        //Updating field
+        //Creating field
         $this->createFields($mutation, $field, $key, $model);
 
-        //Updating field
+        //Removing field
         $this->removeFields($mutation, $field, $key, $model);
 
         //Register attributes from mutation
         $this->registerProperties($mutation);
 
+        //Register post updates mutators
+        $this->registerPostUpdate($mutation, $field, $key, $model);
+
         return $field;
+    }
+
+    //Register post updates
+    protected function registerPostUpdate($mutation, $field, $key, $model)
+    {
+        if (
+            ! method_exists($mutation, 'getPostUpdate')
+            || count($closures = $mutation->getPostUpdate()) == 0
+        )
+            return;
+
+        foreach ($closures as $closure)
+        {
+            $this->post_update[$model->getTable()][] = [
+                'closure' => $closure,
+                'mutation' => $mutation,
+            ];
+        }
     }
 
     protected function registerProperties($mutation)
@@ -428,6 +472,20 @@ class Fields
             {
                 $this->addAttribute( $attribute );
             }
+        }
+    }
+
+    protected function updateFields($mutation, &$field, $key, $model)
+    {
+        //Updating field
+        if ( ! method_exists($mutation, 'update') )
+            return;
+
+        if (
+            ($response = $mutation->update($field, $key, $model))
+            && is_array($response)
+        ) {
+            $field = $response;
         }
     }
 

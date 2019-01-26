@@ -71,7 +71,7 @@ class LayoutController extends BaseController
         if ( !$model || ! auth()->guard('web')->user()->hasAccess( $model ) )
             Ajax::permissionsError();
 
-        //If is first request into table, then load allso all options from fields
+        //If is first request into table, then load also all options from fields
         if ( $count == 0 ){
             $model->withAllOptions(true);
         }
