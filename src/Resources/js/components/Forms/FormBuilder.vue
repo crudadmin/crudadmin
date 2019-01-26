@@ -19,11 +19,11 @@
 
         <div class="dropdown pull-right multi-languages" v-if="hasLocaleFields && selectedLanguage">
           <button class="btn btn-default dropdown-toggle" type="button" id="languageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-            <i class="fa fa-globe"></i> <span class="text">{{ selectedLanguage.name }}</span>
+            <i class="fa fa-globe"></i> <span class="text">{{ getLangName(selectedLanguage) }}</span>
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selectedlangid = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ lang.name }}</a></li>
+            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selectedlangid = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ getLangName(lang) }}</a></li>
           </ul>
         </div>
 
@@ -200,6 +200,14 @@
     },
 
     methods: {
+      getLangName(lang){
+        //If language table is also translatable
+        if ( typeof lang.name == 'object' ){
+          return lang.name[Object.keys(lang.name)[0]];
+        }
+
+        return lang.name;
+      },
       showHistory(row){
         this.$parent.showHistory(row);
       },
