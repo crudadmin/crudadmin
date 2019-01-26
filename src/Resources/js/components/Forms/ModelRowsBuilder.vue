@@ -539,8 +539,30 @@
             }
 
             //Update options
-            if ( 'options' in this.model.fields[key] && Object.keys(fields[key].options).length > 0 ){
-              this.model.fields[key].options = fields[key].options;
+            if (
+              'options' in this.model.fields[key]
+              && (
+                typeof fields[key].options === 'string'
+                || Object.keys(fields[key].options).length > 0
+              )
+            )
+            {
+              //Use options from different field
+              if ( typeof fields[key].options === 'string' )
+              {
+                if ( fields[key].options.substr(0, 2) == '$.' )
+                {
+                  var from_key = fields[key].options.substr(2);
+
+                  this.model.fields[key].options = fields[from_key].options;
+                }
+              }
+
+              //Use own field options
+              else {
+                this.model.fields[key].options = fields[key].options;
+              }
+
             }
           }
 

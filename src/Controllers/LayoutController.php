@@ -99,27 +99,48 @@ class LayoutController extends BaseController
 
     /*
      * Return fields with correct order of options in select for administration
-     * because browser dont know correct values of keys in object
+     * because browser does not know correct values of keys in object
      *
      * Every row in options will be represented as array of key and value,
      */
+    private function updateOptionsForm($key, $field, &$fields)
+    {
+        if ( ! array_key_exists('options', $field) )
+            return;
+
+        $data = [];
+
+        foreach ($field['options'] as $k => $v)
+            $data[] = [$k, $v];
+
+        $fields[$key]['options'] = $data;
+    }
+
+    private function findEqualOptions($key, $field, &$fields)
+    {
+        if ( ! array_key_exists('options', $field) || count($options = $field['options']) == 0 )
+            return;
+
+        foreach ($fields as $k => $f) {
+            if ( $key == $k || ! array_key_exists('options', $f) )
+                continue;
+
+            //If this set of options exists in other field already
+            if ( $options == $f['options'] ){
+                $fields[$key]['options'] = '$.' . $k;
+            }
+        }
+    }
+
     protected function getModelFields($model)
     {
         $fields = $model->getFields();
 
         foreach ($fields as $key => $field)
         {
-            if ( array_key_exists('options', $field) )
-            {
-                $data = [];
+            $this->updateOptionsForm($key, $field, $fields);
 
-                foreach ($field['options'] as $k => $v)
-                {
-                    $data[] = [$k, $v];
-                }
-
-                $fields[$key]['options'] = $data;
-            }
+            $this->findEqualOptions($key, $field, $fields);
         }
 
         return $fields;
