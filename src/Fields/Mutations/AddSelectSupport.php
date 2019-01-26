@@ -1,4 +1,5 @@
 <?php
+
 namespace Gogol\Admin\Fields\Mutations;
 
 use DB;
@@ -106,7 +107,7 @@ class AddSelectSupport extends MutationRule
     {
         $attribute = array_key_exists('belongsTo', $field)
                     ? $field['belongsTo']
-                    : ( array_key_exists('belongsTo', $field)
+                    : ( array_key_exists('belongsToMany', $field)
                         ? $field['belongsToMany']
                         : ''
                     );
