@@ -11,7 +11,7 @@
 .sidebar a { cursor: pointer; }
 .no-margin { margin: 0 }
 .tooltip-inner { word-wrap: break-word; }
-.box-table-body { overflow-x: auto; }
+.box-table-body { overflow-x: auto; clear: both; }
 .box { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2)  }
 .box-info { background: #fafeff }
 .box-warning { background: #fffdfa }
