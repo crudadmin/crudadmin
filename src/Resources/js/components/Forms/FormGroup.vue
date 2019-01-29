@@ -93,7 +93,7 @@ export default {
 
     methods: {
       canShowField(field){
-        return !('removeFromForm' in field);
+        return !('removeFromForm' in field) && !('invisible' in field);
       },
       //Return group class
       getGroupClass(group){

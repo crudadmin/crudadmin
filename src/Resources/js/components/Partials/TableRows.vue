@@ -105,7 +105,13 @@
             if (
               this.hidden.indexOf( key ) == -1
               && this.avaliableColumns.indexOf( key ) > -1
-              && (!(key in this.model.fields) || this.model.fields[key].hidden != true)
+              && (
+                  !(key in this.model.fields)
+                  || (
+                    this.model.fields[key].hidden != true
+                    && this.model.fields[key].invisible != true
+                  )
+              )
             )
             {
               data[ this.model.columns[i] ] = this.fieldName( this.model.columns[i] );
@@ -167,7 +173,7 @@
 
             for ( var key in columns )
             {
-              if ( !(key in data) && columns[key].hidden != true )
+              if ( !(key in data) && (columns[key].hidden != true && columns[key].invisible != true) )
               {
                 var field_key = this.getColumnRightKey(key);
 
