@@ -141,7 +141,7 @@ class AddSelectSupport extends MutationRule
         return null;
     }
 
-    private function getAllColumnsFromAllAttributes($model, $fields)
+    private function getAllColumnsFromAllAttributes($model, $fields, $table)
     {
         $columns = [];
 
@@ -149,7 +149,7 @@ class AddSelectSupport extends MutationRule
         {
             $properties = $this->getBelongsToProperties($field);
 
-            if ( count($properties) < 2 )
+            if ( count($properties) < 2 || $properties[0] != $table )
                 continue;
 
             $columns = array_merge($columns, $model->getRelationshipNameBuilder($properties[1]));
@@ -172,9 +172,11 @@ class AddSelectSupport extends MutationRule
         if ( count($properties) >= 2 && strtolower($properties[1]) != 'null' )
         {
             //Get all columns from each field witch belongsTo relation
-            $load_columns = $this->getAllColumnsFromAllAttributes($model, $fields);
+            $load_columns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);
 
             $load_columns = $this->getColumnsByProperties($properties, $field, $load_columns);
+
+            $load_columns = array_unique($load_columns);
 
             //Get data from table, and bind them info buffer for better performance
             $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {
