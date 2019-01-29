@@ -241,7 +241,7 @@
 
         for ( var key in this.model.fields )
         {
-          if ( ! row || this.model.fields[key].value != row[key] || reset )
+          if ( ! is_row || this.model.fields[key].value != row[key] || reset )
           {
             var value = row ? row[key] : null;
 
