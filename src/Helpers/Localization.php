@@ -13,6 +13,8 @@ class Localization
 
     protected $default_localization = null;
 
+    protected $booted = false;
+
     public function __construct()
     {
         $this->languages = new Collection;
@@ -26,6 +28,8 @@ class Localization
 
     public function bootLanguages()
     {
+        $this->booted = true;
+
         return $this->languages = \Admin::getModelByTable('languages')->all();
     }
 
@@ -99,6 +103,8 @@ class Localization
 
     public function getDefaultLanguage()
     {
+        $this->checkForBoot();
+
         if ( $this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first() )
         {
             return $language;
@@ -114,6 +120,8 @@ class Localization
 
     public function getFirstLanguage()
     {
+        $this->checkForBoot();
+
         return $this->languages->first();
     }
 
@@ -127,8 +135,17 @@ class Localization
         return $this->isValid( request()->segment(1) );
     }
 
+    private function checkForBoot()
+    {
+        if ( $this->booted === false )
+            $this->bootLanguages();
+    }
+
     public function get()
     {
+        //Fix for requesting data from console
+        $this->checkForBoot();
+
         $segment = request()->segment(1);
 
         if ( ! $this->isValidSegment() )
