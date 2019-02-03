@@ -213,13 +213,36 @@ class AddSelectSupport extends MutationRule
         return $field;
     }
 
+    private function makeOptionsFromSimpleArray($options)
+    {
+        $array = [];
+
+        foreach ($options as $option){
+            $id = $option['id'];
+
+            unset($option['id']);
+
+            $array[$id] = $option;
+        }
+
+        return $array;
+    }
+
     private function updateAssocField(&$field)
     {
         if ( array_key_exists('options', $field) )
         {
             //Checks if is array associative
             if ( ! $this->isAssoc($field['options']) )
-                $field['options'] = array_combine($field['options'], $field['options']);
+            {
+                //If is simple string options
+                if ( is_string($field['options'][0]) )
+                    $field['options'] = array_combine($field['options'], $field['options']);
+
+                //If is simple array options
+                else if ( is_array($field['options'][0]) && array_key_exists('id', $field['options'][0]) )
+                    $field['options'] = $this->makeOptionsFromSimpleArray($field['options']);
+            }
         } else {
             $field['options'] = [];
         }
