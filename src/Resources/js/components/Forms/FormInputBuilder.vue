@@ -386,13 +386,17 @@
             });
 
             //If field value has been updated by setter and not by the user
-            this.$watch('field.value', function(value){
-              if ( is_change === true || ! value ){
+            this.$watch('field.value', function(value, oldvalue){
+              if (
+                is_change === true
+                || ! value
+                || (value === oldvalue || _.isEqual(value, oldvalue))
+              ){
                 is_change = false;
                 return;
               }
 
-              $('#' + this.getId).chosen(this.chosenOptions()).trigger("chosen:updated")
+              this.reloadSelectWithMultipleOrders(this.field);
             });
           }
         },
@@ -424,25 +428,7 @@
 
             //If is select
             if ( this.isSelect )
-            {
-              var select = $('#' + this.getId).chosen(this.chosenOptions()).trigger("chosen:updated");
-
-              //Rebuild multiple order into fake select which will send data into request
-              if ( this.isMultiple ){
-
-                //Set selection order into multiple select
-                if ( field.value ){
-                  //Error exception when is some options missing, or filtrated by filters
-                  try {
-                    select.setSelectionOrder(field.value);
-                  } catch(e){
-
-                  }
-                }
-
-                this.rebuildSelect();
-              }
-            }
+              this.reloadSelectWithMultipleOrders(field);
 
             this.addMultipleFilesSupport();
           })
@@ -510,6 +496,25 @@
 
           for ( var i = 0; i < values.length; i++ )
             fake_select.append($('<option></option>').attr('selected', true).attr('value', values[i]).text(values[i]));
+        },
+        reloadSelectWithMultipleOrders(field){
+          var select = $('#' + this.getId).chosen(this.chosenOptions()).trigger("chosen:updated");
+
+          //Rebuild multiple order into fake select which will send data into request
+          if ( this.isMultiple ){
+
+            //Set selection order into multiple select
+            if ( field.value ){
+              //Error exception when is some options missing, or filtrated by filters
+              try {
+                select.setSelectionOrder(field.value);
+              } catch(e){
+
+              }
+            }
+
+            this.rebuildSelect();
+          }
         },
         trans(key){
           return this.$root.trans(key);
