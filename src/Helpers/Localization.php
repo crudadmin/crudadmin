@@ -103,7 +103,7 @@ class Localization
 
     public function getDefaultLanguage()
     {
-        $this->checkForBoot();
+        $this->checkForConsoleBoot();
 
         if ( $this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first() )
         {
@@ -120,7 +120,7 @@ class Localization
 
     public function getFirstLanguage()
     {
-        $this->checkForBoot();
+        $this->checkForConsoleBoot();
 
         return $this->languages->first();
     }
@@ -135,16 +135,21 @@ class Localization
         return $this->isValid( request()->segment(1) );
     }
 
-    private function checkForBoot()
+    private function checkForConsoleBoot()
     {
-        if ( $this->booted === false )
+        if (
+            $this->booted === false
+            && \Admin::isEnabledMultiLanguages() === true
+            && app()->runningInConsole() === true
+        ) {
             $this->bootLanguages();
+        }
     }
 
     public function get()
     {
         //Fix for requesting data from console
-        $this->checkForBoot();
+        $this->checkForConsoleBoot();
 
         $segment = request()->segment(1);
 
