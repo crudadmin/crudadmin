@@ -30,7 +30,10 @@ class Localization
     {
         $this->booted = true;
 
-        return $this->languages = \Admin::getModelByTable('languages')->all();
+        if ( !($model = \Admin::getModelByTable('languages')) )
+            return new Collection;
+
+        return $this->languages = $model->all();
     }
 
     public function boot()
