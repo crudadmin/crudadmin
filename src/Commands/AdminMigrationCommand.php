@@ -772,7 +772,7 @@ class AdminMigrationCommand extends Command
                          ->map(function($item) use($singular_column, $properties) {
                             return [
                                 $properties[6] => $item->getKey(),
-                                $singular_column => $item->{$singular_column},
+                                $properties[7] => $item->{$singular_column},
                             ];
                          })->toArray();
         }
