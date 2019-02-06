@@ -757,6 +757,29 @@ class AdminMigrationCommand extends Command
         return 'fk_'.$table_index.'_'.$key;
     }
 
+    private function getPivotRowsFromSingleRelation($model, $singular_column, $properties)
+    {
+        //If singular column exists in table and has not been deleted yet and pivot table does not exists
+        if (
+            !$model->getField($singular_column)
+            && $model->getSchema()->hasColumn($model->getTable(), $singular_column)
+            && !$model->getSchema()->hasTable( $properties[3] )
+         ) {
+            return $model->withoutGlobalScopes()
+                         ->select([ $model->getKeyName(), $singular_column ])
+                         ->whereNotNull($singular_column)
+                         ->get()
+                         ->map(function($item) use($singular_column, $properties) {
+                            return [
+                                $properties[6] => $item->getKey(),
+                                $singular_column => $item->{$singular_column},
+                            ];
+                         })->toArray();
+        }
+
+        return [];
+    }
+
     /*
      * Add relationship for column created by developer
      */
@@ -764,10 +787,14 @@ class AdminMigrationCommand extends Command
     {
         if ( $model->hasFieldParam($key, 'belongsToMany') )
         {
-            $this->buffer[ $table->getTable() ][] = function() use($table, $model, $key) {
-                $properties = $model->getRelationProperty($key, 'belongsToMany');
+            $properties = $model->getRelationProperty($key, 'belongsToMany');
 
-                //If pivot table non exists
+            $singular_column = trim_end(str_singular($key), '_id') . '_id';
+
+            $pivot_rows = $this->getPivotRowsFromSingleRelation($model, $singular_column, $properties);
+
+            $this->buffer[ $table->getTable() ][] = function() use($table, $model, $key, $properties, $pivot_rows, $singular_column) {
+                //If pivot table does not exists
                 if ( ! $model->getSchema()->hasTable( $properties[3] ) )
                 {
                     //Create pivot table
@@ -785,6 +812,14 @@ class AdminMigrationCommand extends Command
                     });
 
                     $this->line('<comment>Created table:</comment> '.$properties[3]);
+
+                    //Sync data from previous belongsTo relation into belongsToMany
+                    if ( count($pivot_rows) > 0 )
+                    {
+                        $synced = $model->{$key}()->sync($pivot_rows);
+
+                        $this->line('<comment>Imported rows ('.count($pivot_rows).'):</comment> from <info>'.$singular_column.'</info> into pivot <info>'.$properties[3].'</info> table');
+                    }
                 } else {
                     $this->line('<info>Checked table:</info> '.$properties[3]);
 
@@ -853,7 +888,7 @@ class AdminMigrationCommand extends Command
         $this->buffer_after[ $model->getTable() ][] = function() use ($model) {
 
             //Get empty slugs
-            $empty_slugs = $model->where(function($query) use ($model) {
+            $empty_slugs = $model->withoutGlobalScopes()->where(function($query) use ($model) {
                 //If some of localized slug value is empty
                 if ( $model->hasLocalizedSlug() )
                 {
