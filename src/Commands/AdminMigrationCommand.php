@@ -818,7 +818,7 @@ class AdminMigrationCommand extends Command
                     //Sync data from previous belongsTo relation into belongsToMany
                     if ( count($pivot_rows) > 0 )
                     {
-                        $synced = $model->{$key}()->sync($pivot_rows);
+                        $model->{$key}()->sync($pivot_rows);
 
                         $this->line('<comment>Imported rows ('.count($pivot_rows).'):</comment> from <info>'.$singular_column.'</info> into pivot <info>'.$properties[3].'</info> table');
                     }
