@@ -789,7 +789,9 @@ class AdminMigrationCommand extends Command
         {
             $properties = $model->getRelationProperty($key, 'belongsToMany');
 
-            $singular_column = trim_end(str_singular($key), '_id') . '_id';
+            $singular_column = ($migrateToPivot = $model->getFieldParam($key, 'migrateToPivot')) && is_string($migrateToPivot)
+                               ? $migrateToPivot
+                               : (trim_end(str_singular($key), '_id') . '_id');
 
             $pivot_rows = $this->getPivotRowsFromSingleRelation($model, $singular_column, $properties);
 
