@@ -303,6 +303,7 @@ class LayoutController extends BaseController
                 continue;
 
             $data[$key]['slug'] = $key;
+            $data[$key]['table'] = $key;
 
             foreach (['submenu', 'childs'] as $subkey)
             {
