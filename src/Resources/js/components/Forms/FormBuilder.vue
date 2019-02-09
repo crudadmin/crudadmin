@@ -452,6 +452,14 @@
           }
         });
       },
+      buildEventData(row, request){
+        return {
+          table : this.model.slug,
+          model : this.model,
+          row : row,
+          request : request
+        };
+      },
       saveForm(e)
       {
         //Devide if is updating or creating form
@@ -471,10 +479,10 @@
               this.saveParentChilds(response);
 
             //Bind values for input builder
-            this.$broadcast('onSubmit', clonedRow);
+            this.$broadcast('onSubmit', this.buildEventData(clonedRow, response.data));
 
             //Send notification about new row
-            this.$dispatch('proxy', 'onCreate', [this.model.slug, response.data]);
+            this.$dispatch('proxy', 'onCreate', this.buildEventData(clonedRow, response.data));
 
             //If form has disabled autoreseting
             var autoreset = this.$root.getModelProperty(this.model, 'settings.autoreset');
@@ -497,10 +505,10 @@
             var clonedRow = _.cloneDeep(response.data.row);
 
             //Bind values for input builder
-            this.$broadcast('onSubmit', clonedRow);
+            this.$broadcast('onSubmit', this.buildEventData(clonedRow, response.data));
 
             //Send notification about updated row
-            this.$dispatch('proxy', 'onUpdate', [this.model.slug, clonedRow]);
+            this.$dispatch('proxy', 'onUpdate', this.buildEventData(clonedRow, response.data));
 
             for ( var key in response.data.row )
             {

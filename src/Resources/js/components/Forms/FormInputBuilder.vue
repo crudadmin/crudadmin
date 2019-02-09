@@ -195,19 +195,21 @@
         this.addMultipleFilesSupport(true);
       },
       events : {
-        onSubmit(row){
-          if ( this.isFile )
-          {
-            if ( this.file_from_server == true && row != null )
-              return;
+        onSubmit(data){
+          var row = data.row;
 
-            this.file_from_server = row ? true : false;
+          if ( data.table != this.model.slug || ! this.isFile )
+            return;
 
-            this.field.value = row ? row[this.key] : '';
+          if ( this.file_from_server == true && row != null )
+            return;
 
-            //Reset input value after file has been sent
-            $('#' + this.getId).val('');
-          }
+          this.file_from_server = row ? true : false;
+
+          this.field.value = row ? row[this.key] : '';
+
+          //Reset input value after file has been sent
+          $('#' + this.getId).val('');
         },
         updateField(data){
           if ( data[0] != this.key )
