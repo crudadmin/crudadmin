@@ -60,6 +60,11 @@ trait ModelRules
         return true;
     }
 
+    private function isDeletingRow()
+    {
+        return $this->exists && $this->deleted_at && ! $this->getOriginal('deleted_at');
+    }
+
     /*
      * Firing methods before save/create method state
      * good for validation, rules. Method need's to support
@@ -80,9 +85,9 @@ trait ModelRules
                 if ( method_exists($rule, $method) && $this->exists )
                     $rule->{$method}($this);
 
-        if ( in_array('delete', $rules) )
+        if ( in_array('deleting', $rules) )
             foreach (['delete', 'deleting'] as $method)
-                if ( method_exists($rule, $method) )
+                if ( method_exists($rule, $method) && $this->isDeletingRow() )
                     $rule->{$method}($this);
     }
 
@@ -103,7 +108,7 @@ trait ModelRules
             if ( method_exists($rule, 'updated') && $exists )
                 $rule->updated($this);
 
-        if ( in_array('delete', $rules) )
+        if ( in_array('deleted', $rules) )
             if ( method_exists($rule, 'deleted') )
                 $rule->deleted($this);
     }

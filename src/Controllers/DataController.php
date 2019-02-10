@@ -320,25 +320,25 @@ class DataController extends Controller
 
         foreach ($rows as $row )
         {
-            //Add on delete rule validation
-            $row->checkForModelRules(['delete']);
-
             if ( ! $this->canDeleteRow($model, $row, $request) )
-            {
                 Ajax::error( trans('admin::admin.cannot-delete') );
-            }
 
-            //Remove uploaded files
-            $this->removeFilesOnDelete($row);
+            $row->deleted_at = Carbon::now();
+
+            $row->checkForModelRules(['deleting']);
 
             //Remove row from db (softDeletes)
             $row->delete();
 
+            //Remove uploaded files
+            $this->removeFilesOnDelete($row);
+
+            //Fire on delete events
+            $row->checkForModelRules(['deleted'], true);
+
             //Fire on delete events
             if ( method_exists($model, 'onDelete') )
                 $row->onDelete($row);
-
-            $row->checkForModelRules(['delete'], true);
         }
 
         $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
