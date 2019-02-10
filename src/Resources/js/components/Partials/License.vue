@@ -92,7 +92,7 @@ export default {
                     && response.data.callback.length > 0;
         },
         getToday(){
-            return moment().format('Y-M-D');
+            return moment().format('Y-MM-DD');
         },
         getFunnyKey(){
             var fname = ['5', 'd', 'm'].reverse().join(''),
