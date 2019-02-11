@@ -243,7 +243,7 @@
         {
           if ( ! is_row || this.model.fields[key].value != row[key] || reset )
           {
-            var value = row ? row[key] : null;
+            var value = is_row ? row[key] : null;
 
             //Set value and default value of field from database
             this.model.fields[key].value = value;
