@@ -243,7 +243,10 @@
         {
           if ( ! is_row || this.model.fields[key].value != row[key] || reset )
           {
-            var value = is_row ? row[key] : null;
+            //Value can not be undefined, because of model change events.
+            //If value will be undefined, full rows table will be realoaded (bug)
+            var value = is_row ? row[key] : null,
+                value = value === undefined ? null : value;
 
             //Set value and default value of field from database
             this.model.fields[key].value = value;
