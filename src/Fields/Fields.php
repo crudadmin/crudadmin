@@ -35,6 +35,11 @@ class Fields
     protected $fields = [];
 
     /*
+     * Loaded models completelly
+     */
+    protected $loaded_fields = [];
+
+    /*
      * Model groups of fields
      */
     protected $groups = [];
@@ -118,11 +123,16 @@ class Fields
         //Get model table name
         $table = $model->getTable();
 
-        //Buffer
-        if ( array_key_exists($table, $this->fields) && $force === false )
-        {
+        //Return fields from cache
+        if (
+            array_key_exists($table, $this->fields)
+            && $this->isCompletedState($table)
+            && $force === false
+        ) {
             return $this->fields[$table];
         }
+
+        $this->setUncompletedState($table);
 
         //Resets buffer
         $this->fields[$table] = [];
@@ -145,7 +155,26 @@ class Fields
 
         $this->firePushUpdates($model, $table);
 
+        $this->setCompletedState($table);
+
         return $this->fields[$table];
+    }
+
+    private function setCompletedState($table)
+    {
+        if ( ! in_array($table, $this->loaded_fields) )
+            $this->loaded_fields[] = $table;
+    }
+
+    private function setUncompletedState($table)
+    {
+        if ( in_array($table, $this->loaded_fields) )
+            unset($this->loaded_fields[array_search($table, $this->loaded_fields)]);
+    }
+
+    private function isCompletedState($table)
+    {
+        return in_array($table, $this->loaded_fields);
     }
 
     private function firePushUpdates($model, $table)
