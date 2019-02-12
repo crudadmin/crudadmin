@@ -21,8 +21,10 @@ trait HasAttributes
      */
     public function toArray()
     {
-        if ( Admin::isAdmin() )
+        //Skip modified attributes and get raw data in admin
+        if ( Admin::isAdmin() ){
             return array_merge(parent::attributesToArray(), $this->relationsToArray());
+        }
 
         return array_merge($this->attributesToArray(), $this->relationsToArray());
     }
