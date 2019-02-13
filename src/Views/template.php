@@ -193,6 +193,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
     </div>
 
+    <?php
+    //Slot into template
+    if ( file_exists($path = resource_path('views/vendor/crudadmin/slot.php')) )
+    {
+      include_once($path);
+    }
+    ?>
+
     <!-- Admin variables -->
     <script type="text/javascript">
       window.crudadmin = {
