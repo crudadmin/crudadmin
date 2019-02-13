@@ -24,7 +24,10 @@ trait FieldComponent
         $content = preg_replace('#^\s*//.+$#m', '', $content);
 
         $template = $this->getTextBetweenTags($content, 'template');
+
+        //Fixed CRLF for windows, js does not work with CRLF
         $template = str_replace("\n", "", $template);
+        $template = str_replace(["\r\n", "\n", "\r"], '', $template);
 
         $script = $this->getTextBetweenTags($content, 'script');
         $script = trim(str_replace_first('export default', '', $script));

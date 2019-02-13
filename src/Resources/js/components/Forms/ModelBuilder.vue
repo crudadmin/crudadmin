@@ -329,6 +329,10 @@
         return true;
       },
 
+      reloadRows(model){
+        this.$broadcast('reloadRows', model);
+      },
+
     },
 
     methods : {

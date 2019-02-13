@@ -144,6 +144,12 @@
     },
 
     events: {
+      reloadRows(table){
+        if ( this.model.slug != table )
+          return;
+
+        this.loadRows();
+      },
       /*
        * When row is added, then push it into table
        */
