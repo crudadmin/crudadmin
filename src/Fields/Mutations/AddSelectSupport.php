@@ -260,9 +260,6 @@ class AddSelectSupport extends MutationRule
             if ( $static_field = $this->getStaticField($field, $key, $model) )
                 return $static_field;
 
-            //Add admin rows global scope into model
-            $model->getAdminRows();
-
             //Get options from model, and cache them
             $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {
                 return (array)$model->getProperty('options', $model->getModelParentRow());

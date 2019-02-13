@@ -240,7 +240,7 @@ class AdminRows
         $with = $this->loadWithDependecies();
 
         //Get base columns from database with relationships
-        $query = $this->model->getAdminRows()->with($with);
+        $query = $this->model->adminRows()->with($with);
 
         //Filter rows by language id and parent id
         $query->filterByParentOrLanguage($subid, $langid, $parent_table);
@@ -376,7 +376,7 @@ class AdminRows
                         $this->paginateRecords($query, $limit, $page, $count);
                 }, $parent_table );
 
-                $all_rows_data = $this->model->getAdminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
+                $all_rows_data = $this->model->adminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
             }
 
             $data = [
