@@ -233,7 +233,7 @@ class AddSelectSupport extends MutationRule
         if ( array_key_exists('options', $field) )
         {
             //Checks if is array associative
-            if ( ! $this->isAssoc($field['options']) )
+            if ( ! $this->isAssoc($field['options']) && count($field['options']) > 0 )
             {
                 //If is simple string options
                 if ( is_string($field['options'][0]) )

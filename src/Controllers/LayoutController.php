@@ -71,11 +71,6 @@ class LayoutController extends BaseController
         if ( !$model || ! auth()->guard('web')->user()->hasAccess( $model ) )
             Ajax::permissionsError();
 
-        //If is first request into table, then load also all options from fields
-        if ( $count == 0 ){
-            $model->withAllOptions(true);
-        }
-
         if ( $parent_table == '0' )
             $parent_table = null;
         else {
@@ -93,7 +88,9 @@ class LayoutController extends BaseController
         return $this->makePage(
             $model,
             $data,
-            false
+            false,
+            false,
+            $count == 0
         );
     }
 
@@ -132,8 +129,12 @@ class LayoutController extends BaseController
         }
     }
 
-    protected function getModelFields($model)
+    protected function getModelFields($model, $withOptions = false)
     {
+        //If is first request into table, then load also all options from fields
+        if ( $withOptions === true )
+            $model->withAllOptions(true);
+
         $fields = $model->getFields();
 
         foreach ($fields as $key => $field)
@@ -238,7 +239,7 @@ class LayoutController extends BaseController
      * @param  boolean $layout_request if is first request for admin boot
      * @return json
      */
-    protected function makePage($model, $data = null, $withChilds = true, $initial_request = false)
+    protected function makePage($model, $data = null, $withChilds = true, $initial_request = false, $withOptions = false)
     {
         $childs_models = $model->getModelChilds();
 
@@ -257,7 +258,6 @@ class LayoutController extends BaseController
 
             $childs[ $child_model->getTable() ] = $child;
         }
-
 
         return array_merge((array)$data, [
             'name' => $model->getProperty('name'),
@@ -279,7 +279,7 @@ class LayoutController extends BaseController
             'sortable' => $model->isSortable(),
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
-            'fields' => $this->getModelFields($model),
+            'fields' => $this->getModelFields($model, $withOptions),
             'fields_groups' => Group::build($model),
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
