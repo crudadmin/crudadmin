@@ -133,7 +133,7 @@ class LayoutController extends BaseController
     {
         //If is first request into table, then load also all options from fields
         if ( $withOptions === true )
-            $model->withAllOptions(true);
+            $model->withAllOptions();
 
         $fields = $model->getFields();
 

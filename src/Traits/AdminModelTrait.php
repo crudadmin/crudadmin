@@ -385,14 +385,24 @@ trait AdminModelTrait
             $force = true;
 
         //Field mutations
-        if ( $this->_fields == null || $force == true || $with_options === true )
+        if ( $this->_fields == null || $force == true )
         {
             $this->_fields = Fields::getFields( $this, $param, $force );
 
-            $this->withAllOptions(false);
+            $this->withoutOptions();
         }
 
         return $this->_fields;
+    }
+
+    /*
+     * Return all model fields with options
+     */
+    public function getFieldsWithOptions($param = null, $force = false)
+    {
+        $this->withAllOptions();
+
+        return $this->getFields($param, $force);
     }
 
     /*

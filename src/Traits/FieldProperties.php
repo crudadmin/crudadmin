@@ -29,31 +29,42 @@ trait FieldProperties
     /*
      * Field mutator for selects returns all options (also from db, etc...)
      */
-    public function withAllOptions($set = null)
+    public function withAllOptions()
     {
-        return $this->withOptions($set);
+        return $this->withOptions(true);
     }
 
+    /*
+     * Disable generate select options into fields
+     */
+    public function withoutOptions()
+    {
+        return $this->withOptions(false);
+    }
+
+    /*
+     * Allow options
+     */
     public function withOptions( $set = null )
     {
         //We want all fields options
         if ( $set === true ){
-            $this->withOptions = array_keys($this->getFields());
+            $this->withOptions = ['*'];
         }
 
         //We want specifics fields options
-        else if ( is_array($set) ){
-            $this->withOptions = $set;
+        else if ( is_array($set) || $set === false ){
+            $this->withOptions = $set ?: [];
         }
 
-        //We dont want any options
-        else if ( $set === false ){
-            $this->withOptions = [];
-        }
+        return $this;
+    }
 
-        if ( $set !== null )
-            return $this;
-
+    /*
+     * Returns allowed field options
+     */
+    public function getAllowedOptions()
+    {
         return $this->withOptions;
     }
 
