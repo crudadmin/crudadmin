@@ -110,8 +110,10 @@
           var canResetForm = !this.isOpenedRow || ! oldRow || row.id != oldRow.id;
 
           //Init new form after change row
-          if ( !row || !oldRow || row.id != oldRow.id || this.history.history_id ){
+          if ( !row || !oldRow || row.id != oldRow.id || this.history.history_id )
+          {
             this.initForm(row, canResetForm);
+            this.$dispatch('sendParentRow');
           }
         },
         deep: true,
