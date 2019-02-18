@@ -175,12 +175,7 @@
       ready()
       {
         //If this field has own component
-        if ( this.hasComponent ){
-
-          this.updateValueOnChange();
-
-          return;
-        }
+        this.syncFieldsValueWithRow();
 
         this.bindDatepickers();
 
@@ -220,9 +215,13 @@
       },
 
       methods : {
-        updateValueOnChange(){
+        syncFieldsValueWithRow(){
+          this.$watch('row.'+this.key, function(value){
+            this.$set('field.value', value);
+          });
+
           this.$watch('field.value', function(value){
-            this.$set('row.' + this.key, value);
+            this.$set('row.'+this.key, value);
           });
         },
         registerComponents(){
@@ -398,7 +397,10 @@
                 return;
               }
 
-              this.reloadSelectWithMultipleOrders(this.field);
+              //Update selects when vuejs is fully rendered
+              this.$nextTick(function(){
+                this.reloadSelectWithMultipleOrders(this.field);
+              })
             });
           }
         },
@@ -429,8 +431,9 @@
             this.bindDatepickers();
 
             //If is select
-            if ( this.isSelect )
+            if ( this.isSelect ){
               this.reloadSelectWithMultipleOrders(field);
+            }
 
             this.addMultipleFilesSupport();
           })
