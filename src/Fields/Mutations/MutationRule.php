@@ -10,7 +10,11 @@ class MutationRule
 
     protected $key;
 
-    protected $post_update = [];
+    /*
+     * Closure with post update mutation
+     * params: $fields, $field, $key, $model
+     */
+    protected $postUpdate = null;
 
     public function setFields($fields)
     {
@@ -32,14 +36,14 @@ class MutationRule
         return $this->key;
     }
 
-    public function addPostUpdate($closure)
+    public function setPostUpdate($closure)
     {
-        $this->post_update[] = $closure;
+        $this->postUpdate = $closure;
     }
 
     public function getPostUpdate()
     {
-        return $this->post_update;
+        return $this->postUpdate;
     }
 }
 ?>

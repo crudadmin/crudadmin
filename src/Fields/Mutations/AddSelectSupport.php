@@ -14,6 +14,11 @@ class AddSelectSupport extends MutationRule
 {
     public $attributes = ['options', 'multiple', 'default', 'filterBy', 'required_with_values'];
 
+    private function isAllowedMutation($field)
+    {
+        return $field['type'] == 'select' || $field['type'] == 'radio';
+    }
+
     /*
      * If has key in admin buffer, returns data from buffer, if has not, then get data from database and save into buffer
      */
@@ -160,7 +165,7 @@ class AddSelectSupport extends MutationRule
         return $columns;
     }
 
-    private function postBindRelationships($model, $field, $key, $options, $fields)
+    private function bindRelationships($model, $field, $key, $options, $fields)
     {
         $properties = $this->getBelongsToProperties($field);
 
@@ -250,9 +255,52 @@ class AddSelectSupport extends MutationRule
         }
     }
 
+    //Bind relationships at the end of the getFields method
+    //for one relationships for all columns which share one table
+    public function initPostUpdate($fields, $field, $key, $model)
+    {
+        //Get options from model, and cache them
+        $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {
+            return (array)$model->getProperty('options', $model->getModelParentRow());
+        });
+
+        /*
+         * If options are defined in method od $options property
+         */
+        if ( (array_key_exists($key, $options) || array_key_exists(($key = rtrim($key, '_id')), $options)) && !is_string($options[$key]) )
+        {
+            $field['options'] = $options[$key];
+
+            //If has been inserted collection between array, then convert collection into array
+            if ( $field['options'] instanceof Collection )
+            {
+                $field['options'] = $field['options']->toArray();
+            }
+        }
+
+        /*
+         * If options are defined in field for static multiselect
+         */
+        else if ( array_key_exists('options', $field) ){
+            $field['options'] = is_string($field['options']) ? explode(',', $field['options']) : $field['options'];
+        }
+
+        /*
+         * If options are in db as relationship
+         */
+        else if ( array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field) ) {
+            return $this->bindRelationships($model, $field, $key, $options, $fields);
+        }
+
+        //Checks if is non associal array
+        $this->updateAssocField($field);
+
+        return $field;
+    }
+
     public function update( $field, $key, $model )
     {
-        if ( $field['type'] == 'select' || $field['type'] == 'radio' )
+        if ( $this->isAllowedMutation($field) )
         {
             //Update filter by property
             if ( count($filterBy = $this->getFilterBy($field)) > 0 )
@@ -262,50 +310,13 @@ class AddSelectSupport extends MutationRule
             if ( $static_field = $this->getStaticField($field, $key, $model) )
                 return $static_field;
 
-            //Get options from model, and cache them
-            $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {
-                return (array)$model->getProperty('options', $model->getModelParentRow());
+            /*
+             * When fields will be fully loaded, then add options
+             * property into array
+             */
+            $this->setPostUpdate(function($fields, $field, $key, $model){
+                return $this->initPostUpdate($fields, $field, $key, $model);
             });
-
-            /*
-             * If options are defined in method od $options property
-             */
-            if ( (array_key_exists($key, $options) || array_key_exists(($key = rtrim($key, '_id')), $options)) && !is_string($options[$key]) )
-            {
-                $field['options'] = $options[$key];
-
-                //If has been inserted collection between array, then convert collection into array
-                if ( $field['options'] instanceof Collection )
-                {
-                    $field['options'] = $field['options']->toArray();
-                }
-
-            }
-
-            /*
-             * If options are defined in field for static multiselect
-             */
-            else if ( array_key_exists('options', $field) ){
-                $field['options'] = is_string($field['options']) ? explode(',', $field['options']) : $field['options'];
-            }
-
-            /*
-             * If options are in db as relationship
-             */
-            else if ( array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field) ) {
-                $field['options'] = [];
-
-                //Bind relationships at the end of the getFields method
-                //for one relationships for all columns which share one table
-                $this->addPostUpdate(function($fields, $field, $key, $model) use ($options) {;
-                    return $this->postBindRelationships($model, $field, $key, $options, $fields);
-                });
-
-                return $field;
-            }
-
-            //Checks if is non associal array
-            $this->updateAssocField($field);
         }
 
         return $field;

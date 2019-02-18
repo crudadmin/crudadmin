@@ -35,6 +35,11 @@ class Fields
     protected $fields = [];
 
     /*
+     * Model fields without options
+     */
+    protected $base_fields = [];
+
+    /*
      * Loaded models completelly
      */
     protected $loaded_fields = [];
@@ -125,11 +130,11 @@ class Fields
 
         //Return fields from cache
         if (
-            array_key_exists($table, $this->fields)
+            array_key_exists($table, $this->base_fields)
             && $this->isCompletedState($table)
             && $force === false
         ) {
-            return $this->fields[$table];
+            return $this->base_fields[$table];
         }
 
         $this->setUncompletedState($table);
@@ -153,11 +158,28 @@ class Fields
         //Register fields from groups
         $this->manageGroupFields($model, 0, $fields, null);
 
-        $this->firePushUpdates($model, $table);
-
+        //Set rendering of fields as completed
         $this->setCompletedState($table);
 
+        //Register base fields without options for cachced operations
+        $this->base_fields[$table] = $this->removeOptions($this->fields[$table]);
+
+        //Fire post updated on fields as queries, loading options etc...
+        $fields = $this->firePostUpdate($model, $table);
+
         return $this->fields[$table];
+    }
+
+    /*
+     * Remove options from base fields
+     */
+    private function removeOptions($fields)
+    {
+        foreach ($fields as $key => $field)
+            if ( array_key_exists('options', $field) )
+                $fields[$key]['options'] = [];
+
+        return $fields;
     }
 
     private function setCompletedState($table)
@@ -177,24 +199,36 @@ class Fields
         return in_array($table, $this->loaded_fields);
     }
 
-    private function firePushUpdates($model, $table)
+    /*
+     * Fire post update events for additional relationships, options, etc...
+     */
+    private function firePostUpdate($model, $table)
     {
+        $fields = $this->fields[$table];
+
         if (
             ! isset($this->post_update[$table])
             || count($updates = $this->post_update[$table]) == 0
         )
-            return;
+            return $fields;
 
-        foreach ($updates as $update)
+        foreach ($updates as $mutation)
         {
-            $key = $update['mutation']->getKey();
+            $key = $mutation->getKey();
 
-            $field = $this->fields[$table][$key];
+            //Skip removed columns
+            if ( ! array_key_exists($key, $fields) )
+                continue;
 
-            $field = $update['closure']($this->fields[$table], $field, $key, $model);
+            $field = $mutation->getPostUpdate()($fields, $fields[$key], $key, $model);
 
-            $this->fields[$table][$key] = $field;
+            $fields[$key] = $field;
         }
+
+        //Overide fields back to previous state before post update
+        $this->fields[$table] = $fields;
+
+        return $fields;
     }
 
     /*
@@ -474,17 +508,11 @@ class Fields
     {
         if (
             ! method_exists($mutation, 'getPostUpdate')
-            || count($closures = $mutation->getPostUpdate()) == 0
+            || ! $mutation->getPostUpdate()
         )
             return;
 
-        foreach ($closures as $closure)
-        {
-            $this->post_update[$model->getTable()][] = [
-                'closure' => $closure,
-                'mutation' => $mutation,
-            ];
-        }
+        $this->post_update[$model->getTable()][] = $mutation;
     }
 
     protected function registerProperties($mutation)

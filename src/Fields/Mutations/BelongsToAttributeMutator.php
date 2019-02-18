@@ -1,8 +1,6 @@
 <?php
 namespace Gogol\Admin\Fields\Mutations;
 
-use Fields;
-
 class BelongsToAttributeMutator
 {
     public $attributes = ['belongsTo', 'belongsToMany', 'canAdd'];
