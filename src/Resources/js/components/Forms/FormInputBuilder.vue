@@ -216,12 +216,12 @@
 
       methods : {
         syncFieldsValueWithRow(){
-          this.$watch('row.'+this.key, function(value){
-            this.$set('field.value', value);
-          });
+          // this.$watch('row.'+this.key, function(value){
+          //     this.$set('field.value', value);
+          // });
 
           this.$watch('field.value', function(value){
-            this.$set('row.'+this.key, value);
+              this.$set('row.'+this.key, value);
           });
         },
         registerComponents(){
