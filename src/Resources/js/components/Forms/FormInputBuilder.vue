@@ -215,13 +215,21 @@
       },
 
       methods : {
+        //We need reset empty values because of infinity loop in setter
+        //when is NaN setted
+        resetEmptyValue(value){
+          if ( value === undefined || isNaN(value) )
+            return null;
+
+          return value;
+        },
         syncFieldsValueWithRow(){
-          // this.$watch('row.'+this.key, function(value){
-          //     this.$set('field.value', value);
-          // });
+          this.$watch('row.'+this.key, function(value){
+            this.$set('field.value', this.resetEmptyValue(value));
+          });
 
           this.$watch('field.value', function(value){
-              this.$set('row.'+this.key, value);
+            this.$set('row.'+this.key, this.resetEmptyValue(value));
           });
         },
         registerComponents(){
