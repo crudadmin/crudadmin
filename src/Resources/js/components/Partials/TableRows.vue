@@ -290,15 +290,19 @@
           return Object.keys(buttons||{}).length + additional;
         },
         getButtonsForRow(item){
-          if ( ! this.rows.buttons )
-            return [];
+          if ( ! this.rows.buttons || !(item.id in this.rows.buttons) )
+            return {};
 
-          if ( item.id in this.rows.buttons )
+          var data = {},
+              buttons = this.rows.buttons[item.id];
+
+          for ( var key in buttons )
           {
-            return _.filter(this.rows.buttons[item.id], item => {
-              return ['button', 'both', 'multiple'].indexOf(item.type) > -1;
-            });
+            if ( ['button', 'both', 'multiple'].indexOf(buttons[key].type) > -1 )
+              data[key] = buttons[key];
           }
+
+          return data;
         },
         getButtonKey(id, key){
           return this.$parent.getButtonKey(id, key);
