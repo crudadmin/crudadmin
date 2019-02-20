@@ -109,8 +109,12 @@ trait Validation {
                 $field['nullable'] = true;
             }
 
-            //If is existing row and required image already exists
-            if ( $row && !empty($row[$orig_key]) && $this->hasFieldParam($orig_key, 'required') ){
+            //If is existing row is file type and required file already exists
+            if ( $row
+                && !empty($row[$orig_key])
+                && $this->hasFieldParam($orig_key, 'required')
+                && $this->isFieldType($key, 'file')
+            ){
                 $field['required'] = false;
             }
 
