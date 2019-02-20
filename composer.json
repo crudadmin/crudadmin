@@ -16,6 +16,9 @@
         "gettext/gettext": "^4.6",
         "spatie/image-optimizer": "^1.1"
     },
+    "require-dev": {
+        "phpunit/phpunit": "~5.7|~7.0"
+    },
     "autoload": {
         "psr-4": {
             "Gogol\\Admin\\": "src"
@@ -23,6 +26,11 @@
         "files": [
             "src/Helpers/helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
     "scripts": {
         "post-update-cmd": [
