@@ -230,9 +230,7 @@ trait Validation {
 
         //Remove unnecesary fields
         if ( is_array($except) )
-        {
             $rules = array_diff_key($rules, array_flip($except));
-        }
 
         $validator = Validator::make(request()->all(), $rules);
 
