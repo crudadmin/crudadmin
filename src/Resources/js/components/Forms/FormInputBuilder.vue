@@ -218,7 +218,7 @@
         //We need reset empty values because of infinity loop in setter
         //when is NaN setted
         resetEmptyValue(value){
-          if ( value === undefined || isNaN(value) )
+          if ( value === undefined || Number.isNaN(value) )
             return null;
 
           return value;
