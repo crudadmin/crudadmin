@@ -292,7 +292,10 @@ trait AdminModelTrait
         foreach ($this->getFields() as $key => $field)
         {
             //Add cast attribute for fields with multiple select
-            if ( $this->isFieldType($key, ['select', 'file', 'date', 'time']) && $this->hasFieldParam($key, 'multiple', true)
+            if ( (
+                     $this->isFieldType($key, ['select', 'file', 'date', 'time'])
+                     && $this->hasFieldParam($key, 'multiple', true)
+                 )
                  || $this->isFieldType($key, 'json')
                  || $this->hasFieldParam($key, 'locale')
              )
@@ -314,6 +317,13 @@ trait AdminModelTrait
         //Add cast for order field
         if ( $this->isSortable() )
             $this->casts['_order'] = 'integer';
+
+        //Casts foreign keys
+        if ( is_array($relations = $this->getForeignColumn()) )
+        {
+            foreach ($relations as $key)
+                $this->casts[$key] = 'integer';
+        }
     }
 
     /*

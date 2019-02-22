@@ -357,27 +357,28 @@ trait ModelRelationships
         return $relation;
     }
 
-    /*
-     * Returns foreign gey for parent model
+    /**
+     * Returns foreign keys or specific key for parent model
+     * @param  [type] $table [description]
+     * @return array/string        returns all foreign keys, or specific one
      */
-    public function getForeignColumn($model = null)
+    public function getForeignColumn($table = null)
     {
         if ( $this->belongsToModel == null )
             return null;
 
-        $belongsToModel = is_array($this->belongsToModel) ? $this->belongsToModel : [ $this->belongsToModel ];
-
         $columns = [];
 
-        foreach ($belongsToModel as $parent)
+        foreach (array_wrap($this->belongsToModel) as $parent)
         {
             $model_table_name = Str::snake(class_basename($parent));
 
             $columns[ str_plural($model_table_name) ] = $model_table_name . '_id';
         }
 
-        if ( $model ) {
-            return array_key_exists($model, $columns) ? $columns[$model] : null;
+        //Returns
+        if ( $table ) {
+            return array_key_exists($table, $columns) ? $columns[$table] : null;
         }
 
         return $columns;
