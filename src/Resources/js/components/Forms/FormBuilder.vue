@@ -549,15 +549,25 @@
         var _this = this;
 
         input.parents('.tab-pane').each(function(){
-          var index = $(this).index();
+          var getActiveTab = (panel) => {
+            var li = panel.parent().prev().find('li'),
+                id = panel.attr('id'),
+                tab = id ? li.parent().find('> li > a[href="#'+id+'"]') : null;
+
+            //Return tab by id, if those tabs are custom
+            if ( tab )
+              return tab.parent();
+
+            return li.eq(panel.index());
+          };
 
           //On button click, remove tabs alerts in actual tree, if tab has no more recursive errors
           $(this).one('click', function(){
             if ( $(this).find('.nav-tabs-custom:not(.default) li.has-error').length == 0 )
-              _this.removeActiveTab($(this).parent().prev().find('li').eq($(this).index()), true);
+              _this.removeActiveTab(getActiveTab($(this)), true);
           });
 
-          $(this).parent().prev().find('li').eq(index).each(function(){
+          getActiveTab($(this)).each(function(){
             if ( ! $(this).hasClass('has-error') )
               $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).addClass('has-error').one('click', function(){
 
