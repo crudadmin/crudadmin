@@ -277,8 +277,6 @@
       },
       sendForm(e, action, callback)
       {
-        var _this = this;
-
         //Disable send already sent form
         if ( this.submit == true )
           return;
@@ -321,19 +319,6 @@
 
         this.progress = true;
 
-        var unknownError = function(){
-          _this.$root.arrorAlert(function(){
-
-            _this.progress = false;
-
-            //Timeout for sending new request with enter
-            setTimeout(function(){
-              _this.submit = false;
-            }, 500);
-
-          });
-        }
-
         $(e.target).ajaxSubmit({
 
           url : this.$root.requests[action],
@@ -346,116 +331,138 @@
               arr.unshift({ name : key, value : data[key] });
           },
 
-          success(data){
+          success : data => {
 
-            _this.submit = true;
-            _this.progress = false;
+            this.submit = true;
+            this.progress = false;
 
             //Error occured
             if ( $.type(data) != 'object' || ! ('type' in data) )
-            {
-              unknownError();
-              return;
-            }
+              return this.unknownAjaxErrorResponse();
 
-            //Fix for closing with enter
-            setTimeout(function(){
+            //Fix for resubmiting form after closing with enter
+            setTimeout(() => {
 
-              _this.$root.openAlert(data.title, data.message, data.type, null, function(){
+              this.$root.openAlert(data.title, data.message, data.type, null, () => {
 
                 //Timeout for sending new request with enter
-                setTimeout(function(){
-                  _this.submit = false;
+                setTimeout(() => {
+                  this.submit = false;
                 }, 500);
 
               });
-
 
             }, 100);
 
             callback( data );
           },
 
-          error(response){
-            _this.resetErrors();
+          error : response => {
+            this.resetErrors();
 
             // Wrong validation
-            _this.$root.errorResponseLayer( response, 422, function(){
-
+            this.$root.errorResponseLayer( response, 422, () => {
               var obj = response.responseJSON,
-                  array = [];
+                  errors = [];
 
-              //Laravel 5.5 provides validation errors in errors object.
+              //Laravel 5.5+ provides validation errors in errors object.
               if ( 'errors' in obj && !('length' in obj.errors) )
                 obj = obj.errors;
 
               for ( var key in obj )
               {
                 //One or multiple errors
-                if ( typeof obj[key] == 'string' )
-                    array = [ obj[key] ];
-                else
-                    array = obj[key];
+                errors = typeof obj[key] == 'string' ? [ obj[key] ] : obj[key];
 
                 //Display errors
-                for (var i = 0; i < array.length; i++){
-                  for ( var a = 0; a <= 1; a++ )
-                  {
-                    var key = key.split('.').map(function(item, i){
-                      if ( i == 0 )
-                        return item;
-
-                      if ( item == 0 )
-                        return '[]';
-
-                      return '['+item+']';
-                    }).join('');
-
-                    //Also for multiple fields...
-                    key = a == 0 ? key : key + '[]';
-
-                    _this.form.find( 'input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]' ).firstLevelForm(_this.form[0]).each(function(){
-                      var where = $(this);
-
-                      //Colorize tabs
-                      _this.colorizeTab($(this));
-
-                      _this.colorizeLangDropdown($(this));
-
-                      if ( $(this).is('select') ){
-                        where = where.parent().parent().children().last().prev();
-                      }
-
-                      else if ( $(this).is('textarea') ){
-                        where = where.parent().children().last().prev();
-                      }
-
-                      else if ( $(this).is('input:radio') ){
-                        where = where.parent().parent().parent();
-
-                        if ( where.find('.help-block').length == 0 )
-                          where = where.children().last().prev();
-                        else
-                          where = null;
-                      }
-
-                      if ( where )
-                        where.after( '<span class="help-block">'+array[i]+'</span>' );
-
-                      //On first error
-                      if ( i == 0 ){
-                        var label = $(this).closest('div.form-group').addClass('has-error').find('> label');
-
-                        if ( label.find('.fa-times-circle-o').length == 0 )
-                          label.prepend('<i class="fa fa-times-circle-o"></i> ');
-                      }
-                    });
-                  }
-                }
+                this.bindErrorMessages(key, errors);
               }
             })
           }
         });
+      },
+      unknownAjaxErrorResponse(){
+        this.$root.arrorAlert(() => {
+
+          this.progress = false;
+
+          //Timeout for sending new request with enter
+          setTimeout(() => {
+            this.submit = false;
+          }, 500);
+
+        });
+      },
+      bindErrorMessages(key, errors){
+        var keys = [],
+            parts = key.split('.');
+
+        //Add also multiple keys selectors
+        if ( parts.length == 1 ){
+          keys.push(key);
+          parts.push(0);
+        }
+
+        parts = parts.map((item, i) => {
+          if ( i == 0 )
+            return item;
+
+          return '['+item+']';
+        });
+
+        keys.push(parts.join(''));
+
+        if ( parts[parts.length - 1] == '[0]' )
+          keys.push(keys.slice(0, parts.length - 1).concat(['[]']).join(''))
+
+        for ( var i = 0; i < errors.length; i++ )
+        {
+          _.uniqBy(keys).map(key => {
+            this.form.find('input[name="'+key+'"], select[name="'+key+'"], textarea[name="'+key+'"]')
+                     .firstLevelForm(this.form[0])
+                     .each(this.showErrorMessage(errors[i], i));
+          });
+        }
+      },
+      showErrorMessage(message, i){
+        var component = this;
+
+        return function(){
+          var where = $(this);
+
+          //Colorize tabs
+          component.colorizeTab($(this));
+
+          component.colorizeLangDropdown($(this));
+
+          if ( $(this).is('select') ){
+            where = where.parent().parent().children().last().prev();
+          }
+
+          else if ( $(this).is('textarea') ){
+            where = where.parent().children().last().prev();
+          }
+
+          else if ( $(this).is('input:radio') ){
+            where = where.parent().parent().parent();
+
+            if ( where.find('.help-block').length == 0 )
+              where = where.children().last().prev();
+            else
+              where = null;
+          }
+
+          if ( where )
+            where.after( '<span class="help-block">'+message+'</span>' );
+
+          //On first error
+          if ( i == 0 ){
+            var label = $(this).closest('div.form-group').addClass('has-error').find('> label');
+
+            if ( label.find('.fa-times-circle-o').length == 0 )
+              label.prepend('<i class="fa fa-times-circle-o"></i> ');
+          }
+        };
       },
       buildEventData(row, request){
         return {
