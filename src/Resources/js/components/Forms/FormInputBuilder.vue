@@ -82,7 +82,7 @@
         <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? key : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
           <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
           <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
-          <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || (!this.isOpenedRow && data[0] == field.default)" :value="data[0]">{{ data[1] === null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+          <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || (!this.isOpenedRow && data[0] == field.default)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
         </select>
         <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
       </div>

@@ -283,6 +283,9 @@
                             var value = typeof array[key][1] == 'object' && array[key][1]!==null ? this.getLangValue(array[key][1][field_key], related_field) : array[key][1];
                           }
 
+                          //Change undefined values on null values
+                          value = value == null ? null : value;
+
                           items.push([array[key][0], value]);
                         }
 
