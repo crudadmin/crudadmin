@@ -688,9 +688,9 @@ trait AdminModelTrait
     public function makeDescription($field, $limit = 150)
     {
         $string = $this->getValue($field);
+
         $string = strip_tags($string);
-        $string = preg_replace("/&nbsp;/", ' ', $string);
-        $string = preg_replace("/(\s| |\n)+/", ' ', $string);
+        $string = preg_replace("/(\n|\s|&nbsp;)+/u", ' ', $string);
         $string = trim($string, ' ');
 
         return str_limit($string, $limit);
