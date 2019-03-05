@@ -135,7 +135,11 @@ export default {
         var add_before = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_before'),
             add_after = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_after');
 
-        return rowValue || rowValue == 0 ? ((add_before||'') + rowValue + (add_after||'')) : null;
+        //If is object
+        if ( typeof rowValue == 'object' )
+          return rowValue;
+
+        return (rowValue || rowValue == 0) ? ((add_before||'') + rowValue + (add_after||'')) : null;
       },
     },
 
