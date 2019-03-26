@@ -14,7 +14,10 @@ class SEOServiceProvider extends ServiceProvider {
     public function register()
     {
         $this->app->bind('seo', \Gogol\Admin\Helpers\SEO::class);
+    }
 
+    public function boot()
+    {
         $this->registerBladeDirectives();
     }
 

@@ -16,7 +16,10 @@ class GettextServiceProvider extends ServiceProvider {
     public function register()
     {
         $this->app->bind('gettext', \Gogol\Admin\Helpers\Gettext::class);
+    }
 
+    public function boot()
+    {
         $this->registerBladeDirectives();
     }
 
