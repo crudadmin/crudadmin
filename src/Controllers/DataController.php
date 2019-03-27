@@ -154,7 +154,7 @@ class DataController extends Controller
         {
             try {
                 //Create row into db
-                $row = (new $model)->create($request_row);
+                $row = (new $model)->create($request_row)->refresh();
             } catch (\Illuminate\Database\QueryException $e) {
                 return Ajax::mysqlError($e);
             }

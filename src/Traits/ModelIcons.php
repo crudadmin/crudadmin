@@ -80,6 +80,7 @@ trait ModelIcons
             'watch' => 'fa-clock-o',
             'contract' => 'fa-file-text-o',
             'place' => 'fa-map-marker',
+            'company' => 'fa-building-o',
         ];
     }
 
