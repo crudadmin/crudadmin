@@ -339,6 +339,33 @@
           })
         },
         /*
+         * If field has setters, then check for change of changer field
+         */
+        reloadSetters(value){
+          for ( var key in this.model.fields )
+          {
+            var field = this.model.fields[key],
+                fillBy = this.getFillBy(field);
+
+            if ( ! fillBy || ! fillBy[0] || (fillBy[0] != this.key && fillBy[0] + '_id' != this.key) )
+              continue;
+
+            var options = this.field.options||[];
+
+            for ( var k in options )
+            {
+              //Skip other values
+              if ( options[k][0] != value )
+                continue;
+
+              this.$set('row.' + key, options[k][1][fillBy[1]||key]);
+
+              break;
+            }
+
+          }
+        },
+        /*
          * Apply event on changed value
          */
         changeValue(e, value, no_field){
@@ -390,7 +417,11 @@
                   _this.rebuildSelect();
                 }.bind(this), 50);
               } else {
-                _this.changeValue(null, $(this).val());
+                var value = $(this).val();
+
+                _this.changeValue(null, value);
+
+                _this.reloadSetters(value);
               }
             });
 
@@ -609,6 +640,20 @@
           }
 
           return modelBuilder;
+        },
+        getFillBy(field){
+          if ( !('fillBy' in field) )
+            return null;
+
+          var filterBy = field.fillBy.split(','),
+              column;
+
+          //Get column of relation field
+          this.model.fields[column = filterBy[0]+'_id']||this.model.fields[column = filterBy[0]]
+
+          filterBy[0] = column;
+
+          return filterBy;
         },
       },
 

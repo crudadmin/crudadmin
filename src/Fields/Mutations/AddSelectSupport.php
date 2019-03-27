@@ -12,7 +12,7 @@ use Ajax;
 
 class AddSelectSupport extends MutationRule
 {
-    public $attributes = ['options', 'multiple', 'default', 'filterBy', 'required_with_values'];
+    public $attributes = ['options', 'multiple', 'default', 'filterBy', 'fillBy', 'required_with_values'];
 
     private function isAllowedMutation($field)
     {
@@ -78,20 +78,46 @@ class AddSelectSupport extends MutationRule
         return [];
     }
 
+    private function getFillBy($fields)
+    {
+        $columns = [];
+
+        $actual_key = trim_end($this->getKey(), '_id');
+
+        foreach ($fields as $key => $field)
+        {
+            if ( array_key_exists('fillBy', $field) )
+            {
+                $fillBy = explode('.', str_replace(',', '.', $field['fillBy']));
+
+                if ( trim_end($fillBy[0], '_id') != $actual_key )
+                    break;
+
+                $columns[] = isset($fillBy[1]) ? $fillBy[1] : $key;
+            }
+        }
+
+        return $columns;
+    }
+
     /*
      * Get columns by regex prefix
      */
-    private function getColumnsByProperties($properties, $field, $columns = [])
+    private function getColumnsByProperties($properties, $field, $columns = [], $fields)
     {
-        //Get foreign column from relationship table which will be loaded into selectbox
+        //Get foreign column from relationship table which will be loaded into selectbox for filterBy purposes
         if ( count($filterBy = $this->getFilterBy($field)) > 0 )
             $columns[] = $filterBy[1];
+
+        //Get foreign column from relationship table which will be loaded into selectbox for fillBy purposes
+        if ( count($fillBy = $this->getFillBy($fields)) > 0 )
+            $columns = array_merge($fillBy, $columns);
 
         //If relationship table has localizations
         if (($model = Admin::getModelByTable($properties[0])) && $model->isEnabledLanguageForeign())
             $columns[] = 'language_id';
 
-        return $columns;
+        return array_unique($columns);
     }
 
     /*
@@ -181,7 +207,7 @@ class AddSelectSupport extends MutationRule
             //Get all columns from each field witch belongsTo relation
             $load_columns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);
 
-            $load_columns = $this->getColumnsByProperties($properties, $field, $load_columns);
+            $load_columns = $this->getColumnsByProperties($properties, $field, $load_columns, $fields);
 
             $load_columns = array_unique($load_columns);
 
