@@ -119,4 +119,20 @@ trait FieldProperties
 
         return null;
     }
+
+    public function getSelectOption($field, $value = null)
+    {
+        $options = $this->getProperty('options');
+
+        if ( is_null($value) )
+            $value = $this->{$field};
+
+        if (
+            ! array_key_exists($field, $options)
+            || ! array_key_exists($value, $options[$field])
+        )
+            return null;
+
+        return $options[$field][$value];
+    }
 }

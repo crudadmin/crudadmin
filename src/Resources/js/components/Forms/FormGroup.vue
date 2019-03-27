@@ -84,7 +84,11 @@ export default {
         var fields = this.group.fields.filter(item => {
           var field = this.model.fields[item];
 
-          return typeof item !== 'string' || !(field.invisible||field.removeFromForm);
+          return typeof item !== 'string'
+                 || !(
+                      field.invisible && field.invisible == true
+                      || field.removeFromForm && field.removeFromForm == true
+                  );
         });
 
         return fields;
@@ -93,7 +97,8 @@ export default {
 
     methods: {
       canShowField(field){
-        return !('removeFromForm' in field) && !('invisible' in field);
+        return !('removeFromForm' in field && field.removeFromForm == true)
+                && !('invisible' in field && field.invisible == true);
       },
       //Return group class
       getGroupClass(group){

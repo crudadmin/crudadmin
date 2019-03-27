@@ -645,7 +645,7 @@
           if ( !('fillBy' in field) )
             return null;
 
-          var filterBy = field.fillBy.split(','),
+          var filterBy = field.fillBy.replace(',', '.').split('.'),
               column;
 
           //Get column of relation field
@@ -807,7 +807,7 @@
         },
         isSelect()
         {
-          return this.field.type == 'select';
+          return this && this.field.type == 'select';
         },
         isRadio()
         {
@@ -819,7 +819,7 @@
         },
         isDatepicker()
         {
-          return this.field.type == 'date' || this.field.type == 'datetime' || this.field.type == 'time';
+          return this && (this.field.type == 'date' || this.field.type == 'datetime' || this.field.type == 'time');
         },
         isMultipleDatepicker()
         {
