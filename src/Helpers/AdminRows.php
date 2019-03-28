@@ -291,7 +291,7 @@ class AdminRows
                         'icon' => $button->icon,
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
-                        'ask' => method_exists($button, 'ask'),
+                        'ask' => method_exists($button, 'ask') || method_exists($button, 'question'),
                     ];
                 }
             }

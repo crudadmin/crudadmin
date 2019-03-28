@@ -385,7 +385,7 @@ class DataController extends Controller
     private function getButtonResponse($button, $rows, $multiple, $ask)
     {
         if ( $ask ){
-            return $button->ask($multiple === true ? $rows : $rows[0]);
+            return $button->{ method_exists($button, 'ask') ? 'ask' : 'question' }($multiple === true ? $rows : $rows[0]);
         } if ( $multiple ){
             return $button->fireMultiple($rows);
         } else {
@@ -410,7 +410,8 @@ class DataController extends Controller
 
         $button = new $buttons[ $request['button_id'] ]($multiple ? null : $rows[0]);
 
-        $ask = $request['ask'] === true && method_exists($button, 'ask');
+        $ask = $request['ask'] === true
+               && (method_exists($button, 'ask') || method_exists($button, 'question'));
 
         $response = $this->getButtonResponse($button, $rows, $multiple, $ask);
 
@@ -433,7 +434,7 @@ class DataController extends Controller
             'component' => isset($button->message['component']) ? $button->message['component'] : null,
             'rows' => $rows,
             'redirect' => $button->redirect,
-            'ask' => $ask,
+            'ask' => $ask && $button->accept,
         ] );
     }
 

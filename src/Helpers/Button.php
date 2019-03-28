@@ -56,6 +56,11 @@ class Button
     public $reloadAll = false;
 
     /*
+     * Allow accept in ask/question alert
+     */
+    public $accept = true;
+
+    /*
      * Title
      */
     public $message = [
@@ -103,6 +108,13 @@ class Button
         return $this;
     }
 
+    public function type($type)
+    {
+        $this->message['type'] = $type;
+
+        return $this;
+    }
+
     /*
      * Set title separately
      */
@@ -118,7 +130,10 @@ class Button
      */
     public function error($message, $title = null)
     {
-        return $this->message($message, $title, 'danger');
+        if ( ! $this->message['title'] )
+            $title = trans('admin::admin.warning');
+
+        return $this->message($message, $title, 'danger')->accept(false);
     }
 
     /*
@@ -165,6 +180,16 @@ class Button
     public function component($template)
     {
         $this->message['component'] = $this->renderVuejs($template);
+
+        return $this;
+    }
+
+    /*
+     * Allow/denny accept button in question alert
+     */
+    public function accept($accept)
+    {
+        $this->accept = $accept;
 
         return $this;
     }

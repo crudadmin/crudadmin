@@ -811,6 +811,7 @@
       },
       buttonAction(key, button, row){
         var ids = row ? [ row.id ] : this.checked;
+
         var makeAction = function(ask, data){
           this.button_loading = row ? this.getButtonKey(row.id, key) : key;
 
