@@ -323,7 +323,7 @@
         },
         fieldName(key){
           if ( key in this.model.fields )
-            return this.model.fields[key].column_name||this.model.fields[key].name;
+            return this.model.fields[key].column_name||this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.name')||this.model.fields[key].name;
           else {
             switch( key )
             {

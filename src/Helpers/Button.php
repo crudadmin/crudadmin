@@ -122,6 +122,14 @@ class Button
     }
 
     /*
+     * Set warning message
+     */
+    public function warning($message, $title = null)
+    {
+        return $this->message($message, $title, 'warning');
+    }
+
+    /*
      * Set success message
      */
     public function success($message, $title = null)
@@ -160,6 +168,15 @@ class Button
 
         return $this;
     }
+
+    /*
+     * Ask question with form before action
+     */
+    // public function ask()
+    // {
+    //     return $this->title('Your title...')
+    //                 ->component('YoutComponent.vue');
+    // }
 }
 
 ?>
