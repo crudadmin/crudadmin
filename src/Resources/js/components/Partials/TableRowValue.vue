@@ -140,7 +140,7 @@ export default {
           return rowValue;
 
         return (rowValue || rowValue == 0) ? ((add_before||'') + rowValue + (add_after||'')) : null;
-      },
+      }
     },
 
     methods: {
@@ -197,7 +197,7 @@ export default {
         if ( !(field in this.model.fields) )
           return false;
 
-        if ( this.model.fields[field].type == 'file' )
+        if ( this.model.fields[field].type == 'file' && this.isEncodedValue(field) )
           return true;
 
         return false;
@@ -218,7 +218,7 @@ export default {
         return key in this.model.fields;
       },
       getFieldLimit(key, defaultLimit){
-        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
+        if ( this.isEncodedValue(key) === false )
           return 0;
 
         if ( this.isRealField(key) )
@@ -232,6 +232,10 @@ export default {
       },
       trans(key){
         return this.$root.trans(key);
+      },
+      isEncodedValue(key)
+      {
+        return this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true);
       }
     }
 }

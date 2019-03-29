@@ -80,7 +80,12 @@ trait FieldComponent
         $filename = trim_end($template, '.vue');
         $filename = str_replace('.', '/', $filename);
 
-        if ( ($path = resource_path('views/admin/components/'.$filename.'.vue')) && !file_exists($path) )
+        $loaded_components = Admin::getComponentsTemplates();
+
+        if ( array_key_exists($strtolower_filename = strtolower($filename), $loaded_components) )
+            $path = $loaded_components[$strtolower_filename];
+
+        elseif ( ($path = resource_path('views/admin/components/'.$filename.'.vue')) && !file_exists($path) )
             $path = resource_path('views/'.$filename.'.vue');
 
         //Throw ajax error for button component render

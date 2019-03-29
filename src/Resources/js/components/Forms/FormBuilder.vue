@@ -452,6 +452,9 @@
               where = null;
           }
 
+          else if ( $(this).parent().hasClass('input-group') )
+            where = $(this).parent();
+
           if ( where )
             where.after( '<span class="help-block">'+message+'</span>' );
 
