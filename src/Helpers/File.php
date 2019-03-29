@@ -306,6 +306,14 @@ class File
 
         return $bytes;
     }
+
+    /*
+     * Check if file exists
+     */
+    public function exists()
+    {
+        return file_exists($this->path);
+    }
 }
 
 ?>
