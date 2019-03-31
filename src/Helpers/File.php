@@ -265,12 +265,39 @@ class File
     }
 
     /*
-     * Removes file
+     * Remove file
      */
     public function delete()
     {
         if ( file_exists($this->path) )
             unlink($this->path);
+    }
+
+    /*
+     * Remove file alias
+     */
+    public function remove()
+    {
+        return $this->delete();
+    }
+
+    /*
+     * Check if file exists
+     */
+    public function exists()
+    {
+        return file_exists($this->path);
+    }
+
+    /*
+     * Copy file to destination directory
+     */
+    public function copy($destination)
+    {
+        if ( file_exists($this->path) )
+            return copy($this->path, $destination);
+
+        return false;
     }
 
     /**
@@ -305,14 +332,6 @@ class File
         }
 
         return $bytes;
-    }
-
-    /*
-     * Check if file exists
-     */
-    public function exists()
-    {
-        return file_exists($this->path);
     }
 }
 
