@@ -102,6 +102,7 @@ class Gettext
         putenv('LC_ALL='.$locale);
         putenv('LC_MESSAGES='.$locale);
         putenv('LC_COLLATE='.$locale);
+        putenv('LANGUAGE='.$locale);
         setlocale(LC_ALL, $locale.'.UTF-8');
         setlocale(LC_MESSAGES, $locale.'.UTF-8');
         setlocale(LC_COLLATE, $locale.'.UTF-8');
