@@ -82,7 +82,7 @@
         <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? key : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
           <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
           <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
-          <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || ((!value || value === 0) && !this.isOpenedRow && data[0] == field.default)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+          <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || ((!value || value === 0) && !this.isOpenedRow && data[0] == defaultFieldValue)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
         </select>
         <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
       </div>
@@ -627,10 +627,16 @@
           }
         },
         //Get parent model builder
-        getModelBuilder(slug){
-          var modelBuilder = this.$parent;
+        getModelBuilder(slug, except){
+          var modelBuilder = this.$parent,
+              except = slug === '$parent' ? this.model.slug : null,
+              slug = slug === '$parent' ? null : slug;
 
-          while(modelBuilder && (modelBuilder.$options.name != 'model-builder' || (slug && modelBuilder.model.slug != slug)))
+          while(modelBuilder && (
+            modelBuilder.$options.name != 'model-builder'
+            || (slug && modelBuilder.model.slug != slug)
+            || (except && modelBuilder.model.slug === except)
+          ))
             modelBuilder = modelBuilder.$parent;
 
           if ( slug && (!modelBuilder || modelBuilder.model.slug != slug) ){
@@ -867,16 +873,9 @@
           if ( this.isMultipleDatepicker )
             return JSON.stringify(this.field.value||[]);
 
-          if ( ! this.isOpenedRow ){
-            var default_value = this.field.value||this.field.default;
-
-            //If is current date value in datepicker
-            if ( this.isDatepicker && default_value && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' ){
-              default_value = moment().format(this.$root.fromPHPFormatToMoment(this.field.date_format));
-            }
-
-            return default_value;
-          }
+          //If row is not opened, then return default field value
+          if ( ! this.isOpenedRow )
+            return this.defaultFieldValue;
 
           //Localization field
           if ( this.hasLocale )
@@ -884,10 +883,36 @@
             if ( this.field.value && this.langslug in this.field.value )
               return this.field.value[this.langslug];
 
-            return this.field.default||'';
+            return this.defaultFieldValue;
           }
 
           return this.field.value;
+        },
+        defaultFieldValue(){
+          var default_value = this.field.value||this.field.default;
+
+          if ( ! default_value || ['number', 'string'].indexOf(typeof default_value) === -1 )
+            return '';
+
+          //If is current date value in datepicker
+          if ( this.isDatepicker && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' )
+            default_value = moment().format(this.$root.fromPHPFormatToMoment(this.field.date_format));
+
+          //Get value by other table
+          if ( this.field.default )
+          {
+            var default_parts = this.field.default.split('.');
+
+            if ( default_parts.length == 2 )
+            {
+              var model = this.getModelBuilder(default_parts[0]);
+
+              if ( model && (default_parts[1] in model.row) )
+                return model.row[default_parts[1]];
+            }
+          }
+
+          return default_value||'';
         },
         value(){
           var value = this.field.value;
