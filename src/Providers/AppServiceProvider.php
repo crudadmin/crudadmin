@@ -18,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
         ValidatorServiceProvider::class,
         CommandsRegisterServiceProvider::class,
         PasswordResetServiceProvider::class,
+        ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
         FieldsServiceProvider::class,
         SEOServiceProvider::class,
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         'Localization' => Facades\Localization::class,
         'Fields' => Facades\Fields::class,
         'SEO' => Facades\SEOFacade::class,
+        'ImageCompressor' => Facades\ImageCompressor::class,
         'Image' => \Intervention\Image\Facades\Image::class,
     ];
 

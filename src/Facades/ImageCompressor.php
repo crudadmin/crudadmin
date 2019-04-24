@@ -4,10 +4,10 @@ namespace Gogol\Admin\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class Gettext extends Facade
+class ImageCompressor extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'gettext';
+        return 'imagecompressor';
     }
 }

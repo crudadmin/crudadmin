@@ -4,6 +4,8 @@ namespace Gogol\Admin\Traits;
 
 use File;
 use Gogol\Admin\Helpers\File as AdminFile;
+use Spatie\ImageOptimizer\OptimizerChainFactory;
+use ImageCompressor;
 use Image;
 
 trait Uploadable
@@ -26,10 +28,10 @@ trait Uploadable
      */
     public function filePath($key, $file = null)
     {
-        $path = 'uploads/' . $this->getTable() . '/' . $key;
+        $path = 'uploads/' . $this->getTable().'/'.$key;
 
         if ( $file )
-            return $path . '/' . $file;
+            return $path.'/'.$file;
 
         return $path;
     }
@@ -51,6 +53,19 @@ trait Uploadable
         return true;
     }
 
+    //Checks if is Image class avaiable
+    protected function checkImagePackage()
+    {
+        if ( ! class_exists('Image') )
+        {
+            $this->error = '- Zmena obrázku nebola aplikovaná pre "'.$field.'", kedže rozšírenie pre spracovanie obrázkov nebolo nainštalované.';
+
+            return false;
+        }
+
+        return true;
+    }
+
     /*
      * Postprocess images
      */
@@ -61,18 +76,13 @@ trait Uploadable
 
         if ( is_string($actions_steps) )
         {
-            return $this->resizeCacheImages( public_path( $path . '/' . $filename ), $actions_steps);
+            return $this->resizeCacheImages( public_path( $path.'/'.$filename ), $actions_steps);
         }
 
         //If is required some image post processing changes with Image class
         if (is_array($actions_steps) && count($actions_steps) > 0 && $extension != 'svg'){
-            //Checks if is Image class avaiable
-            if ( ! class_exists('Image') )
-            {
-                $this->error = '- Zmena obrázku nebola aplikovaná pre "'.$field.'", kedže rozšírenie pre spracovanie obrázkov nebolo nainštalované.';
-
+            if ( ! $this->checkImagePackage() )
                 return false;
-            }
 
             foreach ((array)$actions_steps as $dir => $actions)
             {
@@ -103,7 +113,7 @@ trait Uploadable
      */
     private function guessExtension($path, $filename)
     {
-        $mimeType = File::mimeType($path . '/' . $filename);
+        $mimeType = File::mimeType($path.'/'.$filename);
 
         $replace = [
             'image/jpeg' => 'jpg',
@@ -131,10 +141,10 @@ trait Uploadable
         $extension = File::extension($file);
 
         if ( !empty( $extension ) )
-            $filename = $this->filenameModifier($filename . '.' . $extension, $field);
+            $filename = $this->filenameModifier($filename.'.'.$extension, $field);
 
         //Copy file from server, or directory into uploads for field
-        File::copy($file, $path . '/' . $filename);
+        File::copy($file, $path.'/'.$filename);
 
         //If file hasn't extension type from filename, then check file mimetype and guess file extension
         if ( ! $extension )
@@ -142,9 +152,9 @@ trait Uploadable
             if ( $extension = $this->guessExtension($path, $filename) )
             {
                 //Modified filename
-                $filename_with_extension = $this->filenameModifier($filename . '.' . $extension, $field);
+                $filename_with_extension = $this->filenameModifier($filename.'.'.$extension, $field);
 
-                File::move($path . '/' . $filename, $path . '/' . $filename_with_extension);
+                File::move($path.'/'.$filename, $path.'/'.$filename_with_extension);
 
                 $filename = $filename_with_extension;
             }
@@ -169,7 +179,7 @@ trait Uploadable
         $extension = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : false;
 
         //If filename exists, then add number prefix of file
-        if ( $extension && File::exists($path . '/' . $filename . '.' . $extension) )
+        if ( $extension && File::exists($path.'/'.$filename.'.'.$extension) )
         {
             $i = 0;
 
@@ -227,8 +237,8 @@ trait Uploadable
             }
 
             //Get extension of file
-            $extension = $file->getClientOriginalExtension();
-            $filename = $this->filenameModifier($filename . '.' . $extension, $field);
+            $extension = strtolower($file->getClientOriginalExtension());
+            $filename = $this->filenameModifier($filename.'.'.$extension, $field);
 
             //Move photo from request to directory
             $file = $file->move($path, $filename);
@@ -238,6 +248,10 @@ trait Uploadable
             $filename = $response['filename'];
             $extension = $response['extension'];
         }
+
+        //Compress images
+        if ( ! ImageCompressor::compressOriginalImage($file, null, $extension) )
+            return false;
 
         if ( ! $this->filePostProcess($field, $path, $file, $filename, $extension, $actions_steps) )
             return false;
@@ -273,7 +287,7 @@ trait Uploadable
                     }
                 }
 
-                $cache_path = AdminFile::adminModelCachePath($this->getTable() . '/' . $key );
+                $cache_path = AdminFile::adminModelCachePath($this->getTable().'/'.$key );
                 $need_delete = $new_files === null
                                || is_array($new_files) && ! in_array($file->filename, array_flatten($new_files))
                                || is_string($new_files) && $file->filename != $new_files;
@@ -283,11 +297,11 @@ trait Uploadable
                 {
                     foreach ((array)scandir($cache_path) as $dir)
                     {
-                        $path = $cache_path . '/' . $dir;
+                        $path = $cache_path.'/'.$dir;
 
                         if ( !in_array($dir, array('.', '..')) && is_dir($path) )
                         {
-                            $cache_file_path = $path . '/' . $file->filename;
+                            $cache_file_path = $path.'/'.$file->filename;
 
                             if ( file_exists($cache_file_path) )
                                 unlink($cache_file_path);

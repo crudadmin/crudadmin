@@ -2,23 +2,23 @@
 
 namespace Gogol\Admin\Models;
 
-use Illuminate\Database\Eloquent\Model as BaseModel;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
+use Admin;
+use Gogol\Admin\Traits\AdminModelTrait;
+use Gogol\Admin\Traits\FieldComponent;
+use Gogol\Admin\Traits\FieldProperties;
+use Gogol\Admin\Traits\HasAttributes;
+use Gogol\Admin\Traits\HasChildrens;
+use Gogol\Admin\Traits\ModelIcons;
 use Gogol\Admin\Traits\ModelLayoutBuilder;
 use Gogol\Admin\Traits\ModelRelationships;
 use Gogol\Admin\Traits\ModelRules;
-use Gogol\Admin\Traits\FieldComponent;
-use Gogol\Admin\Traits\FieldProperties;
-use Gogol\Admin\Traits\AdminModelTrait;
 use Gogol\Admin\Traits\Sluggable;
-use Gogol\Admin\Traits\HasChildrens;
-use Gogol\Admin\Traits\HasAttributes;
-use Gogol\Admin\Traits\ModelIcons;
 use Gogol\Admin\Traits\Uploadable;
 use Gogol\Admin\Traits\Validation;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model as BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Localization;
-use Admin;
 
 class Model extends BaseModel
 {

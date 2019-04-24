@@ -2,8 +2,8 @@
 
 namespace Gogol\Admin\Helpers;
 
-use Image;
 use File as BaseFile;
+use Image;
 
 class File
 {
@@ -228,12 +228,18 @@ class File
         }
 
         //Save image into cache folder
-        $image->save( $filepath, 70 );
+        $image->save( $filepath, 85 );
 
         if ( $return_object )
             return $image;
 
-        return new static($filepath);
+        $instance = new static($filepath);
+
+        //Create webp version of image
+        if ( config('admin.upload_webp', true) === true )
+            $instance->createWebp();
+
+        return $instance;
     }
 
     /*
@@ -320,6 +326,14 @@ class File
     {
         $bytes = sprintf('%u', filesize($path));
 
+        return (new static)->formatFilesizeNumber($bytes);
+    }
+
+    /*
+     * Format filesize number
+     */
+    static function formatFilesizeNumber($bytes)
+    {
         if ($bytes > 0)
         {
             $unit = intval(log($bytes, 1024));
@@ -333,6 +347,27 @@ class File
 
         return $bytes;
     }
+
+    /*
+     * Create webp version of image file
+     */
+    public function createWebp()
+    {
+        $output_filename = $this->basepath.'.webp';
+
+        //If webp exists already
+        if ( file_exists($output_filename) )
+            return $this;
+
+        $image = Image::make($this->basepath);
+
+        $encoded = $image->encode('webp');
+
+        @file_put_contents($output_filename, $encoded);
+
+        return $this;
+    }
+
 }
 
 ?>
