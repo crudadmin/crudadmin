@@ -230,16 +230,15 @@ class File
         //Save image into cache folder
         $image->save( $filepath, 85 );
 
+        //Create webp version of image
+        if ( config('admin.upload_webp', false) === true )
+            $this->createWebp($filepath);
+
+        //Return image object
         if ( $return_object )
             return $image;
 
-        $instance = new static($filepath);
-
-        //Create webp version of image
-        if ( config('admin.upload_webp', true) === true )
-            $instance->createWebp();
-
-        return $instance;
+        return new static($filepath);
     }
 
     /*
@@ -351,17 +350,19 @@ class File
     /*
      * Create webp version of image file
      */
-    public function createWebp()
+    public function createWebp($source_path = null)
     {
-        $output_filename = $this->basepath.'.webp';
+        $source_path = $source_path ?: $this->basepath;
+
+        $output_filename = $source_path.'.webp';
 
         //If webp exists already
         if ( file_exists($output_filename) )
             return $this;
 
-        $image = Image::make($this->basepath);
+        $image = Image::make($source_path);
 
-        $encoded = $image->encode('webp');
+        $encoded = $image->encode('webp', 85);
 
         @file_put_contents($output_filename, $encoded);
 

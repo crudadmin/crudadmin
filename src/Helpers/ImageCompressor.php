@@ -61,11 +61,11 @@ class ImageCompressor
             $resized = $this->resizeMaxResolution($image);
 
             //Resize jpeg images
-            if ( $is_jpg && ($resized === true || $can_compress === true) )
+            if ( isset($is_jpg) && $is_jpg === true && ($resized === true || $can_compress === true) )
                 $encoded_image = $image->encode('jpg', $can_compress === false ? 100 : 85);
 
             //Resize png image
-            if ( $is_png && $resized === true )
+            if ( isset($is_png) && $is_png === true && $resized === true )
                 $encoded_image = $image->encode('png');
 
             //Save if has been modified and filesize is smaller then uploaded file

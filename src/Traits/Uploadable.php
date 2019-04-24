@@ -303,7 +303,12 @@ trait Uploadable
                         {
                             $cache_file_path = $path.'/'.$file->filename;
 
+                            //Remove resized image
                             if ( file_exists($cache_file_path) )
+                                unlink($cache_file_path);
+
+                            //Remove also webp version of image
+                            if ( file_exists($cache_file_path .= '.webp') )
                                 unlink($cache_file_path);
                         }
                     }

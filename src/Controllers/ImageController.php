@@ -53,7 +53,7 @@ class ImageController extends Controller
         $file = (new File($cache['original_path']))->image($cache['mutators'], null, true, true);
 
         //Remove temporary file with settings
-        unlink($temporary_path);
+        @unlink($temporary_path);
 
         //Return resized image response
         return $file->response();
