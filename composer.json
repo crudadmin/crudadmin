@@ -13,7 +13,8 @@
         "laravel/framework": "^5.4",
         "doctrine/dbal": "2.6.3",
         "intervention/image": "^2.3.0",
-        "gettext/gettext": "^4.6"
+        "gettext/gettext": "^4.6",
+        "spatie/image-optimizer": "^1.1"
     },
     "autoload": {
         "psr-4": {

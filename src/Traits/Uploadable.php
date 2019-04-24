@@ -250,7 +250,7 @@ trait Uploadable
         }
 
         //Compress images
-        if ( ! ImageCompressor::compressOriginalImage($file, null, $extension) )
+        if ( ! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension) )
             return false;
 
         if ( ! $this->filePostProcess($field, $path, $file, $filename, $extension, $actions_steps) )
@@ -303,6 +303,9 @@ trait Uploadable
                         {
                             $cache_file_path = $path.'/'.$file->filename;
 
+                            //Remove cache file from compressed list
+                            ImageCompressor::removeCompressedPath($cache_file_path);
+
                             //Remove resized image
                             if ( file_exists($cache_file_path) )
                                 unlink($cache_file_path);
@@ -318,6 +321,8 @@ trait Uploadable
                 if ( $need_delete && $is_allowed_deleting )
                 {
                     $file->delete();
+
+                    ImageCompressor::removeCompressedPath($file->basepath);
                 }
             }
         }

@@ -125,11 +125,25 @@ class ImageCompressor
     /*
      * Add compressed file into compressed list
      */
-    private function addCompressedPath($source_path, $dest_path, $orig_size)
+    public function addCompressedPath($source_path, $dest_path, $orig_size)
     {
         $source_path = str_replace(public_path('uploads/'), '', $source_path);
 
         @file_put_contents($this->getCompressedListPath(), $source_path.':'.$orig_size."\n", FILE_APPEND);
+    }
+
+    /*
+     * Add compressed file into compressed list
+     */
+    public function removeCompressedPath($source_path)
+    {
+        $compressed_path = $this->getCompressedListPath();
+        $source_path = str_replace(public_path('uploads/'), '', $source_path);
+
+        $data = file_get_contents($compressed_path);
+        $data = str_replace($source_path.':', '-:', $data);
+
+        @file_put_contents($compressed_path, $data);
     }
 
     /*
