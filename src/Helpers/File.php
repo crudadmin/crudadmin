@@ -151,10 +151,16 @@ class File
         return $params;
     }
 
-    /*
-     * Postprocess image file
+    /**
+     * Resize image
+     * @param  array   $mutators      array of muttators
+     * @param  [type]  $directory     where should be image saved, directory name may be generated automatically
+     * @param  boolean $force         force render image immediately
+     * @param  boolean $return_object return image instance
+     * @param  boolean $webp          enable/disable webp image extension
+     * @return File/Image class
      */
-    public function image($mutators = [], $directory = null, $force = false, $return_object = false)
+    public function image($mutators = [], $directory = null, $force = false, $return_object = false, $webp = true)
     {
         //When is file type svg, then image postprocessing subdirectories not exists
         if ( $this->extension == 'svg' || !file_exists($this->path) )
@@ -231,7 +237,7 @@ class File
         $image->save( $filepath, 85 );
 
         //Create webp version of image
-        if ( config('admin.upload_webp', false) === true )
+        if ( $webp === true && config('admin.upload_webp', false) === true )
             $this->createWebp($filepath);
 
         //Return image object
@@ -255,7 +261,7 @@ class File
     /*
      * Resize or fit image depending on dimensions
      */
-    public function resize($width = null, $height = null, $directory = null, $force = false)
+    public function resize($width = null, $height = null, $directory = null, $force = false, $webp = true)
     {
         if ( is_numeric($width) && is_numeric($height) )
         {
@@ -266,7 +272,7 @@ class File
 
         return $this->image([
             $action => [ $width, $height ],
-        ], $directory, $force);
+        ], $directory, $force, false, $webp);
     }
 
     /*

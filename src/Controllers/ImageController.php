@@ -27,7 +27,7 @@ class ImageController extends Controller
         //Check if model and field exists
         if ( ($model = Admin::getModelByTable($model)) && $model->getField($field) )
         {
-            return response()->download( $file->resize(40, 40, 'admin-thumbnails', true)->path );
+            return response()->download( $file->resize(40, 40, 'admin-thumbnails', true, false)->path );
         }
 
         return abort(404);
