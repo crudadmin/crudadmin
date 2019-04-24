@@ -51,8 +51,8 @@ class ImageCompressor
         if (
             $this->imageExtExists()
             && (
-                $is_jpg = in_array($extension, ['jpg', 'jpeg']) ||
-                $is_png = in_array($extension, ['png'])
+                ($is_jpg = in_array($extension, ['jpg', 'jpeg'])) ||
+                ($is_png = in_array($extension, ['png']))
             )
         ) {
             $image = Image::make($file);
