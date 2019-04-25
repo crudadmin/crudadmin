@@ -139,21 +139,35 @@
 
         if ( this.isOpenedRow )
         {
-          //Update title
-          if ( title = this.$root.getModelProperty(this.model, 'settings.title.update') )
-          {
-            //Bind value from row to title
-            for ( var key in this.row )
-              title = title.replace(':'+key, this.row[key]);
+          //If update title has not been set
+          if ( !(title = this.$root.getModelProperty(this.model, 'settings.title.update')) )
+            return this.trans('edit-row-n')+' ' + this.row.id;
 
-            return title;
+          //Bind value from row to title
+          for ( var key in this.row )
+          {
+            var value = this.row[key];
+
+            if ( this.isFieldSelect(key) )
+            {
+              var values = this.$root.languageOptions(this.model.fields[key].options, key);
+
+              for ( var i = 0; i < values.length; i++ )
+                if ( values[i][0] == value )
+                {
+                  value = values[i][1];
+                  break;
+                }
+            }
+
+            title = title.replace(':'+key, value);
           }
 
-          return this.trans('edit-row-n')+' ' + this.row.id;
+          return title;
         }
 
         //Insert title
-        if ( title = this.$root.getModelProperty(this.model, 'settings.title.insert') )
+        else if ( title = this.$root.getModelProperty(this.model, 'settings.title.insert') )
           return title;
 
         return this.trans('new-row');
@@ -638,7 +652,10 @@
       },
       openGettextEditor(){
         this.gettext_editor = this.row;
-      }
+      },
+      isFieldSelect(column){
+        return column && column in this.model.fields && (['select', 'radio'].indexOf(this.model.fields[column].type) > -1) ? true : false;
+      },
     },
   }
 </script>
