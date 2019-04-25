@@ -14,14 +14,19 @@
                     :history="history">
                 </form-tabs-builder>
               </div>
+              <div v-else>
+                <div class="col-md-12">
+                  <p v-if="visibleFields.length == 0" class="empty-group-separator">...</p>
+                </div>
+              </div>
 
                 <div v-for="(index, item) in group.fields">
                     <div
                       :data-field="item"
                       :data-lang="langslug"
-                      v-if="isField(item) && canShowField(model.fields[item])"
+                      v-if="isField(item) && canRenderField(model.fields[item])"
                       v-for="langslug in getFieldLangs(model.fields[item])"
-                      v-show="canShowLanguageField(this.model.fields[item], langslug, inputlang)"
+                      v-show="canShowField(model.fields[item]) && canShowLanguageField(this.model.fields[item], langslug, inputlang)"
                       class="col-lg-12 field-wrapper">
                         <form-input-builder
                           :history="history"
@@ -88,6 +93,7 @@ export default {
                  || !(
                       field.invisible && field.invisible == true
                       || field.removeFromForm && field.removeFromForm == true
+                      || field.hideFromForm && field.hideFromForm == true
                   );
         });
 
@@ -96,9 +102,12 @@ export default {
     },
 
     methods: {
-      canShowField(field){
+      canRenderField(field){
         return !('removeFromForm' in field && field.removeFromForm == true)
                 && !('invisible' in field && field.invisible == true);
+      },
+      canShowField(field){
+        return !('hideFromForm' in field && field.hideFromForm == true);
       },
       //Return group class
       getGroupClass(group){

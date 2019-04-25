@@ -874,8 +874,9 @@
             return JSON.stringify(this.field.value||[]);
 
           //If row is not opened, then return default field value
-          if ( ! this.isOpenedRow )
+          if ( ! this.isOpenedRow ){
             return this.defaultFieldValue;
+          }
 
           //Localization field
           if ( this.hasLocale )
@@ -891,7 +892,7 @@
         defaultFieldValue(){
           var default_value = this.field.value||this.field.default;
 
-          if ( ! default_value || ['number', 'string'].indexOf(typeof default_value) === -1 )
+          if ( ! default_value || ['number', 'string', 'boolean'].indexOf(typeof default_value) === -1 )
             return '';
 
           //If is current date value in datepicker
@@ -943,10 +944,47 @@
           return [ value ];
         },
         isRequired(){
-          return 'required' in this.field && this.field.required == true;
+          //Basic required attribute
+          if ( 'required' in this.field && this.field.required == true )
+              return true;
+
+          //Required if attribute
+          if ( this.field.required_if )
+          {
+            var parts = this.field.required_if.split(','),
+                value = this.row[parts[0]];
+
+            if (value && parts.slice(1).indexOf(value) > -1)
+              return true;
+          }
+
+          //Required without attribute
+          if ( this.field.required_without )
+          {
+            var parts = this.field.required_without.split(',');
+
+            for ( var i = 0; i < parts.length; i++ )
+            {
+              if ( ! this.row[parts[i]] )
+                return true;
+            }
+          }
+
+          //Required without attribute
+          if ( this.field.required_with )
+          {
+            var parts = this.field.required_with.split(',');
+
+            for ( var i = 0; i < parts.length; i++ )
+            {
+              if ( this.row[parts[i]] )
+                return true;
+            }
+          }
+
+          return false;
         },
-        isRequiredIfHasValues()
-        {
+        isRequiredIfHasValues(){
           return 'required_with_values' in this.field && this.field.required_with_values == true;
         },
         hasLocale(){
