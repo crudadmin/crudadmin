@@ -1019,7 +1019,7 @@ class AdminMigrationCommand extends Command
      */
     private function canSetDefault($model, $key)
     {
-        return $model->hasFieldParam($key, 'default') && ! $model->isFieldType($key, ['belongsTo', 'belongsToMany']);
+        return $model->hasFieldParam($key, 'default') && ! $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']);
     }
 
     /*
