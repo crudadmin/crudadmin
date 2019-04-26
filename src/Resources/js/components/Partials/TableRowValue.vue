@@ -188,9 +188,11 @@ export default {
       getLanguageSelectOptions(array, model){
         model = this.$root.models_list[model];
 
-        return this.$root.languageOptions(array, this.model.fields[this.field], model && model.localization ? {
+        var filter =  model && model.localization ? {
           language_id : this.$root.language_id,
-        } : {});
+        } : {};
+
+        return this.$root.languageOptions(array, this.model.fields[this.field], filter, false);
       },
       isFile(field){
 

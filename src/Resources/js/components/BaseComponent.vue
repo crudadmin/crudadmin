@@ -237,7 +237,7 @@
                     /*
                     * Returns correct values into multilangual select
                     */
-                    languageOptions(array, field, filter){
+                    languageOptions(array, field, filter, with_hidden){
                         var key,
                             relation,
                             field_key,
@@ -247,46 +247,57 @@
                             hasFilter = filter && Object.keys(filter).length > 0;
 
                         if ( field && (relation = field['belongsTo']||field['belongsToMany']) && (field_key = relation.split(',')[1]) ){
-                          matched_keys = field_key.replace(/\\:/g, '').match(new RegExp(/[\:^]([0-9,a-z,A-Z$_]+)+/, 'g'));
+                            matched_keys = field_key.replace(/\\:/g, '').match(new RegExp(/[\:^]([0-9,a-z,A-Z$_]+)+/, 'g'));
                         }
 
                         loop1:
                         for ( var key in array )
                         {
-                          //If select has filters
-                          if ( hasFilter )
-                            for ( var k in filter ){
-                              if ( array[key][1][k] != filter[k] || array[key][1][k] == null )
-                                continue loop1;
+                            //If select has filters
+                            if ( hasFilter )
+                                for ( var k in filter ){
+                                    if ( array[key][1][k] != filter[k] || array[key][1][k] == null )
+                                        continue loop1;
                             }
 
-                          //Build value from multiple columns
-                          if ( matched_keys )
-                          {
-                            var value = field_key.replace(/\\:/g, ':');
-
-                            for ( var i = 0; i < matched_keys.length; i++ )
+                            //Build value from multiple columns
+                            if ( matched_keys )
                             {
-                                var related_field = this.models_list[relation.split(',')[0]].fields[matched_keys[i].substr(1)],
-                                    option_value = this.getLangValue(array[key][1][matched_keys[i].substr(1)], related_field);
+                                var value = field_key.replace(/\\:/g, ':');
 
-                                value = value.replace(new RegExp(matched_keys[i], 'g'), !option_value && option_value !== 0 ? '' : option_value);
+                                for ( var i = 0; i < matched_keys.length; i++ )
+                                {
+                                    var related_field = this.models_list[relation.split(',')[0]].fields[matched_keys[i].substr(1)],
+                                        option_value = this.getLangValue(array[key][1][matched_keys[i].substr(1)], related_field);
+
+                                    value = value.replace(new RegExp(matched_keys[i], 'g'), !option_value && option_value !== 0 ? '' : option_value);
+                                }
                             }
-                          }
 
-                          //Simple value by one column
-                          else {
-                            if ( field_key )
-                                related_field = this.models_list[relation.split(',')[0]].fields[field_key];
+                            //Simple value by one column
+                            else {
+                                if ( field_key )
+                                    related_field = this.models_list[relation.split(',')[0]].fields[field_key];
 
-                            //Get value of multiarray or simple array
-                            var value = typeof array[key][1] == 'object' && array[key][1]!==null ? this.getLangValue(array[key][1][field_key], related_field) : array[key][1];
-                          }
+                                //Get value of multiarray or simple array
+                                var value = typeof array[key][1] == 'object' && array[key][1]!==null ? this.getLangValue(array[key][1][field_key], related_field) : array[key][1];
+                            }
 
-                          //Change undefined values on null values
-                          value = value == null ? null : value;
+                            //Change undefined values on null values
+                            value = value == null ? null : value;
 
-                          items.push([array[key][0], value]);
+                            var hiddenOptions = field.hiddenOptions||field.optionsFilter;
+
+                            //Skip hidden options
+                            if ( hiddenOptions && with_hidden !== false ){
+                                if ( typeof hiddenOptions == 'object' && hiddenOptions.indexOf(array[key][0]) > -1 )
+                                    continue;
+
+                                if ( typeof hiddenOptions == 'function' && hiddenOptions(array[key][0], value, array[key][1]) === false )
+                                    continue;
+                            }
+
+                            items.push([array[key][0], value]);
                         }
 
                         return items;

@@ -14,9 +14,9 @@
                     :history="history">
                 </form-tabs-builder>
               </div>
-              <div v-else>
+              <div v-else v-if="visibleFields.length == 0">
                 <div class="col-md-12">
-                  <p v-if="visibleFields.length == 0" class="empty-group-separator">...</p>
+                  <p class="empty-group-separator">...</p>
                 </div>
               </div>
 
