@@ -21,6 +21,7 @@
 
 <script>
   import ModelBuilder from '../Forms/ModelBuilder.vue';
+  import ModelHelper from '../Model/ModelHelper.js';
 
   export default {
       name : 'base-page-view',
@@ -28,7 +29,7 @@
       data : function(){
         return {
           //Passing model data from parent
-          model : this.mutateModel(this.$parent.model),
+          model : ModelHelper(this.$parent.model),
         };
       },
 
@@ -59,9 +60,6 @@
       methods : {
         trans(key){
           return this.$root.trans(key);
-        },
-        mutateModel(model){
-          return model;
         },
       }
   }

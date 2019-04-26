@@ -1,7 +1,7 @@
 <template>
   <div class="nav-tabs-custom" :class="{ default : hasNoTabs }">
     <ul class="nav nav-tabs">
-      <li v-for="tab in getTabs" v-if="isTab(tab) && !tab.model || isModel(tab)" :model-table="isModel(tab) && getModel(tab.model) ? getModel(tab.model).slug : ''" :class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
+      <li v-for="tab in getTabs" v-if="isTab(tab) && !tab.model || isModel(tab)" v-show="isTabVisible(tab)" :model-table="isModel(tab) && getModel(tab.model) ? getModel(tab.model).slug : ''" :class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
         <a data-toggle="tab" aria-expanded="true"><i v-if="getTabIcon(tab)" :class="['fa', getTabIcon(tab)]"></i> {{ getTabName(tab)||trans('general-tab') }}</a>
       </li>
     </ul>
@@ -50,6 +50,7 @@
 <script>
   import FormGroup from './FormGroup.vue';
   import ModelBuilder from './ModelBuilder.vue';
+  import ModelHelper from '../Model/ModelHelper.js';
 
   export default {
     name : 'form-tabs-builder',
@@ -173,7 +174,7 @@
         if ( typeof this.model.childs[model] == 'string' )
           return _.cloneDeep(this.model);
 
-        return this.model.childs[model];
+        return ModelHelper(this.model.childs[model]);
       },
       /*
        * Return tab name
@@ -294,6 +295,12 @@
           this.models_loaded.push(model.slug);
 
         return this.models_loaded.indexOf(model.slug) > -1;
+      },
+      isTabVisible(tab){
+        if ( ! this.isTab(tab) )
+          return false;
+
+        return (this.model.hidden_tabs||[]).indexOf(tab.model||tab.id) === -1;
       }
     }
   }

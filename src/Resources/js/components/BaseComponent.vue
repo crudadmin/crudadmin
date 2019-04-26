@@ -2,6 +2,7 @@
     import Sidebar from './Sidebar/Sidebar.vue';
     import License from './Partials/License.vue';
     import CheckAssetsVersion from './Partials/CheckAssetsVersion.vue';
+    import ModelHelper from './Model/ModelHelper.js';
 
     export default {
         init(layout, models_list, groups_prefix){
@@ -327,7 +328,7 @@
                             if ( typeof models[key] != 'object' )
                                 continue;
 
-                            data[models[key].slug] = models[key];
+                            data[models[key].slug] = ModelHelper(models[key]);
 
                             if ( Object.keys(models[key].childs).length > 0 )
                                 data = _.merge(data, this.getRecursiveModels(models[key].childs));

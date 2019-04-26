@@ -267,6 +267,7 @@ class LayoutController extends BaseController
             'foreign_column' => $model->getForeignColumn(),
             'without_parent' => $model->getProperty('withoutParent') ?: false,
             'in_tab' => $model->getProperty('inTab') ?: false,
+            'hidden_tabs' => $model->getProperty('hidden_tabs') ?: [],
             'reserved' => $model->getProperty('reserved') ?: false,
             'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),

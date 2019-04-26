@@ -141,6 +141,7 @@
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
   import GettextExtension from '../Partials/GettextExtension.vue';
   import History from '../Partials/History.vue';
+  import ModelHelper from '../Model/ModelHelper.js';
 
   export default {
     props : ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
@@ -665,7 +666,7 @@
           return _.cloneDeep(this.model);
         }
 
-        return model;
+        return ModelHelper(model);
       },
     },
 

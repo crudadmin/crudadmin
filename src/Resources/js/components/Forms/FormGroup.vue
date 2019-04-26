@@ -14,7 +14,7 @@
                     :history="history">
                 </form-tabs-builder>
               </div>
-              <div v-else v-if="visibleFields.length == 0">
+              <div v-else v-if="canShowGroupName(group) && visibleFields.length == 0">
                 <div class="col-md-12">
                   <p class="empty-group-separator">...</p>
                 </div>
