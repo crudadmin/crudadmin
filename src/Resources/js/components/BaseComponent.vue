@@ -1,3 +1,7 @@
+<template>
+    <div></div>
+</template>
+
 <script>
     import Sidebar from './Sidebar/Sidebar.vue';
     import License from './Partials/License.vue';
@@ -5,7 +9,8 @@
     import ModelHelper from './Model/ModelHelper.js';
 
     export default {
-        init(layout, models_list, groups_prefix){
+        init(layout, models_list, groups_prefix, router){
+
             //Replace requests paths
             var replace = ['model', 'parent', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
 
@@ -16,6 +21,8 @@
             }
 
             return {
+                el: '#app',
+                router,
                 data : function(){
                     return {
                         version : layout.version,

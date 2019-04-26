@@ -1,39 +1,41 @@
 <template>
-  <!-- Content Header (Page header) -->
-  <section class="content-header">
-    <h1>
-      Dashboard
-      <small>{{ trans('welcome-in-admin') }}</small>
-    </h1>
-    <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
-      <li class="active">Dashboard</li>
-    </ol>
-  </section>
+  <div>
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        Dashboard
+        <small>{{ trans('welcome-in-admin') }}</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
+        <li class="active">Dashboard</li>
+      </ol>
+    </section>
 
-  <!-- Main content -->
-  <section class="content">
-    <div class="row">
-      <!-- left column -->
-      <div class="col-md-12">
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
 
-        <!-- Horizontal Form -->
-        <div class="box box-info">
+          <!-- Horizontal Form -->
+          <div class="box box-info">
 
 
-          <div class="box-body">
-            <h2 v-if="!layout">{{ trans('welcome') }} {{ user.username }}</h2>
-            {{{ layout }}}
+            <div class="box-body">
+              <h2 v-if="!layout">{{ trans('welcome') }} {{ user.username }}</h2>
+              <div v-html="layout"></div>
+            </div>
           </div>
-        </div>
-        <!-- /.box -->
+          <!-- /.box -->
 
+        </div>
+        <!--/.col (left) -->
       </div>
-      <!--/.col (left) -->
-    </div>
-    <!-- /.row -->
-  </section>
-  <!-- /.content -->
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+  </div>
 </template>
 
 <script>

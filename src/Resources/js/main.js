@@ -1,6 +1,8 @@
 //Requires
 window.Vue = require('vue');
-window.VueRouter = require('vue-router');
+
+import VueRouter from 'vue-router';
+import Fragment from 'vue-fragment'
 
 require('jquery-form/jquery.form.js');
 
@@ -12,19 +14,15 @@ window.md5 = require('js-md5');
 //Uses
 Vue.use(require('vue-resource'));
 Vue.use(require('vue-drag-and-drop'));
+Vue.use(Fragment.Plugin);
 Vue.use(VueRouter);
 
 // Components
 import BaseComponent from './components/BaseComponent.vue';
 
 //Layouts
-import DashboardView from './components/views/DashboardView.vue';
+import DashboardView from './components/views/DashBoardView.vue';
 import BasePageView from './components/views/BasePageView.vue';
-
-/*
- * App root
- */
-var router = new VueRouter();
 
 /*
  * Requests settings
@@ -51,9 +49,9 @@ var router = new VueRouter();
 /*
  * Initial request for administration data
  */
-Vue.http.get( 'api/layout' ).then(function(response){
+Vue.http.get('api/layout').then(function(response){
 
-    var routes = {},
+    var routes = [],
         layout = response.data,
         models_list = [],
         groups_prefix = '#$_';
@@ -89,7 +87,8 @@ Vue.http.get( 'api/layout' ).then(function(response){
                 continue;
 
             //Prida sa adresa modela do route systemu
-            routes[ '/' + models[i].slug ] = {
+            routes.push({
+                path : '/'+models[i].slug,
                 name : models[i].slug,
                 component: {
                     props : ['langid'],
@@ -107,7 +106,7 @@ Vue.http.get( 'api/layout' ).then(function(response){
                     //Subkomponenta
                     components : { BasePageView },
                 },
-            }
+            });
         }
 
         models_list = models_list.concat(models);
@@ -117,14 +116,14 @@ Vue.http.get( 'api/layout' ).then(function(response){
         component: DashboardView,
     };
 
-    //Mapping routes
-    router.map( routes );
+    var router = new VueRouter({
+        routes: routes,
+    });
+
+    var BaseApp = BaseComponent.init( layout, models_list, groups_prefix, router);
 
     //Initialize custom componenets
-    var app = Vue.extend( BaseComponent.init( layout, models_list, groups_prefix ) );
-
-    //Init app
-    router.start(app, '#app');
+    window.VueApp = new Vue(BaseApp);
 
 }).catch(function(e){
     if ( window.crudadmin.dev === true )

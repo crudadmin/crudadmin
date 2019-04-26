@@ -14,7 +14,7 @@
               </div>
               <div class="modal-body">
                   <label>{{ trans('search') }}</label>
-                  <input type="text" class="form-control" placeholder="{{ trans('gettext-search') }}" v-model="query">
+                  <input type="text" class="form-control" :placeholder="trans('gettext-search')" v-model="query">
 
                   <hr>
                   <p v-if="loaded && resultLength == 0">{{ trans('gettext-no-match') }}</p>

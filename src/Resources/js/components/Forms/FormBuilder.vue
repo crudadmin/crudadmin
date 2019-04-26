@@ -11,6 +11,7 @@
 
         <component
           v-for="name in getComponents('form-header')"
+          :key="name"
           :model="model"
           :row="row"
           :rows="rows.data"
@@ -32,6 +33,7 @@
       <div class="box-body" :class="{ cantadd : !cansave }">
         <component
           v-for="name in getComponents('form-top')"
+          :key="name"
           :model="model"
           :row="row"
           :rows="rows.data"
@@ -51,6 +53,7 @@
 
         <component
           v-for="name in getComponents('form-bottom')"
+          :key="name"
           :model="model"
           :row="row"
           :rows="rows.data"
@@ -61,6 +64,7 @@
       <div class="box-footer" v-if="canUpdateForm">
         <component
           v-for="name in getComponents('form-footer')"
+          :key="name"
           :model="model"
           :row="row"
           :rows="rows.data"

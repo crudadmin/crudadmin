@@ -14,7 +14,7 @@
           <th class="th-options-buttons"></th>
         </tr>
       </thead>
-      <tbody data-model="{{ model.slug }}">
+      <tbody :data-model="model.slug">
         <tr v-for="(key, item) in rowsdata" :data-index="item.id" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
           <td class="checkbox-td" v-if="multipleCheckbox">
             <div class="checkbox-box" @click="checkRow(item.id)">

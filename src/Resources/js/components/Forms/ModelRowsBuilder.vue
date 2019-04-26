@@ -38,6 +38,7 @@
 
       <component
         v-for="name in getComponents('table-header')"
+        :key="name"
         :model="model"
         :row="row"
         :rows="rows.data"
@@ -61,12 +62,13 @@
         :checked.sync="checked"
         :dragging.sync="dragging"
         :orderby.sync="orderBy">
-      </table-row>
+      </table-rows>
     </div>
 
     <div class="box-footer" v-if="isPaginationEnabled && rows.count>pagination.limit || getComponents('table-footer').length > 0">
       <component
         v-for="name in getComponents('table-footer')"
+        :key="name"
         :model="model"
         :row="row"
         :rows="rows.data"

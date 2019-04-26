@@ -32,6 +32,7 @@
 
           <form-group
             v-for="item in chunkGroups(tab.fields)"
+            :key="item"
             v-if="isGroup(item) && !isTab(item)"
             :group="item"
             :model="model"

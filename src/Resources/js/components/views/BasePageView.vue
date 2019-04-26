@@ -1,22 +1,24 @@
 <template>
-  <!-- Content Header (model header) -->
-  <section class="content-header">
-    <h1>
-      {{ model.name }}
-      <small>{{{ model.title }}}</small>
-    </h1>
-    <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
-      <li v-if="getGroup">{{ getGroup.name }}</li>
-      <li class="active"><a class="active"><i v-bind:class="['fa', model.icon]"></i> {{ model.name }}</a></li>
-    </ol>
-  </section>
+  <div>
+    <!-- Content Header (model header) -->
+    <section class="content-header">
+      <h1>
+        {{ model.name }}
+        <small v-html="model.title"></small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
+        <li v-if="getGroup">{{ getGroup.name }}</li>
+        <li class="active"><a class="active"><i v-bind:class="['fa', model.icon]"></i> {{ model.name }}</a></li>
+      </ol>
+    </section>
 
-  <!-- Main content -->
-  <section class="content">
-      <model-builder :model="model" :langid="langid"></model-builder>
-  </section>
-  <!-- /.content -->
+    <!-- Main content -->
+    <section class="content">
+        <model-builder :model="model" :langid="langid"></model-builder>
+    </section>
+    <!-- /.content -->
+  </div>
 </template>
 
 <script>

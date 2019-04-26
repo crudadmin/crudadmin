@@ -1,23 +1,25 @@
 <template>
-    <ul class="sidebar-menu">
-        <li class="header">
-            {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
-            <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
-                <select v-model="langid" class="form-control">
-                    <option v-for="language in languages" value="{{ language.id }}">{{ getLangName(language) }}</option>
-                </select>
-            </div>
-        </li>
-    </ul>
+    <div>
+        <ul class="sidebar-menu">
+                <li class="header">
+                    {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
+                    <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
+                        <select v-model="langid" class="form-control">
+                            <option v-for="language in languages" :value="language.id">{{ getLangName(language) }}</option>
+                        </select>
+                    </div>
+                </li>
+            </ul>
 
-    <!-- Sidebar Menu -->
-    <ul class="sidebar-menu">
-        <sidebar-row v-for="row in rows | groups" :row="row"></sidebar-row>
-    </ul>
+            <!-- Sidebar Menu -->
+            <ul class="sidebar-menu">
+                <sidebar-row v-for="(row, key) in groups" :key="key" :row="row"></sidebar-row>
+            </ul>
 
-      <!-- /.sidebar-menu -->
-    </section>
-    <!-- /.sidebar -->
+              <!-- /.sidebar-menu -->
+            </section>
+            <!-- /.sidebar -->
+    </div>
 </template>
 
 <script>
@@ -28,8 +30,10 @@
 
         components: { SidebarRow },
 
-        filters: {
-            groups(groups){
+        computed : {
+            groups(){
+                var groups = this.rows;
+
                 for ( var key in groups )
                 {
                     //Is allowed module
@@ -40,11 +44,10 @@
                         delete groups[key];
                 }
 
-                return groups;
-            }
-        },
+                console.log(groups);
 
-        computed : {
+                return groups;
+            },
             hasLanguages(){
                 return this.languages.length > 0;
             },

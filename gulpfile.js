@@ -1,14 +1,13 @@
-var elixir = require('laravel-elixir'),
-    gulp = require('gulp');
+var elixir = require('laravel-elixir');
 
 //Elixir ueify
-require('laravel-elixir-vueify');
+require('laravel-elixir-vue-2');
 
 //Where sould be compiled assets
 var config = require('./config.js');
 
 //Gulp watch for browserify
-elixir.config.js.browserify.watchify.options.poll = true;
+// elixir.config.js.browserify.watchify.options.poll = true;
 
 //Set production for no config paths
 if ( elixir.config.production === false && config.paths.length == 0 )

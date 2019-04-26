@@ -24,7 +24,8 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in history.rows | orderBy 'id' -1">
+                      <!-- <tr v-for="item in history.rows | orderBy 'id' -1"> -->
+                      <tr v-for="item in history.rows">
                         <td class="td-id">{{ history.rows.length - $index }}</td>
                         <td>{{ item.user ? item.user.username : trans('history.system') }}</td>
                         <td>

@@ -3,7 +3,7 @@
         <div class="callout callout-danger">
             <h4><i class="icon fa fa-warning"></i> {{ message.title }}</h4>
 
-            <p>{{{ message.message }}}</p>
+            <p v-html="message.message"></p>
         </div>
     </section>
 </template>

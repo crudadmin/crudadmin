@@ -9,8 +9,8 @@
     </div>
 
     <!-- Table value -->
-    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue | encodedTitle field true">{{{ fieldValue | stringLimit field | encodeValue field }}}</span>
-
+    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue" v-html="fieldValue"></span>
+    <!-- <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue | encodedTitle field true" v-html="fieldValue | stringLimit field | encodeValue field"></span> -->
   </div>
 </template>
 

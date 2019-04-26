@@ -39,158 +39,160 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
 </head>
-<body class="hold-transition skin-blue sidebar-mini" id="app">
-    <div class="wrapper">
+<body class="hold-transition skin-blue sidebar-mini">
+    <div id="app">
+        <div class="wrapper">
 
-      <!-- Main Header -->
-      <header class="main-header">
+          <!-- Main Header -->
+          <header class="main-header">
 
-        <!-- Logo -->
-        <a href="#" class="logo">
-          <!-- mini logo for sidebar mini 50x50 pixels -->
-          <span class="logo-mini"><?php echo config('admin.name') ?></span>
-          <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><?php echo config('admin.name') ?></span>
-        </a>
+            <!-- Logo -->
+            <a href="#" class="logo">
+              <!-- mini logo for sidebar mini 50x50 pixels -->
+              <span class="logo-mini"><?php echo config('admin.name') ?></span>
+              <!-- logo for regular state and mobile devices -->
+              <span class="logo-lg"><?php echo config('admin.name') ?></span>
+            </a>
 
-        <!-- Header Navbar -->
-        <nav class="navbar navbar-static-top" role="navigation">
-          <!-- Sidebar toggle button-->
-          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-            <span class="sr-only">Toggle navigation</span>
-          </a>
-          <!-- Navbar Right Menu -->
-          <div class="navbar-custom-menu">
-            <ul class="nav navbar-nav">
+            <!-- Header Navbar -->
+            <nav class="navbar navbar-static-top" role="navigation">
+              <!-- Sidebar toggle button-->
+              <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+              </a>
+              <!-- Navbar Right Menu -->
+              <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
 
-              <!-- User Account Menu -->
-              <li class="dropdown user user-menu">
-                <!-- Menu Toggle Button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <!-- The user image in the navbar-->
-                  <img v-bind:src="getAvatar" class="user-image" alt="User Image">
-                  <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                  <span class="hidden-xs">{{ user.username }}</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <!-- The user image in the menu -->
-                  <li class="user-header">
-                    <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
+                  <!-- User Account Menu -->
+                  <li class="dropdown user user-menu">
+                    <!-- Menu Toggle Button -->
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      <!-- The user image in the navbar-->
+                      <img v-bind:src="getAvatar" class="user-image" alt="User Image">
+                      <!-- hidden-xs hides the username on small devices so only the image appears. -->
+                      <span class="hidden-xs">{{ user.username }}</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      <!-- The user image in the menu -->
+                      <li class="user-header">
+                        <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
 
-                    <p>
-                      {{ user.username }} - {{ getPermissions }}
-                    </p>
-                  </li>
-                  <!-- Menu Body -->
-                  <li class="user-body">
+                        <p>
+                          {{ user.username }} - {{ getPermissions }}
+                        </p>
+                      </li>
+                      <!-- Menu Body -->
+                      <li class="user-body">
 
-                  </li>
-                  <!-- Menu Footer-->
-                  <li class="user-footer">
-                    <div class="pull-right">
-                      <a href="<?php echo action('\Gogol\Admin\Controllers\Auth\LoginController@logout'); ?>" class="btn btn-default btn-flat"><?php echo trans('admin::admin.logout') ?></a>
-                    </div>
+                      </li>
+                      <!-- Menu Footer-->
+                      <li class="user-footer">
+                        <div class="pull-right">
+                          <a href="<?php echo action('\Gogol\Admin\Controllers\Auth\LoginController@logout'); ?>" class="btn btn-default btn-flat"><?php echo trans('admin::admin.logout') ?></a>
+                        </div>
+                      </li>
+                    </ul>
                   </li>
                 </ul>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </header>
-      <!-- Left side column. contains the logo and sidebar -->
-      <aside class="main-sidebar">
-
-        <!-- sidebar: style can be found in sidebar.less -->
-        <section class="sidebar">
-
-          <!-- Sidebar user panel (optional) -->
-          <div class="user-panel">
-            <div class="pull-left image">
-              <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
-            </div>
-            <div class="pull-left info">
-              <p>{{ user.username }}</p>
-              <!-- Status -->
-              <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
-            </div>
-          </div>
-
-          <sidebar :rows="models" :languages="languages" :langid.sync="language_id"></sidebar>
-      </aside>
-
-      <!-- MODAL -->
-      <div class="example-modal message-modal" v-if="canShowAlert">
-        <div class="modal modal-{{ alert.type }}" v-bind:style="{ display : canShowAlert ? 'block' : 'none' }">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" v-on:click="closeAlert( alert.close )" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">×</span>
-                </button>
-                <h4 class="modal-title">{{ alert.title }}</h4>
               </div>
-              <div class="modal-body">
-                <p v-if="alert.message">{{{ alert.message }}}</p>
-                <component
-                  v-if="alert.component"
-                  :model="alert.component.model"
-                  :rows="alert.component.rows"
-                  :row="alert.component.row"
-                  :request="alert.component.request"
-                  :data="alert.component.data"
-                  :is="getComponentName(alert.component.name)">
+            </nav>
+          </header>
+          <!-- Left side column. contains the logo and sidebar -->
+          <aside class="main-sidebar">
+
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+
+              <!-- Sidebar user panel (optional) -->
+              <div class="user-panel">
+                <div class="pull-left image">
+                  <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
+                </div>
+                <div class="pull-left info">
+                  <p>{{ user.username }}</p>
+                  <!-- Status -->
+                  <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                </div>
               </div>
-              <div class="modal-footer">
-                <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type=='success' && !alert.close || !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal"><?php echo trans('admin::admin.close') ?></button>
-                <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success" class="btn btn-outline"><?php echo trans('admin::admin.accept') ?></button>
+
+              <sidebar :rows="models" :languages="languages" :langid.sync="language_id"></sidebar>
+          </aside>
+
+          <!-- MODAL -->
+          <div class="example-modal message-modal" v-if="canShowAlert">
+            <div class="modal" :class="'modal-'+alert.type" v-bind:style="{ display : canShowAlert ? 'block' : 'none' }">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" v-on:click="closeAlert( alert.close )" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">{{ alert.title }}</h4>
+                  </div>
+                  <div class="modal-body">
+                    <p v-if="alert.message" v-html="alert.message"></p>
+                    <component
+                      v-if="alert.component"
+                      :model="alert.component.model"
+                      :rows="alert.component.rows"
+                      :row="alert.component.row"
+                      :request="alert.component.request"
+                      :data="alert.component.data"
+                      :is="getComponentName(alert.component.name)">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" v-on:click="closeAlert( alert.close )" v-if="alert.close || alert.type=='success' && !alert.close || !alert.close && !alert.success" v-bind:class="{ 'btn' : true, 'btn-outline' : true, 'pull-left' : alert.success }" data-dismiss="modal"><?php echo trans('admin::admin.close') ?></button>
+                    <button type="button" v-on:click="closeAlert( alert.success )" v-if="alert.success" class="btn btn-outline"><?php echo trans('admin::admin.accept') ?></button>
+                  </div>
+                </div>
+                <!-- /.modal-content -->
               </div>
+              <!-- /.modal-dialog -->
             </div>
-            <!-- /.modal-content -->
+            <!-- /.modal -->
           </div>
-          <!-- /.modal-dialog -->
+
+          <!-- Your Page Content Here -->
+          <!-- Content Wrapper. Contains page content -->
+          <div class="content-wrapper">
+            <license></license>
+            <check-assets-version></check-assets-version>
+
+            <router-view :langid="language_id"></router-view>
+          </div>
+          <!-- END CONTENT -->
+
+          <!-- Main Footer -->
+          <footer class="main-footer">
+            <!-- To the right -->
+            <div class="pull-right hidden-xs">
+              Version <a target="_blank" v-bind:href="'https://packagist.org/packages/marekgogol/crudadmin#'+version">{{ version }}</a>
+            </div>
+            <!-- Default to the left -->
+            <strong>
+              &copy; <?php echo date('Y') > config('admin.author.since', 2016) ? config('admin.author.since', 2016) . ' - '.date('Y') : date('Y') ?> <a href="<?php echo config('admin.author.url', 'http://marekgogol.sk') ?>" target="_blank"><?php echo config('admin.author.name', 'CrudAdmin') ?></a>
+              <?php if ( config('admin.author', true) !== false ){ ?>
+              system by <a href="<?php echo config('admin.author.url', 'http://marekgogol.sk') ?>" target="_blank"><?php echo config('admin.author.copyright', 'Marek Gogoľ') ?></a>.
+              <?php } ?>
+            </strong>
+          </footer>
+
+          <div class="control-sidebar-bg"></div>
         </div>
-        <!-- /.modal -->
-      </div>
+        <!-- ./wrapper -->
 
-      <!-- Your Page Content Here -->
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper">
-        <license></license>
-        <check-assets-version></check-assets-version>
-
-        <router-view :langid="language_id"></router-view>
-      </div>
-      <!-- END CONTENT -->
-
-      <!-- Main Footer -->
-      <footer class="main-footer">
-        <!-- To the right -->
-        <div class="pull-right hidden-xs">
-          Version <a target="_blank" v-bind:href="'https://packagist.org/packages/marekgogol/crudadmin#'+version">{{ version }}</a>
-        </div>
-        <!-- Default to the left -->
-        <strong>
-          &copy; <?php echo date('Y') > config('admin.author.since', 2016) ? config('admin.author.since', 2016) . ' - '.date('Y') : date('Y') ?> <a href="<?php echo config('admin.author.url', 'http://marekgogol.sk') ?>" target="_blank"><?php echo config('admin.author.name', 'CrudAdmin') ?></a>
-          <?php if ( config('admin.author', true) !== false ){ ?>
-          system by <a href="<?php echo config('admin.author.url', 'http://marekgogol.sk') ?>" target="_blank"><?php echo config('admin.author.copyright', 'Marek Gogoľ') ?></a>.
-          <?php } ?>
-        </strong>
-      </footer>
-
-      <div class="control-sidebar-bg"></div>
-    </div>
-    <!-- ./wrapper -->
-
-    <!-- REQUIRED JS SCRIPTS -->
-    <div id="loader" v-bind:class="{ hidenloader : true }">
-        <div class="spinner">
-            <h2><strong><?php echo config('admin.author.name', 'CrudAdmin') ?></strong> <span>&copy;</span> <?php echo date('Y') > config('admin.author.since', 2016) ? config('admin.author.since', 2016) . ' - '.date('Y') : date('Y') ?>
-            <?php if ( config('admin.author', true) !== false ){ ?>
-            by <?php echo config('admin.author.copyright', 'Marek Gogoľ') ?>
-            <?php } ?></h2>
-            <div class="bounce1"></div>
-            <div class="bounce2"></div>
-            <div class="bounce3"></div>
+        <!-- REQUIRED JS SCRIPTS -->
+        <div id="loader" v-bind:class="{ hidenloader : true }">
+            <div class="spinner">
+                <h2><strong><?php echo config('admin.author.name', 'CrudAdmin') ?></strong> <span>&copy;</span> <?php echo date('Y') > config('admin.author.since', 2016) ? config('admin.author.since', 2016) . ' - '.date('Y') : date('Y') ?>
+                <?php if ( config('admin.author', true) !== false ){ ?>
+                by <?php echo config('admin.author.copyright', 'Marek Gogoľ') ?>
+                <?php } ?></h2>
+                <div class="bounce1"></div>
+                <div class="bounce2"></div>
+                <div class="bounce3"></div>
+            </div>
         </div>
     </div>
 

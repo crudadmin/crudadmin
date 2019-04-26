@@ -1,139 +1,145 @@
 <template>
-  <!-- Additional top layouts -->
-  <component
-    v-for="name in getComponents('top')"
-    :model="model"
-    :row="row"
-    :rows="rows.data"
-    :is="name">
-  </component>
+  <div>
+    <!-- Additional top layouts -->
+    <component
+      v-for="name in getComponents('top')"
+      :key="name"
+      :model="model"
+      :row="row"
+      :rows="rows.data"
+      :is="name">
+    </component>
 
-  <div class="alert alert-danger" v-if="languages.length == 0 && isLocaleModel">
-    <strong>{{ trans('warning') }}!</strong>
-    <p>{{ trans('languages-missing') }}</p>
-  </div>
+    <div class="alert alert-danger" v-if="languages.length == 0 && isLocaleModel">
+      <strong>{{ trans('warning') }}!</strong>
+      <p>{{ trans('languages-missing') }}</p>
+    </div>
 
-  <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
+    <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
-    <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
-      <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild">{{{ model.title }}}</span>
+      <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
+        <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild" v-html="model.title"></span>
 
-      <div class="pull-right" v-if="!isSingle">
-        <div class="search-bar" :class="{ interval : search.interval }" v-bind:id="getFilterId" v-show="canShowSearchBar">
-          <div class="input-group input-group-sm">
-            <div class="input-group-btn">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
-                <span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                  <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
-                  <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
-                  <li v-for="key in getSearchableFields" v-bind:class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
-                  <li v-bind:class="{ active : search.column == 'created_at' }"><a href="#" @click.prevent="search.column = 'created_at'">{{ getSearchingColumnName('created_at') }}</a></li>
-                </ul>
-            </div>
-            <!-- /btn-group -->
+        <div class="pull-right" v-if="!isSingle">
+          <div class="search-bar" :class="{ interval : search.interval }" v-bind:id="getFilterId" v-show="canShowSearchBar">
+            <div class="input-group input-group-sm">
+              <div class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
+                  <span class="caret"></span></button>
+                  <ul class="dropdown-menu">
+                    <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
+                    <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
+                    <li v-for="key in getSearchableFields" v-bind:class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
+                    <li v-bind:class="{ active : search.column == 'created_at' }"><a href="#" @click.prevent="search.column = 'created_at'">{{ getSearchingColumnName('created_at') }}</a></li>
+                  </ul>
+              </div>
+              <!-- /btn-group -->
 
-            <!-- Search columns -->
-            <input type="text" v-show="isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
+              <!-- Search columns -->
+              <input type="text" v-show="isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
 
-            <input type="text" v-show="isDate" v-model="search.query" class="form-control js_date">
+              <input type="text" v-show="isDate" v-model="search.query" class="form-control js_date">
 
-            <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
-              <option value="0">{{ trans('off') }}</option>
-              <option value="1">{{ trans('on') }}</option>
-            </select>
-
-            <div class="select" v-show="isSelect">
-              <select type="text" v-model="search.query" class="form-control js_chosen" :data-placeholder="trans('get-value')">
-                <option value="">{{ trans('show-all') }}</option>
-                <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]" v-bind:value="data[0]">{{ data[1] }}</option>
+              <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
+                <option value="0">{{ trans('off') }}</option>
+                <option value="1">{{ trans('on') }}</option>
               </select>
-            </div>
-            <!-- Search columns -->
 
-            <div class="interval" v-if="canBeInterval" data-toggle="tooltip" data-original-title="Interval">
-              <button class="btn" @click="search.interval = !search.interval" :class="{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }"><i class="fa fa-arrows-h"></i></button>
-            </div>
+              <div class="select" v-show="isSelect">
+                <select type="text" v-model="search.query" class="form-control js_chosen" :data-placeholder="trans('get-value')">
+                  <option value="">{{ trans('show-all') }}</option>
+                  <!-- <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]" v-bind:value="data[0]">{{ data[1] }}</option> -->
+                  <!-- <option v-for="data in (isSelect ? model.fields[search.column].options : [])" v-bind:value="data[0]">{{ data[1] }}</option> -->
+                </select>
+              </div>
+              <!-- Search columns -->
 
-            <input type="text" v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
+              <div class="interval" v-if="canBeInterval" data-toggle="tooltip" data-original-title="Interval">
+                <button class="btn" @click="search.interval = !search.interval" :class="{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }"><i class="fa fa-arrows-h"></i></button>
+              </div>
 
-            <input type="text" v-show="search.interval && isDate" v-model="search.query_to" class="form-control js_date">
+              <input type="text" v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
 
-            <div class="interval" v-if="search.query || search.query_to" data-toggle="tooltip" :data-original-title="trans('reset')">
-              <button class="btn btn-default" @click="search.query = ''"><i class="fa fa-times"></i></button>
+              <input type="text" v-show="search.interval && isDate" v-model="search.query_to" class="form-control js_date">
+
+              <div class="interval" v-if="search.query || search.query_to" data-toggle="tooltip" :data-original-title="trans('reset')">
+                <button class="btn btn-default" @click="search.query = ''"><i class="fa fa-times"></i></button>
+              </div>
             </div>
           </div>
+
+          <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" :data-original-title="trans('edit-size')">
+            <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="box-body">
+
+        <div v-bind:class="{ 'row' : true, 'flex-table' : activeSize == 0 }">
+
+          <!-- left column -->
+          <div :class="['col-lg-'+(12 - activeSize)]" class="col col-form col-md-12 col-sm-12" v-show="canShowForm" v-if="activetab!==false">
+            <form-builder
+              :progress.sync="progress"
+              :rows.sync="rows"
+              :history="history"
+              :model="model"
+              :langid="selected_language_id ? selected_language_id : langid"
+              :selectedlangid.sync="selected_language_id"
+              :canaddrow="canAddRow"
+              :hasparentmodel="hasparentmodel"
+              :gettext_editor.sync="gettext_editor"
+              :row.sync="row"
+            ></form-builder>
+          </div>
+          <!--/.col (left) -->
+
+          <!-- right column -->
+          <div :class="['col-lg-'+(12-(12-activeSize))]" class="col col-rows col-md-12 col-sm-12" v-show="hasRows && canShowRows">
+            <model-rows-builder
+              :model.sync="model"
+              :rows.sync="rows"
+              :row.sync="row"
+              :langid="selected_language_id ? selected_language_id : langid"
+              :progress.sync="progress"
+              :search="search"
+              :iswithoutparent="isWithoutParentRow"
+              :activetab="activetab"
+              :gettext_editor.sync="gettext_editor"
+              :history="history">
+            </model-rows-builder>
+          </div>
+          <!--/.col (right) -->
+
         </div>
 
-        <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" :data-original-title="trans('edit-size')">
-          <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
-        </ul>
+        <model-builder
+          v-if="(isOpenedRow || getModel(child).without_parent == true) && getModel(child).in_tab !== true"
+          v-for="child in model.childs"
+          :key="getModel(child).slug"
+          :hasparentmodel="hasparentmodel"
+          :langid="langid"
+          :ischild="true"
+          :model="getModel(child)"
+          :activetab="activetab"
+          :parentrow="row">
+        </model-builder>
       </div>
     </div>
 
-    <div class="box-body">
+    <component
+      v-for="name in getComponents('bottom')"
+      :key="name"
+      :model="model"
+      :row="row"
+      :rows="rows.data"
+      :is="name">
+    </component>
 
-      <div v-bind:class="{ 'row' : true, 'flex-table' : activeSize == 0 }">
-
-        <!-- left column -->
-        <div class="col col-form col-lg-{{ 12 - activeSize }} col-md-12 col-sm-12" v-show="canShowForm" v-if="activetab!==false">
-          <form-builder
-            :progress.sync="progress"
-            :rows.sync="rows"
-            :history="history"
-            :model="model"
-            :langid="selected_language_id ? selected_language_id : langid"
-            :selectedlangid.sync="selected_language_id"
-            :canaddrow="canAddRow"
-            :hasparentmodel="hasparentmodel"
-            :gettext_editor.sync="gettext_editor"
-            :row.sync="row"
-          ></form-builder>
-        </div>
-        <!--/.col (left) -->
-
-        <!-- right column -->
-        <div class="col col-rows col-lg-{{ 12 - ( 12 - activeSize ) }} col-md-12 col-sm-12" v-show="hasRows && canShowRows">
-          <model-rows-builder
-            :model.sync="model"
-            :rows.sync="rows"
-            :row.sync="row"
-            :langid="selected_language_id ? selected_language_id : langid"
-            :progress.sync="progress"
-            :search="search"
-            :iswithoutparent="isWithoutParentRow"
-            :activetab="activetab"
-            :gettext_editor.sync="gettext_editor"
-            :history="history">
-          </model-rows-builder>
-        </div>
-        <!--/.col (right) -->
-
-      </div>
-
-      <model-builder
-        v-if="(isOpenedRow || getModel(child).without_parent == true) && getModel(child).in_tab !== true"
-        v-for="child in model.childs"
-        :hasparentmodel="hasparentmodel"
-        :langid="langid"
-        :ischild="true"
-        :model="getModel(child)"
-        :activetab="activetab"
-        :parentrow="row">
-      </model-builder>
-    </div>
+    <history v-if="history.id" :history="history"></history>
+    <gettext-extension v-if="gettext_editor" :gettext_editor.sync="gettext_editor"></gettext-extension>
   </div>
-
-  <component
-    v-for="name in getComponents('bottom')"
-    :model="model"
-    :row="row"
-    :rows="rows.data"
-    :is="name">
-  </component>
-
-  <history v-if="history.id" :history="history"></history>
-  <gettext-extension v-if="gettext_editor" :gettext_editor.sync="gettext_editor"></gettext-extension>
 </template>
 
 <script>

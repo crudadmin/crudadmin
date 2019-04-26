@@ -1,7 +1,7 @@
 <template>
 <div class="fields-group" :group-id="group.id" v-bind:class="getGroupClass(group)" :data-fields="visibleFields.length">
     <div :class="{ 'nav-tabs-custom' : canShowGroupName(group) }">
-        <h4 v-if="canShowGroupName(group)"><i v-if="group.icon" :class="['fa', group.icon]"></i> {{{ group.name }}}</h4>
+        <h4 v-if="canShowGroupName(group)"><i v-if="group.icon" :class="['fa', group.icon]"></i> <span v-html="group.name"></span></h4>
 
         <div class="tab-content">
             <div class="row">
