@@ -457,7 +457,7 @@
             where = where.parent().children().last().prev();
           }
 
-          else if ( $(this).is('input:radio') ){
+          else if ( $(this).is('input:radio') || $(this).parent().hasClass('label-wrapper') ){
             where = where.parent().parent().parent();
 
             if ( where.find('.help-block').length == 0 )
