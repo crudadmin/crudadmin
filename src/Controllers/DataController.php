@@ -432,6 +432,7 @@ class DataController extends Controller
 
         return Ajax::message( $button->message['message'], $button->message['title'], $button->message['type'], [
             'component' => isset($button->message['component']) ? $button->message['component'] : null,
+            'component_data' => isset($button->message['component_data']) ? $button->message['component_data'] : null,
             'rows' => $rows,
             'redirect' => $button->redirect,
             'ask' => $ask && $button->accept,

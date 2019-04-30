@@ -174,7 +174,7 @@
         if ( typeof this.model.childs[model] == 'string' )
           return _.cloneDeep(this.model);
 
-        return ModelHelper(this.model.childs[model]);
+        return ModelHelper(this.model.childs[model]||this.$root.models_list[model]);
       },
       /*
        * Return tab name

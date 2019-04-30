@@ -579,11 +579,10 @@ trait AdminModelTrait
             $column = $this->getForeignColumn($parent_table);
 
             if ( $parent_table === null && count($column) == 1 )
-            {
                 $column = array_values($column)[0];
-            }
 
-            $query->where($column, $subid);
+            if ( $column )
+                $query->where($column, $subid);
         }
 
         //If is not parent table, but rows can be related into recursive relation

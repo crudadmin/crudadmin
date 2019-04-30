@@ -177,9 +177,10 @@ class Button
     /*
      * Render VueJs template
      */
-    public function component($template)
+    public function component($template, $component_data = [])
     {
         $this->message['component'] = $this->renderVuejs($template);
+        $this->message['component_data'] = $component_data;
 
         return $this;
     }
@@ -197,7 +198,7 @@ class Button
     /*
      * Ask question with form before action
      */
-    // public function ask()
+    // public function question()
     // {
     //     return $this->title('Your title...')
     //                 ->component('YoutComponent.vue');

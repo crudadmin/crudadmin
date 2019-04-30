@@ -865,6 +865,7 @@
                 rows : this.rows.data.filter(item => ids.indexOf(item.id) > -1),
                 row : row,
                 request : {},
+                data : data.data.component_data||[],
               } : null;
 
               var success_callback = function(){

@@ -137,6 +137,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   :rows="alert.component.rows"
                   :row="alert.component.row"
                   :request="alert.component.request"
+                  :data="alert.component.data"
                   :is="getComponentName(alert.component.name)">
               </div>
               <div class="modal-footer">
