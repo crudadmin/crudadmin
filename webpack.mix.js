@@ -1,4 +1,9 @@
 const mix = require('laravel-mix');
 
+//Where sould be compiled assets
+var config = require('./config.js');
+
 mix.js('src/Resources/js/main.js', 'src/Resources/admin/js');
-// /volumes/ssd/www/root/home/dev/poisti/web/public/vendor/crudadmin/js/main.js
+
+for ( key in config.paths )
+    mix.copy('src/Resources/admin/js/main.js', config.paths[key] + '/main.js');

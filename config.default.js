@@ -1,14 +1,9 @@
 var config = {
     /*
-     * If production is on true, compiled assets
-     * automatically will be in admin directory
-     * and paths will be skipped
+     * Where do you vant build admin resources
      */
-    production : true,
-
     paths : [
-        //../../../public/assets/admin/js'
-        '/volumes/ssd/www/root/paths-to-your-projects',
+        '/volumes/ssd/www/paths-to-your-projects',
     ],
 };
 
