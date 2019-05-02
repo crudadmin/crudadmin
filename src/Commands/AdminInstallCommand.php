@@ -14,10 +14,24 @@ class AdminInstallCommand extends Command
 {
     use ConfirmableTrait;
 
-    protected $auth = [
-        'username' => 'Administrator',
-        'email' => 'admin@admin.com',
-    ];
+    public function getCredentials($user = null)
+    {
+        //Default crudadmin credentials
+        $credentials = [
+            'username' => 'Administrator',
+            'email' => 'admin@admin.com',
+        ];
+
+        //Use credentials from admin model
+        if ( $user )
+            $credentials = ($user->getProperty('demo') ?: []) + $credentials;
+
+        //Set testing password
+        if ( app()->environment('testing') )
+            $credentials['password'] = 'password';
+
+        return $credentials;
+    }
 
     /**
      * The name and signature of the console command.
@@ -58,19 +72,11 @@ class AdminInstallCommand extends Command
 
         $this->runMigrations();
 
-        $this->createDemoUser();
+        $this->createSuperUser();
 
         $this->line('Installation completed!');
 
         parent::__construct();
-    }
-
-    protected function getUserModel()
-    {
-        if ( ! class_exists('App\User') || ! Admin::isAdminModel( new User ) )
-            return new BaseUser;
-        else
-            return new User;
     }
 
     public function publishVendor()
@@ -137,32 +143,38 @@ class AdminInstallCommand extends Command
         ]);
     }
 
-    public function createDemoUser()
+    protected function getUserModel()
+    {
+        if ( ! class_exists('App\User') || ! Admin::isAdminModel( new User ) )
+            return new BaseUser;
+        else
+            return new User;
+    }
+
+    public function createSuperUser()
     {
         $user = $this->getUserModel();
-        $demo = property_exists($user, 'demo') ? $user->getProperty('demo') : [];
 
-        if ( $user->where('email', $this->auth['email'])->count() == 0 )
-        {
-            $data = $demo + $this->auth + [
-                'permissions' => 1,
-                'password' => str_random(6),
-            ];
+        $credentials = $this->getCredentials($user);
 
-            //Demo user
-            $user->create( $data );
+        //If user has been already created
+        if ( $user->where('email', $credentials['email'])->count() > 0 )
+            return;
 
-            $this->line('<comment>+ Demo user created</comment>');
-            $this->line('<info>- Admin path:</info> <comment>'.action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
-            $this->line('<info>- Email:</info> <comment>'.$data['email'].'</comment>');
-            $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
+        //Demo user
+        $user->create($data = $credentials + [
+            'permissions' => 1,
+            'password' => str_random(6),
+        ]);
 
-            //Show additional columns in demo user
-            foreach ($demo as $key => $value)
-            {
-                if ( ! in_array($key, ['email', 'password']) )
-                    $this->line('<info>- '.ucfirst($key).':</info> <comment>'.$value.'</comment>');
-            }
-        }
+        $this->line('<comment>+ Demo user created</comment>');
+        $this->line('<info>- Admin path:</info> <comment>'.action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
+        $this->line('<info>- Email:</info> <comment>'.$data['email'].'</comment>');
+        $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
+
+        //Show additional columns in demo user
+        foreach ($user->getProperty('demo') ?: [] as $key => $value)
+            if ( ! in_array($key, ['email', 'password']) )
+                $this->line('<info>- '.ucfirst($key).':</info> <comment>'.$value.'</comment>');
     }
 }

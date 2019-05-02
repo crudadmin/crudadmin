@@ -2,10 +2,8 @@
 
 namespace Gogol\Admin\Tests\Commands;
 
-use Gogol\Admin\Models\User;
 use Gogol\Admin\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 
 class AdminInstallCommandTest extends TestCase
 {
@@ -15,7 +13,7 @@ class AdminInstallCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->artisan('admin:install')
+        $this->installAdmin()
              ->expectsOutput('+ Vendor directories has been successfully published')
              ->expectsOutput('+ Demo user created')
              ->expectsOutput('Installation completed!')
@@ -26,12 +24,7 @@ class AdminInstallCommandTest extends TestCase
     {
         //Remove all published resources
         foreach ($this->getPublishableResources() as $path)
-        {
-            if ( is_dir($path) )
-                File::deleteDirectory($path);
-            else
-                @unlink(config_path('admin.php'));
-        }
+            $this->deleteFileOrDirectory($path);
 
         parent::tearDown();
     }
@@ -42,7 +35,7 @@ class AdminInstallCommandTest extends TestCase
             config_path('admin.php'),
             resource_path('lang/cs'),
             resource_path('lang/sk'),
-            public_path('vendor/crudadmin'),
+            public_path('vendor/crudadmin/dist/version'),
         ];
     }
 
@@ -57,9 +50,7 @@ class AdminInstallCommandTest extends TestCase
     public function check_if_is_demo_user_has_been_created()
     {
         $this->assertDatabaseHas('users', [
-            'email' => 'admin@admin.com'
+            'email' => $this->credentials['email']
         ]);
     }
-
-
 }
