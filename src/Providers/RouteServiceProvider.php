@@ -71,14 +71,17 @@ class RouteServiceProvider extends ServiceProvider
             require __DIR__ . '/../routes.php';
         });
 
-        //Web routes
-        $router->group([
-            'namespace' => $this->namespace,
-            'prefix' => $this->localization,
-            'middleware' => 'web',
-        ], function ($router) {
-            require base_path('routes/web.php');
-        });
+        //Boot application routes
+        if ( file_exists($route_path = base_path('routes/web.php')) )
+        {
+            $router->group([
+                'namespace' => $this->namespace,
+                'prefix' => $this->localization,
+                'middleware' => 'web',
+            ], function ($router) use ($route_path) {
+                require $route_path;
+            });
+        }
 
     }
 }

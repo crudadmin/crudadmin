@@ -5,8 +5,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Filesystem\Filesystem;
 use Artisan;
 
-class PublishServiceProvider extends ServiceProvider {
-
+class PublishServiceProvider extends ServiceProvider
+{
     /**
      * Register the service provider.
      *

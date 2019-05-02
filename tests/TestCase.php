@@ -1,10 +1,28 @@
 <?php
 
-namespace Tests;
+namespace Gogol\Admin\Tests;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Gogol\Admin\Providers\AppServiceProvider;
+use Orchestra\Testbench\TestCase as BaseTestCase;
 
-abstract class TestCase extends BaseTestCase
+class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    protected function getPackageProviders($app)
+    {
+        return [
+            AppServiceProvider::class,
+        ];
+    }
+
+    /**
+     * Define environment setup.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     * @return void
+     */
+    protected function getEnvironmentSetUp($app)
+    {
+        // Setup default database to use sqlite :memory:
+        $app['config']->set('database.default', 'sqlite');
+    }
 }

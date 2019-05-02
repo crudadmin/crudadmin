@@ -52,8 +52,6 @@ class AdminInstallCommand extends Command
     {
         $this->publishVendor();
 
-        Admin::publishAssetsVersion();
-
         $this->removeUserMigration();
 
         $this->rewriteUserModel();
@@ -83,7 +81,9 @@ class AdminInstallCommand extends Command
         Artisan::call('vendor:publish', [ '--tag' => 'admin.migrations' ]);
         Artisan::call('vendor:publish', [ '--tag' => 'admin.languages' ]);
 
-        $this->line('<comment>+ Vendor directories was successfully published</comment>');
+        Admin::publishAssetsVersion();
+
+        $this->line('<comment>+ Vendor directories has been successfully published</comment>');
     }
 
     public function removeUserMigration()
@@ -163,7 +163,6 @@ class AdminInstallCommand extends Command
                 if ( ! in_array($key, ['email', 'password']) )
                     $this->line('<info>- '.ucfirst($key).':</info> <comment>'.$value.'</comment>');
             }
-
         }
     }
 }

@@ -17,7 +17,8 @@
         "spatie/image-optimizer": "^1.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "~5.7|~7.0"
+        "phpunit/phpunit": "~5.7|~7.0",
+        "orchestra/testbench": "^3.5"
     },
     "autoload": {
         "psr-4": {
@@ -29,13 +30,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Gogol\\Admin\\Tests\\": "tests/"
         }
-    },
-    "scripts": {
-        "post-update-cmd": [
-            "php artisan admin:update"
-        ]
     },
     "extra": {
         "laravel": {
