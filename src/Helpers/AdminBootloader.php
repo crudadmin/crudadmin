@@ -184,8 +184,8 @@ class AdminBootloader
 
     /**
      * Returns all files of namespace path
-     * @param  [type] $path [description]
-     * @return [type]       [description]
+     * @param  [type] $path
+     * @return [type]
      */
     private function getNamespaceFiles($basepath)
     {
@@ -240,7 +240,7 @@ class AdminBootloader
 
     /**
      * Return absulute basename path to directory with admin models
-     * @param string $path [description]
+     * @param string $path
      * @return string
      */
     private function getModelsPath($path)
@@ -266,10 +266,10 @@ class AdminBootloader
 
     /**
      * Raplaces file path to file namespace
-     * @param  [type] $path      [description]
-     * @param  [type] $source    [description]
-     * @param  [type] $namespace [description]
-     * @return [type]            [description]
+     * @param  string $path
+     * @param  string $source
+     * @param  string $namespace
+     * @return string
      */
     private function fromFilePathToNamespace($path, $basepath, $namespace)
     {
@@ -381,8 +381,8 @@ class AdminBootloader
 
     /**
      * Checks if model exists in admin models list by class name
-     * @param  [type]  $model [description]
-     * @return boolean        [description]
+     * @param  string  $model
+     * @return boolean
      */
     public function hasAdminModel($model)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Commands;
+namespace Gogol\Admin\Tests\Feature\Commands;
 
 use Gogol\Admin\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;

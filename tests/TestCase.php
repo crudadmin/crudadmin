@@ -50,6 +50,14 @@ class TestCase extends BaseTestCase
     }
 
     /*
+     * Return testing laravel app path
+     */
+    protected function getAppPath($path = null)
+    {
+        return __DIR__.'/Stubs/app'.($path ? '/'.$path : '');
+    }
+
+    /*
      * Install admin enviroment
      */
     public function installAdmin()
