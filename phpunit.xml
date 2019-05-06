@@ -12,6 +12,7 @@
         <testsuite name="Feature Tests">
             <directory suffix="Test.php">./tests/Commands</directory>
             <directory suffix="Test.php">./tests/Auth</directory>
+            <directory suffix="Test.php">./tests/Model</directory>
         </testsuite>
     </testsuites>
     <filter>

@@ -22,21 +22,9 @@ class AdminInstallCommandTest extends TestCase
 
     protected function tearDown() : void
     {
-        //Remove all published resources
-        foreach ($this->getPublishableResources() as $path)
-            $this->deleteFileOrDirectory($path);
+        $this->uninstallAdmin();
 
         parent::tearDown();
-    }
-
-    private function getPublishableResources()
-    {
-        return [
-            config_path('admin.php'),
-            resource_path('lang/cs'),
-            resource_path('lang/sk'),
-            public_path('vendor/crudadmin/dist/version'),
-        ];
     }
 
     /** @test */

@@ -118,7 +118,7 @@ class AdminInstallCommand extends Command
             //Replace namespace in new user model
             $user_model = app_path('User.php');
 
-            if ( !($content = @file_get_contents($user_model)) || ! @file_put_contents($user_model, str_replace('Gogol\Admin\Models;', 'App;', $content)) )
+            if ( !($content = @file_get_contents($user_model)) || ! @file_put_contents($user_model, str_replace('Gogol\Admin\Models;', config('admin.app_namespace').';', $content)) )
             {
                 $this->error('Some error with replacing namespace in User model...');
                 die;

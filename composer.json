@@ -30,7 +30,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Gogol\\Admin\\Tests\\": "tests/"
+            "Gogol\\Admin\\Tests\\": "tests/",
+            "Gogol\\Admin\\Tests\\App\\": "tests/Stubs/app"
         }
     },
     "extra": {

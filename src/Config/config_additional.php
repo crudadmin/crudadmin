@@ -1,6 +1,11 @@
 <?php
 return [
     /*
+     * Application namespace
+     */
+    'app_namespace' => 'App',
+
+    /*
      * Directories for loading gettext translations
      */
     'gettext_source_paths' => [
