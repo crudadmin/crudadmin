@@ -208,7 +208,7 @@ class Admin
     {
         //Add default app namespace
         $paths = [
-            app_path() => 'App',
+            app_path() => config('admin.app_namespace', 'App'),
         ];
 
         foreach (config('admin.models', []) as $namespace => $path)
@@ -347,7 +347,7 @@ class Admin
                 'condition' => config('admin.history') === true,
                 'model' => \Gogol\Admin\Models\ModelsHistory::class,
             ],
-            //Models history
+            //Sluggable history
             [
                 'condition' => config('admin.sluggable_history', false) === true,
                 'model' => \Gogol\Admin\Models\SluggableHistory::class,
