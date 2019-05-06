@@ -81,7 +81,7 @@ class Authenticatable extends Model implements
             }
         }
 
-        return Admin::save($key, $models);
+        return Admin::set($key, $models);
     }
 
     /*

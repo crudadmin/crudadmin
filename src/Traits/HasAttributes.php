@@ -73,7 +73,7 @@ trait HasAttributes
                 $properties = $this->getRelationProperty($key, 'belongsToMany');
 
                 //Get all admin modules
-                $models = Admin::getAdminModelsPaths();
+                $models = Admin::getAdminModelNamespaces();
 
                 foreach ($models as $path)
                 {

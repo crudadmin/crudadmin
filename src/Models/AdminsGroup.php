@@ -79,7 +79,7 @@ class AdminsGroup extends AdminModel
 
     public function options()
     {
-        $models = Admin::getAdminModelsPaths();
+        $models = Admin::getAdminModelNamespaces();
 
         $options = [];
 

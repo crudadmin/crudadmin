@@ -49,7 +49,7 @@ trait ModelRelationships
      */
     public function setRelation($relation, $value)
     {
-        Admin::save( $this->getAdminRelationKey( $relation ), $value );
+        Admin::set( $this->getAdminRelationKey( $relation ), $value );
 
         return parent::setRelation($relation, $value);
     }
@@ -213,7 +213,7 @@ trait ModelRelationships
 
         //Get all admin modules
         if ( ! $models )
-            $models = Admin::getAdminModelsPaths();
+            $models = Admin::getAdminModelNamespaces();
 
         /*
          * Return relations by defined fields in actual model

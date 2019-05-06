@@ -1,34 +1,17 @@
 <?php
 namespace Gogol\Admin\Helpers;
 
-use Gogol\Admin\Models\Model as AdminModel;
+use Gogol\Admin\Helpers\AdminBootloader;
+use Gogol\Admin\Helpers\File;
 use Illuminate\Filesystem\Filesystem;
-use Gogol\Admin\Helpers\File as AdminFile;
 
-class Admin
+class Admin extends AdminBootloader
 {
+
+    /*
+     * Filesystem provider
+     */
     protected $files;
-
-    /*
-     * Checks if has been admin models loaded
-     */
-    protected $booted = false;
-
-    /*
-     * Model paths
-     */
-    protected $model_paths = [];
-
-    public $buffer = [
-        'namespaces' => [],
-        'modelnames' => [],
-        'components' => [],
-    ];
-
-    /*
-     *
-     */
-    protected $models = [];
 
     public function __construct()
     {
@@ -36,88 +19,8 @@ class Admin
     }
 
     /*
-     * Save property, if is not in administration interface
+     * Check if is admin interface
      */
-    public function bind($key, $data, $call = true, $cache_in_admin = false)
-    {
-        if ( ! $this->isAdmin() || $cache_in_admin === true )
-        {
-            //If is passed data callable function
-            if ( is_callable($data) && $call == true )
-                $data = call_user_func($data);
-
-            return $this->save($key, $data);
-        }
-
-        return $data;
-    }
-
-    /*
-     * Save property with value into buffer
-     */
-    public function set($key, $data)
-    {
-        return $this->buffer[$key] = $data;
-    }
-
-    /*
-     * Save property with value into buffer
-     */
-    public function save($key, $data)
-    {
-        return $this->set($key, $data);
-    }
-
-    /*
-     * Push data into array buffer
-     */
-    public function push($key, $data)
-    {
-        if ( !array_key_exists($key, $this->buffer) || !is_array($this->buffer[$key]) )
-            $this->buffer[$key] = [];
-
-        return $this->buffer[$key][] = $data;
-    }
-
-    /*
-     * Checks if is property into buffer
-     */
-    public function has($key)
-    {
-        return array_key_exists($key, $this->buffer);
-    }
-
-    /*
-     * Get property from buffer
-     */
-    public function get($key, $default = null)
-    {
-        if ( $this->has( $key ) )
-            return $this->buffer[ $key ];
-        else
-            return $default;
-    }
-
-    /*
-     * Cache into array if does not exists
-     * force parameter means cache also in administration page
-     */
-    public function cache($key, $data, $save_in_admin = true)
-    {
-        if ( $this->has($key) )
-            return $this->get($key);
-
-        return $this->bind($key, $data, true, $save_in_admin);
-    }
-
-    /*
-     * Checks if is correcty type of admin model
-     */
-    public function isAdminModel($model)
-    {
-        return $model instanceof AdminModel && $model->getMigrationDate();
-    }
-
     public function isAdmin()
     {
         return request()->segment(1) == 'admin';
@@ -132,355 +35,6 @@ class Admin
     }
 
     /*
-     * Add model path reader
-     */
-    public function addModelPath($namespace, $path)
-    {
-        $this->model_paths[$path] = $namespace;
-
-        //Load admin models again
-        $this->boot(true);
-    }
-
-    /*
-     * Return root namespace by path name
-     */
-    private function getNamespaceByPath($path)
-    {
-        $path = trim_end($path, '*');
-        $path = str_replace('/', '\\', $path);
-        $path = array_filter(explode('\\', $path));
-        $path = array_map(function($item){
-            return ucfirst($item);
-        }, $path);
-
-        return implode('\\', $path);
-    }
-
-    /*
-     * Return private or absulute app basename path
-     */
-    private function getDirecotoryPath($path)
-    {
-        $path = trim_end( $path, '/' );
-
-        if ( substr($path, 0, 1) != '/' )
-            $path = base_path( $path );
-
-        return $path;
-    }
-
-    private function getPathFiles($path)
-    {
-        //Get all files from folder recursive
-        if ( substr($path, -1) == '*' )
-        {
-            $path = trim_end(trim_end($path, '*'), '/');
-
-            $files = array_map(function($item){
-                return $item->getPathName();
-            }, $this->files->allFiles( $path ));
-        }
-
-        //Get files from actual folder
-        else {
-            $files = $this->files->files($path);
-        }
-
-        return array_unique($files);
-    }
-
-    /*
-     * Make from path recursive path
-     */
-    private function makeRecursivePath($path)
-    {
-        $path = trim_end($path, '*');
-        $path = trim_end($path, '/');
-
-        return $path.'/*';
-    }
-
-    /*
-     * Get all files from paths which can has admin models
-     */
-    protected function getModelFiles()
-    {
-        //Add default app namespace
-        $paths = [
-            app_path() => config('admin.app_namespace', 'App'),
-        ];
-
-        foreach (config('admin.models', []) as $namespace => $path)
-        {
-            //If is not set namespace, then use default namespace generated by path
-            if ( ! is_string($namespace) )
-                $namespace = $this->getNamespaceByPath($path);
-
-            $path = $this->getDirecotoryPath($path);
-            $path = $this->makeRecursivePath($path);
-
-            if ( ! in_array($path, $paths) )
-                $paths[$path] = $namespace;
-        }
-
-        //Merge default paths, paths from config, and path from 3rd extension in correct order for overiding.
-        $paths = $paths + $this->model_paths;
-
-        $files = [];
-
-        foreach ($paths as $path => $namespace)
-        {
-            $files[$namespace] = [
-                'path' => $path,
-                'files' => $this->getPathFiles($path),
-            ];
-        }
-
-        return $files;
-    }
-
-    /*
-     * Raplaces file path to namespace
-     */
-    protected function fromPathToNamespace($path, $source, $namespace)
-    {
-        $source = trim_end($source, '*');
-
-        $path = str_replace_first($source, '', $path);
-        $path = str_replace('/', '\\', $path);
-        $path = str_replace('.php', '', $path);
-        $path = trim($path, '\\');
-
-        return $namespace . '\\' .$path;
-    }
-
-    /*
-     * Sorting models by migration date
-     */
-    protected function sortModels()
-    {
-        //Sorting according to migration date
-        ksort($this->buffer['namespaces']);
-        ksort($this->buffer['models']);
-    }
-
-    /*
-     * Add admin model into administration
-     */
-    public function addModel( $namespace, $sort = true )
-    {
-        $model = new $namespace;
-
-        //Checks if is admin models
-        if ( ! $this->isAdminModel( $model ) )
-            return;
-
-        //If model with migration date already exists
-        if ( array_key_exists($model->getMigrationDate(), $this->buffer['namespaces']) )
-        {
-            //If duplicite model which is actual loaded is extented parent of loaded child, then just skip adding this model
-            if ( $this->buffer['models'][$model->getMigrationDate()] instanceof $model ){
-                return;
-            }
-
-            abort(500, 'Model name '.$model->getTable().' has migration date which '.$model->getMigrationDate().' already exists in other model '.$this->buffer['models'][$model->getMigrationDate()]->getTable().'.');
-        }
-
-        //Save model namespace into array
-        $this->buffer['namespaces'][ $model->getMigrationDate() ] = $namespace;
-
-        //Save model into array
-        $this->buffer['models'][ $model->getMigrationDate() ] = $model;
-
-        //Sorting models by migration date
-        if ( $sort == true )
-        {
-            $this->sortModels();
-        }
-    }
-
-    /*
-     * Register all models related to admin extensions
-     */
-    public function registerModelExtensions($extensions)
-    {
-        $model_names = array_values(array_map(function($item){
-            return strtolower(class_basename($item));
-        }, $this->get('namespaces')));
-
-        foreach ($extensions as $extension)
-        {
-            //If extension is allowed and if is not already registred
-            if (
-                $extension['condition']
-                && ! in_array(strtolower(class_basename($extension['model'])), $model_names)
-            ) {
-                $this->addModel( $extension['model'], false );
-            }
-        }
-    }
-
-    /*
-     * Extension list
-     */
-    public function addModelExtensions()
-    {
-        $this->registerModelExtensions([
-            //When is first admin migration started, default User model from package will be included.
-            [
-                'condition' => count( $this->get('namespaces') ) == 0,
-                'model' => \Gogol\Admin\Models\User::class,
-            ],
-            // Localization
-            [
-                'condition' => $this->isEnabledMultiLanguages() === true,
-                'model' => \Gogol\Admin\Models\Language::class,
-            ],
-            //Admin groups
-            [
-                'condition' => config('admin.admin_groups') === true,
-                'model' => \Gogol\Admin\Models\AdminsGroup::class,
-            ],
-            //Models history
-            [
-                'condition' => config('admin.history') === true,
-                'model' => \Gogol\Admin\Models\ModelsHistory::class,
-            ],
-            //Sluggable history
-            [
-                'condition' => config('admin.sluggable_history', false) === true,
-                'model' => \Gogol\Admin\Models\SluggableHistory::class,
-            ],
-        ]);
-    }
-
-    public function getAdminModelsPaths($force = false)
-    {
-        //Checks if is namespaces into buffer
-        if ( $force === false && count( $this->get('namespaces', []) ) > 0 )
-            return $this->get( 'namespaces' );
-
-        $files = $this->getModelFiles();
-
-        foreach ($files as $namespace => $models)
-        {
-            foreach ($models['files'] as $key => $class)
-            {
-                $models[$key] = $this->fromPathToNamespace( (string)$class, $models['path'], $namespace );
-
-                //If is not same class with filename
-                if ( ! class_exists($models[$key]) )
-                    continue;
-
-                $this->addModel( $models[$key], false );
-            }
-        }
-
-        //Register model extensions
-        $this->addModelExtensions();
-
-        //Sorting models
-        $this->sortModels();
-
-        //All admin models has been properly loaded
-        $this->booted = true;
-
-        return $this->get('namespaces');
-    }
-
-    /**
-     * Returns all admin models into Admin directory with correct namespace name
-     * @return [array]
-     */
-    public function getAdminModels()
-    {
-        //For rendering models classes
-        $this->getAdminModelsPaths();
-
-        return $this->get('models');
-    }
-
-    /**
-     * Returns model by table
-     * @param  [string] $table
-     * @return [model]
-     */
-    public function getModelByTable($table)
-    {
-        $models = $this->getAdminModels();
-
-        foreach ($models as $model)
-        {
-            if ( $model->getTable() == $table )
-                return $model;
-        }
-    }
-
-    /*
-     * Returns model by model name
-     */
-    public function getModel($model)
-    {
-        $paths = $this->getAdminModelsPaths();
-
-        $model = strtolower($model);
-
-        foreach ($paths as $path)
-        {
-            $model_name = class_basename($path);
-
-            if ( strtolower($model_name) == $model )
-                return new $path;
-        }
-    }
-
-    /*
-     * Returns all model names in lowercase and without full namespace path
-     */
-    public function getAdminModelNames()
-    {
-        //Checks if is namespaces into buffer
-        if ( $this->get('modelnames') )
-        {
-            return $this->get( 'modelnames' );
-        }
-
-        $names = [];
-
-        foreach( $this->getAdminModelsPaths() as $path )
-        {
-            $names[ strtolower( class_basename($path) ) ] = $path;
-        }
-
-        if ( $this->isLoaded() )
-            $this->buffer['modelnames'] = $names;
-
-        return $names;
-    }
-
-    /*
-     * Checks if model exists in admin models list
-     */
-    public function hasAdminModel($model, $callback = null)
-    {
-        $model = strtolower($model);
-
-        $modelnames = $this->getAdminModelNames();
-
-        //Checks if is model in modelnames array
-        if ( array_key_exists($model, $modelnames) )
-        {
-            if ( $callback )
-                return call_user_func_array($callback, [$model, $modelnames[$model]]);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /*
      * Returns if is in config allowed multi languages support
      */
     public function isEnabledMultiLanguages()
@@ -492,23 +46,8 @@ class Admin
     }
 
     /*
-     * Returns if is admin model loaded
+     * Get stub path
      */
-    public function isLoaded()
-    {
-        return $this->booted;
-    }
-
-    /*
-     * Force boot admin models
-     */
-    public function boot($force = false)
-    {
-        $this->getAdminModelsPaths($force);
-
-        return true;
-    }
-
     public function stub($stub)
     {
         return __DIR__ . '/../Stubs/'.$stub.'.stub';
@@ -519,7 +58,7 @@ class Admin
      */
     public function start()
     {
-        $this->save('microtime.start', microtime(true));
+        $this->set('microtime.start', microtime(true));
     }
 
     /*
@@ -602,7 +141,7 @@ class Admin
         $directory = Admin::getAssetsVersionPath();
 
         //Create directory if not exists
-        AdminFile::makeDirs($directory);
+        File::makeDirs($directory);
 
         $this->files->put($directory . 'version.txt', Admin::getVersion());
 

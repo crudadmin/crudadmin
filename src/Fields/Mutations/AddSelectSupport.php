@@ -2,36 +2,24 @@
 
 namespace Gogol\Admin\Fields\Mutations;
 
-use DB;
 use Admin;
-use Localization;
+use Ajax;
+use DB;
 use Gogol\Admin\Fields\Mutations\MutationRule;
 use Gogol\Admin\Helpers\Helper;
+use Gogol\Admin\Traits\Support\DataCache;
 use Illuminate\Support\Collection;
-use Ajax;
+use Localization;
 
 class AddSelectSupport extends MutationRule
 {
+    use DataCache;
+
     public $attributes = ['options', 'multiple', 'default', 'filterBy', 'fillBy', 'required_with_values'];
 
     private function isAllowedMutation($field)
     {
         return $field['type'] == 'select' || $field['type'] == 'radio';
-    }
-
-    /*
-     * If has key in admin buffer, returns data from buffer, if has not, then get data from database and save into buffer
-     */
-    protected function getOptionsFromBuffer($key, $data)
-    {
-        if ( Admin::has( $key ) )
-        {
-            return Admin::get($key);
-        }
-
-        $options = call_user_func($data);
-
-        return Admin::save($key, $options);
     }
 
     /*
@@ -212,7 +200,7 @@ class AddSelectSupport extends MutationRule
             $load_columns = array_unique($load_columns);
 
             //Get data from table, and bind them info buffer for better performance
-            $options = $this->getOptionsFromBuffer('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {
+            $options = $this->cache('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {
                 $load_columns[] = 'id';
 
                 if ($model = Admin::getModelByTable($properties[0]))
@@ -286,7 +274,7 @@ class AddSelectSupport extends MutationRule
     public function initPostUpdate($fields, $field, $key, $model)
     {
         //Get options from model, and cache them
-        $options = $this->getOptionsFromBuffer('selects.'. $model->getTable() . '.options', function() use ( $model ) {
+        $options = $this->cache('selects.'. $model->getTable() . '.options', function() use ( $model ) {
             return (array)$model->getProperty('options', $model->getModelParentRow());
         });
 

@@ -17,7 +17,7 @@ class ModelTest extends TestCase
     /** @test */
     public function only_user_model_is_available()
     {
-        $this->assertArraySubset(Admin::getAdminModelsPaths(), [
+        $this->assertArraySubset(Admin::boot(), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User'
         ]);
     }
@@ -29,7 +29,7 @@ class ModelTest extends TestCase
             'Gogol\Admin\Tests\App\Models' => __DIR__.'/../Stubs/app/Models/*'
         ]);
 
-        $this->assertArraySubset(Admin::getAdminModelsPaths(true), [
+        $this->assertArraySubset(Admin::boot(true), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
             '2019-05-03 11:10:04' => 'Gogol\Admin\Tests\App\Models\FieldsType',
             '2019-05-03 12:10:04' => 'Gogol\Admin\Tests\App\Models\Articles\Article',
