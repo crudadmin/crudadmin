@@ -7,7 +7,6 @@ use Illuminate\Filesystem\Filesystem;
 
 class Admin extends AdminBootloader
 {
-
     /*
      * Filesystem provider
      */
