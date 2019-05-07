@@ -7,7 +7,7 @@ Request.prototype.get = function(type, params){
         return url;
 
     for ( var key in params )
-        url = url.replace(':'+key, params[key]);
+        url = url.replace(':'+key, params[key] == undefined ? '' : params[key]);
 
     return url;
 }

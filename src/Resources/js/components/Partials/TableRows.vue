@@ -6,7 +6,7 @@
           <th @click="toggleAllCheckboxes()" v-if="multipleCheckbox">
             <i data-toggle="tooltip" :data-original-title="trans(isCheckedAll ? 'uncheck-all' : 'check-all')" :class="isCheckedAll ? 'fa-check-square-o' : 'fa-square-o'" class="fa"></i>
           </th>
-          <th v-for="(field, name) in columns" v-bind:class="'th-'+field" v-on:click="toggleSorting(field)">
+          <th v-for="(name, field) in columns" v-bind:class="'th-'+field" v-on:click="toggleSorting(field)">
             <i class="arrow-sorting fa fa-arrow-up" v-if="orderby[0] == field && orderby[1] == 0"></i>
             <i class="arrow-sorting fa fa-arrow-down" v-if="orderby[0] == field && orderby[1] == 1"></i>
             {{ name }}
@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody :data-model="model.slug">
-        <tr v-for="(key, item) in rowsdata" :data-index="item.id" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
+        <tr v-for="(item, key) in rowsdata" :data-index="item.id" drag-start="beforeUpdateOrder" drop="updateOrder">
           <td class="checkbox-td" v-if="multipleCheckbox">
             <div class="checkbox-box" @click="checkRow(item.id)">
               <input type="checkbox" :checked="checked.indexOf(item.id) > -1">
@@ -23,7 +23,7 @@
             </div>
           </td>
 
-          <td v-for="(field, name) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
+          <td v-for="(name, field) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
             <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
           </td>
 
@@ -32,7 +32,7 @@
             <div v-if="isEnabledHistory"><button type="button" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
             <div v-if="canShowGettext"><button type="button" v-on:click="openGettextEditor(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('gettext-update')"><i class="fa fa-globe"></i></button></div>
             <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('row-info')"><i class="fa fa-info"></i></button></div>
-            <div v-for="(button_key, button) in getButtonsForRow(item)">
+            <div v-for="(button, button_key) in getButtonsForRow(item)">
               <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]"></i></button>
             </div>
             <div v-if="model.publishable"><button type="button" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" :data-original-title="item.published_at ? trans('hide') : trans('show')"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
@@ -468,7 +468,7 @@
 
           //Resets form
           if ( row === true && data === null )
-            return this.row = null;
+            return this.$parent.row = null;
 
           var render = function(response){
             for ( var key in response ){
@@ -476,7 +476,7 @@
             }
 
             //Bind model data
-            this.row = _.cloneDeep(row, true);
+            this.$parent.$parent.row = _.cloneDeep(row, true);
 
             //Fix for single model with history support
             if ( model_row ){
@@ -492,7 +492,7 @@
           if ( data ) {
             render(data);
           } else {
-            this.$http.get(this.$root.requests.show, { model : this.model.slug, id : row.id, subid : history_id })
+            this.$http.get(this.$root.requests.get('show', { model : this.model.slug, id : row.id, subid : history_id }))
             .then(function(response){
               render(response.data);
             })

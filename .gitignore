@@ -1,3 +1,4 @@
 /vendor
 /node_modules
 config.js
+mix-manifest.json

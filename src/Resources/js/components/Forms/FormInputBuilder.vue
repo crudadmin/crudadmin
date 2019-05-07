@@ -172,9 +172,16 @@
         this.$options.components['model-builder'] = Vue.extend(ModelBuilder);
 
         this.registerComponents();
+
+        eventHub.$on('updateField', data => {
+          if ( data[0] != this.field_key )
+            return;
+
+          this.updateField(data[1]);
+        });
       },
 
-      ready()
+      mounted()
       {
         //If this field has own component
         this.syncFieldsValueWithRow();
@@ -208,12 +215,6 @@
           //Reset input value after file has been sent
           $('#' + this.getId).val('');
         },
-        updateField(data){
-          if ( data[0] != this.field_key )
-            return;
-
-          this.updateField(data[1]);
-        },
       },
 
       methods : {
@@ -227,11 +228,11 @@
         },
         syncFieldsValueWithRow(){
           this.$watch('row.'+this.field_key, function(value){
-            this.$set('field.value', this.resetEmptyValue(value));
+            this.field.value = this.resetEmptyValue(value);
           });
 
           this.$watch('field.value', function(value){
-            this.$set('row.'+this.field_key, this.resetEmptyValue(value));
+            this.row[this.field_key] = this.resetEmptyValue(value);
           });
         },
         registerComponents(){
@@ -394,7 +395,7 @@
           if ( no_field != true )
             this.field.value = value;
 
-          this.$set('row.' + this.field_key, value);
+          this.row[this.field_key] = value;
         },
         /*
          * Apply on change events into selectbox

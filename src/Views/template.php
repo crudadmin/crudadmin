@@ -205,20 +205,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </script>
 
     <!-- jQuery 2.1.4 -->
-    <script src="<?php echo admin_asset('/plugins/jQuery/jQuery-2.1.4.min.js') ?>"></script>
-    <script src="<?php echo admin_asset('/plugins/jQueryUI/jquery-ui.min.js') ?>"></script>
-
-    <!-- Bootstrap 3.3.5 -->
-    <script src="<?php echo admin_asset('/bootstrap/js/bootstrap.min.js') ?>"></script>
-
-    <!-- AdminLTE App -->
-    <script src="<?php echo admin_asset('/plugins/datetimepicker/jquery.datetimepicker.min.js') ?>"></script>
-    <script src="<?php echo admin_asset('/plugins/lightbox/lightbox.min.js') ?>"></script>
+    <script src="<?php echo admin_asset('/js/manifest.js') ?>"></script>
+    <script src="<?php echo admin_asset('/js/vendor.js') ?>"></script>
     <script src="<?php echo admin_asset('/plugins/ckeditor/ckeditor.js') ?>"></script>
-    <script src="<?php echo admin_asset('/plugins/chosen/chosen.jquery.min.js') ?>"></script>
-    <script src="<?php echo admin_asset('/plugins/chosen-order/chosen.order.jquery.min.js') ?>"></script>
-    <script src="<?php echo admin_asset('/dist/js/app.min.js') ?>"></script>
-    <script src="<?php echo admin_asset('/dist/js/main.js?v=').Admin::getAssetsVersion() ?>">"></script>
 
     <?php foreach((array)config('admin.scripts', []) as $script){ ?>
     <script type="text/javascript" src="<?php echo admin_asset($script) ?>"></script>

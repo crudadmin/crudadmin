@@ -321,7 +321,7 @@
 
       //Send into all childs parent row data
       sendParentRow(){
-        this.$broadcast('getParentRow', {
+        eventHub.$emit('getParentRow', {
           model : this.model,
           slug : this.model.slug,
           row : this.row,

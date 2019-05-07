@@ -1,6 +1,7 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
+window.eventHub = new Vue();
 
 import VueRouter from 'vue-router';
 import Fragment from 'vue-fragment'

@@ -15,7 +15,7 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu menu-left dropdown-menu-right">
-          <li @click="$event.stopPropagation()" v-for="(key, column) in enabled_columns" v-if="canShowColumn(column, key)">
+          <li @click="$event.stopPropagation()" v-for="(column, key) in enabled_columns" v-if="canShowColumn(column, key)">
             <label><input type="checkbox" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
           </li>
           <li role="separator" class="divider"></li>
@@ -32,7 +32,7 @@
           <li v-if="model.deletable"><a @click.prevent="removeRow()"><i class="fa fa-remove"></i> {{ trans('delete') }}</a></li>
           <li v-if="model.publishable"><a @click.prevent="togglePublishedAt()"><i class="fa fa-eye"></i> {{ trans('publish-toggle') }}</a></li>
           <li role="separator" v-if="hasButtons" class="divider"></li>
-          <li v-for="(button_key, button) in availableButtons"><a @click="buttonAction(button_key, button)"><i class="fa" :class="button.icon"></i> {{ button.name }}</a></li>
+          <li v-for="(button, button_key) in availableButtons"><a @click="buttonAction(button_key, button)"><i class="fa" :class="button.icon"></i> {{ button.name }}</a></li>
         </ul>
       </div>
 
@@ -139,23 +139,11 @@
 
       //Refresh rows refreshInterval
       this.loadRows();
-    },
 
-    destroyed() {
-      this.destroyTimeout();
-    },
-
-    events: {
-      reloadRows(table){
-        if ( this.model.slug != table )
-          return;
-
-        this.loadRows();
-      },
       /*
        * When row is added, then push it into table
        */
-      onCreate(data){
+      eventHub.$on('onCreate', data => {
         if ( data.table != this.model.slug )
           return;
 
@@ -189,6 +177,19 @@
         } else {
           this.loadRows();
         }
+      });
+    },
+
+    destroyed() {
+      this.destroyTimeout();
+    },
+
+    events: {
+      reloadRows(table){
+        if ( this.model.slug != table )
+          return;
+
+        this.loadRows();
       },
       /*
        * When row is updated, then change data into table for changed rows

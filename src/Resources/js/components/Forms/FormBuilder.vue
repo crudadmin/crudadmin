@@ -97,7 +97,7 @@
       };
     },
 
-    ready()
+    mounted()
     {
       //Initialize form
       this.form = $('#'+this.formID);
@@ -117,7 +117,7 @@
           if ( !row || !oldRow || row.id != oldRow.id || this.history.history_id )
           {
             this.initForm(row, canResetForm);
-            this.$dispatch('sendParentRow');
+            eventHub.$emit('sendParentRow');
           }
         },
         deep: true,
@@ -243,7 +243,8 @@
           this.form.resetForm();
 
           for ( var key in this.model.fields ){
-            this.$set('model.fields.'+key+'.value', null);
+            if ( this.model.fields[key].value )
+              this.model.fields[key].value = null;
           }
         }
 
@@ -270,9 +271,10 @@
 
             //Set value and default value of field from database
             this.model.fields[key].value = value;
-            this.$set('model.fields.'+key+'.$original_value', value);
+            if ( value )
+              this.model.fields[key].$original_value = value;
 
-            this.$broadcast('updateField', [key, this.model.fields[key]]);
+            eventHub.$emit('updateField', [key, this.model.fields[key]]);
           }
         }
 
@@ -291,7 +293,7 @@
         this.form.find('.fa.fa-times-circle-o').firstLevelForm(this.form[0]).remove();
         this.form.find('.multi-languages .has-error').firstLevelForm(this.form[0]).removeClass('has-error');
         this.removeActiveTab(this.form.find('.nav-tabs li.has-error').firstLevelForm(this.form[0]));
-        this.progress = false;
+        this.$parent.progress = false;
       },
       sendForm(e, action, callback)
       {
@@ -335,7 +337,7 @@
 
         this.resetErrors();
 
-        this.progress = true;
+        this.$parent.progress = true;
 
         $(e.target).ajaxSubmit({
 
@@ -352,7 +354,7 @@
           success : data => {
 
             this.submit = true;
-            this.progress = false;
+            this.$parent.progress = false;
 
             //Error occured
             if ( $.type(data) != 'object' || ! ('type' in data) )
@@ -402,7 +404,7 @@
       unknownAjaxErrorResponse(){
         this.$root.arrorAlert(() => {
 
-          this.progress = false;
+          this.$parent.progress = false;
 
           //Timeout for sending new request with enter
           setTimeout(() => {
@@ -515,7 +517,7 @@
             this.$broadcast('onSubmit', this.buildEventData(clonedRow, response.data));
 
             //Send notification about new row
-            this.$dispatch('proxy', 'onCreate', this.buildEventData(clonedRow, response.data));
+            eventHub.$emit('onCreate', this.buildEventData(clonedRow, response.data));
 
             //If form has disabled autoreseting
             var autoreset = this.$root.getModelProperty(this.model, 'settings.autoreset');
