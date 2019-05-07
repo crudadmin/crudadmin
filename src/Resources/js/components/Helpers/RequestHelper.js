@@ -7,9 +7,7 @@ Request.prototype.get = function(type, params){
         return url;
 
     for ( var key in params )
-    {
         url = url.replace(':'+key, params[key]);
-    }
 
     return url;
 }
@@ -19,6 +17,7 @@ Request.prototype.get = function(type, params){
  */
 const RequestHelper = function(request){
     var core = new Request;
+
 
     //Copy all given model attributes
     for ( var key in request )

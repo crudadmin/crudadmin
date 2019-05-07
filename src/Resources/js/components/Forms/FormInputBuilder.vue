@@ -59,7 +59,7 @@
           <small>{{ field.title }}</small>
 
           <span v-if="getValueOrDefault && !hasMultipleFilesValue && file_from_server && !isMultiple">
-            <file :file="getValueOrDefault" :field="key" :model="model"></file>
+            <file :file="getValueOrDefault" :field="field_key" :model="model"></file>
           </span>
 
         </div>
@@ -72,7 +72,7 @@
         :history="history"
         :field="field"
         :index="index"
-        :key="key + '_confirmation'"
+        :field_key="field_key + '_confirmation'"
         :row="row"
         :confirmation="true"></form-input-builder>
 
@@ -152,7 +152,7 @@
 
   export default {
       name: 'form-input-builder',
-      props: ['model', 'field', 'index', 'key', 'row', 'confirmation', 'history', 'langid', 'hasparentmodel', 'langslug'],
+      props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'hasparentmodel', 'langslug'],
 
       components: { File },
 
@@ -203,13 +203,13 @@
 
           this.file_from_server = row ? true : false;
 
-          this.field.value = row ? row[this.key] : '';
+          this.field.value = row ? row[this.field_key] : '';
 
           //Reset input value after file has been sent
           $('#' + this.getId).val('');
         },
         updateField(data){
-          if ( data[0] != this.key )
+          if ( data[0] != this.field_key )
             return;
 
           this.updateField(data[1]);
@@ -226,12 +226,12 @@
           return value;
         },
         syncFieldsValueWithRow(){
-          this.$watch('row.'+this.key, function(value){
+          this.$watch('row.'+this.field_key, function(value){
             this.$set('field.value', this.resetEmptyValue(value));
           });
 
           this.$watch('field.value', function(value){
-            this.$set('row.'+this.key, this.resetEmptyValue(value));
+            this.$set('row.'+this.field_key, this.resetEmptyValue(value));
           });
         },
         registerComponents(){
@@ -349,7 +349,7 @@
             var field = this.model.fields[key],
                 fillBy = this.getFillBy(field);
 
-            if ( ! fillBy || ! fillBy[0] || (fillBy[0] != this.key && fillBy[0] + '_id' != this.key) )
+            if ( ! fillBy || ! fillBy[0] || (fillBy[0] != this.field_key && fillBy[0] + '_id' != this.field_key) )
               continue;
 
             var options = this.field.options||[];
@@ -386,7 +386,7 @@
               this.field.value = obj_value;
 
             //Update specific row language value
-            this.$set('row.' + this.key + '.' + this.langslug, value);
+            this.$set('row.' + this.field_key + '.' + this.langslug, value);
             return;
           }
 
@@ -394,7 +394,7 @@
           if ( no_field != true )
             this.field.value = value;
 
-          this.$set('row.' + this.key, value);
+          this.$set('row.' + this.field_key, value);
         },
         /*
          * Apply on change events into selectbox
@@ -535,7 +535,7 @@
           var values = select.getSelectionOrder();
 
           if ( ! fake_select.is('select') )
-            fake_select = select.before('<select name="'+this.key+'[]" multiple="multiple" style="display: none"></select>').prev();
+            fake_select = select.before('<select name="'+this.field_key+'[]" multiple="multiple" style="display: none"></select>').prev();
 
           //Remove inserted options
           fake_select.find('option').remove();
@@ -736,21 +736,21 @@
 
           parent = modelBuilder.getParentTableName(this.model.withoutParent == true);
 
-          return 'id-' + this.model.slug + this.key + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.langslug;
+          return 'id-' + this.model.slug + this.field_key + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.langslug;
         },
         getModalId(){
           return 'form-relation-modal-'+this.getId;
         },
         getFieldKey()
         {
-          return this.model.slug + '-' + this.key;
+          return this.model.slug + '-' + this.field_key;
         },
         getFieldName()
         {
           if ( this.hasLocale )
-            return this.key+'['+this.langslug+']';
+            return this.field_key+'['+this.langslug+']';
 
-          return this.key;
+          return this.field_key;
         },
         getFilterBy(){
           if ( !('filterBy' in this.field) )
@@ -1044,7 +1044,7 @@
           if ( ! this.history )
             return false;
 
-          return this.history.fields.indexOf(this.key) > -1;
+          return this.history.fields.indexOf(this.field_key) > -1;
         },
         /*
          * Can show adding row just for first level of forms (not when user click to add new row in form),

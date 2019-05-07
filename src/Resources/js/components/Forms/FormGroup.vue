@@ -1,43 +1,44 @@
 <template>
-<div class="fields-group" :group-id="group.id" v-bind:class="getGroupClass(group)" :data-fields="visibleFields.length">
+<div class="fields-group" :group-id="group.id" :class="getGroupClass(group)" :data-fields="visibleFields.length">
     <div :class="{ 'nav-tabs-custom' : canShowGroupName(group) }">
         <h4 v-if="canShowGroupName(group)"><i v-if="group.icon" :class="['fa', group.icon]"></i> <span v-html="group.name"></span></h4>
 
         <div class="tab-content">
             <div class="row">
-              <div v-if="hasTabs(group.fields)" class="col-lg-12">
-                <form-tabs-builder
-                    :tabs="group.fields | tabs"
-                    :model="model"
-                    :row="row"
-                    :hasparentmodel="hasparentmodel"
-                    :history="history">
-                </form-tabs-builder>
-              </div>
-              <div v-else v-if="canShowGroupName(group) && visibleFields.length == 0">
-                <div class="col-md-12">
-                  <p class="empty-group-separator">...</p>
+                <div v-if="hasTabs(group.fields)" class="col-lg-12">
+                  <form-tabs-builder
+                      :tabs="group.fields | tabs"
+                      :model="model"
+                      :row="row"
+                      :hasparentmodel="hasparentmodel"
+                      :history="history">
+                  </form-tabs-builder>
                 </div>
-              </div>
+                <div v-else v-if="canShowGroupName(group) && visibleFields.length == 0">
+                    <div class="col-md-12">
+                        <p class="empty-group-separator">...</p>
+                    </div>
+                </div>
 
-                <div v-for="(index, item) in group.fields">
+                <div v-for="(item, index) in group.fields">
                     <div
-                      :data-field="item"
-                      :data-lang="langslug"
-                      v-if="isField(item) && canRenderField(model.fields[item])"
-                      v-for="langslug in getFieldLangs(model.fields[item])"
-                      v-show="canShowField(model.fields[item]) && canShowLanguageField(this.model.fields[item], langslug, inputlang)"
-                      class="col-lg-12 field-wrapper">
+                        :data-field="item"
+                        :data-lang="langslug"
+                        v-if="isField(item) && canRenderField(model.fields[item])"
+                        v-for="langslug in getFieldLangs(model.fields[item])"
+                        v-show="canShowField(model.fields[item]) && canShowLanguageField(model.fields[item], langslug, inputlang)"
+                        class="col-lg-12 field-wrapper">
                         <form-input-builder
-                          :history="history"
-                          :model="model"
-                          :langid="langid"
-                          :langslug="langslug"
-                          :row="row"
-                          :index="index"
-                          :key="item"
-                          :hasparentmodel="hasparentmodel"
-                          :field="model.fields[item]">
+                            :key="item"
+                            :history="history"
+                            :model="model"
+                            :langid="langid"
+                            :langslug="langslug"
+                            :row="row"
+                            :index="index"
+                            :hasparentmodel="hasparentmodel"
+                            :field_key="item"
+                            :field="model.fields[item]">
                         </form-input-builder>
                     </div>
 
