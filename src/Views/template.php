@@ -71,14 +71,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                       <!-- The user image in the navbar-->
                       <img v-bind:src="getAvatar" class="user-image" alt="User Image">
                       <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                      <span class="hidden-xs">{{ user.username }}</span>
+                      <span class="hidden-xs" v-if="user">{{ user.username }}</span>
                     </a>
                     <ul class="dropdown-menu">
                       <!-- The user image in the menu -->
                       <li class="user-header">
                         <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
 
-                        <p>
+                        <p v-if="user">
                           {{ user.username }} - {{ getPermissions }}
                         </p>
                       </li>
@@ -110,13 +110,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <img v-bind:src="getAvatar" class="img-circle" alt="User Image">
                 </div>
                 <div class="pull-left info">
-                  <p>{{ user.username }}</p>
+                  <p v-if="user">{{ user.username }}</p>
                   <!-- Status -->
                   <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
                 </div>
               </div>
 
-              <sidebar :rows="models" :languages="languages" :langid.sync="language_id"></sidebar>
+              <sidebar :rows="tree" :languages="languages" :langid.sync="language_id"></sidebar>
           </aside>
 
           <!-- MODAL -->
@@ -225,7 +225,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <?php } ?>
 
     <!-- APP JS -->
-    <script src="<?php echo admin_asset('/js/main.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
+    <script src="<?php echo admin_asset('/js/app.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-42935841-6"></script>

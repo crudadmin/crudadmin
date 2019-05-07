@@ -14,7 +14,7 @@
     </section>
 
     <!-- Main content -->
-    <section class="content">
+    <section class="content" v-if="model">
         <model-builder :model="model" :langid="langid"></model-builder>
     </section>
     <!-- /.content -->
@@ -29,9 +29,9 @@
       name : 'base-page-view',
 
       data : function(){
+        console.log(this.$root.models, this.$route.params.model);
         return {
-          //Passing model data from parent
-          model : ModelHelper(this.$parent.model),
+
         };
       },
 
@@ -43,6 +43,12 @@
       },
 
       computed: {
+        /*
+         * Return model from actual page
+         */
+        model(){
+          return ModelHelper(this.$root.models[this.$route.params.model]);
+        },
         getGroup(){
           if ( this.model.slug in this.$root.models )
             return false;

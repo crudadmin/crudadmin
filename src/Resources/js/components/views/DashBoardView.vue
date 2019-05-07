@@ -23,7 +23,7 @@
 
 
             <div class="box-body">
-              <h2 v-if="!layout">{{ trans('welcome') }} {{ user.username }}</h2>
+              <h2 v-if="!layout && user">{{ trans('welcome') }} {{ user.username }}</h2>
               <div v-html="layout"></div>
             </div>
           </div>

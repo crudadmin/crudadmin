@@ -3,13 +3,18 @@
 </template>
 
 <script>
+    import axios from 'axios';
+    import config from '../config';
+
     import Sidebar from './Sidebar/Sidebar.vue';
     import License from './Partials/License.vue';
     import CheckAssetsVersion from './Partials/CheckAssetsVersion.vue';
     import ModelHelper from './Model/ModelHelper.js';
 
     export default {
-        init(layout, models_list, groups_prefix, router){
+        init(router){
+
+            var layout = {};
 
             //Replace requests paths
             var replace = ['model', 'parent', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
@@ -25,21 +30,20 @@
                 router,
                 data : function(){
                     return {
-                        version : layout.version,
-                        version_assets : layout.version_assets,
-                        gettext : layout.gettext,
-                        locale : layout.locale,
-                        dashboard : layout.dashboard,
-                        license_key : layout.license_key,
-                        requests: layout.requests,
-                        user : layout.user,
-                        models: layout.models,
-                        models_list : this.getRecursiveModels(models_list),
-                        localization: layout.localization,
-                        languages: layout.languages,
+                        version : null,
+                        version_assets : null,
+                        gettext : null,
+                        locale : null,
+                        dashboard : null,
+                        license_key : null,
+                        requests: null,
+                        user : null,
+                        tree: [],
+                        models: [],
+                        localization: {},
+                        languages: [],
                         language_id : null,
                         languages_active : false,
-                        groups_prefix : groups_prefix,
                         alert: {
                             type : null, // success,danger,warning...
                             title : null,
@@ -60,13 +64,15 @@
                 components: { Sidebar, License, CheckAssetsVersion },
 
                 created(){
+                    this.bootApp();
+
                     this.bootLanguages();
 
                     //Set datepickers language
                     jQuery.datetimepicker.setLocale(this.locale);
                 },
 
-                ready(){
+                mounted(){
                     this.checkAlertEvents();
                 },
 
@@ -76,7 +82,10 @@
                     },
                     getAvatar()
                     {
-                        return this.user.avatar != null ? this.user.avatar : this.$http.options.root + '/../'+window.crudadmin.path+'/dist/img/avatar5.png';
+                        if ( this.user && this.user.avatar )
+                            return this.user.avatar;
+
+                        return this.$http.options.root + '/../'+window.crudadmin.path+'/dist/img/avatar5.png';
                     },
                     getPermissions()
                     {
@@ -97,6 +106,73 @@
                 },
 
                 methods : {
+                    /*
+                     * Boot whole app with data from API
+                     */
+                    bootApp(){
+                        axios.get('api/layout').then(response => {
+                            var layout = response.data;
+
+                            this.version = layout.version;
+                            this.version_assets = layout.version_assets;
+                            this.gettext = layout.gettext;
+                            this.locale = layout.locale;
+                            this.dashboard = layout.dashboard;
+                            this.license_key = layout.license_key;
+                            this.requests = layout.requests;
+                            this.user = layout.user;
+                            this.tree = layout.models;
+                            this.models = this.flattenModelsWithChilds(layout.models);
+                            this.localization = layout.localization||{};
+                            this.languages = layout.languages||[];
+                        });
+                    },
+                    /*
+                     * Get all models from groups tree in flatten list
+                     */
+                    getModelsFromGroups(groups, models){
+                        for ( var key in groups )
+                        {
+                            //Get all models from group
+                            if ( key.substr(0, config.groups_prefix.length) == config.groups_prefix )
+                            {
+                                for ( var subkey in groups[key].submenu )
+                                {
+                                    if ( subkey.substr(0, config.groups_prefix.length) == config.groups_prefix )
+                                        models = models.concat(this.getModelsFromGroups(groups[key].submenu[subkey], models));
+                                    else
+                                        models.push(groups[key].submenu[subkey]);
+                                }
+                            }
+
+                            //Pust model into list
+                            else {
+                                models.push(groups[key]);
+                            }
+                        }
+
+                        return models;
+                    },
+                    /*
+                     * Returns all models also with their childs
+                     */
+                    flattenModelsWithChilds(tree){
+                        var models = {};
+                            tree = this.getModelsFromGroups(tree, []);
+
+                        for ( var key in tree )
+                        {
+                            if ( typeof tree[key] != 'object' )
+                                continue;
+
+                            models[tree[key].slug] = ModelHelper(tree[key]);
+
+                            if ( Object.keys(tree[key].childs).length > 0 )
+                                models = _.merge(models, this.flattenModelsWithChilds(tree[key].childs));
+                        }
+
+                        return models;
+                    },
                     openAlert(title, message, type, success, close, component){
 
                         if ( !type )
@@ -326,22 +402,6 @@
                         }
 
                         return value;
-                    },
-                    getRecursiveModels(models){
-                        var data = {};
-
-                        for ( var key in models )
-                        {
-                            if ( typeof models[key] != 'object' )
-                                continue;
-
-                            data[models[key].slug] = ModelHelper(models[key]);
-
-                            if ( Object.keys(models[key].childs).length > 0 )
-                                data = _.merge(data, this.getRecursiveModels(models[key].childs));
-                        }
-
-                        return data;
                     },
                     /*
                      * Replace datetime format from PHP to momentjs

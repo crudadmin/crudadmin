@@ -44,8 +44,6 @@
                         delete groups[key];
                 }
 
-                console.log(groups);
-
                 return groups;
             },
             hasLanguages(){
