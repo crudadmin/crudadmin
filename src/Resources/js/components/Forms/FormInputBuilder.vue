@@ -179,6 +179,23 @@
 
           this.updateField(data[1]);
         });
+
+        eventHub.$on('onSubmit', data => {
+          var row = data.row;
+
+          if ( data.table != this.model.slug || ! this.isFile )
+            return;
+
+          if ( this.file_from_server == true && row != null )
+            return;
+
+          this.file_from_server = row ? true : false;
+
+          this.field.value = row ? row[this.field_key] : '';
+
+          //Reset input value after file has been sent
+          $('#' + this.getId).val('');
+        });
       },
 
       mounted()
@@ -198,25 +215,6 @@
 
         this.addMultipleFilesSupport(true);
       },
-      events : {
-        onSubmit(data){
-          var row = data.row;
-
-          if ( data.table != this.model.slug || ! this.isFile )
-            return;
-
-          if ( this.file_from_server == true && row != null )
-            return;
-
-          this.file_from_server = row ? true : false;
-
-          this.field.value = row ? row[this.field_key] : '';
-
-          //Reset input value after file has been sent
-          $('#' + this.getId).val('');
-        },
-      },
-
       methods : {
         //We need reset empty values because of infinity loop in setter
         //when is NaN setted

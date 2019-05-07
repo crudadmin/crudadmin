@@ -514,7 +514,7 @@
               this.saveParentChilds(response);
 
             //Bind values for input builder
-            this.$broadcast('onSubmit', this.buildEventData(clonedRow, response.data));
+            eventHub.$emit('onSubmit', this.buildEventData(clonedRow, response.data));
 
             //Send notification about new row
             eventHub.$emit('onCreate', this.buildEventData(clonedRow, response.data));
@@ -540,10 +540,10 @@
             var clonedRow = _.cloneDeep(response.data.row);
 
             //Bind values for input builder
-            this.$broadcast('onSubmit', this.buildEventData(clonedRow, response.data));
+            eventHub.$emit('onSubmit', this.buildEventData(clonedRow, response.data));
 
             //Send notification about updated row
-            this.$dispatch('proxy', 'onUpdate', this.buildEventData(clonedRow, response.data));
+            eventHub.$emit('onUpdate', this.buildEventData(clonedRow, response.data));
 
             for ( var key in response.data.row )
             {

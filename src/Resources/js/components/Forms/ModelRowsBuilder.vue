@@ -178,23 +178,11 @@
           this.loadRows();
         }
       });
-    },
 
-    destroyed() {
-      this.destroyTimeout();
-    },
-
-    events: {
-      reloadRows(table){
-        if ( this.model.slug != table )
-          return;
-
-        this.loadRows();
-      },
       /*
        * When row is updated, then change data into table for changed rows
        */
-      onUpdate(data){
+      eventHub.$on('onUpdate', data => {
         if ( data.table != this.model.slug )
           return;
 
@@ -212,6 +200,19 @@
 
         //Reset history on update row
         this.$parent.closeHistory();
+      })
+    },
+
+    destroyed() {
+      this.destroyTimeout();
+    },
+
+    events: {
+      reloadRows(table){
+        if ( this.model.slug != table )
+          return;
+
+        this.loadRows();
       },
     },
 
