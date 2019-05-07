@@ -37,7 +37,7 @@ trait DataCache
             return $this->get($key);
 
         //If is passed data callable function
-        if ( is_callable($data) && $call == true )
+        if ( is_callable($data) )
             $data = call_user_func($data);
 
         return $this->set($key, $data);
