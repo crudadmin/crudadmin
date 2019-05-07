@@ -88,7 +88,7 @@
               :langid="selected_language_id ? selected_language_id : langid"
               :selectedlangid.sync="selected_language_id"
               :canaddrow="canAddRow"
-              :hasparentmodel="hasparentmodel"
+              :hasparentmodel="hasparentmodelMutated"
               :gettext_editor.sync="gettext_editor"
               :row.sync="row"
             ></form-builder>
@@ -118,7 +118,7 @@
           v-if="(isOpenedRow || getModel(child).without_parent == true) && getModel(child).in_tab !== true"
           v-for="child in model.childs"
           :key="getModel(child).slug"
-          :hasparentmodel="hasparentmodel"
+          :hasparentmodel="hasparentmodelMutated"
           :langid="langid"
           :ischild="true"
           :model="getModel(child)"
@@ -220,10 +220,6 @@
       //For file paths
       this.root = this.$root.$http.$options.root;
 
-      //If model builder model parent
-      if ( [null, undefined].indexOf(this.hasparentmodel) > -1 )
-        this.hasparentmodel = true;
-
       //Set deep level of models
       this.setDeepLevel();
     },
@@ -292,6 +288,7 @@
        */
       layouts(layouts){
         var Vue = this;
+
         for ( var key in layouts )
         {
           var layout = layouts[key];
@@ -489,10 +486,10 @@
         var row = this.$parent.row;
 
         //if is model loaded in field, and has parent row, then load model of that parent
-        if ( this.hasparentmodel && typeof this.hasparentmodel == 'object' && 'slug' in this.hasparentmodel )
-          return this.hasparentmodel.slug;
+        if ( this.hasparentmodelMutated && typeof this.hasparentmodelMutated == 'object' && 'slug' in this.hasparentmodelMutated )
+          return this.hasparentmodelMutated.slug;
 
-        if ( force !== true && ((!row || !( 'id' in row )) || this.hasparentmodel === false) )
+        if ( force !== true && ((!row || !( 'id' in row )) || this.hasparentmodelMutated === false) )
           return 0;
 
         return this.$parent.model.slug;
@@ -524,7 +521,6 @@
           return this.sizes[3].active = true;
       },
       checkActiveSize(columns){
-
         var data = this.getStorage(),
             defaultValue = this.$root.getModelProperty(this.model, 'settings.grid.default');
 
@@ -677,6 +673,13 @@
     },
 
     computed: {
+      hasparentmodelMutated(){
+          //If parent model builder does not exists
+          if ( [null, undefined].indexOf(this.hasparentmodel) > -1 )
+            return true;
+
+          return this.hasparentmodel;
+      },
       canBeInterval(){
         var column = this.search.column;
 
@@ -692,7 +695,7 @@
        * Return if acutal model can be added without parent row, and if parent row is not selected
        */
       isWithoutParentRow(){
-        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true && this.hasparentmodel == true;
+        return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true && this.hasparentmodelMutated == true;
       },
       getFilterId(){
         return 'js_filter' + this.getModelKey;

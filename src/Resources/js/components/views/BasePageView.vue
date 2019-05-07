@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Content Header (model header) -->
-    <section class="content-header">
+    <section class="content-header" v-if="model">
       <h1>
         {{ model.name }}
         <small v-html="model.title"></small>
@@ -9,7 +9,9 @@
       <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> {{ trans('admin') }}</a></li>
         <li v-if="getGroup">{{ getGroup.name }}</li>
-        <li class="active"><a class="active"><i v-bind:class="['fa', model.icon]"></i> {{ model.name }}</a></li>
+        <li class="active">
+          <a class="active"><i v-bind:class="['fa', model.icon]"></i> {{ model.name }}</a>
+        </li>
       </ol>
     </section>
 
@@ -29,7 +31,6 @@
       name : 'base-page-view',
 
       data : function(){
-        console.log(this.$root.models, this.$route.params.model);
         return {
 
         };
@@ -47,7 +48,9 @@
          * Return model from actual page
          */
         model(){
-          return ModelHelper(this.$root.models[this.$route.params.model]);
+          var model = this.$root.models[this.$route.params.model];
+
+          return model ? ModelHelper(model) : null;
         },
         getGroup(){
           if ( this.model.slug in this.$root.models )

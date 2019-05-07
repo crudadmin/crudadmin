@@ -4273,9 +4273,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
   },
   created: function created() {
     //For file paths
-    this.root = this.$root.$http.$options.root; //If model builder model parent
-
-    if ([null, undefined].indexOf(this.hasparentmodel) > -1) this.hasparentmodel = true; //Set deep level of models
+    this.root = this.$root.$http.$options.root; //Set deep level of models
 
     this.setDeepLevel();
   },
@@ -4498,8 +4496,8 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     getParentTableName: function getParentTableName(force) {
       var row = this.$parent.row; //if is model loaded in field, and has parent row, then load model of that parent
 
-      if (this.hasparentmodel && _typeof(this.hasparentmodel) == 'object' && 'slug' in this.hasparentmodel) return this.hasparentmodel.slug;
-      if (force !== true && (!row || !('id' in row) || this.hasparentmodel === false)) return 0;
+      if (this.hasparentmodelMutated && _typeof(this.hasparentmodelMutated) == 'object' && 'slug' in this.hasparentmodelMutated) return this.hasparentmodelMutated.slug;
+      if (force !== true && (!row || !('id' in row) || this.hasparentmodelMutated === false)) return 0;
       return this.$parent.model.slug;
     },
 
@@ -4651,6 +4649,11 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
     }
   },
   computed: {
+    hasparentmodelMutated: function hasparentmodelMutated() {
+      //If parent model builder does not exists
+      if ([null, undefined].indexOf(this.hasparentmodel) > -1) return true;
+      return this.hasparentmodel;
+    },
     canBeInterval: function canBeInterval() {
       var column = this.search.column;
       if (['created_at', 'id'].indexOf(column) > -1) return true;
@@ -4664,7 +4667,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
      * Return if acutal model can be added without parent row, and if parent row is not selected
      */
     isWithoutParentRow: function isWithoutParentRow() {
-      return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true && this.hasparentmodel == true;
+      return this.model.without_parent == true && this.parentrow && this.$parent.isOpenedRow !== true && this.hasparentmodelMutated == true;
     },
     getFilterId: function getFilterId() {
       return 'js_filter' + this.getModelKey;
@@ -4902,7 +4905,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
       //Receive value from tablerows component
       checked: [],
       default_columns: [],
-      enabled_columns: null,
+      enabled_columns: {},
       button_loading: false
     };
   },
@@ -6931,12 +6934,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'base-page-view',
   data: function data() {
-    console.log(this.$root.models, this.$route.params.model);
     return {};
   },
   props: ['langid'],
@@ -6948,7 +6952,8 @@ __webpack_require__.r(__webpack_exports__);
      * Return model from actual page
      */
     model: function model() {
-      return Object(_Model_ModelHelper_js__WEBPACK_IMPORTED_MODULE_1__["default"])(this.$root.models[this.$route.params.model]);
+      var model = this.$root.models[this.$route.params.model];
+      return model ? Object(_Model_ModelHelper_js__WEBPACK_IMPORTED_MODULE_1__["default"])(model) : null;
     },
     getGroup: function getGroup() {
       if (this.model.slug in this.$root.models) return false;
@@ -56249,7 +56254,7 @@ var render = function() {
       _c(
         "ul",
         { staticClass: "nav nav-tabs" },
-        _vm._l(_vm.getTabs, function(tab) {
+        _vm._l(_vm.getTabs, function(tab, $index) {
           return (_vm.isTab(tab) && !tab.model) || _vm.isModel(tab)
             ? _c(
                 "li",
@@ -56263,7 +56268,7 @@ var render = function() {
                     }
                   ],
                   class: {
-                    active: _vm.activetab == _vm.$index,
+                    active: _vm.activetab == $index,
                     "model-tab": _vm.isModel(tab)
                   },
                   attrs: {
@@ -56274,7 +56279,7 @@ var render = function() {
                   },
                   on: {
                     click: function($event) {
-                      _vm.activetab = _vm.$index
+                      _vm.activetab = $index
                     }
                   }
                 },
@@ -56306,12 +56311,12 @@ var render = function() {
       _c(
         "div",
         { staticClass: "tab-content" },
-        _vm._l(_vm.getTabs, function(tab) {
+        _vm._l(_vm.getTabs, function(tab, $index) {
           return _c(
             "div",
             {
               staticClass: "tab-pane",
-              class: { active: _vm.activetab == _vm.$index },
+              class: { active: _vm.activetab == $index },
               attrs: {
                 "tab-model": _vm.isModel(tab)
                   ? _vm.getModel(tab.model).slug
@@ -56353,7 +56358,7 @@ var render = function() {
                                   model: _vm.getModel(tab.model),
                                   activetab: _vm.isLoadedModel(
                                     _vm.getModel(tab.model),
-                                    _vm.activetab == _vm.$index
+                                    _vm.activetab == $index
                                   ),
                                   parentrow: _vm.row
                                 }
@@ -56364,10 +56369,10 @@ var render = function() {
                       )
                     : _vm._e(),
                   _vm._v(" "),
-                  _vm._l(_vm.chunkGroups(tab.fields), function(item) {
+                  _vm._l(_vm.chunkGroups(tab.fields), function(item, $index) {
                     return _vm.isGroup(item) && !_vm.isTab(item)
                       ? _c("form-group", {
-                          key: item,
+                          key: $index,
                           attrs: {
                             group: item,
                             model: _vm.model,
@@ -57057,7 +57062,7 @@ var render = function() {
                                 : _vm.langid,
                               selectedlangid: _vm.selected_language_id,
                               canaddrow: _vm.canAddRow,
-                              hasparentmodel: _vm.hasparentmodel,
+                              hasparentmodel: _vm.hasparentmodelMutated,
                               gettext_editor: _vm.gettext_editor,
                               row: _vm.row
                             },
@@ -57145,7 +57150,7 @@ var render = function() {
                   ? _c("model-builder", {
                       key: _vm.getModel(child).slug,
                       attrs: {
-                        hasparentmodel: _vm.hasparentmodel,
+                        hasparentmodel: _vm.hasparentmodelMutated,
                         langid: _vm.langid,
                         ischild: true,
                         model: _vm.getModel(child),
@@ -57379,7 +57384,7 @@ var render = function() {
                       on: {
                         click: function($event) {
                           $event.preventDefault()
-                          _vm.enabled_columns = null
+                          _vm.enabled_columns = {}
                         }
                       }
                     },
@@ -57515,7 +57520,7 @@ var render = function() {
               rows: _vm.rows,
               rowsdata: _vm.rowsData,
               enabledcolumns: _vm.enabled_columns,
-              item: _vm.$row,
+              item: _vm.row,
               button_loading: _vm.button_loading,
               checked: _vm.checked,
               dragging: _vm.dragging,
@@ -58926,30 +58931,34 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("section", { staticClass: "content-header" }, [
-      _c("h1", [
-        _vm._v("\n      " + _vm._s(_vm.model.name) + "\n      "),
-        _c("small", { domProps: { innerHTML: _vm._s(_vm.model.title) } })
-      ]),
-      _vm._v(" "),
-      _c("ol", { staticClass: "breadcrumb" }, [
-        _c("li", [
-          _c("a", { attrs: { href: "#" } }, [
-            _c("i", { staticClass: "fa fa-dashboard" }),
-            _vm._v(" " + _vm._s(_vm.trans("admin")))
-          ])
-        ]),
-        _vm._v(" "),
-        _vm.getGroup ? _c("li", [_vm._v(_vm._s(_vm.getGroup.name))]) : _vm._e(),
-        _vm._v(" "),
-        _c("li", { staticClass: "active" }, [
-          _c("a", { staticClass: "active" }, [
-            _c("i", { class: ["fa", _vm.model.icon] }),
-            _vm._v(" " + _vm._s(_vm.model.name))
+    _vm.model
+      ? _c("section", { staticClass: "content-header" }, [
+          _c("h1", [
+            _vm._v("\n      " + _vm._s(_vm.model.name) + "\n      "),
+            _c("small", { domProps: { innerHTML: _vm._s(_vm.model.title) } })
+          ]),
+          _vm._v(" "),
+          _c("ol", { staticClass: "breadcrumb" }, [
+            _c("li", [
+              _c("a", { attrs: { href: "#" } }, [
+                _c("i", { staticClass: "fa fa-dashboard" }),
+                _vm._v(" " + _vm._s(_vm.trans("admin")))
+              ])
+            ]),
+            _vm._v(" "),
+            _vm.getGroup
+              ? _c("li", [_vm._v(_vm._s(_vm.getGroup.name))])
+              : _vm._e(),
+            _vm._v(" "),
+            _c("li", { staticClass: "active" }, [
+              _c("a", { staticClass: "active" }, [
+                _c("i", { class: ["fa", _vm.model.icon] }),
+                _vm._v(" " + _vm._s(_vm.model.name))
+              ])
+            ])
           ])
         ])
-      ])
-    ]),
+      : _vm._e(),
     _vm._v(" "),
     _vm.model
       ? _c(

@@ -19,7 +19,7 @@
             <label><input type="checkbox" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
           </li>
           <li role="separator" class="divider"></li>
-          <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
+          <li><a href="#" @click.prevent="enabled_columns = {}">{{ trans('default') }}</a></li>
         </ul>
       </div>
 
@@ -57,7 +57,7 @@
         :rows="rows"
         :rowsdata.sync="rowsData"
         :enabledcolumns.sync="enabled_columns"
-        :item="$row"
+        :item="row"
         :button_loading="button_loading"
         :checked.sync="checked"
         :dragging.sync="dragging"
@@ -125,7 +125,7 @@
         //Receive value from tablerows component
         checked : [],
         default_columns : [],
-        enabled_columns : null,
+        enabled_columns : {},
         button_loading : false,
       };
     },
