@@ -5,6 +5,7 @@
 <script>
     import axios from 'axios';
     import config from '../config';
+    import RequestHelper from './Helpers/RequestHelper';
 
     import Sidebar from './Sidebar/Sidebar.vue';
     import License from './Partials/License.vue';
@@ -15,15 +16,6 @@
         init(router){
 
             var layout = {};
-
-            //Replace requests paths
-            var replace = ['model', 'parent', 'id', 'subid', 'limit', 'page', 'langid', 'count'];
-
-            for (var key in layout.requests)
-            {
-                for ( var i = 0; i < replace.length; i++ )
-                    layout.requests[key] = layout.requests[key].replace(':'+replace[i], '{'+replace[i]+'}');
-            }
 
             return {
                 el: '#app',
@@ -36,7 +28,7 @@
                         locale : null,
                         dashboard : null,
                         license_key : null,
-                        requests: null,
+                        requests: {},
                         user : null,
                         tree: [],
                         models: [],
@@ -119,7 +111,7 @@
                             this.locale = layout.locale;
                             this.dashboard = layout.dashboard;
                             this.license_key = layout.license_key;
-                            this.requests = layout.requests;
+                            this.requests = RequestHelper(layout.requests);
                             this.user = layout.user;
                             this.tree = layout.models;
                             this.models = this.flattenModelsWithChilds(layout.models);

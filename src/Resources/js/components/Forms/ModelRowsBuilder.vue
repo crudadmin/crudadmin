@@ -447,7 +447,7 @@
           this.$root.openAlert(this.trans('warning'), 'Nastala nečakana chyba, skúste neskôr prosím.<br><br>Príčinu zlyhania požiadavky môžete zistiť na tejto adrese:<br> <a target="_blank" href="'+url+'">'+url+'</a>', 'error');
         }
 
-        this.$http.get(this.$root.requests.rows, query).then(function(response){
+        this.$http.get(this.$root.requests.get('rows', query)).then(function(response){
           //If has been component destroyed, and request is delivered... and some conditions
           if ( this.dragging === true || this.progress === true || !this.$root ){
             return;
