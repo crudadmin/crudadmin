@@ -10,7 +10,7 @@ class FieldsType extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-03 11:10:04';
+    protected $migration_date = '2019-05-03 12:02:04';
 
     /*
      * Template name
@@ -27,19 +27,19 @@ class FieldsType extends AdminModel
     public function fields()
     {
         return [
-            'string' => 'name:string|type:string',
-            'text' => 'name:text|type:text',
-            'editor' => 'name:editor|type:editor',
-            'select' => 'name:select|type:select',
-            'integer' => 'name:integer|type:integer',
-            'decimal' => 'name:decimal|type:decimal',
-            'file' => 'name:file|type:file',
-            'password' => 'name:password|type:password',
-            'date' => 'name:date|type:date',
-            'datetime' => 'name:datetime|type:datetime',
-            'time' => 'name:time|type:time',
-            'checkbox' => 'name:checkbox|type:checkbox',
-            'radio' => 'name:radio|type:radio',
+            'string' => 'name:my string field|type:string',
+            'text' => 'name:my text field|type:text',
+            'editor' => 'name:my editor field|type:editor',
+            'select' => 'name:my select field|type:select',
+            'integer' => 'name:my integer field|type:integer',
+            'decimal' => 'name:my decimal field|type:decimal',
+            'file' => 'name:my file field|type:file',
+            'password' => 'name:my password field|type:password',
+            'date' => 'name:my date field|type:date',
+            'datetime' => 'name:my datetime field|type:datetime',
+            'time' => 'name:my time field|type:time',
+            'checkbox' => 'name:my checkbox field|type:checkbox',
+            'radio' => 'name:my radio field|type:radio',
         ];
     }
 

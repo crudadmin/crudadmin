@@ -19,7 +19,7 @@ class ModelBootloaderTest extends TestCase
     /** @test */
     public function only_user_model_is_available()
     {
-        $this->assertArraySubset(Admin::boot(), [
+        $this->assertEquals(Admin::boot(), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User'
         ]);
     }
@@ -31,10 +31,12 @@ class ModelBootloaderTest extends TestCase
             'Gogol\Admin\Tests\App\Models' => $this->getAppPath('Models')
         ]);
 
-        $this->assertArraySubset(Admin::boot(true), [
+        $this->assertEquals(Admin::boot(true), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
-            '2019-05-03 11:10:04' => 'Gogol\Admin\Tests\App\Models\FieldsType',
-            '2019-05-03 12:10:04' => 'Gogol\Admin\Tests\App\Models\Articles\Article',
+            '2019-05-03 12:02:04' => 'Gogol\Admin\Tests\App\Models\FieldsType',
+            '2019-05-03 11:11:02' => 'Gogol\Admin\Tests\App\Models\FieldsLevel',
+            '2019-05-04 12:11:02' => 'Gogol\Admin\Tests\App\Models\FieldsMutator',
+            '2019-05-04 12:10:04' => 'Gogol\Admin\Tests\App\Models\Articles\Article',
         ]);
     }
 
@@ -44,7 +46,7 @@ class ModelBootloaderTest extends TestCase
         //Register dynamically admin model
         Admin::registerAdminModels($this->getAppPath('OtherModels'), 'Gogol\Admin\Tests\App\OtherModels');
 
-        $this->assertArraySubset(Admin::getAdminModelNamespaces(), [
+        $this->assertEquals(Admin::getAdminModelNamespaces(), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
             '2019-05-03 13:10:04' => 'Gogol\Admin\Tests\App\OtherModels\Blog',
             '2019-05-03 14:11:02' => 'Gogol\Admin\Tests\App\OtherModels\BlogsImage'

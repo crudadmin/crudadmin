@@ -10,7 +10,7 @@ class Article extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-03 12:10:04';
+    protected $migration_date = '2019-05-04 12:10:04';
 
     /*
      * Template name
@@ -27,7 +27,7 @@ class Article extends AdminModel
     public function fields()
     {
         return [
-            'name' => 'name:string|type:string',
+            'field1' => 'name:field 1|type:string',
         ];
     }
 }
