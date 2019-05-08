@@ -1,4 +1,6 @@
 /vendor
+/tests/Browser/console
+/tests/Browser/screenshots
 /node_modules
 config.js
 mix-manifest.json

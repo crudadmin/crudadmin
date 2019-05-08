@@ -9,6 +9,9 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
+        <testsuite name="Browser Tests">
+            <directory suffix="Test.php">./tests/Browser</directory>
+        </testsuite>
         <testsuite name="Feature Tests">
             <directory suffix="Test.php">./tests/Feature</directory>
             <directory suffix="Test.php">./tests/Unit</directory>
@@ -20,7 +23,8 @@
         </whitelist>
     </filter>
     <php>
-        <env name="DB_CONNECTION" value="testing"/>
+        <env name="APP_URL" value="127.0.0.1:8000"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
         <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
     </php>
 </phpunit>
