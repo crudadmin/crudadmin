@@ -8,7 +8,7 @@ use Ajax;
 use Admin;
 use Localization;
 use App\Http\Requests;
-use App\Http\Controllers\Controller as BaseController;
+use Gogol\Admin\Controllers\Controller as BaseController;
 use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Helpers\AdminRows;
 use DB;

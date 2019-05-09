@@ -25,12 +25,10 @@ trait AdminTrait
     }
 
     /**
-     * Define environment setup.
-     *
+     * Setup default admin environment
      * @param  \IllumcreateApplicationinate\Foundation\Application  $app
-     * @return void
      */
-    protected function getEnvironmentSetUp($app)
+    protected function setAdminEnvironmentSetUp($app)
     {
         //Bind app path
         $app['path'] = __DIR__.'/Stubs/app';
@@ -49,11 +47,17 @@ trait AdminTrait
         //Reset sqlite database files
         if ( !file_exists($db_file = database_path('database.sqlite')) )
             @file_put_contents($db_file, '');
+    }
 
-        //Boot http request before laravel app starts
-        //because of bug of missing url path in request()->url()
-        if ( isset($this->boot_request) && $this->boot_request === true && ! app()->runningInConsole() )
-            $app->handle(\Illuminate\Http\Request::capture());
+    /**
+     * Define environment setup.
+     *
+     * @param  \IllumcreateApplicationinate\Foundation\Application  $app
+     * @return void
+     */
+    protected function getEnvironmentSetUp($app)
+    {
+        $this->setAdminEnvironmentSetUp($app);
     }
 
     /*
@@ -80,5 +84,15 @@ trait AdminTrait
         //Remove all published resources
         foreach ($this->getAdminResources() as $path)
             $this->deleteFileOrDirectory($path);
+    }
+
+    /*
+     * Register all admin models paths
+     */
+    public function registerAllAdminModels()
+    {
+        config()->set('admin.models', [
+            'Gogol\Admin\Tests\App\Models' => $this->getAppPath('Models')
+        ]);
     }
 }

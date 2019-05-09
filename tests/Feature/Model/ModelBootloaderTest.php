@@ -27,9 +27,7 @@ class ModelBootloaderTest extends TestCase
     /** @test */
     public function models_from_config_directory_are_available()
     {
-        config()->set('admin.models', [
-            'Gogol\Admin\Tests\App\Models' => $this->getAppPath('Models')
-        ]);
+        $this->registerAllAdminModels();
 
         $this->assertEquals(Admin::boot(true), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
