@@ -11,6 +11,14 @@ if ( ! function_exists('admin_asset') )
     }
 }
 
+if ( ! function_exists('admin_action') )
+{
+    function admin_action($controller, $params = null)
+    {
+        return action('\Gogol\Admin\Controllers\\'.$controller, $params);
+    }
+}
+
 if ( ! function_exists('isActiveController') )
 {
     function isActiveController($controller, $text = null)

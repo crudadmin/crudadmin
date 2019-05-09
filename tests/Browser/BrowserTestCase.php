@@ -14,13 +14,6 @@ class BrowserTestCase extends TestCase
      * Boot request kernel
      */
     protected $boot_request = true;
-
-    public function __construct()
-    {
-        static::useChromedriver(__DIR__.'/drivers/chromedriver75');
-
-        parent::__construct();
-    }
 }
 
 ?>

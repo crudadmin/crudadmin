@@ -23,8 +23,12 @@ class MenuTest extends BrowserTestCase
     {
         $user = new User;
         $this->browse(function (Browser $browser) use ($user) {
-            $browser->visit(action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm'))
-                    ->assertSee('My Admin');
+            $browser->visit(admin_action('Auth\LoginController@showLoginForm'))
+                    ->assertSee('My Admin')
+                    ->type('email', $this->credentials['email'])
+                    ->type('password', $this->credentials['password'])
+                    ->press(trans('admin::admin.login'))
+                    ->assertUrlIs(admin_action('DashboardController@index'))
         });
     }
 }
