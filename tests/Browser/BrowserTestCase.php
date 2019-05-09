@@ -10,6 +10,11 @@ class BrowserTestCase extends TestCase
 {
     use AdminTrait;
 
+    /*
+     * Boot request kernel
+     */
+    protected $boot_request = true;
+
     public function __construct()
     {
         static::useChromedriver(__DIR__.'/drivers/chromedriver75');

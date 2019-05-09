@@ -43,6 +43,15 @@ trait AdminTrait
 
         // Setup default database to use sqlite :memory:
         $app['config']->set('admin.app_namespace', 'Gogol\Admin\Tests\App');
+
+        //Reset sqlite database files
+        if ( !file_exists($db_file = database_path('database.sqlite')) )
+            @file_put_contents($db_file, '');
+
+        //Boot http request before laravel app starts
+        //because of bug of missing url path in request()->url()
+        if ( isset($this->boot_request) && $this->boot_request === true )
+            $app->handle(\Illuminate\Http\Request::capture());
     }
 
     /*
