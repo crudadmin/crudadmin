@@ -190,6 +190,10 @@ abstract class Request extends FormRequest
                             $date->{$arr[0]}($arr[1]);
                     }
 
+                    //Set time as string
+                    if ( $this->model->isFieldType($key, 'time') )
+                        $date = $date->format('H:i:s');
+
                     $this->merge( [ $key => $date ] );
                 }
             }

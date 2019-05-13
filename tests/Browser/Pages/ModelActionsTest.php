@@ -11,13 +11,13 @@ use Gogol\Admin\Tests\Traits\DropDatabase;
 use Gogol\Admin\Tests\Traits\DropUploads;
 use Illuminate\Foundation\Auth\User;
 
-class ModelFieldsTest extends BrowserTestCase
+class ModelActionsTest extends BrowserTestCase
 {
     use DropDatabase;
     use DropUploads;
 
     /** @test */
-    public function test_fields_interactivity()
+    public function test_create_new_row()
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->loginAs(User::first())
@@ -32,11 +32,36 @@ class ModelFieldsTest extends BrowserTestCase
                     ->assertSeeSuccess(trans('admin::admin.success-created'));
         });
 
-        $this->assertRowExists(FieldsType::class, [
-            'date' => Carbon::createFromFormat('d.m.Y', $this->getFormData('date'))->format('Y-m-d'),
-            'datetime' => Carbon::createFromFormat('d.m.Y H:i', $this->getFormData('datetime'))->format('Y-m-d H:i:s'),
-            'time' => $this->getFormData('time'),
-        ] + $this->getFormData());
+        $this->assertRowExists(FieldsType::class, $this->getFormData());
+    }
+
+    /** @test */
+    public function test_update_old_row()
+    {
+        $row = $this->getFormData();
+
+        $this->browse(function (DuskBrowser $browser) use($row) {
+            $browser->loginAs(User::first())
+                    ->visit(admin_action('DashboardController@index'))
+                    ->assertSeeLink('Fields types')
+                    ->clickLink('Fields types')
+
+                    ->fillForm(FieldsType::class, $row)
+                    ->submitForm()
+                    ->assertSeeSuccess(trans('admin::admin.success-created'))
+                    // ->assertVue('row', [], '@model-builder') check if form has been resetted, need complete
+                    ->closeAlert()
+                    ->scrollToElement('body')
+                    ->openRow(1)
+                    ->assertHasFormValues(FieldsType::class, $row)
+                    ->fillForm(FieldsType::class, [
+                        'password' => $this->getFormData('password')
+                    ])
+                    ->saveForm()
+                    ->assertSeeSuccess(trans('admin::admin.success-save'));
+        });
+
+        $this->assertRowExists(FieldsType::class, $row);
     }
 
     public function getFormData($key = null)

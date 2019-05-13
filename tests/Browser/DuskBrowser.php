@@ -72,7 +72,7 @@ class DuskBrowser extends Browser
     }
 
     /**
-     * Submit form
+     * Submit new instance of form
      */
     public function submitForm()
     {
@@ -80,14 +80,61 @@ class DuskBrowser extends Browser
     }
 
     /**
+     * Submit existing instance of row
+     */
+    public function saveForm()
+    {
+        return $this->press(trans('admin::admin.save'));
+    }
+
+    /**
      * Check if success message exists
      * @return string
      */
-    public function assertSeeSuccess($message)
+    public function assertSeeSuccess($message, $seconds = null)
     {
-        $this->waitForText(trans('admin::admin.success-created'))
-             ->assertSee(trans('admin::admin.success-created'));
+        $this->waitForText($message ?: trans('admin::admin.success-created'), $seconds)
+             ->assertSee($message ?: trans('admin::admin.success-created'));
 
          return $this;
+    }
+
+    /**
+     * Close admin message alert
+     * @return string
+     */
+    public function closeAlert()
+    {
+        $this->press(trans('admin::admin.close'));
+
+        return $this;
+    }
+
+    /**
+     * Scroll to element
+     * @param  string $element
+     * @return object
+     */
+    public function scrollToElement($element = null)
+    {
+        $this->script('$("html, body").animate({ scrollTop: $("'.($element?:'body').'").offset().top }, 0);');
+
+        return $this;
+    }
+
+    /**
+     * Open admin row
+     * @param  [type] $element
+     * @return [type]
+     */
+    public function openRow($id = null)
+    {
+        //Open row
+        $this->click($selector = '.buttons-options button[data-button="edit"][data-id="'.$id.'"]');
+
+        //Wait till row will be opened
+        $this->waitFor($selector.'.btn-success');
+
+        return $this;
     }
 }

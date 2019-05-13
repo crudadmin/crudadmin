@@ -2,6 +2,7 @@
 
 namespace Gogol\Admin\Tests\Browser;
 
+use Carbon\Carbon;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\AdminTrait;
 use Orchestra\Testbench\Dusk\TestCase;
@@ -56,8 +57,20 @@ class BrowserTestCase extends TestCase
         foreach ($data as $key => $value)
         {
             //Update checkbox values
-            if ( $model->isFieldType($key, ['checkbox']) )
+            if ( $model->isFieldType($key, 'checkbox') )
                 $data[$key] = $value == true ? 1 : 0;
+
+            //Update filled date format into date format from db
+            if ( $model->isFieldType($key, 'date') )
+                $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('Y-m-d') : null;
+
+            //Update filled datetime format into date format from db
+            if ( $model->isFieldType($key, 'datetime') )
+                $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('Y-m-d H:i:s') : null;
+
+            //Update filled time format into date format from db
+            if ( $model->isFieldType($key, 'time') )
+                $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('H:i:s') : null;
         }
 
         $this->assertDatabaseHas($model->getTable(), $data);
