@@ -2,24 +2,13 @@
 
 namespace Gogol\Admin\Tests;
 
-use Gogol\Admin\Tests\AdminTrait;
+use Gogol\Admin\Tests\Traits\AdminTrait;
 use Illuminate\Support\Facades\File;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 class TestCase extends BaseTestCase
 {
     use AdminTrait;
-
-    /*
-     * Delete file, or whole directory
-     */
-    protected function deleteFileOrDirectory($path)
-    {
-        if ( is_dir($path) )
-            File::deleteDirectory($path);
-        else
-            @unlink($path);
-    }
 
     /*
      * All published admin resources

@@ -3,7 +3,7 @@
 namespace Gogol\Admin\Tests\Browser\Pages;
 
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Laravel\Dusk\Browser;
+use Gogol\Admin\Tests\DuskBrowser as Browser;
 
 class LoginTest extends BrowserTestCase
 {

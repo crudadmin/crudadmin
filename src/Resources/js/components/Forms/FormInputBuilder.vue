@@ -36,7 +36,7 @@
       <!-- TEXT INPUT -->
       <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
         <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-        <textarea :id="getId" @change="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName">{{ getValueOrDefault }}</textarea>
+        <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName">{{ getValueOrDefault }}</textarea>
         <small>{{ field.title }}</small>
       </div>
 
@@ -80,15 +80,15 @@
       <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
         <label :for="getId">{{ getName }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
         <div :class="{ 'can-add-select' : canAddRow }">
-          <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? key : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
+          <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? field_key : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
             <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
             <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
-            <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || ((!value || value === 0) && !this.isOpenedRow && data[0] == defaultFieldValue)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+            <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || ((!value || value === 0) && !isOpenedRow && data[0] == defaultFieldValue)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
           </select>
           <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
         </div>
         <small>{{ field.title }}</small>
-        <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+key" value="1">
+        <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+field_key" value="1">
 
         <!-- Modal for adding relation -->
         <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
@@ -138,7 +138,7 @@
       :field="field"
       :history_changed="isChangedFromHistory"
       :row="row"
-      :key="key"
+      :key="field_key"
       :is="componentName">
     </component>
   </div>

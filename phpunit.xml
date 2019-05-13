@@ -24,7 +24,7 @@
     </filter>
     <php>
         <env name="APP_URL" value="127.0.0.1:8000"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_CONNECTION" value="mysql"/>
         <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
     </php>
 </phpunit>

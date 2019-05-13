@@ -612,7 +612,7 @@ class AdminMigrationCommand extends Command
                 }
             }
 
-            $column = $table->datetime($key)->nullable();
+            $column = $table->{$model->getFieldType($key)}($key)->nullable();
 
             return $column;
         }

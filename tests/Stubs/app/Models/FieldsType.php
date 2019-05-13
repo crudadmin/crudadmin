@@ -15,7 +15,7 @@ class FieldsType extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Field types';
+    protected $name = 'Fields types';
 
     /*
      * Automatic form and database generation
@@ -27,19 +27,19 @@ class FieldsType extends AdminModel
     public function fields()
     {
         return [
-            'string' => 'name:my string field|type:string',
-            'text' => 'name:my text field|type:text',
-            'editor' => 'name:my editor field|type:editor',
-            'select' => 'name:my select field|type:select',
-            'integer' => 'name:my integer field|type:integer',
-            'decimal' => 'name:my decimal field|type:decimal',
-            'file' => 'name:my file field|type:file',
-            'password' => 'name:my password field|type:password',
-            'date' => 'name:my date field|type:date',
-            'datetime' => 'name:my datetime field|type:datetime',
-            'time' => 'name:my time field|type:time',
-            'checkbox' => 'name:my checkbox field|type:checkbox',
-            'radio' => 'name:my radio field|type:radio',
+            'string' => 'name:my string field|type:string|required',
+            'text' => 'name:my text field|type:text|required',
+            'editor' => 'name:my editor field|type:editor|required',
+            'select' => 'name:my select field|type:select|options:option a,option b|required',
+            'integer' => 'name:my integer field|type:integer|required',
+            'decimal' => 'name:my decimal field|type:decimal|required',
+            'file' => 'name:my file field|type:file|required',
+            'password' => 'name:my password field|type:password|required',
+            'date' => 'name:my date field|type:date|required',
+            'datetime' => 'name:my datetime field|type:datetime|required',
+            'time' => 'name:my time field|type:time|required',
+            'checkbox' => 'name:my checkbox field|type:checkbox|required',
+            'radio' => 'name:my radio field|type:radio|options:c,d,b|required',
         ];
     }
 

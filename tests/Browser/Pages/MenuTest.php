@@ -9,7 +9,7 @@ use Laravel\Dusk\Browser;
 class MenuTest extends BrowserTestCase
 {
     /** @test */
-    public function can_authenticate_user()
+    public function is_menu_available()
     {
         $this->browse(function (Browser $browser) {
             $browser->loginAs(User::first())

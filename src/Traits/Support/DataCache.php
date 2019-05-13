@@ -14,7 +14,7 @@ trait DataCache
      */
     protected function getBufferKey()
     {
-        return $this->buffer_key ?: 'buffer';
+        return isset($this->buffer_key) ? $this->buffer_key : 'buffer';
     }
 
     /*
@@ -48,7 +48,7 @@ trait DataCache
      */
     public function set($key, $data)
     {
-        return $this->{$this->buffer_key}[$key] = $data;
+        return $this->{$this->getBufferKey()}[$key] = $data;
     }
 
     /*
@@ -57,7 +57,7 @@ trait DataCache
     public function get($key, $default = null)
     {
         if ( $this->has($key) )
-            return $this->{$this->buffer_key}[ $key ];
+            return $this->{$this->getBufferKey()}[ $key ];
         else
             return $default;
     }
@@ -67,7 +67,7 @@ trait DataCache
      */
     public function has($key)
     {
-        return array_key_exists($key, $this->{$this->buffer_key});
+        return array_key_exists($key, $this->{$this->getBufferKey()});
     }
 
     /*
@@ -75,9 +75,9 @@ trait DataCache
      */
     public function push($key, $data)
     {
-        if ( !array_key_exists($key, $this->{$this->buffer_key}) || !is_array($this->{$this->buffer_key}[$key]) )
-            $this->{$this->buffer_key}[$key] = [];
+        if ( !array_key_exists($key, $this->{$this->getBufferKey()}) || !is_array($this->{$this->getBufferKey()}[$key]) )
+            $this->{$this->getBufferKey()}[$key] = [];
 
-        return $this->{$this->buffer_key}[$key][] = $data;
+        return $this->{$this->getBufferKey()}[$key][] = $data;
     }
 }

@@ -85,22 +85,19 @@ trait HasAttributes
                 }
             }
 
-            /*
-             * Parse decimal format
-             */
-            if ( $field['type'] == 'decimal' && array_key_exists($key, $attributes) && $attributes[$key])
+            if ( array_key_exists($key, $attributes) )
             {
-                $attributes[$key] = number_format($attributes[$key], 2, '.', '');
-            }
+                /*
+                 * Casts decimal format
+                 */
+                if ( $field['type'] == 'decimal' && $attributes[$key])
+                    $attributes[$key] = number_format($attributes[$key], 2, '.', '');
 
-            /*
-             * Update to correct datetime format
-             */
-            if ( in_array($field['type'], ['date', 'datetime', 'time']) && array_key_exists($key, $attributes) && ! $this->hasFieldParam($key, 'multiple', true) )
-            {
-                $attributes[$key] = $attributes[$key]
-                                    ? (new Carbon($attributes[$key]))->format( $field['date_format'] )
-                                    : null;
+                /*
+                 * Casts date/datetime/time values
+                 */
+                if ( ! $this->hasFieldParam($key, 'multiple', true) )
+                    $this->castsAdminDatetimes($field, $key, $attributes);
             }
         }
 
@@ -111,6 +108,32 @@ trait HasAttributes
         }
 
         return $attributes;
+    }
+
+    /*
+     * Casts datetime/date/time values
+     */
+    private function castsAdminDatetimes($field, $key, &$attributes)
+    {
+        /*
+         * Update to correct datetime format
+         */
+        if ( in_array($field['type'], ['date', 'datetime']) )
+        {
+            $attributes[$key] = $attributes[$key]
+                                ? (new Carbon($attributes[$key]))->format( $field['date_format'] )
+                                : null;
+        }
+
+        /*
+         * Update to correct time format
+         */
+        if ( $field['type'] == 'time' )
+        {
+            $attributes[$key] = $attributes[$key]
+                                ? (Carbon::createFromFormat('H:i:s', $attributes[$key]))->format( $field['date_format'] )
+                                : null;
+        }
     }
 
     /*

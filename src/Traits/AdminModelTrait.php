@@ -96,6 +96,10 @@ trait AdminModelTrait
                 return null;
             }
 
+            //Casts time value
+            else if ( $field['type'] == 'time' )
+                return ($value = parent::__get($key)) ? Carbon::createFromFormat('H:i:s', $value) : null;
+
             //If field has not relationship, then return field value... This condition is here for better framework performance
             else if ( !array_key_exists('belongsTo', $field) && !array_key_exists('belongsToMany', $field) || substr($key, -3) == '_id' ){
 
@@ -111,7 +115,7 @@ trait AdminModelTrait
             }
         }
 
-        // //Register this offen called properties for better performance
+        // Register this offen called properties for better performance
         else if ( in_array($key, ['id', 'slug', 'created_at', 'published_at', 'deleted_at', 'pivot']) ) {
             if ( $key != 'slug' || $this->sluggable == true && $key == 'slug' )
                 return parent::__get($key);
@@ -132,7 +136,7 @@ trait AdminModelTrait
             $force_check_relation = true;
         }
 
-        // //Checks for relationship
+        // Checks for relationship
         if ($force_check_relation === true || !property_exists($this, $key) && !method_exists($this, $key) && !array_key_exists($key, $this->attributes) && !$this->hasGetMutator($key) )
         {
             //If relations has been in buffer, but returns nullable value
@@ -275,7 +279,7 @@ trait AdminModelTrait
     {
         foreach ($this->getFields() as $key => $field)
         {
-            if ( $this->isFieldType($key, ['date', 'datetime', 'time']) && ! $this->hasFieldParam($key, 'multiple', true) )
+            if ( $this->isFieldType($key, ['date', 'datetime']) && ! $this->hasFieldParam($key, 'multiple', true) )
                 $this->dates[] = $key;
         }
 
@@ -310,7 +314,10 @@ trait AdminModelTrait
             else if ( $this->isFieldType($key, 'decimal') )
                 $this->casts[$key] = 'float';
 
-            else if ( $this->isFieldType($key, ['date', 'datetime', 'time']) )
+            else if ( $this->isFieldType($key, ['date']) )
+                $this->casts[$key] = 'date';
+
+            else if ( $this->isFieldType($key, ['datetime']) )
                 $this->casts[$key] = 'datetime';
         }
 
