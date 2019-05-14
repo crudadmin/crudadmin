@@ -4,6 +4,7 @@ namespace Gogol\Admin\Tests\Browser;
 
 use Gogol\Admin\Tests\Traits\AdminTrait;
 use Laravel\Dusk\Browser;
+use PHPUnit\Framework\Assert as PHPUnit;
 
 class DuskBrowser extends Browser
 {
@@ -67,6 +68,24 @@ class DuskBrowser extends Browser
             $this->assertVue('row.'.$key, $value, '@model-builder');
             $this->assertVue('model.fields.'.$key.'.value', $value, '@model-builder');
         }
+
+        return $this;
+    }
+
+    /**
+     * Check if element has class
+     * @param  class $element
+     * @param  array  $class
+     * @return object
+     */
+    public function assertHasClass($element, $class)
+    {
+        $classes = explode(' ', $this->attribute($element, 'class'));
+
+        PHPUnit::assertContains(
+            $class, $classes,
+            'Class ['.$class.'] does not exists in element ['.$element.']'
+        );
 
         return $this;
     }

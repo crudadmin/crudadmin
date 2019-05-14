@@ -19,4 +19,17 @@ class MenuTest extends BrowserTestCase
                     ->assertSeeLink('Administrátori');
         });
     }
+
+    /** @test */
+    public function menu_item_is_active()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(User::first())
+                    ->visit(admin_action('DashboardController@index'))
+                    ->clickLink('Nastavenia')
+                    ->pause(1000)
+                    ->clickLink('Administrátori', 'li a')
+                    ->assertHasClass('li[data-slug="users"]', 'active');
+        });
+    }
 }
