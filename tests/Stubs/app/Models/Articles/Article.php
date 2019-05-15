@@ -2,8 +2,9 @@
 
 namespace Gogol\Admin\Tests\App\Models\Articles;
 
-use Gogol\Admin\Models\Model as AdminModel;
 use Gogol\Admin\Fields\Group;
+use Gogol\Admin\Models\Model as AdminModel;
+use Gogol\Admin\Tests\App\User;
 
 class Article extends AdminModel
 {
@@ -15,7 +16,7 @@ class Article extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Articles';
+    protected $name = 'Články';
 
     /*
      * Automatic form and database generation
@@ -27,7 +28,12 @@ class Article extends AdminModel
     public function fields()
     {
         return [
-            'field1' => 'name:field 1|type:string',
+            'name' => 'name:Názov článku|type:string',
+            'Parametre' => Group::tab([
+                'updated_at' => 'name:Dátum upravenia|type:date',
+                'created_at' => 'name:Dátum vytvorenia|type:date',
+            ]),
+            'Autori článku' => Group::tab(User::class)
         ];
     }
 }
