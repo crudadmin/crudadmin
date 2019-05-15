@@ -2,7 +2,7 @@
 
 namespace Gogol\Admin\Tests\Feature\Model;
 
-use Gogol\Admin\Tests\App\Models\FieldsLevel;
+use Gogol\Admin\Tests\App\Models\FieldsGroup;
 use Gogol\Admin\Tests\App\Models\FieldsMutator;
 use Gogol\Admin\Tests\App\Models\FieldsType;
 use Gogol\Admin\Tests\TestCase;
@@ -23,7 +23,7 @@ class ModelFieldsAvaiabilityTest extends TestCase
     /** @test */
     public function recursive_groups_and_tabs_fields_avaiability()
     {
-        $fields = (new FieldsLevel)->getFields();
+        $fields = (new FieldsGroup)->getFields();
 
         $this->assertEquals(array_keys($fields), [
             'field1', 'field2', 'field3', 'field4', 'field5', 'field6', 'field7', 'field8', 'field9', 'field10',

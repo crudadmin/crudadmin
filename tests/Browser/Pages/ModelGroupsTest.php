@@ -21,8 +21,8 @@ class ModelGroupsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) {
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields level')
-                    ->clickLink('Fields level')
+                    ->assertSeeLink('Fields groups & tabs')
+                    ->clickLink('Fields groups & tabs')
 
                     //Check if base level field is available
                     ->assertPresent('input[name="field1"]')
@@ -127,8 +127,8 @@ class ModelGroupsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) {
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields level')
-                    ->clickLink('Fields level')
+                    ->assertSeeLink('Fields groups & tabs')
+                    ->clickLink('Fields groups & tabs')
                     ->submitForm()
                     ->waitForText(trans('validation.required'), 2)
                     ->assertHasAttribute('li:contains("my tab 1")', 'has-error')
@@ -144,8 +144,8 @@ class ModelGroupsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) {
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields level')
-                    ->clickLink('Fields level')
+                    ->assertSeeLink('Fields groups & tabs')
+                    ->clickLink('Fields groups & tabs')
                     ->submitForm()
                     ->waitForText(trans('validation.required'), 2)
 
@@ -185,8 +185,8 @@ class ModelGroupsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) {
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields level')
-                    ->clickLink('Fields level')
+                    ->assertSeeLink('Fields groups & tabs')
+                    ->clickLink('Fields groups & tabs')
                     ->clickLink('my tab 4')
                     ->submitForm()
                     ->waitForText(trans('validation.required'), 2)

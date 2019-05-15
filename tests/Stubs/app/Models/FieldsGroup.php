@@ -6,7 +6,7 @@ use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Models\Model as AdminModel;
 use Gogol\Admin\Tests\App\Models\FieldsType;
 
-class FieldsLevel extends AdminModel
+class FieldsGroup extends AdminModel
 {
     /*
      * Model created date, for ordering tables in database and in user interface
@@ -16,7 +16,7 @@ class FieldsLevel extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Fields level';
+    protected $name = 'Fields groups & tabs';
 
     /*
      * Automatic form and database generation

@@ -32,7 +32,7 @@ class ModelBootloaderTest extends TestCase
         $this->assertEquals(Admin::boot(true), [
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
             '2019-05-03 12:02:04' => 'Gogol\Admin\Tests\App\Models\FieldsType',
-            '2019-05-03 11:11:02' => 'Gogol\Admin\Tests\App\Models\FieldsLevel',
+            '2019-05-03 11:11:02' => 'Gogol\Admin\Tests\App\Models\FieldsGroup',
             '2019-05-04 12:11:02' => 'Gogol\Admin\Tests\App\Models\FieldsMutator',
             '2019-05-04 12:10:04' => 'Gogol\Admin\Tests\App\Models\Articles\Article',
         ]);
