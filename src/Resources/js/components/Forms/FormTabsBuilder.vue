@@ -11,7 +11,7 @@
           <div v-if="hasTabs(tab.fields) || isModel(tab)" :class="{ model : isModel(tab) }" class="col-lg-12">
             <form-tabs-builder
               v-if="hasTabs(tab.fields)"
-              :tabs="tab.fields | tabs"
+              :tabs="tabsFields(tab.fields)"
               :model="model"
               :row="row"
               :langid="langid"
@@ -91,15 +91,10 @@
 
     watch: {
       activetab(tabid){
-        this.cansave = ! this.isModel(this.getTabs[tabid]);
-      },
-    },
-
-    filters: {
-      tabs(items){
-        return items.filter(function(item){
-          return this.isTab(item);
-        }.bind(this));
+        eventHub.$emit('changeFormSaveState', {
+          model : this.model.slug,
+          state : !this.isModel(this.getTabs[tabid])
+        });
       },
     },
 
@@ -168,6 +163,11 @@
     },
 
     methods: {
+      tabsFields(fields){
+        return fields.filter(item => {
+          return this.isTab(item);
+        });
+      },
       /*
        * Return model from childs by model table
        */
@@ -175,7 +175,7 @@
         if ( typeof this.model.childs[model] == 'string' )
           return _.cloneDeep(this.model);
 
-        return ModelHelper(this.model.childs[model]||this.$root.models_list[model]);
+        return ModelHelper(this.model.childs[model]||this.$root.models[model]);
       },
       /*
        * Return tab name

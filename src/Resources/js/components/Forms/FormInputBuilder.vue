@@ -703,7 +703,7 @@
 
           var relationTable = (this.field.belongsTo||this.field.belongsToMany).split(',')[0];
 
-          return this.$root.models_list[relationTable];
+          return this.$root.models[relationTable];
         },
         /*
          * Return model of parent filtration field
@@ -717,7 +717,7 @@
           var field = this.model.fields[filterBy[0]],
               relationTable = (field.belongsTo||field.belongsToMany).split(',')[0];
 
-          return this.$root.models_list[relationTable];
+          return this.$root.models[relationTable];
         },
         isOpenedRow(){
           return this.row && 'id' in this.row;

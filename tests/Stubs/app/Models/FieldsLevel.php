@@ -2,8 +2,9 @@
 
 namespace Gogol\Admin\Tests\App\Models;
 
-use Gogol\Admin\Models\Model as AdminModel;
 use Gogol\Admin\Fields\Group;
+use Gogol\Admin\Models\Model as AdminModel;
+use Gogol\Admin\Tests\App\Models\FieldsType;
 
 class FieldsLevel extends AdminModel
 {
@@ -27,55 +28,58 @@ class FieldsLevel extends AdminModel
     public function fields()
     {
         return [
-            'field1' => 'name:field 1|type:string',
+            'field1' => 'name:field 1|required',
             'my_group1' => Group::half([
-                'field2' => 'name:my field 2',
-                'field3' => 'name:my field 3',
-                Group::tab([
-                    'field4' => 'name:my field 4',
-                    'field5' => 'name:my field 5',
+                'my tab 1' => Group::tab([
+                    'field2' => 'name:my field 2|required',
+                    'field3' => 'name:my field 3|required',
                 ]),
-                'field6' => 'name:my field 6',
-                'field7' => 'name:my field 7',
-                Group::tab([
-                    'field8' => 'name:my field 8',
-                    'field9' => 'name:my field 8',
-                    'field10' => 'name:my field 8',
+                'my tab 2' => Group::tab([
+                    'field4' => 'name:my field 4|required',
+                    'field5' => 'name:my field 5|required',
                 ]),
+                'field6' => 'name:my field 6|required',
+                'field7' => 'name:my field 7|required',
+                'field8' => 'name:my field 8|required',
+                'field9' => 'name:my field 9|required',
             ]),
-            'my_group2' => Group::fields([
-                'field11' => 'name:my field 2',
-                'field12' => 'name:my field 3',
+            'my_group2' => Group::half([
                 Group::tab([
-                    'field13' => 'name:my field 4',
-                    'field14' => 'name:my field 5',
-                ])->id('my_tab')->icon('my_icon'),
-                'field15' => 'name:my field 6',
-                'field17' => 'name:my field 7',
-                Group::tab([
-                    'field17' => 'name:my field 8',
-                    'field18' => 'name:my field 8',
-                    'field19' => 'name:my field 8',
+                    'field10' => 'name:my field 10|required',
+                    'field11' => 'name:my field 11|required',
+                ])->id('my_tab')->icon('fa-gifht')->name('my tab 3'),
+                'my tab 4' => Group::tab([
+                    'field12' => 'name:my field 12|required',
+                    'field13' => 'name:my field 13|required',
                     Group::third([
-                        'field20' => 'name:my field 8',
-                        'field21' => 'name:my field 8',
+                        'field14' => 'name:my field 14|required',
+                        'field15' => 'name:my field 15|required',
                         Group::full([
-                            'field22' => 'name:my field 8',
-                            'field23' => 'name:my field 8',
-                        ]),
-                        Group::full([
-                            'field24' => 'name:my field 8',
-                            'field25' => 'name:my field 8',
+                            'field16' => 'name:my field 16|required',
+                            'field17' => 'name:my field 17|required',
                         ])->inline(),
                     ]),
+                    'my_group3' => Group::fields([
+                        'field18' => 'name:my field 18|required',
+                        'field19' => 'name:my field 19|required',
+                    ])->width(8),
+                    'my_group4' => Group::fields([
+                        'field20' => 'name:my field 20|required',
+                        'field21' => 'name:my field 21|required',
+                    ])->grid(12),
+                    'my tab 5' => Group::tab([
+                        'field22' => 'name:my field 22|required',
+                        'field23' => 'name:my field 23|required',
+                    ]),
+                    'my tab 6' => Group::tab([
+                        'field24' => 'name:my field 24|required',
+                        'field25' => 'name:my field 25|required',
+                    ]),
                 ]),
+                'field26' => 'name:my field 26|required',
+                'field27' => 'name:my field 27|required',
+                'field28' => 'name:my field 28|required',
             ]),
-            'my_group3' => Group::fields([
-                'field26' => 'name:my field 8',
-            ])->width(6),
-            'my_group4' => Group::fields([
-                'field26' => 'name:my field 8',
-            ])->grid(6),
         ];
     }
 

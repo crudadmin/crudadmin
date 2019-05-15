@@ -78,13 +78,83 @@ class DuskBrowser extends Browser
      * @param  array  $class
      * @return object
      */
-    public function assertHasClass($element, $class)
+    public function assertHasAttribute($element, $attribute, $value = null)
     {
-        $classes = explode(' ', $this->attribute($element, 'class'));
+        $query = $this->script('return $(\''.$element.'\').eq(0).attr("'.$attribute.'")')[0];
+
+        //If value is empty, we want check if attribute is equal to empty string
+        //if query value is empty string, this means that attribute is available
+        if ( $value === null )
+            $value = '';
+
+        PHPUnit::assertSame(
+            $query, $value,
+            'Attribute ['.$attribute.'] does not '.($value ? "match value [$value]" : 'exists').' in element ['.$element.']'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Check if element does not have class
+     * @param  class $element
+     * @param  string  $attribute
+     * @param  string  $value
+     * @return object
+     */
+    public function assertHasNotAttribute($element, $attribute, $value = null)
+    {
+        $query = $this->script('return $(\''.$element.'\').eq(0).attr("'.$attribute.'")')[0];
+
+        //If we want check if attribute does not exists
+        //then we need check query value, if value is empty string, this means that atribute is available
+        //in this case we need change query to null, for passing test
+        $query = $value === null ? ($query === "" ? null : "") : $query;
+
+        PHPUnit::assertNotSame(
+            $query, $value,
+            'Attribute ['.$attribute.'] does '.($value !== null ? "match value [$value]" : 'exists').' in element ['.$element.']'
+        );
+
+        return $this;
+    }
+
+
+    /**
+     * Check if element has class
+     * @param  class $element
+     * @param  array  $class
+     * @return object
+     */
+    public function assertHasClass($element, $class, $has_not = false)
+    {
+        $query = $this->script('return $(\''.$element.'\').eq(0).attr("class")');
+
+        $classes = count($query) > 0 ? explode(' ', (string)$query[0]) : [];
 
         PHPUnit::assertContains(
             $class, $classes,
             'Class ['.$class.'] does not exists in element ['.$element.']'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Check if element does not have class
+     * @param  class $element
+     * @param  array  $class
+     * @return object
+     */
+    public function assertHasNotClass($element, $class)
+    {
+        $query = $this->script('return $(\''.$element.'\').eq(0).attr("class")');
+
+        $classes = count($query) > 0 ? explode(' ', (string)$query[0]) : [];
+
+        PHPUnit::assertNotContains(
+            $class, $classes,
+            'Class ['.$class.'] does exists in element ['.$element.']'
         );
 
         return $this;

@@ -7,14 +7,14 @@
             <div class="row">
                 <div v-if="hasTabs(group.fields)" class="col-lg-12">
                   <form-tabs-builder
-                      :tabs="group.fields | tabs"
+                      :tabs="tabsFields"
                       :model="model"
                       :row="row"
                       :hasparentmodel="hasparentmodel"
                       :history="history">
                   </form-tabs-builder>
                 </div>
-                <div v-else v-if="canShowGroupName(group) && visibleFields.length == 0">
+                <div v-else-if="canShowGroupName(group) && visibleFields.length == 0">
                     <div class="col-md-12">
                         <p class="empty-group-separator">...</p>
                     </div>
@@ -75,17 +75,12 @@ export default {
         this.$options.components['form-tabs-builder'] = Vue.extend(FormTabsBuilder);
     },
 
-    filters: {
-      tabs(items){
-        var tabs = items.filter(function(item){
-          return this.isTab(item);
-        }.bind(this));
-
-        return tabs;
-      },
-    },
-
     computed: {
+      tabsFields(){
+        return this.group.fields.filter(item => {
+          return this.isTab(item);
+        });
+      },
       visibleFields(){
         var fields = this.group.fields.filter(item => {
           var field = this.model.fields[item];

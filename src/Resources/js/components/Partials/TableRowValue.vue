@@ -186,7 +186,7 @@ export default {
         return value||'';
       },
       getLanguageSelectOptions(array, model){
-        model = this.$root.models_list[model];
+        model = this.$root.models[model];
 
         var filter =  model && model.localization ? {
           language_id : this.$root.language_id,

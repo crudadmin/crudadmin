@@ -46,7 +46,7 @@
           :langid="langid"
           :inputlang="selectedLanguage"
           :row="row"
-          :cansave.sync="cansave"
+          :cansave="cansave"
           :hasparentmodel="hasparentmodel"
           :history="history">
         </form-tabs-builder>
@@ -104,6 +104,15 @@
 
       //Reset form
       this.initForm(this.row);
+
+      eventHub.$on('changeFormSaveState', data => {
+        if ( data.model != this.model.slug )
+          return;
+
+        //Change if form can show send/save button
+        //in other tab, button need to be hidden
+        this.cansave = data.state;
+      });
     },
 
     watch: {
@@ -292,7 +301,7 @@
         this.form.find('.form-group.has-error').firstLevelForm(this.form[0]).removeClass('has-error').find('.help-block').remove();
         this.form.find('.fa.fa-times-circle-o').firstLevelForm(this.form[0]).remove();
         this.form.find('.multi-languages .has-error').firstLevelForm(this.form[0]).removeClass('has-error');
-        this.removeActiveTab(this.form.find('.nav-tabs li.has-error').firstLevelForm(this.form[0]));
+        this.removeActiveTab(this.form.find('.nav-tabs li[has-error]').firstLevelForm(this.form[0]));
         this.$parent.progress = false;
       },
       sendForm(e, action, callback)
@@ -564,9 +573,11 @@
 
       },
       removeActiveTab(tab, all){
-        tab.filter(function(){
+        var remove_from = tab.filter(function(){
           return all === true || ! $(this).hasClass('model-tab');
-        }).removeAttr('data-toggle').removeAttr('data-original-title').removeClass('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
+        });
+
+        remove_from.removeAttr('data-toggle').removeAttr('data-original-title').removeAttr('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
       },
       colorizeTab(input){
         var _this = this;
@@ -586,18 +597,19 @@
 
           //On button click, remove tabs alerts in actual tree, if tab has no more recursive errors
           $(this).one('click', function(){
-            if ( $(this).find('.nav-tabs-custom:not(.default) li.has-error').length == 0 )
+            if ( $(this).find('.nav-tabs-custom:not(.default) li[has-error]').length == 0 )
               _this.removeActiveTab(getActiveTab($(this)), true);
           });
 
           getActiveTab($(this)).each(function(){
-            if ( ! $(this).hasClass('has-error') )
-              $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).addClass('has-error').one('click', function(){
+                if ( $(this).hasClass('has-error') )
+                    return;
 
-                var active = $(this).parent().find('li.has-error').not($(this)).length == 0 ? $(this).parents('.nav-tabs-custom').find('li.active.has-error') : [];
+                $(this).attr('data-toggle', 'tooltip').attr('data-original-title', _this.trans('tab-error')).attr('has-error', '').one('click', function(){
+                    var active = $(this).parents('.nav-tabs-custom').find('> .nav-tabs > li.active[has-error]').not($(this).parent().find('> li'));
 
-                _this.removeActiveTab($(this).extend(active), true);
-              }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
+                    _this.removeActiveTab($([this].concat(active.toArray())), true);
+                }).find('a').prepend('<i class="fa fa-exclamation-triangle"></i>');
           })
         });
       },

@@ -417,8 +417,7 @@
           count : this.rows.count,
         };
 
-        this.$broadcast('rows-changed', data, true);
-        this.$dispatch('rows-changed', data, true);
+        eventHub.$emit('rows-changed', data);
       },
       resetSearchBar(){
         //On change column reset input

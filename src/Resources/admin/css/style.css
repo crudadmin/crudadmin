@@ -373,10 +373,10 @@ button.enabled-history:hover, button.enabled-history:focus, button.enabled-histo
  * Tabs
  */
 .nav-tabs-custom > .nav-tabs > li > a {cursor: pointer;}
-.nav-tabs-custom > .nav-tabs > li.has-error {border-top-color: #dd4939;}
-.nav-tabs-custom > .nav-tabs > li.has-error i {margin-left: -1px;}
-.nav-tabs-custom > .nav-tabs > li.has-error i.fa-exclamation-triangle ~ i {display: none}
-.nav-tabs-custom > .nav-tabs > li.has-error a {color: #dd4939}
+.nav-tabs-custom > .nav-tabs > li[has-error] {border-top-color: #dd4939;}
+.nav-tabs-custom > .nav-tabs > li[has-error] i {margin-left: -1px;}
+.nav-tabs-custom > .nav-tabs > li[has-error] i.fa-exclamation-triangle ~ i {display: none}
+.nav-tabs-custom > .nav-tabs > li[has-error] a {color: #dd4939}
 .nav-tabs-custom.default {box-shadow: none;margin-bottom: 0;background: transparent;}
 .nav-tabs-custom.default > .nav-tabs { display: none; }
 .nav-tabs-custom.default > .tab-content { margin: 0; padding: 0; background: transparent; }
