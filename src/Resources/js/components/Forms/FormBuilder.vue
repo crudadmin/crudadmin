@@ -577,7 +577,12 @@
           return all === true || ! $(this).hasClass('model-tab');
         });
 
-        remove_from.removeAttr('data-toggle').removeAttr('data-original-title').removeAttr('has-error').tooltip("destroy").find('a > .fa.fa-exclamation-triangle').remove();
+        remove_from.removeAttr('data-toggle')
+                    .removeAttr('data-original-title')
+                    .removeAttr('has-error')
+                    .tooltip("destroy")
+                    .find('a > .fa.fa-exclamation-triangle')
+                    .remove();
       },
       colorizeTab(input){
         var _this = this;
