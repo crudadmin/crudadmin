@@ -1,24 +1,23 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models\Articles;
+namespace Gogol\Admin\Tests\App\Models\Tree;
 
 use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Tests\App\User;
 
-class Article extends AdminModel
+class Model3 extends AdminModel
 {
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-04 12:10:04';
+    protected $migration_date = '2019-05-15 12:12:02';
 
     /*
      * Template name
      */
-    protected $name = 'Články';
+    protected $name = 'Model 3';
 
-    protected $title = 'Upravte vaše články...';
+    protected $group = 'level1.level2.level3';
 
     /*
      * Automatic form and database generation
@@ -30,8 +29,7 @@ class Article extends AdminModel
     public function fields()
     {
         return [
-            'name' => 'name:Názov článku|type:string',
-            'content' => 'name:Názov článku|type:text',
+            'field1' => 'name:field 1|required',
         ];
     }
 }

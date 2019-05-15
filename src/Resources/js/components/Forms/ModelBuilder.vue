@@ -48,8 +48,7 @@
               <div class="select" v-show="isSelect">
                 <select type="text" v-model="search.query" class="form-control js_chosen" :data-placeholder="trans('get-value')">
                   <option value="">{{ trans('show-all') }}</option>
-                  <!-- <option v-for="data in (isSelect ? model.fields[search.column].options : []) | languageOptions model.fields[search.column]" v-bind:value="data[0]">{{ data[1] }}</option> -->
-                  <!-- <option v-for="data in (isSelect ? model.fields[search.column].options : [])" v-bind:value="data[0]">{{ data[1] }}</option> -->
+                  <option v-for="data in languageOptionsSearchFilter(isSelect ? model.fields[search.column].options : [])" v-bind:value="data[0]">{{ data[1] }}</option>
                 </select>
               </div>
               <!-- Search columns -->
@@ -224,7 +223,7 @@
       this.setDeepLevel();
     },
 
-    ready() {
+    mounted() {
       this.checkIfCanShowLanguages();
 
       this.initSearchSelectboxes();
@@ -302,16 +301,6 @@
       }
     },
 
-    filters: {
-      /*
-       * Returns correct values into multilangual select
-       */
-      languageOptions(array, field){
-        return this.$root.languageOptions(array, field);
-      },
-
-    },
-
     events : {
 
       //Receive event and send into child components
@@ -340,6 +329,12 @@
     },
 
     methods : {
+      /*
+       * Returns correct values into multilangual select
+       */
+      languageOptionsSearchFilter(array){
+        return this.$root.languageOptions(array, this.model.fields[this.search.column]);
+      },
       showHistory(row){
         this.$http.get( this.$root.requests.getHistory, {
           model : this.model.slug,

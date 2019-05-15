@@ -130,14 +130,17 @@
                             {
                                 for ( var subkey in groups[key].submenu )
                                 {
+                                    //Get sub models from subtree
                                     if ( subkey.substr(0, config.groups_prefix.length) == config.groups_prefix )
-                                        models = models.concat(this.getModelsFromGroups(groups[key].submenu[subkey], models));
+                                        models = models.concat(this.getModelsFromGroups(groups[key].submenu[subkey].submenu, models));
+
+                                    //Push model into models list
                                     else
                                         models.push(groups[key].submenu[subkey]);
                                 }
                             }
 
-                            //Pust model into list
+                            //Push model into list
                             else {
                                 models.push(groups[key]);
                             }

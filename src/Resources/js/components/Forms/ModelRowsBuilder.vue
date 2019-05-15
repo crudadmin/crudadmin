@@ -56,7 +56,7 @@
         :gettext_editor.sync="gettext_editor"
         :rows="rows"
         :rowsdata.sync="rowsData"
-        :enabledcolumns.sync="enabled_columns"
+        :enabledcolumns="enabled_columns"
         :item="row"
         :button_loading="button_loading"
         :checked.sync="checked"
@@ -77,8 +77,8 @@
 
       <ul v-if="isPaginationEnabled && rows.count>pagination.limit" class="pagination pagination-sm no-margin pull-right">
         <li v-if="pagination.position>1"><a v-on:click.prevent="setPosition(pagination.position - 1)" href="#">«</a></li>
-        <li v-bind:class="{ active : pagination.position == i + 1 }" v-if="showLimit(i)" v-for="i in Math.ceil(rows.count / pagination.limit)"><a href="#" @click.prevent="setPosition(i + 1)">{{ i + 1 }}</a></li>
-        <li v-if="pagination.position<rows.count/pagination.limit"><a v-on:click.prevent="setPosition(pagination.position + 1)" href="#">»</a></li>
+        <li v-bind:class="{ active : pagination.position == i }" v-if="showLimit(i)" v-for="i in Math.ceil(rows.count / pagination.limit)"><a href="#" @click.prevent="setPosition(i)">{{ i }}</a></li>
+        <li v-if="pagination.position<rows.count/pagination.limit"><a v-on:click.prevent="setPosition(pagination.position)" href="#">»</a></li>
       </ul>
     </div>
 
