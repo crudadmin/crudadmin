@@ -33,6 +33,16 @@ trait AdminTrait
      */
     protected function tearDown() : void
     {
+        $this->registerTraits();
+
+        parent::tearDown();
+    }
+
+    /*
+     * Register all traits instances
+     */
+    protected function registerTraits()
+    {
         $uses = array_flip(class_uses_recursive(static::class));
 
         //Registers own event for dropping database after test
@@ -44,8 +54,6 @@ trait AdminTrait
         if (isset($uses[DropUploads::class])) {
             $this->dropUploads();
         }
-
-        parent::tearDown();
     }
 
     /**
@@ -111,11 +119,11 @@ trait AdminTrait
     protected function getPublishableResources()
     {
         return [
-            config_path('admin.php'),
-            resource_path('lang/cs'),
-            resource_path('lang/sk'),
-            public_path('vendor/crudadmin/dist/version'),
-            public_path('vendor/crudadmin/css'),
+            $this->getBasePath().'/config/admin.php',
+            $this->getBasePath().'/resources/lang/cs',
+            $this->getBasePath().'/resources/lang/sk',
+            $this->getBasePath().'/public/vendor/crudadmin/dist/version',
+            $this->getBasePath().'/public/vendor/crudadmin/css',
         ];
     }
 

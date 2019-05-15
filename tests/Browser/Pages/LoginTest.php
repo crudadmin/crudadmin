@@ -3,14 +3,14 @@
 namespace Gogol\Admin\Tests\Browser\Pages;
 
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\DuskBrowser as Browser;
+use Gogol\Admin\Tests\Browser\DuskBrowser;
 
 class LoginTest extends BrowserTestCase
 {
     /** @test */
     public function can_authenticate_user()
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function (DuskBrowser $browser) {
             $browser->visit(admin_action('Auth\LoginController@showLoginForm'))
                     ->assertSee('My Admin')
                     ->type('email', $this->credentials['email'])

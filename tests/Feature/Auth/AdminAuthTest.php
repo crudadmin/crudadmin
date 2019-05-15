@@ -3,12 +3,12 @@
 namespace Gogol\Admin\Tests\Feature\Auth;
 
 use Gogol\Admin\Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Gogol\Admin\Tests\Traits\DropDatabase;
 use Illuminate\Support\Facades\File;
 
 class AdminAuthTest extends TestCase
 {
-    use RefreshDatabase;
+    use DropDatabase;
 
     protected function setUp() : void
     {

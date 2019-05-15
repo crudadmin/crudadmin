@@ -3,11 +3,11 @@
 namespace Gogol\Admin\Tests\Feature\Commands;
 
 use Gogol\Admin\Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Gogol\Admin\Tests\Traits\DropDatabase;
 
 class AdminInstallCommandTest extends TestCase
 {
-    use RefreshDatabase;
+    use DropDatabase;
 
     protected function setUp() : void
     {
