@@ -80,7 +80,7 @@ trait AdminTrait
         $app['config']->set('admin.app_namespace', 'Gogol\Admin\Tests\App');
 
         //Add submenu tree settings
-        $app['config']->set('admin.groups', config('admin.groups') + [
+        $app['config']->set('admin.groups', config('admin.groups', []) + [
             'level1' => 'My tree level 1',
             'level1.level2' => 'My subtree level',
             'level1.level2.level3' => 'My sub-subtree level',

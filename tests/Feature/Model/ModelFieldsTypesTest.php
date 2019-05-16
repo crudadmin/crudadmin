@@ -21,6 +21,7 @@ class ModelFieldsTypesTest extends TestCase
     {
         $this->assertEquals($this->model->getField('string'), [
             'name' => 'my string field',
+            'title' => 'this is my field description',
             'type' => 'string',
             'required' => true,
             'max' => '255',
@@ -163,7 +164,6 @@ class ModelFieldsTypesTest extends TestCase
     {
         $this->assertEquals($this->model->getField('checkbox'), [
             'name' => 'my checkbox field',
-            'required' => true,
             'type' => 'checkbox',
             'boolean' => true,
             'value' => null,
