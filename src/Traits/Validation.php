@@ -113,7 +113,7 @@ trait Validation {
             if ( $row
                 && !empty($row[$orig_key])
                 && $this->hasFieldParam($orig_key, 'required')
-                && $this->isFieldType($key, 'file')
+                && $this->isFieldType($orig_key, 'file')
             ){
                 $field['required'] = false;
             }

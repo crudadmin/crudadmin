@@ -426,8 +426,10 @@
         var keys = [],
             parts = key.split('.');
 
-        //Add also multiple keys selectors
-        if ( parts.length == 1 ){
+        if ( parts.length == 1 || parts.length == 2 && parts[1] == 0 ){
+          parts = [parts[0]];
+          key = parts[0];
+
           keys.push(key);
           parts.push(0);
         }
