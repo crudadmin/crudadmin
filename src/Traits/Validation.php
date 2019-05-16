@@ -99,7 +99,7 @@ trait Validation {
             //Add multiple validation support for files
             if (
                 $is_multiple = $this->hasFieldParam($orig_key, 'array', true)
-                && $this->isFieldType($key, ['file', 'date'])
+                && $this->isFieldType($key, ['file', 'date', 'time'])
             )
                 $key = $key . '.*';
 

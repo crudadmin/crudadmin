@@ -33,16 +33,16 @@ class FieldsGroup extends AdminModel
                 'my tab 1' => Group::tab([
                     'field2' => 'name:my field 2|required',
                     'field3' => 'name:my field 3|required',
-                ]),
+                ])->icon('fa-gift'),
                 'my tab 2' => Group::tab([
                     'field4' => 'name:my field 4|required',
                     'field5' => 'name:my field 5|required',
-                ]),
+                ])->icon('fa-truck'),
                 'field6' => 'name:my field 6|required',
                 'field7' => 'name:my field 7|required',
                 'field8' => 'name:my field 8|required',
                 'field9' => 'name:my field 9|required',
-            ]),
+            ])->icon('fa-gear'),
             'my_group2' => Group::half([
                 Group::tab([
                     'field10' => 'name:my field 10|required',

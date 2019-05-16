@@ -31,7 +31,7 @@ class Article extends AdminModel
     {
         return [
             'name' => 'name:Názov článku|type:string',
-            'content' => 'name:Názov článku|type:text',
+            'content' => 'name:Obsah článku|type:text',
         ];
     }
 }

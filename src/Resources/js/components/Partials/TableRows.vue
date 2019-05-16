@@ -275,7 +275,7 @@
               };
 
 
-          this.$parent.$set('enabled_columns', enabled);
+          this.$parent.enabled_columns = enabled;
         },
         isReservedRow(row){
           return this.$parent.isReservedRow(row.id);

@@ -125,7 +125,7 @@
         //Receive value from tablerows component
         checked : [],
         default_columns : [],
-        enabled_columns : {},
+        enabled_columns : null,
         button_loading : false,
       };
     },

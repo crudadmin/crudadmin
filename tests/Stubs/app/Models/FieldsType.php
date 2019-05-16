@@ -27,7 +27,7 @@ class FieldsType extends AdminModel
     public function fields()
     {
         return [
-            'string' => 'name:my string field|type:string|required',
+            'string' => 'name:my string field|type:string|title:this is my field description|required',
             'text' => 'name:my text field|type:text|required',
             'editor' => 'name:my editor field|type:editor|required',
             'select' => 'name:my select field|type:select|options:option a,option b|required',
@@ -38,7 +38,7 @@ class FieldsType extends AdminModel
             'date' => 'name:my date field|type:date|required',
             'datetime' => 'name:my datetime field|type:datetime|required',
             'time' => 'name:my time field|type:time|required',
-            'checkbox' => 'name:my checkbox field|type:checkbox|required',
+            'checkbox' => 'name:my checkbox field|type:checkbox',
             'radio' => 'name:my radio field|type:radio|options:c,d,b|required',
         ];
     }
