@@ -28,7 +28,7 @@ trait HasChildrens
             return $relation;
 
         //Check by last model convention name
-        foreach (Admin::getAdminModelsPaths() as $migration_date => $modelname)
+        foreach (Admin::getAdminModelNamespaces() as $migration_date => $modelname)
         {
             $basename = class_basename($modelname);
 
