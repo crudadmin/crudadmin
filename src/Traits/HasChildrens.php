@@ -19,10 +19,9 @@ trait HasChildrens
         $child_model_name = strtolower( str_plural( $basename_class ) . $method_singular);
 
         //Check if exists child with model name
-        $relation = Admin::hasAdminModel($child_model_name, function( $classname ) use ( $get ) {
-            return $this->returnAdminRelationship($classname, $get);
-        });
-
+        $relation = Admin::hasAdminModel($child_model_name)
+                        ? $this->returnAdminRelationship($classname, $get)
+                        : null;
 
         //If is found relation, or if is called relation in singular mode, that means, we don't need hasMany, bud belongsTo relation
         if ( $relation || $method == $method_singular )
@@ -36,9 +35,12 @@ trait HasChildrens
             //Check if model ends with needed relation name
             if ( last(explode('_', snake_case($basename))) == $method_singular )
             {
-                return $this->returnAdminRelationship(str_plural($basename), $get, [
+                if ( ($response = $this->returnAdminRelationship(str_plural($basename), $get, [
                     $migration_date => $modelname,
-                ]);
+                ])) === false )
+                    continue;
+
+                return $response;
             }
         }
 
