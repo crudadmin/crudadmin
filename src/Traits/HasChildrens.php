@@ -20,7 +20,7 @@ trait HasChildrens
 
         //Check if exists child with model name
         $relation = Admin::hasAdminModel($child_model_name)
-                        ? $this->returnAdminRelationship($classname, $get)
+                        ? $this->returnAdminRelationship($child_model_name, $get)
                         : null;
 
         //If is found relation, or if is called relation in singular mode, that means, we don't need hasMany, bud belongsTo relation
