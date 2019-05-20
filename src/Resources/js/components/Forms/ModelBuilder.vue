@@ -68,7 +68,7 @@
           </div>
 
           <ul class="pagination pagination-sm no-margin" v-if="isEnabledGrid" data-toggle="tooltip" :data-original-title="trans('edit-size')">
-            <li v-for="size in sizes" v-bind:class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
+            <li v-for="size in sizes" :data-size="size.key" :class="{ 'active' : size.active, 'disabled' : size.disabled }"><a href="#" @click.prevent="changeSize(size)" title="">{{ size.name }}</a></li>
           </ul>
         </div>
       </div>
@@ -302,7 +302,6 @@
     },
 
     events : {
-
       //Receive event and send into child components
       proxy(name, param){
         this.$broadcast(name, param);
@@ -545,6 +544,7 @@
         /*
          * When is localStorage value empty, then automatic chose the best grid value
          */
+        columns = Object.keys(columns);
 
         if ( columns.length >= 5 )
           this.sizes[2].disabled = true;

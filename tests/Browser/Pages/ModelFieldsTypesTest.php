@@ -11,7 +11,7 @@ use Gogol\Admin\Tests\Traits\DropDatabase;
 use Gogol\Admin\Tests\Traits\DropUploads;
 use Illuminate\Foundation\Auth\User;
 
-class ModelActionsTest extends BrowserTestCase
+class ModelFieldsTypesTest extends BrowserTestCase
 {
     use DropDatabase;
     use DropUploads;

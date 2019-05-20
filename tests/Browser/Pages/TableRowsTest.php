@@ -2,9 +2,10 @@
 
 namespace Gogol\Admin\Tests\Browser\Pages;
 
+use Admin;
 use Artisan;
 use Carbon\Carbon;
-use Gogol\Admin\Tests\App\Models\Articles\Article;
+use Gogol\Admin\Tests\App\Models\FieldsType;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\DropDatabase;
@@ -25,18 +26,17 @@ class TableRowsTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_pagination()
+    public function test_full_grid_size()
     {
         //Create 100 articles
-        factory(Article::class, 100)->create();
+        factory(FieldsType::class, 100)->create();
 
         $this->browse(function (DuskBrowser $browser) {
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Články')
-                    ->clickLink('Články');
-
-                    // ->pause(100000);
+                    ->clickLink('Fields types')
+                    ->assertHasClass('li[data-size="full"]', 'active')
+                    ->pause(100000);
         });
     }
 }
