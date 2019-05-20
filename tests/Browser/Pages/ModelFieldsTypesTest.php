@@ -46,18 +46,24 @@ class ModelActionsTest extends BrowserTestCase
                     ->assertSeeLink('Fields types')
                     ->clickLink('Fields types')
 
+                    //Create new row
                     ->fillForm(FieldsType::class, $row)
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
                     // ->assertVue('row', [], '@model-builder') check if form has been resetted, need complete
                     ->closeAlert()
                     ->scrollToElement('body')
+
+                    //Open row and check if has correct values
                     ->openRow(1)
                     ->assertHasFormValues(FieldsType::class, $row)
                     ->fillForm(FieldsType::class, [
                         'password' => $this->getFormData('password')
                     ])
+
+                    //Save existing row and check if has correct values
                     ->saveForm()
+                    ->assertHasFormValues(FieldsType::class, $row)
                     ->assertSeeSuccess(trans('admin::admin.success-save'));
         });
 

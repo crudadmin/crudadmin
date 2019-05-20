@@ -39,9 +39,9 @@ class FieldsTypesMultiple extends AdminModel
                 'date' => 'name:my date field|type:date|required',
                 'date_multiple' => 'name:my multiple date field|type:date|multiple|required',
             ])->inline(),
-            Group::fields([
+            Group::half([
                 'datetime' => 'name:my datetime field|type:datetime|required',
-            ])->inline(),
+            ]),
             Group::fields([
                 'time' => 'name:my time field|type:time|required',
                 'time_multiple' => 'name:my time field|type:time|multiple|required',

@@ -34,9 +34,9 @@ class TableRowsTest extends BrowserTestCase
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
                     ->assertSeeLink('Články')
-                    ->clickLink('Články')
+                    ->clickLink('Články');
 
-                    ->pause(100000);
+                    // ->pause(100000);
         });
     }
 }

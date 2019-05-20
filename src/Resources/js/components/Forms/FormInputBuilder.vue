@@ -315,7 +315,13 @@
                   value.push(pickedDate);
 
                 this.changeValue(null, value);
-            }.bind(this)
+            }.bind(this),
+            //Also update object of single date values
+            onClose : function(current_date_time){
+              var pickedDate = moment(current_date_time).format(this.$root.fromPHPFormatToMoment(this.field.date_format));
+
+              this.changeValue(null, pickedDate);
+            }.bind(this),
           });
         },
         getMultiDateValue(time){

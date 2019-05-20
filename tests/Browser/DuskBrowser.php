@@ -2,6 +2,9 @@
 
 namespace Gogol\Admin\Tests\Browser;
 
+use Carbon\Carbon;
+use Exception;
+use Facebook\WebDriver\Remote\LocalFileDetector;
 use Gogol\Admin\Tests\Traits\AdminTrait;
 use Laravel\Dusk\Browser;
 use PHPUnit\Framework\Assert as PHPUnit;
@@ -23,33 +26,96 @@ class DuskBrowser extends Browser
         foreach ($array as $key => $value)
         {
             //Set string value
-            if ( $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password', 'date', 'datetime', 'time']) )
+            if (
+                $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password', 'date', 'datetime', 'time'])
+                && ! $model->hasFieldParam($key, 'multiple')
+            ) {
                 $this->type($key, $value);
+            }
 
             //Set editor value
-            else if ( $model->isFieldType($key, ['longeditor', 'editor']) )
+            else if ( $model->isFieldType($key, ['longeditor', 'editor']) ) {
                 $this->with('textarea[name='.$key.']', function($browser) use ($key, $value) {
                     $browser->script('CKEDITOR.instances[$("[name='.$key.']").attr("id")].setData("'.$value.'")');
                 });
+            }
 
             //Set select value
             else if ( $model->isFieldType($key, ['select']) )
-                $this->value('select[name="'.$key.'"]', $value)
-                     ->with('select[name='.$key.']', function($browser) use ($key) {
-                         $browser->script('$("select[name='.$key.']").change().trigger("chosen:updated");');
-                     });
+            {
+                //Multiple select
+                if ( $model->hasFieldParam($key, 'multiple') )
+                {
+                    //Select options in reversed order
+                    foreach ($value as $k => $option_value)
+                    {
+                        $this->script("
+                        $('select[name=\"{$key}[]\"]').parents('.form-group').eq(0).each(function(){
+                            $(this).find('input').click().focus();
+                            $(this).find('.chosen-results li:contains(\"{$option_value}\")').mouseup()
+                        });
+                        ");
+                        $this->pause(100);
+                    }
+                }
+
+                //Single select
+                else {
+                    $this->value('select[name="'.$key.'"]', $value)
+                         ->with('select[name='.$key.']', function($browser) use ($key) {
+                             $browser->script('$("select[name='.$key.']").change().trigger("chosen:updated");');
+                         });
+                }
+            }
 
             //Set file value
             else if ( $model->isFieldType($key, ['file']) )
-                $this->attach($key, $this->getStubPath('/uploads/'.$value));
+            {
+                //Attach multiple files
+                if ( $model->hasFieldParam($key, 'multiple') )
+                {
+                    $this->attachMultiple($key.'[]', array_map(function($file){
+                        return $this->getStubPath('/uploads/'.$file);
+                    }, $value));
+                }
+
+                //Attach single file
+                else {
+                    $this->attach($key, $this->getStubPath('/uploads/'.$value));
+                }
+            }
 
             //Set file value
-            else if ( $model->isFieldType($key, ['checkbox']) )
+            else if ( $model->isFieldType($key, ['checkbox']) ) {
                 $this->{$value === true || $value === 1 ? 'check' : 'uncheck'}($key);
+            }
 
             //Set file value
-            else if ( $model->isFieldType($key, ['radio']) )
+            else if ( $model->isFieldType($key, ['radio']) ) {
                 $this->radio($key, $value);
+            }
+
+            //Set multiple date value
+            else if ( $model->isFieldType($key, 'date') && $model->hasFieldParam($key, 'multiple') )
+            {
+                foreach ($value as $date)
+                {
+                    $date = Carbon::createFromFormat('d.m.Y', $date);
+
+                    $this->script('$(\'[data-field="'.$key.'"]\').find(\'td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]\').click()');
+                }
+            }
+
+            //Set multiple time value
+            else if ( $model->isFieldType($key, 'time') && $model->hasFieldParam($key, 'multiple') )
+            {
+                foreach ($value as $time)
+                {
+                    $time = explode(':', $time);
+
+                    $this->script('$(\'[data-field="'.$key.'"]\').find(\'div[data-hour="'.(int)$time[0].'"][data-minute="'.(int)$time[1].'"]\').click()');
+                }
+            }
         }
 
         return $this;
@@ -63,8 +129,23 @@ class DuskBrowser extends Browser
      */
     public function assertHasFormValues($model, $array = [])
     {
+        $model = $this->getModelClass($model);
+
         foreach ($array as $key => $value)
         {
+            //Editor and file are not binding row values for now
+            if ( $model->isFieldType($key, ['editor', 'file']) )
+                continue;
+
+            //Update date multiple values
+            if ( $model->isFieldType($key, 'date') && $model->hasFieldParam($key, 'multiple') )
+            {
+                foreach ($value as $k => $date)
+                {
+                    $value[$k] = Carbon::createFromFormat('d.m.Y', $date)->format($model->getFieldParam($key, 'date_format'));
+                }
+            }
+
             $this->assertVue('row.'.$key, $value, '@model-builder');
             $this->assertVue('model.fields.'.$key.'.value', $value, '@model-builder');
         }
@@ -226,4 +307,29 @@ class DuskBrowser extends Browser
 
         return $this;
     }
+
+    /**
+     * Attach the given files into to the field.
+     *
+     * @param  string  $field
+     * @param  array  $paths
+     * @return $this
+     */
+    public function attachMultiple($field, array $paths = [])
+    {
+        $element = $this->resolver->resolveForAttachment($field);
+
+        $files = array_map(function($file){
+            if (! is_file($file) || ! file_exists($file)) {
+                throw new Exception('You may only upload existing files: '.$file);
+            }
+
+            return realpath($file);
+        }, $paths);
+
+        $element->sendKeys(implode("\n ", $files));
+
+        return $this;
+    }
+
 }
