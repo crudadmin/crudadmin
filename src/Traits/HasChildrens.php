@@ -28,16 +28,19 @@ trait HasChildrens
             return $relation;
 
         //Check by last model convention name
-        foreach (Admin::getAdminModelNamespaces() as $migration_date => $modelname)
+        foreach (Admin::getAdminModelsPaths() as $migration_date => $modelname)
         {
             $basename = class_basename($modelname);
 
             //Check if model ends with needed relation name
             if ( last(explode('_', snake_case($basename))) == $method_singular )
             {
-                return $this->returnAdminRelationship(str_plural($basename), $get, [
+                if ( ($response = $this->returnAdminRelationship(str_plural($basename), $get, [
                     $migration_date => $modelname,
-                ]);
+                ])) === false )
+                    continue;
+
+                return $response;
             }
         }
 
