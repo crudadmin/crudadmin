@@ -45,7 +45,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
                     ->clickLink('Fields types multiple')
-                    ->pause(4000)
+
                     //Create new row
                     ->fillForm(FieldsTypesMultiple::class, $row)
                     ->assertHasFormValues(FieldsTypesMultiple::class, $row)
