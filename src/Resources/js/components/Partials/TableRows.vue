@@ -72,10 +72,6 @@
         }
       },
 
-      ready() {
-
-      },
-
       events: {
         selectHistoryRow(history_data){
           if ( this.model.slug != history_data[0] )
