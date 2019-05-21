@@ -15,30 +15,30 @@
       <p>{{ trans('languages-missing') }}</p>
     </div>
 
-    <div v-bind:class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
+    <div :class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
-      <div class="box-header" v-bind:class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
+      <div class="box-header" :class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
         <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild" v-html="model.title"></span>
 
         <div class="pull-right" v-if="!isSingle">
-          <div class="search-bar" :class="{ interval : search.interval }" v-bind:id="getFilterId" v-show="canShowSearchBar">
+          <div class="search-bar" data-search-bar :class="{ interval : search.interval }" :id="getFilterId" v-show="canShowSearchBar">
             <div class="input-group input-group-sm">
               <div class="input-group-btn">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{ getSearchingColumnName(search.column) }}
                   <span class="caret"></span></button>
                   <ul class="dropdown-menu">
-                    <li v-bind:class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
-                    <li v-bind:class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
-                    <li v-for="key in getSearchableFields" v-bind:class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
-                    <li v-bind:class="{ active : search.column == 'created_at' }"><a href="#" @click.prevent="search.column = 'created_at'">{{ getSearchingColumnName('created_at') }}</a></li>
+                    <li data-field="" :class="{ active : !search.column }"><a href="#" @click.prevent="search.column = null">{{ trans('search-all') }}</a></li>
+                    <li data-field="id" :class="{ active : search.column == 'id' }"><a href="#" @click.prevent="search.column = 'id'">{{ getSearchingColumnName('id') }}</a></li>
+                    <li :data-field="key" v-for="key in getSearchableFields" :class="{ active : search.column == key }"><a href="#" @click.prevent="search.column = key">{{ getSearchingColumnName(key) }}</a></li>
+                    <li data-field="created_at" :class="{ active : search.column == 'created_at' }"><a href="#" @click.prevent="search.column = 'created_at'">{{ getSearchingColumnName('created_at') }}</a></li>
                   </ul>
               </div>
               <!-- /btn-group -->
 
               <!-- Search columns -->
-              <input type="text" v-show="isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
+              <input type="text" v-show="isSearch" data-search-text :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
 
-              <input type="text" v-show="isDate" v-model="search.query" class="form-control js_date">
+              <input type="text" v-show="isDate" data-search-date readonly class="form-control js_date">
 
               <select type="text" v-show="isCheckbox" v-model="search.query" class="form-control">
                 <option value="0">{{ trans('off') }}</option>
@@ -46,23 +46,23 @@
               </select>
 
               <div class="select" v-show="isSelect">
-                <select type="text" v-model="search.query" class="form-control js_chosen" :data-placeholder="trans('get-value')">
+                <select v-model="search.query" data-search-select class="form-control js_chosen" :data-placeholder="trans('get-value')">
                   <option value="">{{ trans('show-all') }}</option>
-                  <option v-for="data in languageOptionsSearchFilter(isSelect ? model.fields[search.column].options : [])" v-bind:value="data[0]">{{ data[1] }}</option>
+                  <option v-for="data in languageOptionsSearchFilter(isSelect ? model.fields[search.column].options : [])" :value="data[0]">{{ data[1] }}</option>
                 </select>
               </div>
               <!-- Search columns -->
 
-              <div class="interval" v-if="canBeInterval" data-toggle="tooltip" data-original-title="Interval">
-                <button class="btn" @click="search.interval = !search.interval" :class="{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }"><i class="fa fa-arrows-h"></i></button>
+              <div class="interval" data-interval v-if="canBeInterval" data-toggle="tooltip" data-original-title="Interval">
+                <button class="btn" :class="{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }" @click="search.interval = !search.interval"><i class="fa fa-arrows-h"></i></button>
               </div>
 
-              <input type="text" v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
+              <input type="text" data-search-interval-text v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
 
-              <input type="text" v-show="search.interval && isDate" v-model="search.query_to" class="form-control js_date">
+              <input type="text" data-search-interval-date v-show="search.interval && isDate" readonly class="form-control js_date">
 
-              <div class="interval" v-if="search.query || search.query_to" data-toggle="tooltip" :data-original-title="trans('reset')">
-                <button class="btn btn-default" @click="search.query = ''"><i class="fa fa-times"></i></button>
+              <div class="interval" data-reset-interval v-if="search.query || search.query_to" data-toggle="tooltip" :data-original-title="trans('reset')">
+                <button class="btn btn-default" @click="resetInerval()"><i class="fa fa-times"></i></button>
               </div>
             </div>
           </div>
@@ -75,7 +75,7 @@
 
       <div class="box-body">
 
-        <div v-bind:class="{ 'row' : true, 'flex-table' : activeSize == 0 }">
+        <div :class="{ 'row' : true, 'flex-table' : activeSize == 0 }">
 
           <!-- left column -->
           <div :class="['col-lg-'+(12 - activeSize)]" class="col col-form col-md-12 col-sm-12" v-show="canShowForm" v-if="activetab!==false">
@@ -473,6 +473,9 @@
           timepicker: column == 'created_at' ? false : this.model.fields[column].type != 'date',
           datepicker: column == 'created_at' ? true : this.model.fields[column].type != 'time',
           scrollInput: false,
+          onChangeDateTime : (current_date_time, e) => {
+              this.search[e.attr('data-search-date') === undefined ? 'query_to' : 'query'] = moment(current_date_time).format('DD.MM.Y');
+          }
         });
       },
       getParentTableName(force){
@@ -759,7 +762,7 @@
         else if ( searching === false )
           return false;
 
-        return this.search.used === true || (this.model.maximum==0 || this.model.maximum > 10) && this.rows.count > 10;
+        return this.search.used === true || (this.model.maximum==0 || this.model.maximum >= 10) && this.rows.count >= 10;
       },
       getSearchableFields(){
         var keys = [];
@@ -808,6 +811,10 @@
       },
       isSearching(){
         return this.search.used == true;
+      },
+      resetInerval(){
+        this.search.query = '';
+        this.search.query_to = '';
       },
       isLocaleModel(){
         if ( this.model.localization === true )

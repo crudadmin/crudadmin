@@ -4,19 +4,19 @@
       <h3 class="box-title">{{ title }} <small>({{ rows.count }})</small></h3>
 
       <div class="form-group pull-right" v-if="isPaginationEnabled" :title="trans('rows-count')">
-        <select @change="changeLimit" class="form-control" v-model="pagination.limit">
+        <select @change="changeLimit" class="form-control" v-model="pagination.limit" data-limit>
           <option v-for="count in pagination.limits">{{ count }}</option>
         </select>
       </div>
 
-      <div class="dropdown fields-list">
+      <div class="dropdown fields-list" fields-list>
         <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
           {{ trans('rows-list') }}
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu menu-left dropdown-menu-right">
           <li @click="$event.stopPropagation()" v-for="(column, key) in enabled_columns" v-if="canShowColumn(column, key)">
-            <label><input type="checkbox" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
+            <label><input type="checkbox" :data-column="key" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
           </li>
           <li role="separator" class="divider"></li>
           <li><a href="#" @click.prevent="enabled_columns = {}">{{ trans('default') }}</a></li>
@@ -57,7 +57,6 @@
         :rows="rows"
         :rowsdata.sync="rowsData"
         :enabledcolumns="enabled_columns"
-        :item="row"
         :button_loading="button_loading"
         :checked.sync="checked"
         :dragging.sync="dragging"
@@ -245,9 +244,10 @@
           //On first search query reset pagination
           if ( this.searching == true && was_searching == false ){
             this.setPosition(1, true);
+          }
 
           //If is normal searching, then search in every char, or if is turned searching from on to off state, then show normal rows
-          } else if ( this.searching || ( this.searching == false && was_searching == true ) ) {
+          else if ( this.searching || ( this.searching == false && was_searching == true ) ) {
             this.loadRows(true);
           }
         },
@@ -389,7 +389,7 @@
 
         return true;
       },
-      changeLimit(value){
+      changeLimit(){
         localStorage.limit = this.pagination.limit;
 
         //Reset pagination to first page
@@ -415,6 +415,7 @@
         // Remove last auto timeout
         this.destroyTimeout();
 
+        var search_query = {};
         var query = {
           model : this.model.slug,
           parent : this.$parent.getParentTableName(this.model.without_parent),
@@ -427,17 +428,17 @@
 
         //If is enabled searching
         if ( this.searching == true ){
-          query.query = this.search.query;
+          search_query.query = this.search.query;
 
           if ( this.search.interval === true )
-            query.query_to = this.search.query_to;
+            search_query.query_to = this.search.query_to;
 
-          query.column = this.search.column;
+          search_query.column = this.search.column;
         }
 
-        //Add additional columns
+        //Add additional columns which are not in default rows state
         if ( this.enabledColumnsList.length > 0 )
-          query.enabled_columns = this.enabledColumnsList.join(';');
+          search_query.enabled_columns = this.enabledColumnsList.join(';');
 
         //My error
         function customErrorAlert(response){
@@ -449,7 +450,9 @@
           this.$root.openAlert(this.trans('warning'), 'Nastala nečakana chyba, skúste neskôr prosím.<br><br>Príčinu zlyhania požiadavky môžete zistiť na tejto adrese:<br> <a target="_blank" href="'+url+'">'+url+'</a>', 'error');
         }
 
-        this.$http.get(this.$root.requests.get('rows', query)).then(function(response){
+        this.$http.get(this.$root.requests.get('rows', query), {
+          params : search_query,
+        }).then(function(response){
           //If has been component destroyed, and request is delivered... and some conditions
           if ( this.dragging === true || this.progress === true || !this.$root ){
             return;

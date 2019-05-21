@@ -1,6 +1,6 @@
 <template>
   <div>
-    <table v-bind:id="'table-'+model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
+    <table v-bind:id="'table-'+model.slug" :data-table-rows="model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
       <thead>
         <tr>
           <th @click="toggleAllCheckboxes()" v-if="multipleCheckbox">
@@ -14,8 +14,8 @@
           <th class="th-options-buttons"></th>
         </tr>
       </thead>
-      <tbody :data-model="model.slug">
-        <tr v-for="(item, key) in rowsdata" :data-index="item.id" drag-start="beforeUpdateOrder" drop="updateOrder">
+      <tbody>
+        <tr v-for="(item, key) in rowsdata" :data-id="item.id" drag-start="beforeUpdateOrder" drop="updateOrder">
           <td class="checkbox-td" v-if="multipleCheckbox">
             <div class="checkbox-box" @click="checkRow(item.id)">
               <input type="checkbox" :checked="checked.indexOf(item.id) > -1">
@@ -23,7 +23,7 @@
             </div>
           </td>
 
-          <td v-for="(name, field) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
+          <td v-for="(name, field) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]" :data-field="field">
             <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
           </td>
 

@@ -32,6 +32,8 @@ class Article extends AdminModel
         return [
             'name' => 'name:Názov článku|type:string',
             'content' => 'name:Obsah článku|type:text',
+            'score' => 'name:Score|type:integer|min:0|max:10|required',
+            'image' => 'name:Obrázok|type:file|image',
         ];
     }
 }

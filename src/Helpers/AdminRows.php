@@ -54,7 +54,7 @@ class AdminRows
     {
         try {
             return Carbon::createFromFormat($this->model->getField($column)['date_format'] ?: 'd.m.Y', $value);
-        } catch(\Exeption $e){
+        } catch(\Exception $e){
             return null;
         }
     }
@@ -87,6 +87,9 @@ class AdminRows
                 if ( isset($date) && isset($date_to) )
                     $query->whereDate($column, '>=', $date->format('Y-m-d'))
                           ->whereDate($column, '<=', $date_to->format('Y-m-d'));
+
+                if ( !isset($date) && !isset($date_to) )
+                    $query->whereRaw('0');
             }
 
             //If is more than 3 chars for searching

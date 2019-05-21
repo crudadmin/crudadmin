@@ -6,12 +6,104 @@ use Carbon\Carbon;
 use Exception;
 use Facebook\WebDriver\Remote\LocalFileDetector;
 use Gogol\Admin\Tests\Traits\AdminTrait;
+use Illuminate\Foundation\Auth\User;
 use Laravel\Dusk\Browser;
 use PHPUnit\Framework\Assert as PHPUnit;
 
 class DuskBrowser extends Browser
 {
     use AdminTrait;
+
+    /**
+     * Open model page
+     * @param  class $model
+     * @return object
+     */
+    public function openModelPage($model)
+    {
+        $model = $this->getModelClass($model);
+
+        $this->loginAs(User::first())
+             ->visit(admin_action('DashboardController@index'))
+             ->clickLink($model->getProperty('name'));
+
+        return $this;
+    }
+
+    /**
+     * Get rows data in array
+     * @param  class $model
+     * @return arrat
+     */
+    public function getRows($model)
+    {
+        $model = $this->getModelClass($model);
+
+        $rows = $this->script("
+            return (function(){
+                var rows = $('[data-table-rows=\"".$model->getTable()."\"] tbody tr'),
+                    data = [];
+
+                for ( var i = 0; i < rows.length; i++ )
+                {
+                    var columns = $(rows[i]).find('td[data-field]'),
+                        col_data = [];
+
+                    for ( var a = 0; a < columns.length; a++ )
+                        col_data.push([$(columns[a]).attr('data-field'), $(columns[a]).text()]);
+
+                    data.push([$(rows[i]).attr('data-id'), col_data]);
+                }
+
+                return data;
+            })();
+        ");
+
+        $array = [];
+
+        //Fix order of keys from row columns
+        foreach ($rows[0] as $item)
+        {
+            if ( ! array_key_exists($item[0], $array) )
+                $array[$item[0]] = [];
+
+            //Set keys and values
+            foreach ($item[1] as $column)
+            {
+                $array[$item[0]][$column[0]] = $column[1];
+            }
+        }
+
+        return $array;
+    }
+
+    /**
+     * Change table rows limit
+     * @param  integer $limit
+     * @return void
+     */
+    public function changeRowsLimit($limit)
+    {
+        return $this->valueWithEvent('select[data-limit]', $limit, 'change');
+    }
+
+    /**
+     * Change field value with event
+     * @param  string $selector
+     * @param  string $value
+     * @return object
+     */
+    public function valueWithEvent($selector, $value, $type = 'input')
+    {
+        $this->script("
+            var e = document.createEvent('HTMLEvents');
+                e.initEvent('{$type}', true, true);
+
+            $('{$selector}').val({$value})[0].dispatchEvent(e);
+        ");
+
+        return $this;
+    }
 
     /**
      * Fill form with array values
@@ -85,12 +177,12 @@ class DuskBrowser extends Browser
                 }
             }
 
-            //Set file value
+            //Set checkbox value
             else if ( $model->isFieldType($key, ['checkbox']) ) {
                 $this->{$value === true || $value === 1 ? 'check' : 'uncheck'}($key);
             }
 
-            //Set file value
+            //Set radio value
             else if ( $model->isFieldType($key, ['radio']) ) {
                 $this->radio($key, $value);
             }
@@ -102,7 +194,7 @@ class DuskBrowser extends Browser
                 {
                     $date = Carbon::createFromFormat('d.m.Y', $date);
 
-                    $this->script('$(\'[data-field="'.$key.'"]\').find(\'td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]\').click()');
+                    $this->clickDatePicker($date->format('d.m.Y'), '[data-field="'.$key.'"]');
                 }
             }
 
@@ -200,7 +292,6 @@ class DuskBrowser extends Browser
         return $this;
     }
 
-
     /**
      * Check if element has class
      * @param  class $element
@@ -216,6 +307,30 @@ class DuskBrowser extends Browser
         PHPUnit::assertContains(
             $class, $classes,
             'Class ['.$class.'] does not exists in element ['.$element.']'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Check if table rows has visible given fields
+     * @param  class $model
+     * @param  array  $array
+     * @return object
+     */
+    public function assertVisibleColumnsList($model, $excepted = [])
+    {
+        $model = $this->getModelClass($model);
+
+        $columns = $this->script("return $('[data-table-rows=\"".$model->getTable()."\"] thead th').map(function(){
+            return $(this).attr('class')
+        })");
+
+        PHPUnit::assertEquals(
+            $columns[0], array_map(function($item){
+                return 'th-'.$item;
+            }, array_merge($excepted, ['options-buttons'])),
+            'Table ['.$model->getTable().'] does not match excepted columns list'
         );
 
         return $this;
@@ -304,6 +419,21 @@ class DuskBrowser extends Browser
 
         //Wait till row will be opened
         $this->waitFor($selector.'.btn-success');
+
+        return $this;
+    }
+
+    /**
+     * Click datepicker value
+     * @param  string $string d.m.Y
+     * @param  string $selector
+     * @return object
+     */
+    public function clickDatePicker($date, $selector = null)
+    {
+        $date = Carbon::createFromFormat('d.m.Y', $date);
+
+        $this->script('$(\''.($selector ?: 'body').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
 
         return $this;
     }
