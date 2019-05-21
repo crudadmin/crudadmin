@@ -3,7 +3,6 @@
   "description": "CrudAdmin",
   "version": "2.0.0",
   "scripts": {
-    "precommit": "echo 1",
     "dev": "npm run development",
     "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "watch": "npm run development -- --watch",
