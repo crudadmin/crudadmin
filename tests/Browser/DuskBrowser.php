@@ -210,7 +210,7 @@ class DuskBrowser extends Browser
             }
         }
 
-        return $this;
+        return $this->pause(300);
     }
 
     /**

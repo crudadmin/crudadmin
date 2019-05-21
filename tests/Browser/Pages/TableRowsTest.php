@@ -46,14 +46,14 @@ class TableRowsTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_medium_grid_size()
+    public function test_small_grid_size()
     {
         //Create 100 articles
         factory(Article::class, 10)->create();
 
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(Article::class)
-                    ->assertHasClass('li[data-size="medium"]', 'active');
+                    ->assertHasClass('li[data-size="small"]', 'active');
         });
     }
 
