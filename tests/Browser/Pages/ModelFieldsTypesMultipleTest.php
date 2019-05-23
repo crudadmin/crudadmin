@@ -15,12 +15,20 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     use DropUploads;
 
     /** @test */
-    public function test_create_new_row_and_then_update_same_data()
+    public function test_validation_errors_then_create_new_row_and_then_update_without_change()
     {
         $row = $this->getFormData();
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
+            $fieldKeys = array_keys((new FieldsTypesMultiple)->getFields());
+
             $browser->openModelPage(FieldsTypesMultiple::class)
+
+                    //Check if validation does work
+                    ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
+                    ->submitForm()
+                    ->pause(500)
+                    ->assertHasValidationError(FieldsTypesMultiple::class, $fieldKeys)
 
                     //Check if form values has been successfully filled
                     ->fillForm(FieldsTypesMultiple::class, $row)
@@ -32,6 +40,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Check if form values has been successfully reseted after save
                     ->closeAlert()
+                    ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsTypesMultiple::class)
 
                     //Check if table after creation contains of correct column values

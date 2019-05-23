@@ -80,7 +80,7 @@ class DuskBrowser extends Browser
     /**
      * Check row exists in table rows
      * @param  class $model
-     * @param  array  $array
+     * @param  array $array
      * @param  integer  $id
      * @return object
      */
@@ -478,6 +478,94 @@ class DuskBrowser extends Browser
             $class, $classes,
             'Class ['.$class.'] does exists in element ['.$element.']'
         );
+
+        return $this;
+    }
+
+     /**
+     * Return selectors to validation error message and error parent class
+     * @param  string $model
+     * @param  string $key
+     * @return array
+     */
+    private function getValidationErrorSelectors($model, $origKey)
+    {
+        $model = $this->getModelClass($model);
+        $key = $origKey;
+
+        //Add multiple key selector if missing
+        if ( $model->hasFieldParam($key, 'multiple') && strpos($key, '[]') === false ){
+            $key .= '[]';
+        }
+
+        //Reset error message selector and error class selector
+        $selectorMessage = null;
+        $selectorClass = null;
+
+        if ( $model->isFieldType($origKey, ['string', 'text', 'editor', 'integer', 'decimal', 'file', 'password', 'date', 'datetime', 'time']) )
+            $selectorMessage = "$('input[name=\"{$key}\"], textarea[name=\"{$key}\"]').parent()";
+
+        if ( $model->isFieldType($origKey, ['select']) )
+            $selectorMessage = "$('select[name=\"{$key}\"]').parent().parent()";
+
+        if ( $model->isFieldType($origKey, ['radio']) )
+            $selectorMessage = "$('input[name=\"{$key}\"]').parent().parent().parent()";
+
+        if ( $model->isFieldType($origKey, ['file']) )
+            $selectorClass = "$('input[name=\"{$key}\"]').parent().parent()";
+
+        //Checkbox can not be required field
+        if ( $model->isFieldType($origKey, ['checkbox']) )
+            return false;
+
+        if ( ! $selectorMessage )
+            throw new Exception('Field ['.$key.'] in model ['.$model->getTable().'] is not valid type.');
+
+        //Check if element does not
+        return [
+            'errorClass' => $this->script('return '.($selectorClass ? $selectorClass : $selectorMessage).'.hasClass("has-error")')[0],
+            'errorMessage' => $this->script('return '.$selectorMessage.'.find("> span.help-block").length == 1')[0]
+        ];
+    }
+
+    /**
+     * Check if input does have validation error
+     * @param  class $model
+     * @param  array $array
+     * @return object
+     */
+    public function assertDoesNotHaveValidationError($model, $fields)
+    {
+        foreach ($fields as $key)
+        {
+            //Skip non validation inputs
+            if ( ($selectors = $this->getValidationErrorSelectors($model, $key)) === false )
+                continue;
+
+            PHPUnit::assertFalse($selectors['errorClass'], 'Field ['.$key.'] does have validation error class.');
+            PHPUnit::assertFalse($selectors['errorMessage'], 'Field ['.$key.'] does have validation error message.');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if input have validation error
+     * @param  class $model
+     * @param  array $array
+     * @return object
+     */
+    public function assertHasValidationError($model, $fields)
+    {
+        foreach ($fields as $key)
+        {
+            //Skip non validation inputs
+            if ( ($selectors = $this->getValidationErrorSelectors($model, $key)) === false )
+                continue;
+
+            PHPUnit::assertTrue($selectors['errorClass'], 'Field ['.$key.'] does not have validation error class.');
+            PHPUnit::assertTrue($selectors['errorMessage'], 'Field ['.$key.'] does not have validation error message.');
+        }
 
         return $this;
     }

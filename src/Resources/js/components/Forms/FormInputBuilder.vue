@@ -19,7 +19,8 @@
       <div class="form-group" :class="{ disabled : isDisabled, 'multiple-date' : isMultipleDatepicker }" v-if="isDatepicker">
         <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
         <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" type="text" :name="isMultipleDatepicker ? '' : getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
-        <input type="hidden" :name="getFieldName + '[]'" v-for="date in getMultiDates" :value="getMultiDateValue(date)">
+        <input type="hidden" :name="getFieldName + '[]'" v-if="isMultipleDatepicker && getMultiDates.length == 0" value="">
+        <input type="hidden" :name="getFieldName + '[]'" :value="getMultiDateValue(date)" v-if="isMultipleDatepicker" v-for="date in getMultiDates">
         <small>{{ field.title }}</small>
       </div>
 

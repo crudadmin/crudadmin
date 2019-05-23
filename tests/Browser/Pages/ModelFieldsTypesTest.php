@@ -15,12 +15,20 @@ class ModelFieldsTypesTest extends BrowserTestCase
     use DropUploads;
 
     /** @test */
-    public function test_create_new_row_and_then_update_same_data()
+    public function test_validation_errors_then_create_new_row_and_then_update_without_change()
     {
         $row = $this->getFormData();
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
+            $fieldKeys = array_keys((new FieldsType)->getFields());
+
             $browser->openModelPage(FieldsType::class)
+
+                    //Check if validation does work
+                    ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
+                    ->submitForm()
+                    ->pause(500)
+                    ->assertHasValidationError(FieldsType::class, $fieldKeys)
 
                     //Check if form values has been successfully filled
                     ->fillForm(FieldsType::class, $row)
@@ -30,8 +38,9 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
 
-                    //Check if form values has been successfully reseted after save
+                    //Check if form values has been successfully reseted after save and validation errors are gone
                     ->closeAlert()
+                    ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsType::class)
 
                     //Check if table after creation contains of correct column values
