@@ -19,20 +19,28 @@ class ModelFieldsTypesTest extends BrowserTestCase
     /** @test */
     public function test_create_new_row()
     {
-        $this->browse(function (DuskBrowser $browser) {
+        $row = $this->getFormData();
+
+        $this->browse(function (DuskBrowser $browser) use ($row) {
             $browser->loginAs(User::first())
                     ->visit(admin_action('DashboardController@index'))
                     ->assertSeeLink('Fields types')
                     ->clickLink('Fields types')
 
-                    ->fillForm(FieldsType::class, $this->getFormData())
-                    ->assertHasFormValues(FieldsType::class, array_diff_key($this->getFormData(), array_flip(['editor', 'file'])))
+                    //Check if form values has been successfully filled
+                    ->fillForm(FieldsType::class, $row)
+                    ->assertHasFormValues(FieldsType::class, $row)
 
+                    //Check if form has been successfully saved
                     ->submitForm()
-                    ->assertSeeSuccess(trans('admin::admin.success-created'));
+                    ->assertSeeSuccess(trans('admin::admin.success-created'))
+
+                    //Check if form values has been successfully reseted
+                    ->closeAlert()
+                    ->assertFormIsEmpty(FieldsType::class);
         });
 
-        $this->assertRowExists(FieldsType::class, $this->getFormData());
+        $this->assertRowExists(FieldsType::class, $row);
     }
 
     /** @test */
@@ -50,7 +58,6 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->fillForm(FieldsType::class, $row)
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
-                    // ->assertVue('row', [], '@model-builder') check if form has been resetted, need complete
                     ->closeAlert()
                     ->scrollToElement('body')
 
@@ -64,7 +71,12 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     //Save existing row and check if has correct values
                     ->saveForm()
                     ->assertHasFormValues(FieldsType::class, $row)
-                    ->assertSeeSuccess(trans('admin::admin.success-save'));
+                    ->assertSeeSuccess(trans('admin::admin.success-save'))
+                    ->closeAlert()
+
+                    //Reset form after update and check for empty values
+                    ->press(trans('admin::admin.new-row'))
+                    ->assertFormIsEmpty(FieldsType::class);
         });
 
         $this->assertRowExists(FieldsType::class, $row);

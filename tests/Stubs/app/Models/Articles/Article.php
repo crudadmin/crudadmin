@@ -16,9 +16,9 @@ class Article extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Články';
+    protected $name = 'Articles';
 
-    protected $title = 'Upravte vaše články...';
+    protected $title = 'This is simple model test, with some articles sample data.';
 
     /*
      * Automatic form and database generation
@@ -30,10 +30,10 @@ class Article extends AdminModel
     public function fields()
     {
         return [
-            'name' => 'name:Názov článku|type:string',
-            'content' => 'name:Obsah článku|type:text',
+            'name' => 'name:Article name|type:string',
+            'content' => 'name:Content data|type:text',
             'score' => 'name:Score|type:integer|min:0|max:10|required',
-            'image' => 'name:Obrázok|type:file|image',
+            'image' => 'name:Image|type:file|image',
         ];
     }
 }

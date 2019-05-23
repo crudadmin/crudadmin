@@ -246,6 +246,57 @@ class DuskBrowser extends Browser
     }
 
     /**
+     * Check if form is empty and has no values
+     * @param  class $model
+     * @param  array  $array
+     * @return object
+     */
+    public function assertFormIsEmpty($model)
+    {
+        $model = $this->getModelClass($model);
+
+        foreach ($model->getFields() as $key => $value)
+        {
+            //Check if input has empty value
+            $this->assertEmptyValue($model, $key);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if input type is empty
+     * @param  class $model
+     * @param  array  $array
+     * @return object
+     */
+    public function assertEmptyValue($model, $key)
+    {
+        $model = $this->getModelClass($model);
+
+        //Create multiple key selector for multiple type fields
+        $selectorKey = ($isMultiple = $model->hasFieldParam($key, ['multiple'])) ? $key.'[]' : $key;
+
+        //In some types of elements we need search for checked elements
+        $stateSelector = $model->isFieldType($key, ['radio', 'checkbox']) ? ':checked' : '';
+
+        //Get jquery value
+        $actual = $this->script('return $("input[name=\"'.$selectorKey.'\"]'.$stateSelector.', select[name=\"'.$selectorKey.'\"], textarea[name=\"'.$selectorKey.'\"]").eq(0).val();')[0];
+
+        //If input is multiple select type, then we need check if value is empty array
+        $expected = $isMultiple && $model->isFieldType($key, 'select') ? [] : null;
+
+        //Check javascript input value
+        PHPUnit::assertEquals($expected, $actual, 'Input ['.$selectorKey.'] is not empty in ['.$model->getTable().'] form.');
+
+        //Check vuejs values
+        $this->assertVue('row.'.$key, null, '@model-builder');
+        $this->assertVue('model.fields.'.$key.'.value', null, '@model-builder');
+
+        return $this;
+    }
+
+    /**
      * Check if element has class
      * @param  class $element
      * @param  array  $class

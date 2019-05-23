@@ -27,16 +27,23 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->assertSeeLink('Fields types multiple')
                     ->clickLink('Fields types multiple')
 
+                    //Check if form values has been successfully filled
                     ->fillForm(FieldsTypesMultiple::class, $row)
                     ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+
+                    //Check if form has been successfully saved
                     ->submitForm()
-                    ->assertSeeSuccess(trans('admin::admin.success-created'));
+                    ->assertSeeSuccess(trans('admin::admin.success-created'))
+
+                    //Check if form values has been successfully reseted
+                    ->closeAlert()
+                    ->assertFormIsEmpty(FieldsTypesMultiple::class);
         });
 
         $this->assertRowExists(FieldsTypesMultiple::class, $row);
     }
 
-    // /** @test */
+    /** @test */
     public function test_update_old_row()
     {
         $row = $this->getFormData();
@@ -48,10 +55,8 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Create new row
                     ->fillForm(FieldsTypesMultiple::class, $row)
-                    ->assertHasFormValues(FieldsTypesMultiple::class, $row)
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
-                    // ->assertVue('row', [], '@model-builder') check if form has been resetted, need complete
                     ->closeAlert()
                     ->scrollToElement('body')
 
@@ -59,11 +64,16 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->openRow(1)
                     ->assertHasFormValues(FieldsTypesMultiple::class, $row)
 
-                    //Save existing row and check if has correct values
+                    //Wait one second for proper component state and save existing row and check if has correct values
                     ->pause(1000)
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
-                    ->assertHasFormValues(FieldsTypesMultiple::class, $row);
+                    ->closeAlert()
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+
+                    //Reset form after update and check for empty values
+                    ->press(trans('admin::admin.new-row'))
+                    ->assertFormIsEmpty(FieldsTypesMultiple::class);
         });
 
         $this->assertRowExists(FieldsTypesMultiple::class, $row);
