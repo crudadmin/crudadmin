@@ -32,7 +32,10 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Check if form values has been successfully reseted
                     ->closeAlert()
-                    ->assertFormIsEmpty(FieldsType::class);
+                    ->assertFormIsEmpty(FieldsType::class)
+
+                    //Check if table contains of correct column values
+                    ->assertTableRowExists(FieldsType::class, $this->getTableRow($row));
         });
 
         $this->assertRowExists(FieldsType::class, $row);
@@ -68,7 +71,10 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Reset form after update and check for empty values
                     ->press(trans('admin::admin.new-row'))
-                    ->assertFormIsEmpty(FieldsType::class);
+                    ->assertFormIsEmpty(FieldsType::class)
+
+                    //Check if table contains of correct column values
+                    ->assertTableRowExists(FieldsType::class, $this->getTableRow($row));
         });
 
         $this->assertRowExists(FieldsType::class, $row);
@@ -81,8 +87,8 @@ class ModelFieldsTypesTest extends BrowserTestCase
             'text' => 'This is my text example value',
             'editor' => '<p>This is my editor <strong>example</strong> value</p>',
             'select' => 'option a',
-            'integer' => 10,
-            'decimal' => 11.5,
+            'integer' => '10',
+            'decimal' => '11.50',
             'file' => 'image1.jpg',
             'password' => 'password_test',
             'date' => date('d.m.Y'),
@@ -93,5 +99,15 @@ class ModelFieldsTypesTest extends BrowserTestCase
         ];
 
         return isset($key) ? $data[$key] : $data;
+    }
+
+    public function getTableRow($row)
+    {
+        $row = ['id' => '1'] + $row;
+        $row['file'] = trans('admin::admin.show-image');
+        unset($row['password']);
+        unset($row['editor']);
+
+        return $row;
     }
 }

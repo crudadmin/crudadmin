@@ -3,8 +3,9 @@
 
     <!-- File -->
     <div v-if="isFile(field)" class="filesList">
-      <div v-for="file in getFiles(item, field)">
-        <file :file="file" :field="field" :model="model" :image="image"></file> <span>, </span>
+      <div v-for="(file, index) in getFiles">
+        <file :file="file" :field="field" :model="model" :image="image"></file>
+        <span v-if="index != getFiles.length - 1">, </span>
       </div>
     </div>
 
@@ -65,6 +66,17 @@ export default {
     },
 
     computed: {
+      getFiles(){
+        var value = this.fieldValue;
+
+        if ( ! value )
+          return [];
+
+        if ( $.isArray(value) )
+          return value;
+
+        return [ value ];
+      },
       fieldValue()
       {
         var field = this.field in this.model.fields ? this.model.fields[this.field] : null,
@@ -204,17 +216,6 @@ export default {
 
         return false;
 
-      },
-      getFiles(row, field){
-        var value = this.fieldValue;
-
-        if ( ! value )
-          return [];
-
-        if ( $.isArray(value) )
-          return value;
-
-        return [ value ];
       },
       isRealField(key){
         return key in this.model.fields;

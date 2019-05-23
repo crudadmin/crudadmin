@@ -50,7 +50,7 @@ class DuskBrowser extends Browser
                         col_data = [];
 
                     for ( var a = 0; a < columns.length; a++ )
-                        col_data.push([$(columns[a]).attr('data-field'), $(columns[a]).text()]);
+                        col_data.push([$(columns[a]).attr('data-field'), $(columns[a]).text().replace(/\s+/g, ' ').trim()]);
 
                     data.push([$(rows[i]).attr('data-id'), col_data]);
                 }
@@ -75,6 +75,37 @@ class DuskBrowser extends Browser
         }
 
         return $array;
+    }
+
+    /**
+     * Check row exists in table rows
+     * @param  class $model
+     * @param  array  $array
+     * @param  integer  $id
+     * @return object
+     */
+    public function assertTableRowExists($model, $row = [], $id = null)
+    {
+        $model = $this->getModelClass($model);
+
+        //Mutate diven rows data
+        foreach ($row as $key => $value)
+        {
+            //Update checkbox values
+            if ( $model->isFieldType($key, ['checkbox']) )
+                $row[$key] = $value ? trans('admin::admin.yes') : trans('admin::admin.yes');
+
+            //Everything need to be string
+            $row[$key] = (string)$row[$key];
+        }
+
+        //Get id from row, if is not given
+        if ( ! $id )
+            $id = $row['id'];
+
+        PHPUnit::assertEquals($this->getRows($model)[$id], $row, 'Row '.$id.' does not match diven data in table rows.');
+
+        return $this;
     }
 
     /**
