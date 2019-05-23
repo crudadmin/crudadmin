@@ -93,10 +93,13 @@ class DuskBrowser extends Browser
         {
             //Update checkbox values
             if ( $model->isFieldType($key, ['checkbox']) )
-                $row[$key] = $value ? trans('admin::admin.yes') : trans('admin::admin.yes');
+                $row[$key] = $value ? trans('admin::admin.yes') : trans('admin::admin.no');
 
             //Everything need to be string
-            $row[$key] = (string)$row[$key];
+            if ( is_array($row[$key]) )
+                $row[$key] = implode(', ', $row[$key]);
+            else if ( is_numeric($row[$key]) )
+                $row[$key] = (string)$row[$key];
         }
 
         //Get id from row, if is not given
@@ -150,7 +153,7 @@ class DuskBrowser extends Browser
         {
             //Set string value
             if (
-                $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password', 'date', 'datetime', 'time'])
+                $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password'])
                 && ! $model->hasFieldParam($key, 'multiple')
             ) {
                 $this->type($key, $value);
@@ -219,29 +222,70 @@ class DuskBrowser extends Browser
             }
 
             //Set multiple date value
-            else if ( $model->isFieldType($key, 'date') && $model->hasFieldParam($key, 'multiple') )
+            else if ( $model->isFieldType($key, 'date') )
             {
-                foreach ($value as $date)
+                //Fill multiple date
+                if ( $model->hasFieldParam($key, 'multiple') )
                 {
-                    $date = Carbon::createFromFormat('d.m.Y', $date);
+                    foreach ($value as $date)
+                    {
+                        $this->clickDatePicker($date, '[data-field="'.$key.'"]');
+                    }
+                }
 
-                    $this->clickDatePicker($date->format('d.m.Y'), '[data-field="'.$key.'"]');
+                //Open calendar and click on specific date
+                else {
+                    //We need reset cursor before opening date and wait half of second till calendar opens
+                    $this->resetFocus()
+                         ->click('input[name="'.$key.'"]')
+                         ->pause(500)
+                         ->clickDatePicker($value);
                 }
             }
 
-            //Set multiple time value
-            else if ( $model->isFieldType($key, 'time') && $model->hasFieldParam($key, 'multiple') )
+            //Set datetime value
+            else if ( $model->isFieldType($key, 'datetime') )
             {
-                foreach ($value as $time)
-                {
-                    $time = explode(':', $time);
+                $date = explode(' ', $value);
 
-                    $this->script('$(\'[data-field="'.$key.'"]\').find(\'div[data-hour="'.(int)$time[0].'"][data-minute="'.(int)$time[1].'"]\').click()');
+                //We need reset cursor before opening date and wait half of second till calendar opens
+                $this->resetFocus()
+                     ->click('input[name="'.$key.'"]')
+                     ->pause(500)
+                     ->clickDatePicker($date[0])
+                     ->clickTimePicker($date[1]);
+            }
+
+            //Set multiple time value
+            else if ( $model->isFieldType($key, 'time') )
+            {
+                //Update multiple time value
+                if ( $model->hasFieldParam($key, 'multiple') )
+                {
+                    foreach ($value as $time)
+                       $this->clickTimePicker($time, '[data-field="'.$key.'"]');
+                }
+
+                //Open calendar and click on time
+                else {
+                    //We need reset cursor before opening date and wait half of second till calendar opens
+                    $this->resetFocus()
+                         ->click('input[name="'.$key.'"]')
+                         ->pause(500)
+                         ->clickTimePicker($value);
                 }
             }
         }
 
         return $this->pause(300);
+    }
+
+    /*
+     * Resets focus by clicking to nowhere
+     */
+    public function resetFocus()
+    {
+        return $this->click('> div');
     }
 
     /**
@@ -515,7 +559,22 @@ class DuskBrowser extends Browser
     {
         $date = Carbon::createFromFormat('d.m.Y', $date);
 
-        $this->script('$(\''.($selector ?: 'body').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
+        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
+
+        return $this;
+    }
+
+    /**
+     * Click datepicker value
+     * @param  string $string d.m.Y
+     * @param  string $selector
+     * @return object
+     */
+    public function clickTimePicker($time, $selector = null)
+    {
+        $time = explode(':', $time);
+
+        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' div[data-hour="'.(int)$time[0].'"][data-minute="'.(int)$time[1].'"]:visible\').click()');
 
         return $this;
     }
@@ -543,5 +602,4 @@ class DuskBrowser extends Browser
 
         return $this;
     }
-
 }

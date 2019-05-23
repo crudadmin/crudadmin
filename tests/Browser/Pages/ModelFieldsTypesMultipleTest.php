@@ -15,7 +15,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     use DropUploads;
 
     /** @test */
-    public function test_create_new_row()
+    public function test_create_new_row_and_then_update_same_data()
     {
         $row = $this->getFormData();
 
@@ -32,22 +32,37 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Check if form values has been successfully reseted
                     ->closeAlert()
-                    ->assertFormIsEmpty(FieldsTypesMultiple::class);
+                    ->assertFormIsEmpty(FieldsTypesMultiple::class)
+
+                    //Check if table after creation contains of correct column values
+                    ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($row))
+
+                    //Open row, update it, and check if still has same values after update without changing anything
+                    ->openRow(1)
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+                    ->pause(1000)
+                    ->saveForm()
+                    ->assertSeeSuccess(trans('admin::admin.success-save'))
+                    ->closeAlert()
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+                    ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($row));
         });
 
         $this->assertRowExists(FieldsTypesMultiple::class, $row);
     }
 
     /** @test */
-    public function test_update_old_row()
+    public function test_update_existing_row()
     {
-        $row = $this->getFormData();
+        $create = $this->getFormData();
+        $update = $this->getFormDataUpdated();
+        $rowUpdated = $this->createUpdatedRecord($create, $update);
 
-        $this->browse(function (DuskBrowser $browser) use ($row) {
+        $this->browse(function (DuskBrowser $browser) use ($create, $update, $rowUpdated) {
             $browser->openModelPage(FieldsTypesMultiple::class)
 
                     //Create new row
-                    ->fillForm(FieldsTypesMultiple::class, $row)
+                    ->fillForm(FieldsTypesMultiple::class, $create)
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
                     ->closeAlert()
@@ -55,26 +70,33 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Open row and check if has correct values
                     ->openRow(1)
-                    ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $create)
 
-                    //Wait one second for proper component state and save existing row and check if has correct values
+                    //Update row and check if values has been properly changed
+                    ->fillForm(FieldsTypesMultiple::class, $update)
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $rowUpdated)
+
+                    //Wait one second for proper component state and save updated row and check if has correct values
                     ->pause(1000)
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
-                    ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $rowUpdated)
 
                     //Reset form after update and check for empty values
                     ->press(trans('admin::admin.new-row'))
-                    ->assertFormIsEmpty(FieldsTypesMultiple::class);
+                    ->assertFormIsEmpty(FieldsTypesMultiple::class)
+
+                    //Check if table contains of correct column values
+                    ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($rowUpdated));
         });
 
-        $this->assertRowExists(FieldsTypesMultiple::class, $row);
+        $this->assertRowExists(FieldsTypesMultiple::class, $rowUpdated);
     }
 
-    public function getFormData($key = null)
+    public function getFormData()
     {
-        $data = [
+        return [
             'select' => 'option a',
             'select_multiple' => ['option c', 'option a'],
             'file' => 'image2.jpg',
@@ -84,11 +106,53 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                 Carbon::now()->format('d.m.Y'),
                 Carbon::now()->addDays(-1)->format('d.m.Y'),
             ],
-            'datetime' => date('d.m.Y H:i'),
-            'time' => date('H:i'),
+            'datetime' => date('d.m.Y H:00'),
+            'time' => date('H:00'),
             'time_multiple' => [ '00:30', '02:00', '12:00', '14:00', '17:30', '20:00', '21:30', '22:00' ],
         ];
+    }
 
-        return isset($key) ? $data[$key] : $data;
+    public function getFormDataUpdated()
+    {
+        return [
+            'select' => 'option b',
+            'select_multiple' => ['option b'],
+            'file_multiple' => ['image2.jpg'],
+            'date' => Carbon::now()->addDays(-1)->format('d.m.Y'),
+            'date_multiple' => [
+                Carbon::now()->addDays(-2)->format('d.m.Y'),
+            ],
+            'datetime' => Carbon::now()->addDays(-1)->format('d.m.Y H:00'),
+            'time' => Carbon::now()->addHours(-1)->format('H:00'),
+            'time_multiple' => [ '16:00' ],
+        ];
+    }
+
+    /*
+     * Build array of correct values in table row
+     */
+    public function getTableRow($original)
+    {
+        $row = ['id' => '1'] + $original;
+
+        //Limit text with dots
+        foreach ($original as $key => $value)
+        {
+            //Join all array values with dots
+            if ( is_array($value) )
+                $row[$key] = implode(', ', $value);
+
+            //Set limit of strings
+            if ( is_string($row[$key]) )
+                $row[$key] = $this->strLimit($row[$key], 20);
+        }
+
+        //Overide file values with clickable texts
+        $row['file'] = trans('admin::admin.show-image');
+        $row['file_multiple'] = implode(' , ', array_map(function($item){
+            return trans('admin::admin.show-image');
+        }, $original['file_multiple']));
+
+        return $row;
     }
 }

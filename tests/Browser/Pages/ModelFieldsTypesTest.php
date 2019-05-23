@@ -15,7 +15,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
     use DropUploads;
 
     /** @test */
-    public function test_create_new_row()
+    public function test_create_new_row_and_then_update_same_data()
     {
         $row = $this->getFormData();
 
@@ -34,7 +34,20 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->closeAlert()
                     ->assertFormIsEmpty(FieldsType::class)
 
-                    //Check if table contains of correct column values
+                    //Check if table after creation contains of correct column values
+                    ->assertTableRowExists(FieldsType::class, $this->getTableRow($row))
+
+                    //Open row, update it, and check if still has same values after update without changing anything
+                    ->openRow(1)
+                    ->assertHasFormValues(FieldsType::class, $row)
+                    ->fillForm(FieldsType::class, [
+                        'password' => $this->getFormData('password')
+                    ])
+                    ->pause(1000)
+                    ->saveForm()
+                    ->assertSeeSuccess(trans('admin::admin.success-save'))
+                    ->closeAlert()
+                    ->assertHasFormValues(FieldsType::class, $row)
                     ->assertTableRowExists(FieldsType::class, $this->getTableRow($row));
         });
 
@@ -42,15 +55,17 @@ class ModelFieldsTypesTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_update_old_row()
+    public function test_update_existing_row()
     {
-        $row = $this->getFormData();
+        $create = $this->getFormData();
+        $update = $this->getFormDataUpdated();
+        $rowUpdated = $this->createUpdatedRecord($create, $update);
 
-        $this->browse(function (DuskBrowser $browser) use($row) {
+        $this->browse(function (DuskBrowser $browser) use ($create, $update, $rowUpdated) {
             $browser->openModelPage(FieldsType::class)
 
                     //Create new row
-                    ->fillForm(FieldsType::class, $row)
+                    ->fillForm(FieldsType::class, $create)
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
                     ->closeAlert()
@@ -58,14 +73,15 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Open row and check if has correct values
                     ->openRow(1)
-                    ->assertHasFormValues(FieldsType::class, $row)
-                    ->fillForm(FieldsType::class, [
-                        'password' => $this->getFormData('password')
-                    ])
+                    ->assertHasFormValues(FieldsType::class, $create)
+
+                    //Update row and check if values has been properly changed
+                    ->fillForm(FieldsType::class, $update)
+                    ->assertHasFormValues(FieldsType::class, $rowUpdated)
 
                     //Save existing row and check if has correct values
                     ->saveForm()
-                    ->assertHasFormValues(FieldsType::class, $row)
+                    ->assertHasFormValues(FieldsType::class, $rowUpdated)
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
 
@@ -74,10 +90,11 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertFormIsEmpty(FieldsType::class)
 
                     //Check if table contains of correct column values
-                    ->assertTableRowExists(FieldsType::class, $this->getTableRow($row));
+                    ->pause(100)
+                    ->assertTableRowExists(FieldsType::class, $this->getTableRow($rowUpdated));
         });
 
-        $this->assertRowExists(FieldsType::class, $row);
+        $this->assertRowExists(FieldsType::class, $rowUpdated);
     }
 
     public function getFormData($key = null)
@@ -92,8 +109,8 @@ class ModelFieldsTypesTest extends BrowserTestCase
             'file' => 'image1.jpg',
             'password' => 'password_test',
             'date' => date('d.m.Y'),
-            'datetime' => date('d.m.Y H:i'),
-            'time' => date('H:i'),
+            'datetime' => date('d.m.Y H:00'),
+            'time' => date('H:00'),
             'checkbox' => true,
             'radio' => 'b',
         ];
@@ -101,16 +118,40 @@ class ModelFieldsTypesTest extends BrowserTestCase
         return isset($key) ? $data[$key] : $data;
     }
 
+    public function getFormDataUpdated()
+    {
+        return [
+            'string' => 'This is my updated string example value',
+            'text' => 'This is my updated text example value',
+            'editor' => '<p>This is my updated editor <strong>example</strong> value</p>',
+            'select' => 'option b',
+            'integer' => '12',
+            'decimal' => '14.20',
+            'file' => 'image2.jpg',
+            'password' => 'password_test',
+            'date' => Carbon::now()->addDays(-1)->format('d.m.Y'),
+            'datetime' => Carbon::now()->addDays(-1)->format('d.m.Y H:00'),
+            'time' => Carbon::now()->addHours(-1)->format('H:00'),
+            'checkbox' => false,
+            'radio' => 'c',
+        ];
+    }
+
+    /*
+     * Build array of correct values in table row
+     */
     public function getTableRow($row)
     {
         $row = ['id' => '1'] + $row;
-        $row['file'] = trans('admin::admin.show-image');
+
         unset($row['password']);
         unset($row['editor']);
 
         //Limit text with dots
         foreach ($row as $key => $value)
             $row[$key] = str_limit($value, 20);
+
+        $row['file'] = trans('admin::admin.show-image');
 
         return $row;
     }

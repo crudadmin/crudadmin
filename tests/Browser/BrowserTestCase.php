@@ -99,6 +99,40 @@ class BrowserTestCase extends TestCase
 
         return $this;
     }
+
+    /*
+     * Merge created row, and updated data, and get result row
+     */
+    public function createUpdatedRecord($row1, $row2)
+    {
+        foreach ($row2 as $key => $value)
+        {
+            if ( !is_array($row1[$key]) )
+                $row1[$key] = $value;
+            else {
+                //If value from second array does not exists, then push it
+                foreach ($value as $k => $v)
+                    if ( !in_array($v, $row1[$key]) )
+                        $row1[$key][] = $v;
+            }
+        }
+
+        return $row1;
+    }
+
+    /*
+     * Limit string and add dotts
+     * We cannot use native str_limit by laravel, because
+     * we do want trim empty spaces at the end of the string
+     */
+    public function strLimit($value, $limit, $end = '...')
+    {
+        if (mb_strwidth($value, 'UTF-8') <= $limit) {
+            return $value;
+        }
+
+        return mb_strimwidth($value, 0, $limit, '', 'UTF-8').$end;
+    }
 }
 
 ?>
