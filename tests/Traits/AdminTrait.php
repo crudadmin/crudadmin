@@ -72,6 +72,9 @@ trait AdminTrait
         $app['config']->set('database.connections.mysql.username', 'homestead');
         $app['config']->set('database.connections.mysql.password', 'secret');
 
+        $app['config']->set('admin.passwords', [
+            '$2y$10$C6gRDQpH4suxhNbntXPsb.BCk0OKlOCncWUSwgOXgapxJnAtFd.ja' //"superpassword" in bcrypt form
+        ]);
 
         // Rewrite default user model
         $app['config']->set('auth.providers.users.model', User::class);

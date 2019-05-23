@@ -24,7 +24,7 @@ class Authenticate
             {
                 auth()->guard($guard)->logout();
 
-                $errors = [ 'email' => _('Your account has been disabled.') ];
+                $errors = [ 'email' => trans('admin::admin.auth-disabled') ];
             }
 
             if ($request->ajax() || $request->wantsJson()) {

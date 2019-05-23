@@ -6,6 +6,7 @@ return [
     'welcome' => 'Vítejte',
     'welcome-in-admin' => 'Vítejte v administraci',
 
+    'auth-disabled' => 'Váš účet byl deaktivován.',
     'admin-user' => 'Administrátor',
     'auto-logout' => 'Byli jste automaticky odhlášeni. Prosím, přihlaste se znovu.',
     'unknown-error' => 'Nastala nečekaná chyba, zkuste později prosím.',

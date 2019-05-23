@@ -6,6 +6,7 @@ return [
     'welcome' => 'Welcome',
     'welcome-in-admin' => 'Welcome to admin',
 
+    'auth-disabled' => 'Your account has been disabled.',
     'admin-user' => 'Administrator',
     'auto-logout' => 'You were automatically logged off. Please sign in again.',
     'unknown-error' => 'An error occurred unexpectedly, please try again later',
