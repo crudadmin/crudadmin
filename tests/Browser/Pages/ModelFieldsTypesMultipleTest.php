@@ -72,7 +72,6 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsTypesMultiple::class, $rowUpdated)
 
                     //Wait one second for proper component state and save updated row and check if has correct values
-                    ->pause(1000)
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
@@ -83,6 +82,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->assertFormIsEmpty(FieldsTypesMultiple::class)
 
                     //Check if table contains of correct column values
+                    ->pause(100)
                     ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($rowUpdated));
         });
 
