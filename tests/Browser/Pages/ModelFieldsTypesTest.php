@@ -108,6 +108,10 @@ class ModelFieldsTypesTest extends BrowserTestCase
         unset($row['password']);
         unset($row['editor']);
 
+        //Limit text with dots
+        foreach ($row as $key => $value)
+            $row[$key] = str_limit($value, 20);
+
         return $row;
     }
 }

@@ -10,8 +10,7 @@
     </div>
 
     <!-- Table value -->
-    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue" v-html="fieldValue"></span>
-    <!-- <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="fieldValue | encodedTitle field true" v-html="fieldValue | stringLimit field | encodeValue field"></span> -->
+    <span v-else :data-toggle="fieldValue.length > 20 ? 'tooltip' : ''" :data-original-title="onlyEncodedTitle" v-html="fieldValueLimitedAndEncoded"></span>
   </div>
 </template>
 
@@ -22,48 +21,6 @@ export default {
     props : ['model', 'item', 'field', 'name', 'image'],
 
     components : { File },
-
-    filters: {
-      stringLimit(string, key){
-        var limit = this.getFieldLimit(key, Object.keys(this.$parent.columns).length < 5 ? 40 : 20);
-
-        if ( limit != 0 && string.length > limit && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) !== false )
-          return string.substr(0, limit) + '...';
-
-        return string;
-      },
-      encodeValue(string, key, is_title){
-        var isReal = this.isRealField(key);
-
-        //Check if column can be encoded
-        if ( isReal && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) == true )
-        {
-          string = $(document.createElement('div')).text(string).html();
-        }
-
-        if ( is_title && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
-          return '';
-
-        if ( this.isRealField(key) && this.model.fields[key].type == 'text' && parseInt(this.model.fields[key].limit) === 0)
-        {
-          return string.replace(/\n/g, '<br>');
-        }
-
-        //Is phone number
-        if ( this.isRealField(key) && this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key] || 'phone_link' in this.model.fields[key]) )
-        {
-          return '<a href="tel:'+string+'">'+string+'</a>';
-        }
-
-        return string;
-      },
-      encodedTitle(string, key){
-        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
-          return '';
-
-        return string;
-      }
-    },
 
     computed: {
       getFiles(){
@@ -152,10 +109,50 @@ export default {
           return rowValue;
 
         return (rowValue || rowValue == 0) ? ((add_before||'') + rowValue + (add_after||'')) : null;
-      }
+      },
+      onlyEncodedTitle(){
+        //If is not encoded column, then return empty value
+        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.encode', true) === false )
+          return '';
+
+        return this.fieldValue;
+      },
+      fieldValueLimitedAndEncoded(){
+        return this.encodeValue(this.stringLimit(this.fieldValue));
+      },
     },
 
     methods: {
+      stringLimit(string){
+        var limit = this.getFieldLimit(Object.keys(this.$parent.columns).length < 5 ? 40 : 20);
+
+        if ( limit != 0 && string.length > limit && this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.encode', true) !== false )
+          return string.substr(0, limit) + '...';
+
+        return string;
+      },
+      encodeValue(string){
+        var isReal = this.isRealField(this.field);
+
+        //Check if column can be encoded
+        if ( isReal && this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.encode', true) == true )
+        {
+          string = $(document.createElement('div')).text(string).html();
+        }
+
+        if ( this.isRealField(this.field) && this.model.fields[this.field].type == 'text' && parseInt(this.model.fields[this.field].limit) === 0)
+        {
+          return string.replace(/\n/g, '<br>');
+        }
+
+        //Is phone number
+        if ( this.isRealField(this.field) && this.model.fields[this.field].type == 'string' && ('phone' in this.model.fields[this.field] || 'phone_link' in this.model.fields[this.field]) )
+        {
+          return '<a href="tel:'+string+'">'+string+'</a>';
+        }
+
+        return string;
+      },
       getRelatedModelTable(field){
         var table = field.belongsTo||field.belongsToMany;
 
@@ -220,17 +217,17 @@ export default {
       isRealField(key){
         return key in this.model.fields;
       },
-      getFieldLimit(key, defaultLimit){
-        if ( this.isEncodedValue(key) === false )
+      getFieldLimit(defaultLimit){
+        if ( this.isEncodedValue(this.field) === false )
           return 0;
 
-        if ( this.isRealField(key) )
+        if ( this.isRealField(this.field) )
         {
-          var field = this.model.fields[key];
+          var field = this.model.fields[this.field];
 
           return 'limit' in field ? field.limit : defaultLimit;
         } else {
-          return this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.limit', defaultLimit);
+          return this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.limit', defaultLimit);
         }
       },
       trans(key){
