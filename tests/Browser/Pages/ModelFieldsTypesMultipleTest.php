@@ -30,7 +30,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
 
-                    //Check if form values has been successfully reseted
+                    //Check if form values has been successfully reseted after save
                     ->closeAlert()
                     ->assertFormIsEmpty(FieldsTypesMultiple::class)
 

@@ -30,7 +30,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
 
-                    //Check if form values has been successfully reseted
+                    //Check if form values has been successfully reseted after save
                     ->closeAlert()
                     ->assertFormIsEmpty(FieldsType::class)
 
@@ -76,9 +76,9 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Save existing row and check if has correct values
                     ->saveForm()
-                    ->assertHasFormValues(FieldsType::class, $rowUpdated)
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
+                    ->assertHasFormValues(FieldsType::class, $rowUpdated)
 
                     //Reset form after update and check for empty values
                     ->press(trans('admin::admin.new-row'))
