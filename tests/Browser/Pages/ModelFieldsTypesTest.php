@@ -2,14 +2,12 @@
 
 namespace Gogol\Admin\Tests\Browser\Pages;
 
-use Artisan;
 use Carbon\Carbon;
 use Gogol\Admin\Tests\App\Models\FieldsType;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\DropDatabase;
 use Gogol\Admin\Tests\Traits\DropUploads;
-use Illuminate\Foundation\Auth\User;
 
 class ModelFieldsTypesTest extends BrowserTestCase
 {
@@ -22,10 +20,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
         $row = $this->getFormData();
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->loginAs(User::first())
-                    ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields types')
-                    ->clickLink('Fields types')
+            $browser->openModelPage(FieldsType::class)
 
                     //Check if form values has been successfully filled
                     ->fillForm(FieldsType::class, $row)
@@ -49,10 +44,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
         $row = $this->getFormData();
 
         $this->browse(function (DuskBrowser $browser) use($row) {
-            $browser->loginAs(User::first())
-                    ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields types')
-                    ->clickLink('Fields types')
+            $browser->openModelPage(FieldsType::class)
 
                     //Create new row
                     ->fillForm(FieldsType::class, $row)

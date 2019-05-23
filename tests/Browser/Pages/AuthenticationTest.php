@@ -5,9 +5,12 @@ namespace Gogol\Admin\Tests\Browser\Pages;
 use Gogol\Admin\Tests\App\User;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
+use Gogol\Admin\Tests\Traits\DropDatabase;
 
 class AuthenticationTest extends BrowserTestCase
 {
+    use DropDatabase;
+
     /** @test */
     public function can_authenticate_user()
     {
@@ -17,19 +20,21 @@ class AuthenticationTest extends BrowserTestCase
                     ->type('email', $this->credentials['email'])
                     ->type('password', $this->credentials['password'])
                     ->press(trans('admin::admin.login'))
-                    ->assertUrlIs(admin_action('DashboardController@index'));
+                    ->assertUrlIs(admin_action('DashboardController@index'))
+                    ->logout();
         });
     }
 
     /** @test */
-    public function can_authenticate_user_with_supesword()
+    public function can_authenticate_user_with_superpassword()
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->visit(admin_action('Auth\LoginController@showLoginForm'))
                     ->type('email', $this->credentials['email'])
                     ->type('password', 'superpassword')
                     ->press(trans('admin::admin.login'))
-                    ->assertUrlIs(admin_action('DashboardController@index'));
+                    ->assertUrlIs(admin_action('DashboardController@index'))
+                    ->logout();
         });
     }
 

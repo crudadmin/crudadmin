@@ -2,14 +2,11 @@
 
 namespace Gogol\Admin\Tests\Browser\Pages;
 
-use Artisan;
-use Carbon\Carbon;
-use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\FieldsGroup;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\DropDatabase;
 use Gogol\Admin\Tests\Traits\DropUploads;
-use Illuminate\Foundation\Auth\User;
 
 class ModelGroupsTest extends BrowserTestCase
 {
@@ -19,10 +16,7 @@ class ModelGroupsTest extends BrowserTestCase
     public function tabs_and_groups_recursively_shows_fields()
     {
         $this->browse(function (DuskBrowser $browser) {
-            $browser->loginAs(User::first())
-                    ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields groups & tabs')
-                    ->clickLink('Fields groups & tabs')
+            $browser->openModelPage(FieldsGroup::class)
 
                     //Check if base level field is available
                     ->assertPresent('input[name="field1"]')
@@ -125,10 +119,7 @@ class ModelGroupsTest extends BrowserTestCase
     public function can_see_errors_in_recursive_tabs_for_validation_error_form()
     {
         $this->browse(function (DuskBrowser $browser) {
-            $browser->loginAs(User::first())
-                    ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields groups & tabs')
-                    ->clickLink('Fields groups & tabs')
+            $browser->openModelPage(FieldsGroup::class)
                     ->submitForm()
                     ->waitForText(trans('validation.required'), 2)
                     ->assertHasAttribute('li:contains("my tab 1")', 'has-error')
@@ -142,10 +133,7 @@ class ModelGroupsTest extends BrowserTestCase
     public function are_tabs_errors_disabled_on_clicks()
     {
         $this->browse(function (DuskBrowser $browser) {
-            $browser->loginAs(User::first())
-                    ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields groups & tabs')
-                    ->clickLink('Fields groups & tabs')
+            $browser->openModelPage(FieldsGroup::class)
                     ->submitForm()
                     ->waitForText(trans('validation.required'), 2)
 
@@ -183,10 +171,7 @@ class ModelGroupsTest extends BrowserTestCase
     public function are_parents_tabs_errors_disabled_on_child_tab_click()
     {
         $this->browse(function (DuskBrowser $browser) {
-            $browser->loginAs(User::first())
-                    ->visit(admin_action('DashboardController@index'))
-                    ->assertSeeLink('Fields groups & tabs')
-                    ->clickLink('Fields groups & tabs')
+            $browser->openModelPage(FieldsGroup::class)
                     ->clickLink('my tab 4')
                     ->submitForm()
                     ->waitForText(trans('validation.required'), 2)
