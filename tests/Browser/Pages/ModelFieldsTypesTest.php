@@ -61,16 +61,11 @@ class ModelFieldsTypesTest extends BrowserTestCase
         $update = $this->getFormDataUpdated();
         $rowUpdated = $this->createUpdatedRecord($create, $update);
 
+        //Create sample row
+        FieldsType::create($this->buildDbData(FieldsType::class, $create));
+
         $this->browse(function (DuskBrowser $browser) use ($create, $update, $rowUpdated) {
             $browser->openModelPage(FieldsType::class)
-
-                    //Create new row
-                    ->fillForm(FieldsType::class, $create)
-                    ->submitForm()
-                    ->assertSeeSuccess(trans('admin::admin.success-created'))
-                    ->closeAlert()
-                    ->scrollToElement('body')
-
                     //Open row and check if has correct values
                     ->openRow(1)
                     ->assertHasFormValues(FieldsType::class, $create)

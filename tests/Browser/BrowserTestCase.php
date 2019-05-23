@@ -46,12 +46,12 @@ class BrowserTestCase extends TestCase
     }
 
     /**
-     * Check if row exists
+     * Parse given data into database format
      * @param  string/object $model
      * @param  array  $data
-     * @return void
+     * @return array
      */
-    public function assertRowExists($model, $data = [])
+    public function buildDbData($model, $data = [])
     {
         $model = $this->getModelClass($model);
 
@@ -91,6 +91,21 @@ class BrowserTestCase extends TestCase
                 $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('H:i:s') : null;
             }
         }
+
+        return $data;
+    }
+
+    /**
+     * Check if row exists
+     * @param  string/object $model
+     * @param  array  $data
+     * @return void
+     */
+    public function assertRowExists($model, $data = [])
+    {
+        $model = $this->getModelClass($model);
+
+        $data = $this->buildDbData($model, $data);
 
         PHPUnit::assertEquals(
             $model->select(array_keys($data))->first()->toArray(), $data,
