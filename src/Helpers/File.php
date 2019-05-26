@@ -280,8 +280,8 @@ class File
      */
     public function delete()
     {
-        if ( file_exists($this->path) )
-            unlink($this->path);
+        if ( file_exists($this->basepath) )
+            unlink($this->basepath);
     }
 
     /*
@@ -297,7 +297,7 @@ class File
      */
     public function exists()
     {
-        return file_exists($this->path);
+        return file_exists($this->basepath);
     }
 
     /*
@@ -305,8 +305,8 @@ class File
      */
     public function copy($destination)
     {
-        if ( file_exists($this->path) )
-            return copy($this->path, $destination);
+        if ( file_exists($this->basepath) )
+            return copy($this->basepath, $destination);
 
         return false;
     }
@@ -331,7 +331,7 @@ class File
     {
         $bytes = sprintf('%u', filesize($path));
 
-        return (new static)->formatFilesizeNumber($bytes);
+        return (new static($path))->formatFilesizeNumber($bytes);
     }
 
     /*
