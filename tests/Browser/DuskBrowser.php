@@ -95,6 +95,9 @@ class DuskBrowser extends Browser
             if ( $model->isFieldType($key, ['checkbox']) )
                 $row[$key] = $value ? trans('admin::admin.yes') : trans('admin::admin.no');
 
+            //Get field select values
+            $row[$key] = $this->parseSelectValue($model, $key, $row[$key]);
+
             //Everything need to be string
             if ( is_array($row[$key]) )
                 $row[$key] = implode(', ', $row[$key]);
@@ -167,30 +170,50 @@ class DuskBrowser extends Browser
             }
 
             //Set select value
-            else if ( $model->isFieldType($key, ['select']) )
+            else if ( $model->isFieldType($key, ['select']) || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']) )
             {
                 //Multiple select
-                if ( $model->hasFieldParam($key, 'multiple') )
+                if ( $model->hasFieldParam($key, ['multiple', 'array']) )
                 {
                     //Select options in reversed order
                     foreach ($value as $k => $option_value)
                     {
-                        $this->script("
-                        $('select[name=\"{$key}[]\"]').parents('.form-group').eq(0).each(function(){
-                            $(this).find('input').click().focus();
-                            $(this).find('.chosen-results li:contains(\"{$option_value}\")').mouseup()
-                        });
-                        ");
+                        $selected = $this->script("return $('select[name=\"{$key}[]\"]').val()")[0];
+
+                        //If value is selected already, we wante unselect given value
+                        if ( $this->isAssoc($value) && in_array($k, $selected) )
+                        {
+                            $this->script("$('select[name=\"{$key}[]\"]').parents('.form-group').eq(0).find('.chosen-choices li.search-choice:contains(\"{$option_value}\") a').eq(0).click()");
+                        }
+
+                        //Select given value
+                        else {
+                            $this->script("
+                            $('select[name=\"{$key}[]\"]').parents('.form-group').eq(0).each(function(){
+                                $(this).find('input').click().focus();
+                                $(this).find('.chosen-results li:contains(\"{$option_value}\")').eq(0).mouseup()
+                            });
+                            ");
+                        }
+
                         $this->pause(100);
                     }
                 }
 
                 //Single select
                 else {
-                    $this->value('select[name="'.$key.'"]', $value)
-                         ->with('select[name='.$key.']', function($browser) use ($key) {
-                             $browser->script('$("select[name='.$key.']").change().trigger("chosen:updated");');
-                         });
+                    //If is associative value with key, then we want only value
+                    if ( is_array($value) )
+                        $value = array_values($value)[0];
+
+                    $this->script($s = "
+                        var select = $('select[name=\"{$key}\"]');
+                        select.trigger('chosen:open').parents('.form-group').eq(0).each(function(){
+                            $(this).find('.chosen-results li:contains(\"{$value}\")').eq(0).mouseup()
+                        });
+                    ");
+
+                    $this->pause(100);
                 }
             }
 
@@ -312,6 +335,9 @@ class DuskBrowser extends Browser
                     $value[$k] = Carbon::createFromFormat('d.m.Y', $date)->format($model->getFieldParam($key, 'date_format'));
                 }
             }
+
+            //If is associative array in select field type, then we need compare keys, not values
+            $value = $this->parseSelectValue($model, $key, $value, true);
 
             $this->assertVue('row.'.$key, $value, '@model-builder');
             $this->assertVue('model.fields.'.$key.'.value', $value, '@model-builder');
@@ -494,7 +520,7 @@ class DuskBrowser extends Browser
         $key = $origKey;
 
         //Add multiple key selector if missing
-        if ( $model->hasFieldParam($key, 'multiple') && strpos($key, '[]') === false ){
+        if ( $model->hasFieldParam($key, ['multiple', 'array']) && strpos($key, '[]') === false ){
             $key .= '[]';
         }
 
@@ -523,6 +549,7 @@ class DuskBrowser extends Browser
 
         //Check if element does not
         return [
+            'key' => $key,
             'errorClass' => $this->script('return '.($selectorClass ? $selectorClass : $selectorMessage).'.hasClass("has-error")')[0],
             'errorMessage' => $this->script('return '.$selectorMessage.'.find("> span.help-block").length == 1')[0]
         ];
@@ -542,8 +569,8 @@ class DuskBrowser extends Browser
             if ( ($selectors = $this->getValidationErrorSelectors($model, $key)) === false )
                 continue;
 
-            PHPUnit::assertFalse($selectors['errorClass'], 'Field ['.$key.'] does have validation error class.');
-            PHPUnit::assertFalse($selectors['errorMessage'], 'Field ['.$key.'] does have validation error message.');
+            PHPUnit::assertFalse($selectors['errorClass'], 'Field ['.$selectors['key'].'] does have validation error class.');
+            PHPUnit::assertFalse($selectors['errorMessage'], 'Field ['.$selectors['key'].'] does have validation error message.');
         }
 
         return $this;
@@ -563,8 +590,8 @@ class DuskBrowser extends Browser
             if ( ($selectors = $this->getValidationErrorSelectors($model, $key)) === false )
                 continue;
 
-            PHPUnit::assertTrue($selectors['errorClass'], 'Field ['.$key.'] does not have validation error class.');
-            PHPUnit::assertTrue($selectors['errorMessage'], 'Field ['.$key.'] does not have validation error message.');
+            PHPUnit::assertTrue($selectors['errorClass'], 'Field ['.$selectors['key'].'] does not have validation error class.');
+            PHPUnit::assertTrue($selectors['errorMessage'], 'Field ['.$selectors['key'].'] does not have validation error message.');
         }
 
         return $this;

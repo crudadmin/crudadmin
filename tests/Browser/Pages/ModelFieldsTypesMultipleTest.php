@@ -24,7 +24,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
             $browser->openModelPage(FieldsTypesMultiple::class)
 
-                    //Check if validation does work
+                    //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->submitForm()
                     ->pause(500)
@@ -65,7 +65,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     {
         $create = $this->getFormData();
         $update = $this->getFormDataUpdated();
-        $rowUpdated = $this->createUpdatedRecord($create, $update);
+        $rowUpdated = $this->createUpdatedRecord(FieldsTypesMultiple::class, $create, $update);
 
         //Create sample row
         FieldsTypesMultiple::create($this->buildDbData(FieldsTypesMultiple::class, $create));

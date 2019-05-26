@@ -24,7 +24,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
             $browser->openModelPage(FieldsType::class)
 
-                    //Check if validation does work
+                    //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->submitForm()
                     ->pause(500)
@@ -68,7 +68,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
     {
         $create = $this->getFormData();
         $update = $this->getFormDataUpdated();
-        $rowUpdated = $this->createUpdatedRecord($create, $update);
+        $rowUpdated = $this->createUpdatedRecord(FieldsType::class, $create, $update);
 
         //Create sample row
         FieldsType::create($this->buildDbData(FieldsType::class, $create));

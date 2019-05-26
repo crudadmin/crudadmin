@@ -50,7 +50,7 @@ trait AdminTrait
             $this->dropDatabase();
         }
 
-        //Registers own event for dropping uploads data after test
+        // //Registers own event for dropping uploads data after test
         if (isset($uses[DropUploads::class])) {
             $this->dropUploads();
         }
@@ -201,4 +201,43 @@ trait AdminTrait
         return is_object($model) ? $model : new $model;
     }
 
+    /*
+     * Check if is array associative
+     */
+    protected function isAssoc(array $arr)
+    {
+        if ([] === $arr)
+            return false;
+
+        if ( array_keys($arr) !== range(0, count($arr) - 1) )
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Parse select/multiselect values/keys to correct format
+     * Sometimes we need just select keys, or select values
+     * @param  string/object    $model
+     * @param  string           $key
+     * @param  mixed            $value
+     * @param  boolean            $returnKey
+     * @return mixed
+     */
+    protected function parseSelectValue($model, $key, $value, $returnKey = false)
+    {
+        $model = $this->getModelClass($model);
+
+        if ( $model->isFieldType($key, 'select') || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']) )
+        {
+            if ( is_array($value) && $this->isAssoc($value) )
+            {
+                $items = $returnKey ? array_keys($value) : array_values($value);
+
+                $value = $model->hasFieldParam($key, ['belongsTo']) ? $items[0] : $items;
+            }
+        }
+
+        return $value;
+    }
 }

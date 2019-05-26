@@ -751,7 +751,8 @@ class AdminMigrationCommand extends Command
 
         foreach((array)explode('_', $table) as $t)
         {
-            $table_index .= $t[0];
+            //Get first letter and last letter from table name
+            $table_index .= $t[0].$t[strlen($t) - 1];
         }
 
         return 'fk_'.$table_index.'_'.$key;
