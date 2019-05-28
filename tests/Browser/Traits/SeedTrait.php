@@ -4,7 +4,7 @@ namespace Gogol\Admin\Tests\Browser\Traits;
 
 use Gogol\Admin\Tests\App\Models\Articles\Article;
 
-trait ArticleSeedTrait
+trait SeedTrait
 {
     /*
      * Create articles list
@@ -37,5 +37,17 @@ trait ArticleSeedTrait
                 'created_at' => $date,
             ]);
         }
+    }
+
+    private function getFieldsRelationFormData()
+    {
+        return [
+            'relation1_id' => [9 => 'hellboy'],
+            'relation2_id' => [8 => 'my option barefoot 7'],
+            'relation3_id' => [10 => 'my second option spider-man 18'],
+            'relation_multiple1' => [ 5 => 'aquaman', 6 => 'star is born', 3 => 'shrek' ],
+            'relation_multiple2' => [ 9 => 'my option hellboy 8', 5 => 'my option aquaman 4', 11 => 'my option superman 10' ],
+            'relation_multiple3' => [ 12 => 'second option john wick 22' ],
+        ];
     }
 }

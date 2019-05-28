@@ -240,4 +240,18 @@ trait AdminTrait
 
         return $value;
     }
+
+    /*
+     * Limit string and add dotts
+     * We cannot use native str_limit by laravel, because
+     * we do want trim empty spaces at the end of the string
+     */
+    public function strLimit($value, $limit, $end = '...')
+    {
+        if (mb_strwidth($value, 'UTF-8') <= $limit) {
+            return $value;
+        }
+
+        return mb_strimwidth($value, 0, $limit, '', 'UTF-8').$end;
+    }
 }

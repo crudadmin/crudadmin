@@ -6,16 +6,17 @@ use Admin;
 use Artisan;
 use Carbon\Carbon;
 use Gogol\Admin\Tests\App\Models\Articles\Article;
+use Gogol\Admin\Tests\App\Models\FieldsRelation;
 use Gogol\Admin\Tests\App\Models\FieldsType;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Browser\Traits\ArticleSeedTrait;
+use Gogol\Admin\Tests\Browser\Traits\SeedTrait;
 use Gogol\Admin\Tests\Traits\DropDatabase;
 
 class TableRowsTest extends BrowserTestCase
 {
     use DropDatabase,
-        ArticleSeedTrait;
+        SeedTrait;
 
     private function getColumnsList()
     {
@@ -80,6 +81,49 @@ class TableRowsTest extends BrowserTestCase
                     //Check if all columns except hidden are available
                     $browser->assertVisibleColumnsList(FieldsType::class, array_diff($this->getColumnsList(), $hide_columns));
         });
+    }
+
+    /** @test */
+    public function test_hidden_columns_visibility_changed_with_relations_values()
+    {
+        //Create article testing data for relation purposes
+        $this->createArticleMoviesList();
+
+        //Create testing rows with belongsToMany relations
+        $row = $this->getFieldsRelationFormData();
+        FieldsRelation::create($this->buildDbData(FieldsRelation::class, $row));
+        $this->saveFieldRelationsValues(FieldsRelation::class, $row);
+
+        $this->browse(function (DuskBrowser $browser) use ($row) {
+            $browser->openModelPage(FieldsRelation::class)
+                    ->press(trans('admin::admin.rows-list'));
+
+                    $show_columns = ['relation1_id', 'relation_multiple1', 'relation_multiple2', 'relation_multiple3'];
+
+                    //Hide columns
+                    foreach ($show_columns as $column)
+                        $browser->click('*[fields-list] input[data-column="'.$column.'"]');
+
+                    $visible = array_merge(['id', 'relation2_id', 'relation3_id'], $show_columns);
+                    asort($visible);
+
+                    //Check if all columns except hidden are available
+                    //then wait 300ms for generating belongsToMany columnd, and then test...
+                    $browser->pause(300)
+                            ->assertVisibleColumnsList(FieldsRelation::class, $visible)
+                            ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
+        });
+    }
+
+    //Parse data items into table row format
+    private function getHiddenColumnsRowData($row)
+    {
+        return array_map(function($item){
+            if ( is_array($item) )
+                $item = implode(', ', $item);
+
+            return is_string($item) ? $this->strLimit($item, 20) : $item;
+        }, ['id' => 1] + $row);
     }
 
     /** @test */

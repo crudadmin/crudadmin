@@ -481,7 +481,7 @@ class DuskBrowser extends Browser
         PHPUnit::assertEquals(
             $columns[0], array_map(function($item){
                 return 'th-'.$item;
-            }, array_merge($excepted, ['options-buttons'])),
+            }, array_values(array_merge($excepted, ['options-buttons']))),
             'Table ['.$model->getTable().'] does not match excepted columns list'
         );
 
@@ -674,7 +674,7 @@ class DuskBrowser extends Browser
     {
         $date = Carbon::createFromFormat('d.m.Y', $date);
 
-        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
+        $this->script($s = '$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
 
         return $this;
     }

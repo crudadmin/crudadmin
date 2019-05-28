@@ -39,7 +39,7 @@ return [
     'custom_rules' => [
         'image' => 'type:file|image|max:5120',
         'belongsTo' => 'type:select',
-        'belongsToMany' => 'type:select|array',
+        'belongsToMany' => 'type:select|array|multiple',
         'multiple' => 'array',
         'multirows' => 'array',
         'invisible' => 'hidden|removeFromForm',

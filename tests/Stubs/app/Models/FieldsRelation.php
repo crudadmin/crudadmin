@@ -29,7 +29,7 @@ class FieldsRelation extends AdminModel
     {
         return [
             Group::half([
-                'relation1' => 'name:BelongsTo (simple)|belongsTo:articles,name|title:with single column|required',
+                'relation1' => 'name:BelongsTo (simple)|belongsTo:articles,name|title:with single column|hidden|required',
                 'relation2' => 'name:BelongsTo (column)|belongsTo:articles,my option :name :score|title:with builded option by columns|required',
                 'relation3' => 'name:BelongsTo (binded data)|belongsTo:articles,my second option :name :score|title:with builded option by columns and given rows|required',
             ]),
@@ -40,6 +40,10 @@ class FieldsRelation extends AdminModel
             ])
         ];
     }
+
+    protected $settings = [
+        'grid.default' => 'full',
+    ];
 
     protected function options()
     {

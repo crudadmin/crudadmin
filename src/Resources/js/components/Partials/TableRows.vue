@@ -48,7 +48,7 @@
   import TableRowValue from './TableRowValue.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabledcolumns', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabled_columns', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
 
       components: { TableRowValue },
 
@@ -187,19 +187,17 @@
           return data;
         },
         columns(){
-          var columns = _.cloneDeep(this.defaultColumns);
-
-          //If enabled columns has not been set yet
-          if ( ! this.enabledcolumns )
-            this.resetAllowedFields(columns)
-          else {
-            //Disable changed fields
-            for ( var key in this.enabledcolumns )
-              if ( this.enabledcolumns[key].enabled == false && key in columns )
-                delete columns[key];
-              else if ( this.enabledcolumns[key].enabled == true && !(key in columns) )
-                columns[key] = this.fieldName(key);
+          //If enabled columns has not been set yet, or has been reseted in view
+          if ( ! this.enabled_columns ) {
+            this.resetAllowedFields()
           }
+
+          var columns = {}
+
+          //Disable changed fields
+          for ( var key in this.enabled_columns )
+            if ( this.enabled_columns[key].enabled == true )
+              columns[key] = this.fieldName(key);
 
           return columns;
         },
@@ -252,8 +250,11 @@
           else
             this.checked.splice(checked, 1);
         },
-        resetAllowedFields(columns){
-          var enabled = {};
+        resetAllowedFields(){
+          var columns = _.cloneDeep(this.defaultColumns),
+              enabled = {},
+              order = Object.keys(columns),
+              model_keys = Object.keys(this.model.fields);
 
           //Add allowed keys
           for ( var key in columns )
@@ -264,14 +265,54 @@
 
           //After allowed keys, add all hidden
           for ( var key in this.model.fields )
-            if ( !(key in enabled) )
-              enabled[key] = {
-                name : this.fieldName( key ),
-                enabled : false,
-              };
+          {
+            //Skip existing columns
+            if ( key in enabled )
+              continue;
 
+            var add_index = null,
+                after = true,
+                before_columns = model_keys.slice(0, model_keys.indexOf(key)),
+                after_columns = model_keys.slice(model_keys.indexOf(key) + 1);
 
-          this.$parent.enabled_columns = enabled;
+            //Add column after first visible column before this field
+            for ( var i = before_columns.length - 1; i >= 0; i-- )
+            {
+              if ( order.indexOf(before_columns[i]) > -1 ){
+                add_index = order.indexOf(before_columns[i]);
+                break;
+              }
+            }
+
+            //Add column before first visible column after this field
+            if ( ! add_index )
+            {
+              for ( var i = 0; i < after_columns.length; i++ )
+              {
+                if ( order.indexOf(after_columns[i]) > -1 ){
+                  add_index = order.indexOf(after_columns[i]);
+                  after = false;
+                  break;
+                }
+              }
+            }
+
+            if ( add_index === null )
+              order.push(key);
+            else
+              order.splice(add_index + (after ? 1 : 0), 0, key);
+
+            enabled[key] = {
+              name : this.fieldName( key ),
+              enabled : false,
+            };
+          }
+
+          var correctOrder = {};
+          for ( var i = 0; i < order.length; i++ )
+            correctOrder[order[i]] = enabled[order[i]];
+
+          this.$parent.enabled_columns = correctOrder;
         },
         isReservedRow(row){
           return this.$parent.isReservedRow(row.id);

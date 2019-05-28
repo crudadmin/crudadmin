@@ -134,6 +134,32 @@ class BrowserTestCase extends TestCase
     }
 
     /**
+     * Fields belongsToMany values into db for given model
+     * @param  string/class $model
+     * @param  array $data
+     * @return void
+     */
+    public function saveFieldRelationsValues($model, $data)
+    {
+        $model = $this->getModelClass($model);
+
+        $data = $this->buildRelationData($model, $data);
+
+        foreach ($data as $fieldKey => $values)
+        {
+            foreach ($values as $value)
+            {
+                $properties = $model->getRelationProperty($fieldKey, 'belongsToMany');
+
+                DB::table($properties[3])->insert([
+                    $properties[6] => 1,
+                    $properties[7] => $value
+                ]);
+            }
+        }
+    }
+
+    /**
      * Check if row exists
      * @param  string/object $model
      * @param  array  $data
@@ -231,20 +257,6 @@ class BrowserTestCase extends TestCase
         }
 
         return $row1;
-    }
-
-    /*
-     * Limit string and add dotts
-     * We cannot use native str_limit by laravel, because
-     * we do want trim empty spaces at the end of the string
-     */
-    public function strLimit($value, $limit, $end = '...')
-    {
-        if (mb_strwidth($value, 'UTF-8') <= $limit) {
-            return $value;
-        }
-
-        return mb_strimwidth($value, 0, $limit, '', 'UTF-8').$end;
     }
 }
 

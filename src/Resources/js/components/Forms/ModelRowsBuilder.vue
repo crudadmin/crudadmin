@@ -19,7 +19,7 @@
             <label><input type="checkbox" :data-column="key" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
           </li>
           <li role="separator" class="divider"></li>
-          <li><a href="#" @click.prevent="enabled_columns = {}">{{ trans('default') }}</a></li>
+          <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
         </ul>
       </div>
 
@@ -56,7 +56,7 @@
         :gettext_editor.sync="gettext_editor"
         :rows="rows"
         :rowsdata.sync="rowsData"
-        :enabledcolumns="enabled_columns"
+        :enabled_columns="enabled_columns"
         :button_loading="button_loading"
         :checked.sync="checked"
         :dragging.sync="dragging"

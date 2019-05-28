@@ -6,14 +6,14 @@ use Carbon\Carbon;
 use Gogol\Admin\Tests\App\Models\FieldsRelation;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Browser\Traits\ArticleSeedTrait;
+use Gogol\Admin\Tests\Browser\Traits\SeedTrait;
 use Gogol\Admin\Tests\Traits\DropDatabase;
 use Illuminate\Support\Facades\DB;
 
 class ModelFieldsTypesRelationsTest extends BrowserTestCase
 {
     use DropDatabase,
-        ArticleSeedTrait;
+        SeedTrait;
 
     /** @test */
     public function test_validation_errors_then_create_new_row_and_then_update_without_change()
@@ -74,7 +74,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
 
         //Create sample row
         FieldsRelation::create($this->buildDbData(FieldsRelation::class, $create));
-        $this->saveFieldRelationsValues($this->buildRelationData(FieldsRelation::class, $create));
+        $this->saveFieldRelationsValues(FieldsRelation::class, $create);
 
         $this->browse(function (DuskBrowser $browser) use ($create, $update, $rowUpdated) {
             $browser->openModelPage(FieldsRelation::class)
@@ -106,14 +106,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
 
     public function getFormData($key = null)
     {
-        return [
-            'relation1_id' => [9 => 'hellboy'],
-            'relation2_id' => [8 => 'my option barefoot 7'],
-            'relation3_id' => [10 => 'my second option spider-man 18'],
-            'relation_multiple1' => [ 5 => 'aquaman', 6 => 'star is born', 3 => 'shrek' ],
-            'relation_multiple2' => [ 9 => 'my option hellboy 8', 5 => 'my option aquaman 4', 11 => 'my option superman 10' ],
-            'relation_multiple3' => [ 12 => 'second option john wick 22' ],
-        ];
+        return $this->getFieldsRelationFormData();
     }
 
     public function getFormDataUpdated()
@@ -126,27 +119,6 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
             'relation_multiple2' => [ 9 => 'my option hellboy 8' ], //we want remove this item
             'relation_multiple3' => [ 11 => 'second option superman 20', 10 => 'second option spider-man 18' ],
         ];
-    }
-
-    /*
-     * Fields belongsToMany values into db
-     */
-    private function saveFieldRelationsValues($data)
-    {
-        $model = new FieldsRelation;
-
-        foreach ($data as $fieldKey => $values)
-        {
-            foreach ($values as $value)
-            {
-                $properties = $model->getRelationProperty($fieldKey, 'belongsToMany');
-
-                DB::table($properties[3])->insert([
-                    $properties[6] => 1,
-                    $properties[7] => $value
-                ]);
-            }
-        }
     }
 
     /*
