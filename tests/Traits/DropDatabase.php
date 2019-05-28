@@ -11,6 +11,8 @@ trait DropDatabase
      * Drop all tables in database
      */
     public function dropDatabase(){
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+
         $tables = DB::select('SHOW TABLES');
 
         foreach($tables as $table)
@@ -18,5 +20,7 @@ trait DropDatabase
             $table = array_values((array)$table)[0];
             Schema::drop($table);
         }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 }
