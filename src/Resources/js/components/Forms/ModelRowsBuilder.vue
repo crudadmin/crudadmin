@@ -19,7 +19,7 @@
             <label><input type="checkbox" :data-column="key" v-model="column.enabled"> {{ columnName(key, column.name) }}</label>
           </li>
           <li role="separator" class="divider"></li>
-          <li><a href="#" @click.prevent="enabled_columns = null">{{ trans('default') }}</a></li>
+          <li><a href="#" @click.prevent="resetColumnsList">{{ trans('default') }}</a></li>
         </ul>
       </div>
 
@@ -56,7 +56,6 @@
         :gettext_editor.sync="gettext_editor"
         :rows="rows"
         :rowsdata.sync="rowsData"
-        :enabled_columns="enabled_columns"
         :button_loading="button_loading"
         :checked.sync="checked"
         :dragging.sync="dragging"
@@ -124,7 +123,7 @@
         //Receive value from tablerows component
         checked : [],
         default_columns : [],
-        enabled_columns : null,
+        enabled_columns : {},
         button_loading : false,
       };
     },
@@ -349,7 +348,7 @@
       enabledColumnsList(){
         var allowed = [];
 
-        for ( var key in this.enabled_columns||{} )
+        for ( var key in this.enabled_columns )
           if ( this.enabled_columns[key].enabled == true && this.default_columns.indexOf(key) == -1 )
             allowed.push(key);
 
@@ -358,6 +357,15 @@
     },
 
     methods: {
+      resetColumnsList(){
+        for ( var key in this.$children )
+        {
+          var children = this.$children[key];
+
+          if ( children.$options._componentTag == 'table-rows' )
+            children.$options.methods.resetAllowedColumns.call(children);
+        }
+      },
       getComponents(type){
         return this.$parent.getComponents(type);
       },

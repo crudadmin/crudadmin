@@ -553,9 +553,7 @@
           this.sizes[2].disabled = true;
 
         if ( this.hasChilds() > 0 )
-        {
           return this.sizes[3].active = true;
-        }
 
         //Full screen
         if ( columns.length > 5 )

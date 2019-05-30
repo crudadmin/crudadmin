@@ -48,12 +48,13 @@
   import TableRowValue from './TableRowValue.vue';
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'enabled_columns', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
 
       components: { TableRowValue },
 
       data(){
         return {
+          enabled_columns : {},
           hidden: ['language_id', '_order', 'slug', 'published_at', 'updated_at', 'created_at'],
           autoSize : false,
         };
@@ -64,12 +65,12 @@
         if ( this.model.foreign_column != null )
           this.hidden.push( this.model.foreign_column );
 
-        //Automatically set columns
+        //Set allowed columns
+        this.resetAllowedColumns();
+
+        //Automaticaly choose size of tables
         if ( this.autoSize == false )
-        {
-          //Automaticaly choose size of tables
           this.$parent.$parent.checkActiveSize( this.columns );
-        }
       },
 
       events: {
@@ -187,11 +188,6 @@
           return data;
         },
         columns(){
-          //If enabled columns has not been set yet, or has been reseted in view
-          if ( ! this.enabled_columns ) {
-            this.resetAllowedFields()
-          }
-
           var columns = {}
 
           //Disable changed fields
@@ -250,7 +246,7 @@
           else
             this.checked.splice(checked, 1);
         },
-        resetAllowedFields(){
+        resetAllowedColumns(){
           var columns = _.cloneDeep(this.defaultColumns),
               enabled = {},
               order = Object.keys(columns),
@@ -312,7 +308,7 @@
           for ( var i = 0; i < order.length; i++ )
             correctOrder[order[i]] = enabled[order[i]];
 
-          this.$parent.enabled_columns = correctOrder;
+          this.$parent.enabled_columns = this.enabled_columns = correctOrder;
         },
         isReservedRow(row){
           return this.$parent.isReservedRow(row.id);

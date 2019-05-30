@@ -25,6 +25,7 @@ class DuskBrowser extends Browser
 
         $this->loginAs(User::first())
              ->visit(admin_action('DashboardController@index'))
+             ->waitForLink($model->getProperty('name'))
              ->clickLink($model->getProperty('name'));
 
         return $this;
