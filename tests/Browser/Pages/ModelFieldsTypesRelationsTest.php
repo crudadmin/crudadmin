@@ -128,6 +128,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
     {
         $row = ['id' => '1'] + $row;
 
+        unset($row['relation1_id']);
         unset($row['relation_multiple1']);
         unset($row['relation_multiple2']);
         unset($row['relation_multiple3']);

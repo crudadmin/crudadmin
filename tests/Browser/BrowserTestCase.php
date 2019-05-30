@@ -233,7 +233,7 @@ class BrowserTestCase extends TestCase
                 //We ned reset previous value if is select value or single relation type
                 if (
                     ($model->isFieldType($key, 'select') && !$model->hasFieldParam($key, 'multiple'))
-                    || $model->hasFieldParam($key, 'belongsTo')
+                    || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany'])
                 ) {
                     foreach ($row1[$key] as $k => $v)
                     {
