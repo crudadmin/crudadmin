@@ -73,10 +73,10 @@
         :is="name">
       </component>
 
-      <ul v-if="isPaginationEnabled && rows.count>pagination.limit" class="pagination pagination-sm no-margin pull-right">
-        <li v-if="pagination.position>1"><a v-on:click.prevent="setPosition(pagination.position - 1)" href="#">«</a></li>
+      <ul v-if="isPaginationEnabled && rows.count>pagination.limit" data-pagination class="pagination pagination-sm no-margin pull-right">
+        <li data-pagination-prev v-if="pagination.position>1"><a v-on:click.prevent="setPosition(pagination.position - 1)" href="#">«</a></li>
         <li v-bind:class="{ active : pagination.position == i }" v-if="showLimit(i)" v-for="i in Math.ceil(rows.count / pagination.limit)"><a href="#" @click.prevent="setPosition(i)">{{ i }}</a></li>
-        <li v-if="pagination.position<rows.count/pagination.limit"><a v-on:click.prevent="setPosition(pagination.position)" href="#">»</a></li>
+        <li data-pagination-next v-if="pagination.position<rows.count/pagination.limit"><a v-on:click.prevent="setPosition(pagination.position + 1)" href="#">»</a></li>
       </ul>
     </div>
 

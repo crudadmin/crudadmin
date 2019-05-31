@@ -168,50 +168,33 @@ class TableRowsTest extends BrowserTestCase
             $browser->openModelPage(Article::class);
 
             //Search for word
-            $browser->type('[data-search-bar] input[data-search-text]', 'man')->pause(700);
-            $this->assertCount(4, $rows = $browser->getRows(Article::class));
-            $this->assertEquals(array_values(array_map(function($item){
-                return $item['name'];
-            }, $rows)), ['superman', 'spider-man', 'hastrman', 'aquaman']);
+            $browser->type('[data-search-bar] input[data-search-text]', 'man')->pause(700)
+                    ->assertColumnRowData(Article::class, 'name', ['superman', 'spider-man', 'hastrman', 'aquaman']);
 
             //Search by column
             $browser->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="score"] a')
-                    ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)->pause(700);
-            $this->assertCount(1, $rows = $browser->getRows(Article::class));
-            $this->assertEquals(array_values(array_map(function($item){
-                return $item['name'];
-            }, $rows)), ['spider-man']);
+                    ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)->pause(700)
+                    ->assertColumnRowData(Article::class, 'name', ['spider-man']);
 
             //Search by interval from 9 to 11
             $browser->click('[data-interval] button')
-                    ->type('[data-search-bar] input[data-search-interval-text]', 11)->pause(700);
-            $this->assertCount(3, $rows = $browser->getRows(Article::class));
-            $this->assertEquals(array_values(array_map(function($item){
-                return $item['name'];
-            }, $rows)), ['john wick', 'superman', 'spider-man']);
+                    ->type('[data-search-bar] input[data-search-interval-text]', 11)->pause(700)
+                    ->assertColumnRowData(Article::class, 'name', ['john wick', 'superman', 'spider-man']);
 
             //Close interval and test searching by date
             $browser->click('[data-interval] button')
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="created_at"] a')
                     ->click('[data-search-bar] input[data-search-date]')->pause(500)
-                    ->clickDatePicker(date('16.m.Y'))
-                    ->pause(300);
-            $this->assertCount(1, $rows = $browser->getRows(Article::class));
-            $this->assertEquals(array_values(array_map(function($item){
-                return $item['name'];
-            }, $rows)), ['star is born']);
+                    ->clickDatePicker(date('16.m.Y'))->pause(300)
+                    ->assertColumnRowData(Article::class, 'name', ['star is born']);
 
             //Search by interval date 16 to 20
             $browser->click('[data-interval] button')
                     ->click('[data-search-bar] input[data-search-interval-date]')->pause(500)
-                    ->clickDatePicker(date('20.m.Y'))
-                    ->pause(300);
-            $this->assertCount(4, $rows = $browser->getRows(Article::class));
-            $this->assertEquals(array_values(array_map(function($item){
-                return $item['name'];
-            }, $rows)), ['hellboy', 'barefoot', 'hastrman', 'star is born']);
+                    ->clickDatePicker(date('20.m.Y'))->pause(300)
+                    ->assertColumnRowData(Article::class, 'name', ['hellboy', 'barefoot', 'hastrman', 'star is born']);
         });
     }
 
@@ -227,19 +210,59 @@ class TableRowsTest extends BrowserTestCase
                     //Test select filter
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="type"] a')
-                    ->setChosenValue('[data-search-bar] [data-search-select]', 'moovie');
-                    $this->assertCount(4, $rows = $browser->getRows(Tag::class));
-                    $this->assertEquals(array_values(array_map(function($item){
-                        return $item['article_id'];
-                    }, $rows)), ['avengers', 'avengers', 'avengers', 'titanic']);
+                    ->setChosenValue('[data-search-bar] [data-search-select]', 'moovie')
+                    ->assertColumnRowData(Tag::class, 'article_id', ['avengers', 'avengers', 'avengers', 'titanic'])
 
-            $browser->click('[data-search-bar] button.dropdown-toggle')
+                    //Test belongsTo relation filter
+                    ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="article_id"] a')
-                    ->setChosenValue('[data-search-bar] [data-search-select]', 'avengers');
-                    $this->assertCount(4, $rows = $browser->getRows(Tag::class));
-                    $this->assertEquals(array_values(array_map(function($item){
-                        return $item['type'];
-                    }, $rows)), ['blog', 'moovie', 'moovie', 'moovie']);
+                    ->setChosenValue('[data-search-bar] [data-search-select]', 'avengers')
+                    ->assertColumnRowData(Tag::class, 'type', ['blog', 'moovie', 'moovie', 'moovie']);
+        });
+    }
+
+    /** @test */
+    public function test_pagination()
+    {
+        $this->createArticleMoviesList();
+
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(Article::class)
+                    ->changeRowsLimit(5)->pause(300);
+
+            //Check if pagination has correct number of pages
+            $browser->assertHasClass('[data-pagination] li:contains(1)', 'active');
+            $paginationItems = $browser->script('return $("[data-pagination] li:not([data-pagination-next]):not([data-pagination-prev])")')[0];
+            $this->assertCount(3, $paginationItems);
+
+            //Test next page button
+            $browser->click('[data-pagination-next] a')->pause(300)
+                    ->assertHasClass('[data-pagination] li:contains(2)', 'active')
+                    ->assertColumnRowData(Article::class, 'name', ['hastrman', 'star is born', 'aquaman', 'captain marvel', 'shrek']);
+
+            //Test prev page button
+            $browser->click('[data-pagination-prev] a')->pause(300)
+                    ->assertHasClass('[data-pagination] li:contains(1)', 'active')
+                    ->assertColumnRowData(Article::class, 'name', ['john wick', 'superman', 'spider-man', 'hellboy', 'barefoot']);
+
+            //Test number page button
+            $browser->click('[data-pagination] li:contains(3) a')->pause(300)
+                    ->assertHasClass('[data-pagination] li:contains(3)', 'active')
+                    ->assertColumnRowData(Article::class, 'name', ['avengers', 'titanic']);
+        });
+    }
+
+    /** @test */
+    public function test_pagination_skipping_pages_when_is_lot_of_pages()
+    {
+        factory(Article::class, 500)->create();
+
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(Article::class)
+                    ->changeRowsLimit(5)->pause(300);
+
+            $paginationItems = $browser->script('return $("[data-pagination] li:not([data-pagination-next]):not([data-pagination-prev])")')[0];
+            $this->assertCount(15, $paginationItems);
         });
     }
 }

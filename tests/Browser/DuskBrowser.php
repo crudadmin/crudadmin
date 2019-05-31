@@ -483,6 +483,34 @@ class DuskBrowser extends Browser
     }
 
     /**
+     * Check if values in specific columns contains of given data
+     * @param  class $model
+     * @param  string $column
+     * @param  array $excepted
+     * @return object
+     */
+    public function assertColumnRowData($model, $column, $excepted = [])
+    {
+        $model = $this->getModelClass($model);
+
+        $columns = $this->script("return $('[data-table-rows=\"".$model->getTable()."\"] thead th').map(function(){
+            return $(this).attr('class')
+        })");
+
+        $rows = $this->getRows($model);
+
+        PHPUnit::assertEquals(
+            $excepted,
+            array_values(array_map(function($item) use($column) {
+                return $item[$column];
+            }, $rows)),
+            "Column [{$column}] in model [{$model->getTable()}] does not contains of given values."
+        );
+
+        return $this;
+    }
+
+    /**
      * Check if element does not have class
      * @param  class $element
      * @param  array  $class
