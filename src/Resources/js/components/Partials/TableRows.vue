@@ -121,29 +121,6 @@
           * Check if can be added column after other column
           */
           var except = [];
-          var addColumn = function(modifiedData, k, key, where, columns)
-          {
-            if ( where in columns[k] && (columns[k][where] == key || columns[k][where] + '_id' == key) )
-            {
-              var field_key = this.getColumnRightKey(k);
-
-              //We can't add column which has been added, because we reorder array
-              if ( except.indexOf(field_key) > -1 )
-                return modifiedData;
-
-              except.push(field_key);
-
-              if ( k in modifiedData )
-                delete modifiedData[k];
-
-              if ( field_key in modifiedData )
-                delete modifiedData[field_key];
-
-              modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].column_name||this.model.fields[field_key].name;
-            }
-
-            return modifiedData;
-          }.bind(this);
 
           //Add before and after column values
           if ( columns )
@@ -156,13 +133,13 @@
               {
                 //Add custom column before actual column
                 for ( var k in columns )
-                  modifiedData = addColumn(modifiedData, k, key, 'before', columns);
+                  modifiedData = this.addColumn(modifiedData, k, key, 'before', columns, except);
 
                 modifiedData[key] = data[key];
 
                 //Add custom column after actual column
                 for ( var k in columns )
-                  modifiedData = addColumn(modifiedData, k, key, 'after', columns);
+                  modifiedData = this.addColumn(modifiedData, k, key, 'after', columns, except);
               }
 
               data = modifiedData;
@@ -193,7 +170,7 @@
           //Disable changed fields
           for ( var key in this.enabled_columns )
             if ( this.enabled_columns[key].enabled == true )
-              columns[key] = this.fieldName(key);
+              columns[key] = this.enabled_columns[key].name;
 
           return columns;
         },
@@ -229,6 +206,28 @@
       },
 
       methods: {
+        addColumn(modifiedData, k, key, where, columns, except){
+          if ( where in columns[k] && (columns[k][where] == key || columns[k][where] + '_id' == key) )
+          {
+            var field_key = this.getColumnRightKey(k);
+
+            //We can't add column which has been added, because we reorder array
+            if ( except.indexOf(field_key) > -1 )
+              return modifiedData;
+
+            except.push(field_key);
+
+            if ( k in modifiedData )
+              delete modifiedData[k];
+
+            if ( field_key in modifiedData )
+              delete modifiedData[field_key];
+
+            modifiedData[field_key] = columns[k].name||columns[k].title||this.model.fields[field_key].column_name||this.model.fields[field_key].name;
+          }
+
+          return modifiedData;
+        },
         toggleAllCheckboxes(){
           var ids = this.rows.data.map(item => item.id);
 
@@ -299,7 +298,7 @@
               order.splice(add_index + (after ? 1 : 0), 0, key);
 
             enabled[key] = {
-              name : this.fieldName( key ),
+              name : this.fieldName(key),
               enabled : false,
             };
           }

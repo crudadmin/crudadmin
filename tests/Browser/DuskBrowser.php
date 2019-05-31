@@ -108,7 +108,10 @@ class DuskBrowser extends Browser
         if ( ! $id )
             $id = $row['id'];
 
-        PHPUnit::assertEquals($this->getRows($model)[$id], $row, 'Row '.$id.' does not match diven data in table rows.');
+        $actual = $this->getRows($model)[$id];
+
+        PHPUnit::assertEquals(array_keys($actual), array_keys($row), 'Row '.$id.' does not match given order of columns in data table row.');
+        PHPUnit::assertEquals($actual, $row, 'Row '.$id.' does not match given data in data table rows.');
 
         return $this;
     }

@@ -30,18 +30,40 @@ class Model1 extends AdminModel
     {
         return [
             'field1' => 'name:field 1|required',
+            'field2' => 'name:field 2|required',
+            'field3' => 'name:field 3|required',
+            'field4' => 'name:field 4|required',
         ];
     }
 
     protected $settings = [
         'title' => [
             'create' => 'Hlavička nového záznamu',
-            'update' => 'Upravujete záznam č. :id :field1',
+            'update' => 'Upravujete záznam č. :id, :field1',
         ],
         'buttons' => [
             'insert' => 'Vytvoriť nový záznam',
             'create' => 'Odoslať nový záznam',
             'update' => 'Upraviť starý záznam',
         ],
+        'columns' => [
+            'field1' => [
+                'name' => 'Test field',
+                'limit' => 5,
+            ],
+            'field3.encode' => false,
+            'field3.before' => 'field1',
+            'field4.after' => 'field1',
+            'field5' => [
+                'name' => 'My imaginary column',
+            ],
+        ],
     ];
+
+    public function setAdminAttributes($attributes = [])
+    {
+        $attributes['field5'] = 'my non existing column';
+
+        return $attributes;
+    }
 }

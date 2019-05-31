@@ -223,9 +223,18 @@ export default {
 
         if ( this.isRealField(this.field) )
         {
-          var field = this.model.fields[this.field];
+          var field = this.model.fields[this.field],
+              limit;
 
-          return 'limit' in field ? field.limit : defaultLimit;
+          if ( 'limit' in field ) {
+            limit = field.limit;
+          }
+
+          else {
+            limit = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.limit', defaultLimit);
+          }
+
+          return limit || limit === 0 ? limit : defaultLimit;
         } else {
           return this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.limit', defaultLimit);
         }
