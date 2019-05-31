@@ -37,6 +37,7 @@ class ModelBootloaderTest extends TestCase
             '2019-05-04 12:11:02' => 'Gogol\Admin\Tests\App\Models\FieldsMutator',
             '2019-05-03 14:12:04' => 'Gogol\Admin\Tests\App\Models\FieldsRelation',
             '2019-05-04 12:10:04' => 'Gogol\Admin\Tests\App\Models\Articles\Article',
+            '2019-05-04 12:10:24' => 'Gogol\Admin\Tests\App\Models\Articles\Tag',
             '2019-05-15 12:10:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model1',
             '2019-05-15 12:11:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model2',
             '2019-05-15 12:12:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model3',
