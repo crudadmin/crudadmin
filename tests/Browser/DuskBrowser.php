@@ -302,7 +302,16 @@ class DuskBrowser extends Browser
      */
     public function resetFocus()
     {
-        return $this->click('h1');
+        return $this->jsClick('h1');
+    }
+
+    /*
+     * Create jquery click
+     */
+    public function jsClick($selector)
+    {
+        $this->script('$("'.$selector.'")[0].click()');
+        return $this;
     }
 
     /**

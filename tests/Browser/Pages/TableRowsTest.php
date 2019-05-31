@@ -246,7 +246,7 @@ class TableRowsTest extends BrowserTestCase
                     ->assertColumnRowData(Article::class, 'name', ['john wick', 'superman', 'spider-man', 'hellboy', 'barefoot']);
 
             //Test number page button
-            $browser->click('[data-pagination] li:contains(3) a')->pause(300)
+            $browser->jsClick('[data-pagination] li:contains(3) a')->pause(300)
                     ->assertHasClass('[data-pagination] li:contains(3)', 'active')
                     ->assertColumnRowData(Article::class, 'name', ['avengers', 'titanic']);
         });
