@@ -3,7 +3,7 @@
   <form method="post" action="" v-bind:id="formID" :data-form="model.slug" v-on:submit.prevent="saveForm">
     <div v-bind:class="['box', { 'box-info' : isActive, 'box-warning' : !isActive }]">
 
-      <div class="box-header with-border" :class="{ visible : (hasLocaleFields || canShowGettext || (isOpenedRow && model.history)) }">
+      <div data-header class="box-header with-border" :class="{ visible : (hasLocaleFields || canShowGettext || (isOpenedRow && model.history)) }">
         <h3 class="box-title"><span v-if="model.localization" data-toggle="tooltip" :data-original-title="trans('multilanguages')" class="fa fa-globe"></span> {{ title }}</h3>
         <button v-if="isOpenedRow && canShowGettext" @click="openGettextEditor()" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-globe"></i> {{ trans('gettext-open') }}</button>
         <button v-if="isOpenedRow && canaddrow && !isSingle" @click.prevent="resetForm" type="button" class="add-row-btn pull-right btn btn-default btn-sm"><i class="fa fa-plus"></i> {{ newRowTitle }}</button>
@@ -61,7 +61,7 @@
         </component>
       </div>
 
-      <div class="box-footer" v-if="canUpdateForm">
+      <div data-footer class="box-footer" v-if="canUpdateForm">
         <component
           v-for="name in getComponents('form-footer')"
           :key="name"
@@ -180,8 +180,12 @@
         }
 
         //Insert title
-        else if ( title = this.$root.getModelProperty(this.model, 'settings.title.insert') )
+        else if (
+          (title = this.$root.getModelProperty(this.model, 'settings.title.insert'))
+          || (title = this.$root.getModelProperty(this.model, 'settings.title.create'))
+        ) {
           return title;
+        }
 
         return this.trans('new-row');
       },
@@ -192,7 +196,8 @@
         return this.$root.getModelProperty(this.model, 'settings.buttons.update') || this.trans('save');
       },
       sendButton(){
-        return this.$root.getModelProperty(this.model, 'settings.buttons.create') || this.trans('send');
+        return this.$root.getModelProperty(this.model, 'settings.buttons.create')
+               || this.trans('send');
       },
       hasLocaleFields(){
         for ( var key in this.model.fields )

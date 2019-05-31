@@ -32,4 +32,16 @@ class Model1 extends AdminModel
             'field1' => 'name:field 1|required',
         ];
     }
+
+    protected $settings = [
+        'title' => [
+            'create' => 'Hlavička nového záznamu',
+            'update' => 'Upravujete záznam č. :id :field1',
+        ],
+        'buttons' => [
+            'insert' => 'Vytvoriť nový záznam',
+            'create' => 'Odoslať nový záznam',
+            'update' => 'Upraviť starý záznam',
+        ],
+    ];
 }
