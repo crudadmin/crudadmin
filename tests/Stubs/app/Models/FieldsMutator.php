@@ -10,7 +10,7 @@ class FieldsMutator extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-04 12:11:02';
+    protected $migration_date = '2019-05-03 15:12:04';
 
     /*
      * Template name
