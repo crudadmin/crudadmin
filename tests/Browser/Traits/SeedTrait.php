@@ -3,6 +3,7 @@
 namespace Gogol\Admin\Tests\Browser\Traits;
 
 use Gogol\Admin\Tests\App\Models\Articles\Article;
+use Gogol\Admin\Tests\App\Models\Articles\Tag;
 
 trait SeedTrait
 {
@@ -35,6 +36,30 @@ trait SeedTrait
                 'score' => $i++,
                 'content' => 'my-search-content',
                 'created_at' => $date,
+            ]);
+        }
+    }
+
+    private function createTagList()
+    {
+        $tags = [
+            ['type' => 'moovie', 'article_id' => 1 ],
+            ['type' => 'moovie', 'article_id' => 2 ],
+            ['type' => 'moovie', 'article_id' => 2 ],
+            ['type' => 'moovie', 'article_id' => 2 ],
+            ['type' => 'blog', 'article_id' => 2 ],
+            ['type' => 'blog', 'article_id' => 3 ],
+            ['type' => 'blog', 'article_id' => 4 ],
+            ['type' => 'article', 'article_id' => 5 ],
+            ['type' => 'article', 'article_id' => 6 ],
+            ['type' => 'article', 'article_id' => 7 ],
+        ];
+
+        foreach ($tags as $item)
+        {
+            Tag::create([
+                'type' => $item['type'],
+                'article_id' => $item['article_id'],
             ]);
         }
     }

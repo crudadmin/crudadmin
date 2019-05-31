@@ -6,6 +6,7 @@ use Admin;
 use Artisan;
 use Carbon\Carbon;
 use Gogol\Admin\Tests\App\Models\Articles\Article;
+use Gogol\Admin\Tests\App\Models\Articles\Tag;
 use Gogol\Admin\Tests\App\Models\FieldsRelation;
 use Gogol\Admin\Tests\App\Models\FieldsType;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
@@ -29,12 +30,18 @@ class TableRowsTest extends BrowserTestCase
     /** @test */
     public function test_full_grid_size()
     {
-        //Create 100 articles
-        factory(FieldsType::class, 10)->create();
-
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsType::class)
                     ->assertHasClass('li[data-size="full"]', 'active');
+        });
+    }
+
+    /** @test */
+    public function test_medium_grid_size()
+    {
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(Tag::class)
+                    ->assertHasClass('li[data-size="medium"]', 'active');
         });
     }
 
@@ -153,7 +160,7 @@ class TableRowsTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_searchbar()
+    public function test_searchbar_text_integers_dates_and_intervals()
     {
         $this->createArticleMoviesList();
 
@@ -205,6 +212,34 @@ class TableRowsTest extends BrowserTestCase
             $this->assertEquals(array_values(array_map(function($item){
                 return $item['name'];
             }, $rows)), ['hellboy', 'barefoot', 'hastrman', 'star is born']);
+        });
+    }
+
+    /** @test */
+    public function test_searchbar_selects_and_relations()
+    {
+        $this->createArticleMoviesList();
+        $this->createTagList();
+
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(Tag::class)
+
+                    //Test select filter
+                    ->click('[data-search-bar] button.dropdown-toggle')
+                    ->click('[data-search-bar] [data-field="type"] a')
+                    ->setChosenValue('[data-search-bar] [data-search-select]', 'moovie');
+                    $this->assertCount(4, $rows = $browser->getRows(Tag::class));
+                    $this->assertEquals(array_values(array_map(function($item){
+                        return $item['article_id'];
+                    }, $rows)), ['avengers', 'avengers', 'avengers', 'titanic']);
+
+            $browser->click('[data-search-bar] button.dropdown-toggle')
+                    ->click('[data-search-bar] [data-field="article_id"] a')
+                    ->setChosenValue('[data-search-bar] [data-search-select]', 'avengers');
+                    $this->assertCount(4, $rows = $browser->getRows(Tag::class));
+                    $this->assertEquals(array_values(array_map(function($item){
+                        return $item['type'];
+                    }, $rows)), ['blog', 'moovie', 'moovie', 'moovie']);
         });
     }
 }

@@ -628,7 +628,9 @@
         return name;
       },
       reloadSearchBarSelect(){
-        $('#'+this.getFilterId+' .js_chosen').trigger("chosen:updated");
+        this.$nextTick(() => {
+          $('#'+this.getFilterId+' .js_chosen').trigger("chosen:updated");
+        });
       },
       /*
        * Close history rows

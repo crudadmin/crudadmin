@@ -207,14 +207,7 @@ class DuskBrowser extends Browser
                     if ( is_array($value) )
                         $value = array_values($value)[0];
 
-                    $this->script($s = "
-                        var select = $('select[name=\"{$key}\"]');
-                        select.trigger('chosen:open').parents('.form-group').eq(0).each(function(){
-                            $(this).find('.chosen-results li:contains(\"{$value}\")').eq(0).mouseup()
-                        });
-                    ");
-
-                    $this->pause(100);
+                    $this->setChosenValue('select[name="'.$key.'"]', $value);
                 }
             }
 
@@ -675,7 +668,28 @@ class DuskBrowser extends Browser
     {
         $date = Carbon::createFromFormat('d.m.Y', $date);
 
-        $this->script($s = '$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
+        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
+
+        return $this;
+    }
+
+    /**
+     * Set chosenjs select value
+     * @param  string $selector
+     * @param  string $value
+     * @return object
+     */
+    public function setChosenValue($selector, $value = null)
+    {
+        $this->script($s = "
+            var select = $('{$selector}');
+            select.trigger('chosen:open').parent().each(function(){
+                $(this).find('.chosen-results li:contains(\"{$value}\")')
+                       .eq(0).mouseup()
+            });
+        ");
+
+        $this->pause(100);
 
         return $this;
     }
