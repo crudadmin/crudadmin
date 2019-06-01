@@ -22,8 +22,8 @@ export default {
         }
     },
 
-    ready(){
-        console.log('Your field component is ready!!', this.key, this.row, this.field);
+    mounted(){
+        console.log('Your field component is mounted!!', this.key, this.row, this.field);
 
         /*
          * You can watch actual field value, or other form fields in row variable

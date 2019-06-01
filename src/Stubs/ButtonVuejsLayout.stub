@@ -19,8 +19,8 @@ export default {
         }
     },
 
-    ready(){
-        console.log('Your own layout is ready!!', this.model, this.row, this.rows, this.request);
+    mounted(){
+        console.log('Your own layout is mounted!!', this.model, this.row, this.rows, this.request);
     },
 
     computed: {
