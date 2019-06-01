@@ -4,6 +4,9 @@ namespace Gogol\Admin\Tests\App\Models\Tree;
 
 use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Models\Model as AdminModel;
+use Gogol\Admin\Tests\App\Buttons\QuestionButton;
+use Gogol\Admin\Tests\App\Buttons\SimpleButton;
+use Gogol\Admin\Tests\App\Buttons\TemplateButton;
 
 class Model1 extends AdminModel
 {
@@ -66,4 +69,10 @@ class Model1 extends AdminModel
 
         return $attributes;
     }
+
+    protected $buttons = [
+        SimpleButton::class,
+        QuestionButton::class,
+        TemplateButton::class
+    ];
 }

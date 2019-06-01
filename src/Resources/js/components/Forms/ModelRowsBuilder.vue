@@ -503,7 +503,7 @@
           this.refresh.refreshing = false;
 
           //Get new csrf token
-          reloadCSRFToken(response.data.token);
+          this.$root.reloadCSRFToken(response.data.token);
 
           //Add next timeout
           this.initTimeout(false);
@@ -774,7 +774,7 @@
               this.row = {};
 
             //Remove row from options
-            if ( this.$parent.hasparentmodel !== true ){
+            if ( this.$parent.hasparentmodelMutated !== true ){
               this.$parent.$parent.pushOption(requestData.id, 'delete');
             }
 

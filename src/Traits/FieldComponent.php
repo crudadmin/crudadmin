@@ -82,11 +82,25 @@ trait FieldComponent
 
         $loaded_components = Admin::getComponentsTemplates();
 
+        //Get component from loaded components list
         if ( array_key_exists($strtolower_filename = strtolower($filename), $loaded_components) )
             $path = $loaded_components[$strtolower_filename];
 
-        elseif ( ($path = resource_path('views/admin/components/'.$filename.'.vue')) && !file_exists($path) )
-            $path = resource_path('views/'.$filename.'.vue');
+        //Get component from component directory path
+        elseif ( ($path = resource_path('views/admin/components/'.$filename.'.vue')) && file_exists($path) )
+            $path = $path;
+
+        //Get component with directory from views path
+        else if ( ($path = resource_path('views/'.$filename.'.vue')) && file_exists($path) )
+            $path = $path;
+
+        //Get component from given path
+        else if ( ($path = $template) && file_exists($path) || ($path = $template.'.vue') && file_exists($path) )
+            $path = $path;
+
+        //If component does not exists
+        else
+            $path = null;
 
         //Throw ajax error for button component render
         if ($this instanceof \Gogol\Admin\Helpers\Button && ! file_exists($path) ){

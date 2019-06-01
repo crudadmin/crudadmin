@@ -20,6 +20,7 @@ class ModelSettingsTest extends BrowserTestCase
             'field3' => '<a href="#">Text</a>',
             'field4' => 'column 4 longest text more than 20 chars...',
         ]);
+
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(Model1::class)
 

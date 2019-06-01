@@ -15,8 +15,6 @@
     export default {
         init(router){
 
-            var layout = {};
-
             return {
                 el: '#app',
                 router,
@@ -56,6 +54,8 @@
                 components: { Sidebar, License, CheckAssetsVersion },
 
                 created(){
+                    this.reloadCSRFToken($('meta[name="csrf-token"]')[0].content);
+
                     this.bootApp();
 
                     this.bootLanguages();
@@ -98,6 +98,19 @@
                 },
 
                 methods : {
+                    reloadCSRFToken(token){
+                        window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+
+                        Vue.http.options.headers = {
+                            'X-CSRF-TOKEN' : token,
+                        };
+
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': token,
+                            }
+                        });
+                    },
                     /*
                      * Boot whole app with data from API
                      */
@@ -202,8 +215,9 @@
 
                             try {
                                 obj = (new Function('return '+component.component))();
+                                obj.name = this.getComponentName(component.name);
 
-                                Vue.component(this.getComponentName(component.name), obj);
+                                this.$options.components[obj.name] = obj;
 
                                 console.log('component registred', this.getComponentName(component.name), component);
                             } catch(error){

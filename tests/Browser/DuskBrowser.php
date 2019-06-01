@@ -376,7 +376,7 @@ class DuskBrowser extends Browser
      */
     public function jsClick($selector)
     {
-        $this->script('$("'.$selector.'")[0].click()');
+        $this->script('$("'.str_replace('"', "'", $selector).'")[0].click()');
         return $this;
     }
 
@@ -562,9 +562,10 @@ class DuskBrowser extends Browser
      * @param  class $model
      * @param  string $column
      * @param  array $excepted
+     * @param  boolean $equals
      * @return object
      */
-    public function assertColumnRowData($model, $column, $excepted = [])
+    public function assertColumnRowData($model, $column, $excepted = [], $equals = true)
     {
         $model = $this->getModelClass($model);
 
@@ -574,13 +575,27 @@ class DuskBrowser extends Browser
 
         $rows = $this->getRows($model);
 
-        PHPUnit::assertEquals(
+        PHPUnit::{$equals ? 'assertEquals' : 'assertNotEquals'}(
             $excepted,
             array_values(array_map(function($item) use($column) {
                 return $item[$column];
             }, $rows)),
-            "Column [{$column}] in model [{$model->getTable()}] does not contains of given values."
+            "Column [{$column}] in model [{$model->getTable()}] does ".($equals ? 'not ' : '')."contains of given values."
         );
+
+        return $this;
+    }
+
+    /**
+     * Check if values in specific columns does not contains of given data
+     * @param  class $model
+     * @param  string $column
+     * @param  array $excepted
+     * @return object
+     */
+    public function assertColumnRowDataNotEquals($model, $column, $excepted = [], $equals = true)
+    {
+        $this->assertColumnRowData($model, $column, $excepted, false);
 
         return $this;
     }
