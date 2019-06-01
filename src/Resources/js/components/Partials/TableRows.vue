@@ -1,12 +1,12 @@
 <template>
   <div>
-    <table v-bind:id="'table-'+model.slug" :data-table-rows="model.slug" v-bind:class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
-      <thead>
+    <table :id="'table-'+model.slug" :data-table-rows="model.slug" :class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
+      <thead data-table-head>
         <tr>
           <th @click="toggleAllCheckboxes()" v-if="multipleCheckbox">
             <i data-toggle="tooltip" :data-original-title="trans(isCheckedAll ? 'uncheck-all' : 'check-all')" :class="isCheckedAll ? 'fa-check-square-o' : 'fa-square-o'" class="fa"></i>
           </th>
-          <th v-for="(name, field) in columns" v-bind:class="'th-'+field" v-on:click="toggleSorting(field)">
+          <th v-for="(name, field) in columns" :class="'th-'+field" @click="toggleSorting(field)">
             <i class="arrow-sorting fa fa-arrow-up" v-if="orderby[0] == field && orderby[1] == 0"></i>
             <i class="arrow-sorting fa fa-arrow-down" v-if="orderby[0] == field && orderby[1] == 1"></i>
             {{ name }}
@@ -23,19 +23,19 @@
             </div>
           </td>
 
-          <td v-for="(name, field) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]" :data-field="field">
+          <td v-for="(name, field) in columns" @click="checkRow(item.id, field)" :class="['td-'+field, { image_field : isImageField(field) } ]" :data-field="field">
             <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
           </td>
 
-          <td class="buttons-options" v-bind:class="[ 'additional-' + buttonsCount(item) ]">
-            <div v-if="isEditable"><button data-button="edit" :data-id="item.id" type="button" v-on:click="selectRow(item)" v-bind:class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" :data-original-title="trans('edit')"><i class="fa fa-pencil"></i></button></div>
-            <div v-if="isEnabledHistory"><button type="button" v-on:click="showHistory(item)" class="btn btn-sm btn-default" v-bind:class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
+          <td class="buttons-options" :class="[ 'additional-' + buttonsCount(item) ]">
+            <div v-if="isEditable"><button data-button="edit" :data-id="item.id" type="button" v-on:click="selectRow(item)" :class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" :data-original-title="trans('edit')"><i class="fa fa-pencil"></i></button></div>
+            <div v-if="isEnabledHistory"><button type="button" v-on:click="showHistory(item)" class="btn btn-sm btn-default" :class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
             <div v-if="canShowGettext"><button type="button" v-on:click="openGettextEditor(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('gettext-update')"><i class="fa fa-globe"></i></button></div>
             <div><button type="button" v-on:click="showInfo(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('row-info')"><i class="fa fa-info"></i></button></div>
             <div v-for="(button, button_key) in getButtonsForRow(item)">
-              <button type="button" v-on:click="buttonAction(button_key, button, item)" v-bind:class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" v-bind:data-original-title="button.name"><i v-bind:class="['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]"></i></button>
+              <button type="button" v-on:click="buttonAction(button_key, button, item)" :class="['btn', 'btn-sm', button.class]" data-toggle="tooltip" title="" :data-original-title="button.name"><i :class="['fa', button_loading == getButtonKey(item.id, button_key) ? 'fa-refresh' : button.icon, { 'fa-spin' : button_loading == getButtonKey(item.id, button_key) }]"></i></button>
             </div>
-            <div v-if="model.publishable"><button type="button" v-on:click="togglePublishedAt(item)" v-bind:class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" :data-original-title="item.published_at ? trans('hide') : trans('show')"><i v-bind:class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
+            <div v-if="model.publishable"><button type="button" v-on:click="togglePublishedAt(item)" :class="['btn', 'btn-sm', { 'btn-info' : !item.published_at, 'btn-warning' : item.published_at}]" data-toggle="tooltip" title="" :data-original-title="item.published_at ? trans('hide') : trans('show')"><i :class="{ 'fa' : true, 'fa-eye' : item.published_at, 'fa-eye-slash' : !item.published_at }"></i></button></div>
             <div v-if="model.deletable && count > model.minimum"><button type="button" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" :class="{ disabled : isReservedRow(item) }" data-toggle="tooltip" title="" :data-original-title="trans('delete')"><i class="fa fa-remove"></i></button></div>
           </td>
         </tr>
@@ -352,7 +352,7 @@
 
           var order = this.orderby[0] == key ? (1 - this.orderby[1]) : 0;
 
-          this.orderby = [key, order];
+          this.$parent.orderBy = [key, order];
         },
         fieldName(key){
           if ( key in this.model.fields )

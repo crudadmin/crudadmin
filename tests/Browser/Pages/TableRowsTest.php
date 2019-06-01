@@ -265,4 +265,74 @@ class TableRowsTest extends BrowserTestCase
             $this->assertCount(15, $paginationItems);
         });
     }
+
+    /** @test */
+    public function test_table_sorting()
+    {
+        factory(FieldsType::class, 10)->create();
+
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(FieldsType::class)
+
+                    //Sort id fields
+                    ->click('[data-table-head] .th-id')
+                    ->assertRowsSortOrder(FieldsType::class, 'id', 'asc')
+                    ->click('[data-table-head] .th-id')
+                    ->assertRowsSortOrder(FieldsType::class, 'id', 'desc')
+
+                    //Sort texts fields
+                    ->click('[data-table-head] .th-string')
+                    ->assertRowsSortOrder(FieldsType::class, 'string', 'asc')
+                    ->click('[data-table-head] .th-string')
+                    ->assertRowsSortOrder(FieldsType::class, 'string', 'desc')
+
+                    //Sort string field
+                    ->click('[data-table-head] .th-select')
+                    ->assertRowsSortOrder(FieldsType::class, 'select', 'asc')
+                    ->click('[data-table-head] .th-select')
+                    ->assertRowsSortOrder(FieldsType::class, 'select', 'desc')
+
+                    //Sort integer field
+                    ->click('[data-table-head] .th-integer')
+                    ->assertRowsSortOrder(FieldsType::class, 'integer', 'asc')
+                    ->click('[data-table-head] .th-integer')
+                    ->assertRowsSortOrder(FieldsType::class, 'integer', 'desc')
+
+                    //Sort decimal field
+                    ->click('[data-table-head] .th-decimal')
+                    ->assertRowsSortOrder(FieldsType::class, 'decimal', 'asc')
+                    ->click('[data-table-head] .th-decimal')
+                    ->assertRowsSortOrder(FieldsType::class, 'decimal', 'desc')
+
+                    //Sort date field
+                    ->click('[data-table-head] .th-date')
+                    ->assertRowsSortOrder(FieldsType::class, 'date', 'asc')
+                    ->click('[data-table-head] .th-date')
+                    ->assertRowsSortOrder(FieldsType::class, 'date', 'desc')
+
+                    //Sort datetime field
+                    ->click('[data-table-head] .th-datetime')
+                    ->assertRowsSortOrder(FieldsType::class, 'datetime', 'asc')
+                    ->click('[data-table-head] .th-datetime')
+                    ->assertRowsSortOrder(FieldsType::class, 'datetime', 'desc')
+
+                    //Sort time field
+                    ->click('[data-table-head] .th-time')
+                    ->assertRowsSortOrder(FieldsType::class, 'time', 'asc')
+                    ->click('[data-table-head] .th-time')
+                    ->assertRowsSortOrder(FieldsType::class, 'time', 'desc')
+
+                    //Sort checkbox field
+                    ->click('[data-table-head] .th-checkbox')
+                    ->assertRowsSortOrder(FieldsType::class, 'checkbox', 'asc')
+                    ->click('[data-table-head] .th-checkbox')
+                    ->assertRowsSortOrder(FieldsType::class, 'checkbox', 'desc')
+
+                    //Sort radio field
+                    ->click('[data-table-head] .th-radio')
+                    ->assertRowsSortOrder(FieldsType::class, 'radio', 'asc')
+                    ->click('[data-table-head] .th-radio')
+                    ->assertRowsSortOrder(FieldsType::class, 'radio', 'desc');
+        });
+    }
 }

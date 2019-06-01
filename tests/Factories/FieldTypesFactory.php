@@ -16,7 +16,7 @@ use Gogol\Admin\Tests\App\Models\FieldsType;
 
 $factory->define(FieldsType::class, function (Faker $faker) {
     return [
-        'string' => $faker->title,
+        'string' => $faker->text,
         'text' => $faker->paragraph,
         'editor' => '<p>'.$faker->paragraph.'</p>',
         'select' => $faker->randomElement(['option a', 'option b']),

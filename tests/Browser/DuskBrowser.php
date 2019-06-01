@@ -117,6 +117,71 @@ class DuskBrowser extends Browser
     }
 
     /**
+     * Sort date and datetimes
+     * @param  array   $dates
+     * @param  boolean $asc
+     * @return array
+     */
+    private function sortDateTimes($dates = [], $asc = true)
+    {
+        return usort($dates, function($a, $b) use ($asc) {
+            $a = explode(' ', $a);
+            $b = explode(' ', $b);
+
+            //Change format from d.m.y to y.m.d
+            $a[0] = strrev($a[0]);
+            $b[0] = strrev($b[0]);
+
+            $a = implode(' ', $a);
+            $b = implode(' ', $b);
+
+            if ($a == $b) {
+                return 0;
+            }
+
+            return (($a < $b) ? -1 : 1) * ($asc === false ? -1 : 1);
+        });
+    }
+
+    /**
+     * Check row exists in table rows
+     * @param  class $model
+     * @param  string $column
+     * @param  string  $type
+     * @return object
+     */
+    public function assertRowsSortOrder($model, $column, $type = 'asc')
+    {
+        $model = $this->getModelClass($model);
+
+        $rows = $this->getRows($model);
+
+        $actual = array_map(function($item) use ($column) {
+            return $item[$column];
+        }, $rows);
+
+        $excepted = $actual;
+
+        //Sort date values by given type
+        if ( $model->isFieldType($column, ['date', 'datetime']) )
+        {
+            $this->sortDateTimes($excepted, $type == 'asc');
+        }
+
+        //Sort texts and numbers by given type
+        else {
+            if ( $type == 'desc' )
+                arsort($excepted);
+            else
+                asort($excepted);
+        }
+
+        PHPUnit::assertEquals($actual, $excepted, 'Sorting columns for column ['.$column.'] does not work in ['.$type.'] order.');
+
+        return $this;
+    }
+
+    /**
      * Change table rows limit
      * @param  integer $limit
      * @return void
