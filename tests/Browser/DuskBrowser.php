@@ -203,7 +203,7 @@ class DuskBrowser extends Browser
             var e = document.createEvent('HTMLEvents');
                 e.initEvent('{$type}', true, true);
 
-            $('{$selector}').val({$value})[0].dispatchEvent(e);
+            $('{$selector}').val('{$value}')[0].dispatchEvent(e);
         ");
 
         return $this;

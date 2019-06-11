@@ -17,9 +17,10 @@ class ModelBootloaderTest extends TestCase
     }
 
     /** @test */
-    public function only_user_model_is_available()
+    public function only_default_models_are_available()
     {
         $this->assertEquals(Admin::boot(), [
+            '2016-06-05 00:00:00' => 'Gogol\Admin\Models\Language',
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User'
         ]);
     }
@@ -30,6 +31,7 @@ class ModelBootloaderTest extends TestCase
         $this->registerAllAdminModels();
 
         $this->assertEquals(Admin::boot(true), [
+            '2016-06-05 00:00:00' => 'Gogol\Admin\Models\Language',
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
             '2019-05-03 12:02:04' => 'Gogol\Admin\Tests\App\Models\FieldsType',
             '2019-05-03 12:12:04' => 'Gogol\Admin\Tests\App\Models\FieldsTypesMultiple',
@@ -51,6 +53,7 @@ class ModelBootloaderTest extends TestCase
         Admin::registerAdminModels($this->getAppPath('OtherModels'), 'Gogol\Admin\Tests\App\OtherModels');
 
         $this->assertEquals(Admin::getAdminModelNamespaces(), [
+            '2016-06-05 00:00:00' => 'Gogol\Admin\Models\Language',
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
             '2019-05-03 13:10:04' => 'Gogol\Admin\Tests\App\OtherModels\Blog',
             '2019-05-03 14:11:02' => 'Gogol\Admin\Tests\App\OtherModels\BlogsImage'

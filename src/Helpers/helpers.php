@@ -50,4 +50,13 @@ if ( ! function_exists('trim_end') ) {
         return $string;
     }
 }
+
+
+/*
+ * Returns base or relative path
+ */
+function base_or_relative_path($path)
+{
+    return $path[0] == '/' ? $path : base_path($path);
+}
 ?>

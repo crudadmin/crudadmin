@@ -71,9 +71,12 @@ class RouteServiceProvider extends ServiceProvider
             require __DIR__ . '/../routes.php';
         });
 
-        //Boot application routes
-        if ( file_exists($route_path = base_path('routes/web.php')) )
+        //Boot application routes language within prefix
+        foreach (config('admin.routes', []) as $route)
         {
+            if ( ! file_exists($route_path = base_or_relative_path($route)) )
+                continue;
+
             $router->group([
                 'namespace' => $this->namespace,
                 'prefix' => $this->localization,

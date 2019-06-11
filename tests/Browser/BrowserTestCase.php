@@ -3,6 +3,7 @@
 namespace Gogol\Admin\Tests\Browser;
 
 use Carbon\Carbon;
+use Gogol\Admin\Tests\Browser\Concerns\LoadRoutes;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\AdminTrait;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +12,8 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 class BrowserTestCase extends TestCase
 {
-    use AdminTrait;
+    use AdminTrait,
+        LoadRoutes;
 
    /**
      * Create the DuskBrowser instance.
@@ -45,7 +47,11 @@ class BrowserTestCase extends TestCase
         //Boot http request before laravel app starts
         //because of bug of missing url path in request()->url()
         if ( ! app()->runningInConsole() )
-            $app->handle(\Illuminate\Http\Request::capture());
+        {
+            //set http request before laravel app starts
+            //because missing url path bug in request()->url()
+            $app->instance('request', \Illuminate\Http\Request::capture());
+        }
     }
 
     /**

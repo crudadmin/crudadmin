@@ -63,7 +63,7 @@ trait AdminTrait
     protected function setAdminEnvironmentSetUp($app)
     {
         //Bind app path
-        $app['path'] = $this->getStubpath('app');
+        $app['path'] = $this->getStubPath('app');
 
         // Setup default database to use sqlite :memory:
         $app['config']->set('app.debug', true);
@@ -89,6 +89,24 @@ trait AdminTrait
             'level1.level2.level3' => 'My sub-subtree level',
         ]);
 
+        //Allow localizations
+        $app['config']->set('admin.localization', true);
+        $app['config']->set('admin.gettext', true);
+        $app['config']->set('admin.gettext_source_paths', array_merge(config('admin.gettext_source_paths', []), [
+            $this->getStubPath('views'),
+        ]));
+
+        //Load routes
+        $this->loadRoutesFrom($app, $this->getStubPath('routes.php'));
+        $app['config']->set('admin.routes', [
+            $this->getStubPath('routes.php')
+        ]);
+
+        //Load views
+        $app['config']->set('view.paths', [
+            $this->getStubPath('views')
+        ]);
+
         app()->setLocale(config('admin.locale', 'sk'));
 
         //Reset sqlite database files
@@ -112,7 +130,7 @@ trait AdminTrait
      */
     protected function getAppPath($path = null)
     {
-        return $this->getStubpath('app'.($path ? '/'.$path : ''));
+        return $this->getStubPath('app'.($path ? '/'.$path : ''));
     }
 
     /*

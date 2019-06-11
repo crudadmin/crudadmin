@@ -29,10 +29,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(key, values) in filtratedTranslates">
+                      <tr v-for="(values, key) in filtratedTranslates">
                         <td>{{ key }}</td>
                         <td class="input" :class="{ edited : hasChange(key), plural : isPlural(key) }">
-                          <textarea v-for="i in getPluralLength(key)" :class="{ long : getValue(values, i).length > 80 }" :value="getValue(values, i)" :placeholder="getPluralsPlaceholder(key, i)" :title="getPluralsPlaceholder(key, i)" data-toggle="tooltip" @keyup="changeText($event, key, i)" class="form-control"></textarea>
+                          <textarea v-for="i in getPluralLength(key)" :class="{ long : getValue(values, i-1).length > 80 }" :value="getValue(values, i-1)" :placeholder="getPluralsPlaceholder(key, i-1)" :title="getPluralsPlaceholder(key, i-1)" data-toggle="tooltip" @input="changeText($event, key, i-1)" class="form-control"></textarea>
                         </td>
                       </tr>
                     </tbody>
@@ -71,11 +71,7 @@
         };
       },
 
-      created() {
-
-      },
-
-      ready() {
+      mounted() {
         this.loadTranslations();
       },
 
@@ -165,15 +161,15 @@
           return this.$root.trans(key);
         },
         close(){
-          this.gettext_editor = null;
+          this.$parent.gettext_editor = null;
         },
         loadTranslations(){
-          this.$http.get(this.$root.requests.translations.replace('{id}', this.gettext_editor.id)).then(function(response){
+          this.$http.get(this.$root.requests.translations.replace(':id', this.gettext_editor.id)).then(function(response){
             var messages = response.data.messages;
 
             this.plurals = response.data.plurals;
             this.plural_forms = response.data['plural-forms'];
-            this.translates = response.data.messages[Object.keys(messages)[0]];
+            this.translates = response.data.messages[Object.keys(messages)[0]]||{};
 
             this.loaded = true;
           });
@@ -198,7 +194,7 @@
           if ( ! value )
             return '';
 
-          return value[i];
+          return value[i]||'';
         },
         changeText(e, src, i){
           var value = e.target.value;
@@ -223,7 +219,7 @@
           this.translates[src][i] = value;
         },
         saveAndClose(){
-          this.$http.post(this.$root.requests.update_translations.replace('{id}', this.gettext_editor.id), { changes : JSON.stringify(this.changes) }).then(function(){
+          this.$http.post(this.$root.requests.update_translations.replace(':id', this.gettext_editor.id), { changes : JSON.stringify(this.changes) }).then(function(){
             this.close();
           });
         },

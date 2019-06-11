@@ -71,4 +71,12 @@ return [
     'passwords' => [
         //bcrypted passwords...
     ],
+
+    /*
+     * Re-register all routes also with language prefix
+     * /en/route-a, /en/route-b ...
+     */
+    'routes' => [
+        'routes/web.php'
+    ],
 ];

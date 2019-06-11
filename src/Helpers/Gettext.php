@@ -37,7 +37,7 @@ class Gettext
         return $this->getBasePath( 'gettext/' . $path );
     }
 
-    protected function getLocalePath($locale, $file = null)
+    public function getLocalePath($locale, $file = null)
     {
         return $this->getGettextPath( $locale . '/LC_MESSAGES/' . $file);
     }
@@ -182,8 +182,6 @@ class Gettext
         $locale_mo_path = $this->getLocalePath($locale, $row->poedit_mo);
 
         $locale_po_path = $this->getLocalePath($locale, $locale . '.po');
-
-        // dd($locale_mo_path, $row->poedit_po, md5_file($uploaded_path_po) != md5_file($locale_po_path));
 
         //If pofile has been changed, then generate new mo file and remove previous one
         if ( !file_exists($locale_po_path) || md5_file($uploaded_path_po) != md5_file($locale_po_path))
@@ -419,13 +417,14 @@ class Gettext
      */
     private function mergeDirectoryTranslations($path, $translations)
     {
-        $path = base_path( $path );
+        //Use relative path or laravel base path
+        $path = base_or_relative_path($path);
 
         if ( ! file_exists($path) )
             return;
 
         //Foreach all files and merge translations by file type
-        foreach ($this->filesystem->allFiles( $path ) as $file)
+        foreach ($this->filesystem->allFiles($path) as $file)
         {
             $type = $this->getCollectorType($file);
 
@@ -464,7 +463,7 @@ class Gettext
         $modified = [];
 
         foreach ($views_paths as $path) {
-            $path = base_path( $path );
+            $path = base_or_relative_path($path);
 
             if ( ! file_exists($path) )
                 continue;
