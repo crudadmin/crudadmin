@@ -4,3 +4,4 @@
 /node_modules
 config.js
 mix-manifest.json
+.phpunit.result.cache

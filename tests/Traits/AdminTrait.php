@@ -143,6 +143,7 @@ trait AdminTrait
 
     /*
      * All published admin resources
+     * which will be uninstalled the end of each test
      */
     protected function getPublishableResources()
     {
@@ -165,6 +166,9 @@ trait AdminTrait
         //Add publishable resources
         foreach ($this->getPublishableResources() as $item)
             $resources[] = $item;
+
+        //Admin gettext languages
+        $resources[] = $this->getBasePath().'/storage/app/lang';
 
         return $resources;
     }

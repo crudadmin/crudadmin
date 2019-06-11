@@ -14,6 +14,13 @@ class ModelGettextTest extends BrowserTestCase
 {
     use DropDatabase;
 
+    protected function tearDown() : void
+    {
+        $this->uninstallAdmin();
+
+        parent::tearDown();
+    }
+
     private function getEnTranslates()
     {
         $language = Language::where('slug', 'en')->first();

@@ -140,7 +140,7 @@ class ImageCompressor
         $compressed_path = $this->getCompressedListPath();
         $source_path = str_replace(public_path('uploads/'), '', $source_path);
 
-        $data = file_get_contents($compressed_path);
+        $data = @file_get_contents($compressed_path);
         $data = str_replace($source_path.':', '-:', $data);
 
         @file_put_contents($compressed_path, $data);
