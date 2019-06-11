@@ -1,24 +1,21 @@
 <template>
     <div>
         <ul class="sidebar-menu">
-                <li class="header">
-                    {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
-                    <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
-                        <select v-model="langid" class="form-control">
-                            <option v-for="language in languages" :value="language.id">{{ getLangName(language) }}</option>
-                        </select>
-                    </div>
-                </li>
-            </ul>
+            <li class="header">
+                {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
+                <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
+                    <select v-model="langid" class="form-control">
+                        <option v-for="language in languages" :value="language.id">{{ getLangName(language) }}</option>
+                    </select>
+                </div>
+            </li>
+        </ul>
 
-            <!-- Sidebar Menu -->
-            <ul class="sidebar-menu">
-                <sidebar-row v-for="(row, key) in groups" :key="key" :row="row"></sidebar-row>
-            </ul>
-
-              <!-- /.sidebar-menu -->
-            </section>
-            <!-- /.sidebar -->
+        <!-- Sidebar Menu -->
+        <ul class="sidebar-menu">
+            <sidebar-row v-for="(row, key) in groups" :key="key" :row="row"></sidebar-row>
+        </ul>
+        <!-- /.sidebar-menu -->
     </div>
 </template>
 
@@ -29,6 +26,14 @@
         props: ['rows', 'languages', 'langid'],
 
         components: { SidebarRow },
+
+        watch: {
+            rows(rows){
+                this.$nextTick(() => {
+                    this.addActiveTreeClasses();
+                });
+            },
+        },
 
         computed : {
             groups(){
@@ -54,17 +59,16 @@
             }
         },
 
-        ready(){
-            var owner = $('.sidebar li[data-slug="'+this.$router._currentTransition.to.name+'"]');
-
-            owner.parent().addClass('menu-open').css('display', 'block').parents('.treeview').addClass('active');
-
-            $('.sidebar .treeview-menu a').click(function(){
-                $(this).parent().siblings('.active').removeClass('active').find('.menu-open').slideUp();
-            });
-        },
-
         methods: {
+            addActiveTreeClasses(){
+                var owner = $('.sidebar li[data-slug="'+this.$router.currentRoute.params.model+'"]');
+
+                owner.parent().addClass('menu-open').css('display', 'block').parents('.treeview').addClass('active');
+
+                $('.sidebar .treeview-menu a').click(function(){
+                    $(this).parent().siblings('.active').removeClass('active').find('.menu-open').slideUp();
+                });
+            },
             getLangName(lang){
                 return this.$root.getLangName(lang);
             },

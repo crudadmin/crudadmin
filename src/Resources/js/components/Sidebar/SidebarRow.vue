@@ -7,7 +7,7 @@
           </ul>
         </router-link>
 
-        <li class="treeview" v-if="isActive && isGroup && hasChilds" data-slug="row.slug" >
+        <li class="treeview" v-if="isActive && isGroup && hasChilds" :data-slug="row.slug" >
           <a><i class="fa" :class="row.icon||'fa-folder-open-o'"></i> <span>{{ row.name }}</span> <i v-if="hasSubmenu" class="fa fa-angle-left pull-right"></i></a>
           <ul v-if="hasSubmenu" class="treeview-menu">
             <sidebar-row v-for="(subrow, key) in row.submenu" :key="key" :row="subrow" :parent="levels"></sidebar-row>
