@@ -1,7 +1,7 @@
 <template>
   <div class="nav-tabs-custom" :class="{ default : hasNoTabs }">
     <ul class="nav nav-tabs">
-      <li v-for="(tab, $index) in getTabs" v-if="isTab(tab) && !tab.model || isModel(tab)" v-show="isTabVisible(tab)" :model-table="isModel(tab) && getModel(tab.model) ? getModel(tab.model).slug : ''" :class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
+      <li v-for="(tab, $index) in getTabs" v-if="isTab(tab) && !tab.model || isModel(tab)" v-show="isTabVisible(tab)" data-tabs :data-model="isModel(tab) && getModel(tab.model) ? getModel(tab.model).slug : ''" :class="{ active : activetab == $index, 'model-tab' : isModel(tab) }" @click="activetab = $index">
         <a data-toggle="tab" aria-expanded="true"><i v-if="getTabIcon(tab)" :class="['fa', getTabIcon(tab)]"></i> {{ getTabName(tab)||trans('general-tab') }}</a>
       </li>
     </ul>
@@ -84,8 +84,8 @@
         this.models_loaded = [];
       });
 
-      this.$on('rows-changed', function(item){
-        this.$set('models_data.'+item.slug, item);
+      eventHub.$on('rows-changed', item => {
+        this.$set(this.models_data, item.slug, item);
       });
     },
 

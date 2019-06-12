@@ -387,7 +387,7 @@
         return this.$root.trans(key);
       },
       reloadRows(){
-        this.row = this.$parent.emptyRowInstance();
+        this.$parent.row = this.$parent.emptyRowInstance();
         this.rows.data = [];
         this.rows.count = 0;
         this.rows.save_children = [];
@@ -770,7 +770,7 @@
             }
 
             if ( this.row && ids.indexOf(this.row.id) > -1 )
-              this.row = {};
+              this.$parent.row = this.$parent.emptyRowInstance();
 
             //Remove row from options
             if ( this.$parent.hasparentmodelMutated !== true ){

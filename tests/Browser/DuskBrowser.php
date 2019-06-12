@@ -87,7 +87,7 @@ class DuskBrowser extends Browser
     {
         $model = $this->getModelClass($model);
 
-        //Mutate diven rows data
+        //Mutate given rows data
         foreach ($row as $key => $value)
         {
             //Update checkbox values
@@ -226,7 +226,7 @@ class DuskBrowser extends Browser
                 $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password'])
                 && ! $model->hasFieldParam($key, 'multiple')
             ) {
-                $this->type($key, $value);
+                $this->type('[data-field="'.$model->getTable().'-'.$key.'"]', $value);
             }
 
             //Set editor value
@@ -762,13 +762,16 @@ class DuskBrowser extends Browser
 
     /**
      * Open admin row
-     * @param  [type] $element
-     * @return [type]
+     * @param  integer $id
+     * @param  string/object $model
+     * @return object
      */
-    public function openRow($id = null)
+    public function openRow($id = null, $model = null)
     {
+        $modelSelector = $model ? '[data-model="'.$this->getModelClass($model)->getTable().'"]' : '';
+
         //Open row
-        $this->click($selector = '.buttons-options button[data-button="edit"][data-id="'.$id.'"]');
+        $this->click($selector = '.buttons-options'.$modelSelector.' button[data-button="edit"][data-id="'.$id.'"]');
 
         //Wait till row will be opened
         $this->waitFor($selector.'.btn-success');

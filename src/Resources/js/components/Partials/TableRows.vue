@@ -27,7 +27,7 @@
             <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
           </td>
 
-          <td class="buttons-options" :class="[ 'additional-' + buttonsCount(item) ]">
+          <td class="buttons-options" :data-model="model.slug" :class="[ 'additional-' + buttonsCount(item) ]">
             <div v-if="isEditable"><button data-button="edit" :data-id="item.id" type="button" v-on:click="selectRow(item)" :class="['btn', 'btn-sm', {'btn-success' : isActiveRow(item), 'btn-default' : !isActiveRow(item) }]" data-toggle="tooltip" title="" :data-original-title="trans('edit')"><i class="fa fa-pencil"></i></button></div>
             <div v-if="isEnabledHistory"><button data-button="history" type="button" v-on:click="showHistory(item)" class="btn btn-sm btn-default" :class="{ 'enabled-history' : isActiveRow(item) && history.history_id }" data-toggle="tooltip" title="" :data-original-title="trans('history.changes')"><i class="fa fa-history"></i></button></div>
             <div v-if="canShowGettext"><button data-button="gettext" type="button" v-on:click="openGettextEditor(item)" class="btn btn-sm btn-default" data-toggle="tooltip" title="" :data-original-title="trans('gettext-update')"><i class="fa fa-globe"></i></button></div>
