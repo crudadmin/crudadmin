@@ -124,7 +124,7 @@ export default {
 
     methods: {
       stringLimit(string){
-        var limit = this.getFieldLimit(Object.keys(this.$parent.columns).length < 5 ? 40 : 20);
+        var limit = this.getFieldLimit(Object.keys(this.$parent.$parent.columns).length < 5 ? 40 : 20);
 
         if ( limit != 0 && string.length > limit && this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.encode', true) !== false )
           return string.substr(0, limit) + '...';

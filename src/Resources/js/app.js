@@ -8,7 +8,6 @@ import Fragment from 'vue-fragment'
 
 //Uses
 Vue.use(require('vue-resource'));
-Vue.use(require('vue-drag-and-drop'));
 Vue.use(Fragment.Plugin);
 Vue.use(VueRouter);
 

@@ -58,7 +58,6 @@
         :rowsdata.sync="rowsData"
         :button_loading="button_loading"
         :checked.sync="checked"
-        :dragging.sync="dragging"
         :orderby.sync="orderBy">
       </table-rows>
     </div>

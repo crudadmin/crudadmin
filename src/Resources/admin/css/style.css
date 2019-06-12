@@ -115,7 +115,8 @@ button.dropdown-toggle > span.caret { margin-left: 5px; }
 
 table.table th:not(.th-options-buttons) { cursor: pointer; }
 table.table > tbody > tr { user-select: auto; }
-table.table.sortable tr[draggable="true"] { cursor: move; }
+table.table.sortable tr[draggable="true"] { cursor: move; user-select: none; }
+table.table.sortable tr[draggable="true"] .tooltip { display: none !important; opacity: 0; }
 table.table td.image_field {padding: 0 1px;}
 table.table td.image_field img {height: 46px;transition: 0.2s all ease-in-out;}
 table.table td.image_field img:hover {height: 46px;opacity: 0.8}

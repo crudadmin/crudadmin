@@ -14,8 +14,8 @@
           <th class="th-options-buttons"></th>
         </tr>
       </thead>
-      <tbody>
-        <tr v-for="(item, key) in rowsdata" :data-id="item.id" drag-start="beforeUpdateOrder" drop="updateOrder">
+      <draggable tag="tbody" @start="beforeUpdateOrder" @end="updateOrder">
+        <tr v-for="(item, key) in rowsdata" :key="item.id" :data-id="item.id">
           <td class="checkbox-td" v-if="multipleCheckbox">
             <div class="checkbox-box" @click="checkRow(item.id)">
               <input type="checkbox" :checked="checked.indexOf(item.id) > -1">
@@ -39,18 +39,19 @@
             <div v-if="model.deletable && count > model.minimum"><button data-button="delete" type="button" v-on:click="removeRow( item, key )" class="btn btn-danger btn-sm" :class="{ disabled : isReservedRow(item) }" data-toggle="tooltip" title="" :data-original-title="trans('delete')"><i class="fa fa-remove"></i></button></div>
           </td>
         </tr>
-      </tbody>
+      </draggable>
     </table>
   </div>
 </template>
 
 <script>
   import TableRowValue from './TableRowValue.vue';
+  import draggable from 'vuedraggable'
 
   export default {
-      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'model', 'orderby', 'dragging', 'history', 'checked', 'button_loading'],
+      props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'model', 'orderby', 'history', 'checked', 'button_loading'],
 
-      components: { TableRowValue },
+      components: { TableRowValue, draggable },
 
       data(){
         return {
@@ -384,45 +385,37 @@
 
           return false;
         },
-        findById(id){
-          for ( var key in this.rowsdata )
-            if ( this.rowsdata[key].id == id )
-              return this.rowsdata[key];
+        enableDragging(){
+          this.$parent.initTimeout(false);
+          this.$parent.dragging = false;
+
+          //Enable all tooltips
+          $('[data-toggle="tooltip"]').tooltip('enable');
         },
         beforeUpdateOrder(dragged){
+          //Destroy table reload rows timeout
           this.$parent.destroyTimeout();
 
-          this.dragging = true;
+          //Set drag&drop state as true, because if we drag, we do not want reload rows
+          //from ajax request. We want stop syncing rows. Also ajax request which
+          //has been sent already.
+          this.$parent.dragging = true;
+
+          //Disable all tooltips
+          $('[data-toggle="tooltip"]').tooltip('disable');
         },
-        enableDraggind(){
-          this.$parent.initTimeout(false);
-          this.dragging = false;
-        },
-        updateOrder(dragged, dropped){
+        updateOrder(dragged){
           //Disable sorting when is used sorting columns
           if ( this.orderby[0] != '_order' )
           {
-            this.enableDraggind();
+            this.enableDragging();
             return;
           }
 
-          //Get owner of dragged row
-          while ( $(dropped).attr('data-index') == null )
-          {
-            dropped = $(dropped).parent()[0];
-          }
-
-          //Checks if dropped column is in same table
-          if ( $(dragged).parent().attr('data-model') != $(dropped).parent().attr('data-model') )
-          {
-            this.enableDraggind();
-            return;
-          }
-
-          var dragged_id = $(dragged).attr('data-index'),
-              dropped_id = $(dropped).attr('data-index'),
-              dragged_order = this.findById(dragged_id)._order,
-              dropped_order = this.findById(dropped_id)._order,
+          var dragged_row = this.rowsdata[dragged.oldIndex],
+              dropped_row = this.rowsdata[dragged.newIndex],
+              dragged_order = dragged_row._order,
+              dropped_order = dropped_row._order,
               rows = {},
               changed_ids = [];
 
@@ -432,7 +425,7 @@
             var row = this.$parent.$parent.rows.data[i];
 
             //From top to bottom
-            if ( row.id == dragged_id ){
+            if ( row.id == dragged_row.id ){
               row._order = dropped_order;
               rows[ row.id ] = row._order;
             } else if ( dragged_order > dropped_order && row._order >= dropped_order && row._order <= dragged_order ){
@@ -446,21 +439,18 @@
           }
 
           this.$http.post(this.$root.requests.updateOrder, { model : this.model.slug, rows : rows })
-          .then(function(response){
-
+          .then(response => {
             var data = response.data;
 
             if ( data && 'type' in data )
-            {
               return this.$root.openAlert(data.title, data.message, 'danger');
-            }
 
-            this.enableDraggind();
+            this.enableDragging();
           })
           .catch(function(response){
             this.$root.errorResponseLayer(response);
 
-            this.enableDraggind();
+            this.enableDragging();
           });
         },
         getDateByField(row, key){

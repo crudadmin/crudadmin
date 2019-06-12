@@ -18,7 +18,7 @@ class Model1 extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Model 1';
+    protected $name = 'Model settings';
 
     protected $group = 'level1';
 

@@ -23,10 +23,12 @@
     "lodash": "^4.17.4",
     "moment": "^2.20.1",
     "vue": "^2.5.17",
-    "vue-drag-and-drop": "^2.2.0",
     "vue-fragment": "^1.5.1",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.6",
     "vue-template-compiler": "^2.6.10"
+  },
+  "dependencies": {
+    "vuedraggable": "^2.21.0"
   }
 }

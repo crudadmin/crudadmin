@@ -16,7 +16,7 @@ class Model3 extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Model 3';
+    protected $name = 'Model layouts';
 
     protected $group = 'level1.level2.level3';
 

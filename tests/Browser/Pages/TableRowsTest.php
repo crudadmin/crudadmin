@@ -335,4 +335,21 @@ class TableRowsTest extends BrowserTestCase
                     ->assertRowsSortOrder(FieldsType::class, 'radio', 'desc');
         });
     }
+
+    /*
+     * Drag and drop, does not work drag&drop as axcepted
+     */
+    // public function test_drag_and_drop()
+    // {
+    //     //Create articles
+    //     factory(Article::class, 5)->create();
+
+    //     $this->browse(function (DuskBrowser $browser) {
+    //         $browser->openModelPage(Article::class)
+    //                 ->pause(300)
+    //                 ->drag('tr[data-id="3"]', 'tr[data-id="5"]');
+
+    //         $browser->assertColumnRowData(Article::class, 'id', [3, 5, 4, 2, 1]);
+    //     });
+    // }
 }
