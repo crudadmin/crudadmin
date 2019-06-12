@@ -31,6 +31,9 @@ class Model3 extends AdminModel
     {
         return [
             'field1' => 'name:field 1|required',
+            'field2' => 'name:field 2',
+            'field3' => 'name:field 3',
+            'field4' => 'name:field 4',
         ];
     }
 

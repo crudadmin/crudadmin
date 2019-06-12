@@ -11,7 +11,7 @@ class ArticlesComment extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-04 12:11:05';
+    protected $migration_date = '2019-05-04 12:10:15';
 
     /*
      * Template name

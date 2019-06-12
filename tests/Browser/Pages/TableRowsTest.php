@@ -9,6 +9,7 @@ use Gogol\Admin\Tests\App\Models\Articles\Article;
 use Gogol\Admin\Tests\App\Models\Articles\Tag;
 use Gogol\Admin\Tests\App\Models\FieldsRelation;
 use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\Tree\Model3;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Browser\Traits\SeedTrait;
@@ -37,6 +38,18 @@ class TableRowsTest extends BrowserTestCase
     }
 
     /** @test */
+    public function test_with_childs_grid_size()
+    {
+        //Create 100 articles
+        factory(Article::class, 10)->create();
+
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(Article::class)
+                    ->assertHasClass('li[data-size="full"]', 'active');
+        });
+    }
+
+    /** @test */
     public function test_medium_grid_size()
     {
         $this->browse(function (DuskBrowser $browser) {
@@ -49,10 +62,10 @@ class TableRowsTest extends BrowserTestCase
     public function test_small_grid_size()
     {
         //Create 100 articles
-        factory(Article::class, 10)->create();
+        Model3::create([ 'field1' => 'test value' ]);
 
         $this->browse(function (DuskBrowser $browser) {
-            $browser->openModelPage(Article::class)
+            $browser->openModelPage(Model3::class)
                     ->assertHasClass('li[data-size="small"]', 'active');
         });
     }
