@@ -23,7 +23,7 @@
         </ul>
       </div>
 
-      <div class="dropdown actions-list fields-list" v-if="checked.length > 0">
+      <div class="dropdown actions-list fields-list" v-if="checked.length > 0" data-action-list>
         <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
           {{ trans('action') }}
           <span class="caret"></span>

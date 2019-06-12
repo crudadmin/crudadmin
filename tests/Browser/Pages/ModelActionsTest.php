@@ -63,11 +63,36 @@ class ModelActionsTest extends BrowserTestCase
 
             //Check if is unpublished
             $browser->click('[data-id="10"] [data-button="delete"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("Potvrdiť")')->pause(50);
+                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')->pause(50);
 
             //Check if row has been removed from table and from db
             $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));
             $this->assertNull(Article::find(10));
+        });
+    }
+
+    /** @test */
+    public function test_delete_multiple_items_button()
+    {
+        $this->createArticleMoviesList();
+
+        $article = Article::find(10);
+
+        $this->browse(function (DuskBrowser $browser) use ($article) {
+            $browser->openModelPage(Article::class)->pause(100)
+
+                    //Check which item we want delete
+                    ->click('tr[data-id="10"]')
+                    ->click('tr[data-id="7"]')
+                    ->click('[data-action-list] button')->pause(50)
+                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')->pause(50)
+                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')->pause(50);
+
+            //Check if row has been removed from table and from db
+            $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));
+            $this->assertArrayNotHasKey(7, $browser->getRows(Article::class));
+            $this->assertNull(Article::find(10));
+            $this->assertNull(Article::find(7));
         });
     }
 
