@@ -3,8 +3,10 @@
 namespace Gogol\Admin\Helpers;
 
 use Ajax;
-use Gogol\Admin\Models\Model as AdminModel;
 use Carbon\Carbon;
+use Gogol\Admin\Helpers\Layout;
+use Gogol\Admin\Models\Model as AdminModel;
+use Illuminate\Support\Str;
 
 class AdminRows
 {
@@ -322,6 +324,16 @@ class AdminRows
     }
 
     /*
+     *
+     */
+    private function isInlineTemplateKey($key)
+    {
+        $positions = (new Layout)->available_positions;
+
+        return in_array($key, $positions, true);
+    }
+
+    /*
      * Return rendered blade layouts
      */
     protected function getLayouts($count)
@@ -331,23 +343,41 @@ class AdminRows
         if ( $count > 0 )
             return [];
 
-        foreach ((array)$this->model->getProperty('layouts') as $class)
+        $i = 0;
+        foreach ((array)$this->model->getProperty('layouts') as $key => $class)
         {
-            $layout = new $class;
-
-            $view = $layout->build();
-
-            if ( is_string($view) || $view instanceof \Illuminate\View\View )
+            //Load inline template
+            if ( $this->isInlineTemplateKey($key) )
             {
-                $is_blade = method_exists($view, 'render');
-
                 $layouts[] = [
-                    'name' => class_basename($class),
-                    'type' => $is_blade ? 'blade' : 'vuejs',
-                    'position' => $layout->position,
-                    'view' => $is_blade ? $view->render() : $view,
+                    'name' => 'AnonymousLayout'.$i.strtoupper($key[0]).Str::camel(substr($key, 1)),
+                    'type' => 'vuejs',
+                    'position' => $key,
+                    'view' => (new Layout)->renderVueJs($class),
                 ];
             }
+
+
+            //Load template with layout class
+            else if ( class_exists($class) ) {
+                $layout = new $class;
+
+                $view = $layout->build();
+
+                if ( is_string($view) || $view instanceof \Illuminate\View\View )
+                {
+                    $is_blade = method_exists($view, 'render');
+
+                    $layouts[] = [
+                        'name' => class_basename($class),
+                        'type' => $is_blade ? 'blade' : 'vuejs',
+                        'position' => $layout->position,
+                        'view' => $is_blade ? $view->render() : $view,
+                    ];
+                }
+            }
+
+            $i++;
         }
 
         return $layouts;

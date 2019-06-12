@@ -123,7 +123,7 @@
         //Receive value from tablerows component
         checked : [],
         default_columns : [],
-        enabled_columns : {},
+        enabled_columns : null,
         button_loading : false,
       };
     },
@@ -348,7 +348,7 @@
       enabledColumnsList(){
         var allowed = [];
 
-        for ( var key in this.enabled_columns )
+        for ( var key in this.enabled_columns||{} )
           if ( this.enabled_columns[key].enabled == true && this.default_columns.indexOf(key) == -1 )
             allowed.push(key);
 

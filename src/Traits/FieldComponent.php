@@ -103,7 +103,13 @@ trait FieldComponent
             $path = null;
 
         //Throw ajax error for button component render
-        if ($this instanceof \Gogol\Admin\Helpers\Button && ! file_exists($path) ){
+        if (
+            (
+                $this instanceof \Gogol\Admin\Helpers\Button
+                || $this instanceof \Gogol\Admin\Helpers\Layout
+            )
+            && ! file_exists($path)
+        ){
             Ajax::error(sprintf(trans('admin::admin.component-missing'), $filename, ''), null, null, 500);
         }
 

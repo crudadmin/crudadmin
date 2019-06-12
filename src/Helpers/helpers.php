@@ -57,6 +57,8 @@ if ( ! function_exists('trim_end') ) {
  */
 function base_or_relative_path($path)
 {
-    return $path[0] == '/' ? $path : base_path($path);
+    $path = $path[0] == '/' ? $path : base_path($path);
+
+    return trim_end($path, '/');
 }
 ?>

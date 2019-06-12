@@ -107,6 +107,11 @@ trait AdminTrait
             $this->getStubPath('views')
         ]);
 
+        //Register components path
+        $app['config']->set('admin.components', [
+            $this->getStubPath('components')
+        ]);
+
         app()->setLocale(config('admin.locale', 'sk'));
 
         //Reset sqlite database files

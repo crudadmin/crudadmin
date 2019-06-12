@@ -9,7 +9,16 @@ class Layout
     use FieldComponent;
 
     /*
-     * Position of layour
+     * List of all available positions
+     */
+    public $available_positions = [
+        'top', 'bottom',
+        'form-top', 'form-bottom', 'form-header', 'form-footer',
+        'table-header', 'table-footer'
+    ];
+
+    /*
+     * Position of layout
      * top - before content table
      * bottom - after content table
      * form-top - start of the form

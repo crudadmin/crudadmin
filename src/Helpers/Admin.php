@@ -174,7 +174,7 @@ class Admin extends AdminBootloader
 
             //Get components path and add absolute app path if is needed
             $config_paths = array_map(function($path){
-                return $this->getDirecotoryPath($path);
+                return base_or_relative_path($path);
             }, config('admin.components', []));
 
             //Merge config paths, with default admin path
