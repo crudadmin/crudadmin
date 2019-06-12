@@ -28,7 +28,7 @@ export default {
         };
     },
 
-    ready(){
+    mounted(){
         if ( this.hasLoadedLicense ){
             this.setLicense(this.authentication);
         } else {

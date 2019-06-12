@@ -62,18 +62,6 @@
         };
       },
 
-      created() {
-
-      },
-
-      ready() {
-
-      },
-
-      computed: {
-
-      },
-
       methods: {
         applyChanges(item){
             this.$parent.history.fields = item.changed_fields;

@@ -38,7 +38,7 @@
 
       props : ['langid'],
 
-      ready(){
+      mounted(){
         if ( typeof ga == 'function' )
           ga('send', 'pageview', 'auto');
       },

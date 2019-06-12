@@ -47,10 +47,7 @@
           layout : this.$root.dashboard||'',
         }
       },
-      created() {
-
-      },
-      ready(){
+      mounted(){
         this.$root.runInlineScripts(this.layout)
       },
       methods: {
