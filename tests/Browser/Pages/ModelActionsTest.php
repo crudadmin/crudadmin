@@ -32,6 +32,29 @@ class ModelActionsTest extends BrowserTestCase
         });
     }
 
+
+    /** @test */
+    public function test_publishable_multiple_items_button()
+    {
+        $this->createArticleMoviesList();
+
+        $article = Article::find(10);
+
+        $this->browse(function (DuskBrowser $browser) use ($article) {
+            $browser->openModelPage(Article::class)->pause(100)
+
+                    //Check which item we want delete
+                    ->click('tr[data-id="10"]')
+                    ->click('tr[data-id="7"]')
+                    ->click('[data-action-list] button')->pause(50)
+                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')->pause(50);
+
+            //Check if row has been removed from table and from db
+            $this->assertNull(Article::find(10));
+            $this->assertNull(Article::find(7));
+        });
+    }
+
     /** @test */
     public function test_info_button()
     {
