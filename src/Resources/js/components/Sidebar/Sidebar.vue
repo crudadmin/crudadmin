@@ -4,8 +4,8 @@
             <li class="header">
                 {{ hasLanguages && isActive ? trans('language-mutation') : trans('navigation') }}
                 <div v-if="hasLanguages && isActive" class="form-group language_select" data-toggle="tooltip" title="" :data-original-title="trans('change-language')">
-                    <select v-model="langid" class="form-control">
-                        <option v-for="language in languages" :value="language.id">{{ getLangName(language) }}</option>
+                    <select @change="changeLanguage" class="form-control" data-global-language-switch>
+                        <option v-for="language in languages" :selected="langid == language.id" :value="language.id">{{ getLangName(language) }}</option>
                     </select>
                 </div>
             </li>
@@ -60,6 +60,9 @@
         },
 
         methods: {
+            changeLanguage(e){
+                this.$parent.language_id = e.target.value;
+            },
             addActiveTreeClasses(){
                 var owner = $('.sidebar li[data-slug="'+this.$router.currentRoute.params.model+'"]');
 

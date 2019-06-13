@@ -58,8 +58,6 @@
 
                     this.bootApp();
 
-                    this.bootLanguages();
-
                     //Set datepickers language
                     jQuery.datetimepicker.setLocale(this.locale);
                 },
@@ -130,6 +128,8 @@
                             this.models = this.flattenModelsWithChilds(layout.models);
                             this.localization = layout.localization||{};
                             this.languages = layout.languages||[];
+
+                            this.bootLanguages();
                         });
                     },
                     /*
