@@ -120,6 +120,28 @@ class ModelActionsTest extends BrowserTestCase
     }
 
     /** @test */
+    public function test_multiple_custom_simple_button()
+    {
+        Model1::create([ 'field1' => 'c', 'field2' => 'd', 'field3' => 'e', 'field4' => 'f' ]);
+        Model1::create([ 'field1' => 'a', 'field2' => 'b', 'field3' => 'c', 'field4' => 'd' ]);
+
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(Model1::class)->pause(100)
+
+                    //Click multiple items and then press button action
+                    ->click('tr[data-id="1"]')
+                    ->click('tr[data-id="2"]')
+                    ->click('[data-action-list] button')->pause(50)
+                    ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')->pause(50)
+                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+
+            //Check if action has been processed
+            //and table rewrited with actual data
+            $browser->assertColumnRowData(Model1::class, 'field3', [6, 6]);
+        });
+    }
+
+    /** @test */
     public function test_custom_simple_button()
     {
         $row = Model1::create([

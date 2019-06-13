@@ -4,13 +4,21 @@ namespace DummyNamespace;
 
 use Gogol\Admin\Helpers\Button;
 use Gogol\Admin\Models\Model as AdminModel;
+use Illuminate\Support\Collection;
 
 class DummyButton extends Button
 {
     /*
-     * Here is your place for binding button properties for each row
+     * Button type
+     * button|action|multiple
      */
-    public function __construct(AdminModel $row)
+    public $type = 'button';
+
+    /**
+     * Here you can set your custom properties for each row
+     * @param Gogol\Admin\Models\Model $row
+     */
+    public function __construct($row)
     {
         //Name of button on hover
         $this->name = 'DummyButton';
@@ -22,8 +30,10 @@ class DummyButton extends Button
         $this->icon = 'fa-gift';
     }
 
-    /*
+    /**
      * Firing callback on press button
+     * @param Gogol\Admin\Models\Model $row
+     * @return object
      */
     public function fire(AdminModel $row)
     {
@@ -31,4 +41,13 @@ class DummyButton extends Button
 
         return $this->message('Your action is done!');
     }
+
+    /**
+     * Firing callback on press action for multiple items
+     * @param Illuminate\Support\Collection $rows
+     */
+    // public function fireMultiple(Collection $rows)
+    // {
+    //     return $this->error('Your multiple rows action callback.');
+    // }
 }

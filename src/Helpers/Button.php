@@ -4,6 +4,7 @@ namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Models\Model as AdminModel;
 use Gogol\Admin\Traits\FieldComponent;
+use Illuminate\Support\Collection;
 
 class Button
 {
@@ -89,7 +90,7 @@ class Button
      * Firing callback on press button for multiple items
      * @param  collection $rows
      */
-    public function fireMultiple($rows)
+    public function fireMultiple(Collection $rows)
     {
         return $this->error('Metóda <strong>fireMultiple</strong> nebola nájdená.');
     }

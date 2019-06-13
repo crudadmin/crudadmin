@@ -7,7 +7,7 @@
 .buttons-options { width: 152px; min-width: 152px; }
 .buttons-options.additional-1 { width: 190px; min-width: 190px; }
 .buttons-options.additional-2 { width: 223px; min-width: 223px; }
-.buttons-options.additional-3 { width: 260px; min-width: 260px; }
+.buttons-options.additional-4 { width: 290px; min-width: 29<30px; }
 .sidebar a { cursor: pointer; }
 .no-margin { margin: 0 }
 .tooltip-inner { word-wrap: break-word; }

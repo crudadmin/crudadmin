@@ -6,6 +6,7 @@ use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Models\Model as AdminModel;
 use Gogol\Admin\Tests\App\Buttons\QuestionButton;
 use Gogol\Admin\Tests\App\Buttons\SimpleButton;
+use Gogol\Admin\Tests\App\Buttons\SimpleMultipleButton;
 use Gogol\Admin\Tests\App\Buttons\TemplateButton;
 
 class Model1 extends AdminModel
@@ -72,6 +73,7 @@ class Model1 extends AdminModel
 
     protected $buttons = [
         SimpleButton::class,
+        SimpleMultipleButton::class,
         QuestionButton::class,
         TemplateButton::class
     ];
