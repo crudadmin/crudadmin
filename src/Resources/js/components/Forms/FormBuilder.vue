@@ -519,7 +519,7 @@
         //Devide if is updating or creating form
         var action = ! this.isOpenedRow ? 'store' : 'update';
 
-        this.sendForm(e, action, function(response){
+        this.sendForm(e, action, response => {
           if ( ! response.data )
             return false;
 
@@ -579,7 +579,7 @@
           //Add or update select options
           if ( this.hasparentmodel !== true )
             this.$parent.$parent.pushOption(action == 'store' ? response.data.rows[0] : response.data.row, action);
-        }.bind(this));
+        });
 
       },
       removeActiveTab(tab, all){

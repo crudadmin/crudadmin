@@ -41,6 +41,7 @@
                             success: null,
                             close: null,
                             component: null,
+                            opened : null,
                         }
                     }
                 },
@@ -60,9 +61,7 @@
 
                     //Set datepickers language
                     jQuery.datetimepicker.setLocale(this.locale);
-                },
 
-                mounted(){
                     this.checkAlertEvents();
                 },
 
@@ -194,13 +193,14 @@
                         this.alert.message = message;
                         this.alert.success = success;
                         this.alert.close = close;
+                        this.alert.opened = new Date().getTime();
 
                         this.bindAlertComponent(component);
 
-                        //After opening alert focus close button of this alert for disabling sending form...
-                        setTimeout(function(){
-                            $('.modal .modal-footer button:last-child').focus();
-                        }, 100);
+                        //After opening alert unfocus focused input
+                        //for prevent sending of new form ajax instance...
+                        if ("activeElement" in document)
+                            document.activeElement.blur();
 
                         return this.alert;
                     },
@@ -238,10 +238,15 @@
                         this.openAlert(this.$root.trans('warning'), this.$root.trans('unknown-error'), 'danger', null, callback ? callback : function(){});
                     },
                     checkAlertEvents(){
-                        $(window).keyup(function(e){
+                        $(window).keyup(e => {
 
                             //If is opened alert
                             if ( this.canShowAlert !== true )
+                                return;
+
+                            //If enter/esc has been pressed 500ms after alert has been opened
+                            //does not close this alert and ignore enter
+                            if ( this.alert.opened && new Date().getTime() - this.alert.opened < 500 )
                                 return;
 
                             if ( e.keyCode == 13 )
@@ -250,7 +255,7 @@
                             if ( e.keyCode == 27 )
                                 this.closeAlert( this.alert.close );
 
-                        }.bind(this))
+                        });
                     },
                     bootLanguages(){
                         if ( this.languages.length == 0 )
