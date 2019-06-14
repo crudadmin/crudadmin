@@ -18,13 +18,13 @@
           :is="name">
         </component>
 
-        <div class="dropdown pull-right multi-languages" v-if="hasLocaleFields && selectedLanguage">
+        <div class="dropdown pull-right multi-languages" data-form-language-switch v-if="hasLocaleFields && selectedLanguage">
           <button class="btn btn-default dropdown-toggle" type="button" id="languageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <i class="fa fa-globe"></i> <span class="text">{{ getLangName(selectedLanguage) }}</span>
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="selectedlangid = lang.id"><i class="fa fa-exclamation-triangle"></i>{{ getLangName(lang) }}</a></li>
+            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="changeLanguage(lang.id)"><i class="fa fa-exclamation-triangle"></i>{{ getLangName(lang) }}</a></li>
           </ul>
         </div>
 
@@ -234,6 +234,9 @@
     },
 
     methods: {
+      changeLanguage(id){
+        this.$parent.selected_language_id = id;
+      },
       getLangName(lang){
         return this.$root.getLangName(lang);
       },

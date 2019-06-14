@@ -213,26 +213,29 @@ class DuskBrowser extends Browser
      * Fill form with array values
      * @param  class $model
      * @param  array  $array
+     * @param  string  $locale
      * @return object
      */
-    public function fillForm($model, $array = [])
+    public function fillForm($model, $array = [], $locale = null)
     {
         $model = $this->getModelClass($model);
 
         foreach ($array as $key => $value)
         {
+            $formKey = $model->hasFieldParam($key, 'locale', true) ? $key.'['.$locale.']' : $key;
+
             //Set string value
             if (
                 $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password'])
                 && ! $model->hasFieldParam($key, 'multiple')
             ) {
-                $this->type('[data-field="'.$model->getTable().'-'.$key.'"]', $value);
+                $this->type('[data-field="'.$model->getTable().'-'.$key.'"][name="'.$formKey.'"]', $value);
             }
 
             //Set editor value
             else if ( $model->isFieldType($key, ['longeditor', 'editor']) ) {
-                $this->with('textarea[name='.$key.']', function($browser) use ($key, $value) {
-                    $browser->script('CKEDITOR.instances[$("[name='.$key.']").attr("id")].setData("'.$value.'")');
+                $this->with('textarea[name='.$formKey .']', function($browser) use ($key, $value, $formKey) {
+                    $browser->script('CKEDITOR.instances[$("[name=\''.$formKey .'\']").attr("id")].setData("'.$value.'")');
                 });
             }
 
@@ -245,18 +248,18 @@ class DuskBrowser extends Browser
                     //Select options in reversed order
                     foreach ($value as $k => $option_value)
                     {
-                        $selected = $this->script("return $('select[name=\"{$key}[]\"]').val()")[0];
+                        $selected = $this->script("return $('select[name=\"{$formKey}[]\"]').val()")[0];
 
                         //If value is selected already, we wante unselect given value
                         if ( $this->isAssoc($value) && in_array($k, $selected) )
                         {
-                            $this->script("$('select[name=\"{$key}[]\"]').parents('.form-group').eq(0).find('.chosen-choices li.search-choice:contains(\"{$option_value}\") a').eq(0).click()");
+                            $this->script("$('select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).find('.chosen-choices li.search-choice:contains(\"{$option_value}\") a').eq(0).click()");
                         }
 
                         //Select given value
                         else {
                             $this->script("
-                            $('select[name=\"{$key}[]\"]').parents('.form-group').eq(0).each(function(){
+                            $('select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).each(function(){
                                 $(this).find('input').click().focus();
                                 $(this).find('.chosen-results li:contains(\"{$option_value}\")').eq(0).mouseup()
                             });
@@ -273,7 +276,7 @@ class DuskBrowser extends Browser
                     if ( is_array($value) )
                         $value = array_values($value)[0];
 
-                    $this->setChosenValue('select[name="'.$key.'"]', $value);
+                    $this->setChosenValue('select[name="'.$formKey.'"]', $value);
                 }
             }
 
@@ -290,18 +293,18 @@ class DuskBrowser extends Browser
 
                 //Attach single file
                 else {
-                    $this->attach($key, $this->getStubPath('/uploads/'.$value));
+                    $this->attach($formKey, $this->getStubPath('/uploads/'.$value));
                 }
             }
 
             //Set checkbox value
             else if ( $model->isFieldType($key, ['checkbox']) ) {
-                $this->{$value === true || $value === 1 ? 'check' : 'uncheck'}($key);
+                $this->{$value === true || $value === 1 ? 'check' : 'uncheck'}($formKey);
             }
 
             //Set radio value
             else if ( $model->isFieldType($key, ['radio']) ) {
-                $this->radio($key, $value);
+                $this->radio($formKey, $value);
             }
 
             //Set multiple date value
@@ -312,7 +315,7 @@ class DuskBrowser extends Browser
                 {
                     foreach ($value as $date)
                     {
-                        $this->clickDatePicker($date, '[data-field="'.$key.'"]');
+                        $this->clickDatePicker($date, '[data-field="'.$formKey.'"]');
                     }
                 }
 
@@ -320,7 +323,7 @@ class DuskBrowser extends Browser
                 else {
                     //We need reset cursor before opening date and wait half of second till calendar opens
                     $this->resetFocus()
-                         ->click('input[name="'.$key.'"]')
+                         ->click('input[name="'.$formKey.'"]')
                          ->pause(500)
                          ->clickDatePicker($value);
                 }
@@ -333,7 +336,7 @@ class DuskBrowser extends Browser
 
                 //We need reset cursor before opening date and wait half of second till calendar opens
                 $this->resetFocus()
-                     ->click('input[name="'.$key.'"]')
+                     ->click('input[name="'.$formKey.'"]')
                      ->pause(500)
                      ->clickDatePicker($date[0])
                      ->clickTimePicker($date[1]);
@@ -346,14 +349,14 @@ class DuskBrowser extends Browser
                 if ( $model->hasFieldParam($key, 'multiple') )
                 {
                     foreach ($value as $time)
-                       $this->clickTimePicker($time, '[data-field="'.$key.'"]');
+                       $this->clickTimePicker($time, '[data-field="'.$formKey.'"]');
                 }
 
                 //Open calendar and click on time
                 else {
                     //We need reset cursor before opening date and wait half of second till calendar opens
                     $this->resetFocus()
-                         ->click('input[name="'.$key.'"]')
+                         ->click('input[name="'.$formKey.'"]')
                          ->pause(500)
                          ->clickTimePicker($value);
                 }
@@ -384,9 +387,10 @@ class DuskBrowser extends Browser
      * Check if form has filled form values
      * @param  class $model
      * @param  array  $array
+     * @param  string  $locale
      * @return object
      */
-    public function assertHasFormValues($model, $array = [])
+    public function assertHasFormValues($model, $array = [], $locale = null)
     {
         $model = $this->getModelClass($model);
 
@@ -408,8 +412,8 @@ class DuskBrowser extends Browser
             //If is associative array in select field type, then we need compare keys, not values
             $value = $this->parseSelectValue($model, $key, $value, true);
 
-            $this->assertVue('row.'.$key, $value, '@model-builder');
-            $this->assertVue('model.fields.'.$key.'.value', $value, '@model-builder');
+            $this->assertVue('row.'.$key.($locale ? '.'.$locale : ''), $value, '@model-builder');
+            $this->assertVue('model.fields.'.$key.'.value'.($locale ? '.'.$locale : ''), $value, '@model-builder');
         }
 
         return $this;
@@ -417,18 +421,18 @@ class DuskBrowser extends Browser
 
     /**
      * Check if form is empty and has no values
-     * @param  class $model
-     * @param  array  $array
+     * @param  class  $model
+     * @param  string $locale
      * @return object
      */
-    public function assertFormIsEmpty($model)
+    public function assertFormIsEmpty($model, $locale = null)
     {
         $model = $this->getModelClass($model);
 
         foreach ($model->getFields() as $key => $value)
         {
             //Check if input has empty value
-            $this->assertEmptyValue($model, $key);
+            $this->assertEmptyValue($model, $key, $locale);
         }
 
         return $this;
@@ -437,14 +441,16 @@ class DuskBrowser extends Browser
     /**
      * Check if input type is empty
      * @param  class $model
-     * @param  array  $array
+     * @param  string  $key
+     * @param  string  $locale
      * @return object
      */
-    public function assertEmptyValue($model, $key)
+    public function assertEmptyValue($model, $key, $locale = null)
     {
         $model = $this->getModelClass($model);
 
         //Create multiple key selector for multiple type fields
+        $selectorKey = $locale ? $key.'['.$locale.']' : '';
         $selectorKey = ($isMultiple = $model->hasFieldParam($key, ['multiple'])) ? $key.'[]' : $key;
 
         //In some types of elements we need search for checked elements
@@ -459,9 +465,22 @@ class DuskBrowser extends Browser
         //Check javascript input value
         PHPUnit::assertEquals($expected, $actual, 'Input ['.$selectorKey.'] is not empty in ['.$model->getTable().'] form.');
 
-        //Check vuejs values
-        $this->assertVue('row.'.$key, null, '@model-builder');
-        $this->assertVue('model.fields.'.$key.'.value', null, '@model-builder');
+        $row = $this->vueAttribute('@model-builder', $rowKey = 'row.'.$key);
+        $value = $this->vueAttribute('@model-builder', $valueKey = 'model.fields.'.$key.'.value');
+
+        //Check vuejs row value
+        if ( $locale && is_array($row) ) {
+            $this->assertVue($rowKey.'.'.$locale, null, '@model-builder');
+        } else {
+            $this->assertVue($rowKey, null, '@model-builder');
+        }
+
+        //Check vuejs field value
+        if ( $locale && is_array($value) ) {
+            $this->assertVue($valueKey.'.'.$locale, null, '@model-builder');
+        } else {
+            $this->assertVue($valueKey, null, '@model-builder');
+        }
 
         return $this;
     }

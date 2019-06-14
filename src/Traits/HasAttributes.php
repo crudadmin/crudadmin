@@ -90,8 +90,25 @@ trait HasAttributes
                 /*
                  * Casts decimal format
                  */
-                if ( $field['type'] == 'decimal' && $attributes[$key])
-                    $attributes[$key] = number_format($attributes[$key], 2, '.', '');
+                if ( $field['type'] == 'decimal' && !is_null($attributes[$key]))
+                {
+                    //Parse locale values
+                    if ( $this->hasFieldParam($key, 'locale', true) )
+                    {
+                        foreach (array_wrap($attributes[$key]) as $k => $v)
+                        {
+                            if ( is_null($v) )
+                                unset($attributes[$key][$k]);
+                            else
+                                $attributes[$key][$k] = number_format($v, 2, '.', '');
+                        }
+                    }
+
+                    //Parse simple values
+                    else {
+                        $attributes[$key] = number_format($attributes[$key], 2, '.', '');
+                    }
+                }
 
                 /*
                  * Casts date/datetime/time values
@@ -115,6 +132,10 @@ trait HasAttributes
      */
     private function castsAdminDatetimes($field, $key, &$attributes)
     {
+        //Skip locales values
+        if ( $this->hasFieldParam($key, 'locale', true) )
+            return;
+
         /*
          * Update to correct datetime format
          */

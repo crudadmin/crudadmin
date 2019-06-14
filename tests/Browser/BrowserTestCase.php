@@ -74,11 +74,18 @@ class BrowserTestCase extends TestCase
 
             //Update checkbox values
             if ( $model->isFieldType($key, 'checkbox') ) {
-                $data[$key] = $value == true ? 1 : 0;
+                if ( $model->hasFieldParam($key, ['locale'], true) )
+                {
+                    foreach (array_wrap($data[$key]) as $k => $v) {
+                        $data[$key][$k] = $v === true ? 1 : 0;
+                    }
+                } else {
+                    $data[$key] = $value == true ? 1 : 0;
+                }
             }
 
             //Update filled date format into date format from db
-            if ( $model->isFieldType($key, 'date') )
+            if ( $model->isFieldType($key, 'date') && ! $model->hasFieldParam($key, ['locale'], true) )
             {
                 //Update multiple date field
                 if ( $model->hasFieldParam($key, 'multiple') )
@@ -96,12 +103,13 @@ class BrowserTestCase extends TestCase
             }
 
             //Update filled datetime format into date format from db
-            if ( $model->isFieldType($key, 'datetime') ) {
+            if ( $model->isFieldType($key, 'datetime') && ! $model->hasFieldParam($key, ['locale'], true) )
+            {
                 $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('Y-m-d H:i:s') : null;
             }
 
             //Update filled time format into date format from db
-            if ( $model->isFieldType($key, 'time') && ! $model->hasFieldParam($key, 'multiple') )
+            if ( $model->isFieldType($key, 'time') && ! $model->hasFieldParam($key, ['multiple', 'locale'], true) )
             {
                 $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('H:i:s') : null;
             }
@@ -179,13 +187,33 @@ class BrowserTestCase extends TestCase
         $data = $this->buildDbData($model, $originalData);
 
         PHPUnit::assertEquals(
-            $model->select(array_keys($data))->first()->toArray(), $data,
+            $this->sortLocaleKeys($model, $model->select(array_keys($data))->first()->toArray()),
+            $this->sortLocaleKeys($model, $data),
             'Table ['.$model->getTable().'] does not have excepted row'
         );
 
         $this->assertRowRelationsExists($model, $originalData, $id);
 
         return $this;
+    }
+
+    /**
+     * Sort locale keys by asc
+     * @param  string/object $model
+     * @param  arrat $data
+     * @return array
+     */
+    private function sortLocaleKeys($model, $data)
+    {
+        $model = $this->getModelClass($model);
+
+        foreach ($data as $key => $value)
+        {
+            if ( $model->hasFieldParam($key, 'locale', true) )
+                ksort($data[$key]);
+        }
+
+        return $data;
     }
 
     /**

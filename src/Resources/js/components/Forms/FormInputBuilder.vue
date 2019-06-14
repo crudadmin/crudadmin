@@ -81,15 +81,15 @@
       <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
         <label :for="getId">{{ getName }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
         <div :class="{ 'can-add-select' : canAddRow }">
-          <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? field_key : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
+          <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? getFieldName : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
             <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
-            <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, value, isMultiple)">{{ mvalue }}</option>
-            <option v-for="data in fieldOptions" :selected="hasValue(data[0], value, isMultiple) || ((!value || value === 0) && !isOpenedRow && data[0] == defaultFieldValue)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+            <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, getValueOrDefault, isMultiple)">{{ mvalue }}</option>
+            <option v-for="data in fieldOptions" :selected="hasValue(data[0], getValueOrDefault, isMultiple) || ((!value || value === 0) && !isOpenedRow && data[0] == defaultFieldValue)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
           </select>
           <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
         </div>
         <small>{{ field.title }}</small>
-        <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+field_key" value="1">
+        <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+getFieldName" value="1">
 
         <!-- Modal for adding relation -->
         <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
@@ -217,6 +217,15 @@
         this.addMultipleFilesSupport(true);
       },
       methods : {
+        getLocalizedValue(value, defaultValue){
+          if ( ! this.hasLocale )
+            return value||null;
+
+          if ( value && this.langslug in value )
+              return value[this.langslug];
+
+            return defaultValue||null;
+        },
         //We need reset empty values because of infinity loop in setter
         //when is NaN setted
         resetEmptyValue(value){
@@ -387,20 +396,12 @@
             var obj_value = typeof this.field.value === 'object' ? this.field.value||{} : {};
                 obj_value[this.langslug] = value;
 
-            //Update field values
-            if ( no_field != true )
-              this.field.value = obj_value;
-
             //Update specific row language value
-            this.$set('row.' + this.field_key + '.' + this.langslug, value);
+            this.$set(this.row, this.field_key, obj_value);
             return;
           }
 
-          //Update field values
-          if ( no_field != true )
-            this.field.value = value;
-
-          this.row[this.field_key] = value;
+          this.$set(this.row, this.field_key, value);
         },
         /*
          * Apply on change events into selectbox
@@ -881,17 +882,12 @@
           if ( this.isMultipleDatepicker )
             return JSON.stringify(this.field.value||[]);
 
-          //If row is not opened, then return default field value
-          if ( ! this.isOpenedRow ){
-            return this.defaultFieldValue;
-          }
-
           //Localization field
           if ( this.hasLocale )
-          {
-            if ( this.field.value && this.langslug in this.field.value )
-              return this.field.value[this.langslug];
+            return this.getLocalizedValue(this.field.value, this.defaultFieldValue);
 
+          //If row is not opened, then return default field value
+          if ( ! this.isOpenedRow ){
             return this.defaultFieldValue;
           }
 
@@ -1011,7 +1007,7 @@
 
           var options = this.fieldOptions,
               missing = [],
-              original_value = this.field.$original_value;
+              original_value = this.getLocalizedValue(this.field.$original_value);
 
           //For multiple selects
           if ( this.isMultiple )

@@ -44,6 +44,8 @@ class ModelBootloaderTest extends TestCase
             '2019-05-15 12:10:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model1',
             '2019-05-15 12:11:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model2',
             '2019-05-15 12:12:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model3',
+            '2019-07-13 15:05:04' => 'Gogol\Admin\Tests\App\Models\ModelLocalization',
+            '2019-07-13 15:06:05' => 'Gogol\Admin\Tests\App\Models\ModelLocale'
         ]);
     }
 

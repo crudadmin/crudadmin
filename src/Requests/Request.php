@@ -180,19 +180,24 @@ abstract class Request extends FormRequest
 
                 } else if ( $this->has( $key ) && ! empty( $this->get($key) ) )
                 {
-                    $date = Carbon::createFromFormat( $field['date_format'], $this->get($key) );
+                    if ( $has_locale = $this->model->hasFieldParam($key, 'locale') )
+                    {
+                        $date = $this->get($key);
+                    } else {
+                        $date = Carbon::createFromFormat( $field['date_format'], $this->get($key) );
 
-                    $date_format = strtolower($field['date_format']);
+                        $date_format = strtolower($field['date_format']);
 
-                    foreach ($reset as $identifier => $arr) {
-                        //Reset hours if are not in date format
-                        if ( strpos($date_format, $identifier) === false )
-                            $date->{$arr[0]}($arr[1]);
+                        foreach ($reset as $identifier => $arr) {
+                            //Reset hours if are not in date format
+                            if ( strpos($date_format, $identifier) === false )
+                                $date->{$arr[0]}($arr[1]);
+                        }
+
+                        //Set time as string
+                        if ( $this->model->isFieldType($key, 'time') )
+                            $date = $date->format('H:i:s');
                     }
-
-                    //Set time as string
-                    if ( $this->model->isFieldType($key, 'time') )
-                        $date = $date->format('H:i:s');
 
                     $this->merge( [ $key => $date ] );
                 }

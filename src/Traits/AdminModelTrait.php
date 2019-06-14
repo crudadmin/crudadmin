@@ -279,7 +279,7 @@ trait AdminModelTrait
     {
         foreach ($this->getFields() as $key => $field)
         {
-            if ( $this->isFieldType($key, ['date', 'datetime']) && ! $this->hasFieldParam($key, 'multiple', true) )
+            if ( $this->isFieldType($key, ['date', 'datetime']) && ! $this->hasFieldParam($key, ['multiple', 'locale'], true) )
                 $this->dates[] = $key;
         }
 

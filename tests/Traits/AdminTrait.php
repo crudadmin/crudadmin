@@ -255,7 +255,10 @@ trait AdminTrait
     {
         $model = $this->getModelClass($model);
 
-        if ( $model->isFieldType($key, 'select') || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']) )
+        if (
+            ($model->isFieldType($key, 'select') || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']))
+            && !$model->hasFieldParam($key, ['locale'], true)
+        )
         {
             if ( is_array($value) && $this->isAssoc($value) )
             {
