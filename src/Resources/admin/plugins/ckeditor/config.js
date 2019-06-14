@@ -12,6 +12,8 @@ CKEDITOR.editorConfig = function( config ) {
 
     var basedir = '/' + window.crudadmin.path;
 
+    config.skin = 'moono-lisa';
+
     //CKFinder
     config.filebrowserBrowseUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/ckfinder.html';
     config.filebrowserImageBrowseUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/ckfinder.html?type=Images';
