@@ -1,7 +1,7 @@
 <?php
 
 use Faker\Generator as Faker;
-use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
 
 /*
 |--------------------------------------------------------------------------

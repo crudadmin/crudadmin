@@ -2,8 +2,8 @@
 
 namespace Gogol\Admin\Tests\Browser\Pages;
 
-use Gogol\Admin\Tests\App\Models\ModelLocale;
-use Gogol\Admin\Tests\App\Models\ModelLocalization;
+use Gogol\Admin\Tests\App\Models\Locales\ModelLocale;
+use Gogol\Admin\Tests\App\Models\Locales\ModelLocalization;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\DropDatabase;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models;
+namespace Gogol\Admin\Tests\App\Models\Locales;
 
 use Gogol\Admin\Models\Model as AdminModel;
 use Gogol\Admin\Fields\Group;

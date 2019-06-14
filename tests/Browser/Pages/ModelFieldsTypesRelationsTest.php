@@ -3,7 +3,7 @@
 namespace Gogol\Admin\Tests\Browser\Pages;
 
 use Carbon\Carbon;
-use Gogol\Admin\Tests\App\Models\FieldsRelation;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsRelation;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Browser\Traits\SeedTrait;

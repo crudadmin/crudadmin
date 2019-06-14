@@ -2,7 +2,7 @@
 
 namespace Gogol\Admin\Tests\Browser\Pages;
 
-use Gogol\Admin\Tests\App\Models\FieldsGroup;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsGroup;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\DropDatabase;

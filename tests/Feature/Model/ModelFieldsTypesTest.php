@@ -2,7 +2,7 @@
 
 namespace Gogol\Admin\Tests\Feature\Model;
 
-use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
 use Gogol\Admin\Tests\TestCase;
 
 class ModelFieldsTypesTest extends TestCase

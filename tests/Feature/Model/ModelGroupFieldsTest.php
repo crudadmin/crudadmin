@@ -2,9 +2,9 @@
 
 namespace Gogol\Admin\Tests\Feature\Model;
 
-use Gogol\Admin\Tests\App\Models\FieldsGroup;
-use Gogol\Admin\Tests\App\Models\FieldsMutator;
-use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsGroup;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsMutator;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
 use Gogol\Admin\Tests\TestCase;
 
 class ModelFieldsAvaiabilityTest extends TestCase

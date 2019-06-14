@@ -1,10 +1,10 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models;
+namespace Gogol\Admin\Tests\App\Models\Fields;
 
 use Gogol\Admin\Fields\Group;
 use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
 
 class FieldsGroup extends AdminModel
 {

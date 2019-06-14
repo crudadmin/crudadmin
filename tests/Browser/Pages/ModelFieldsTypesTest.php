@@ -3,7 +3,7 @@
 namespace Gogol\Admin\Tests\Browser\Pages;
 
 use Carbon\Carbon;
-use Gogol\Admin\Tests\App\Models\FieldsType;
+use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
 use Gogol\Admin\Tests\Traits\DropDatabase;
