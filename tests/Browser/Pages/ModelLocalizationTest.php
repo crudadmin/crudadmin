@@ -47,7 +47,7 @@ class ModelLocalizationTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_locale_create_row()
+    public function test_locales_create_and_update_row()
     {
         $row_sk = $this->getFormDataSK();
         $row_en = $this->getFormDataEN();
@@ -89,6 +89,26 @@ class ModelLocalizationTest extends BrowserTestCase
         });
 
         $this->assertRowExists(ModelLocale::class, $this->createLangArray($row_sk, $row_en));
+    }
+
+    /** @test */
+    public function test_locales_default_language_validation_error()
+    {
+        $this->browse(function (DuskBrowser $browser) {
+            $browser->openModelPage(ModelLocale::class)
+
+                    //Submit form and check if language switched is not colorized
+                    ->submitForm()->pause(100)
+                    ->assertHasNotClass('[data-form-language-switch] > button', 'has-error')
+
+                    //Change language to english, and again send form, and chech if language switcher is colorized
+                    ->click('[data-form-language-switch] > button')->pause(300)
+                    ->click('[data-form-language-switch] li[data-slug="en"]')
+                    ->submitForm()->pause(100)
+                    ->assertSeeIn('.modal', trans('admin::admin.lang-error'))
+                    ->closeAlert()
+                    ->assertHasClass('[data-form-language-switch] > button', 'has-error');
+        });
     }
 
     /*
