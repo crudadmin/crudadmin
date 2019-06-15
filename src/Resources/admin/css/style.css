@@ -367,6 +367,7 @@ form .is-changed-from-history label { color: #b900e2; }
 form .is-changed-from-history .form-control,
 form .is-changed-from-history .form-group .chosen-container > .chosen-choices,
 form .is-changed-from-history .form-group .chosen-container > .chosen-single { border: 1px solid #b900e2; }
+form .is-changed-from-history .form-group > .cke { border: 1px solid #b900e2; }
 button.enabled-history { background: #b900e2; color: white !important; border: 1px solid #80009c !important; }
 button.enabled-history:hover, button.enabled-history:focus, button.enabled-history:active, button.enabled-history:visited { background: #80009c !important }
 

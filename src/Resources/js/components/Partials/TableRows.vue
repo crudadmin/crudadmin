@@ -72,15 +72,14 @@
         //Automaticaly choose size of tables
         if ( this.autoSize == false )
           this.$parent.$parent.checkActiveSize( this.columns );
-      },
 
-      events: {
-        selectHistoryRow(history_data){
-          if ( this.model.slug != history_data[0] )
+        //On history change
+        eventHub.$on('selectHistoryRow', data => {
+          if ( this.model.slug != data.table )
             return;
 
-          this.selectRow({ id : history_data[1] }, null, null, history_data[2], history_data[3]);
-        }
+          this.selectRow({ id : data.row_id }, null, null, data.history_id, data.row);
+        })
       },
 
       computed: {
@@ -492,24 +491,26 @@
           if ( row === true && data === null )
             return this.$parent.row = null;
 
-          var render = function(response){
+          var render = response => {
             for ( var key in response ){
               row[key] = response[key];
             }
 
             //Bind model data
-            this.$parent.$parent.row = _.cloneDeep(row, true);
+            this.$set(this.$parent.$parent, 'row', _.cloneDeep(row, true));
 
             //Fix for single model with history support
             if ( model_row ){
               for ( var key in model_row )
-                model_row[key] = row[key];
+              {
+                this.$set(model_row, key, row[key]);
+              }
             }
 
             this.$parent.$parent.closeHistory(history_id ? true : false);
 
             this.scrollToForm();
-          }.bind(this);
+          };
 
           if ( data ) {
             render(data);

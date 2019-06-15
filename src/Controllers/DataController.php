@@ -77,7 +77,7 @@ class DataController extends Controller
      */
     public function showDataFromHistory($model, $id, $history_id)
     {
-        $model = $this->getModel( $model );
+        $model = $this->getModel($model);
 
         $row = $model->getHistorySnapshot($history_id, $id);
 
@@ -164,7 +164,7 @@ class DataController extends Controller
             $this->insertUnsavedChilds($row, $request);
 
             /*
-             * Save into hustory
+             * Save into history
              */
             if ( $model->getProperty('history') === true )
                 $row->historySnapshot($request_row);
@@ -471,7 +471,9 @@ class DataController extends Controller
                             ->with(['user' => function($query){
                                 $query->select(['id', 'username']);
                             }])
-                            ->get(['id', 'data', 'user_id', 'created_at']);
+                            ->get(['id', 'data', 'user_id', 'created_at'])->map(function($item){
+                                return $item->getMutatedAdminAttributes();
+                            });
 
         return $rows;
     }

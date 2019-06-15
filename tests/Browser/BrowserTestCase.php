@@ -58,9 +58,10 @@ class BrowserTestCase extends TestCase
      * Parse given data into database format
      * @param  string/object $model
      * @param  array  $data
+     * @param  string  $locale
      * @return array
      */
-    public function buildDbData($model, $data = [])
+    public function buildDbData($model, $data = [], $locale = null)
     {
         $model = $this->getModelClass($model);
 
@@ -116,6 +117,12 @@ class BrowserTestCase extends TestCase
 
             //Get key of select
             $data[$key] = $this->parseSelectValue($model, $key, $data[$key], true);
+
+            //Set value as locale value
+            if ( $model->hasFieldParam($key, 'locale', true) && $locale )
+            {
+                $data[$key] = [ $locale => $data[$key] ];
+            }
         }
 
         return $data;
@@ -186,8 +193,11 @@ class BrowserTestCase extends TestCase
 
         $data = $this->buildDbData($model, $originalData);
 
+        $row = $id ? $model->select(array_keys($data))->where('id', $id)->first()->toArray()
+                   : $model->select(array_keys($data))->first()->toArray();
+
         PHPUnit::assertEquals(
-            $this->sortLocaleKeys($model, $model->select(array_keys($data))->first()->toArray()),
+            $this->sortLocaleKeys($model, $row),
             $this->sortLocaleKeys($model, $data),
             'Table ['.$model->getTable().'] does not have excepted row'
         );

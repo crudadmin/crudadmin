@@ -335,10 +335,10 @@
         return this.$root.languageOptions(array, this.model.fields[this.search.column]);
       },
       showHistory(row){
-        this.$http.get( this.$root.requests.getHistory, {
+        this.$http.get( this.$root.requests.get('getHistory', {
           model : this.model.slug,
           id : row.id,
-        })
+        }))
         .then(function(response){
 
           var data = response.data;

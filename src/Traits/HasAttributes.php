@@ -61,7 +61,6 @@ trait HasAttributes
 
         $this->without_mutators = false;
 
-
         //Bing belongs to many values
         foreach ($this->getFields() as $key => $field)
         {
@@ -99,8 +98,9 @@ trait HasAttributes
                         {
                             if ( is_null($v) )
                                 unset($attributes[$key][$k]);
-                            else
+                            else {
                                 $attributes[$key][$k] = number_format($v, 2, '.', '');
+                            }
                         }
                     }
 

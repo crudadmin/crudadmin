@@ -67,8 +67,9 @@ class AdminBootloader
         //Search specific order
         foreach ($models as $model)
         {
+            //Return cloned booted class instance
             if ( $model->getTable() == $table_name )
-                return $model;
+                return $model->newInstance();
         }
     }
 

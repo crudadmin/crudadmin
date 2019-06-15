@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!hasComponent" v-show="canShowField" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
+    <div v-if="!hasComponent" v-show="canShowField" :data-history-changed="isChangedFromHistory" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
       <!-- STRING INPUT -->
       <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
         <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
@@ -37,7 +37,7 @@
       <!-- TEXT INPUT -->
       <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
         <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-        <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName">{{ getValueOrDefault }}</textarea>
+        <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName" :value="getValueOrDefault"></textarea>
         <small>{{ field.title }}</small>
       </div>
 
@@ -235,11 +235,11 @@
           return value;
         },
         syncFieldsValueWithRow(){
-          this.$watch('row.'+this.field_key, function(value){
+          this.$watch('row.'+this.field_key, value => {
             this.field.value = this.resetEmptyValue(value);
           });
 
-          this.$watch('field.value', function(value){
+          this.$watch('field.value', value => {
             this.row[this.field_key] = this.resetEmptyValue(value);
           });
         },

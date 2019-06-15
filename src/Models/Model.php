@@ -8,6 +8,7 @@ use Gogol\Admin\Traits\FieldComponent;
 use Gogol\Admin\Traits\FieldProperties;
 use Gogol\Admin\Traits\HasAttributes;
 use Gogol\Admin\Traits\HasChildrens;
+use Gogol\Admin\Traits\Historiable;
 use Gogol\Admin\Traits\ModelIcons;
 use Gogol\Admin\Traits\ModelLayoutBuilder;
 use Gogol\Admin\Traits\ModelRelationships;
@@ -34,7 +35,8 @@ class Model extends BaseModel
         Uploadable,
         Validation,
         ModelIcons,
-        Sluggable;
+        Sluggable,
+        Historiable;
 
     /*
      * Template name

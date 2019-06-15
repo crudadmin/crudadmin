@@ -244,9 +244,9 @@
                             if ( this.canShowAlert !== true )
                                 return;
 
-                            //If enter/esc has been pressed 500ms after alert has been opened
+                            //If enter/esc has been pressed 300ms after alert has been opened
                             //does not close this alert and ignore enter
-                            if ( this.alert.opened && new Date().getTime() - this.alert.opened < 500 )
+                            if ( this.alert.opened && new Date().getTime() - this.alert.opened < 300 )
                                 return;
 
                             if ( e.keyCode == 13 )

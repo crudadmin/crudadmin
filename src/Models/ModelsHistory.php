@@ -60,6 +60,7 @@ class ModelsHistory extends Model
                 $data[$key] = $value->format('Y-m-d H:i:00');
         }
 
+        ksort($data);
 
         return $data;
     }
@@ -122,7 +123,7 @@ class ModelsHistory extends Model
         $changes = [];
 
         //Get also modified field by mutators, which are not in request
-        $data = array_merge($data, $this->array_diff_recursive($model->attributes, $data));
+        $data = array_merge($data, $this->array_diff_recursive($model->attributesToArray(), $data));
 
         //Compare changes
         foreach ($data as $key => $value)
@@ -191,10 +192,8 @@ class ModelsHistory extends Model
         return $row;
     }
 
-    public function toArray()
+    public function setAdminAttributes($attributes)
     {
-        $attributes = parent::attributesToArray();
-
         $attributes['changed_fields'] = array_keys((array)json_decode($attributes['data']));
 
         unset($attributes['data']);

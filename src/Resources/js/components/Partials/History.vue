@@ -16,7 +16,7 @@
                   <table class="table data-table table-bordered table-striped">
                     <thead>
                       <tr>
-                        <th class="td-id">Č.</th>
+                        <th class="td-id">{{ trans('number') }}</th>
                         <th>{{ trans('history.who') }}</th>
                         <th>{{ trans('history.count') }}</th>
                         <th>{{ trans('history.date') }}</th>
@@ -24,11 +24,10 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <!-- <tr v-for="item in history.rows | orderBy 'id' -1"> -->
-                      <tr v-for="item in history.rows">
+                      <tr v-for="(item, $index) in sortedHistory" :data-history-id="item.id">
                         <td class="td-id">{{ history.rows.length - $index }}</td>
                         <td>{{ item.user ? item.user.username : trans('history.system') }}</td>
-                        <td>
+                        <td data-changes-length>
                           <span data-toggle="tooltip" title="" :data-original-title="changedFields(item)">{{ item.changed_fields.length }} <i class="fa fa-eye"></i></span>
                         </td>
                         <td>{{ date(item.created_at) }}</td>
@@ -62,12 +61,23 @@
         };
       },
 
+      computed: {
+        sortedHistory(){
+          return _.orderBy(this.history.rows, 'id', 'desc');
+        }
+      },
+
       methods: {
         applyChanges(item){
             this.$parent.history.fields = item.changed_fields;
             this.$parent.history.history_id = item.id;
 
-            this.$dispatch('proxy', 'selectHistoryRow', [this.$parent.model.slug, this.$parent.history.id, item.id, this.$parent.row]);
+            eventHub.$emit('selectHistoryRow', {
+              table : this.$parent.model.slug,
+              row_id : this.$parent.history.id,
+              history_id : item.id,
+              row : this.$parent.row,
+            });
         },
         date(date){
             return moment(date).format('D.M.Y H:mm');

@@ -3,14 +3,12 @@
 namespace Gogol\Admin\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
-use Gogol\Admin\Models\ModelsHistory;
 use Gogol\Admin\Helpers\File;
 use Carbon\Carbon;
 use Localization;
 use Fields;
 use Admin;
 use Schema;
-use DB;
 
 trait AdminModelTrait
 {
@@ -803,40 +801,5 @@ trait AdminModelTrait
     public function scopeWithPublished($query)
     {
         $query->where('published_at', '!=', null)->whereRAW('published_at <= NOW()');
-    }
-
-    /*
-     * Save actual model row into history
-     */
-    public function historySnapshot($request, $original = null)
-    {
-        return Admin::getModel('ModelsHistory')->pushChanges($this, $request, $original);
-    }
-
-
-    /*
-     * Foreach all rows in history, and get acutal data status
-     */
-    public function getHistorySnapshot($max_id = null, $id = null)
-    {
-        if (!($changes = ModelsHistory::where('table', $this->getTable())->where('row_id', $id ?: $this->getKey())->where(function($query) use ( $max_id ) {
-            if ( $max_id )
-                $query->where('id', '<=', $max_id);
-        })->orderBy('id', 'ASC')->get()))
-            return [];
-
-        $data = [];
-
-        foreach ($changes as $row)
-        {
-            $array = (array)json_decode($row['data']);
-
-            foreach ($array as $key => $value)
-            {
-                $data[$key] = $value;
-            }
-        }
-
-        return $data;
     }
 }

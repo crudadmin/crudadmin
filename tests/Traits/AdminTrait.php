@@ -89,6 +89,9 @@ trait AdminTrait
             'level1.level2.level3' => 'My sub-subtree level',
         ]);
 
+        //Allow history module
+        $app['config']->set('admin.history', true);
+
         //Allow localizations
         $app['config']->set('admin.localization', true);
         $app['config']->set('admin.gettext', true);

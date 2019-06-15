@@ -206,20 +206,25 @@ abstract class Request extends FormRequest
     }
 
     /*
-     * Return binded multilocale json values
+     * Return binded checkbox values with multilocale support
      */
-    private function getCheckboxNullValue($key)
+    private function getCheckboxValue($key)
     {
-        $languages = Localization::getLanguages();
-
-        $data = [];
-
-        foreach ($languages as $language)
+        if ( $this->model->hasFieldParam($key, 'locale') )
         {
-            $data[$language->slug] = $this->has( $key . '.' . $language->slug ) ? 1 : 0;
+            $languages = Localization::getLanguages();
+
+            $data = [];
+
+            foreach ($languages as $language)
+            {
+                $data[$language->slug] = $this->has($key.'.'.$language->slug) ? 1 : 0;
+            }
+
+            return $data;
         }
 
-        return $data;
+        return $this->has($key) && $this->get($key) == 1 ? 1 : 0;
     }
 
     //If is no value for checkbox, then automaticaly add zero value
@@ -229,14 +234,7 @@ abstract class Request extends FormRequest
         {
             if ( $this->model->isFieldType($key, 'checkbox') )
             {
-                $has_locale = $this->model->hasFieldParam($key, 'locale');
-
-                $default_value = $has_locale
-                        ? $this->getCheckboxNullValue($key)
-                        : 0;
-
-                if ( ! $this->has( $key ) || $has_locale )
-                    $this->merge( [ $key => $default_value ] );
+                $this->merge( [ $key => $this->getCheckboxValue($key) ] );
             }
         }
     }
@@ -283,6 +281,24 @@ abstract class Request extends FormRequest
     }
 
     /*
+     * Remove empty locale values from requests
+     */
+    protected function emptyLocalesToNull($fields = null)
+    {
+        foreach ($fields as $key => $field)
+        {
+            $value = $this->get($key);
+
+            if ( $this->model->hasFieldParam($key, 'locale', true) && is_array($value) )
+            {
+                $this->merge( [ $key => array_filter($value, function($var){
+                  return $var !== NULL && $var !== FALSE;
+                }) ] );
+            }
+        }
+    }
+
+    /*
      * Remove empty passwords
      */
     protected function removeEmptyPassword($fields = null)
@@ -323,6 +339,7 @@ abstract class Request extends FormRequest
         $this->datetimes( $fields );
         $this->removeEmptyForeign( $fields );
         $this->emptyStringsToNull( $fields );
+        $this->emptyLocalesToNull( $fields );
         $this->resetMultipleSelects( $fields );
         $this->removeEmptyPassword( $fields );
 

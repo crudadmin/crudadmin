@@ -412,8 +412,10 @@ class DuskBrowser extends Browser
             //If is associative array in select field type, then we need compare keys, not values
             $value = $this->parseSelectValue($model, $key, $value, true);
 
-            $this->assertVue('row.'.$key.($locale ? '.'.$locale : ''), $value, '@model-builder');
-            $this->assertVue('model.fields.'.$key.'.value'.($locale ? '.'.$locale : ''), $value, '@model-builder');
+            $hasLocale = $model->hasFieldParam($key, 'locale', true);
+
+            $this->assertVue('row.'.$key.($locale && $hasLocale ? '.'.$locale : ''), $value, '@model-builder');
+            $this->assertVue('model.fields.'.$key.'.value'.($locale && $hasLocale ? '.'.$locale : ''), $value, '@model-builder');
         }
 
         return $this;
@@ -869,6 +871,34 @@ class DuskBrowser extends Browser
         }, $paths);
 
         $element->sendKeys(implode("\n ", $files));
+
+        return $this;
+    }
+
+    /**
+     * Check if given element exists
+     * @param  string  $query
+     * @return void
+     */
+    public function assertElementExists($query)
+    {
+        $element = $this->script('return $("'.str_replace('"', '\"', $query).'").length;');
+
+        PHPUnit::assertTrue($element[0] > 0, 'Element ['.$query.'] does not exists');
+
+        return $this;
+    }
+
+    /**
+     * Check if given element does not exists
+     * @param  string  $query
+     * @return void
+     */
+    public function assertElementDoesNotExists($query)
+    {
+        $element = $this->script('return $("'.str_replace('"', '\"', $query).'").length;');
+
+        PHPUnit::assertFalse($element[0] > 0, 'Element ['.$query.'] does not exists');
 
         return $this;
     }
