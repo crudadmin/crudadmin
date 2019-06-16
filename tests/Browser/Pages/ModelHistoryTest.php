@@ -36,7 +36,7 @@ class ModelHistoryTest extends BrowserTestCase
             //Assert if default history row exists
             $this->assertRowExists(ModelsHistory::class, $this->getHistoryRow(1, $row, 'sk'));
 
-            //Open row, change to en language and change some values
+            //Open row, change to en language and change some form values
             $browser->openRow(1)
                     ->click('[data-form-language-switch] > button')->pause(300)
                     ->click('[data-form-language-switch] li[data-slug="en"]')
@@ -51,10 +51,10 @@ class ModelHistoryTest extends BrowserTestCase
 
             //Open history switcher
             $browser->click('[data-id="1"] [data-button="history"]')->pause(400)
-                    ->assertSeeIn('[data-history-id="1"] td[data-changes-length]', 11)
-                    ->assertSeeIn('[data-history-id="2"] td[data-changes-length]', 4);
+                    ->assertSeeIn('[data-history-id="1"] td[data-changes-length]', count($row))
+                    ->assertSeeIn('[data-history-id="2"] td[data-changes-length]', count($updatedRow));
 
-            //Open first row values
+            //Open first row values and check editor values, also check history button state
             $browser->click('[data-history-id="1"] button')->pause(1000)->scrollToElement()
                     ->assertHasFormValues(History::class, array_merge($row, [
                         'editor' => null,
@@ -62,7 +62,8 @@ class ModelHistoryTest extends BrowserTestCase
                         'decimal' => null,
                         'file' => null,
                         'date' => null,
-                    ]), 'en');
+                    ]), 'en')
+                    ->assertHasClass('[data-id="1"] [data-button="history"]', 'enabled-history');
 
             //Open actual history row and check values
             $browser->click('[data-id="1"] [data-button="history"]')->pause(400)
@@ -74,10 +75,10 @@ class ModelHistoryTest extends BrowserTestCase
                     ->assertElementExists('[data-field="text"] [data-history-changed]')
                     ->assertElementExists('[data-field="editor"] [data-history-changed]')
                     ->assertElementExists('[data-field="decimal"] [data-history-changed]')
+                    ->assertElementExists('[data-field="time"] [data-history-changed]')
                     ->assertElementDoesNotExists('[data-field="integer"] [data-history-changed]')
                     ->assertElementDoesNotExists('[data-field="file"] [data-history-changed]')
                     ->assertElementDoesNotExists('[data-field="date"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="time"] [data-history-changed]')
                     ->assertElementDoesNotExists('[data-field="checkbox"] [data-history-changed]')
                     ->assertElementDoesNotExists('[data-field="radio"] [data-history-changed]')
                     ->assertElementDoesNotExists('[data-field="select"] [data-history-changed]');
@@ -110,7 +111,7 @@ class ModelHistoryTest extends BrowserTestCase
             'decimal' => '11.50',
             'file' => 'image1.jpg',
             'date' => date('d.m.Y'),
-            'time' => date('H:00'),
+            'time' => date('14:00'),
             'checkbox' => true,
             'radio' => 'b',
         ];
@@ -125,6 +126,7 @@ class ModelHistoryTest extends BrowserTestCase
             'decimal' => '5.20',
             'text' => 'this is my updated text value',
             'editor' => '<p>this is my updated locale editor value</p>',
+            'time' => '15:00',
         ];
     }
 
