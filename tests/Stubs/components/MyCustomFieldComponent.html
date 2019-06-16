@@ -4,11 +4,7 @@
 
         <input type="text" :name="field_key" :value="value" @keyup="onChange" placeholder="Wohoo,,, this is my first custom component field!!" class="form-control">
 
-        <ul>
-            <li>This is my first custom component for field <strong>{{ field.name }}</strong>, with <strong>{{ field.value || 'empty' }}</strong> value.</li>
-            <li>Is this field required? <strong>{{ field.required ? 'Yes' : 'No' }}</strong></li>
-            <li>For other field properties check <strong>field</strong> property</li>
-        </ul>
+        <p>This is my first custom component for field <strong>{{ field.name }}</strong>, with <strong>{{ field.value || 'empty' }}</strong> value.</p>
     </div>
 </template>
 

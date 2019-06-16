@@ -40,6 +40,7 @@ class FieldsType extends AdminModel
             'time' => 'name:my time field|type:time|required',
             'checkbox' => 'name:my checkbox field|type:checkbox',
             'radio' => 'name:my radio field|type:radio|options:c,d,b|required',
+            'custom' => 'name:my custom field|type:string|component:MyCustomFieldComponent|required',
         ];
     }
 

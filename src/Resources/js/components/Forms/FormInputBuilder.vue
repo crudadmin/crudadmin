@@ -139,7 +139,7 @@
       :field="field"
       :history_changed="isChangedFromHistory"
       :row="row"
-      :key="field_key"
+      :field_key="field_key"
       :is="componentName">
     </component>
   </div>

@@ -15,7 +15,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
     use DropUploads;
 
     /** @test */
-    public function test_validation_errors_then_create_new_row_and_then_update_without_change()
+    public function test_fields_types_validation_errors_then_create_new_row_and_then_update_without_change()
     {
         $row = $this->getFormData();
 
@@ -30,9 +30,15 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->pause(500)
                     ->assertHasValidationError(FieldsType::class, $fieldKeys)
 
+                    //Check if custom component renders properly
+                    ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with empty value.')
+
                     //Check if form values has been successfully filled
                     ->fillForm(FieldsType::class, $row)
                     ->assertHasFormValues(FieldsType::class, $row)
+
+                    //Check if custom component is modified properly
+                    ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with my custom value value.')
 
                     //Check if form has been successfully saved
                     ->submitForm()
@@ -64,7 +70,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_update_existing_row()
+    public function test_fields_types_update_existing_row()
     {
         $create = $this->getFormData();
         $update = $this->getFormDataUpdated();
@@ -117,6 +123,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             'time' => date('H:00'),
             'checkbox' => true,
             'radio' => 'b',
+            'custom' => 'my custom value',
         ];
 
         return isset($key) ? $data[$key] : $data;
@@ -138,6 +145,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             'time' => Carbon::now()->addHours(-1)->format('H:00'),
             'checkbox' => false,
             'radio' => 'c',
+            'custom' => 'updated custom value',
         ];
     }
 

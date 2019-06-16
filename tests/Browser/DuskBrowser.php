@@ -229,7 +229,9 @@ class DuskBrowser extends Browser
                 $model->isFieldType($key, ['string', 'longtext', 'text', 'integer', 'decimal', 'password'])
                 && ! $model->hasFieldParam($key, 'multiple')
             ) {
-                $this->type('[data-field="'.$model->getTable().'-'.$key.'"][name="'.$formKey.'"]', $value);
+                $hasComponent = $model->hasFieldParam($key, 'component');
+
+                $this->type((!$hasComponent ? '[data-field="'.$model->getTable().'-'.$key.'"]' : '').'[name="'.$formKey.'"]', $value);
             }
 
             //Set editor value
