@@ -33,6 +33,7 @@
                             :history="history"
                             :model="model"
                             :langid="langid"
+                            :inputlang="inputlang"
                             :langslug="langslug"
                             :row="row"
                             :index="index"

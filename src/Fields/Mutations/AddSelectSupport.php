@@ -321,8 +321,12 @@ class AddSelectSupport extends MutationRule
                 $field['filterBy'] = implode(',', $filterBy);
 
             //Return static field options, or no options
-            if ( $static_field = $this->getStaticField($field, $key, $model) )
+            if ( $static_field = $this->getStaticField($field, $key, $model) ){
+                //We need pair keys with values
+                $this->updateAssocField($static_field);
+
                 return $static_field;
+            }
 
             /*
              * When fields will be fully loaded, then add options

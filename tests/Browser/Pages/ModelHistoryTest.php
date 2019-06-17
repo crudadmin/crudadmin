@@ -38,8 +38,7 @@ class ModelHistoryTest extends BrowserTestCase
 
             //Open row, change to en language and change some form values
             $browser->openRow(1)
-                    ->click('[data-form-language-switch] > button')->pause(300)
-                    ->click('[data-form-language-switch] li[data-slug="en"]')
+                    ->changeRowLanguage('en')
                     ->fillForm(History::class, $updatedRow, 'en')
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))

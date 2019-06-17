@@ -59,7 +59,7 @@ class ModelFieldsTypesTest extends TestCase
             'name' => 'my select field',
             'type' => 'select',
             'required' => true,
-            'options' => ['option a', 'option b'],
+            'options' => ['option a' => 'option a', 'option b' => 'option b'],
             'value' => null,
         ]);
     }
@@ -177,7 +177,7 @@ class ModelFieldsTypesTest extends TestCase
         $this->assertEquals($this->model->getField('radio'), [
             'name' => 'my radio field',
             'type' => 'radio',
-            'options' => ['c', 'd', 'b'],
+            'options' => ['c' => 'c', 'd' => 'd', 'b' => 'b'],
             'required' => true,
             'value' => null,
         ]);

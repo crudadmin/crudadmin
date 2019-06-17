@@ -153,7 +153,7 @@
 
   export default {
       name: 'form-input-builder',
-      props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'hasparentmodel', 'langslug'],
+      props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug'],
 
       components: { File },
 
@@ -365,7 +365,39 @@
 
           this.$watch('row.'+this.getFilterBy[0], function(value){
             this.filterBy = value;
-          })
+          });
+
+          this.filterBy = this.defaultFieldValue(this.model.fields[this.getFilterBy[0]]);
+        },
+        defaultFieldValue(field){
+          var default_value = field.value||field.default;
+
+          if (
+            ! default_value
+            || (['number', 'string', 'boolean'].indexOf(typeof default_value) === -1 && !this.isMultipleField(field))
+          ) {
+            return '';
+          }
+
+          //If is current date value in datepicker
+          if ( this.isDatepickerField(field) && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' )
+            default_value = moment().format(this.$root.fromPHPFormatToMoment(field.date_format));
+
+          //Get value by other table
+          if ( field.default )
+          {
+            var default_parts = field.default.split('.');
+
+            if ( default_parts.length == 2 )
+            {
+              var model = this.getModelBuilder(default_parts[0]);
+
+              if ( model && (default_parts[1] in model.row) )
+                return model.row[default_parts[1]];
+            }
+          }
+
+          return default_value||'';
         },
         /*
          * If field has setters, then check for change of changer field
@@ -592,7 +624,7 @@
           var filter = {};
 
           if ( (options && options[0] && typeof options[0][1] == 'object' && options[0][1] !== null) && ('language_id' in options[0][1]) == true )
-            filter['language_id'] = this.getLangageId;
+            filter['language_id'] = this.row.language_id||(this.inputlang ? this.inputlang.id : null)||this.langid;
 
           if ( this.getFilterBy )
             filter[this.getFilterBy[1]] = this.isStaticFilterColumn ? this.getStaticFilterBy : this.filterBy;
@@ -686,6 +718,12 @@
 
           return filterBy;
         },
+        isMultipleField(field){
+          return field.multiple && field.multiple === true || ('belongsToMany' in field);
+        },
+        isDatepickerField(field){
+          return (field.type == 'date' || field.type == 'datetime' || field.type == 'time');
+        }
       },
 
       computed : {
@@ -853,7 +891,7 @@
         },
         isDatepicker()
         {
-          return this && (this.field.type == 'date' || this.field.type == 'datetime' || this.field.type == 'time');
+          return this.isDatepickerField(this.field);
         },
         isMultipleDatepicker()
         {
@@ -869,7 +907,7 @@
         },
         isMultiple()
         {
-          return this.field.multiple && this.field.multiple === true || ('belongsToMany' in this.field);
+          return this.isMultipleField(this.field);
         },
         isMultirows()
         {
@@ -905,44 +943,14 @@
 
           //Localization field
           if ( this.hasLocale )
-            return this.getLocalizedValue(value, this.defaultFieldValue);
+            return this.getLocalizedValue(value, this.defaultFieldValue(this.field));
 
           //If row is not opened, then return default field value
           if ( ! this.isOpenedRow ){
-            return this.defaultFieldValue;
+            return this.defaultFieldValue(this.field);
           }
 
           return value;
-        },
-        defaultFieldValue(){
-          var default_value = this.field.value||this.field.default;
-
-          if (
-            ! default_value
-            || (['number', 'string', 'boolean'].indexOf(typeof default_value) === -1 && !this.isMultiple)
-          ) {
-            return '';
-          }
-
-          //If is current date value in datepicker
-          if ( this.isDatepicker && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' )
-            default_value = moment().format(this.$root.fromPHPFormatToMoment(this.field.date_format));
-
-          //Get value by other table
-          if ( this.field.default )
-          {
-            var default_parts = this.field.default.split('.');
-
-            if ( default_parts.length == 2 )
-            {
-              var model = this.getModelBuilder(default_parts[0]);
-
-              if ( model && (default_parts[1] in model.row) )
-                return model.row[default_parts[1]];
-            }
-          }
-
-          return default_value||'';
         },
         hasMultipleFilesValue(){
           return $.isArray(this.field.value);
@@ -1004,13 +1012,6 @@
         },
         hasLocale(){
           return 'locale' in this.field;
-        },
-        /*
-         If is selected row, which not belongs to selected language,
-         then select options from language of selected row
-         */
-        getLangageId(){
-          return this.isOpenedRow && 'language_id' in this.row ? this.row.language_id : this.$root.language_id;
         },
         missingValueInSelectOptions(){
           if ( !this.isOpenedRow )

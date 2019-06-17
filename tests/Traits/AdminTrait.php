@@ -84,6 +84,8 @@ trait AdminTrait
 
         //Add submenu tree settings
         $app['config']->set('admin.groups', config('admin.groups', []) + [
+            'fields' => 'Fields',
+            'localization' => 'Localization',
             'level1' => 'My tree level 1',
             'level1.level2' => 'My subtree level',
             'level1.level2.level3' => 'My sub-subtree level',

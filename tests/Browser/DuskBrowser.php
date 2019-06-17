@@ -26,7 +26,8 @@ class DuskBrowser extends Browser
         $this->loginAs(User::first())
              ->visit(admin_action('DashboardController@index') . '#/page/'.$model->getTable());
 
-        return $this;
+        //Wait till page loads
+        return $this->waitFor('h1');
     }
 
     /**
@@ -612,6 +613,30 @@ class DuskBrowser extends Browser
     }
 
     /**
+     * Check if given select has correct values
+     * @param  class $model
+     * @param  string $key
+     * @param  array $excepted
+     * @return object
+     */
+    public function assertSelectValues($model, $key, $excepted = [])
+    {
+        $model = $this->getModelClass($model);
+
+        $options = $this->script("return $('[data-field=\"".$model->getTable()."-".$key."\"] option').map(function(){
+            return $(this).text();
+        })")[0];
+
+        PHPUnit::assertEquals(
+            array_values(array_merge([trans('admin::admin.select-option')], $excepted)),
+            $options,
+            "Select [{$key}] in model [{$model->getTable()}] does not have given values."
+        );
+
+        return $this;
+    }
+
+    /**
      * Check if values in specific columns does not contains of given data
      * @param  class $model
      * @param  string $column
@@ -907,5 +932,16 @@ class DuskBrowser extends Browser
         PHPUnit::assertFalse($element[0] > 0, 'Element ['.$query.'] does not exists');
 
         return $this;
+    }
+
+    /**
+     * Change language of form
+     * @param  string $lang
+     * @return object
+     */
+    public function changeRowLanguage($lang)
+    {
+        return $this->click('[data-form-language-switch] > button')->pause(100)
+                    ->click('[data-form-language-switch] li[data-slug="'.$lang.'"]');
     }
 }

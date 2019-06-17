@@ -24,7 +24,11 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug"><a href="#" @click.prevent="changeLanguage(lang.id)"><i class="fa fa-exclamation-triangle"></i>{{ getLangName(lang) }}</a></li>
+            <li v-for="lang in languages" v-if="selectedLanguage.id != lang.id" :data-slug="lang.slug">
+              <a href="#" @click.prevent="changeLanguage(lang.id)">
+                <i class="fa fa-exclamation-triangle"></i>{{ getLangName(lang) }}
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -198,8 +202,15 @@
       },
       hasLocaleFields(){
         for ( var key in this.model.fields )
+        {
           if ( this.model.fields[key].locale == true )
             return true;
+
+          //If some field has localized options rows
+          var options = this.model.fields[key].options;
+          if ( (options && options[0] && typeof options[0][1] == 'object' && options[0][1] !== null) && ('language_id' in options[0][1]) == true )
+            return true;
+        }
 
         return false;
       },

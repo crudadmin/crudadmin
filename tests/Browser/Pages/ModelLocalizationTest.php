@@ -72,8 +72,7 @@ class ModelLocalizationTest extends BrowserTestCase
 
                     //Open row and check if english is empty
                     ->openRow(1)
-                    ->click('[data-form-language-switch] > button')->pause(100)
-                    ->click('[data-form-language-switch] li[data-slug="en"]')
+                    ->changeRowLanguage('en')
                     ->assertFormIsEmpty(ModelLocale::class, 'en')
 
                     //Fill and save english form values
@@ -102,8 +101,7 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->assertHasNotClass('[data-form-language-switch] > button', 'has-error')
 
                     //Change language to english, and again send form, and chech if language switcher is colorized
-                    ->click('[data-form-language-switch] > button')->pause(100)
-                    ->click('[data-form-language-switch] li[data-slug="en"]')
+                    ->changeRowLanguage('en')
                     ->submitForm()->pause(100)
                     ->assertSeeIn('.modal', trans('admin::admin.lang-error'))
                     ->closeAlert()
