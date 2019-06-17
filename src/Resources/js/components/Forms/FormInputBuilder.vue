@@ -269,7 +269,7 @@
                 obj;
 
             try {
-                obj = (new Function('return '+data))();
+                obj = this.$root.getComponentObject(data);
             } catch(error){
                 console.error('Syntax error in component ' + component[i] + '.Vue' + "\n", error);
                 continue;

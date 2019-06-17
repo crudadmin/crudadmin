@@ -373,7 +373,7 @@
           if ( layouts[i].type == 'vuejs' )
           {
             try {
-                obj = (new Function('return '+data))();
+                obj = this.$root.getComponentObject(data);
             } catch(error){
                 console.error('Syntax error in component ' + layouts[i].name + '.Vue' + "\n", error);
                 continue;

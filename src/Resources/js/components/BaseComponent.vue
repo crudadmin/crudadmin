@@ -217,7 +217,7 @@
                             var obj;
 
                             try {
-                                obj = (new Function('return '+component.component))();
+                                obj = this.getComponentObject(component.component);
                                 obj.name = this.getComponentName(component.name);
 
                                 this.$options.components[obj.name] = obj;
@@ -466,6 +466,15 @@
                         }
 
                         return lang.name;
+                    },
+                    getComponentObject(data){
+                        var obj = (new Function('return '+data))();
+
+                        //Fixed backwards compacitibility for vuejs1 components
+                        if ( obj.ready && !obj.mounted )
+                          obj.mounted = obj.ready;
+
+                      return obj;
                     }
                 }
             }
