@@ -458,6 +458,10 @@
                                 }
                             }
                         });
+
+                        $('<div>'+layout+'</div>').find('style').each(function(){
+                            $('body').append($(this)[0].outerHTML);
+                        });
                     },
                     getLangName(lang){
                         //If language table is also translatable

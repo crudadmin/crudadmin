@@ -382,8 +382,12 @@
 
           //Create blade component
           else {
+            var data = $(data);
+                data.find('script').remove();
+                data.find('style').remove();
+
             obj = {
-              template: '<div class="my-component" data-component="'+name+'">'+data+'</div>',
+              template: '<div class="my-component" data-component="'+name+'">'+data.html()+'</div>',
             };
           }
 
