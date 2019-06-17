@@ -84,7 +84,7 @@
           <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? getFieldName : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
             <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
             <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, getValueOrDefault, isMultiple)">{{ mvalue }}</option>
-            <option v-for="data in fieldOptions" :selected="hasValue(data[0], getValueOrDefault, isMultiple) || ((!value || value === 0) && !isOpenedRow && data[0] == defaultFieldValue)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+            <option v-for="data in fieldOptions" :selected="hasValue(data[0], getValueOrDefault, isMultiple)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
           </select>
           <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
         </div>
@@ -890,11 +890,11 @@
         },
         getValueOrDefault()
         {
-          var value = this.parseArrayValue(this.field.value);
-
           //If is password, return none value
           if ( this.isPassword )
             return '';
+
+          var value = this.parseArrayValue(this.field.value);
 
           if ( this.isMultipleDatepicker )
             return JSON.stringify(value||[]);
