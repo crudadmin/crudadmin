@@ -413,6 +413,10 @@
             return;
           }
 
+          //Update field values
+          if ( no_field != true )
+            this.field.value = value;
+
           this.$set(this.row, this.field_key, value);
         },
         /*
@@ -913,8 +917,12 @@
         defaultFieldValue(){
           var default_value = this.field.value||this.field.default;
 
-          if ( ! default_value || ['number', 'string', 'boolean'].indexOf(typeof default_value) === -1 )
+          if (
+            ! default_value
+            || (['number', 'string', 'boolean'].indexOf(typeof default_value) === -1 && !this.isMultiple)
+          ) {
             return '';
+          }
 
           //If is current date value in datepicker
           if ( this.isDatepicker && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' )
