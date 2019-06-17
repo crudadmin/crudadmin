@@ -20,6 +20,7 @@ class AdminBootloader
     private $bootloader = [
         'models' => [],
         'namespaces' => [],
+        'booted_namespaces' => [],
         'modelnames' => [],
         'components' => [],
     ];
@@ -43,6 +44,9 @@ class AdminBootloader
      */
     public function getAdminModels()
     {
+        if ( $this->isLoaded() === false )
+            $this->boot();
+
         return $this->get('models');
     }
 
@@ -52,6 +56,9 @@ class AdminBootloader
      */
     public function getAdminModelNamespaces()
     {
+        if ( $this->isLoaded() === false )
+            $this->boot();
+
         return $this->get('namespaces');
     }
 
@@ -97,19 +104,10 @@ class AdminBootloader
 
     /**
      * Boot admin interface
-     * @param  boolean $refresh
-     * @return void
+     * @return array
      */
-    public function boot($refresh = false)
+    public function boot()
     {
-        //Checks if is namespaces into buffer
-        if (
-            $refresh === false
-            && count($this->get('namespaces', [])) > 0
-        ) {
-            return $this->get('namespaces');
-        }
-
         //Register all models from namespaces
         foreach ($this->getNamespacesList() as $basepath => $namespace)
             $this->registerAdminModels($basepath, $namespace);
@@ -124,7 +122,7 @@ class AdminBootloader
         $this->booted = true;
 
         //Returns namespaces list
-        return $this->getAdminModelNamespaces();
+        return $this->get('namespaces');
     }
 
     /**
@@ -135,6 +133,10 @@ class AdminBootloader
      */
     public function registerAdminModels($basepath, $namespace)
     {
+        //If namespace has been already loaded
+        if ( in_array($namespace, $this->get('booted_namespaces')) )
+            return;
+
         $files = $this->getNamespaceFiles($basepath);
 
         foreach ($files as $key => $file)
@@ -147,6 +149,9 @@ class AdminBootloader
 
             $this->registerModel($model, false);
         }
+
+        //Set actual namespace as booted
+        $this->push('booted_namespaces', $namespace);
     }
 
     /**
@@ -154,6 +159,10 @@ class AdminBootloader
      */
     private function addModelExtensions()
     {
+        //If admin bootloaded has been loaded yet
+        if ( $this->isLoaded() === true )
+            return;
+
         $this->registerModelExtensions([
             //When is first admin migration started, default User model from package will be included.
             [
@@ -373,7 +382,7 @@ class AdminBootloader
             //If model/extension is allowed and if is not already registred
             if (
                 $extension['condition']
-                && ! in_array($this->toModelBaseName($extension['model']), $model_names)
+                && ! array_key_exists($this->toModelBaseName($extension['model']), $model_names)
             ) {
                 $this->registerModel($extension['model'], false);
             }

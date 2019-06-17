@@ -156,7 +156,7 @@ class Localization
 
         $segment = request()->segment(1);
 
-        if ( ! $this->isValidSegment() )
+        if ( $this->isValidSegment() === false )
             $language = $this->getDefaultLanguage();
         else
             $language = $this->languages->where('slug', $segment)->first();

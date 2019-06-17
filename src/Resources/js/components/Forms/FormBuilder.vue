@@ -102,9 +102,6 @@
       //Initialize form
       this.form = $('#'+this.formID);
 
-      //Reset form
-      this.initForm(this.row);
-
       eventHub.$on('changeFormSaveState', data => {
         if ( data.model != this.model.slug )
           return;
@@ -257,11 +254,9 @@
         //can be reseted just when is changed row for other, or inserting new row
         if ( reset !== false )
         {
-          this.form.resetForm();
-
-          for ( var key in this.model.fields ){
-            if ( this.model.fields[key].value )
-              this.model.fields[key].value = null;
+          for ( var key in this.model.fields )
+          {
+            this.$set(this.model, 'fields.'+key+'.value', null);
           }
         }
 
@@ -288,8 +283,7 @@
 
             //Set value and default value of field from database
             this.model.fields[key].value = value;
-            if ( value )
-              this.model.fields[key].$original_value = value;
+            this.model.fields[key].$original_value = value;
 
             eventHub.$emit('updateField', [key, this.model.fields[key]]);
           }

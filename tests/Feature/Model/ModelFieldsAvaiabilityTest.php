@@ -16,7 +16,7 @@ class ModelFieldsAvaiabilityTest extends TestCase
 
         $this->assertEquals(array_keys($fields), [
             'string', 'text', 'editor', 'select', 'integer', 'decimal', 'file',
-            'password', 'date', 'datetime', 'time', 'checkbox', 'radio',
+            'password', 'date', 'datetime', 'time', 'checkbox', 'radio', 'custom',
         ]);
     }
 

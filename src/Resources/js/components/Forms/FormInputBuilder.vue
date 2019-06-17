@@ -217,6 +217,18 @@
         this.addMultipleFilesSupport(true);
       },
       methods : {
+        parseArrayValue(value){
+          if ( $.isArray(value) )
+          {
+            for ( var key in value )
+            {
+              if ( $.isNumeric( value[key] ) )
+                value[key] = parseInt( value[key] );
+            }
+          }
+
+          return value;
+        },
         getLocalizedValue(value, defaultValue){
           if ( ! this.hasLocale )
             return value||null;
@@ -731,6 +743,9 @@
           return this.row && 'id' in this.row;
         },
         fieldOptions(){
+          if ( typeof this.field.options != 'object' )
+            return [];
+
           //On change fields options rebuild select
           this.updateField(this.field);
 
@@ -875,23 +890,25 @@
         },
         getValueOrDefault()
         {
+          var value = this.parseArrayValue(this.field.value);
+
           //If is password, return none value
           if ( this.isPassword )
             return '';
 
           if ( this.isMultipleDatepicker )
-            return JSON.stringify(this.field.value||[]);
+            return JSON.stringify(value||[]);
 
           //Localization field
           if ( this.hasLocale )
-            return this.getLocalizedValue(this.field.value, this.defaultFieldValue);
+            return this.getLocalizedValue(value, this.defaultFieldValue);
 
           //If row is not opened, then return default field value
           if ( ! this.isOpenedRow ){
             return this.defaultFieldValue;
           }
 
-          return this.field.value;
+          return value;
         },
         defaultFieldValue(){
           var default_value = this.field.value||this.field.default;
@@ -918,20 +935,6 @@
           }
 
           return default_value||'';
-        },
-        value(){
-          var value = this.field.value;
-
-          if ( $.isArray(value) )
-          {
-            for ( var key in value )
-            {
-              if ( $.isNumeric( value[key] ) )
-                value[key] = parseInt( value[key] );
-            }
-          }
-
-          return value;
         },
         hasMultipleFilesValue(){
           return $.isArray(this.field.value);

@@ -24,7 +24,7 @@ class TableRowsTest extends BrowserTestCase
     {
         return [
             'id', 'string', 'text', 'select', 'integer', 'decimal', 'file', 'date',
-            'datetime', 'time', 'checkbox', 'radio'
+            'datetime', 'time', 'checkbox', 'radio', 'custom'
         ];
     }
 

@@ -21,7 +21,8 @@ class ModelBootloaderTest extends TestCase
     {
         $this->assertEquals(Admin::boot(), [
             '2016-06-05 00:00:00' => 'Gogol\Admin\Models\Language',
-            '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User'
+            '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
+            '2017-07-15 00:00:00' => 'Gogol\Admin\Models\ModelsHistory',
         ]);
     }
 
@@ -33,11 +34,13 @@ class ModelBootloaderTest extends TestCase
         $this->assertEquals(Admin::boot(true), [
             '2016-06-05 00:00:00' => 'Gogol\Admin\Models\Language',
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
+            '2017-07-15 00:00:00' => 'Gogol\Admin\Models\ModelsHistory',
             '2019-05-03 12:02:04' => 'Gogol\Admin\Tests\App\Models\Fields\FieldsType',
             '2019-05-03 12:12:04' => 'Gogol\Admin\Tests\App\Models\Fields\FieldsTypesMultiple',
             '2019-05-03 11:11:02' => 'Gogol\Admin\Tests\App\Models\Fields\FieldsGroup',
             '2019-05-03 14:12:04' => 'Gogol\Admin\Tests\App\Models\Fields\FieldsRelation',
             '2019-05-03 15:12:04' => 'Gogol\Admin\Tests\App\Models\Fields\FieldsMutator',
+            '2019-05-03 15:13:07' => 'Gogol\Admin\Tests\App\Models\Fields\SelectType',
             '2019-05-04 12:10:04' => 'Gogol\Admin\Tests\App\Models\Articles\Article',
             '2019-05-04 12:10:15' => 'Gogol\Admin\Tests\App\Models\Articles\ArticlesComment',
             '2019-05-04 12:10:24' => 'Gogol\Admin\Tests\App\Models\Articles\Tag',
@@ -45,7 +48,8 @@ class ModelBootloaderTest extends TestCase
             '2019-05-15 12:11:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model2',
             '2019-05-15 12:12:02' => 'Gogol\Admin\Tests\App\Models\Tree\Model3',
             '2019-07-13 15:05:04' => 'Gogol\Admin\Tests\App\Models\Locales\ModelLocalization',
-            '2019-07-13 15:06:05' => 'Gogol\Admin\Tests\App\Models\Locales\ModelLocale'
+            '2019-07-13 15:06:05' => 'Gogol\Admin\Tests\App\Models\Locales\ModelLocale',
+            '2019-07-14 12:10:05' => 'Gogol\Admin\Tests\App\Models\History\History',
         ]);
     }
 
@@ -58,6 +62,7 @@ class ModelBootloaderTest extends TestCase
         $this->assertEquals(Admin::getAdminModelNamespaces(), [
             '2016-06-05 00:00:00' => 'Gogol\Admin\Models\Language',
             '2016-07-09 17:27:57' => 'Gogol\Admin\Tests\App\User',
+            '2017-07-15 00:00:00' => 'Gogol\Admin\Models\ModelsHistory',
             '2019-05-03 13:10:04' => 'Gogol\Admin\Tests\App\OtherModels\Blog',
             '2019-05-03 14:11:02' => 'Gogol\Admin\Tests\App\OtherModels\BlogsImage'
         ]);

@@ -210,14 +210,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="<?php echo admin_asset('/js/vendor.js') ?>"></script>
     <script src="<?php echo admin_asset('/plugins/ckeditor/ckeditor.js') ?>"></script>
 
+    <!-- APP JS -->
+    <script src="<?php echo admin_asset('/js/app.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
+
     <?php foreach((array)config('admin.scripts', []) as $script){ ?>
     <script type="text/javascript" src="<?php echo admin_asset($script) ?>"></script>
     <?php } ?>
 
-    <!-- APP JS -->
-    <script src="<?php echo admin_asset('/js/app.js?v=' . (Admin::getVersion() == 'dev-master' ? rand(00000, 99999) : Admin::getAssetsVersion() ) ) ?>"></script>
-
     <!-- Global site tag (gtag.js) - Google Analytics -->
+    <?php if ( strpos(Admin::getVersion(), 'dev') === false ) { ?>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-42935841-6"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -226,6 +227,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
       gtag('config', 'UA-42935841-6');
     </script>
+    <?php } ?>
 
     <?php
     //Slot into template

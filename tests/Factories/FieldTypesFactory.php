@@ -29,5 +29,6 @@ $factory->define(FieldsType::class, function (Faker $faker) {
         'time' => $faker->time(),
         'checkbox' => $faker->randomElement([1, 0]),
         'radio' => $faker->randomElement(['a', 'b', 'c']),
+        'custom' => $faker->text,
     ];
 });

@@ -550,7 +550,7 @@
           {
             //Update filterBy for each model
             if ( 'filterBy' in (model.fields[key]||{}) && model.fields[key].filterBy ){
-              this.$set('model.fields.'+key+'.filterBy', model.fields[key].filterBy);
+              this.$set(this.model, 'fields.'+key+'.filterBy', model.fields[key].filterBy);
             } else if ( 'filterBy' in this.model.fields[key]||{} ){
               delete this.model.fields[key].filterBy;
             }
