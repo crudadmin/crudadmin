@@ -27,7 +27,6 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->submitForm()
-                    ->pause(500)
                     ->assertHasValidationError(FieldsType::class, $fieldKeys)
 
                     //Check if custom component renders properly
@@ -58,7 +57,6 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->fillForm(FieldsType::class, [
                         'password' => $this->getFormData('password')
                     ])
-                    ->pause(1000)
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()

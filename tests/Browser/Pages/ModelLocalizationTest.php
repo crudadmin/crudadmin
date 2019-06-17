@@ -27,7 +27,7 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->assertColumnRowData(ModelLocalization::class, 'name', [ 'sk name' ])
 
                     //Change into english language and check if table is empty
-                    ->valueWithEvent('[data-global-language-switch]', 2, 'change')->pause(300);
+                    ->valueWithEvent('[data-global-language-switch]', 2, 'change')->pause(100);
                     $this->assertEquals([], $browser->getRows(ModelLocalization::class));
 
             //Add two rows into english language and check correct values
@@ -41,7 +41,7 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->assertColumnRowData(ModelLocalization::class, 'name', [ 'en name second', 'en name' ]);
 
             //Change back to slovak language, and check correct rows
-            $browser->valueWithEvent('[data-global-language-switch]', 1, 'change')->pause(300)
+            $browser->valueWithEvent('[data-global-language-switch]', 1, 'change')->pause(100)
                     ->assertColumnRowData(ModelLocalization::class, 'name', [ 'sk name' ]);
         });
     }
@@ -72,19 +72,19 @@ class ModelLocalizationTest extends BrowserTestCase
 
                     //Open row and check if english is empty
                     ->openRow(1)
-                    ->click('[data-form-language-switch] > button')->pause(300)
+                    ->click('[data-form-language-switch] > button')->pause(100)
                     ->click('[data-form-language-switch] li[data-slug="en"]')
                     ->assertFormIsEmpty(ModelLocale::class, 'en')
 
                     //Fill and save english form values
-                    ->fillForm(ModelLocale::class, $row_en, 'en')->pause(500)
+                    ->fillForm(ModelLocale::class, $row_en, 'en')
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
 
-                    //Open row, update it, and check if still has same values after update without changing anything
+                    //Check correct valeus
                     ->assertHasFormValues(ModelLocale::class, $row_sk, 'sk')
-                    ->assertHasFormValues(ModelLocale::class, $row_en, 'en')->pause(500)
+                    ->assertHasFormValues(ModelLocale::class, $row_en, 'en')
                     ->assertTableRowExists(ModelLocale::class, $this->getTableRow($row_sk));
         });
 
@@ -98,11 +98,11 @@ class ModelLocalizationTest extends BrowserTestCase
             $browser->openModelPage(ModelLocale::class)
 
                     //Submit form and check if language switched is not colorized
-                    ->submitForm()->pause(100)
+                    ->submitForm()
                     ->assertHasNotClass('[data-form-language-switch] > button', 'has-error')
 
                     //Change language to english, and again send form, and chech if language switcher is colorized
-                    ->click('[data-form-language-switch] > button')->pause(300)
+                    ->click('[data-form-language-switch] > button')->pause(100)
                     ->click('[data-form-language-switch] li[data-slug="en"]')
                     ->submitForm()->pause(100)
                     ->assertSeeIn('.modal', trans('admin::admin.lang-error'))

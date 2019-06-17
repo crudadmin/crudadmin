@@ -365,7 +365,7 @@ class DuskBrowser extends Browser
             }
         }
 
-        return $this->pause(300);
+        return $this->resetFocus()->pause(400);
     }
 
     /*
@@ -373,7 +373,9 @@ class DuskBrowser extends Browser
      */
     public function resetFocus()
     {
-        return $this->jsClick('h1');
+        $this->script('if ("activeElement" in document) document.activeElement.blur();');
+
+        return $this;
     }
 
     /*
@@ -737,7 +739,9 @@ class DuskBrowser extends Browser
      */
     public function submitForm()
     {
-        return $this->press(trans('admin::admin.send'));
+        return $this->waitFor('button[data-action-type="create"]')
+                    ->press(trans('admin::admin.send'))
+                    ->waitUntilMissing('button[data-action-type="loading"]');
     }
 
     /**
@@ -745,7 +749,7 @@ class DuskBrowser extends Browser
      */
     public function saveForm()
     {
-        return $this->press(trans('admin::admin.save'));
+        return $this->waitFor('button[data-action-type="update"]')->press(trans('admin::admin.save'));
     }
 
     /**

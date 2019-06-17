@@ -71,8 +71,8 @@
           :is="name">
         </component>
 
-        <button v-if="progress" type="button" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
-        <button v-if="!progress" type="submit" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? saveButton : sendButton }}</button>
+        <button v-if="progress" type="button" data-action-type="updating" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]"><i class="fa updating fa-refresh"></i> {{ isOpenedRow ? trans('saving') : trans('sending') }}</button>
+        <button v-if="!progress" type="submit" :data-action-type="isOpenedRow ? 'update' : 'create'" name="submit" v-bind:class="['btn', 'btn-' + ( isOpenedRow ? 'success' : 'primary')]">{{ isOpenedRow ? saveButton : sendButton }}</button>
       </div>
 
     </div>

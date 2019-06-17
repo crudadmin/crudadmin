@@ -16,7 +16,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
         SeedTrait;
 
     /** @test */
-    public function test_validation_errors_then_create_new_row_and_then_update_without_change()
+    public function test_fields_types_relation_validation_errors_then_create_new_row_and_then_update_without_change()
     {
         $this->createArticleMoviesList();
 
@@ -30,7 +30,6 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
                     //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsRelation::class, $fieldKeys)
                     ->submitForm()
-                    ->pause(500)
                     ->assertHasValidationError(FieldsRelation::class, $fieldKeys)
 
                     //Check if form values has been successfully filled
@@ -52,7 +51,6 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
                     //Open row, update it, and check if still has same values after update without changing anything
                     ->openRow(1)
                     ->assertHasFormValues(FieldsRelation::class, $row)
-                    ->pause(1000)
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
@@ -64,7 +62,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_update_existing_row()
+    public function test_fields_types_relation_update_existing_row()
     {
         $create = $this->getFormData();
         $update = $this->getFormDataUpdated();

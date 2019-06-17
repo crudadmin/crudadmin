@@ -30,7 +30,7 @@ class ModelRelationsTest extends BrowserTestCase
             $browser->openModelPage(Article::class)
 
                     //Open row, and load related model data, also check if count of loaded data is correct
-                    ->openRow(1)->pause(400)
+                    ->openRow(1)
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (3)')
 
                     //Click on related model and check given data
@@ -39,22 +39,23 @@ class ModelRelationsTest extends BrowserTestCase
 
                     //Fill form and save new related row.
                     ->fillForm(ArticlesComment::class, [ 'name' => 'new related comment' ])
-                    ->submitForm()->pause(100)->closeAlert()
+                    ->submitForm()
+                    ->closeAlert()
 
                     //Check if new row has been given into table
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (4)')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [5, 3, 2, 1])
 
                     //Open second row, and check relations data
-                    ->openRow(2, Article::class)->pause(400)
+                    ->openRow(2, Article::class)
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (1)')
                     ->click('[data-tabs][data-model="articles_comments"]')
-                    ->assertColumnRowData(ArticlesComment::class, 'id', [4])->pause(300)
+                    ->assertColumnRowData(ArticlesComment::class, 'id', [4])
                     ->fillForm(ArticlesComment::class, [ 'name' => 'my second new related comment' ])
-                    ->submitForm()->pause(100)->closeAlert()->pause(100)
+                    ->submitForm()->closeAlert()
 
                     //Assert if another relation has no related data
-                    ->openRow(3, Article::class)->pause(400)
+                    ->openRow(3, Article::class)
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (0)');
 
             //Check if all data are correct

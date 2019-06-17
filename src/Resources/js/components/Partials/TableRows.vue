@@ -556,11 +556,11 @@
           if ( this.$parent.$parent.activeSize != 0 )
             return;
 
-          setTimeout(function(){
+          setTimeout(() => {
             $('html, body').animate({
                 scrollTop: $('#' + this.formID).offset().top - 10
-            }, 500);
-          }.bind(this), 25);
+            }, this.$root.isTest ? 0 : 500);
+          }, 25);
         },
         trans(key){
           return this.$root.trans(key);

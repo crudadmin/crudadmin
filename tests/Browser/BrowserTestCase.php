@@ -33,6 +33,8 @@ class BrowserTestCase extends TestCase
     {
         parent::setUp();
 
+        \Orchestra\Testbench\Dusk\Options::withoutUI();
+
         $this->withFactories(__DIR__.'/../Factories');
 
         $this->installAdmin();

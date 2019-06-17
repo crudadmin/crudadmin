@@ -346,7 +346,9 @@ form label span.required { color: red; position: relative; top: 2px }
 
 .gettext-table table { background: white; width: 100%; max-width: 700px; margin-bottom: 0;}
 .gettext-table .modal-body { overflow-y: auto; }
-.gettext-table .modal-dialog { width: 1000px }
+@media (min-width: 1000px) {
+    .gettext-table .modal-dialog { width: 1000px }
+}
 .gettext-table .modal-dialog table { max-width: none }
 .gettext-table .modal-dialog td { padding: 5px 5px; line-height: 155% !important; }
 .gettext-table .modal-dialog td.input { background: white; padding: 0; }

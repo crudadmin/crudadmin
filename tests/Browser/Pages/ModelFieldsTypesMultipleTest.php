@@ -15,7 +15,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     use DropUploads;
 
     /** @test */
-    public function test_validation_errors_then_create_new_row_and_then_update_without_change()
+    public function test_fields_types_multiple_validation_errors_then_create_new_row_and_then_update_without_change()
     {
         $row = $this->getFormData();
 
@@ -23,11 +23,9 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
             $fieldKeys = array_keys((new FieldsTypesMultiple)->getFields());
 
             $browser->openModelPage(FieldsTypesMultiple::class)
-
                     //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->submitForm()
-                    ->pause(500)
                     ->assertHasValidationError(FieldsTypesMultiple::class, $fieldKeys)
 
                     //Check if form values has been successfully filled
@@ -49,7 +47,6 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     //Open row, update it, and check if still has same values after update without changing anything
                     ->openRow(1)
                     ->assertHasFormValues(FieldsTypesMultiple::class, $row)
-                    ->pause(1000)
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
@@ -61,7 +58,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_update_existing_row()
+    public function test_fields_types_multiple_update_existing_row()
     {
         $create = $this->getFormData();
         $update = $this->getFormDataUpdated();
@@ -101,17 +98,12 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     public function getFormData()
     {
         return [
-            'select' => 'option a',
             'select_multiple' => ['option c', 'option a'],
-            'file' => 'image2.jpg',
             'file_multiple' => ['image1.jpg', 'image3.jpg'],
-            'date' => date('d.m.Y'),
             'date_multiple' => [
                 Carbon::now()->format('d.m.Y'),
                 Carbon::now()->addDays(-1)->format('d.m.Y'),
             ],
-            'datetime' => date('d.m.Y H:00'),
-            'time' => date('H:00'),
             'time_multiple' => [ '00:30', '02:00', '12:00', '14:00', '17:30', '20:00', '21:30', '22:00' ],
         ];
     }
@@ -119,15 +111,11 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
     public function getFormDataUpdated()
     {
         return [
-            'select' => 'option b',
             'select_multiple' => ['option b'],
             'file_multiple' => ['image2.jpg'],
-            'date' => Carbon::now()->addDays(-1)->format('d.m.Y'),
             'date_multiple' => [
                 Carbon::now()->addDays(-2)->format('d.m.Y'),
             ],
-            'datetime' => Carbon::now()->addDays(-1)->format('d.m.Y H:00'),
-            'time' => Carbon::now()->addHours(-1)->format('H:00'),
             'time_multiple' => [ '16:00' ],
         ];
     }
@@ -152,7 +140,6 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
         }
 
         //Overide file values with clickable texts
-        $row['file'] = trans('admin::admin.show-image');
         $row['file_multiple'] = implode(' , ', array_map(function($item){
             return trans('admin::admin.show-image');
         }, $original['file_multiple']));

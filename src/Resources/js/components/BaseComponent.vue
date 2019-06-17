@@ -66,6 +66,9 @@
                 },
 
                 computed : {
+                    isTest(){
+                        return this.version.indexOf('test') > -1;
+                    },
                     canShowAlert(){
                         return this.alert.title != null && this.alert.message != null || this.alert.component;
                     },

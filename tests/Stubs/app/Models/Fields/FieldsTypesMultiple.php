@@ -27,33 +27,10 @@ class FieldsTypesMultiple extends AdminModel
     public function fields()
     {
         return [
-            Group::fields([
-                'select' => 'name:my select field|type:select|options:option a,option b|required',
-                'select_multiple' => 'name:my multiple select field|type:select|multiple|options:option a,option b,option c|required',
-            ])->inline(),
-            Group::fields([
-                'file' => 'name:my file field|type:file|required',
-                'file_multiple' => 'name:my multiple file field|type:file|multiple|required',
-            ])->inline(),
-            Group::fields([
-                'date' => 'name:my date field|type:date|required',
-                'date_multiple' => 'name:my multiple date field|type:date|multiple|required',
-            ])->inline(),
-            Group::half([
-                'datetime' => 'name:my datetime field|type:datetime|required',
-            ]),
-            Group::fields([
-                'time' => 'name:my time field|type:time|required',
-                'time_multiple' => 'name:my time field|type:time|multiple|required',
-            ])->inline(),
+            'select_multiple' => 'name:my multiple select field|type:select|multiple|options:option a,option b,option c|required',
+            'file_multiple' => 'name:my multiple file field|type:file|multiple|required',
+            'date_multiple' => 'name:my multiple date field|type:date|multiple|required',
+            'time_multiple' => 'name:my time field|type:time|multiple|required',
         ];
-    }
-
-    /*
-     * Mutate calculator fields
-     */
-    public function mutateFields($fields)
-    {
-
     }
 }
