@@ -12,6 +12,7 @@
 export default {
     data(){
         return {
+            initialized : false,
             authentication : JSON.parse( localStorage.authentication||'{}' ),
             message : {
                 type : null,
@@ -29,20 +30,13 @@ export default {
     },
 
     mounted(){
-        if ( this.hasLoadedLicense ){
-            this.setLicense(this.authentication);
-        } else {
-            this.$http.get(this.address).then(function(response){
-                var response = response.data;
+        this.$root.$watch('license_key', (key) => {
+            this.init();
+        });
 
-                response.key = this.$root.license_key,
-
-                this.setLicense(response, true);
-            }).catch(function(error){
-                this.setLicense({ type : 'pending', key : this.$root.license_key, hash : this.getFunnyKey() }, true);
-            });
-        }
-
+        setTimeout(() => {
+            this.init();
+        }, 5000);
     },
 
     computed: {
@@ -69,10 +63,10 @@ export default {
         address(){
             return 'http' + (this.isDev ? '' : 's') + '://' + this.domain + (
                 this.path.reverse().join('')
-                    .replace(':version', this.$root.version)
-                    .replace(':key', this.$root.license_key)
+                    .replace(':version', this.$root.version||'-')
+                    .replace(':key', this.$root.license_key||'-')
                     .replace(':domain', this.host)
-            );
+            )+'?lang='+this.$root.locale;
         },
         hasLoadedLicense(){
             return 'type' in this.authentication
@@ -84,6 +78,28 @@ export default {
     },
 
     methods : {
+        init(){
+            if ( this.initialized === true )
+                return;
+
+            if ( this.hasLoadedLicense ){
+                this.setLicense(this.authentication);
+            } else {
+                this.$http.get(this.address, {
+                    headers : {},
+                }).then(response => {
+                    var response = response.data;
+
+                    response.key = this.$root.license_key,
+
+                    this.setLicense(response, true);
+                }).catch(error => {
+                    this.setLicense({ type : 'pending', key : this.$root.license_key, hash : this.getFunnyKey() }, true);
+                });
+            }
+
+            this.initialized = true;
+        },
         hasCallback(response)
         {
             return 'data' in response
