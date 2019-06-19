@@ -55,4 +55,8 @@ Route::group(['middleware' => 'admin'], function(){
     Route::get('/admin/api/getTranslations/{id}', 'DataController@getTranslations');
     Route::post('/admin/api/updateTranslations/{id}', 'DataController@updateTranslations');
     Route::delete('/admin/api/delete', 'DataController@delete');
+
+    //CKFinder
+    Route::any('/admin/api/ckfinder/browser', 'CKFinderController@browserAction')->name('ckfinder_browser');
+    Route::any('/admin/api/ckfinder/connector', 'CKFinderController@requestAction')->name('ckfinder_connector');
 });

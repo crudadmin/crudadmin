@@ -10,17 +10,17 @@ CKEDITOR.editorConfig = function( config ) {
     config.language = lang;
     config.defaultLanguage = lang;
 
-    var basedir = '/' + window.crudadmin.path;
+    var basedir = window.crudadmin.root + '/admin/api/ckfinder/browser';
 
     config.skin = 'moono-lisa';
 
     //CKFinder
-    config.filebrowserBrowseUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/ckfinder.html';
-    config.filebrowserImageBrowseUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/ckfinder.html?type=Images';
-    config.filebrowserFlashBrowseUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/ckfinder.html?type=Flash';
-    //config.filebrowserUploadUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files';
-    //config.filebrowserImageUploadUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images';
-    config.filebrowserFlashUploadUrl = basedir + '/plugins/ckeditor/plugins/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Flash';
+    config.filebrowserBrowseUrl = basedir;
+    config.filebrowserImageBrowseUrl = basedir + '?type=Images';
+    config.filebrowserFlashBrowseUrl = basedir + '?type=Flash';
+    // config.filebrowserUploadUrl = basedir + '?command=QuickUpload&type=Files';
+    // config.filebrowserImageUploadUrl = basedir + '?command=QuickUpload&type=Images';
+    // config.filebrowserFlashUploadUrl = basedir + '?command=QuickUpload&type=Flash';
     config.filebrowserWindowWidth = '50%';
     config.filebrowserWindowHeight = '50%';
 

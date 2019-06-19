@@ -20,6 +20,7 @@
                 router,
                 data : function(){
                     return {
+                        csrf_token: null,
                         version : null,
                         version_assets : null,
                         gettext : null,
@@ -99,6 +100,8 @@
 
                 methods : {
                     reloadCSRFToken(token){
+                        this.csrf_token = token;
+
                         window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 
                         Vue.http.options.headers = {
