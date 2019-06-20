@@ -36,7 +36,7 @@
               <!-- /btn-group -->
 
               <!-- Search columns -->
-              <input type="text" v-show="isSearch" data-search-text :placeholder="trans('search')+'...'" debounce="300" v-model="search.query" class="form-control">
+              <input type="text" v-show="isSearch" data-search-text :placeholder="trans('search')+'...'" @input="updateSearchQuery('query', $event)" class="form-control">
 
               <input type="text" v-show="isDate" data-search-date readonly class="form-control js_date">
 
@@ -57,7 +57,7 @@
                 <button class="btn" :class="{ 'btn-default' : !search.interval, 'btn-primary' : search.interval }" @click="search.interval = !search.interval"><i class="fa fa-arrows-h"></i></button>
               </div>
 
-              <input type="text" data-search-interval-text v-show="search.interval && isSearch" :placeholder="trans('search')+'...'" debounce="300" v-model="search.query_to" class="form-control">
+              <input type="text" data-search-interval-text v-show="search.interval && isSearch" :placeholder="trans('search')+'...'"  @input="updateSearchQuery('query_to', $event)" class="form-control">
 
               <input type="text" data-search-interval-date v-show="search.interval && isDate" readonly class="form-control js_date">
 
@@ -142,6 +142,7 @@
 </template>
 
 <script>
+  import _ from 'lodash';
   import FormBuilder from './FormBuilder.vue';
   import ModelRowsBuilder from './ModelRowsBuilder.vue';
   import GettextExtension from '../Partials/GettextExtension.vue';
@@ -156,7 +157,6 @@
     components : { FormBuilder, ModelRowsBuilder, GettextExtension, History },
 
     data : function(){
-
       return {
         sizes : [
           { size : 8, key : 'small', name : 'Small', active : false, disabled : false },
@@ -328,6 +328,9 @@
     },
 
     methods : {
+      updateSearchQuery: _.debounce(function(input, e){
+        this.search[input] = e.target.value;
+      }, 300),
       /*
        * Returns correct values into multilangual select
        */
