@@ -41,15 +41,24 @@
 <script>
     export default {
       props : ['langid'],
-      data(){
-        return {
-          user : this.$root.user,
-          layout : this.$root.dashboard||'',
-        }
-      },
+
       mounted(){
-        this.$root.runInlineScripts(this.layout)
+
       },
+
+      computed: {
+        user(){
+          return this.$root.user;
+        },
+        layout(){
+          this.$nextTick(() => {
+            this.$root.runInlineScripts(this.$root.dashboard)
+          });
+
+          return this.$root.dashboard;
+        },
+      },
+
       methods: {
         trans(key){
           return this.$root.trans(key);
