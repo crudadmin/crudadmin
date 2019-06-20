@@ -655,11 +655,11 @@
           this.$root.openAlert(this.trans('warning'), this.trans('lang-error'), 'warning');
       },
       scrollToForm(){
-        setTimeout(function(){
+        setTimeout(() => {
           $('html, body').animate({
               scrollTop: $('#'+this.formID).offset().top - 10
           }, 500);
-        }.bind(this), 400);
+        }, this.$root.isTest ? 0 : 500);
       },
       hasParentModel(){
         return this.$parent.$options.name == 'model-builder';

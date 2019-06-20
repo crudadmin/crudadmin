@@ -183,6 +183,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <!-- ./wrapper -->
 
+        <?php if ( app('env') !== 'testing' ) { ?>
         <!-- REQUIRED JS SCRIPTS -->
         <div id="loader" v-bind:class="{ hidenloader : user }">
             <div class="spinner">
@@ -195,6 +196,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <div class="bounce3"></div>
             </div>
         </div>
+        <?php } ?>
     </div>
 
     <!-- Admin variables -->
