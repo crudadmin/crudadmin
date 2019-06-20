@@ -10,7 +10,7 @@ CKEDITOR.editorConfig = function( config ) {
     config.language = lang;
     config.defaultLanguage = lang;
 
-    var basedir = window.crudadmin.root + '/admin/api/ckfinder/browser';
+    var basedir = window.crudadmin.baseURL + '/api/ckfinder/browser';
 
     config.skin = 'moono-lisa';
 

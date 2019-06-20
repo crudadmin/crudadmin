@@ -20,77 +20,77 @@
 </template>
 
 <script>
-    import SidebarRow from './SidebarRow.vue';
+import SidebarRow from './SidebarRow.vue';
 
-    export default {
-        props: ['rows', 'languages', 'langid'],
+export default {
+    props: ['rows', 'languages', 'langid'],
 
-        components: { SidebarRow },
+    components: { SidebarRow },
 
-        watch: {
-            rows(rows){
-                this.$nextTick(() => {
-                    this.addActiveTreeClasses();
-                });
-            },
+    watch: {
+        rows(rows){
+            this.$nextTick(() => {
+                this.addActiveTreeClasses();
+            });
         },
+    },
 
-        computed : {
-            groups(){
-                var groups = this.rows;
+    computed : {
+        groups(){
+            var groups = this.rows;
 
-                for ( var key in groups )
-                {
-                    //Is allowed module
-                    if ( groups[key].active === true )
-                        continue;
+            for ( var key in groups )
+            {
+                //Is allowed module
+                if ( groups[key].active === true )
+                    continue;
 
-                    if ( groups[key].active === false || ! this.hasActiveModule(groups[key].submenu) )
-                        delete groups[key];
-                }
-
-                return groups;
-            },
-            hasLanguages(){
-                return this.languages.length > 0;
-            },
-            isActive(){
-                return this.$root.languages_active == true ? 1 : 0;
+                if ( groups[key].active === false || ! this.hasActiveModule(groups[key].submenu) )
+                    delete groups[key];
             }
+
+            return groups;
         },
+        hasLanguages(){
+            return this.languages.length > 0;
+        },
+        isActive(){
+            return this.$root.languages_active == true ? 1 : 0;
+        }
+    },
 
-        methods: {
-            changeLanguage(e){
-                this.$parent.language_id = e.target.value;
-            },
-            addActiveTreeClasses(){
-                var owner = $('.sidebar li[data-slug="'+this.$router.currentRoute.params.model+'"]');
+    methods: {
+        changeLanguage(e){
+            this.$parent.language_id = e.target.value;
+        },
+        addActiveTreeClasses(){
+            var owner = $('.sidebar li[data-slug="'+this.$router.currentRoute.params.model+'"]');
 
-                owner.parent().addClass('menu-open').css('display', 'block').parents('.treeview').addClass('active');
+            owner.parent().addClass('menu-open').css('display', 'block').parents('.treeview').addClass('active');
 
-                $('.sidebar .treeview-menu a').click(function(){
-                    $(this).parent().siblings('.active').removeClass('active').find('.menu-open').slideUp();
-                });
-            },
-            getLangName(lang){
-                return this.$root.getLangName(lang);
-            },
-            hasActiveModule(modules){
-                for ( var key in modules )
-                {
-                    if ( modules[key].active === true )
-                        return true;
+            $('.sidebar .treeview-menu a').click(function(){
+                $(this).parent().siblings('.active').removeClass('active').find('.menu-open').slideUp();
+            });
+        },
+        getLangName(lang){
+            return this.$root.getLangName(lang);
+        },
+        hasActiveModule(modules){
+            for ( var key in modules )
+            {
+                if ( modules[key].active === true )
+                    return true;
 
-                    if ( modules[key].submenu && this.hasActiveModule(modules[key].submenu) ){
-                        return true;
-                    }
+                if ( modules[key].submenu && this.hasActiveModule(modules[key].submenu) ){
+                    return true;
                 }
-
-                return false;
-            },
-            trans(key){
-              return this.$root.trans(key);
             }
+
+            return false;
+        },
+        trans(key){
+          return this.$root.trans(key);
         }
     }
+}
 </script>

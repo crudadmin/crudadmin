@@ -4,38 +4,21 @@ window.Vue = require('vue');
 window.eventHub = new Vue();
 
 import VueRouter from 'vue-router';
+import VueResource from 'vue-resource'
 import Fragment from 'vue-fragment'
 
 //Uses
-Vue.use(require('vue-resource'));
+Vue.use(VueResource);
 Vue.use(Fragment.Plugin);
 Vue.use(VueRouter);
 
 // Components
-import BaseComponent from './components/BaseComponent.vue';
+import BaseComponent from './components/BaseComponent.js';
 
-//Layouts
-import DashboardView from './components/Views/DashBoardView.vue';
-import BasePageView from './components/Views/BasePageView.vue';
-
-var routes = [
-    {
-        path : '*',
-        component: DashboardView,
-    },
-    {
-        path : '/page/:model',
-        name : 'admin-model',
-        component: BasePageView,
-    }
-];
-
-var router = new VueRouter({
-    routes,
-});
+//Router
+import Router from './router.js';
 
 //Create base VueApp instance
-var BaseApp = BaseComponent.init(router);
-
-//Initialize custom componenets
-window.VueApp = new Vue(BaseApp);
+window.VueApp = new Vue(
+    BaseComponent(Router)
+);

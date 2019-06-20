@@ -17,50 +17,50 @@
 </template>
 
 <script>
-    import config from '../../config';
+import config from '../../config';
 
-    export default {
-        name : 'sidebar-row',
-        props: ['row', 'parent'],
+export default {
+    name : 'sidebar-row',
+    props: ['row', 'parent'],
 
-        data : function() {
-            return {
-                levels : [],
-            };
-        },
-        created : function()
+    data : function() {
+        return {
+            levels : [],
+        };
+    },
+    created : function()
+    {
+        var levels = [];
+
+        if ( this.parent )
         {
-            var levels = [];
-
-            if ( this.parent )
+            for ( var i = 0; i < this.parent.length; i++ )
             {
-                for ( var i = 0; i < this.parent.length; i++ )
-                {
-                    levels.push( this.parent[i] );
-                }
+                levels.push( this.parent[i] );
             }
+        }
 
-            levels.push( this.row );
+        levels.push( this.row );
 
-            return this.levels = levels;
+        return this.levels = levels;
+    },
+
+    computed: {
+        hasSubmenu() {
+            return this.row.submenu.length !== 0;
         },
-
-        computed: {
-            hasSubmenu() {
-                return this.row.submenu.length !== 0;
-            },
-            isGroup() {
-                return this.row.slug.substr(0, config.groups_prefix.length) == config.groups_prefix;
-            },
-            hasChilds(){
-                for ( var key in this.row.submenu )
-                    return true;
-
-                return false;
-            },
-            isActive(){
-                return this.row.active !== false;
-            }
+        isGroup() {
+            return this.row.slug.substr(0, config.groups_prefix.length) == config.groups_prefix;
         },
-    }
+        hasChilds(){
+            for ( var key in this.row.submenu )
+                return true;
+
+            return false;
+        },
+        isActive(){
+            return this.row.active !== false;
+        }
+    },
+}
 </script>
