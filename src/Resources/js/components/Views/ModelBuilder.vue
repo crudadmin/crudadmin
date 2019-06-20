@@ -143,8 +143,8 @@
 
 <script>
   import _ from 'lodash';
-  import FormBuilder from './FormBuilder.vue';
-  import ModelRowsBuilder from './ModelRowsBuilder.vue';
+  import FormBuilder from '../Forms/FormBuilder.vue';
+  import ModelRowsBuilder from '../Rows/ModelRowsBuilder.vue';
   import GettextExtension from '../Partials/GettextExtension.vue';
   import History from '../Partials/History.vue';
   import ModelHelper from '../Model/ModelHelper.js';

@@ -50,7 +50,7 @@
 
 <script>
   import FormGroup from './FormGroup.vue';
-  import ModelBuilder from './ModelBuilder.vue';
+  import ModelBuilder from '../Views/ModelBuilder.vue';
   import ModelHelper from '../Model/ModelHelper.js';
 
   export default {

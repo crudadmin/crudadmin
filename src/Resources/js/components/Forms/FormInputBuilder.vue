@@ -149,7 +149,7 @@
   var Vue = require('vue');
 
   import File from '../Partials/File.vue';
-  import ModelBuilder from './ModelBuilder.vue';
+  import ModelBuilder from '../Views/ModelBuilder.vue';
 
   export default {
       name: 'form-input-builder',

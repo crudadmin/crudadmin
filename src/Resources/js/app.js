@@ -15,8 +15,8 @@ Vue.use(VueRouter);
 import BaseComponent from './components/BaseComponent.vue';
 
 //Layouts
-import DashboardView from './components/views/DashBoardView.vue';
-import BasePageView from './components/views/BasePageView.vue';
+import DashboardView from './components/Views/DashBoardView.vue';
+import BasePageView from './components/Views/BasePageView.vue';
 
 var routes = [
     {

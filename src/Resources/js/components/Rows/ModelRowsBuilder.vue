@@ -86,7 +86,7 @@
 
 <script>
   import Refreshing from '../Partials/Refreshing.vue';
-  import TableRows from '../Partials/TableRows.vue';
+  import TableRows from './TableRows.vue';
 
   export default {
     props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'gettext_editor', 'iswithoutparent', 'activetab'],

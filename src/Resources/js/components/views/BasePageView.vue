@@ -24,7 +24,7 @@
 </template>
 
 <script>
-  import ModelBuilder from '../Forms/ModelBuilder.vue';
+  import ModelBuilder from './ModelBuilder.vue';
   import ModelHelper from '../Model/ModelHelper.js';
 
   export default {

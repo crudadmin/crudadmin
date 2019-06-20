@@ -85,6 +85,7 @@
 </template>
 <script>
   import FormTabsBuilder from '../Forms/FormTabsBuilder.vue';
+
   export default {
     name : 'form-builder',
 
