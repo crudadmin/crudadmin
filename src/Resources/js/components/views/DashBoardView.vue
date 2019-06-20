@@ -13,7 +13,7 @@
     </section>
 
     <!-- Main content -->
-    <section class="content">
+    <section class="content" v-show="user">
       <div class="row">
         <!-- left column -->
         <div class="col-md-12">

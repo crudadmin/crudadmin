@@ -184,7 +184,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- ./wrapper -->
 
         <!-- REQUIRED JS SCRIPTS -->
-        <div id="loader" v-bind:class="{ hidenloader : true }">
+        <div id="loader" v-bind:class="{ hidenloader : user }">
             <div class="spinner">
                 <h2><strong><?php echo config('admin.author.name', 'CrudAdmin') ?></strong> <span>&copy;</span> <?php echo date('Y') > config('admin.author.since', 2016) ? config('admin.author.since', 2016) . ' - '.date('Y') : date('Y') ?>
                 <?php if ( config('admin.author', true) !== false ){ ?>
