@@ -108,6 +108,14 @@ class Admin extends AdminBootloader
     }
 
     /*
+     * Returns dev state of app
+     */
+    public function isDev()
+    {
+        return strpos($this->getVersion(), 'dev') !== false;
+    }
+
+    /*
      * Return path of admin assets
      */
     public function getAdminAssetsPath()

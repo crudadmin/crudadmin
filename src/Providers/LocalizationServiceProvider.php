@@ -17,6 +17,6 @@ class LocalizationServiceProvider extends ServiceProvider {
 
     public function boot()
     {
-        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang_admin/', 'admin');
+        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang/admin/', 'admin');
     }
 }

@@ -183,9 +183,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <!-- ./wrapper -->
 
-        <?php if ( app('env') !== 'testing' ) { ?>
+        <?php if ( Admin::isDev() == false ) { ?>
         <!-- REQUIRED JS SCRIPTS -->
-        <div id="loader" v-bind:class="{ hidenloader : user }">
+        <div id="loader" v-cloak v-bind:class="{ hidenloader : user }">
             <div class="spinner">
                 <h2><strong><?php echo config('admin.author.name', 'CrudAdmin') ?></strong> <span>&copy;</span> <?php echo date('Y') > config('admin.author.since', 2016) ? config('admin.author.since', 2016) . ' - '.date('Y') : date('Y') ?>
                 <?php if ( config('admin.author', true) !== false ){ ?>
@@ -221,7 +221,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <?php } ?>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <?php if ( strpos(Admin::getVersion(), 'dev') === false ) { ?>
+    <?php if ( Admin::isDev() === false ) { ?>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-42935841-6"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
