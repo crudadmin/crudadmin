@@ -25,7 +25,7 @@
 
 <script>
   import ModelBuilder from './ModelBuilder.vue';
-  import ModelHelper from '../Model/ModelHelper.js';
+  import ModelHelper from '../Helpers/ModelHelper.js';
 
   export default {
       name : 'base-page-view',

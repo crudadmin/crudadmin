@@ -10,7 +10,7 @@
     import Sidebar from './Sidebar/Sidebar.vue';
     import License from './Partials/License.vue';
     import CheckAssetsVersion from './Partials/CheckAssetsVersion.vue';
-    import ModelHelper from './Model/ModelHelper.js';
+    import ModelHelper from './Helpers/ModelHelper.js';
 
     export default {
         init(router){

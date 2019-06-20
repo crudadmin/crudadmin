@@ -147,7 +147,7 @@
   import ModelRowsBuilder from '../Rows/ModelRowsBuilder.vue';
   import GettextExtension from '../Partials/GettextExtension.vue';
   import History from '../Partials/History.vue';
-  import ModelHelper from '../Model/ModelHelper.js';
+  import ModelHelper from '../Helpers/ModelHelper.js';
 
   export default {
     props : ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],

@@ -1,5 +1,5 @@
-import Tabs from './Tabs.js';
-import Fields from './Fields.js';
+import Tabs from './TabsHelper.js';
+import Fields from './FieldsHelper';
 
 const Model = () => {};
 
