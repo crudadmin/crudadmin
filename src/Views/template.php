@@ -204,7 +204,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
       window.crudadmin = {
         root : '<?php echo url('/') ?>',
         path : '<?php echo Admin::getAdminAssetsPath() ?>',
-        dev : <?php echo env('APP_DEBUG') ? 'true' : 'false' ?>
+        dev : <?php echo env('APP_DEBUG') ? 'true' : 'false' ?>,
+        testing : <?php echo Admin::isTesting() ? 'true' : 'false' ?>
       };
     </script>
 

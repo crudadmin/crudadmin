@@ -101,10 +101,18 @@ class Admin extends AdminBootloader
     public function getVersion()
     {
         //Return testing version
-        if ( app('env') === 'testing' )
+        if ( $this->isTesting() )
             return 'dev-test';
 
         return $this->getPackageVersion() ?: 'dev-master';
+    }
+
+    /*
+     * Returns testing version
+     */
+    public function isTesting()
+    {
+        return app('env') === 'testing';
     }
 
     /*

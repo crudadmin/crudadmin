@@ -181,18 +181,18 @@ class TableRowsTest extends BrowserTestCase
             $browser->openModelPage(Article::class);
 
             //Search for word
-            $browser->type('[data-search-bar] input[data-search-text]', 'man')->pause(100)
+            $browser->type('[data-search-bar] input[data-search-text]', 'man')->pause(400)
                     ->assertColumnRowData(Article::class, 'name', ['superman', 'spider-man', 'hastrman', 'aquaman']);
 
             //Search by column
             $browser->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="score"] a')
-                    ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)->pause(100)
+                    ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)->pause(400)
                     ->assertColumnRowData(Article::class, 'name', ['spider-man']);
 
             //Search by interval from 9 to 11
             $browser->click('[data-interval] button')
-                    ->type('[data-search-bar] input[data-search-interval-text]', 11)->pause(100)
+                    ->type('[data-search-bar] input[data-search-interval-text]', 11)->pause(400)
                     ->assertColumnRowData(Article::class, 'name', ['john wick', 'superman', 'spider-man']);
 
             //Close interval and test searching by date
