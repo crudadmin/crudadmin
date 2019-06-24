@@ -24,7 +24,7 @@
                             v-if="isModel(tab)"
                             :langid="langid"
                             :ischild="true"
-                            :model="getModel(tab.model)"
+                            :model_builder="getModel(tab.model)"
                             :activetab="isLoadedModel(getModel(tab.model), activetab == $index)"
                             :parentrow="row">
                         </model-builder>
@@ -173,7 +173,7 @@ export default {
          */
         getModel(model){
             if ( typeof this.model.childs[model] == 'string' )
-                return _.cloneDeep(this.model);
+                return _.cloneDeep(this.$root.models[this.model.slug]);
 
             return ModelHelper(this.model.childs[model]||this.$root.models[model]);
         },

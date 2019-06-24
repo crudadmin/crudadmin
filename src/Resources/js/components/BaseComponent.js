@@ -22,7 +22,7 @@ const BaseComponent = (router) => {
                 requests: {},
                 user : null,
                 tree: [],
-                models: [],
+                models: {},
                 localization: {},
                 languages: [],
                 language_id : null,

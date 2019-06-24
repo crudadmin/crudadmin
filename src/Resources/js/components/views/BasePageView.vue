@@ -17,7 +17,7 @@
 
         <!-- Main content -->
         <section class="content" v-if="model">
-            <model-builder :key="model.slug" :model="model" :langid="langid" dusk="model-builder"></model-builder>
+            <model-builder :key="model.slug" :model_builder="model" :langid="langid" dusk="model-builder"></model-builder>
         </section>
         <!-- /.content -->
     </div>
@@ -48,7 +48,7 @@ export default {
          * Return model from actual page
          */
         model(){
-            var model = this.$root.models[this.$route.params.model];
+            var model = _.cloneDeep(this.$root.models[this.$route.params.model]);
 
             return model ? ModelHelper(model) : null;
         },

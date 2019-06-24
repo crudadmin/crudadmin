@@ -267,7 +267,7 @@ export default {
             {
                 for ( var key in this.model.fields )
                 {
-                    this.$set(this.model, 'fields.'+key+'.value', null);
+                    this.$set(this.model.fields[key], 'value', null);
                 }
             }
 
@@ -290,7 +290,7 @@ export default {
                     //Value can not be undefined, because of model change events.
                     //If value will be undefined, full rows table will be realoaded (bug)
                     var value = is_row ? row[key] : null,
-                            value = value === undefined ? null : value;
+                        value = value === undefined ? null : value;
 
                     //Set value and default value of field from database
                     this.model.fields[key].value = value;

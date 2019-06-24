@@ -151,7 +151,7 @@
     import ModelHelper from '../Helpers/ModelHelper.js';
 
     export default {
-        props : ['model', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
+        props : ['model_builder', 'langid', 'ischild', 'parentrow', 'activetab', 'hasparentmodel'],
 
         name : 'model-builder',
 
@@ -159,6 +159,7 @@
 
         data : function(){
             return {
+                model: this.model_builder,
                 sizes : [
                     { size : 8, key : 'small', name : 'Small', active : false, disabled : false },
                     { size : 6, key : 'medium', name : 'Medium', active : false, disabled : false },
@@ -174,7 +175,7 @@
                  * Search engine
                  */
                 search : {
-                    column : this.$root.getModelProperty(this.model, 'settings.search.column', null),
+                    column : this.$root.getModelProperty(this.model_builder, 'settings.search.column', null),
                     query : null,
                     query_to : null,
                     used : false,
@@ -436,7 +437,7 @@
             },
             setDeepLevel(){
                 var parent = this.$parent,
-                        depth = 0;
+                    depth = 0;
 
                 while(parent.$options.name != 'base-page-view')
                 {
@@ -662,7 +663,7 @@
             emptyRowInstance(){
                 var row = {};
 
-                if ( this.model.foreign_column != null && this.parentrow )
+                if ( this.parentrow && this.model && this.model.foreign_column != null )
                     row[this.model.foreign_column[this.getParentTableName()]] = this.parentrow.id;
 
                 return row;
@@ -670,7 +671,7 @@
             getModel(model){
                 //if is recursive model
                 if ( typeof model === 'string' ){
-                    return _.cloneDeep(this.model);
+                    return _.cloneDeep(this.$root.models[this.model.slug]);
                 }
 
                 return ModelHelper(model);

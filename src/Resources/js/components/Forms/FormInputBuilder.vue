@@ -1,33 +1,40 @@
 <template>
     <div>
-        <div v-if="!hasComponent" v-show="canShowField" :data-history-changed="isChangedFromHistory" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
-            <!-- STRING INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled }" v-if="isString || isPassword">
-                <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-                <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :type="isPassword ? 'password' : 'text'" :name="getFieldName" class="form-control" :maxlength="field.max" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
-                <small>{{ field.title }}</small>
-            </div>
+        <div v-if="!hasComponent" :data-field="getFieldKey" v-show="canShowField" :data-history-changed="isChangedFromHistory" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
+            <string-field
+                v-if="isString || isPassword"
+                :model="model"
+                :field_key="getFieldName"
+                :field="field"
+                :value="getValueOrDefault"
+                :required="isRequired"
+                :disabled="isDisabled">
+            </string-field>
 
-            <!-- NUMBER/DECIMAL INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled }" v-if="isInteger">
-                <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-                <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" type="number" :name="getFieldName" class="form-control" :step="isDecimal ? '0.01' : ''" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
-                <small>{{ field.title }}</small>
-            </div>
+            <number-field
+                v-if="isNumber"
+                :model="model"
+                :field_key="getFieldName"
+                :field="field"
+                :value="getValueOrDefault"
+                :required="isRequired"
+                :disabled="isDisabled">
+            </number-field>
 
-            <!-- DATETIME INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled, 'multiple-date' : isMultipleDatepicker }" v-if="isDatepicker">
-                <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-                <input :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" type="text" :name="isMultipleDatepicker ? '' : getFieldName" class="form-control" :value="getValueOrDefault" :placeholder="field.placeholder || getName">
-                <input type="hidden" :name="getFieldName + '[]'" v-if="isMultipleDatepicker && getMultiDates.length == 0" value="">
-                <input type="hidden" :name="getFieldName + '[]'" :value="getMultiDateValue(date)" v-if="isMultipleDatepicker" v-for="date in getMultiDates">
-                <small>{{ field.title }}</small>
-            </div>
+            <date-time-field
+                v-if="isDatepicker"
+                :model="model"
+                :field_key="getFieldName"
+                :field="field"
+                :value="getValueOrDefault"
+                :required="isRequired"
+                :disabled="isDisabled">
+            </date-time-field>
 
             <!-- Checkbox INPUT -->
             <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
                 <label :for="getId" class="checkbox">
-                    {{ getName }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
+                    {{ field.name }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
                     <input type="checkbox" @change="changeValue" :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
                     <div><div></div></div>
                 </label>
@@ -36,17 +43,17 @@
 
             <!-- TEXT INPUT -->
             <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
-                <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
-                <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || getName" :value="getValueOrDefault"></textarea>
+                <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
+                <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || field.name" :value="getValueOrDefault"></textarea>
                 <small>{{ field.title }}</small>
             </div>
 
             <!-- FILE INPUT -->
             <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
-                <label :for="getId">{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+                <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
 
                 <div class="file-group">
-                    <input :id="getId" :data-field="getFieldKey" :disabled="isDisabled" type="file" :multiple="isMultipleUpload" :name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || getName">
+                    <input :id="getId" :data-field="getFieldKey" :disabled="isDisabled" type="file" :multiple="isMultipleUpload" :name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || field.name">
                     <input v-if="!getValueOrDefault && file_will_remove == true" type="hidden" :name="'$remove_' + getFieldName" :value="1">
 
                     <button v-if="getValueOrDefault && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
@@ -79,7 +86,7 @@
 
             <!-- SELECT INPUT -->
             <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
-                <label :for="getId">{{ getName }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
+                <label :for="getId">{{ field.name }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
                 <div :class="{ 'can-add-select' : canAddRow }">
                     <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? getFieldName : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
                         <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
@@ -104,7 +111,7 @@
                                     :langid="langid"
                                     :hasparentmodel="getRelationModelParent"
                                     :parentrow="getRelationRow"
-                                    :model="getRelationModel">
+                                    :model_builder="getRelationModel">
                                 </model-builder>
                             </div>
                         </div><!-- /.modal-content -->
@@ -114,7 +121,7 @@
 
             <!-- RADIO INPUT -->
             <div class="form-group radio-group" v-if="isRadio">
-                    <label>{{ getName }} <span v-if="isRequired" class="required">*</span></label>
+                    <label>{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
                     <div class="radio" v-if="!isRequired">
                         <label>
                             <input type="radio" :name="getFieldName" value="">
@@ -151,11 +158,15 @@
     import File from '../Partials/File.vue';
     import ModelBuilder from '../Views/ModelBuilder.vue';
 
+    import StringField from '../Fields/StringField';
+    import NumberField from '../Fields/NumberField';
+    import DateTimeField from '../Fields/DateTimeField';
+
     export default {
         name: 'form-input-builder',
         props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug'],
 
-        components: { File },
+        components: { StringField, NumberField, DateTimeField, File },
 
         data(){
             return {
@@ -177,6 +188,8 @@
             eventHub.$on('updateField', data => {
                 if ( data[0] != this.field_key )
                     return;
+
+                // console.log('updated', data[1]);
 
                 this.updateField(data[1]);
             });
@@ -203,8 +216,6 @@
         {
             //If this field has own component
             this.syncFieldsValueWithRow();
-
-            this.bindDatepickers();
 
             this.bindFilters();
 
@@ -291,67 +302,6 @@
             newTitleRow(){
                 return this.$root.getModelProperty(this.getRelationModel, 'settings.title.insert', this.trans('new-row'));
             },
-            bindDatepickers(){
-                var _this = this;
-
-                if ( ! this.isDatepicker )
-                    return;
-
-                //Add datepickers
-                $('#' + this.getId).datetimepicker({
-                    lang: this.$root.locale,
-                    format: this.getDateFormat,
-                    timepicker: this.field.type != 'date',
-                    datepicker: this.field.type != 'time',
-                    scrollInput: false,
-                    timepickerScrollbar: false,
-                    step : this.field.date_step||30,
-                    scrollMonth: false,
-                    scrollYear: false,
-                    inline : this.isMultipleDatepicker,
-                    onGenerate: ! this.isMultipleDatepicker ? null : function( ct ){
-                        $(this).addClass('multiple-dates');
-
-                        var values = _this.getMultiDates;
-
-                        for ( var i = 0; i < values.length; i++ )
-                        {
-                            var date = _this.field.type == 'time' ? values[i].split(':') : new Date(values[i]);
-
-                            var selector = _this.field.type == 'time'
-                                                                ? 'div[data-hour="'+parseInt(date[0])+'"][data-minute="'+parseInt(date[1])+'"]'
-                                                                : 'td[data-date="'+date.getDate()+'"][data-month="'+date.getMonth()+'"][data-year="'+date.getFullYear()+'"]';
-
-                            $(this).find(selector).addClass('multiple-selected');
-                        }
-                    },
-                    onChangeDateTime: ! this.isMultipleDatepicker ? null : function(current_date_time) {
-                            var pickedDate = moment(current_date_time).format(this.field.type == 'time' ? 'HH:mm' : 'YYYY-MM-DD');
-
-                            var value = this.getMultiDates,
-                                    index = value.indexOf(pickedDate);
-
-                            if ( index > -1 )
-                                value.splice(index, 1);
-                            else
-                                value.push(pickedDate);
-
-                            this.changeValue(null, value);
-                    }.bind(this),
-                    //Also update object of single date values
-                    onClose : function(current_date_time){
-                        var pickedDate = moment(current_date_time).format(this.$root.fromPHPFormatToMoment(this.field.date_format));
-
-                        this.changeValue(null, pickedDate);
-                    }.bind(this),
-                });
-            },
-            getMultiDateValue(time){
-                if ( this.field.type == 'time' && time.length == 5 && time[2] == ':' )
-                    return time;
-
-                return moment(time).format('YYYY-MM-DD');
-            },
             /*
              * If field has filters, then check of other fields values for filtrating
              */
@@ -380,7 +330,7 @@
                 }
 
                 //If is current date value in datepicker
-                if ( this.isDatepickerField(field) && default_value.toUpperCase() == 'CURRENT_TIMESTAMP' )
+                if ( field.default && this.isDatepickerField(field) && field.default.toUpperCase() == 'CURRENT_TIMESTAMP' )
                     default_value = moment().format(this.$root.fromPHPFormatToMoment(field.date_format));
 
                 //Get value by other table
@@ -419,7 +369,7 @@
                         if ( options[k][0] != value )
                             continue;
 
-                        this.$set('row.' + key, options[k][1][fillBy[1]||key]);
+                        this.$set(row, key, options[k][1][fillBy[1]||key]);
 
                         break;
                     }
@@ -524,7 +474,7 @@
                     }
 
                     //Update datepickers
-                    this.bindDatepickers();
+                    // this.bindDatepickers();
 
                     //If is select
                     if ( this.isSelect ){
@@ -722,7 +672,7 @@
                 return field.multiple && field.multiple === true || ('belongsToMany' in field);
             },
             isDatepickerField(field){
-                return (field.type == 'date' || field.type == 'datetime' || field.type == 'time');
+                return ['date', 'datetime', 'time'].indexOf(field.type) > -1;
             }
         },
 
@@ -735,19 +685,6 @@
                     return false;
 
                 return true;
-            },
-            getMultiDates(){
-                var value = this.field.value||[];
-
-                if ( ! $.isArray(value) )
-                    value = [];
-
-                //Check correct inputs values
-                var val = _.cloneDeep(value).filter(function(item){
-                        return item.length == (this.field.type == 'time' ? 5 : 10);
-                }.bind(this));
-
-                return val;
             },
             getRelationRow(){
                 var filterBy = this.getFilterBy;
@@ -765,7 +702,7 @@
 
                 var relationTable = (this.field.belongsTo||this.field.belongsToMany).split(',')[0];
 
-                return this.$root.models[relationTable];
+                return _.cloneDeep(this.$root.models[relationTable]);
             },
             /*
              * Return model of parent filtration field
@@ -840,26 +777,13 @@
 
                 return model.row[column[column.length - 1]];
             },
-            getName()
-            {
-                if ( this.isConfirmation )
-                {
-                    return this.field.name + ' ('+this.trans('confirmation')+')';
-                }
-
-                return this.field.name;
-            },
             isString()
             {
                 return this.field.type == 'string';
             },
-            isDecimal()
+            isNumber()
             {
-                return this.field.type == 'decimal';
-            },
-            isInteger()
-            {
-                return this.field.type == 'integer' || this.isDecimal;
+                return ['integer', 'decimal'].indexOf(this.field.type) > -1;
             },
             isText()
             {
@@ -893,10 +817,6 @@
             {
                 return this.isDatepickerField(this.field);
             },
-            isMultipleDatepicker()
-            {
-                return this.field.multiple == true && this.isDatepicker;
-            },
             isCheckbox()
             {
                 return this.field.type == 'checkbox';
@@ -916,10 +836,6 @@
             isMultipleUpload()
             {
                 return (this.isMultirows && !this.isOpenedRow) || this.isMultiple;
-            },
-            getDateFormat()
-            {
-                return this.field.date_format;
             },
             hasComponent(){
                 return 'component' in this.field && this.field.component;

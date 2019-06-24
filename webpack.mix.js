@@ -5,7 +5,7 @@ var config = require('./config.js');
 
 mix.js('src/Resources/js/app.js', 'src/Resources/admin/js')
    .extract([
-        'vue', 'jquery', 'axios', 'lodash', 'js-md5', 'moment', 'vue-router', 'vue-fragment',
+        'vue', 'jquery', 'lodash', 'js-md5', 'moment', 'vue-router', 'vue-fragment',
         'vue-resource', 'vuedraggable', 'jquery-datetimepicker', 'bootstrap-sass'
     ])
 
