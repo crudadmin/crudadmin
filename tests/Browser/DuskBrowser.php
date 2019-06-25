@@ -232,7 +232,9 @@ class DuskBrowser extends Browser
             ) {
                 $hasComponent = $model->hasFieldParam($key, 'component');
 
-                $this->type((!$hasComponent ? '[data-field="'.$model->getTable().'-'.$key.'"]' : '').'[name="'.$formKey.'"]', $value);
+                $wrapper = $hasComponent ? '' : '[data-model="'.$model->getTable().'"][data-field="'.$key.'"] ';
+
+                $this->type($wrapper.'[name="'.$formKey.'"]', $value);
             }
 
             //Set editor value

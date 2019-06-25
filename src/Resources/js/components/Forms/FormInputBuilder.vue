@@ -1,143 +1,141 @@
 <template>
-    <div>
-        <div v-if="!hasComponent" :data-field="getFieldKey" v-show="canShowField" :data-history-changed="isChangedFromHistory" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
-            <string-field
-                v-if="isString || isPassword"
-                :model="model"
-                :field_key="getFieldName"
-                :field="field"
-                :value="getValueOrDefault"
-                :required="isRequired"
-                :disabled="isDisabled">
-            </string-field>
+    <div :data-field="field_key" :data-model="model.slug" :data-lang="langslug" v-show="canShowField" :data-history-changed="isChangedFromHistory" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
+        <string-field
+            v-if="!hasComponent && (isString || isPassword)"
+            :model="model"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </string-field>
 
-            <number-field
-                v-if="isNumber"
-                :model="model"
-                :field_key="getFieldName"
-                :field="field"
-                :value="getValueOrDefault"
-                :required="isRequired"
-                :disabled="isDisabled">
-            </number-field>
+        <number-field
+            v-if="!hasComponent && isNumber"
+            :model="model"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </number-field>
 
-            <date-time-field
-                v-if="isDatepicker"
-                :model="model"
-                :field_key="getFieldName"
-                :field="field"
-                :value="getValueOrDefault"
-                :required="isRequired"
-                :disabled="isDisabled">
-            </date-time-field>
+        <date-time-field
+            v-if="!hasComponent && isDatepicker"
+            :model="model"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </date-time-field>
 
-            <!-- Checkbox INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
-                <label :for="getId" class="checkbox">
-                    {{ field.name }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-                    <input type="checkbox" @change="changeValue" :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
-                    <div><div></div></div>
-                </label>
-                <small>{{ field.title }}</small>
-            </div>
+        <!-- Checkbox INPUT -->
+        <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
+            <label :for="getId" class="checkbox">
+                {{ field.name }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
+                <input type="checkbox" @change="changeValue" :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
+                <div><div></div></div>
+            </label>
+            <small>{{ field.title }}</small>
+        </div>
 
-            <!-- TEXT INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
-                <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
-                <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || field.name" :value="getValueOrDefault"></textarea>
-                <small>{{ field.title }}</small>
-            </div>
+        <!-- TEXT INPUT -->
+        <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
+            <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
+            <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || field.name" :value="getValueOrDefault"></textarea>
+            <small>{{ field.title }}</small>
+        </div>
 
-            <!-- FILE INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
-                <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
+        <!-- FILE INPUT -->
+        <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
+            <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
 
-                <div class="file-group">
-                    <input :id="getId" :data-field="getFieldKey" :disabled="isDisabled" type="file" :multiple="isMultipleUpload" :name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || field.name">
-                    <input v-if="!getValueOrDefault && file_will_remove == true" type="hidden" :name="'$remove_' + getFieldName" :value="1">
+            <div class="file-group">
+                <input :id="getId" :data-field="getFieldKey" :disabled="isDisabled" type="file" :multiple="isMultipleUpload" :name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || field.name">
+                <input v-if="!getValueOrDefault && file_will_remove == true" type="hidden" :name="'$remove_' + getFieldName" :value="1">
 
-                    <button v-if="getValueOrDefault && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
+                <button v-if="getValueOrDefault && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
 
-                    <div v-show="(isMultiple && !isMultirows) && getFiles.length > 0">
-                        <select :id="getId + '_multipleFile'" :name="(hasLocale || (isMultiple && !isMultirows) && getFiles.length > 0) ? '$uploaded_'+getFieldName+'[]' : ''" data-placeholder=" " multiple>
-                            <option selected v-for="file in getFiles">{{ file }}</option>
-                        </select>
-                    </div>
-
-                    <small>{{ field.title }}</small>
-
-                    <span v-if="getValueOrDefault && !hasMultipleFilesValue && file_from_server && !isMultiple">
-                        <file :file="getValueOrDefault" :field="field_key" :model="model"></file>
-                    </span>
-
-                </div>
-            </div>
-
-            <!-- Row Confirmation -->
-            <form-input-builder
-                v-if="field.confirmed == true && !isConfirmation"
-                :model="model"
-                :history="history"
-                :field="field"
-                :index="index"
-                :field_key="field_key + '_confirmation'"
-                :row="row"
-                :confirmation="true"></form-input-builder>
-
-            <!-- SELECT INPUT -->
-            <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
-                <label :for="getId">{{ field.name }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
-                <div :class="{ 'can-add-select' : canAddRow }">
-                    <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? getFieldName : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
-                        <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
-                        <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, getValueOrDefault, isMultiple)">{{ mvalue }}</option>
-                        <option v-for="data in fieldOptions" :selected="hasValue(data[0], getValueOrDefault, isMultiple)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+                <div v-show="(isMultiple && !isMultirows) && getFiles.length > 0">
+                    <select :id="getId + '_multipleFile'" :name="(hasLocale || (isMultiple && !isMultirows) && getFiles.length > 0) ? '$uploaded_'+getFieldName+'[]' : ''" data-placeholder=" " multiple>
+                        <option selected v-for="file in getFiles">{{ file }}</option>
                     </select>
-                    <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
+                </div>
+
+                <small>{{ field.title }}</small>
+
+                <span v-if="getValueOrDefault && !hasMultipleFilesValue && file_from_server && !isMultiple">
+                    <file :file="getValueOrDefault" :field="field_key" :model="model"></file>
+                </span>
+
+            </div>
+        </div>
+
+        <!-- Row Confirmation -->
+        <form-input-builder
+            v-if="field.confirmed == true && !isConfirmation"
+            :model="model"
+            :history="history"
+            :field="field"
+            :index="index"
+            :field_key="field_key + '_confirmation'"
+            :row="row"
+            :confirmation="true"></form-input-builder>
+
+        <!-- SELECT INPUT -->
+        <div class="form-group" :class="{ disabled : isDisabled || hasNoFilterValues }" v-show="isRequired || !hasNoFilterValues" v-if="isSelect">
+            <label :for="getId">{{ field.name }} <span v-if="isRequired || isRequiredIfHasValues" class="required">*</span></label>
+            <div :class="{ 'can-add-select' : canAddRow }">
+                <select :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :name="!isMultiple ? getFieldName : ''" :data-placeholder="field.placeholder ? field.placeholder : trans('select-option-multi')" :multiple="isMultiple" class="form-control">
+                    <option v-if="!isMultiple" value="">{{ trans('select-option') }}</option>
+                    <option v-for="mvalue in missingValueInSelectOptions" :value="mvalue" :selected="hasValue(mvalue, getValueOrDefault, isMultiple)">{{ mvalue }}</option>
+                    <option v-for="data in fieldOptions" :selected="hasValue(data[0], getValueOrDefault, isMultiple)" :value="data[0]">{{ data[1] == null ? trans('number') + ' ' + data[0] : data[1] }}</option>
+                </select>
+                <button v-if="canAddRow" @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
+            </div>
+            <small>{{ field.title }}</small>
+            <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+getFieldName" value="1">
+
+            <!-- Modal for adding relation -->
+            <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">&nbsp;</h4>
+                        </div>
+                        <div class="modal-body">
+                            <model-builder
+                                :langid="langid"
+                                :hasparentmodel="getRelationModelParent"
+                                :parentrow="getRelationRow"
+                                :model_builder="getRelationModel">
+                            </model-builder>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+        </div>
+
+        <!-- RADIO INPUT -->
+        <div class="form-group radio-group" v-if="isRadio">
+                <label>{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
+                <div class="radio" v-if="!isRequired">
+                    <label>
+                        <input type="radio" :name="getFieldName" value="">
+                        {{ trans('no-option') }}
+                    </label>
+                </div>
+
+                <div class="radio" v-for="data in field.options">
+                    <label>
+                        <input type="radio" @change="changeValue" :name="getFieldName" :checked="hasValue(data[0], getValueOrDefault)" :value="data[0]">
+
+                        {{ data[1] }}
+                    </label>
                 </div>
                 <small>{{ field.title }}</small>
-                <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+getFieldName" value="1">
-
-                <!-- Modal for adding relation -->
-                <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title">&nbsp;</h4>
-                            </div>
-                            <div class="modal-body">
-                                <model-builder
-                                    :langid="langid"
-                                    :hasparentmodel="getRelationModelParent"
-                                    :parentrow="getRelationRow"
-                                    :model_builder="getRelationModel">
-                                </model-builder>
-                            </div>
-                        </div><!-- /.modal-content -->
-                    </div><!-- /.modal-dialog -->
-                </div><!-- /.modal -->
-            </div>
-
-            <!-- RADIO INPUT -->
-            <div class="form-group radio-group" v-if="isRadio">
-                    <label>{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
-                    <div class="radio" v-if="!isRequired">
-                        <label>
-                            <input type="radio" :name="getFieldName" value="">
-                            {{ trans('no-option') }}
-                        </label>
-                    </div>
-
-                    <div class="radio" v-for="data in field.options">
-                        <label>
-                            <input type="radio" @change="changeValue" :name="getFieldName" :checked="hasValue(data[0], getValueOrDefault)" :value="data[0]">
-
-                            {{ data[1] }}
-                        </label>
-                    </div>
-                    <small>{{ field.title }}</small>
-            </div>
         </div>
 
         <component
@@ -849,8 +847,9 @@
             getValueOrDefault()
             {
                 //If is password, return none value
-                if ( this.isPassword )
-                    return '';
+                if ( this.isPassword ){
+                    return this.field.value;
+                }
 
                 var value = this.parseArrayValue(this.field.value);
 

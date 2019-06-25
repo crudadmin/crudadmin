@@ -25,8 +25,6 @@
 
                     <div v-for="(item, index) in group.fields">
                         <div
-                            :data-field="item"
-                            :data-lang="langslug"
                             v-if="isField(item) && canRenderField(model.fields[item])"
                             v-for="langslug in getFieldLangs(model.fields[item])"
                             v-show="canShowField(model.fields[item]) && canShowLanguageField(model.fields[item], langslug, inputlang)"
