@@ -84,6 +84,20 @@
             :disabled="isDisabled">
         </select-field>
 
+        <radio-field
+            v-if="!hasComponent && isRadio"
+            :id="getId"
+            :model="model"
+            :field_name="getName"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :inputlang="inputlang"
+            :langid="langid"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </radio-field>
+
         <!-- Row Confirmation -->
         <form-input-builder
             v-if="field.confirmed == true && !isConfirmation"
@@ -94,26 +108,6 @@
             :field_key="field_key + '_confirmation'"
             :row="row"
             :confirmation="true"></form-input-builder>
-
-        <!-- RADIO INPUT -->
-        <div class="form-group radio-group" v-if="isRadio">
-            <label>{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
-            <div class="radio" v-if="!isRequired">
-                <label>
-                    <input type="radio" :name="getFieldName" value="">
-                    {{ trans('no-option') }}
-                </label>
-            </div>
-
-            <div class="radio" v-for="data in field.options">
-                <label>
-                    <input type="radio" @change="changeValue" :name="getFieldName" :checked="hasValue(data[0], getValueOrDefault)" :value="data[0]">
-
-                    {{ data[1] }}
-                </label>
-            </div>
-            <small>{{ field.title }}</small>
-        </div>
 
         <component
             v-if="hasComponent"
@@ -135,12 +129,13 @@
     import TextField from '../Fields/TextField';
     import FileField from '../Fields/FileField';
     import SelectField from '../Fields/SelectField';
+    import RadioField from '../Fields/RadioField';
 
     export default {
         name: 'form-input-builder',
         props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug'],
 
-        components: { StringField, NumberField, DateTimeField, CheckboxField, TextField, FileField, SelectField },
+        components: { StringField, NumberField, DateTimeField, CheckboxField, TextField, FileField, SelectField, RadioField },
 
         created(){
             this.registerComponents();
@@ -152,10 +147,6 @@
             this.syncFieldsValueWithRow();
         },
         methods : {
-            hasValue(key, value, multiple)
-            {
-              return (key || key == 0) && value && key == value;
-            },
             trans(key){
                 return this.$root.trans(key);
             },

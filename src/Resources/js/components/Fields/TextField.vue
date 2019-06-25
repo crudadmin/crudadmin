@@ -20,9 +20,15 @@
         props: ['id', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled'],
 
         mounted(){
-            this.$nextTick(function(){
-                $('#'+this.id).ckEditors();
-            });
+            var editor = $('#'+this.id).ckEditors();
+
+            //On update ckeditor
+            if ( this.isEditor )
+            {
+                CKEDITOR.instances[this.id].on('change', e => {
+                    this.$parent.changeValue(null, e.editor.getData())
+                });
+            }
 
             eventHub.$on('updateField', data => {
                 if ( data[0] != this.field_key )
@@ -33,12 +39,11 @@
                     return;
 
                 var editor = CKEDITOR.instances[this.id];
+                if ( ! editor )
+                    return;
 
-                //If is editor not ready yet, then wait for ready state
-                editor.setData( this.field.value ? this.field.value : '' );
-                editor.on('instanceReady', function(){
-                    editor.setData( this.field.value ? this.field.value : '' );
-                });
+                // If is editor not ready yet, then wait for ready state
+                editor.setData( this.field.value||'' );
             });
         },
 
