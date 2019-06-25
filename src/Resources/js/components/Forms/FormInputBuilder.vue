@@ -56,30 +56,18 @@
             :disabled="isDisabled">
         </text-field>
 
-        <!-- FILE INPUT -->
-        <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
-            <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
-
-            <div class="file-group">
-                <input :id="getId" :data-field="getFieldKey" :disabled="isDisabled" type="file" :multiple="isMultipleUpload" :name="isMultipleUpload ? getFieldName + '[]' : getFieldName" @change="addFile" class="form-control" :placeholder="field.placeholder || field.name">
-                <input v-if="!getValueOrDefault && file_will_remove == true" type="hidden" :name="'$remove_' + getFieldName" :value="1">
-
-                <button v-if="getValueOrDefault && !isMultipleUpload || !file_from_server" @click.prevent="removeFile" type="button" class="btn btn-danger btn-md" data-toggle="tooltip" title="" :data-original-title="trans('delete-file')"><i class="fa fa-remove"></i></button>
-
-                <div v-show="(isMultiple && !isMultirows) && getFiles.length > 0">
-                    <select :id="getId + '_multipleFile'" :name="(hasLocale || (isMultiple && !isMultirows) && getFiles.length > 0) ? '$uploaded_'+getFieldName+'[]' : ''" data-placeholder=" " multiple>
-                        <option selected v-for="file in getFiles">{{ file }}</option>
-                    </select>
-                </div>
-
-                <small>{{ field.title }}</small>
-
-                <span v-if="getValueOrDefault && !hasMultipleFilesValue && file_from_server && !isMultiple">
-                    <file :file="getValueOrDefault" :field="field_key" :model="model"></file>
-                </span>
-
-            </div>
-        </div>
+        <file-field
+            v-if="!hasComponent && isFile"
+            :id="getId"
+            :row="isOpenedRow ? row : null"
+            :model="model"
+            :field_name="getName"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </file-field>
 
         <!-- Row Confirmation -->
         <form-input-builder
@@ -129,22 +117,22 @@
 
         <!-- RADIO INPUT -->
         <div class="form-group radio-group" v-if="isRadio">
-                <label>{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
-                <div class="radio" v-if="!isRequired">
-                    <label>
-                        <input type="radio" :name="getFieldName" value="">
-                        {{ trans('no-option') }}
-                    </label>
-                </div>
+            <label>{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
+            <div class="radio" v-if="!isRequired">
+                <label>
+                    <input type="radio" :name="getFieldName" value="">
+                    {{ trans('no-option') }}
+                </label>
+            </div>
 
-                <div class="radio" v-for="data in field.options">
-                    <label>
-                        <input type="radio" @change="changeValue" :name="getFieldName" :checked="hasValue(data[0], getValueOrDefault)" :value="data[0]">
+            <div class="radio" v-for="data in field.options">
+                <label>
+                    <input type="radio" @change="changeValue" :name="getFieldName" :checked="hasValue(data[0], getValueOrDefault)" :value="data[0]">
 
-                        {{ data[1] }}
-                    </label>
-                </div>
-                <small>{{ field.title }}</small>
+                    {{ data[1] }}
+                </label>
+            </div>
+            <small>{{ field.title }}</small>
         </div>
 
         <component
@@ -162,7 +150,6 @@
 <script>
     var Vue = require('vue');
 
-    import File from '../Partials/File.vue';
     import ModelBuilder from '../Views/ModelBuilder.vue';
 
     import StringField from '../Fields/StringField';
@@ -170,17 +157,16 @@
     import DateTimeField from '../Fields/DateTimeField';
     import CheckboxField from '../Fields/CheckboxField';
     import TextField from '../Fields/TextField';
+    import FileField from '../Fields/FileField';
 
     export default {
         name: 'form-input-builder',
         props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug'],
 
-        components: { StringField, NumberField, DateTimeField, CheckboxField, TextField, File },
+        components: { StringField, NumberField, DateTimeField, CheckboxField, TextField, FileField },
 
         data(){
             return {
-                file_will_remove : false,
-                file_from_server : true,
                 filterBy : null,
                 allowRelation : false,
             };
@@ -198,26 +184,7 @@
                 if ( data[0] != this.field_key )
                     return;
 
-                // console.log('updated', data[1]);
-
                 this.updateField(data[1]);
-            });
-
-            eventHub.$on('onSubmit', data => {
-                var row = data.row;
-
-                if ( data.table != this.model.slug || ! this.isFile )
-                    return;
-
-                if ( this.file_from_server == true && row != null )
-                    return;
-
-                this.file_from_server = row ? true : false;
-
-                this.field.value = row ? row[this.field_key] : '';
-
-                //Reset input value after file has been sent
-                $('#' + this.getId).val('');
             });
         },
 
@@ -229,8 +196,6 @@
             this.bindFilters();
 
             this.onChangeSelect();
-
-            this.addMultipleFilesSupport(true);
         },
         methods : {
             parseArrayValue(value){
@@ -462,51 +427,12 @@
                 };
             },
             updateField(field){
-                if (field.type == 'file')
-                    this.file_from_server = true;
-
                 //When VueJs DOM has been rendered
                 this.$nextTick(function () {
                     //If is select
-                    if ( this.isSelect ){
+                    if ( this.isSelect )
                         this.reloadSelectWithMultipleOrders(field);
-                    }
-
-                    this.addMultipleFilesSupport();
                 })
-            },
-            addMultipleFilesSupport(with_watcher){
-                //Update multiple files upload
-                if ( this.field.type == 'file' && this.isMultiple && !this.isMultirows ){
-                    $('#' + this.getId+'_multipleFile').chosen(this.chosenOptions()).trigger("chosen:updated");
-                }
-
-                //On update value
-                if ( with_watcher == true )
-                {
-                    this.$watch('field.value', function(){
-                        this.$nextTick(function(){
-                            $('#' + this.getId + '_multipleFile').trigger("chosen:updated");
-                        });
-                    });
-                }
-            },
-            removeFile(){
-                if ( ! this.isMultiple ){
-                    if ( this.hasLocale )
-                        this.field.value[this.langslug] = null;
-                    else
-                        this.field.value = null;
-                }
-
-                this.file_will_remove = true;
-                this.file_from_server = true;
-
-                $('#'+this.getId).val('');
-            },
-            addFile(e){
-                this.file_will_remove = false;
-                this.file_from_server = false;
             },
             hasValue(key, value, multiple)
             {
@@ -828,14 +754,6 @@
             {
                 return this.isMultipleField(this.field);
             },
-            isMultirows()
-            {
-                return this.field.multirows && this.field.multirows === true;
-            },
-            isMultipleUpload()
-            {
-                return (this.isMultirows && !this.isOpenedRow) || this.isMultiple;
-            },
             hasComponent(){
                 return 'component' in this.field && this.field.component;
             },
@@ -867,20 +785,6 @@
                 }
 
                 return value;
-            },
-            hasMultipleFilesValue(){
-                return $.isArray(this.field.value);
-            },
-            getFiles(){
-                var value = this.getValueOrDefault;
-
-                if ( ! value )
-                    return [];
-
-                if ( $.isArray(value) )
-                    return value;
-
-                return [ value ];
             },
             isRequired(){
                 if ( this.isOpenedRow && this.field.type == 'password' )
