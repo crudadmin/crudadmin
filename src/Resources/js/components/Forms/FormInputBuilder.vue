@@ -1,8 +1,9 @@
 <template>
-    <div :data-field="field_key" :data-model="model.slug" :data-lang="langslug" v-show="canShowField" :data-history-changed="isChangedFromHistory" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
+    <div :data-field="field_key" :data-model="model.slug" :data-lang="langslug" v-show="canShowField" :data-history-changed="isChangedFromHistory" class="field-wrapper" :class="{ 'is-changed-from-history' : isChangedFromHistory }">
         <string-field
             v-if="!hasComponent && (isString || isPassword)"
             :model="model"
+            :field_name="getName"
             :field_key="getFieldName"
             :field="field"
             :value="getValueOrDefault"
@@ -13,6 +14,7 @@
         <number-field
             v-if="!hasComponent && isNumber"
             :model="model"
+            :field_name="getName"
             :field_key="getFieldName"
             :field="field"
             :value="getValueOrDefault"
@@ -23,6 +25,7 @@
         <date-time-field
             v-if="!hasComponent && isDatepicker"
             :model="model"
+            :field_name="getName"
             :field_key="getFieldName"
             :field="field"
             :value="getValueOrDefault"
@@ -775,6 +778,14 @@
 
                 return model.row[column[column.length - 1]];
             },
+            getName()
+            {
+                //Return confirmation name
+                if ( this.isConfirmation )
+                    return this.field.name + ' ('+this.trans('confirmation')+')';
+
+                return this.field.name;
+            },
             isString()
             {
                 return this.field.type == 'string';
@@ -882,9 +893,12 @@
                 return [ value ];
             },
             isRequired(){
+                if ( this.isOpenedRow && this.field.type == 'password' )
+                    return false;
+
                 //Basic required attribute
                 if ( 'required' in this.field && this.field.required == true )
-                        return true;
+                    return true;
 
                 //Required if attribute
                 if ( this.field.required_if )

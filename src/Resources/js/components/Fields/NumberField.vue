@@ -1,7 +1,7 @@
 <template>
     <div class="form-group" :class="{ disabled : disabled }">
         <label>
-            {{ field.name }}
+            {{ field_name }}
             <span v-if="required" class="required">*</span>
         </label>
         <input
@@ -10,7 +10,7 @@
             :name="field_key"
             :value="value"
             :step="isDecimal ? '0.01' : ''"
-            :placeholder="field.placeholder || field.name"
+            :placeholder="field.placeholder || field_name"
             :disabled="disabled"
             @keyup="changeValue">
         <small>{{ field.title }}</small>
@@ -19,7 +19,7 @@
 
 <script>
     export default {
-        props: ['model', 'field_key', 'field', 'value', 'required', 'disabled'],
+        props: ['model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled'],
 
         computed : {
             isDecimal(){

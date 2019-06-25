@@ -70,17 +70,17 @@ class ModelHistoryTest extends BrowserTestCase
                     ->assertHasFormValues(History::class, $updatedRow, 'en');
 
             //Also check colorized changes
-            $browser->assertElementExists('[data-field="string"] [data-history-changed]')
-                    ->assertElementExists('[data-field="text"] [data-history-changed]')
-                    ->assertElementExists('[data-field="editor"] [data-history-changed]')
-                    ->assertElementExists('[data-field="decimal"] [data-history-changed]')
-                    ->assertElementExists('[data-field="time"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="integer"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="file"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="date"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="checkbox"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="radio"] [data-history-changed]')
-                    ->assertElementDoesNotExists('[data-field="select"] [data-history-changed]');
+            $browser->assertElementExists('[data-field="string"][data-history-changed]')
+                    ->assertElementExists('[data-field="text"][data-history-changed]')
+                    ->assertElementExists('[data-field="editor"][data-history-changed]')
+                    ->assertElementExists('[data-field="decimal"][data-history-changed]')
+                    ->assertElementExists('[data-field="time"][data-history-changed]')
+                    ->assertElementDoesNotExists('[data-field="integer"][data-history-changed]')
+                    ->assertElementDoesNotExists('[data-field="file"][data-history-changed]')
+                    ->assertElementDoesNotExists('[data-field="date"][data-history-changed]')
+                    ->assertElementDoesNotExists('[data-field="checkbox"][data-history-changed]')
+                    ->assertElementDoesNotExists('[data-field="radio"][data-history-changed]')
+                    ->assertElementDoesNotExists('[data-field="select"][data-history-changed]');
         });
     }
 

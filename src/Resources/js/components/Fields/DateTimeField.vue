@@ -1,6 +1,6 @@
 <template>
     <div class="form-group" :class="{ disabled : disabled, 'multiple-date' : isMultipleDatepicker }">
-        <label>{{ field.name }} <span v-if="required" class="required">*</span></label>
+        <label>{{ field_name }} <span v-if="required" class="required">*</span></label>
 
         <input
             ref="input"
@@ -9,7 +9,7 @@
             :disabled="disabled"
             :name="isMultipleDatepicker ? '' : field_key"
             :value="value"
-            :placeholder="field.placeholder || field.name"
+            :placeholder="field.placeholder || field_name"
             @keyup="changeValue">
 
         <input type="hidden" :name="field_key+'[]'" v-if="isMultipleDatepicker && getMultiDates.length == 0" value="">
@@ -20,7 +20,7 @@
 
 <script>
     export default {
-        props: ['model', 'field_key', 'field', 'value', 'required', 'disabled'],
+        props: ['model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled'],
 
         mounted(){
             this.bindDatepickers();
