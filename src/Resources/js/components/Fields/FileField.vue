@@ -80,7 +80,7 @@
                 return this.field.multirows && this.field.multirows === true;
             },
             isMultipleUpload(){
-                return (this.isMultirows && !this.row) || this.isMultiple;
+                return (this.isMultirows && !this.isOpenedRow) || this.isMultiple;
             },
             hasMultipleFilesValue(){
                 return $.isArray(this.field.value);

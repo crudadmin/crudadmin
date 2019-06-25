@@ -625,7 +625,7 @@ class DuskBrowser extends Browser
     {
         $model = $this->getModelClass($model);
 
-        $options = $this->script("return $('[data-field=\"".$model->getTable()."-".$key."\"] option').map(function(){
+        $options = $this->script("return $('[data-model=\"".$model->getTable()."\"][data-field=\"$key\"] select option').map(function(){
             return $(this).text();
         })")[0];
 

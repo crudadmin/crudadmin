@@ -90,21 +90,33 @@ export default {
                 return typeof item !== 'string' || !(
                     field.invisible && field.invisible == true
                     || field.removeFromForm && field.removeFromForm == true
-                    || field.hideFromForm && field.hideFromForm == true
+                    || ! this.canShowField(field)
                 );
             });
 
             return fields;
+        },
+        isOpenedRow(){
+            return this.row && 'id' in this.row;
         },
     },
 
     methods: {
         canRenderField(field){
             return !('removeFromForm' in field && field.removeFromForm == true)
-                            && !('invisible' in field && field.invisible == true);
+                    && !('invisible' in field && field.invisible == true);
         },
         canShowField(field){
-            return !('hideFromForm' in field && field.hideFromForm == true);
+            if ( 'hideFromForm' in field && field.hideFromForm == true )
+                return false;
+
+            if ( field.ifExists === true && ! this.isOpenedRow )
+                return false;
+
+            if ( field.ifDoesntExists === true && this.isOpenedRow )
+                return false;
+
+            return true;
         },
         //Return group class
         getGroupClass(group){
