@@ -33,22 +33,28 @@
             :disabled="isDisabled">
         </date-time-field>
 
-        <!-- Checkbox INPUT -->
-        <div class="form-group" :class="{ disabled : isDisabled }" v-if="isCheckbox">
-            <label :for="getId" class="checkbox">
-                {{ field.name }} <span v-if="field.placeholder">{{ field.placeholder }}</span>
-                <input type="checkbox" @change="changeValue" :id="getId" :data-field="getFieldKey" :disabled="isDisabled" :checked="getValueOrDefault == 1" value="1" class="ios-switch green" :name="getFieldName">
-                <div><div></div></div>
-            </label>
-            <small>{{ field.title }}</small>
-        </div>
+        <checkbox-field
+            v-if="!hasComponent && isCheckbox"
+            :model="model"
+            :field_name="getName"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </checkbox-field>
 
-        <!-- TEXT INPUT -->
-        <div class="form-group" :class="{ disabled : isDisabled }" v-if="isText || isEditor">
-            <label :for="getId">{{ field.name }} <span v-if="isRequired" class="required">*</span></label>
-            <textarea :id="getId" @keyup="changeValue" :data-field="getFieldKey" :disabled="isDisabled" :name="getFieldName" :class="{ 'form-control' : isText, 'js_editor' : isEditor }" rows="5" :placeholder="field.placeholder || field.name" :value="getValueOrDefault"></textarea>
-            <small>{{ field.title }}</small>
-        </div>
+        <text-field
+            v-if="!hasComponent && (isText || isEditor)"
+            :id="getId"
+            :model="model"
+            :field_name="getName"
+            :field_key="getFieldName"
+            :field="field"
+            :value="getValueOrDefault"
+            :required="isRequired"
+            :disabled="isDisabled">
+        </text-field>
 
         <!-- FILE INPUT -->
         <div class="form-group" :class="{ disabled : isDisabled }" v-if="isFile">
@@ -162,12 +168,14 @@
     import StringField from '../Fields/StringField';
     import NumberField from '../Fields/NumberField';
     import DateTimeField from '../Fields/DateTimeField';
+    import CheckboxField from '../Fields/CheckboxField';
+    import TextField from '../Fields/TextField';
 
     export default {
         name: 'form-input-builder',
         props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug'],
 
-        components: { StringField, NumberField, DateTimeField, File },
+        components: { StringField, NumberField, DateTimeField, CheckboxField, TextField, File },
 
         data(){
             return {
@@ -221,10 +229,6 @@
             this.bindFilters();
 
             this.onChangeSelect();
-
-            this.$nextTick(function(){
-                $('#'+this.getId).ckEditors();
-            });
 
             this.addMultipleFilesSupport(true);
         },
@@ -463,20 +467,6 @@
 
                 //When VueJs DOM has been rendered
                 this.$nextTick(function () {
-                    //After change value, update same value in ckeditor
-                    if ( ['editor', 'longeditor'].indexOf(field.type) > -1 ){
-                        var editor = CKEDITOR.instances[this.getId];
-
-                        //If is editor not ready yet, then wait for ready state
-                        editor.setData( field.value ? field.value : '' );
-                        editor.on('instanceReady', function(){
-                            editor.setData( field.value ? field.value : '' );
-                        });
-                    }
-
-                    //Update datepickers
-                    // this.bindDatepickers();
-
                     //If is select
                     if ( this.isSelect ){
                         this.reloadSelectWithMultipleOrders(field);

@@ -299,6 +299,7 @@ select[multiple] {height: 34px;color: white;}
 .file-group .chosen-container-multi .chosen-choices { background: none; border: none; padding: 2px 0; }
 .file-group .chosen-container-multi .chosen-drop { border: none; }
 .file-group .chosen-container-active .chosen-choices { box-shadow: none !important }
+.form-group.has-error > .cke,
 .form-group.has-error .chosen-container > .chosen-single,
 .form-group.has-error .chosen-container > .chosen-choices { border-color: #dd4b39; box-shadow: none; }
 .form-group .can-add-select { width: 100%; position: relative; }

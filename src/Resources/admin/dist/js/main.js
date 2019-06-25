@@ -9,9 +9,9 @@ jQuery.fn.ckEditors = function(){
         $(this).addClass('editor_replaced');
 
         CKEDITOR.config.height = $(this).attr('data-height') ? $(this).attr('data-height') : '250px';
-        CKEDITOR.replace($(this).attr('id')).on('instanceReady', function() {
+        CKEDITOR.replace($(this).attr('id')).on('instanceReady', () => {
             $(this).removeClass('js_editor');
-        }.bind(this));
+        });
     });
 };
 
