@@ -291,9 +291,9 @@ export default {
         },
         rowsData(){
             var field = this.orderBy[0],
-                    is_numeric = this.isNumericValue( field ),
-                    is_date = this.isDateValue( field ),
-                    is_decoded = this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.encode', true) !== true;
+                is_numeric = this.isNumericValue( field ),
+                is_date = this.isDateValue( field ),
+                is_decoded = this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.encode', true) !== true;
 
             //If is date field, then receive correct date format of this field
             if ( this.isDateValue( field ) && field in this.model.fields )

@@ -3,7 +3,7 @@
         <table :id="'table-'+model.slug" :data-table-rows="model.slug" :class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
             <thead data-table-head>
                 <tr>
-                    <th @click="toggleAllCheckboxes()" v-if="multipleCheckbox">
+                    <th @click="toggleAllCheckboxes" v-if="multipleCheckbox">
                         <i data-toggle="tooltip" :data-original-title="trans(isCheckedAll ? 'uncheck-all' : 'check-all')" :class="isCheckedAll ? 'fa-check-square-o' : 'fa-square-o'" class="fa"></i>
                     </th>
                     <th v-for="(name, field) in columns" :class="'th-'+field" @click="toggleSorting(field)">
@@ -231,19 +231,19 @@ export default {
         toggleAllCheckboxes(){
             var ids = this.rows.data.map(item => item.id);
 
-            this.checked = this.isCheckedAll ? [] : ids;
+            this.$parent.checked = this.isCheckedAll ? [] : ids;
         },
         checkRow(id, field){
-            var checked = this.checked.indexOf(id);
+            var checked = this.$parent.checked.indexOf(id);
 
             //Disable checking on type of fields
             if ( field in this.model.fields && ['file'].indexOf(this.model.fields[field].type) > -1 )
                 return;
 
             if ( checked == -1 )
-                this.checked.push(id);
+                this.$parent.checked.push(id);
             else
-                this.checked.splice(checked, 1);
+                this.$parent.checked.splice(checked, 1);
         },
         resetAllowedColumns(){
             var columns = _.cloneDeep(this.defaultColumns),
