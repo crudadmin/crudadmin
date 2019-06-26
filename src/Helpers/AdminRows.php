@@ -110,8 +110,12 @@ class AdminRows
                     {
                         //Search in all columns
                         $builder->{ $key == 0 ? 'where' : 'orWhere' }(function($builder) use ( $columns, $column, $queries, $search, $search_to ) {
+                            //If is imaginarry field, skip whole process
+                            if ( $this->model->isFieldType($column, 'imaginary') ) {
+                                return;
+                            }
 
-                            if ( $search_to )
+                            else if ( $search_to )
                             {
                                 $builder->where(function($builder) use($column, $search, $search_to) {
                                     if ( !isset($search) && isset($search_to) )

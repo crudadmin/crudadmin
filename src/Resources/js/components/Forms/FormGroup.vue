@@ -110,10 +110,10 @@ export default {
             if ( 'hideFromForm' in field && field.hideFromForm == true )
                 return false;
 
-            if ( field.ifExists === true && ! this.isOpenedRow )
+            if ( (field.ifExists === true || field.hideOnCreate === true) && ! this.isOpenedRow )
                 return false;
 
-            if ( field.ifDoesntExists === true && this.isOpenedRow )
+            if ( (field.ifDoesntExists === true || field.hideOnUpdate === true) && this.isOpenedRow )
                 return false;
 
             return true;

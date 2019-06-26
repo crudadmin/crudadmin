@@ -23,10 +23,10 @@ class Fields
      * Registred custom admin attributes for fields
      */
     protected $attributes = [
-         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled',
+         'name', 'title', 'type', 'placeholder', 'resize', 'hidden', 'disabled', 'default',
          'orderBy', 'limit', 'removeFromForm', 'hideFromForm', 'multirows', 'phone_link', 'unique_db',
          'index', 'invisible', 'unsigned', 'component', 'column_name', 'imaginary',
-         'ifDoesntExists', 'ifExists', 'migrateToPivot'
+         'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate', 'migrateToPivot'
     ];
 
     /*

@@ -15,7 +15,7 @@ class AddSelectSupport extends MutationRule
 {
     use DataCache;
 
-    public $attributes = ['options', 'multiple', 'default', 'filterBy', 'fillBy', 'required_with_values'];
+    public $attributes = ['options', 'multiple', 'filterBy', 'fillBy', 'required_with_values'];
 
     private function isAllowedMutation($field)
     {

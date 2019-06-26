@@ -116,7 +116,7 @@ class Controller extends BaseController
     /*
      * If select has values, then add this select required
      */
-    private function checkRequiredWithValues($model, $key, $replaced_key, &$data)
+    private function checkRequiredWithValues($model, $request, $key, $replaced_key, &$data)
     {
         if ( $model->hasFieldParam($key, 'required_with_values', true)
              && $request->has( '$required_' . $replaced_key )
@@ -155,7 +155,7 @@ class Controller extends BaseController
                 unset($data[array_search('required', $data)]);
 
             //If selectbox has available values, then add required rule for this field
-            $this->checkRequiredWithValues($model, $key, $replaced_key, $data);
+            $this->checkRequiredWithValues($model, $request, $key, $replaced_key, $data);
 
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             //also Allow send form without file, when is file uploaded already in server

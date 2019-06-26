@@ -10,7 +10,7 @@
             <button v-if="canAddRow" data-add-relation-row @click="allowRelation = true" type="button" :data-target="'#'+getModalId" data-toggle="modal" class="btn-success"><i class="fa fa-plus"></i></button>
         </div>
         <small>{{ field.title }}</small>
-        <input v-if="!hasNoFilterValues && isRequiredIfHasValues" type="hidden" :name="'$required_'+field_key" value="1">
+        <input v-if="isRequiredIfHasValues" type="hidden" :name="'$required_'+field_key" value="1">
 
         <!-- Modal for adding relation -->
         <div class="modal fade" v-if="canAddRow && allowRelation" :id="getModalId" tabindex="-1" role="dialog">
@@ -176,7 +176,7 @@
                 return missing;
             },
             isRequiredIfHasValues(){
-                return 'required_with_values' in this.field && this.field.required_with_values == true;
+                return 'required_with_values' in this.field && this.field.required_with_values == true && this.fieldOptions.length > 0;
             },
             hasNoFilterValues(){
                 //If foreign key identificator is not field, bud static foreign key column
