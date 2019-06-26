@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Pages;
+namespace Gogol\Admin\Tests\Browser\Tests;
 
 use Gogol\Admin\Tests\App\Models\Articles\ArticlesComment;
 use Gogol\Admin\Tests\App\Models\Fields\SelectType;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Pages;
+namespace Gogol\Admin\Tests\Browser\Tests;
 
 use Carbon\Carbon;
 use Gogol\Admin\Tests\App\Models\Fields\FieldsType;

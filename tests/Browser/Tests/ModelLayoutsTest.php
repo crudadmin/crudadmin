@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Pages;
+namespace Gogol\Admin\Tests\Browser\Tests;
 
 use Gogol\Admin\Tests\App\Models\Tree\Model3;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
