@@ -318,9 +318,9 @@ select[multiple] {height: 34px;color: white;}
 @media screen and (min-width: 768px) {
     .form-group .modal .modal-dialog { width: 80%; }
 }
-.form-group .modal > .modal-dialog > .modal-content > .modal-body > .box {box-shadow: none;border: 0;margin-bottom: 0}
-.form-group .modal > .modal-dialog > .modal-content > .modal-body > .box > .box-header {padding: 0;position: absolute;right: 45px;top: -59px;}
-.form-group .modal > .modal-dialog > .modal-content > .modal-body > .box > .box-body {padding: 0;margin-bottom: -15px;}
+.form-group .modal > .modal-dialog > .modal-content > .modal-body > div > .box {box-shadow: none;border: 0;margin-bottom: 0}
+.form-group .modal > .modal-dialog > .modal-content > .modal-body > div > .box > .box-header {padding: 0;position: absolute;right: 45px;top: -59px;}
+.form-group .modal > .modal-dialog > .modal-content > .modal-body > div > .box > .box-body {padding: 0;margin-bottom: -15px;}
 
 .th-id { width: 50px; text-align: center; }
 .td-id { text-align: center; }

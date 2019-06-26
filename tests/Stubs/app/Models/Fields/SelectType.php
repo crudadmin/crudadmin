@@ -29,7 +29,7 @@ class SelectType extends AdminModel
     public function fields()
     {
         return [
-            'langs' => 'name:my lang select|belongsTo:model_localizations,name',
+            'langs' => 'name:my lang select|belongsTo:model_localizations,name|canAdd',
             'score_input' => 'name:my score select|type:select|options:1,2,3,4,5,6,7,8,9,10|default:8',
             'select_filter_by' => 'name:my filter by select|belongsTo:articles,:name :score|filterBy:score_input,score',
             'comments' => 'name:my filter by auto-table|belongsTo:articles_comments,:name :article_id|filterBy:select_filter_by',
