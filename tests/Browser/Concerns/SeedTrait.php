@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Traits;
+namespace Gogol\Admin\Tests\Browser\Concerns;
 
 use Gogol\Admin\Tests\App\Models\Articles\Article;
 use Gogol\Admin\Tests\App\Models\Articles\Tag;

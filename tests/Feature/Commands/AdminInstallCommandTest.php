@@ -3,7 +3,7 @@
 namespace Gogol\Admin\Tests\Feature\Commands;
 
 use Gogol\Admin\Tests\TestCase;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 
 class AdminInstallCommandTest extends TestCase
 {

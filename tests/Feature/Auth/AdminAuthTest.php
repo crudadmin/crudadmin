@@ -3,7 +3,7 @@
 namespace Gogol\Admin\Tests\Feature\Auth;
 
 use Gogol\Admin\Tests\TestCase;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 use Illuminate\Support\Facades\File;
 
 class AdminAuthTest extends TestCase

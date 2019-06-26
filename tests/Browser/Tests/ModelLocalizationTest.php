@@ -6,8 +6,8 @@ use Gogol\Admin\Tests\App\Models\Locales\ModelLocale;
 use Gogol\Admin\Tests\App\Models\Locales\ModelLocalization;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Traits\DropDatabase;
-use Gogol\Admin\Tests\Traits\DropUploads;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropUploads;
 
 class ModelLocalizationTest extends BrowserTestCase
 {

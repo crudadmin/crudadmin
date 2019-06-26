@@ -5,7 +5,7 @@ namespace Gogol\Admin\Tests\Browser\Tests;
 use Gogol\Admin\Tests\App\User;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 
 class AuthenticationTest extends BrowserTestCase
 {

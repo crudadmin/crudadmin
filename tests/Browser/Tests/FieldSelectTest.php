@@ -6,8 +6,8 @@ use Gogol\Admin\Tests\App\Models\Articles\ArticlesComment;
 use Gogol\Admin\Tests\App\Models\Fields\SelectType;
 use Gogol\Admin\Tests\App\Models\Locales\ModelLocalization;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\Browser\Traits\SeedTrait;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Browser\Concerns\SeedTrait;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 use Laravel\Dusk\Browser;
 
 class FieldSelectTest extends BrowserTestCase

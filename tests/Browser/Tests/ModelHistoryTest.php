@@ -6,8 +6,8 @@ use Gogol\Admin\Models\ModelsHistory;
 use Gogol\Admin\Tests\App\Models\History\History;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Traits\DropDatabase;
-use Gogol\Admin\Tests\Traits\DropUploads;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropUploads;
 
 class ModelHistoryTest extends BrowserTestCase
 {

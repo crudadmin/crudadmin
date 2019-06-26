@@ -12,8 +12,8 @@ use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
 use Gogol\Admin\Tests\App\Models\Tree\Model3;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Browser\Traits\SeedTrait;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Browser\Concerns\SeedTrait;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 
 class TableRowsTest extends BrowserTestCase
 {

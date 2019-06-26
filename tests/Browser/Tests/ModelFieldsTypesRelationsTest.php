@@ -6,8 +6,8 @@ use Carbon\Carbon;
 use Gogol\Admin\Tests\App\Models\Fields\FieldsRelation;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Browser\Traits\SeedTrait;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Browser\Concerns\SeedTrait;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 use Illuminate\Support\Facades\DB;
 
 class ModelFieldsTypesRelationsTest extends BrowserTestCase

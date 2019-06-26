@@ -6,7 +6,7 @@ use Gogol\Admin\Tests\App\Models\Articles\Article;
 use Gogol\Admin\Tests\App\Models\Articles\ArticlesComment;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 
 class ModelRelationsTest extends BrowserTestCase
 {

@@ -7,7 +7,7 @@ use Gettext\Translations;
 use Gogol\Admin\Models\Language;
 use Gogol\Admin\Tests\Browser\BrowserTestCase;
 use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Traits\DropDatabase;
+use Gogol\Admin\Tests\Concerns\DropDatabase;
 use Gettext\Generators\PhpArray;
 
 class ModelGettextTest extends BrowserTestCase

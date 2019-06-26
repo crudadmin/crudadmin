@@ -2,12 +2,12 @@
 
 namespace Gogol\Admin\Tests;
 
-use Gogol\Admin\Tests\Browser\Concerns\LoadRoutes;
-use Gogol\Admin\Tests\Traits\AdminTrait;
+use Gogol\Admin\Tests\Concerns\AdminIntegration;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Gogol\Admin\Tests\OrchestraSetup;
 
 class TestCase extends BaseTestCase
 {
-    use AdminTrait,
-        LoadRoutes;
+    use OrchestraSetup,
+        AdminIntegration;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Traits;
+namespace Gogol\Admin\Tests\Concerns;
 
 trait DropUploads
 {

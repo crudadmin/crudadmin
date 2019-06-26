@@ -1,17 +1,12 @@
 <?php
 
-namespace Gogol\Admin\Tests\Traits;
+namespace Gogol\Admin\Tests;
 
-use Artisan;
 use Gogol\Admin\Providers\AppServiceProvider;
 use Gogol\Admin\Tests\App\User;
-use Gogol\Admin\Tests\Traits\DropDatabase;
-use Gogol\Admin\Tests\Traits\DropUploads;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Schema;
 
-trait AdminTrait
+trait OrchestraSetup
 {
     /*
      * Admin user credentials
@@ -29,30 +24,15 @@ trait AdminTrait
     }
 
     /**
-     * Setup the test environment.
+     * Load the given routes file if routes are not already cached.
+     *
+     * @param  string  $path
+     * @return void
      */
-    protected function tearDown() : void
+    protected function loadRoutesFrom($app, $path)
     {
-        $this->registerTraits();
-
-        parent::tearDown();
-    }
-
-    /*
-     * Register all traits instances
-     */
-    protected function registerTraits()
-    {
-        $uses = array_flip(class_uses_recursive(static::class));
-
-        //Registers own event for dropping database after test
-        if (isset($uses[DropDatabase::class])) {
-            $this->dropDatabase();
-        }
-
-        // //Registers own event for dropping uploads data after test
-        if (isset($uses[DropUploads::class])) {
-            $this->dropUploads();
+        if (! $app->routesAreCached()) {
+            require $path;
         }
     }
 
@@ -148,7 +128,7 @@ trait AdminTrait
      */
     public function getStubPath($path = null)
     {
-        return __DIR__.'/../Stubs/'.ltrim($path, '/');
+        return __DIR__.'/Stubs/'.ltrim($path, '/');
     }
 
     /*
@@ -202,16 +182,6 @@ trait AdminTrait
     }
 
     /*
-     * Register all admin models paths
-     */
-    public function registerAllAdminModels()
-    {
-        config()->set('admin.models', [
-            'Gogol\Admin\Tests\App\Models' => $this->getAppPath('Models')
-        ]);
-    }
-
-    /*
      * Delete file, or whole directory
      */
     protected function deleteFileOrDirectory($path)
@@ -222,71 +192,13 @@ trait AdminTrait
             @unlink($path);
     }
 
-
-    /**
-     * Return object of class
-     * @param  string/object $model
-     * @return object
-     */
-    private function getModelClass($model)
-    {
-        return is_object($model) ? $model : new $model;
-    }
-
     /*
-     * Check if is array associative
+     * Register all admin models paths
      */
-    protected function isAssoc(array $arr)
+    public function registerAllAdminModels()
     {
-        if ([] === $arr)
-            return false;
-
-        if ( array_keys($arr) !== range(0, count($arr) - 1) )
-            return true;
-
-        return false;
-    }
-
-    /**
-     * Parse select/multiselect values/keys to correct format
-     * Sometimes we need just select keys, or select values
-     * @param  string/object    $model
-     * @param  string           $key
-     * @param  mixed            $value
-     * @param  boolean            $returnKey
-     * @return mixed
-     */
-    protected function parseSelectValue($model, $key, $value, $returnKey = false)
-    {
-        $model = $this->getModelClass($model);
-
-        if (
-            ($model->isFieldType($key, 'select') || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']))
-            && !$model->hasFieldParam($key, ['locale'], true)
-        )
-        {
-            if ( is_array($value) && $this->isAssoc($value) )
-            {
-                $items = $returnKey ? array_keys($value) : array_values($value);
-
-                $value = $model->hasFieldParam($key, ['belongsTo']) ? $items[0] : $items;
-            }
-        }
-
-        return $value;
-    }
-
-    /*
-     * Limit string and add dotts
-     * We cannot use native str_limit by laravel, because
-     * we do want trim empty spaces at the end of the string
-     */
-    public function strLimit($value, $limit, $end = '...')
-    {
-        if (mb_strwidth($value, 'UTF-8') <= $limit) {
-            return $value;
-        }
-
-        return mb_strimwidth($value, 0, $limit, '', 'UTF-8').$end;
+        config()->set('admin.models', [
+            'Gogol\Admin\Tests\App\Models' => $this->getAppPath('Models')
+        ]);
     }
 }
