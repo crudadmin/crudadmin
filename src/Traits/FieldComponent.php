@@ -2,23 +2,53 @@
 
 namespace Gogol\Admin\Traits;
 
-use Illuminate\Filesystem\Filesystem;
 use Admin;
 use Ajax;
+use Gogol\Admin\Helpers\Button;
+use Gogol\Admin\Helpers\Layout;
 
 trait FieldComponent
 {
-    private function getTextBetweenTags($string, $tagname)
+    /*
+     * Return parsed field component, or multiple components
+     */
+    public function getFieldsComponents($initial_request = false)
     {
-        $string = trim($string);
+        $fields = $this->getFields();
 
-        preg_match("/\<$tagname.*?\>(.*?)\<\/$tagname\>/s", $string, $matches);
+        $loadedComponents = Admin::getComponentsFiles();
 
-        return trim($matches[1]);
+        $components = [];
+
+        foreach ($fields as $key => $field)
+        {
+            if ( ! array_key_exists('component', $field) )
+                continue;
+
+            $componentsNames = explode(',', $field['component']);
+
+            foreach ($componentsNames as $name)
+            {
+                if ( !($path = $this->getComponentRealPath($name)) )
+                {
+                    //Disable throw error on initial admin boot request
+                    if ( $initial_request === true )
+                        continue;
+
+                    Ajax::error(sprintf(trans('admin::admin.component-missing'), $name, $key), null, null, 500);
+                }
+
+                $components[strtolower($name)] = $this->renderVuejsComponent($path);
+            }
+        }
+
+        return $components;
     }
 
-
-    private function renderFieldComponent($path)
+    /*
+     * Render component
+     */
+    private function renderVuejsComponent($path)
     {
         $content = file_get_contents($path);
         $content = preg_replace('#^\s*//.+$#m', '', $content);
@@ -37,39 +67,69 @@ trait FieldComponent
     }
 
     /*
-     * Return parsed field components
+     * Get everything between given element
      */
-    public function getFieldsComponents($initial_request = false)
+    private function getTextBetweenTags($string, $tagname)
     {
-        $fields = $this->getFields();
+        $string = trim($string);
 
-        $loaded_components = Admin::getComponentsTemplates();
+        preg_match("/\<$tagname.*?\>(.*?)\<\/$tagname\>/s", $string, $matches);
 
-        $components = [];
+        return trim($matches[1]);
+    }
 
-        foreach ($fields as $key => $field)
+
+    /*
+     * Check if component does exists in specific paths
+     */
+    private function getComponentRealPath($originalFilename)
+    {
+        $filename = trim_end($originalFilename, '.vue');
+        $filename = str_replace('.', '/', $filename);
+
+        $componentPaths = Admin::getComponentsPaths();
+
+        //Get components from root of given component directories
+        $locations = array_map(function($path) use($filename) {
+            return trim_end($path, '/').'/'.$filename.'.vue';
+        }, $componentPaths);
+
+        //Get files from absolute paths
+        if ( $originalFilename[0] == '/' )
         {
-            if ( ! array_key_exists('component', $field) )
-                continue;
-
-            $components_names = explode(',', strtolower($field['component']));
-
-            foreach ($components_names as $component_name)
-            {
-                if ( ! array_key_exists($component_name, $loaded_components) )
-                {
-                    //Disable throw error on initial admin boot request
-                    if ( $initial_request === true )
-                        continue;
-
-                    Ajax::error(sprintf(trans('admin::admin.component-missing'), $component_name, $key), null, null, 500);
-                }
-
-                $components[$component_name] = $this->renderFieldComponent( $loaded_components[$component_name] );
-            }
+            $locations = array_merge($locations, [
+                //Get from absolute path
+                $originalFilename.'.vue',
+                $originalFilename
+            ]);
         }
 
-        return $components;
+        //Get files from components path
+        $locations = array_unique(array_merge($locations, [
+            //Get component with directory from views path (in case someone would type admin/components/template.vue)
+            resource_path('views/'.$filename.'.vue'),
+
+            //Get component from buttons/layouts/fields directory
+            resource_path('views/admin/components/fields/'.$filename.'.vue'),
+            resource_path('views/admin/components/buttons/'.$filename.'.vue'),
+            resource_path('views/admin/components/layouts/'.$filename.'.vue'),
+        ]));
+
+        //Try all possible combinations where would be stored component
+        foreach ($locations as $path)
+        {
+            if ( file_exists($path) )
+                return $path;
+        }
+
+        //Get all loaded lowercase components
+        $loadedComponents = Admin::getComponentsFiles();
+
+        //Get component from loaded components list with lowercase file support
+        if ( array_key_exists($strtolower_filename = strtolower($filename), $loadedComponents) )
+            return $loadedComponents[$strtolower_filename];
+
+        return null;
     }
 
     /*
@@ -77,43 +137,14 @@ trait FieldComponent
      */
     public function renderVueJs($template)
     {
-        $filename = trim_end($template, '.vue');
-        $filename = str_replace('.', '/', $filename);
+        $path = $this->getComponentRealPath($template);
 
-        $loaded_components = Admin::getComponentsTemplates();
-
-        //Get component from loaded components list
-        if ( array_key_exists($strtolower_filename = strtolower($filename), $loaded_components) )
-            $path = $loaded_components[$strtolower_filename];
-
-        //Get component from component directory path
-        elseif ( ($path = resource_path('views/admin/components/'.$filename.'.vue')) && file_exists($path) )
-            $path = $path;
-
-        //Get component with directory from views path
-        else if ( ($path = resource_path('views/'.$filename.'.vue')) && file_exists($path) )
-            $path = $path;
-
-        //Get component from given path
-        else if ( ($path = $template) && file_exists($path) || ($path = $template.'.vue') && file_exists($path) )
-            $path = $path;
-
-        //If component does not exists
-        else
-            $path = null;
-
-        //Throw ajax error for button component render
-        if (
-            (
-                $this instanceof \Gogol\Admin\Helpers\Button
-                || $this instanceof \Gogol\Admin\Helpers\Layout
-            )
-            && ! file_exists($path)
-        ){
+        //Throw ajax error for button or layout component render
+        if ( $path === null && ( $this instanceof Button || $this instanceof Layout ) ){
             Ajax::error(sprintf(trans('admin::admin.component-missing'), $filename, ''), null, null, 500);
         }
 
-        return $this->renderFieldComponent($path);
+        return $this->renderVuejsComponent($path);
     }
 
     /*

@@ -79,4 +79,11 @@ return [
     'routes' => [
         'routes/web.php'
     ],
+
+    /*
+     * Components directories
+     */
+    'components' => [
+        'resources/views/admin/components'
+    ],
 ];

@@ -185,26 +185,28 @@ class Admin extends AdminBootloader
     }
 
     /*
+     * Get components config paths and add absolute app path if is needed
+     */
+    public function getComponentsPaths()
+    {
+        return array_map(function($path){
+            return base_or_relative_path($path);
+        }, config('admin.components', []));
+    }
+
+    /*
      * Return all components templates for fields
      */
-    public function getComponentsTemplates()
+    public function getComponentsFiles()
     {
         return $this->cache('fields_components', function(){
             $components = [];
 
             //Get components path and add absolute app path if is needed
-            $config_paths = array_map(function($path){
-                return base_or_relative_path($path);
-            }, config('admin.components', []));
-
-            //Merge config paths, with default admin path
-            $paths = array_merge(
-                $config_paths,
-                [ resource_path('views/admin/components') ]
-            );
+            $configPaths = $this->getComponentsPaths();
 
             //Get all components
-            foreach ($paths as $path)
+            foreach ($configPaths as $path)
             {
                 if ( ! file_exists($path) )
                     continue;

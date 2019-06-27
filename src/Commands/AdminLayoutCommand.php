@@ -63,7 +63,7 @@ class AdminLayoutCommand extends GeneratorCommand
 
     protected function copyBladeLayout()
     {
-        $directory = resource_path('views/admin/'.($this->template_type == 'vuejs' ? 'components/' : null));
+        $directory = resource_path('views/admin/'.($this->template_type == 'vuejs' ? 'components/layouts/' : null));
 
         $path = $directory . $this->getLayoutName() . ($this->template_type == 'blade' ? '.blade.php' : '.vue');
 

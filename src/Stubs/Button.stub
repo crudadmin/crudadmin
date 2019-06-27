@@ -14,20 +14,22 @@ class DummyButton extends Button
      */
     public $type = 'button';
 
+    //Name of button on hover
+    public $name = 'DummyButton';
+
+    //Button classes
+    public $class = 'btn-default';
+
+    //Button Icon
+    public $icon = 'fa-gift';
+
     /**
      * Here you can set your custom properties for each row
      * @param Gogol\Admin\Models\Model $row
      */
     public function __construct($row)
     {
-        //Name of button on hover
-        $this->name = 'DummyButton';
-
-        //Button classes
-        $this->class = 'btn-default';
-
-        //Button Icon
-        $this->icon = 'fa-gift';
+        $this->active = true;
     }
 
     /**

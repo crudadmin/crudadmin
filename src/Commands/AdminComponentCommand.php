@@ -79,6 +79,21 @@ class AdminComponentCommand extends GeneratorCommand
         return __DIR__.'/../Stubs/'.$stub.'.stub';
     }
 
+    /*
+     * Where to store component
+     */
+    protected function getDirType()
+    {
+        if ( $this->template_type == 'form field' )
+            return 'fields';
+        elseif ( $this->template_type == 'layout' )
+            return 'layouts';
+        elseif ( $this->template_type == 'button' )
+            return 'buttons';
+
+        return '';
+    }
+
     /**
      * Get the desired class name from the input.
      *
@@ -99,6 +114,8 @@ class AdminComponentCommand extends GeneratorCommand
     {
         $name = str_replace_first($this->rootNamespace(), '', $name);
 
-        return resource_path('views/admin/components/' . str_replace('\\', '/', $name) . '.vue');
+        $type = $this->getDirType();
+
+        return resource_path('views/admin/components/' . $type . '/' . str_replace('\\', '/', $name) . '.vue');
     }
 }
