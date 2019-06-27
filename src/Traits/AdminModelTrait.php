@@ -802,4 +802,12 @@ trait AdminModelTrait
     {
         $query->where('published_at', '!=', null)->whereRAW('published_at <= NOW()');
     }
+
+    /*
+     * Where are stored VueJS components
+     */
+    protected function getComponentPaths()
+    {
+        return resource_path('views/admin/components/fields');
+    }
 }

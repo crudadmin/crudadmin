@@ -2,11 +2,11 @@
 
 namespace Gogol\Admin\Helpers;
 
-use Gogol\Admin\Traits\FieldComponent;
+use Gogol\Admin\Traits\VueComponent;
 
 class Layout
 {
-    use FieldComponent;
+    use VueComponent;
 
     /*
      * List of all available positions
@@ -29,6 +29,14 @@ class Layout
      * table-footer - footer of the table
      */
     public $position = 'top';
+
+    /*
+     * Where are stored VueJS components
+     */
+    protected function getComponentPaths()
+    {
+        return resource_path('views/admin/components/layouts');
+    }
 }
 
 ?>

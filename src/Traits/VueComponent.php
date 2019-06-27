@@ -6,8 +6,9 @@ use Admin;
 use Ajax;
 use Gogol\Admin\Helpers\Button;
 use Gogol\Admin\Helpers\Layout;
+use Gogol\Admin\Models\Model as AdminModel;
 
-trait FieldComponent
+trait VueComponent
 {
     /*
      * Return parsed field component, or multiple components
@@ -15,8 +16,6 @@ trait FieldComponent
     public function getFieldsComponents($initial_request = false)
     {
         $fields = $this->getFields();
-
-        $loadedComponents = Admin::getComponentsFiles();
 
         $components = [];
 
@@ -80,40 +79,31 @@ trait FieldComponent
 
 
     /*
-     * Check if component does exists in specific paths
+     * Check if component does exists in specific locations
      */
     private function getComponentRealPath($originalFilename)
     {
         $filename = trim_end($originalFilename, '.vue');
         $filename = str_replace('.', '/', $filename);
 
-        $componentPaths = Admin::getComponentsPaths();
-
-        //Get components from root of given component directories
+        //Try components from root of given component directories from config
         $locations = array_map(function($path) use($filename) {
             return trim_end($path, '/').'/'.$filename.'.vue';
-        }, $componentPaths);
+        }, Admin::getComponentsPaths());
 
-        //Get files from absolute paths
+        //Try also files with absolute paths
         if ( $originalFilename[0] == '/' )
         {
-            $locations = array_merge($locations, [
-                //Get from absolute path
-                $originalFilename.'.vue',
-                $originalFilename
-            ]);
+            $locations[] = $originalFilename.'.vue';
+            $locations[] = $originalFilename;
         }
 
-        //Get files from components path
-        $locations = array_unique(array_merge($locations, [
-            //Get component with directory from views path (in case someone would type admin/components/template.vue)
-            resource_path('views/'.$filename.'.vue'),
+        //Try additional feature components path
+        if ( method_exists($this, 'getComponentPaths') )
+            $locations[] = trim_end($this->getComponentPaths(), '/').'/'.$filename.'.vue';
 
-            //Get component from buttons/layouts/fields directory
-            resource_path('views/admin/components/fields/'.$filename.'.vue'),
-            resource_path('views/admin/components/buttons/'.$filename.'.vue'),
-            resource_path('views/admin/components/layouts/'.$filename.'.vue'),
-        ]));
+        //Get component with directory from views path (in case someone would type admin/components/template.vue)
+        $locations[] = resource_path('views/'.$filename.'.vue');
 
         //Try all possible combinations where would be stored component
         foreach ($locations as $path)
@@ -135,9 +125,9 @@ trait FieldComponent
     /*
      * Parse vuejs template
      */
-    public function renderVueJs($template)
+    public function renderVueJs($filename)
     {
-        $path = $this->getComponentRealPath($template);
+        $path = $this->getComponentRealPath($filename);
 
         //Throw ajax error for button or layout component render
         if ( $path === null && ( $this instanceof Button || $this instanceof Layout ) ){

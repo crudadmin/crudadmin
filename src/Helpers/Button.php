@@ -3,12 +3,12 @@
 namespace Gogol\Admin\Helpers;
 
 use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Traits\FieldComponent;
+use Gogol\Admin\Traits\VueComponent;
 use Illuminate\Support\Collection;
 
 class Button
 {
-    use FieldComponent;
+    use VueComponent;
 
     /*
      * Button row
@@ -204,6 +204,14 @@ class Button
     //     return $this->title('Your title...')
     //                 ->component('YoutComponent.vue');
     // }
+
+    /*
+     * Where are stored VueJS components
+     */
+    protected function getComponentPaths()
+    {
+        return resource_path('views/admin/components/buttons');
+    }
 }
 
 ?>

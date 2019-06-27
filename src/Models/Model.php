@@ -4,7 +4,7 @@ namespace Gogol\Admin\Models;
 
 use Admin;
 use Gogol\Admin\Traits\AdminModelTrait;
-use Gogol\Admin\Traits\FieldComponent;
+use Gogol\Admin\Traits\VueComponent;
 use Gogol\Admin\Traits\FieldProperties;
 use Gogol\Admin\Traits\HasAttributes;
 use Gogol\Admin\Traits\HasChildrens;
@@ -27,7 +27,7 @@ class Model extends BaseModel
         ModelRelationships,
         ModelLayoutBuilder,
         ModelRules,
-        FieldComponent,
+        VueComponent,
         FieldProperties,
         AdminModelTrait,
         HasChildrens,

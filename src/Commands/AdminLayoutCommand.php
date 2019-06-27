@@ -139,9 +139,7 @@ class AdminLayoutCommand extends GeneratorCommand
      */
     protected function getLayoutName()
     {
-        $name = $this->getNameInput();
-
-        return strtolower($name[0]) . substr($name, 1);
+        return $this->getNameInput();
     }
 
     protected function getLayoutResponse()
@@ -149,7 +147,7 @@ class AdminLayoutCommand extends GeneratorCommand
         if ( $this->template_type == 'blade' )
             return "view('admin.".$this->getLayoutName()."')";
 
-        return '$this->renderVueJs(\'admin/components/'.$this->getLayoutName().'.vue\')';
+        return '$this->component(\''.$this->getLayoutName().'.vue\')';
     }
 
     /**
