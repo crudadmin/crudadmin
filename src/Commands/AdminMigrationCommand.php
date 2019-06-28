@@ -35,14 +35,14 @@ class AdminMigrationCommand extends Command
     protected $files;
 
     /*
-     * Here will is migrations which will be booted at the end after all migrations
+     * Here is events what will be fired when all migrations will be done
      */
-    protected $buffer = [];
+    protected $fire_after_all = [];
 
     /*
-     * Here will is migrations which will be booted at the end of actual migration
+     * Here will is migrations which will be booted at the end of every migration
      */
-    protected $buffer_after = [];
+    protected $fire_after_migration = [];
 
     /**
      * Create a new command instance.
@@ -59,6 +59,34 @@ class AdminMigrationCommand extends Command
 
         //DB doctrine fix for enum columns
         DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+    }
+
+    /**
+     * Register event after specific migration
+     * @param  object/string $model
+     * @param  $callback
+     * @return void
+     */
+    public function registerAfterMigration($model, $callback)
+    {
+        if ( is_object($model) )
+            $table = $model->getTable();
+
+        $this->fire_after_migration[ $table ][] = $callback;
+    }
+
+    /**
+     * Register event what will be fired when all migrations will be done
+     * @param  object/string $model
+     * @param  $callback
+     * @return void
+     */
+    public function registerAfterAllMigrations($model, $callback)
+    {
+        if ( is_object($model) )
+            $table = $model->getTable();
+
+        $this->fire_after_all[ $table ][] = $callback;
     }
 
     protected function fire()
@@ -138,11 +166,11 @@ class AdminMigrationCommand extends Command
             return $this->line('<info>Noting to migrate.</info>');
 
         /*
-         * Run migrations from buffer
+         * Run events migrations from buffer
          */
         foreach ($models as $model)
         {
-            $this->runFromCache($model);
+            $this->fireEventsFromCache($model, 'fire_after_all');
         }
     }
 
@@ -162,26 +190,26 @@ class AdminMigrationCommand extends Command
         //Checks if model has some extre migrations on create
         if ( method_exists($model, 'onMigrate') )
         {
-            $this->buffer[ $model->getTable() ][] = function( $table ) use( $model ) {
-                $model->onMigrate($table, $model->getSchema());
-            };
+            $this->registerAfterAllMigrations($model, function( $table ) use( $model ) {
+                $model->onMigrate($table, $model->getSchema(), $this);
+            });
         }
 
         //Run migrations from cache which have to be runned after actual migration
-        $this->runFromCache($model, 'buffer_after');
+        $this->fireEventsFromCache($model, 'fire_after_migration');
     }
 
     /*
-     * Run all migrations saved into buffer
+     * Run all migrations saved in buffer
      */
-    public function runFromCache($model, $from = 'buffer')
+    public function fireEventsFromCache($model, $type)
     {
         $table = $model->getTable();
 
-        if ( ! array_key_exists($table, $this->{$from}) )
+        if ( ! array_key_exists($table, $this->{$type}) )
             return;
 
-        foreach ($this->{$from}[ $table ] as $function)
+        foreach ($this->{$type}[ $table ] as $function)
         {
             $model->getSchema()->table( $table , function (Blueprint $table) use ($function) {
                 $function($table);
@@ -697,10 +725,9 @@ class AdminMigrationCommand extends Command
                     }
                 }
 
-                $this->buffer[ $model->getTable() ][] = function( $table ) use ( $key, $properties, $model )
-                {
+                $this->registerAfterAllMigrations($model, function( $table ) use ( $key, $properties, $model ){
                     $table->foreign($key)->references($properties[2])->on($properties[0]);
-                };
+                });
             }
 
             return $table->integer($key)->unsigned();
@@ -733,10 +760,10 @@ class AdminMigrationCommand extends Command
                 }
             } while( ! is_numeric($requested_id) );
 
-            $this->buffer_after[ $model->getTable() ][] = function() use ( $model, $key, $requested_id )
-            {
+            //Register event after this migration will be done
+            $this->registerAfterMigration($model, function() use ( $model, $key, $requested_id ) {
                 DB::connection($model->getConnectionName())->table($model->getTable())->update([ $key => $requested_id ]);
-            };
+            });
         } else {
             $this->line('<error>+ You have to insert at least one row into '.$reference_table.' reference table or remove all existing data in actual '.$model->getTable().' table:</error>');
             die;
@@ -796,7 +823,7 @@ class AdminMigrationCommand extends Command
 
             $pivot_rows = $this->getPivotRowsFromSingleRelation($model, $singular_column, $properties);
 
-            $this->buffer[ $table->getTable() ][] = function() use($table, $model, $key, $properties, $pivot_rows, $singular_column) {
+            $this->registerAfterMigration($table, function() use($table, $model, $key, $properties, $pivot_rows, $singular_column) {
                 //If pivot table does not exists
                 if ( ! $model->getSchema()->hasTable( $properties[3] ) )
                 {
@@ -837,7 +864,7 @@ class AdminMigrationCommand extends Command
                     }
 
                 }
-            };
+            });
 
             return true;
         }
@@ -888,7 +915,7 @@ class AdminMigrationCommand extends Command
     //Resave all rows in model for updating slug if needed
     protected function updateSlugs($model)
     {
-        $this->buffer_after[ $model->getTable() ][] = function() use ($model) {
+        $this->registerAfterMigration($model, function() use ($model) {
 
             //Get empty slugs
             $empty_slugs = $model->withoutGlobalScopes()->where(function($query) use ($model) {
@@ -922,13 +949,13 @@ class AdminMigrationCommand extends Command
                 foreach ($empty_slugs->select([$model->getKeyName(), 'slug', $model->getProperty('sluggable')])->get() as $row)
                     $row->save();
             }
-        };
+        });
     }
 
     //Resave all rows in model for updating slug if needed
     protected function addDefaultOrder($model)
     {
-        $this->buffer_after[ $model->getTable() ][] = function() use ($model) {
+        $this->registerAfterMigration($model, function() use ($model) {
             $i = 0;
 
             foreach ($model->get() as $row)
@@ -936,7 +963,7 @@ class AdminMigrationCommand extends Command
                 $row->_order = $i++;
                 $row->save();
             }
-        };
+        });
     }
 
     /**
@@ -1107,9 +1134,9 @@ class AdminMigrationCommand extends Command
                 continue;
             }
 
-            $this->buffer[ $model->getTable() ][] = function( $table ) use ($foreign_column, $parent) {
+            $this->registerAfterAllMigrations($model, function( $table ) use ($foreign_column, $parent) {
                 $table->foreign( $foreign_column )->references( 'id' )->on( $parent->getTable() );
-            };
+            });
         }
     }
 
