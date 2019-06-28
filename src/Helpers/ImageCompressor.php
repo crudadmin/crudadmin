@@ -44,8 +44,15 @@ class ImageCompressor
             $extension = end($file_parts);
         }
 
+        //Default compression quality
+        $defaultQuality = 85;
+        $qualityCompression = config('admin.image_compression', $defaultQuality);
+
+        //Set default compress quality if is set to true
+        if ( $qualityCompression === true )
+            $qualityCompression = $defaultQuality;
+
         $extension = strtolower($extension);
-        $can_compress = config('admin.upload_compression', true);
 
         //Compress and resize images
         if (
@@ -61,8 +68,8 @@ class ImageCompressor
             $resized = $this->resizeMaxResolution($image);
 
             //Resize jpeg images
-            if ( isset($is_jpg) && $is_jpg === true && ($resized === true || $can_compress === true) )
-                $encoded_image = $image->encode('jpg', $can_compress === false ? 100 : 85);
+            if ( isset($is_jpg) && $is_jpg === true && ($resized === true || $qualityCompression !== false) )
+                $encoded_image = $image->encode('jpg', $qualityCompression === false ? 100 : $qualityCompression);
 
             //Resize png image
             if ( isset($is_png) && $is_png === true && $resized === true )
@@ -74,7 +81,7 @@ class ImageCompressor
         }
 
         //Optimize images
-        if ( $can_compress )
+        if ( config('admin.image_lossless_compression', true) )
             $this->tryShellCompression($file, $dest_path);
 
         return true;

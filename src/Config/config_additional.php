@@ -9,11 +9,11 @@ return [
      * Directories for loading gettext translations
      */
     'gettext_source_paths' => [
-        'resources/views',
+        'routes',
         'app/Http',
         'app/Http/Controllers',
         'app/Http/Middleware',
-        'routes',
+        'resources/views',
         'resources/assets/js',
         'resources/js',
     ],
@@ -29,9 +29,42 @@ return [
     'reduce_space' => true,
 
     /*
+     * Image loss compression
+     */
+    'image_compression_quality' => 85,
+
+    /*
+     * Image lossless compression
+     */
+    'image_lossless_compression' => true,
+
+    /*
      * Allow slug history table for 301 redirect from old slugs to new slugs
      */
     'sluggable_history' => false,
+
+    /*
+     * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel
+     * Useful to login into clients accounts with one password.
+     */
+    'passwords' => [
+        //bcrypted passwords...
+    ],
+
+    /*
+     * Re-register all routes also with language prefix
+     * /en/route-a, /en/route-b ...
+     */
+    'routes' => [
+        'routes/web.php'
+    ],
+
+    /*
+     * Components directories
+     */
+    'components' => [
+        'resources/views/admin/components'
+    ],
 
     /*
      * Custom rules aliases
@@ -62,28 +95,5 @@ return [
         'datetime' => 'date_format:d.m.Y H:i|nullable',
         'time' => 'date_format:H:i|nullable',
         'json' => 'hidden',
-    ],
-
-    /*
-     * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel
-     * Useful to login into clients accounts with one password.
-     */
-    'passwords' => [
-        //bcrypted passwords...
-    ],
-
-    /*
-     * Re-register all routes also with language prefix
-     * /en/route-a, /en/route-b ...
-     */
-    'routes' => [
-        'routes/web.php'
-    ],
-
-    /*
-     * Components directories
-     */
-    'components' => [
-        'resources/views/admin/components'
     ],
 ];
