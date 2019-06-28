@@ -30,10 +30,9 @@ class DummyClass extends AdminModel
     protected $belongsToModel = DummyBelongsTo::class;
 
     /*
-     * Automatic form and database generation
-     * @name - field name
-     * @placeholder - field placeholder
-     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox/radio
+     * Automatic form and database generator by fields list
+     * :name - field name
+     * :type - field type (string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox/radio)
      * ... other validation methods from laravel
      */
     protected $fields = [
