@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Traits\VueComponent;
+use Admin\Models\Model as AdminModel;
+use Admin\Traits\VueComponent;
 use Illuminate\Support\Collection;
 
 class Button

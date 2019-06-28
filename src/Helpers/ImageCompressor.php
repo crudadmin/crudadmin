@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
 use Image;
 use Spatie\ImageOptimizer\OptimizerChainFactory;

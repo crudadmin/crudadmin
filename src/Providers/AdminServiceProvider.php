@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -13,6 +13,6 @@ class AdminServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind('admin', \Gogol\Admin\Helpers\Admin::class);
+        $this->app->bind('admin', \Admin\Helpers\Admin::class);
     }
 }

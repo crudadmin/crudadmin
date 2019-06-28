@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Filesystem\Filesystem;

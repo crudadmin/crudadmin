@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use Validator;
-use Gogol\Admin\Exceptions\ValidationException;
+use Admin\Exceptions\ValidationException;
 use Localization;
 use Fields;
 
@@ -164,7 +164,7 @@ trait Validation {
 
     protected function muttatorsResponse($fields)
     {
-        $request = new \Gogol\Admin\Requests\DataRequest( request()->all() );
+        $request = new \Admin\Requests\DataRequest( request()->all() );
 
         $request->applyMutators( $this, $fields );
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Facades;
+namespace Admin\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

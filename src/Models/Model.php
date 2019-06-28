@@ -1,21 +1,21 @@
 <?php
 
-namespace Gogol\Admin\Models;
+namespace Admin\Models;
 
 use Admin;
-use Gogol\Admin\Traits\AdminModelTrait;
-use Gogol\Admin\Traits\VueComponent;
-use Gogol\Admin\Traits\FieldProperties;
-use Gogol\Admin\Traits\HasAttributes;
-use Gogol\Admin\Traits\HasChildrens;
-use Gogol\Admin\Traits\Historiable;
-use Gogol\Admin\Traits\ModelIcons;
-use Gogol\Admin\Traits\ModelLayoutBuilder;
-use Gogol\Admin\Traits\ModelRelationships;
-use Gogol\Admin\Traits\ModelRules;
-use Gogol\Admin\Traits\Sluggable;
-use Gogol\Admin\Traits\Uploadable;
-use Gogol\Admin\Traits\Validation;
+use Admin\Traits\AdminModelTrait;
+use Admin\Traits\VueComponent;
+use Admin\Traits\FieldProperties;
+use Admin\Traits\HasAttributes;
+use Admin\Traits\HasChildrens;
+use Admin\Traits\Historiable;
+use Admin\Traits\ModelIcons;
+use Admin\Traits\ModelLayoutBuilder;
+use Admin\Traits\ModelRelationships;
+use Admin\Traits\ModelRules;
+use Admin\Traits\Sluggable;
+use Admin\Traits\Uploadable;
+use Admin\Traits\Validation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;

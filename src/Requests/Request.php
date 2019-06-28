@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Requests;
+namespace Admin\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Carbon\Carbon;

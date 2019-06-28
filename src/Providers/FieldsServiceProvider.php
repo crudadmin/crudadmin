@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -12,6 +12,6 @@ class FieldsServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bind('fields', \Gogol\Admin\Fields\Fields::class);
+        $this->app->bind('fields', \Admin\Fields\Fields::class);
     }
 }

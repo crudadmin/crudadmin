@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Commands;
+namespace Admin\Commands;
 
 use Illuminate\Console\Command;
 

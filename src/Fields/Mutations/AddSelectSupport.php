@@ -1,13 +1,13 @@
 <?php
 
-namespace Gogol\Admin\Fields\Mutations;
+namespace Admin\Fields\Mutations;
 
 use Admin;
 use Ajax;
 use DB;
-use Gogol\Admin\Fields\Mutations\MutationRule;
-use Gogol\Admin\Helpers\Helper;
-use Gogol\Admin\Traits\Support\DataCache;
+use Admin\Fields\Mutations\MutationRule;
+use Admin\Helpers\Helper;
+use Admin\Traits\Support\DataCache;
 use Illuminate\Support\Collection;
 use Localization;
 

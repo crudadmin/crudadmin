@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\OtherModels;
+namespace Admin\Tests\App\OtherModels;
 
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
+use Admin\Fields\Group;
 
 class Blog extends AdminModel
 {

@@ -2,8 +2,8 @@
 
 namespace DummyNamespace;
 
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
+use Admin\Fields\Group;
 
 class DummyClass extends AdminModel
 {

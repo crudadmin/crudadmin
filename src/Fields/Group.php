@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Fields;
+namespace Admin\Fields;
 
 class Group
 {

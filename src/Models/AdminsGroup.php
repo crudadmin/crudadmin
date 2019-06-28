@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Models;
+namespace Admin\Models;
 
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Models\Model as AdminModel;
 use Admin;
 
 class AdminsGroup extends AdminModel

@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\Concerns;
+namespace Admin\Tests\Concerns;
 
-use Gogol\Admin\Tests\Concerns\DropDatabase;
-use Gogol\Admin\Tests\Concerns\DropUploads;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Concerns\DropUploads;
 
 trait AdminIntegration
 {

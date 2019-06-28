@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Concerns;
+namespace Admin\Tests\Concerns;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;

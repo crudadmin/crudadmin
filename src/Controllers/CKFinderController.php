@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Controllers;
+namespace Admin\Controllers;
 
 use CKSource\CKFinder\CKFinder;
 use \Illuminate\Routing\Controller;
@@ -39,7 +39,7 @@ class CKFinderController extends Controller
     private function setupForV4PlusKernel($ckfinder)
     {
         $ckfinder['resolver'] = function () use ($ckfinder) {
-            $commandResolver = new \Gogol\Admin\Plugins\CKFinder\Polyfill\CommandResolver($ckfinder);
+            $commandResolver = new \Admin\Plugins\CKFinder\Polyfill\CommandResolver($ckfinder);
             $commandResolver->setCommandsNamespace(\CKSource\CKFinder\CKFinder::COMMANDS_NAMESPACE);
             $commandResolver->setPluginsNamespace(\CKSource\CKFinder\CKFinder::PLUGINS_NAMESPACE);
 

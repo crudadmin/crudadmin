@@ -1,10 +1,10 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use Illuminate\Contracts\Validation\Factory;
-use Gogol\Admin\Exceptions\SluggableException;
-use Gogol\Admin\Models\SluggableHistory;
+use Admin\Exceptions\SluggableException;
+use Admin\Models\SluggableHistory;
 use Localization;
 use Route;
 

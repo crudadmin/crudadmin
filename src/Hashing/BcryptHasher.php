@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Hashing;
+namespace Admin\Hashing;
 
 use Illuminate\Hashing\BcryptHasher as DefaultBcryptHasher;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Requests;
+namespace Admin\Requests;
 
-use Gogol\Admin\Requests\Request;
+use Admin\Requests\Request;
 
 class DataRequest extends Request
 {

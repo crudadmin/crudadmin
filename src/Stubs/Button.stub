@@ -2,8 +2,8 @@
 
 namespace DummyNamespace;
 
-use Gogol\Admin\Helpers\Button;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Helpers\Button;
+use Admin\Models\Model as AdminModel;
 use Illuminate\Support\Collection;
 
 class DummyButton extends Button
@@ -25,7 +25,7 @@ class DummyButton extends Button
 
     /**
      * Here you can set your custom properties for each row
-     * @param Gogol\Admin\Models\Model $row
+     * @param Admin\Models\Model $row
      */
     public function __construct($row)
     {
@@ -34,7 +34,7 @@ class DummyButton extends Button
 
     /**
      * Firing callback on press button
-     * @param Gogol\Admin\Models\Model $row
+     * @param Admin\Models\Model $row
      * @return object
      */
     public function fire(AdminModel $row)

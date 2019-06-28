@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Traits\VueComponent;
+use Admin\Traits\VueComponent;
 
 class Layout
 {

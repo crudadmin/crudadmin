@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -13,7 +13,7 @@ class SEOServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bind('seo', \Gogol\Admin\Helpers\SEO::class);
+        $this->app->bind('seo', \Admin\Helpers\SEO::class);
     }
 
     public function boot()

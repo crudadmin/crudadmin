@@ -1,11 +1,11 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
 use Ajax;
 use Carbon\Carbon;
-use Gogol\Admin\Helpers\Layout;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Helpers\Layout;
+use Admin\Models\Model as AdminModel;
 use Illuminate\Support\Str;
 
 class AdminRows

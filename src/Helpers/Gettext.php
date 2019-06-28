@@ -1,10 +1,10 @@
 <?php
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
 use \App\Core\Models\Language;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
-use Gogol\Admin\Helpers\File;
+use Admin\Helpers\File;
 use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
 use Gettext\Translations;
@@ -247,7 +247,7 @@ class Gettext
         if ( $localization->poedit_po && file_exists($localization->poedit_po->path) )
             $timestamp = filemtime($localization->poedit_po->path);
 
-        return action('\Gogol\Admin\Controllers\GettextController@index')
+        return action('\Admin\Controllers\GettextController@index')
                     . '?lang='.($localization ? $localization->slug : '')
                     . '&t='.$timestamp;
     }

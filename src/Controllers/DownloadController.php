@@ -1,11 +1,11 @@
 <?php
 
-namespace Gogol\Admin\Controllers;
+namespace Admin\Controllers;
 
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
-use Gogol\Admin\Helpers\File;
+use Admin\Helpers\File;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Image;
 

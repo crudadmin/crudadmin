@@ -1,13 +1,13 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Tests;
+namespace Admin\Tests\Browser\Tests;
 
-use Gogol\Admin\Models\ModelsHistory;
-use Gogol\Admin\Tests\App\Models\History\History;
-use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Concerns\DropDatabase;
-use Gogol\Admin\Tests\Concerns\DropUploads;
+use Admin\Models\ModelsHistory;
+use Admin\Tests\App\Models\History\History;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Concerns\DropUploads;
 
 class ModelHistoryTest extends BrowserTestCase
 {

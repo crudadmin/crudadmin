@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Models\Model as AdminModel;
 
 class DummyClass extends AdminModel
 {

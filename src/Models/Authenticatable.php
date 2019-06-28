@@ -1,10 +1,10 @@
 <?php
 
-namespace Gogol\Admin\Models;
+namespace Admin\Models;
 
 use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
-use Gogol\Admin\Models\Model;
-use Gogol\Admin\Traits\Auth\CanResetPassword;
+use Admin\Models\Model;
+use Admin\Traits\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;

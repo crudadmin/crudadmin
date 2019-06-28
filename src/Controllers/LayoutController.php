@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Controllers;
+namespace Admin\Controllers;
 
 use Illuminate\Http\Request;
 
@@ -8,9 +8,9 @@ use Ajax;
 use Admin;
 use Localization;
 use App\Http\Requests;
-use Gogol\Admin\Controllers\Controller as BaseController;
-use Gogol\Admin\Fields\Group;
-use Gogol\Admin\Helpers\AdminRows;
+use Admin\Controllers\Controller as BaseController;
+use Admin\Fields\Group;
+use Admin\Helpers\AdminRows;
 use DB;
 
 class LayoutController extends BaseController
@@ -30,18 +30,18 @@ class LayoutController extends BaseController
             'localization' => trans('admin::admin'),
             'dashboard' => $this->getDashBoard(),
             'requests' => [
-                'show' => action('\Gogol\Admin\Controllers\DataController@show', [':model', ':id', ':subid']),
-                'store' => action('\Gogol\Admin\Controllers\DataController@store'),
-                'update' => action('\Gogol\Admin\Controllers\DataController@update'),
-                'delete' => action('\Gogol\Admin\Controllers\DataController@delete'),
-                'togglePublishedAt' => action('\Gogol\Admin\Controllers\DataController@togglePublishedAt'),
-                'getHistory' => action('\Gogol\Admin\Controllers\DataController@getHistory', [':model', ':id']),
-                'updateOrder' => action('\Gogol\Admin\Controllers\DataController@updateOrder'),
-                'buttonAction' => action('\Gogol\Admin\Controllers\DataController@buttonAction'),
-                'download' => action('\Gogol\Admin\Controllers\DownloadController@index'),
-                'rows' => action('\Gogol\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
-                'translations' => action('\Gogol\Admin\Controllers\DataController@getTranslations', [':id']),
-                'update_translations' => action('\Gogol\Admin\Controllers\DataController@updateTranslations', [':id']),
+                'show' => action('\Admin\Controllers\DataController@show', [':model', ':id', ':subid']),
+                'store' => action('\Admin\Controllers\DataController@store'),
+                'update' => action('\Admin\Controllers\DataController@update'),
+                'delete' => action('\Admin\Controllers\DataController@delete'),
+                'togglePublishedAt' => action('\Admin\Controllers\DataController@togglePublishedAt'),
+                'getHistory' => action('\Admin\Controllers\DataController@getHistory', [':model', ':id']),
+                'updateOrder' => action('\Admin\Controllers\DataController@updateOrder'),
+                'buttonAction' => action('\Admin\Controllers\DataController@buttonAction'),
+                'download' => action('\Admin\Controllers\DownloadController@index'),
+                'rows' => action('\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
+                'translations' => action('\Admin\Controllers\DataController@getTranslations', [':id']),
+                'update_translations' => action('\Admin\Controllers\DataController@updateTranslations', [':id']),
             ],
         ];
 

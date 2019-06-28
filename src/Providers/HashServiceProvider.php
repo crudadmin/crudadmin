@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -26,11 +26,11 @@ class HashServiceProvider extends ServiceProvider
 
         $this->app->extend('hash', function ($hashManager, $app) {
             if ( class_exists('Illuminate\Hashing\HashManager') )
-                return new \Gogol\Admin\Hashing\HashManager($app);
+                return new \Admin\Hashing\HashManager($app);
 
             //Support for Laravel 5.4 and lower
             else
-                return new \Gogol\Admin\Hashing\BcryptHasher;
+                return new \Admin\Hashing\BcryptHasher;
         });
     }
 

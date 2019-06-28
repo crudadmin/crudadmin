@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Hashing;
+namespace Admin\Hashing;
 
 use Illuminate\Hashing\HashManager as DefaultHashManager;
-use Gogol\Admin\Hashing\BcryptHasher;
+use Admin\Hashing\BcryptHasher;
 
 class HashManager extends DefaultHashManager
 {

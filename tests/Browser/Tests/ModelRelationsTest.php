@@ -1,12 +1,12 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Tests;
+namespace Admin\Tests\Browser\Tests;
 
-use Gogol\Admin\Tests\App\Models\Articles\Article;
-use Gogol\Admin\Tests\App\Models\Articles\ArticlesComment;
-use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\App\Models\Articles\ArticlesComment;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Concerns\DropDatabase;
 
 class ModelRelationsTest extends BrowserTestCase
 {

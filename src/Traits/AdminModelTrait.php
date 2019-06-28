@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
-use Gogol\Admin\Helpers\File;
+use Admin\Helpers\File;
 use Carbon\Carbon;
 use Localization;
 use Fields;
@@ -683,7 +683,7 @@ trait AdminModelTrait
      */
     public function newCollection(array $models = [])
     {
-        return new \Gogol\Admin\Helpers\AdminCollection($models);
+        return new \Admin\Helpers\AdminCollection($models);
     }
 
     /*

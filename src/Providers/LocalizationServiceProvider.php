@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +12,7 @@ class LocalizationServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bind('localization', \Gogol\Admin\Helpers\Localization::class);
+        $this->app->bind('localization', \Admin\Helpers\Localization::class);
     }
 
     public function boot()

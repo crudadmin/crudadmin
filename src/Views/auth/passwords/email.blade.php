@@ -5,7 +5,7 @@
 <div class="login-box-body">
   <p class="login-box-msg">{{ trans('admin::admin.password-reset') }}</p>
 
-  <form action="{{ action('\Gogol\Admin\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail') }}" method="post">
+  <form action="{{ action('\Admin\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail') }}" method="post">
     {!! csrf_field() !!}
 
     <div class="form-group has-feedback">

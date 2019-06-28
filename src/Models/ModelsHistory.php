@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Models;
+namespace Admin\Models;
 
-use Gogol\Admin\Models\Model;
+use Admin\Models\Model;
 use Carbon\Carbon;
 use Admin;
 

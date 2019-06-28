@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
 use File as BaseFile;
 use Image;
@@ -121,7 +121,7 @@ class File
         }
 
         $path = substr($this->path, 8);
-        $action = action( '\Gogol\Admin\Controllers\DownloadController@signedDownload', self::getHash( $path ) );
+        $action = action( '\Admin\Controllers\DownloadController@signedDownload', self::getHash( $path ) );
 
         return $action . '?file=' . urlencode($path);
     }

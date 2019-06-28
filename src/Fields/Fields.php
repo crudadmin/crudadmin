@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Fields;
+namespace Admin\Fields;
 
 class Fields
 {
@@ -479,7 +479,7 @@ class Fields
     {
         $mutation = new $namespace;
 
-        if ( $mutation instanceof \Gogol\Admin\Fields\Mutations\MutationRule )
+        if ( $mutation instanceof \Admin\Fields\Mutations\MutationRule )
         {
             $mutation->setFields($this->fields[$model->getTable()]);
             $mutation->setField($field);

@@ -2,7 +2,7 @@
 
 namespace DummyNamespace;
 
-use \Gogol\Admin\Helpers\Layout;
+use \Admin\Helpers\Layout;
 
 class DummyLayout extends Layout
 {

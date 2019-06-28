@@ -5,7 +5,7 @@
 <div class="login-box-body">
   <p class="login-box-msg">{{ trans('admin::admin.password-reset') }}</p>
 
-  <form action="{{ action('\Gogol\Admin\Controllers\Auth\ResetPasswordController@reset') }}" method="post">
+  <form action="{{ action('\Admin\Controllers\Auth\ResetPasswordController@reset') }}" method="post">
     {!! csrf_field() !!}
 
     <input type="hidden" name="token" value="{{ $token }}">

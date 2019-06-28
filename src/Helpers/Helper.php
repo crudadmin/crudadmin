@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
 use Route;
 

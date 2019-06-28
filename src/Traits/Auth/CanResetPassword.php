@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Traits\Auth;
+namespace Admin\Traits\Auth;
 
-use Gogol\Admin\Notifications\ResetPassword as ResetPasswordNotification;
+use Admin\Notifications\ResetPassword as ResetPasswordNotification;
 
 trait CanResetPassword
 {

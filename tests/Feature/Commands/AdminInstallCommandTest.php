@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\Feature\Commands;
+namespace Admin\Tests\Feature\Commands;
 
-use Gogol\Admin\Tests\TestCase;
-use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\TestCase;
+use Admin\Tests\Concerns\DropDatabase;
 
 class AdminInstallCommandTest extends TestCase
 {

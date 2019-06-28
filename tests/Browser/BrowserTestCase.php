@@ -1,11 +1,11 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser;
+namespace Admin\Tests\Browser;
 
-use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Concerns\AdminIntegration;
-use Gogol\Admin\Tests\Concerns\FeatureAssertions;
-use Gogol\Admin\Tests\OrchestraSetup;
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Concerns\AdminIntegration;
+use Admin\Tests\Concerns\FeatureAssertions;
+use Admin\Tests\OrchestraSetup;
 use Orchestra\Testbench\Dusk\TestCase;
 
 class BrowserTestCase extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
 use \Illuminate\Database\Eloquent\Collection as BaseCollection;
 

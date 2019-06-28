@@ -1,12 +1,12 @@
 <?php
 
-namespace Gogol\Admin\Commands;
+namespace Admin\Commands;
 
 use Illuminate\Console\Command;
 use Admin;
 use App\User;
-use Gogol\Admin\Helpers\File;
-use Gogol\Admin\Models\User as BaseUser;
+use Admin\Helpers\File;
+use Admin\Models\User as BaseUser;
 use Illuminate\Console\ConfirmableTrait;
 use Artisan;
 
@@ -120,7 +120,7 @@ class AdminInstallCommand extends Command
 
             if (
                 !($content = @file_get_contents($user_model))
-                || ! @file_put_contents($user_model, str_replace('Gogol\Admin\Models;', config('admin.app_namespace').';', $content))
+                || ! @file_put_contents($user_model, str_replace('Admin\Models;', config('admin.app_namespace').';', $content))
             ) {
                 $this->error('Some error with replacing namespace in User model...');
                 die;
@@ -170,7 +170,7 @@ class AdminInstallCommand extends Command
         ]);
 
         $this->line('<comment>+ Demo user created</comment>');
-        $this->line('<info>- Admin path:</info> <comment>'.action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
+        $this->line('<info>- Admin path:</info> <comment>'.action('\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
         $this->line('<info>- Email:</info> <comment>'.$data['email'].'</comment>');
         $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
 

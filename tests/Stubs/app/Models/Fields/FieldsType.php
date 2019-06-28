@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models\Fields;
+namespace Admin\Tests\App\Models\Fields;
 
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
+use Admin\Fields\Group;
 
 class FieldsType extends AdminModel
 {

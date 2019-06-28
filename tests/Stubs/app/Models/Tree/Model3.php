@@ -1,10 +1,10 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models\Tree;
+namespace Admin\Tests\App\Models\Tree;
 
-use Gogol\Admin\Fields\Group;
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Tests\App\Layouts\FormTopLayout;
+use Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
+use Admin\Tests\App\Layouts\FormTopLayout;
 
 class Model3 extends AdminModel
 {

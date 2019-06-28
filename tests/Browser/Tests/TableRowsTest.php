@@ -1,19 +1,19 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Tests;
+namespace Admin\Tests\Browser\Tests;
 
 use Admin;
 use Artisan;
 use Carbon\Carbon;
-use Gogol\Admin\Tests\App\Models\Articles\Article;
-use Gogol\Admin\Tests\App\Models\Articles\Tag;
-use Gogol\Admin\Tests\App\Models\Fields\FieldsRelation;
-use Gogol\Admin\Tests\App\Models\Fields\FieldsType;
-use Gogol\Admin\Tests\App\Models\Tree\Model3;
-use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Browser\Concerns\SeedTrait;
-use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\App\Models\Articles\Tag;
+use Admin\Tests\App\Models\Fields\FieldsRelation;
+use Admin\Tests\App\Models\Fields\FieldsType;
+use Admin\Tests\App\Models\Tree\Model3;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Browser\Concerns\SeedTrait;
+use Admin\Tests\Concerns\DropDatabase;
 
 class TableRowsTest extends BrowserTestCase
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Tests;
+namespace Admin\Tests\Browser\Tests;
 
-use Gogol\Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\BrowserTestCase;
 use Illuminate\Foundation\Auth\User;
 use Laravel\Dusk\Browser;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Controllers\Auth;
+namespace Admin\Controllers\Auth;
 
 use Auth;
 use App\Http\Controllers\Controller;

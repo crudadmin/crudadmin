@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Concerns;
+namespace Admin\Tests\Browser\Concerns;
 
-use Gogol\Admin\Tests\App\Models\Articles\Article;
-use Gogol\Admin\Tests\App\Models\Articles\Tag;
+use Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\App\Models\Articles\Tag;
 
 trait SeedTrait
 {

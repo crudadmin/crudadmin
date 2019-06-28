@@ -1,10 +1,10 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser;
+namespace Admin\Tests\Browser;
 
-use Gogol\Admin\Tests\Browser\Concerns\AdminBrowserAssertions;
-use Gogol\Admin\Tests\Browser\Concerns\AdminBrowserIntegration;
-use Gogol\Admin\Tests\Concerns\AdminIntegration;
+use Admin\Tests\Browser\Concerns\AdminBrowserAssertions;
+use Admin\Tests\Browser\Concerns\AdminBrowserIntegration;
+use Admin\Tests\Concerns\AdminIntegration;
 use Laravel\Dusk\Browser;
 
 class DuskBrowser extends Browser

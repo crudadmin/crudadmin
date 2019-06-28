@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Buttons;
+namespace Admin\Tests\App\Buttons;
 
-use Gogol\Admin\Helpers\Button;
+use Admin\Helpers\Button;
 use Illuminate\Support\Collection;
 
 class SimpleMultipleButton extends Button

@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests;
+namespace Admin\Tests;
 
-use Gogol\Admin\Providers\AppServiceProvider;
-use Gogol\Admin\Tests\App\User;
+use Admin\Providers\AppServiceProvider;
+use Admin\Tests\App\User;
 use Illuminate\Support\Facades\File;
 
 trait OrchestraSetup
@@ -60,7 +60,7 @@ trait OrchestraSetup
         $app['config']->set('auth.providers.users.model', User::class);
 
         // Setup default database to use sqlite :memory:
-        $app['config']->set('admin.app_namespace', 'Gogol\Admin\Tests\App');
+        $app['config']->set('admin.app_namespace', 'Admin\Tests\App');
 
         //Add submenu tree settings
         $app['config']->set('admin.groups', config('admin.groups', []) + [
@@ -198,7 +198,7 @@ trait OrchestraSetup
     public function registerAllAdminModels()
     {
         config()->set('admin.models', [
-            'Gogol\Admin\Tests\App\Models' => $this->getAppPath('Models')
+            'Admin\Tests\App\Models' => $this->getAppPath('Models')
         ]);
     }
 }

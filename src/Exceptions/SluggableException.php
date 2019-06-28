@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Exceptions;
+namespace Admin\Exceptions;
 
 use Exception;
 use Symfony\Component\HttpFoundation\Response;

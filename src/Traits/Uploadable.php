@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use File;
-use Gogol\Admin\Helpers\File as AdminFile;
+use Admin\Helpers\File as AdminFile;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
 use ImageCompressor;
 use Image;

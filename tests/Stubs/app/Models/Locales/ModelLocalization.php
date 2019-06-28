@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models\Locales;
+namespace Admin\Tests\App\Models\Locales;
 
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
+use Admin\Fields\Group;
 
 class ModelLocalization extends AdminModel
 {

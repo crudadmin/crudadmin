@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Middleware;
+namespace Admin\Middleware;
 
 use Closure;
 use Localization;

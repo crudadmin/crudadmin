@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Concerns;
+namespace Admin\Tests\Browser\Concerns;
 
 use Carbon\Carbon;
 use Exception;

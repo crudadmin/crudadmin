@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Helpers\File as AdminFile;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Helpers\File as AdminFile;
+use Admin\Models\Model as AdminModel;
 use Gettext;
 
 class SEO

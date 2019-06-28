@@ -1,11 +1,11 @@
 <?php
 
-namespace Gogol\Admin\Commands;
+namespace Admin\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
-use Gogol\Admin\Helpers\File;
+use Admin\Helpers\File;
 use Admin;
 
 class AdminLayoutCommand extends GeneratorCommand

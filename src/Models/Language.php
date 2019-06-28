@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Models;
+namespace Admin\Models;
 
-use Gogol\Admin\Models\Model;
-use Gogol\Admin\Traits\Gettextable;
+use Admin\Models\Model;
+use Admin\Traits\Gettextable;
 
 class Language extends Model
 {

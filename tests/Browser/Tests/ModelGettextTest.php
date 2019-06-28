@@ -1,13 +1,13 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Tests;
+namespace Admin\Tests\Browser\Tests;
 
 use Gettext;
 use Gettext\Translations;
-use Gogol\Admin\Models\Language;
-use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\Browser\DuskBrowser;
-use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Admin\Models\Language;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Concerns\DropDatabase;
 use Gettext\Generators\PhpArray;
 
 class ModelGettextTest extends BrowserTestCase

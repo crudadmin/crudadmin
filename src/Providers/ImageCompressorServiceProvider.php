@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -12,6 +12,6 @@ class ImageCompressorServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bind('imagecompressor', \Gogol\Admin\Helpers\ImageCompressor::class);
+        $this->app->bind('imagecompressor', \Admin\Helpers\ImageCompressor::class);
     }
 }

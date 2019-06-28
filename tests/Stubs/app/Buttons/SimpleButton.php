@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Buttons;
+namespace Admin\Tests\App\Buttons;
 
-use Gogol\Admin\Helpers\Button;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Helpers\Button;
+use Admin\Models\Model as AdminModel;
 
 class SimpleButton extends Button
 {

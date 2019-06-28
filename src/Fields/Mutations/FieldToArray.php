@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Fields\Mutations;
+namespace Admin\Fields\Mutations;
 
 class FieldToArray
 {

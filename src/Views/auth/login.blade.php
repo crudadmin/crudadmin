@@ -44,7 +44,7 @@
   </form>
 
 
-  <a href="{{ action('\Gogol\Admin\Controllers\Auth\ForgotPasswordController@showLinkRequestForm') }}">{{ trans('admin::admin.forgot-password') }}</a><br>
+  <a href="{{ action('\Admin\Controllers\Auth\ForgotPasswordController@showLinkRequestForm') }}">{{ trans('admin::admin.forgot-password') }}</a><br>
 </div>
 <!-- /.login-box-body -->
 @stop

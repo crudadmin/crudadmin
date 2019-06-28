@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Middleware;
+namespace Admin\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +33,7 @@ class Authenticate
                 //Custom login path
                 if ( !($path = config('admin.authentication.login.path')) )
                 {
-                    $path = action('\Gogol\Admin\Controllers\Auth\LoginController@showLoginForm');
+                    $path = action('\Admin\Controllers\Auth\LoginController@showLoginForm');
                 }
 
                 return redirect()->guest( $path )->withErrors($errors);

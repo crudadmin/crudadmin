@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Plugins\CKFinder\Polyfill;
+namespace Admin\Plugins\CKFinder\Polyfill;
 
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 

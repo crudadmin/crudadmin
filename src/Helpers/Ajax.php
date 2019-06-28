@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Exceptions\AjaxException;
+use Admin\Exceptions\AjaxException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Admin;
 use Log;

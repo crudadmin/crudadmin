@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use Admin;
-use Gogol\Admin\Models\ModelsHistory;
+use Admin\Models\ModelsHistory;
 
 trait Historiable
 {

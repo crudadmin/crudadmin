@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Notifications;
+namespace Admin\Notifications;
 
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -59,7 +59,7 @@ class ResetPassword extends Notification
         if ( method_exists($this->user, 'getResetLink') )
             $action = $this->user->getResetLink($this->token);
         elseif ( $this->user instanceof \App\User )
-            $action = action('\Gogol\Admin\Controllers\Auth\ResetPasswordController@showResetForm', $this->token);
+            $action = action('\Admin\Controllers\Auth\ResetPasswordController@showResetForm', $this->token);
         else
             $action = route('password.reset', $this->token);
 

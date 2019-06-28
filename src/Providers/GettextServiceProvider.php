@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -15,7 +15,7 @@ class GettextServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bind('gettext', \Gogol\Admin\Helpers\Gettext::class);
+        $this->app->bind('gettext', \Admin\Helpers\Gettext::class);
     }
 
     public function boot()

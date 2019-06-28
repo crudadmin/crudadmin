@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Controllers\Auth;
+namespace Admin\Controllers\Auth;
 
-use Gogol\Admin\Controllers\Controller;
+use Admin\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 

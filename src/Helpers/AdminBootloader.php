@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Traits\Support\DataCache;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Traits\Support\DataCache;
+use Admin\Models\Model as AdminModel;
 
 class AdminBootloader
 {
@@ -167,27 +167,27 @@ class AdminBootloader
             //When is first admin migration started, default User model from package will be included.
             [
                 'condition' => count( $this->get('namespaces') ) == 0,
-                'model' => \Gogol\Admin\Models\User::class,
+                'model' => \Admin\Models\User::class,
             ],
             // Localization
             [
                 'condition' => $this->isEnabledMultiLanguages() === true,
-                'model' => \Gogol\Admin\Models\Language::class,
+                'model' => \Admin\Models\Language::class,
             ],
             //Admin groups
             [
                 'condition' => config('admin.admin_groups') === true,
-                'model' => \Gogol\Admin\Models\AdminsGroup::class,
+                'model' => \Admin\Models\AdminsGroup::class,
             ],
             //Models history
             [
                 'condition' => config('admin.history') === true,
-                'model' => \Gogol\Admin\Models\ModelsHistory::class,
+                'model' => \Admin\Models\ModelsHistory::class,
             ],
             //Sluggable history
             [
                 'condition' => config('admin.sluggable_history', false) === true,
-                'model' => \Gogol\Admin\Models\SluggableHistory::class,
+                'model' => \Admin\Models\SluggableHistory::class,
             ],
         ]);
     }

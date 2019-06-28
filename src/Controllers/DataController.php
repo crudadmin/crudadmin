@@ -1,11 +1,11 @@
 <?php
 
-namespace Gogol\Admin\Controllers;
+namespace Admin\Controllers;
 
 use Illuminate\Http\Request;
-use Gogol\Admin\Requests\DataRequest;
-use Gogol\Admin\Helpers\AdminRows;
-use Gogol\Admin\Models\ModelsHistory;
+use Admin\Requests\DataRequest;
+use Admin\Helpers\AdminRows;
+use Admin\Models\ModelsHistory;
 use Carbon\Carbon;
 use Gettext;
 use Admin;

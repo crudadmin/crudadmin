@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Traits\Support;
+namespace Admin\Traits\Support;
 
 trait DataCache
 {

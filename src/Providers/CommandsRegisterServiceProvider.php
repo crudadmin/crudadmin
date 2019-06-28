@@ -1,5 +1,5 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Filesystem\Filesystem;
@@ -16,25 +16,25 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
         /*
          * Register commands
          */
-        $this->app->bind('gogol::admin.install', \Gogol\Admin\Commands\AdminInstallCommand::class);
+        $this->app->bind('gogol::admin.install', \Admin\Commands\AdminInstallCommand::class);
 
-        $this->app->bind('gogol::admin.update', \Gogol\Admin\Commands\AdminUpdateCommand::class);
+        $this->app->bind('gogol::admin.update', \Admin\Commands\AdminUpdateCommand::class);
 
-        $this->app->bind('gogol::admin.migrate', \Gogol\Admin\Commands\AdminMigrationCommand::class);
+        $this->app->bind('gogol::admin.migrate', \Admin\Commands\AdminMigrationCommand::class);
 
-        $this->app->bind('gogol::admin.model', \Gogol\Admin\Commands\AdminModelCommand::class);
+        $this->app->bind('gogol::admin.model', \Admin\Commands\AdminModelCommand::class);
 
-        $this->app->bind('gogol::admin.button', \Gogol\Admin\Commands\AdminButtonCommand::class);
+        $this->app->bind('gogol::admin.button', \Admin\Commands\AdminButtonCommand::class);
 
-        $this->app->bind('gogol::admin.rule', \Gogol\Admin\Commands\AdminRuleCommand::class);
+        $this->app->bind('gogol::admin.rule', \Admin\Commands\AdminRuleCommand::class);
 
-        $this->app->bind('gogol::admin.layout', \Gogol\Admin\Commands\AdminLayoutCommand::class);
+        $this->app->bind('gogol::admin.layout', \Admin\Commands\AdminLayoutCommand::class);
 
-        $this->app->bind('gogol::admin.component', \Gogol\Admin\Commands\AdminComponentCommand::class);
+        $this->app->bind('gogol::admin.component', \Admin\Commands\AdminComponentCommand::class);
 
-        $this->app->bind('gogol::admin.compress', \Gogol\Admin\Commands\AdminCompressUploadsCommand::class);
+        $this->app->bind('gogol::admin.compress', \Admin\Commands\AdminCompressUploadsCommand::class);
 
-        $this->app->bind('gogol::admin.queue', \Gogol\Admin\Commands\EnsureQueueListenerIsRunning::class);
+        $this->app->bind('gogol::admin.queue', \Admin\Commands\EnsureQueueListenerIsRunning::class);
 
 
         $this->commands([

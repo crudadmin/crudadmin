@@ -1,9 +1,9 @@
 <?php
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
-use Gogol\Admin\Facades as Facades;
-use Gogol\Admin\Helpers as Helpers;
-use Gogol\Admin\Middleware as Middleware;
+use Admin\Facades as Facades;
+use Admin\Helpers as Helpers;
+use Admin\Middleware as Middleware;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Http\Kernel;

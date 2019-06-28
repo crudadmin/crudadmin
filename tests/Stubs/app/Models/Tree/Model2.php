@@ -1,9 +1,9 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models\Tree;
+namespace Admin\Tests\App\Models\Tree;
 
-use Gogol\Admin\Fields\Group;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
 
 class Model2 extends AdminModel
 {

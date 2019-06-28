@@ -1,13 +1,13 @@
 <?php
 
-namespace Gogol\Admin\Tests\Browser\Tests;
+namespace Admin\Tests\Browser\Tests;
 
-use Gogol\Admin\Tests\App\Models\Articles\ArticlesComment;
-use Gogol\Admin\Tests\App\Models\Fields\SelectType;
-use Gogol\Admin\Tests\App\Models\Locales\ModelLocalization;
-use Gogol\Admin\Tests\Browser\BrowserTestCase;
-use Gogol\Admin\Tests\Browser\Concerns\SeedTrait;
-use Gogol\Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Articles\ArticlesComment;
+use Admin\Tests\App\Models\Fields\SelectType;
+use Admin\Tests\App\Models\Locales\ModelLocalization;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\Concerns\SeedTrait;
+use Admin\Tests\Concerns\DropDatabase;
 use Laravel\Dusk\Browser;
 
 class FieldSelectTest extends BrowserTestCase

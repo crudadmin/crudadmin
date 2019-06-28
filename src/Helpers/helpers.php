@@ -15,7 +15,7 @@ if ( ! function_exists('admin_action') )
 {
     function admin_action($controller, $params = null)
     {
-        return action('\Gogol\Admin\Controllers\\'.$controller, $params);
+        return action('\Admin\Controllers\\'.$controller, $params);
     }
 }
 
@@ -23,7 +23,7 @@ if ( ! function_exists('isActiveController') )
 {
     function isActiveController($controller, $text = null)
     {
-        return \Gogol\Admin\Helpers\Helper::isActive($controller, $text);
+        return \Admin\Helpers\Helper::isActive($controller, $text);
     }
 }
 

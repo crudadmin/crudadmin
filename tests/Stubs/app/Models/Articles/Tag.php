@@ -1,10 +1,10 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Models\Articles;
+namespace Admin\Tests\App\Models\Articles;
 
-use Gogol\Admin\Fields\Group;
-use Gogol\Admin\Models\Model as AdminModel;
-use Gogol\Admin\Tests\App\User;
+use Admin\Fields\Group;
+use Admin\Models\Model as AdminModel;
+use Admin\Tests\App\User;
 
 class Tag extends AdminModel
 {

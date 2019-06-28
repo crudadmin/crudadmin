@@ -1,12 +1,12 @@
 <?php
 
-namespace Gogol\Admin\Commands;
+namespace Admin\Commands;
 
 use Admin;
 use ImageCompressor;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Gogol\Admin\Helpers\File;
+use Admin\Helpers\File;
 
 class AdminCompressUploadsCommand extends Command
 {

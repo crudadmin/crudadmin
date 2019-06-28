@@ -1,7 +1,7 @@
 <?php
 
 use Faker\Generator as Faker;
-use Gogol\Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\App\Models\Articles\Article;
 
 /*
 |--------------------------------------------------------------------------

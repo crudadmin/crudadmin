@@ -89,7 +89,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                       <!-- Menu Footer-->
                       <li class="user-footer">
                         <div class="pull-right">
-                          <a href="<?php echo action('\Gogol\Admin\Controllers\Auth\LoginController@logout'); ?>" class="btn btn-default btn-flat"><?php echo trans('admin::admin.logout') ?></a>
+                          <a href="<?php echo action('\Admin\Controllers\Auth\LoginController@logout'); ?>" class="btn btn-default btn-flat"><?php echo trans('admin::admin.logout') ?></a>
                         </div>
                       </li>
                     </ul>

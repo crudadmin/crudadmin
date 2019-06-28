@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Providers;
+namespace Admin\Providers;
 
 use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -18,7 +18,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected $namespace = 'App\Http\Controllers';
 
-    protected $admin_namespace = 'Gogol\Admin\Controllers';
+    protected $admin_namespace = 'Admin\Controllers';
 
     /**
      * Multi languages localization support

@@ -1,12 +1,12 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use Admin;
 use Ajax;
-use Gogol\Admin\Helpers\Button;
-use Gogol\Admin\Helpers\Layout;
-use Gogol\Admin\Models\Model as AdminModel;
+use Admin\Helpers\Button;
+use Admin\Helpers\Layout;
+use Admin\Models\Model as AdminModel;
 
 trait VueComponent
 {

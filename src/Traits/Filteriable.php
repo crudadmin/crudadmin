@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Traits;
+namespace Admin\Traits;
 
 use Validator;
 use Carbon\Carbon;

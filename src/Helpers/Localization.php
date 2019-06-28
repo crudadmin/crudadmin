@@ -1,7 +1,7 @@
 <?php
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Models\Language;
+use Admin\Models\Language;
 use Illuminate\Support\Collection;
 use Gettext;
 

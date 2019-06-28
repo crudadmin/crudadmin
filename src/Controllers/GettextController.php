@@ -1,6 +1,6 @@
 <?php
 
-namespace Gogol\Admin\Controllers;
+namespace Admin\Controllers;
 
 use Illuminate\Http\Request;
 

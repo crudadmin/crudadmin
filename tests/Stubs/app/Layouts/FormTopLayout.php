@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Tests\App\Layouts;
+namespace Admin\Tests\App\Layouts;
 
-use \Gogol\Admin\Helpers\Layout;
+use \Admin\Helpers\Layout;
 
 class FormTopLayout extends Layout
 {

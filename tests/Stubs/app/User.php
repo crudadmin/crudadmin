@@ -1,8 +1,8 @@
 <?php
 
-namespace Gogol\Admin\Tests\App;
+namespace Admin\Tests\App;
 
-use Gogol\Admin\Models\Authenticatable;
+use Admin\Models\Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable

@@ -1,8 +1,8 @@
 <?php
-namespace Gogol\Admin\Helpers;
+namespace Admin\Helpers;
 
-use Gogol\Admin\Helpers\AdminBootloader;
-use Gogol\Admin\Helpers\File;
+use Admin\Helpers\AdminBootloader;
+use Admin\Helpers\File;
 use Illuminate\Filesystem\Filesystem;
 
 class Admin extends AdminBootloader
