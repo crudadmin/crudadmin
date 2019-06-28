@@ -176,12 +176,12 @@ class AdminBootloader
             ],
             //Admin groups
             [
-                'condition' => config('admin.admin_groups') === true,
+                'condition' => config('admin.admin_groups', false) === true,
                 'model' => \Admin\Models\AdminsGroup::class,
             ],
             //Models history
             [
-                'condition' => config('admin.history') === true,
+                'condition' => config('admin.history', false) === true,
                 'model' => \Admin\Models\ModelsHistory::class,
             ],
             //Sluggable history

@@ -79,7 +79,7 @@ export default {
 
     methods : {
         init(){
-            if ( this.initialized === true )
+            if ( this.initialized === true || Object.keys(this.$root.models).length == 0 )
                 return;
 
             if ( this.hasLoadedLicense ){

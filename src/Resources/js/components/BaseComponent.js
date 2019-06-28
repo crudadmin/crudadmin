@@ -125,6 +125,8 @@ const BaseComponent = (router) => {
                     this.languages = layout.languages||[];
 
                     this.bootLanguages();
+                }).catch(error => {
+                    this.errorResponseLayer(error);
                 });
             },
             /*
@@ -269,10 +271,14 @@ const BaseComponent = (router) => {
                 if ( 'responseJSON' in response )
                     response.data = response.responseJSON;
 
+                //Set response data
+                if ( ! response.data && response.body )
+                    response.data = response.body;
+
                 //If error response comes with some message information, then display it
                 if ( response.data && response.data.message && response.data.title && response.data.type )
                 {
-                    return this.$root.openAlert(response.data.title, response.data.message, response.data.type, null, function(){
+                    return this.$root.openAlert(response.data.title, response.data.message, response.data.type, null, () => {
                         if ( response.status == 401 )
                         {
                             window.location.reload();
@@ -296,6 +302,10 @@ const BaseComponent = (router) => {
                 //Callback on code
                 if ( callback && (code === response.status || code === null) )
                     return callback(response);
+
+                //Unknown HTTP error
+                if ( response.data.message )
+                    return this.$root.openAlert('Error ' + response.status, response.data.message, 'error');
 
                 //Unknown error
                 this.$root.arrorAlert();
