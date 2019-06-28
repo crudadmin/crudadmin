@@ -10,11 +10,9 @@
     ],
     "require": {
         "php": ">=7.1",
+        "crudadmin/core" : "^2.0",
         "laravel/framework": "^5.4",
-        "doctrine/dbal": "2.6.3",
-        "intervention/image": "^2.3.0",
         "gettext/gettext": "^4.6",
-        "spatie/image-optimizer": "^1.1",
         "pimple/pimple": "~3.0",
         "league/flysystem": "^1.0.45",
         "league/flysystem-cached-adapter": "^1.0.6"
