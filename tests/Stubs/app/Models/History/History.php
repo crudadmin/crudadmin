@@ -2,7 +2,7 @@
 
 namespace Admin\Tests\App\Models\History;
 
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 
 class History extends AdminModel

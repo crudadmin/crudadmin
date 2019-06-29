@@ -3,7 +3,7 @@
 namespace Admin\Tests\App\Models\Tree;
 
 use Admin\Fields\Group;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Tests\App\Layouts\FormTopLayout;
 
 class Model3 extends AdminModel

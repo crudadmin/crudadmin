@@ -3,7 +3,7 @@
 namespace Admin\Tests\App\Buttons;
 
 use Admin\Helpers\Button;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 
 class QuestionButton extends Button
 {

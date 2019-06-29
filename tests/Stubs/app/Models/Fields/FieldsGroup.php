@@ -3,7 +3,7 @@
 namespace Admin\Tests\App\Models\Fields;
 
 use Admin\Fields\Group;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Tests\App\Models\Fields\FieldsType;
 
 class FieldsGroup extends AdminModel

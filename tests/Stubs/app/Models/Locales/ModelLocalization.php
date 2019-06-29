@@ -2,7 +2,7 @@
 
 namespace Admin\Tests\App\Models\Locales;
 
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 
 class ModelLocalization extends AdminModel

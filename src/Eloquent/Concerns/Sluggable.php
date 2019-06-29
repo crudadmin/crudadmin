@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Traits;
+namespace Admin\Eloquent\Concerns;
 
 use Illuminate\Contracts\Validation\Factory;
 use Admin\Exceptions\SluggableException;

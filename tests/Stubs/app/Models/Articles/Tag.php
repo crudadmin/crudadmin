@@ -3,7 +3,7 @@
 namespace Admin\Tests\App\Models\Articles;
 
 use Admin\Fields\Group;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Tests\App\User;
 
 class Tag extends AdminModel

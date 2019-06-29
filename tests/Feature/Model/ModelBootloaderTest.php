@@ -3,7 +3,7 @@
 namespace Admin\Tests\Feature\Model;
 
 use Admin\Facades\Admin;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Tests\App\OtherModels\Blog;
 use Admin\Tests\TestCase;
 

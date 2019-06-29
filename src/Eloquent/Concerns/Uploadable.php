@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Traits;
+namespace Admin\Eloquent\Concerns;
 
 use File;
 use Admin\Helpers\File as AdminFile;

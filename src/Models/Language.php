@@ -2,8 +2,8 @@
 
 namespace Admin\Models;
 
+use Admin\Eloquent\Concerns\Gettextable;
 use Admin\Models\Model;
-use Admin\Traits\Gettextable;
 
 class Language extends Model
 {

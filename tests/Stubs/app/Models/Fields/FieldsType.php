@@ -2,7 +2,7 @@
 
 namespace Admin\Tests\App\Models\Fields;
 
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 
 class FieldsType extends AdminModel

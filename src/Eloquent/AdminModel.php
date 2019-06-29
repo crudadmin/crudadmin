@@ -1,42 +1,28 @@
 <?php
 
-namespace Admin\Models;
+namespace Admin\Eloquent;
 
 use Admin;
-use Admin\Core\Model\AdminModel as CoreAdminModel;
-use Admin\Traits\AdminModelTrait;
-use Admin\Traits\FieldProperties;
-use Admin\Traits\HasAttributes;
-use Admin\Traits\HasChildrens;
-use Admin\Traits\Historiable;
-use Admin\Traits\ModelIcons;
-use Admin\Traits\ModelLayoutBuilder;
-use Admin\Traits\ModelRelationships;
-use Admin\Traits\ModelRules;
-use Admin\Traits\Sluggable;
-use Admin\Traits\Uploadable;
-use Admin\Traits\Validation;
-use Admin\Traits\VueComponent;
+use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Admin\Eloquent\Concerns\Historiable;
+use Admin\Eloquent\Concerns\ModelIcons;
+use Admin\Eloquent\Concerns\ModelLayoutBuilder;
+use Admin\Eloquent\Concerns\ModelRules;
+use Admin\Eloquent\Concerns\Sluggable;
+use Admin\Eloquent\Concerns\Uploadable;
+use Admin\Eloquent\Concerns\VueComponent;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Localization;
 
 class AdminModel extends CoreAdminModel
 {
-    use SoftDeletes,
-        ModelRelationships,
-        ModelLayoutBuilder,
+    use ModelLayoutBuilder,
         ModelRules,
         VueComponent,
-        FieldProperties,
-        AdminModelTrait,
-        HasChildrens,
-        HasAttributes,
+        Historiable,
         Uploadable,
-        Validation,
         ModelIcons,
-        Sluggable,
-        Historiable;
+        Sluggable;
 
     /*
      * Template name
