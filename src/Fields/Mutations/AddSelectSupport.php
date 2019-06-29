@@ -7,7 +7,7 @@ use Ajax;
 use DB;
 use Admin\Fields\Mutations\MutationRule;
 use Admin\Helpers\Helper;
-use Admin\Traits\Support\DataCache;
+use Admin\Core\Contracts\DataCache;
 use Illuminate\Support\Collection;
 use Localization;
 

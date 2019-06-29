@@ -1,7 +1,7 @@
 <?php
 namespace Admin\Helpers;
 
-use Admin\Helpers\AdminBootloader;
+use Admin\Core\Contracts\AdminBootloader;
 use Admin\Helpers\File;
 use Illuminate\Filesystem\Filesystem;
 

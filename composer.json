@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.1",
-        "crudadmin/core" : "^2.0",
+        "crudadmin/core" : "dev-master",
         "laravel/framework": "^5.4",
         "gettext/gettext": "^4.6",
         "pimple/pimple": "~3.0",
