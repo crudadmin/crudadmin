@@ -1,20 +1,17 @@
 <?php
 namespace Admin\Helpers;
 
-use Admin\Core\Contracts\AdminBootloader;
 use Admin\Helpers\File;
-use Illuminate\Filesystem\Filesystem;
+use Admin\Core\Helpers\AdminCore;
 
-class Admin extends AdminBootloader
+class Admin extends AdminCore
 {
     /*
-     * Filesystem provider
+     * We want share loaded models between AdminCore and Admin classes
      */
-    protected $files;
-
-    public function __construct()
+    protected function getStoreKey()
     {
-        $this->files = new Filesystem;
+        return AdminCore::class;
     }
 
     /*
@@ -36,12 +33,33 @@ class Admin extends AdminBootloader
     /*
      * Returns if is in config allowed multi languages support
      */
-    public function isEnabledMultiLanguages()
+    public function isEnabledLocalization()
     {
-        if (config('admin.localization') == true)
-            return true;
-        else
-            return false;
+        return config('admin.localization', false);
+    }
+
+    /*
+     * Check if admin roles are enabled
+     */
+    public function isRolesEnabled()
+    {
+        return config('admin.admin_groups', false);
+    }
+
+    /*
+     * Check if history is enabled
+     */
+    public function isHistoryEnabled()
+    {
+        return config('admin.history', false);
+    }
+
+    /*
+     * Check if sluggable history is enabled
+     */
+    public function isSluggableHistoryEnabled()
+    {
+        return config('admin.sluggable_history', false);
     }
 
     /*

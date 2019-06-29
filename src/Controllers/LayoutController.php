@@ -321,7 +321,7 @@ class LayoutController extends BaseController
      */
     protected function getLanguages()
     {
-        if ( ! Admin::isEnabledMultiLanguages() )
+        if ( ! Admin::isEnabledLocalization() )
             return [];
 
         return Localization::getLanguages();

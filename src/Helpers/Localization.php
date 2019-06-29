@@ -20,7 +20,7 @@ class Localization
         $this->languages = new Collection;
 
         //Checks if is enabled multi language support
-        if ( ! \Admin::isEnabledMultiLanguages() || app()->runningInConsole() == true )
+        if ( ! \Admin::isEnabledLocalization() || app()->runningInConsole() == true )
             return false;
 
         $this->bootLanguages();
@@ -88,7 +88,7 @@ class Localization
     {
         $segment = request()->segment(1);
 
-        return \Admin::isEnabledMultiLanguages()
+        return \Admin::isEnabledLocalization()
             && app()->runningInConsole() == false
             && $segment != 'admin'
             && $segment != 'uploads';
@@ -142,7 +142,7 @@ class Localization
     {
         if (
             $this->booted === false
-            && \Admin::isEnabledMultiLanguages() === true
+            && \Admin::isEnabledLocalization() === true
             && app()->runningInConsole() === true
         ) {
             $this->bootLanguages();

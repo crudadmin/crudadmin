@@ -7,13 +7,13 @@ use Ajax;
 use DB;
 use Admin\Fields\Mutations\MutationRule;
 use Admin\Helpers\Helper;
-use Admin\Core\Contracts\DataCache;
+use Admin\Core\Contracts\DataStore;
 use Illuminate\Support\Collection;
 use Localization;
 
 class AddSelectSupport extends MutationRule
 {
-    use DataCache;
+    use DataStore;
 
     public $attributes = ['options', 'multiple', 'filterBy', 'fillBy', 'required_with_values'];
 
@@ -200,7 +200,7 @@ class AddSelectSupport extends MutationRule
             $load_columns = array_unique($load_columns);
 
             //Get data from table, and bind them info buffer for better performance
-            $options = $this->cache('selects.options.' . $properties[0], function() use ( $properties, $model, $load_columns ) {
+            $options = $this->cache('selects.options.'.$properties[0], function() use ( $properties, $model, $load_columns ) {
                 $load_columns[] = 'id';
 
                 if ($model = Admin::getModelByTable($properties[0]))
@@ -274,7 +274,7 @@ class AddSelectSupport extends MutationRule
     public function initPostUpdate($fields, $field, $key, $model)
     {
         //Get options from model, and cache them
-        $options = $this->cache('selects.'. $model->getTable() . '.options', function() use ( $model ) {
+        $options = $this->cache('selects.'.$model->getTable().'.options', function() use ( $model ) {
             return (array)$model->getProperty('options', $model->getModelParentRow());
         });
 

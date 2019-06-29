@@ -49,9 +49,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //Boot admin models and other dependencies
-        Admin::boot();
-
         /*
          * Bind variable to admin views path
          */
@@ -65,7 +62,8 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         //Set admin locale
-        if ( \Admin::isAdmin() === true ){
+        if ( \Admin::isAdmin() === true )
+        {
             app()->setLocale( config('admin.locale', 'sk') );
         }
     }

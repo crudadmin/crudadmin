@@ -59,7 +59,7 @@ class Authenticatable extends Model implements AuthenticatableContract, Authoriz
      */
     public function permissions()
     {
-        if ( config('admin.admin_groups') != true )
+        if ( Admin::isRolesEnabled() === false )
             return [];
 
         $key = 'users.'.$this->getKey().'.permissions';
@@ -86,7 +86,8 @@ class Authenticatable extends Model implements AuthenticatableContract, Authoriz
      */
     public function hasAccess($model)
     {
-        if ( config('admin.admin_groups') !== true )
+        //If roles are not enabled, allow everything
+        if ( Admin::isRolesEnabled() === false )
             return true;
 
         //If is super admin
@@ -161,7 +162,7 @@ class Authenticatable extends Model implements AuthenticatableContract, Authoriz
         if ( $this->avatar )
             $this->avatar = $this->avatar->resize(100, 100)->url;
 
-        if ( config('admin.admin_groups') == true )
+        if ( Admin::isRolesEnabled() )
             $this->load('adminsGroups');
 
         return $this->getAttributes() + $this->relationsToArray();
@@ -196,7 +197,7 @@ class Authenticatable extends Model implements AuthenticatableContract, Authoriz
         /*
          * If is enabled admin groups
          */
-        if ( config('admin.admin_groups') === true )
+        if ( Admin::isRolesEnabled() )
         {
             $fields->push([
                 'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',

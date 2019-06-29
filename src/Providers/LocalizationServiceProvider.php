@@ -19,11 +19,23 @@ class LocalizationServiceProvider extends ServiceProvider {
 
     public function boot(Kernel $kernel)
     {
-        //Register localization middleware
-        if ( ! $kernel->hasMiddleware(LocalizationMiddleware::class) )
-            $kernel->prependMiddleware(LocalizationMiddleware::class);
+        $this->loadMiddlewares($kernel);
 
-        //Load translations
+        $this->loadTranslations();
+    }
+
+    //Register localization middleware
+    private function loadMiddlewares($kernel)
+    {
+        if ( $kernel->hasMiddleware(LocalizationMiddleware::class) )
+            return;
+
+        $kernel->prependMiddleware(LocalizationMiddleware::class);
+    }
+
+    //Load translations
+    private function loadTranslations()
+    {
         $this->loadTranslationsFrom(__DIR__.'/../Resources/lang/admin/', 'admin');
     }
 }
