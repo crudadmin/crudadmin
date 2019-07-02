@@ -6,6 +6,20 @@ return [
     'app_namespace' => 'App',
 
     /*
+     * From which directories CrudAdmin should load Admin Modules
+     */
+    'models' => [
+        app_path() => 'App',
+        app_path('/Model/*') => 'App/Model',
+        app_path('/Eloquent/*') => 'App/Eloquent',
+    ],
+
+    /*
+     * Removes default language segment from url
+     */
+    'localization_remove_default' => true,
+
+    /*
      * Directories for loading gettext translations
      */
     'gettext_source_paths' => [

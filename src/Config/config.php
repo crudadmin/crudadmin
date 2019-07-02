@@ -1,4 +1,16 @@
 <?php
+
+/*
+|--------------------------------------------------------------------------
+| Crud Admin configuration
+|--------------------------------------------------------------------------
+|
+| This is general configuration file for CrudAdmin. Any other configuration
+| settings you can find at https://docs.crudadmin.com/#/config or in additional
+| config file /vendor/crudadmin/crudadmin/src/config/config_additional.php
+|
+*/
+
 return [
     /*
      * Administration name
@@ -21,11 +33,6 @@ return [
      * Add multi language mutations support
      */
     'localization' => false,
-
-    /*
-     * Removes default language segment from url
-     */
-    'localization_remove_default' => true,
 
     /*
      * Gettext support
