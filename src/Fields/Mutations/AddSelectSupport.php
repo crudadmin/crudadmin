@@ -2,20 +2,20 @@
 
 namespace Admin\Fields\Mutations;
 
-use Admin;
-use Ajax;
 use DB;
-use Admin\Fields\Mutations\MutationRule;
-use Admin\Helpers\Helper;
-use Admin\Core\Contracts\DataStore;
-use Illuminate\Support\Collection;
+use Ajax;
+use Admin;
 use Localization;
+use Admin\Helpers\Helper;
+use Illuminate\Support\Collection;
+use Admin\Core\Contracts\DataStore;
+use Admin\Core\Fields\Mutations\MutationRule;
 
 class AddSelectSupport extends MutationRule
 {
     use DataStore;
 
-    public $attributes = ['options', 'multiple', 'filterBy', 'fillBy', 'required_with_values'];
+    public $attributes = ['options', 'multiple', 'filterBy', 'fillBy', 'canAdd', 'required_with_values'];
 
     private function isAllowedMutation($field)
     {

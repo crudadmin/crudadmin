@@ -31,7 +31,6 @@ class AppServiceProvider extends ServiceProvider
         'Ajax' => Helpers\Ajax::class,
         'Gettext' => Facades\Gettext::class,
         'Localization' => Facades\Localization::class,
-        'Fields' => Facades\Fields::class,
         'SEO' => Facades\SEOFacade::class,
         'ImageCompressor' => Facades\ImageCompressor::class,
         'Image' => \Intervention\Image\Facades\Image::class,
@@ -57,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
         /*
          * Bind route provider after application boot, for correct route actions in localizations
          */
-        $this->bootProviders([
+        $this->registerProviders([
             RouteServiceProvider::class
         ]);
 
@@ -79,14 +78,14 @@ class AppServiceProvider extends ServiceProvider
             __DIR__.'/../Config/config_additional.php', 'admin'
         );
 
-        $this->bootFacades();
+        $this->registerFacades();
 
-        $this->bootProviders();
+        $this->registerProviders();
 
         $this->bootRouteMiddleware();
     }
 
-    public function bootFacades()
+    public function registerFacades()
     {
         $this->app->booting(function()
         {
@@ -100,7 +99,7 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    public function bootProviders($providers = null)
+    public function registerProviders($providers = null)
     {
         foreach ($providers ?: $this->providers as $provider)
         {

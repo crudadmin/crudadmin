@@ -2,14 +2,11 @@
 
 namespace Admin\Fields;
 
-class Group
+use Admin\Core\Fields\Group as BaseGroup;
+
+class Group extends BaseGroup
 {
     public $name = null;
-
-    public $fields = [];
-
-    //Add fields
-    public $add = [];
 
     public $type = 'default';
 
@@ -19,11 +16,75 @@ class Group
 
     public $model = null;
 
-    public $id = null;
-
-    public function __construct(array $fields = [])
+    /*
+     * Set name of group
+     */
+    public function name($name = null)
     {
-        $this->fields = $fields;
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /*
+     * Group icon
+     */
+    public function icon($icon)
+    {
+        if ( substr($icon, 0, 3) != 'fa-' )
+            $icon = 'fa-'.$icon;
+
+        $this->icon = $icon;
+
+        return $this;
+    }
+
+    /*
+     * Set id of group
+     */
+    public function id($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /*
+     * Push parameters into every field in group
+     */
+    public function add($params)
+    {
+        $this->add[] = $params;
+
+        return $this;
+    }
+
+    /*
+     * Set width of group
+     */
+    public function width($width = 'full')
+    {
+        $this->width = $width;
+
+        return $this;
+    }
+
+    /*
+     * Set width of group
+     */
+    public function grid($width)
+    {
+        return $this->width($width);
+    }
+
+    /*
+     * Set related model as group
+     */
+    public function model($model)
+    {
+        $this->model = (new $model)->getTable();
+
+        return $this;
     }
 
     /*
@@ -36,7 +97,7 @@ class Group
     }
 
     /*
-     * Make group with full with
+     * Make group represented as tab
      */
     public static function tab($fields = [])
     {
@@ -87,45 +148,8 @@ class Group
     }
 
     /*
-     * Set id of group
-     */
-    public function id($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    public function icon($icon)
-    {
-        if ( substr($icon, 0, 3) != 'fa-' )
-            $icon = 'fa-'.$icon;
-
-        $this->icon = $icon;
-
-        return $this;
-    }
-
-    /*
-     * Set width of group
-     */
-    public function width($width = 'full')
-    {
-        $this->width = $width;
-
-        return $this;
-    }
-
-    /*
-     * Set width of group
-     */
-    public function grid($width)
-    {
-        return $this->width($width);
-    }
-
-    /*
      * Set type of group
+     * group/tab
      */
     public function type($type = 'group')
     {
@@ -134,34 +158,9 @@ class Group
         return $this;
     }
 
-    /*
-     * Set name of group
-     */
-    public function name($name = null)
+    public function isTab()
     {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /*
-     * Push into every field into this group
-     */
-    public function add($params)
-    {
-        $this->add[] = $params;
-
-        return $this;
-    }
-
-    /*
-     * Set model
-     */
-    public function model($model)
-    {
-        $this->model = (new $model)->getTable();
-
-        return $this;
+        return $this->type == 'tab';
     }
 
     /*
@@ -170,11 +169,6 @@ class Group
     public static function build( $model )
     {
         return \Fields::getFieldsGroups( $model );
-    }
-
-    public function isTab()
-    {
-        return $this->type == 'tab';
     }
 }
 ?>

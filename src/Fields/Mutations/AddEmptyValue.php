@@ -1,7 +1,10 @@
 <?php
+
 namespace Admin\Fields\Mutations;
 
-class AddEmptyValue
+use Admin\Core\Fields\Mutations\MutationRule;
+
+class AddEmptyValue extends MutationRule
 {
     public $attributes = 'value';
 

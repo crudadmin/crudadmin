@@ -1,10 +1,12 @@
 <?php
+
 namespace Admin\Fields\Mutations;
 
 use Fields;
 use Admin;
+use Admin\Core\Fields\Mutations\MutationRule;
 
-class InterfaceRules
+class InterfaceRules extends MutationRule
 {
     public $attributes = ['inFrontend', 'inBackend', 'inAdmin', 'inConsole'];
 
@@ -19,9 +21,7 @@ class InterfaceRules
 
                 unset($field[$attribute]);
             }
-
         }
-
 
         return $field;
     }

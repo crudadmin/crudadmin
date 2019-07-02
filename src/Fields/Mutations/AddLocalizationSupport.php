@@ -1,9 +1,11 @@
 <?php
+
 namespace Admin\Fields\Mutations;
 
 use Localization;
+use Admin\Core\Fields\Mutations\MutationRule;
 
-class AddLocalizationSupport
+class AddLocalizationSupport extends MutationRule
 {
     /*
      * Localization for old localization support feature (with static columns in DB)

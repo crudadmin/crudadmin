@@ -1,7 +1,10 @@
 <?php
+
 namespace Admin\Fields\Mutations;
 
-class UpdateDateFormat
+use Admin\Core\Fields\Mutations\MutationRule;
+
+class UpdateDateFormat extends MutationRule
 {
     public $attributes = ['format', 'date_step'];
 
