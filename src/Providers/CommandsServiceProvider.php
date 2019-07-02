@@ -1,10 +1,10 @@
 <?php
 namespace Admin\Providers;
 
+use Admin\Contracts\Commands\MutateAdminModelCommand;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Filesystem\Filesystem;
 
-class CommandsRegisterServiceProvider extends ServiceProvider {
+class CommandsServiceProvider extends ServiceProvider {
 
     /**
      * Register the service provider.
@@ -21,8 +21,6 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
         $this->app->bind('gogol::admin.update', \Admin\Commands\AdminUpdateCommand::class);
 
         $this->app->bind('gogol::admin.migrate', \Admin\Commands\AdminMigrationCommand::class);
-
-        $this->app->bind('gogol::admin.model', \Admin\Commands\AdminModelCommand::class);
 
         $this->app->bind('gogol::admin.button', \Admin\Commands\AdminButtonCommand::class);
 
@@ -41,7 +39,6 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
             'gogol::admin.install',
             'gogol::admin.update',
             'gogol::admin.migrate',
-            'gogol::admin.model',
             'gogol::admin.button',
             'gogol::admin.rule',
             'gogol::admin.layout',
@@ -49,5 +46,11 @@ class CommandsRegisterServiceProvider extends ServiceProvider {
             'gogol::admin.compress',
             'gogol::admin.queue',
         ]);
+    }
+
+    public function boot()
+    {
+        //Register core admin model generator command mutator
+        \AdminCore::registerEvents(MutateAdminModelCommand::class);
     }
 }

@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
         LocalizationServiceProvider::class,
         GettextServiceProvider::class,
         ValidatorServiceProvider::class,
-        CommandsRegisterServiceProvider::class,
+        CommandsServiceProvider::class,
         PasswordResetServiceProvider::class,
         ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
