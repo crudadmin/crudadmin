@@ -23,7 +23,6 @@ class AppServiceProvider extends ServiceProvider
         FieldsServiceProvider::class,
         SEOServiceProvider::class,
         HashServiceProvider::class,
-        \Intervention\Image\ImageServiceProvider::class,
     ];
 
     protected $facades = [

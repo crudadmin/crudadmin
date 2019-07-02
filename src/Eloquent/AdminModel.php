@@ -4,6 +4,8 @@ namespace Admin\Eloquent;
 
 use Admin;
 use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Admin\Eloquent\Concerns\AdminModelTrait;
+use Admin\Eloquent\Concerns\HasAttributes;
 use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\ModelIcons;
 use Admin\Eloquent\Concerns\ModelLayoutBuilder;
@@ -16,7 +18,9 @@ use Localization;
 
 class AdminModel extends CoreAdminModel
 {
-    use ModelLayoutBuilder,
+    use AdminModelTrait,
+        ModelLayoutBuilder,
+        HasAttributes,
         ModelRules,
         VueComponent,
         Historiable,
