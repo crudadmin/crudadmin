@@ -1,8 +1,8 @@
 <?php
 
-namespace Admin\Models;
+namespace Admin\Eloquent;
 
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 
 abstract class AdminRule
 {

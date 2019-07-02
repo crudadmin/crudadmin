@@ -2,7 +2,7 @@
 
 namespace Admin\Models;
 
-use Admin\Models\Authenticatable;
+use Admin\Eloquent\Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -48,7 +48,7 @@ class User extends Authenticatable
         return [
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
             'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:30|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
-            'password' => 'name:Heslo|type:password|confirmed|min:4|max:40'.( ! isset($row) ? '|required' : '|nullable' ),
+            'password' => 'name:Heslo|type:password|confirmed|min:4|max:40|'.( isset($row) ? '' : '|required' ),
             'avatar' => 'name:Profilová fotografia|type:file|image',
             'enabled' => 'name:Aktívny|type:checkbox|default:1',
         ];

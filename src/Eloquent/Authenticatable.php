@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Models;
+namespace Admin\Eloquent;
 
 use Admin;
 use Admin\Eloquent\Concerns\CanResetPassword;
