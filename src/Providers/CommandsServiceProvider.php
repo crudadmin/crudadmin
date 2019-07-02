@@ -20,8 +20,6 @@ class CommandsServiceProvider extends ServiceProvider {
 
         $this->app->bind('gogol::admin.update', \Admin\Commands\AdminUpdateCommand::class);
 
-        $this->app->bind('gogol::admin.migrate', \Admin\Commands\AdminMigrationCommand::class);
-
         $this->app->bind('gogol::admin.button', \Admin\Commands\AdminButtonCommand::class);
 
         $this->app->bind('gogol::admin.rule', \Admin\Commands\AdminRuleCommand::class);
@@ -38,7 +36,6 @@ class CommandsServiceProvider extends ServiceProvider {
         $this->commands([
             'gogol::admin.install',
             'gogol::admin.update',
-            'gogol::admin.migrate',
             'gogol::admin.button',
             'gogol::admin.rule',
             'gogol::admin.layout',
