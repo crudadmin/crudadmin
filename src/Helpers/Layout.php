@@ -2,7 +2,7 @@
 
 namespace Admin\Helpers;
 
-use Admin\Traits\VueComponent;
+use Admin\Eloquent\Concerns\VueComponent;
 
 class Layout
 {

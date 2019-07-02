@@ -5,7 +5,7 @@ namespace Admin\Helpers;
 use Ajax;
 use Carbon\Carbon;
 use Admin\Helpers\Layout;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Str;
 
 class AdminRows

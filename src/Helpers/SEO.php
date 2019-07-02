@@ -3,7 +3,7 @@
 namespace Admin\Helpers;
 
 use Admin\Helpers\File as AdminFile;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Gettext;
 
 class SEO

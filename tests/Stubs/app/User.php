@@ -2,7 +2,7 @@
 
 namespace Admin\Tests\App;
 
-use Admin\Models\Authenticatable;
+use Admin\Eloquent\Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable

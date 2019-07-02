@@ -6,7 +6,7 @@ use Admin;
 use Ajax;
 use Admin\Helpers\Button;
 use Admin\Helpers\Layout;
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 
 trait VueComponent
 {

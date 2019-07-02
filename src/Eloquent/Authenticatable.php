@@ -4,7 +4,7 @@ namespace Admin\Eloquent;
 
 use Admin;
 use Admin\Eloquent\Concerns\CanResetPassword;
-use Admin\Models\Model;
+use Admin\Eloquent\AdminModel;
 use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Schema;
 
-class Authenticatable extends Model implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
+class Authenticatable extends AdminModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
     use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable;
 

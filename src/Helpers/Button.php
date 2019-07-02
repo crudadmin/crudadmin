@@ -2,8 +2,8 @@
 
 namespace Admin\Helpers;
 
-use Admin\Models\Model as AdminModel;
-use Admin\Traits\VueComponent;
+use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 
 class Button
