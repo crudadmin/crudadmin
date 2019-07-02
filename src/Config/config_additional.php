@@ -10,8 +10,8 @@ return [
      */
     'models' => [
         app_path() => 'App',
-        app_path('/Model/*') => 'App/Model',
-        app_path('/Eloquent/*') => 'App/Eloquent',
+        app_path('/Model') => 'App/Model',
+        app_path('/Eloquent') => 'App/Eloquent',
     ],
 
     /*

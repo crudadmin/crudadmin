@@ -14,6 +14,7 @@ use Admin\Eloquent\Concerns\Sluggable;
 use Admin\Eloquent\Concerns\Uploadable;
 use Admin\Eloquent\Concerns\VueComponent;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Localization;
 
 class AdminModel extends CoreAdminModel
@@ -26,7 +27,8 @@ class AdminModel extends CoreAdminModel
         Historiable,
         Uploadable,
         ModelIcons,
-        Sluggable;
+        Sluggable,
+        SoftDeletes;
 
     /*
      * Template name
@@ -200,6 +202,9 @@ class AdminModel extends CoreAdminModel
 
     public function __construct(array $attributes = [])
     {
+        //Boot base model trait
+        $this->initTrait();
+
         //Add sortable functions
         static::addGlobalScope('order', function(Builder $builder) {
             $builder->addSorting();
@@ -214,7 +219,6 @@ class AdminModel extends CoreAdminModel
                 $builder->withPublished();
             });
         }
-
 
         parent::__construct($attributes);
     }

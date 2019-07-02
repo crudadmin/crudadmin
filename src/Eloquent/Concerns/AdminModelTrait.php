@@ -2,22 +2,13 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 use Admin;
+use Admin\Helpers\AdminCollection;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 trait AdminModelTrait
 {
-    /*
-     * Default fillable fields
-     */
-    private $_fillable = [ 'published_at' ];
-
-    /*
-     * Buffered fields in model
-     */
-    private $_fields = null;
-
     /*
      * Update model data before saving
      *
@@ -73,11 +64,38 @@ trait AdminModelTrait
         //Checks if is model in sortable mode
         $this->setOrder();
 
-        if ( ! Admin::isLoaded() )
-            return;
+        //If admin models has been loaded
+        //because we do need loaded all models to perform
+        //this features...
+        if ( Admin::isLoaded() === true )
+        {
+            //Remove hidden when is required in admin
+            $this->removeHidden();
+        }
+    }
 
-        //Remove hidden when is required in admin
-        $this->removeHidden();
+    /*
+     * Set selectbox field to automatic json format
+     */
+    protected function makeCastable()
+    {
+        parent::makeCastable();
+
+        //Add cast for order field
+        if ( $this->isSortable() )
+            $this->casts['_order'] = 'integer';
+    }
+
+    /**
+     * Set fillable property for laravel model from admin fields
+     */
+    protected function makeFillable()
+    {
+        parent::makeFillable();
+
+        //Allow language foreign
+        if ( $this->isEnabledLanguageForeign() )
+            $this->fillable[] = 'language_id';
     }
 
     /*
@@ -240,8 +258,15 @@ trait AdminModelTrait
      */
     public function isEnabledLanguageForeign()
     {
-        if ( ( $this->getTable()!='languages' && $this->belongsToModel == null && $this->localization === true || $this->localization === true ) && Admin::isEnabledMultiLanguages())
+        if (
+            Admin::isEnabledLocalization() &&
+            (
+                $this->getTable() != 'languages' && $this->belongsToModel == null && $this->localization === true
+                || $this->localization === true
+            )
+        ) {
             return true;
+        }
 
         return false;
     }
@@ -254,7 +279,7 @@ trait AdminModelTrait
      */
     public function newCollection(array $models = [])
     {
-        return new \Admin\Helpers\AdminCollection($models);
+        return new AdminCollection($models);
     }
 
     /*
@@ -296,6 +321,23 @@ trait AdminModelTrait
 
         return $this->getProperty('sortable');
     }
+
+    /*
+     * Enable sorting
+     */
+    public function scopeAddSorting($query)
+    {
+        $column = $this->orderBy[0];
+
+        if ( count(explode('.', $column)) == 1 )
+            $column = $this->getTable() . '.' . $this->orderBy[0];
+
+        /**
+         * Add global scope for ordering
+         */
+        $query->orderBy($column, $this->orderBy[1]);
+    }
+
 
     /*
      * Returns if form is in reversed mode, it mean that new rows will be added on end
