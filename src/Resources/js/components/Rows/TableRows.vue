@@ -88,7 +88,7 @@ export default {
         },
         defaultColumns(){
             var data = {},
-                    key;
+                key;
 
             //Get columns from row
             for ( var i = 0; i < this.model.columns.length; i++ )
@@ -117,9 +117,10 @@ export default {
 
             var columns = this.$root.getModelProperty(this.model, 'settings.columns');
 
-         /*
-            * Check if can be added column after other column
-            */
+
+            /*
+             * Check if can be added column after other column
+             */
             var except = [];
 
             //Add before and after column values
@@ -247,9 +248,9 @@ export default {
         },
         resetAllowedColumns(){
             var columns = _.cloneDeep(this.defaultColumns),
-                    enabled = {},
-                    order = Object.keys(columns),
-                    model_keys = Object.keys(this.model.fields);
+                enabled = {},
+                order = Object.keys(columns),
+                model_keys = Object.keys(this.model.fields);
 
             //Add allowed keys
             for ( var key in columns )
@@ -266,9 +267,9 @@ export default {
                     continue;
 
                 var add_index = null,
-                        after = true,
-                        before_columns = model_keys.slice(0, model_keys.indexOf(key)),
-                        after_columns = model_keys.slice(model_keys.indexOf(key) + 1);
+                    after = true,
+                    before_columns = model_keys.slice(0, model_keys.indexOf(key)),
+                    after_columns = model_keys.slice(model_keys.indexOf(key) + 1);
 
                 //Add column after first visible column before this field
                 for ( var i = before_columns.length - 1; i >= 0; i-- )
@@ -412,11 +413,11 @@ export default {
             }
 
             var dragged_row = this.rowsdata[dragged.oldIndex],
-                    dropped_row = this.rowsdata[dragged.newIndex],
-                    dragged_order = dragged_row._order,
-                    dropped_order = dropped_row._order,
-                    rows = {},
-                    changed_ids = [];
+                dropped_row = this.rowsdata[dragged.newIndex],
+                dragged_order = dragged_row._order,
+                dropped_order = dropped_row._order,
+                rows = {},
+                changed_ids = [];
 
             //Sort all rows between sorted rows
             for ( var i = this.$parent.$parent.rows.data.length - 1; i >= 0; i-- )

@@ -299,7 +299,7 @@ export default {
             if ( this.isDateValue( field ) && field in this.model.fields )
                 var format = this.$root.fromPHPFormatToMoment(this.model.fields[field].date_format);
 
-            return this.rows.data.slice(0).sort(function(a, b){
+            return this.rows.data.slice(0).sort((a, b) => {
                 //If is null value
                 if ( ! a || ! b )
                     return false;
@@ -342,7 +342,7 @@ export default {
 
                     return a.toLowerCase().localeCompare(b.toLowerCase(), 'sk');
                 }
-            }.bind(this));
+            });
         },
         enabledColumnsList(){
             var allowed = [];

@@ -191,7 +191,7 @@ trait AdminModelTrait
         if ( request()->has('enabled_columns') )
             $fields = array_merge($fields, array_diff(explode(';', request('enabled_columns', '')), $fields));
 
-        return $fields;
+        return array_values($fields);
     }
     public function scopeFilterByParentOrLanguage($query, $subid, $langid, $parent_table = null)
     {

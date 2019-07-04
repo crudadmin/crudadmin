@@ -8,8 +8,6 @@ class Group extends BaseGroup
 {
     public $name = null;
 
-    public $type = 'default';
-
     public $width = 'full';
 
     public $icon = null;
@@ -143,17 +141,6 @@ class Group extends BaseGroup
     public function inline()
     {
         $this->width = $this->width . '-inline';
-
-        return $this;
-    }
-
-    /*
-     * Set type of group
-     * group/tab
-     */
-    public function type($type = 'group')
-    {
-        $this->type = $type;
 
         return $this;
     }
