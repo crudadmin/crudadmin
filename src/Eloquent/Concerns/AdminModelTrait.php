@@ -170,72 +170,37 @@ trait AdminModelTrait
     /*
      * Returns short values of fields for content table of rows in administration
      */
-    public function getBaseFields($all = false)
+    public function getBaseFields()
     {
-        $fields = ['id'];
+        $fields = $this->getColumnNames();
 
-        //If has foreign key, add column name to base fields
-        if ( $this->getForeignColumn() )
-            $fields = array_merge($fields, array_values($this->getForeignColumn()));
-
+        //Remove hidden fields
         foreach ($this->getFields() as $key => $field)
         {
-            //If is not requested all columns, then skip fields with long values
-            if ( $all === false && ( array_key_exists('hidden', $field) && $field['hidden'] == true ) || array_key_exists('belongsToMany', $field))
-                continue;
-
-            $fields[] = $key;
-        }
-
-        //Insert skipped columns
-        if ( is_array($this->skipDropping) )
-        {
-            foreach ($this->skipDropping as $key)
-            {
-                $fields[] = $key;
+            //Skip hidden fields and fields with long values
+            if ( $this->hasFieldParam($key, 'hidden', true) ){
+                unset($fields[array_search($key, $fields)]);
             }
         }
 
-        //Add language id column
-        if ($this->isEnabledLanguageForeign())
-            $fields[] = 'language_id';
+        //Remove delete_at column from list
+        if ( in_array('deleted_at', $fields) )
+            unset($fields[array_search('deleted_at', $fields)]);
 
-        if ( $this->sluggable != null )
-        {
-            $fields[] = 'slug';
-        }
-
-        if ( $this->isSortable() )
-        {
-            $fields[] = '_order';
-        }
-
-        if ( $this->publishable == true )
-        {
-            $fields[] = 'published_at';
-        }
-
-        $fields[] = 'updated_at';
-        $fields[] = 'created_at';
-
-        if ( $all === true )
-        {
-            $fields[] = 'deleted_at';
-        }
-
-        //Push also additional needed columns
+        //Push also additional needed columns from request
         if ( request()->has('enabled_columns') )
             $fields = array_merge($fields, array_diff(explode(';', request('enabled_columns', '')), $fields));
 
         return $fields;
     }
-
     public function scopeFilterByParentOrLanguage($query, $subid, $langid, $parent_table = null)
     {
-        if ( $langid > 0 )
+        if ( $langid > 0 ) {
             $query->localization($langid);
+        }
 
-        if ( $subid > 0 ){
+        if ( $subid > 0 )
+        {
             $column = $this->getForeignColumn($parent_table);
 
             if ( $parent_table === null && count($column) == 1 )
@@ -246,7 +211,7 @@ trait AdminModelTrait
         }
 
         //If is not parent table, but rows can be related into recursive relation
-        if ( ! $parent_table && (int)$subid == 0 ){
+        if ( ! $parent_table && (int)$subid == 0 ) {
             if ( in_array(class_basename(get_class($this)), $this->getBelongsToRelation(true)) )
                 $query->whereNull($this->getForeignColumn($this->getTable()));
         }
