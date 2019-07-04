@@ -37,6 +37,11 @@ class User extends Authenticatable
     protected $minimum = 1;
 
     /*
+     * Allow permissions on "non-user" model
+     */
+    protected $withUserRoles = true;
+
+    /*
      * Automatic form and database generation
      * @name - field name
      * @placeholder - field placeholder

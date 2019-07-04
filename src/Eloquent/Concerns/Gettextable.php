@@ -81,9 +81,9 @@ trait Gettextable
     }
 
     /*
-     * Add columns
+     * Add empty rows
      */
-    public function onMigrate($table, $schema)
+    public function onMigrateEnd($table, $schema)
     {
         if ($this->withUnpublished()->count() == 0)
         {

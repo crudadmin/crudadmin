@@ -119,7 +119,7 @@ trait HasAttributes
         }
 
         //Return just base fields
-        if ( $this->maximum == 0 && $this->justBaseFields === true )
+        if ( $this->maximum == 0 && $this->justBaseFields() === true )
         {
             return array_intersect_key($attributes, array_flip($this->getBaseFields()));
         }

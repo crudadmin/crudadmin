@@ -2,7 +2,7 @@
 
 namespace Admin\Models;
 
-use Admin\Models\Model as AdminModel;
+use Admin\Eloquent\AdminModel;
 use Admin;
 
 class AdminsGroup extends AdminModel

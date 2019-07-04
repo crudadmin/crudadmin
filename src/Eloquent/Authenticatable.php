@@ -46,6 +46,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     protected $guard = 'web';
 
+    /*
+     * Add Admin rules permissions
+     */
+    protected $withUserRoles = true;
+
     public function __construct(array $attributes = [])
     {
         if ( Admin::isFrontend() )
@@ -171,7 +176,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     /*
      * Add columns
      */
-    public function onMigrate($table, $schema)
+    public function onMigrateEnd($table, $schema)
     {
         //Add remember token into user table
         if ( ! $schema->hasColumn( $this->getTable(), 'remember_token') )
@@ -187,17 +192,25 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     }
 
     /*
+     * Check if model can apply user roles
+     */
+    public function canApplyUserRoles()
+    {
+        if ( ! Admin::isRolesEnabled() )
+            return false;
+
+        return class_exists('\App\User') && ($this instanceof \App\User) || $this->withUserRoles == true;
+    }
+
+    /*
      * Add additional fields
      */
     public function mutateFields($fields)
     {
-        if ( !class_exists('\App\User') || !($this instanceof \App\User) )
-            return;
-
         /*
          * If is enabled admin groups
          */
-        if ( Admin::isRolesEnabled() )
+        if ( $this->canApplyUserRoles() )
         {
             $fields->push([
                 'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',
