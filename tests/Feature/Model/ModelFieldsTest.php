@@ -7,7 +7,7 @@ use Admin\Tests\App\Models\Fields\FieldsMutator;
 use Admin\Tests\App\Models\Fields\FieldsType;
 use Admin\Tests\TestCase;
 
-class ModelFieldsAvaiabilityTest extends TestCase
+class ModelFieldsTest extends TestCase
 {
     /** @test */
     public function base_fields_avaiability_without_groups()
