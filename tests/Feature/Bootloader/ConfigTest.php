@@ -12,13 +12,6 @@ class ConfigTest extends TestCase
      */
     protected $loadAllAdminModels = true;
 
-    protected function setUp() : void
-    {
-        parent::setUp();
-
-        $this->installAdmin();
-    }
-
     /** @test */
     public function test_models_loaded_from_config_with_default_user_model_rewrition()
     {

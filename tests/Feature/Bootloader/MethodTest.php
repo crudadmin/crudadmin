@@ -9,13 +9,6 @@ use Admin\Tests\TestCase;
 
 class MethodTest extends TestCase
 {
-    protected function setUp() : void
-    {
-        parent::setUp();
-
-        $this->installAdmin();
-    }
-
     /** @test */
     public function get_model_by_table()
     {

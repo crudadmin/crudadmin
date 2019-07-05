@@ -62,7 +62,7 @@ class AppServiceProvider extends ServiceProvider
         //Set admin locale
         if ( \Admin::isAdmin() === true )
         {
-            app()->setLocale( config('admin.locale', 'sk') );
+            app()->setLocale(config('admin.locale', 'sk'));
         }
     }
 
@@ -73,10 +73,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/../Config/config_additional.php', 'admin'
-        );
-
         $this->registerFacades();
 
         $this->registerProviders();

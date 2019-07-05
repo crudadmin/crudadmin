@@ -9,13 +9,6 @@ use Admin\Tests\TestCase;
 
 class DefaultTest extends TestCase
 {
-    protected function setUp() : void
-    {
-        parent::setUp();
-
-        $this->installAdmin();
-    }
-
     /** @test */
     public function only_default_models_are_available()
     {

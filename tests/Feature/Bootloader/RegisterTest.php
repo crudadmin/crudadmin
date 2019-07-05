@@ -7,13 +7,6 @@ use Admin\Tests\TestCase;
 
 class RegisterTest extends TestCase
 {
-    protected function setUp() : void
-    {
-        parent::setUp();
-
-        $this->installAdmin();
-    }
-
     /** @test */
     public function models_loaded_dynamically_from_package()
     {
