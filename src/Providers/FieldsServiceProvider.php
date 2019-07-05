@@ -4,6 +4,7 @@ namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Admin\Fields\Mutations;
+use Admin\Contracts\Migrations\Types;
 use Admin\Contracts\Migrations\Columns;
 use Fields;
 
@@ -23,11 +24,17 @@ class FieldsServiceProvider extends ServiceProvider {
             'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate'
         ]);
 
+        //Add CrudAdmin additional column types
+        Fields::addColumnType([
+            Types\ImaginaryType::class,
+            Types\StringType::class,
+        ]);
+
+        //Add CrudAdmin static columns
         Fields::addStaticColumn([
             Columns\LanguageId::class,
             Columns\Sortable::class,
         ]);
-
 
         //We need register fields mutators into crudadmin core
         Fields::addMutation([
