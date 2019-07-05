@@ -3,29 +3,35 @@
 namespace Admin\Fields;
 
 use Admin\Core\Fields\Group as BaseGroup;
+use Admin\Eloquent\AdminModel;
 
+/*
+ * Check also available parameters from Admin\Core\Fields\Group
+ */
 class Group extends BaseGroup
 {
-    public $name = null;
-
     public $width = 'full';
 
     public $icon = null;
 
     public $model = null;
 
-    /*
-     * Set name of group
+    /**
+     * Set width of group
+     * @param  string/integer $width full/half/1,2,3,4,5,6,7,8,9,10,11,12
+     * @return Group
      */
-    public function name($name = null)
+    public function width($width = 'full')
     {
-        $this->name = $name;
+        $this->width = $width;
 
         return $this;
     }
 
-    /*
-     * Group icon
+    /**
+     * Group (font-awesome) icon
+     * @param  string $icon
+     * @return Group
      */
     public function icon($icon)
     {
@@ -37,46 +43,10 @@ class Group extends BaseGroup
         return $this;
     }
 
-    /*
-     * Set id of group
-     */
-    public function id($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /*
-     * Push parameters into every field in group
-     */
-    public function add($params)
-    {
-        $this->add[] = $params;
-
-        return $this;
-    }
-
-    /*
-     * Set width of group
-     */
-    public function width($width = 'full')
-    {
-        $this->width = $width;
-
-        return $this;
-    }
-
-    /*
-     * Set width of group
-     */
-    public function grid($width)
-    {
-        return $this->width($width);
-    }
-
-    /*
-     * Set related model as group
+    /**
+     * Set related admin model as group relation
+     * @param  string $model
+     * @return Group
      */
     public function model($model)
     {
@@ -85,17 +55,20 @@ class Group extends BaseGroup
         return $this;
     }
 
-    /*
-     * Make full group
-     * size in 12 cells grid
+    /**
+     * Set width of group
+     * @param  integer/string $width
+     * @return Group
      */
-    public static function fields(array $fields = [], $size = null, $type = 'default')
+    public function grid($width)
     {
-        return (new static($fields))->width($size ?: 'full')->type($type);
+        return $this->width($width);
     }
 
-    /*
-     * Make group represented as tab
+    /**
+     * Make group represented as ta
+     * @param  array  $fields
+     * @return Group
      */
     public static function tab($fields = [])
     {
@@ -111,32 +84,41 @@ class Group extends BaseGroup
         return $tab;
     }
 
-    /*
-     * Make group with full with
+    /**
+     * Make full width group
+     * @param  array  $fields
+     * @return Group
      */
     public static function full(array $fields)
     {
         return (new static($fields))->width('full')->type();
     }
 
-    /*
-     * Make group with half of width in grid
+    /**
+     * Make half width grid group
+     * @param  array  $fields
+     * @return Group
      */
     public static function half(array $fields)
     {
         return (new static($fields))->width('half')->type();
     }
 
-    /*
-     * Make group with half of width in grid
+    /**
+     * Make third width grid group
+     * @param  array  $fields
+     * @return Group
      */
     public static function third(array $fields)
     {
         return (new static($fields))->width(4)->type();
     }
 
-    /*
-     * Make group with auto inline grid style
+    /**
+     * Group which will inline all fields in group
+     * Fields will be in one row, and not in new row
+     * @param  array  $fields
+     * @return Group
      */
     public function inline()
     {
@@ -145,17 +127,22 @@ class Group extends BaseGroup
         return $this;
     }
 
+    /*
+     * Check if group is tab type
+     */
     public function isTab()
     {
         return $this->type == 'tab';
     }
 
-    /*
+    /**
      * Returns groups of fields with correct order
+     * @param  [type] $model [description]
+     * @return [type]        [description]
      */
-    public static function build( $model )
+    public static function build(AdminModel $model)
     {
-        return \Fields::getFieldsGroups( $model );
+        return \Fields::getFieldsGroups($model);
     }
 }
 ?>

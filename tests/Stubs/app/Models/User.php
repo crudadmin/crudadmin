@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Tests\App;
+namespace Admin\Tests\App\Models;
 
 use Admin\Eloquent\Authenticatable;
 use Illuminate\Notifications\Notifiable;

@@ -2,12 +2,18 @@
 
 namespace Admin\Tests;
 
-use Admin\Providers\AppServiceProvider;
+use Admin\Core\Providers\AppServiceProvider as CoreServiceProvider;
+use Admin\Providers\AppServiceProvider as AdminServiceProvider;
 use Admin\Tests\App\User;
 use Illuminate\Support\Facades\File;
 
 trait OrchestraSetup
 {
+    /*
+     * Register all admin models into each test
+     */
+    protected $loadAllAdminModels = false;
+
     /*
      * Admin user credentials
      */
@@ -19,7 +25,8 @@ trait OrchestraSetup
     protected function getPackageProviders($app)
     {
         return [
-            AppServiceProvider::class,
+            CoreServiceProvider::class,
+            AdminServiceProvider::class,
         ];
     }
 
@@ -102,6 +109,10 @@ trait OrchestraSetup
         //Reset sqlite database files
         if ( !file_exists($db_file = database_path('database.sqlite')) )
             @file_put_contents($db_file, '');
+
+        //Register all admin models by default
+        if ( $this->loadAllAdminModels === true )
+            $this->registerAllAdminModels();
     }
 
     /**

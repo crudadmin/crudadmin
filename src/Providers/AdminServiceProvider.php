@@ -24,6 +24,10 @@ class AdminServiceProvider extends ServiceProvider
     //Register admin language model
     private function loadGlobalModules()
     {
+        //If user model does not exists, then load AdminUser model
+        if ( ! \Admin::getModelByTable('users') )
+            \Admin::registerModel(\Admin\Models\User::class);
+
         //Localization enabled
         if ( \Admin::isEnabledLocalization() )
             \Admin::registerModel(\Admin\Models\Language::class);
