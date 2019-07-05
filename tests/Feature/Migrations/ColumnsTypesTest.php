@@ -2,11 +2,12 @@
 
 namespace Admin\Tests\Feature\Migrations;
 
+use Admin;
 use Admin\Core\Tests\Concerns\MigrationAssertions;
 use Admin\Tests\App\Models\Fields\FieldsType;
 use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\TestCase;
-use Admin;
+use Illuminate\Support\Facades\DB;
 
 class ColumnsTypesTest extends TestCase
 {
@@ -20,40 +21,42 @@ class ColumnsTypesTest extends TestCase
         Admin::registerModel(FieldsType::class);
 
         $this->artisan('admin:migrate');
+
+        $this->setSchema(DB::getSchemaBuilder());
     }
 
     /** @test */
     public function test_editor_column()
     {
-        $this->assertColumnExists(FieldsType::class, 'editor')
-             ->assertColumnType(FieldsType::class, 'editor', 'text')
-             ->assertColumnNotNull(FieldsType::class, 'editor', true);
+        $this->assertColumnExists('fields_types', 'editor')
+             ->assertColumnType('fields_types', 'editor', 'text')
+             ->assertColumnNotNull('fields_types', 'editor', true);
     }
 
     /** @test */
     public function test_select_column()
     {
-        $this->assertColumnExists(FieldsType::class, 'select')
-             ->assertColumnType(FieldsType::class, 'select', 'string')
-             ->assertColumnNotNull(FieldsType::class, 'select', true)
-             ->assertColumnLength(FieldsType::class, 'select', 255);
+        $this->assertColumnExists('fields_types', 'select')
+             ->assertColumnType('fields_types', 'select', 'string')
+             ->assertColumnNotNull('fields_types', 'select', true)
+             ->assertColumnLength('fields_types', 'select', 255);
     }
 
     /** @test */
     public function test_password_column()
     {
-        $this->assertColumnExists(FieldsType::class, 'password')
-             ->assertColumnType(FieldsType::class, 'password', 'string')
-             ->assertColumnNotNull(FieldsType::class, 'password', true)
-             ->assertColumnLength(FieldsType::class, 'password', 255);
+        $this->assertColumnExists('fields_types', 'password')
+             ->assertColumnType('fields_types', 'password', 'string')
+             ->assertColumnNotNull('fields_types', 'password', true)
+             ->assertColumnLength('fields_types', 'password', 255);
     }
 
     /** @test */
     public function test_radio_column()
     {
-        $this->assertColumnExists(FieldsType::class, 'radio')
-             ->assertColumnType(FieldsType::class, 'radio', 'string')
-             ->assertColumnNotNull(FieldsType::class, 'radio', true)
-             ->assertColumnLength(FieldsType::class, 'string', 255);
+        $this->assertColumnExists('fields_types', 'radio')
+             ->assertColumnType('fields_types', 'radio', 'string')
+             ->assertColumnNotNull('fields_types', 'radio', true)
+             ->assertColumnLength('fields_types', 'string', 255);
     }
 }
