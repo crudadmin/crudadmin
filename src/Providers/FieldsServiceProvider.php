@@ -24,10 +24,13 @@ class FieldsServiceProvider extends ServiceProvider {
             'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate'
         ]);
 
-        //Add CrudAdmin additional column types
-        Fields::addColumnType([
+        //Add CrudAdmin additional column type
+        Fields::addColumnTypeBefore([
             Types\ImaginaryType::class,
-            Types\StringType::class,
+        ]);
+
+        Fields::addColumnType([
+            Types\StringTypes::class,
         ]);
 
         //Add CrudAdmin static columns

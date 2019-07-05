@@ -6,7 +6,7 @@ use Admin\Core\Migrations\Types\Type;
 use Admin\Core\Eloquent\AdminModel;
 use Illuminate\Database\Schema\Blueprint;
 
-class StringType extends Type
+class StringTypes extends Type
 {
     /**
      * Check if can apply given column
