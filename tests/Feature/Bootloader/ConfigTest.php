@@ -24,7 +24,7 @@ class ConfigTest extends TestCase
     {
         $this->assertEquals(Admin::boot(), [
             '2016-06-05 00:00:00' => 'Admin\Models\Language',
-            '2016-07-09 17:27:57' => 'Admin\Tests\App\Models\User',
+            '2016-07-09 17:27:57' => 'Admin\Tests\App\User',
             '2017-07-15 00:00:00' => 'Admin\Models\ModelsHistory',
             '2019-05-03 12:02:04' => 'Admin\Tests\App\Models\Fields\FieldsType',
             '2019-05-03 12:12:04' => 'Admin\Tests\App\Models\Fields\FieldsTypesMultiple',
@@ -32,6 +32,8 @@ class ConfigTest extends TestCase
             '2019-05-03 14:12:04' => 'Admin\Tests\App\Models\Fields\FieldsRelation',
             '2019-05-03 15:12:04' => 'Admin\Tests\App\Models\Fields\FieldsMutator',
             '2019-05-03 15:13:07' => 'Admin\Tests\App\Models\Fields\SelectType',
+            '2019-05-04 10:10:04' => 'Admin\Tests\App\OtherModels\Blog',
+            '2019-05-04 10:11:02' => 'Admin\Tests\App\OtherModels\BlogsImage',
             '2019-05-04 12:10:04' => 'Admin\Tests\App\Models\Articles\Article',
             '2019-05-04 12:10:15' => 'Admin\Tests\App\Models\Articles\ArticlesComment',
             '2019-05-04 12:10:24' => 'Admin\Tests\App\Models\Articles\Tag',

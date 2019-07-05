@@ -209,7 +209,7 @@ trait OrchestraSetup
     public function registerAllAdminModels()
     {
         config()->set('admin.models', [
-            'Admin\Tests\App\Models' => $this->getAppPath('Models')
+            'Admin\Tests\App' => $this->getAppPath('/')
         ]);
     }
 }
