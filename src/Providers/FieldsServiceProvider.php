@@ -31,6 +31,7 @@ class FieldsServiceProvider extends ServiceProvider {
 
         Fields::addColumnType([
             Types\StringTypes::class,
+            Types\EditorType::class,
         ]);
 
         //Add CrudAdmin static columns

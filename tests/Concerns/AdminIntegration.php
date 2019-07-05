@@ -40,7 +40,7 @@ trait AdminIntegration
      * @param  string/object $model
      * @return object
      */
-    private function getModelClass($model)
+    public function getModelClass($model)
     {
         return is_object($model) ? $model : new $model;
     }
