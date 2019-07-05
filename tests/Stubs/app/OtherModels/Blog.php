@@ -10,7 +10,7 @@ class Blog extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-03 13:10:04';
+    protected $migration_date = '2019-05-04 10:10:04';
 
     /*
      * Template name
