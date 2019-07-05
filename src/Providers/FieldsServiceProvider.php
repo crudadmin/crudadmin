@@ -3,6 +3,8 @@
 namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Admin\Fields\Mutations;
+use Admin\Contracts\Migrations\Columns;
 use Fields;
 
 class FieldsServiceProvider extends ServiceProvider {
@@ -21,14 +23,19 @@ class FieldsServiceProvider extends ServiceProvider {
             'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate'
         ]);
 
+        Fields::addStaticColumn([
+            Columns\LanguageId::class,
+            Columns\Sortable::class,
+        ]);
+
 
         //We need register fields mutators into crudadmin core
         Fields::addMutation([
-            \Admin\Fields\Mutations\InterfaceRules::class,
-            \Admin\Fields\Mutations\AddSelectSupport::class,
-            \Admin\Fields\Mutations\AddLocalizationSupport::class,
-            \Admin\Fields\Mutations\UpdateDateFormat::class,
-            \Admin\Fields\Mutations\AddEmptyValue::class,
+            Mutations\InterfaceRules::class,
+            Mutations\AddSelectSupport::class,
+            Mutations\AddLocalizationSupport::class,
+            Mutations\UpdateDateFormat::class,
+            Mutations\AddEmptyValue::class,
         ]);
     }
 }
