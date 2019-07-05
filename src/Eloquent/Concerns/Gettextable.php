@@ -85,12 +85,14 @@ trait Gettextable
      */
     public function onMigrateEnd($table, $schema)
     {
-        if ($this->withUnpublished()->count() == 0)
+        if ( $this->withUnpublished()->count() == 0 )
         {
-            $i = 0;
-            $languages = [];
-            $languages[] = [ 'name' => 'Slovenský', 'slug' => 'sk', '_order' => $i ];
-            $languages[] = [ 'name' => 'Anglický', 'slug' => 'en', '_order' => $i++ ];
+            $isLanguageTableSortable = Admin::getModelByTable('languages')->isSortable();
+
+            $languages = [
+                [ 'name' => 'Slovenský', 'slug' => 'sk' ] + ($isLanguageTableSortable ? [ '_order' => 0 ] : []),
+                [ 'name' => 'Anglický', 'slug' => 'en' ] + ($isLanguageTableSortable ? [ '_order' => 1 ] : []),
+            ];
 
             $this->insert($languages);
         }
