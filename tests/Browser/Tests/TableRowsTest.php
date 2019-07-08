@@ -128,8 +128,8 @@ class TableRowsTest extends BrowserTestCase
                     asort($visible);
 
                     //Check if all columns except hidden are available
-                    //then wait 100ms for generating belongsToMany columnd, and then test...
-                    $browser->pause(100)
+                    //then wait 150ms for generating belongsToMany columns, and then test...
+                    $browser->pause(150)
                             ->assertVisibleColumnsList(FieldsRelation::class, $visible)
                             ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
         });

@@ -67,7 +67,7 @@ class DataController extends Controller
         if ( is_numeric($history_id) )
             return $this->showDataFromHistory($model, $id, $history_id);
 
-        $model = $this->getModel( $model );
+        $model = $this->getModel($model);
 
         return $model->findOrFail($id)->getMutatedAdminAttributes();
     }
