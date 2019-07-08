@@ -58,7 +58,8 @@
                 :rowsdata.sync="rowsData"
                 :button_loading="button_loading"
                 :checked.sync="checked"
-                :orderby.sync="orderBy">
+                :orderby.sync="orderBy"
+                :depth_level="depth_level">
             </table-rows>
         </div>
 

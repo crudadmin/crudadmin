@@ -1,6 +1,6 @@
 <template>
     <div>
-        <table :id="'table-'+model.slug" :data-table-rows="model.slug" :class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
+        <table :id="'table-'+model.slug" :data-table-rows="model.slug" :data-depth="depth_level" :class="['table', 'data-table', 'table-bordered', 'table-striped', { 'sortable' : model.sortable && orderby[0] == '_order' }]">
             <thead data-table-head>
                 <tr>
                     <th @click="toggleAllCheckboxes" v-if="multipleCheckbox">
@@ -49,7 +49,7 @@ import TableRowValue from './TableRowValue.vue';
 import draggable from 'vuedraggable'
 
 export default {
-    props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'model', 'orderby', 'history', 'checked', 'button_loading'],
+    props : ['row', 'rows', 'rowsdata', 'buttons', 'count', 'field', 'gettext_editor', 'model', 'orderby', 'history', 'checked', 'button_loading', 'depth_level'],
 
     components: { TableRowValue, draggable },
 
@@ -191,7 +191,7 @@ export default {
             return false;
         },
         formID(){
-            return 'form-' + this.$parent.$parent.depth_level + '-' + this.model.slug;
+            return 'form-' + this.depth_level + '-' + this.model.slug;
         },
         availableButtons(){
             return this.$parent.availableButtons;

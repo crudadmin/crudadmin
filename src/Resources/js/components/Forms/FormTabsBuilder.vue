@@ -17,7 +17,8 @@
                             :langid="langid"
                             :inputlang="inputlang"
                             :hasparentmodel="hasparentmodel"
-                            :history="history">
+                            :history="history"
+                            :depth_level="depth_level">
                         </form-tabs-builder>
 
                         <model-builder
@@ -40,7 +41,8 @@
                         :langid="langid"
                         :inputlang="inputlang"
                         :row="row"
-                        :history="history">
+                        :history="history"
+                        :depth_level="depth_level">
                     </form-group>
                 </div>
             </div>
@@ -56,7 +58,7 @@ import ModelHelper from '../Helpers/ModelHelper.js';
 export default {
     name : 'form-tabs-builder',
 
-    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'inputlang', 'cansave', 'hasparentmodel'],
+    props : ['model', 'row', 'history', 'group', 'tabs', 'childs', 'langid', 'inputlang', 'cansave', 'hasparentmodel', 'depth_level'],
 
     components : { FormGroup },
 
@@ -84,8 +86,11 @@ export default {
             this.models_loaded = [];
         });
 
-        eventHub.$on('rows-changed', item => {
-            this.$set(this.models_data, item.slug, item);
+        eventHub.$on('rowsChanged', item => {
+            if ( this.depth_level+1 != item.depth_level )
+                return;
+
+            this.$set(this.models_data, item.table, item);
         });
     },
 

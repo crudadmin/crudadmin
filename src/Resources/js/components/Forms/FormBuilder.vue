@@ -51,6 +51,7 @@
                     :row="row"
                     :cansave="cansave"
                     :hasparentmodel="hasparentmodel"
+                    :depth_level="depth_level"
                     :history="history">
                 </form-tabs-builder>
 
@@ -140,7 +141,7 @@ export default {
 
     computed: {
         formID(){
-            return 'form-' + this.$parent.depth_level + '-' + this.model.slug;
+            return 'form-' + this.depth_level + '-' + this.model.slug;
         },
         isSingle(){
             return this.model.minimum == 1 && this.model.maximum == 1;

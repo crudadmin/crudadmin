@@ -416,13 +416,15 @@
             },
             sendRowsData(){
                 var data = {
+                    table : this.model.slug,
                     slug : this.model.slug,
                     model : this.model,
                     rows : this.rows.data,
                     count : this.rows.count,
+                    depth_level : this.depth_level,
                 };
 
-                eventHub.$emit('rows-changed', data);
+                eventHub.$emit('rowsChanged', data);
             },
             resetSearchBar(){
                 //On change column reset input

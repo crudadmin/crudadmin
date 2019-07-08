@@ -9,7 +9,7 @@
             :value="getValueOrDefault"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </string-field>
 
         <number-field
@@ -21,7 +21,7 @@
             :value="getValueOrDefault"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </number-field>
 
         <date-time-field
@@ -33,7 +33,7 @@
             :value="getValueOrDefault"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </date-time-field>
 
         <checkbox-field
@@ -45,7 +45,7 @@
             :value="getValueOrDefault"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </checkbox-field>
 
         <text-field
@@ -58,7 +58,7 @@
             :value="getValueOrDefault"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </text-field>
 
         <file-field
@@ -72,7 +72,7 @@
             :value="getValueOrDefault"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </file-field>
 
         <select-field
@@ -88,7 +88,7 @@
             :langid="langid"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </select-field>
 
         <radio-field
@@ -103,7 +103,7 @@
             :langid="langid"
             :required="isRequired"
             :disabled="isDisabled"
-            :depth_level="depthLevel">
+            :depth_level="depth_level">
         </radio-field>
 
         <!-- Row Confirmation -->
@@ -115,6 +115,7 @@
             :index="index"
             :field_key="field_key + '_confirmation'"
             :row="row"
+            :depth_level="depth_level"
             :confirmation="true"></form-input-builder>
 
         <component
@@ -141,7 +142,7 @@
 
     export default {
         name: 'form-input-builder',
-        props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug'],
+        props: ['model', 'field', 'field_key', 'index', 'row', 'confirmation', 'history', 'langid', 'inputlang', 'hasparentmodel', 'langslug', 'depth_level'],
 
         components: { StringField, NumberField, DateTimeField, CheckboxField, TextField, FileField, SelectField, RadioField },
 
@@ -324,13 +325,7 @@
 
                 parent = modelBuilder.getParentTableName(this.model.withoutParent == true);
 
-                return 'id-' + this.model.slug + this.field_key + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.langslug;
-            },
-            depthLevel(){
-                //Get parent model builder
-                var modelBuilder = this.getModelBuilder();
-
-                return modelBuilder.depth_level;
+                return 'id-' + this.model.slug + this.field_key + '-' + this.depth_level + '-' + parent + '-' + this.index + '-' + this.langslug;
             },
             getFieldKey()
             {
