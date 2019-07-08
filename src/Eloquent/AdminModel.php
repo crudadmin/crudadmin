@@ -10,7 +10,6 @@ use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\ModelIcons;
 use Admin\Eloquent\Concerns\ModelLayoutBuilder;
 use Admin\Eloquent\Concerns\ModelRules;
-use Admin\Eloquent\Concerns\Sluggable;
 use Admin\Eloquent\Concerns\Uploadable;
 use Admin\Eloquent\Concerns\VueComponent;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,7 +26,6 @@ class AdminModel extends CoreAdminModel
         Historiable,
         Uploadable,
         ModelIcons,
-        Sluggable,
         SoftDeletes;
 
     /*
