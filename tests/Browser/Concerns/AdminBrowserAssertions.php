@@ -335,17 +335,18 @@ trait AdminBrowserAssertions
      * @param  string $column
      * @param  array $excepted
      * @param  boolean $equals
+     * @param  string $wrapper
      * @return object
      */
-    public function assertColumnRowData($model, $column, $excepted = [], $equals = true)
+    public function assertColumnRowData($model, $column, $excepted = [], $equals = true, $wrapper = '')
     {
         $model = $this->getModelClass($model);
 
-        $columns = $this->script("return $('[data-table-rows=\"".$model->getTable()."\"] thead th').map(function(){
+        $columns = $this->script("return $('{$wrapper}[data-table-rows=\"".$model->getTable()."\"] thead th').map(function(){
             return $(this).attr('class')
         })");
 
-        $rows = $this->getRows($model);
+        $rows = $this->getRows($model, $wrapper);
 
         PHPUnit::{$equals ? 'assertEquals' : 'assertNotEquals'}(
             $excepted,

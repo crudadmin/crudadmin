@@ -30,7 +30,7 @@ class ModelRelationsTest extends BrowserTestCase
             $browser->openModelPage(Article::class)
 
                     //Open row, and load related model data, also check if count of loaded data is correct
-                    ->openRow(1)
+                    ->openRow(1)->pause(200)
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (3)')
 
                     //Click on related model and check given data
@@ -39,12 +39,21 @@ class ModelRelationsTest extends BrowserTestCase
 
                     //Fill form and save new related row.
                     ->fillForm(ArticlesComment::class, [ 'name' => 'new related comment' ])
-                    ->submitForm()
-                    ->closeAlert()
+                    ->submitForm()->closeAlert()
 
                     //Check if new row has been given into table
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (4)')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [5, 3, 2, 1])
+
+                    //Open created related row, and test recursivity support
+                    ->openRow(5, ArticlesComment::class)
+                    ->click('[tab-model="articles_comments"] [data-tabs][data-model="articles_comments"]')
+                    ->fillForm(ArticlesComment::class, [ 'name' => 'new recursive comment' ], null, '[data-depth="2"]')
+                    ->submitForm()->closeAlert()
+                    ->assertSeeIn('[data-tabs][data-depth="0"][data-model="articles_comments"]', 'Comments (4)')
+                    ->assertColumnRowData(ArticlesComment::class, 'id', [5, 3, 2, 1], true, '[data-depth="1"]')
+                    ->assertSeeIn('[data-tabs][data-depth="1"][data-model="articles_comments"]', 'Comments (1)')
+                    ->assertColumnRowData(ArticlesComment::class, 'id', [6], true, '[data-depth="2"]')
 
                     //Open second row, and check relations data
                     ->openRow(2, Article::class)
@@ -60,13 +69,14 @@ class ModelRelationsTest extends BrowserTestCase
 
             //Check if all data are correct
             $this->assertEquals([
-                [ "id" => 6, "article_id" => 2, "name" => "my second new related comment"],
-                [ "id" => 5, "article_id" => 1, "name" => "new related comment"],
-                [ "id" => 4, "article_id" => 2, "name" => "comment 1 of article 2"],
-                [ "id" => 3, "article_id" => 1, "name" => "comment 3"],
-                [ "id" => 2, "article_id" => 1, "name" => "comment 2"],
-                [ "id" => 1, "article_id" => 1, "name" => "comment 1"]
-            ], ArticlesComment::select(['id', 'article_id', 'name'])->get()->toArray());
+                [ "id" => 7, "article_id" => 2, "articles_comment_id" => null, "name" => "my second new related comment"],
+                [ "id" => 6, "article_id" => null, "articles_comment_id" => 5, "name" => "new recursive comment"],
+                [ "id" => 5, "article_id" => 1, "articles_comment_id" => null, "name" => "new related comment"],
+                [ "id" => 4, "article_id" => 2, "articles_comment_id" => null, "name" => "comment 1 of article 2"],
+                [ "id" => 3, "article_id" => 1, "articles_comment_id" => null, "name" => "comment 3"],
+                [ "id" => 2, "article_id" => 1, "articles_comment_id" => null, "name" => "comment 2"],
+                [ "id" => 1, "article_id" => 1, "articles_comment_id" => null, "name" => "comment 1"]
+            ], ArticlesComment::select(['id', 'article_id', 'articles_comment_id', 'name'])->get()->toArray());
         });
     }
 }

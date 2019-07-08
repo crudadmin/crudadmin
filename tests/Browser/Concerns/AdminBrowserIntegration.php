@@ -28,15 +28,16 @@ trait AdminBrowserIntegration
     /**
      * Get table rows data in array
      * @param  class $model
+     * @param  string $wrapper
      * @return arrat
      */
-    public function getRows($model)
+    public function getRows($model, $wrapper = '')
     {
         $model = $this->getModelClass($model);
 
         $rows = $this->script("
             return (function(){
-                var rows = $('[data-table-rows=\"".$model->getTable()."\"] tbody tr'),
+                var rows = $('{$wrapper}[data-table-rows=\"".$model->getTable()."\"] tbody tr'),
                     data = [];
 
                 for ( var i = 0; i < rows.length; i++ )
@@ -105,11 +106,14 @@ trait AdminBrowserIntegration
      * @param  class $model
      * @param  array  $array
      * @param  string  $locale
+     * @param  string  $wrapper
      * @return object
      */
-    public function fillForm($model, $array = [], $locale = null)
+    public function fillForm($model, $array = [], $locale = null, $wrapper = null)
     {
         $model = $this->getModelClass($model);
+
+        $wrapper = $wrapper ? $wrapper.' ' : '';
 
         foreach ($array as $key => $value)
         {
@@ -122,14 +126,14 @@ trait AdminBrowserIntegration
             ) {
                 $hasComponent = $model->hasFieldParam($key, 'component');
 
-                $wrapper = $hasComponent ? '' : '[data-model="'.$model->getTable().'"][data-field="'.$key.'"] ';
+                $inputWrapper = $hasComponent ? '' : '[data-model="'.$model->getTable().'"][data-field="'.$key.'"] ';
 
-                $this->type($wrapper.'[name="'.$formKey.'"]', $value);
+                $this->type($wrapper.$inputWrapper.'[name="'.$formKey.'"]', $value);
             }
 
             //Set editor value
             else if ( $model->isFieldType($key, ['longeditor', 'editor']) ) {
-                $this->with('textarea[name='.$formKey .']', function($browser) use ($key, $value, $formKey) {
+                $this->with($wrapper.'textarea[name='.$formKey .']', function($browser) use ($key, $value, $formKey) {
                     $browser->script('CKEDITOR.instances[$("[name=\''.$formKey .'\']").attr("id")].setData("'.$value.'")');
                 });
             }
@@ -148,13 +152,13 @@ trait AdminBrowserIntegration
                         //If value is selected already, we wante unselect given value
                         if ( $this->isAssoc($value) && in_array($k, $selected) )
                         {
-                            $this->script("$('select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).find('.chosen-choices li.search-choice:contains(\"{$option_value}\") a').eq(0).click()");
+                            $this->script("$('{$wrapper}select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).find('.chosen-choices li.search-choice:contains(\"{$option_value}\") a').eq(0).click()");
                         }
 
                         //Select given value
                         else {
                             $this->script("
-                            $('select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).each(function(){
+                            $('{$wrapper}select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).each(function(){
                                 $(this).find('input').click().focus();
                                 $(this).find('.chosen-results li:contains(\"{$option_value}\")').eq(0).mouseup()
                             });
@@ -218,7 +222,7 @@ trait AdminBrowserIntegration
                 else {
                     //We need reset cursor before opening date and wait half of second till calendar opens
                     $this->resetFocus()
-                         ->click('input[name="'.$formKey.'"]')
+                         ->click($wrapper.'input[name="'.$formKey.'"]')
                          ->pause(500)
                          ->clickDatePicker($value);
                 }
@@ -231,7 +235,7 @@ trait AdminBrowserIntegration
 
                 //We need reset cursor before opening date and wait half of second till calendar opens
                 $this->resetFocus()
-                     ->click('input[name="'.$formKey.'"]')
+                     ->click($wrapper.'input[name="'.$formKey.'"]')
                      ->pause(500)
                      ->clickDatePicker($date[0])
                      ->clickTimePicker($date[1]);
@@ -251,7 +255,7 @@ trait AdminBrowserIntegration
                 else {
                     //We need reset cursor before opening date and wait half of second till calendar opens
                     $this->resetFocus()
-                         ->click('input[name="'.$formKey.'"]')
+                         ->click($wrapper.'input[name="'.$formKey.'"]')
                          ->pause(500)
                          ->clickTimePicker($value);
                 }

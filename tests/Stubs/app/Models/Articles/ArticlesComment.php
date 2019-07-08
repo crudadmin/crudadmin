@@ -19,7 +19,7 @@ class ArticlesComment extends AdminModel
 
     protected $title = 'This is comments relation test.';
 
-    protected $belongsToModel = Article::class;
+    protected $belongsToModel = [Article::class, ArticlesComment::class];
 
     protected $sortable = false;
 
