@@ -17,7 +17,7 @@
 
 <script>
     export default {
-        props: ['id', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled'],
+        props: ['id', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled', 'depth_level'],
 
         mounted(){
             var editor = $('#'+this.id).ckEditors();
@@ -31,7 +31,7 @@
             }
 
             eventHub.$on('updateField', data => {
-                if ( data[0] != this.field_key )
+                if ( data.table != this.model.slug || data.depth_level != this.depth_level || data.key != this.field_key )
                     return;
 
                 //After change value, update same value in ckeditor

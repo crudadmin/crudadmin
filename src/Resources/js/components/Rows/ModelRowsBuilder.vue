@@ -89,7 +89,7 @@ import Refreshing from '../Partials/Refreshing.vue';
 import TableRows from './TableRows.vue';
 
 export default {
-    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'gettext_editor', 'iswithoutparent', 'activetab'],
+    props : ['model', 'row', 'rows', 'langid', 'progress', 'search', 'history', 'gettext_editor', 'iswithoutparent', 'activetab', 'depth_level'],
 
     components : { Refreshing, TableRows },
 
@@ -141,11 +141,11 @@ export default {
          * When row is added, then push it into table
          */
         eventHub.$on('onCreate', data => {
-            if ( data.table != this.model.slug )
+            if ( data.table != this.model.slug || data.depth_level != this.depth_level )
                 return;
 
             var array = data.request,
-                    pages = Math.ceil(this.rows.count / this.pagination.limit);
+                pages = Math.ceil(this.rows.count / this.pagination.limit);
 
             //If last page is full, and need to add new page
             if ( this.isReversed(true) && this.rows.count > 0 && !this.$parent.isWithoutParentRow && pages == this.rows.count / this.pagination.limit ){
@@ -180,7 +180,7 @@ export default {
          * When row is updated, then change data into table for changed rows
          */
         eventHub.$on('onUpdate', data => {
-            if ( data.table != this.model.slug )
+            if ( data.table != this.model.slug || data.depth_level != this.depth_level )
                 return;
 
             //Update row in table rows

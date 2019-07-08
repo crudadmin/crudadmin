@@ -15,7 +15,7 @@
             <p>{{ trans('languages-missing') }}</p>
         </div>
 
-        <div :class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
+        <div :data-depth="depth_level" :class="[ 'box', { 'single-mode' : isSingle, 'box-warning' : isSingle } ]" v-show="canShowForm || (hasRows && canShowRows || isSearching)">
 
             <div class="box-header" :class="{ 'with-border' : isSingle }" v-show="ischild && (!model.in_tab || isEnabledGrid || canShowSearchBar) || ( !isSingle && (isEnabledGrid || canShowSearchBar))">
                 <h3 v-if="ischild" class="box-title">{{ model.name }}</h3> <span class="model-info" v-if="model.title && ischild" v-html="model.title"></span>
@@ -90,6 +90,7 @@
                             :canaddrow="canAddRow"
                             :hasparentmodel="hasparentmodelMutated"
                             :gettext_editor.sync="gettext_editor"
+                            :depth_level="depth_level"
                             :row.sync="row"
                         ></form-builder>
                     </div>
@@ -107,6 +108,7 @@
                             :iswithoutparent="isWithoutParentRow"
                             :activetab="activetab"
                             :gettext_editor.sync="gettext_editor"
+                            :depth_level="depth_level"
                             :history="history">
                         </model-rows-builder>
                     </div>

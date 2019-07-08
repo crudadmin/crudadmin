@@ -88,7 +88,7 @@ import FormTabsBuilder from '../Forms/FormTabsBuilder.vue';
 export default {
     name : 'form-builder',
 
-    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid', 'gettext_editor'],
+    props : ['model', 'row', 'rows', 'langid', 'canaddrow', 'progress', 'history', 'hasparentmodel', 'selectedlangid', 'gettext_editor', 'depth_level'],
 
     components: { FormTabsBuilder },
 
@@ -296,7 +296,10 @@ export default {
                     this.model.fields[key].value = value;
                     this.model.fields[key].$original_value = value;
 
-                    eventHub.$emit('updateField', [key, this.model.fields[key]]);
+                    eventHub.$emit('updateField', this.buildEventData({
+                        key : key,
+                        field : this.model.fields[key]
+                    }));
                 }
             }
 
@@ -511,12 +514,12 @@ export default {
                 }
             };
         },
-        buildEventData(row, request){
+        buildEventData(data){
             return {
                 table : this.model.slug,
                 model : this.model,
-                row : row,
-                request : request
+                depth_level : this.depth_level,
+                ...data
             };
         },
         saveForm(e)
@@ -538,10 +541,10 @@ export default {
                         this.saveParentChilds(response);
 
                     //Bind values for input builder
-                    eventHub.$emit('onSubmit', this.buildEventData(clonedRow, response.data));
+                    eventHub.$emit('onSubmit', this.buildEventData({ row : clonedRow, request : response.data}));
 
                     //Send notification about new row
-                    eventHub.$emit('onCreate', this.buildEventData(clonedRow, response.data));
+                    eventHub.$emit('onCreate', this.buildEventData({ row : clonedRow, request : response.data}));
 
                     //If form has disabled autoreseting
                     var autoreset = this.$root.getModelProperty(this.model, 'settings.autoreset');
@@ -564,10 +567,10 @@ export default {
                     var clonedRow = _.cloneDeep(response.data.row);
 
                     //Bind values for input builder
-                    eventHub.$emit('onSubmit', this.buildEventData(clonedRow, response.data));
+                    eventHub.$emit('onSubmit', this.buildEventData({ row : clonedRow, request : response.data}));
 
                     //Send notification about updated row
-                    eventHub.$emit('onUpdate', this.buildEventData(clonedRow, response.data));
+                    eventHub.$emit('onUpdate', this.buildEventData({ row : clonedRow, request : response.data}));
 
                     for ( var key in response.data.row )
                     {

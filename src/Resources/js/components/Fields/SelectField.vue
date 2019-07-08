@@ -38,7 +38,7 @@
     import ModelBuilder from '../Views/ModelBuilder.vue';
 
     export default {
-        props: ['id', 'row', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled', 'inputlang', 'langid'],
+        props: ['id', 'row', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled', 'inputlang', 'langid', 'depth_level'],
 
         data(){
             return {
@@ -58,7 +58,7 @@
             this.bindFilters();
 
             eventHub.$on('updateField', data => {
-                if ( data[0] != this.field_key )
+                if ( data.table != this.model.slug || data.depth_level != this.depth_level || data.key != this.field_key )
                     return;
 
                 this.$nextTick(this.reloadSelectWithMultipleOrders);

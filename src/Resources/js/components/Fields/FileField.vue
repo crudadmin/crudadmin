@@ -28,7 +28,7 @@
     import File from '../Partials/File.vue';
 
     export default {
-        props: ['id', 'row', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled'],
+        props: ['id', 'row', 'model', 'field_name', 'field_key', 'field', 'value', 'required', 'disabled', 'depth_level'],
 
         components : { File },
 
@@ -43,7 +43,7 @@
             this.addMultipleFilesSupport(true);
 
             eventHub.$on('updateField', data => {
-                if ( data[0] != this.field_key )
+                if ( data.table != this.model.slug || data.depth_level != this.depth_level || data.key != this.field_key )
                     return;
 
                 this.file_from_server = true;
@@ -54,7 +54,7 @@
             eventHub.$on('onSubmit', data => {
                 var row = data.row;
 
-                if ( data.table != this.model.slug )
+                if ( data.table != this.model.slug || data.depth_level != this.depth_level )
                     return;
 
                 if ( this.file_from_server == true && row != null )

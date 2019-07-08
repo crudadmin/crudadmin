@@ -8,7 +8,8 @@
             :field="field"
             :value="getValueOrDefault"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </string-field>
 
         <number-field
@@ -19,7 +20,8 @@
             :field="field"
             :value="getValueOrDefault"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </number-field>
 
         <date-time-field
@@ -30,7 +32,8 @@
             :field="field"
             :value="getValueOrDefault"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </date-time-field>
 
         <checkbox-field
@@ -41,7 +44,8 @@
             :field="field"
             :value="getValueOrDefault"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </checkbox-field>
 
         <text-field
@@ -53,7 +57,8 @@
             :field="field"
             :value="getValueOrDefault"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </text-field>
 
         <file-field
@@ -66,7 +71,8 @@
             :field="field"
             :value="getValueOrDefault"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </file-field>
 
         <select-field
@@ -81,7 +87,8 @@
             :inputlang="inputlang"
             :langid="langid"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </select-field>
 
         <radio-field
@@ -95,7 +102,8 @@
             :inputlang="inputlang"
             :langid="langid"
             :required="isRequired"
-            :disabled="isDisabled">
+            :disabled="isDisabled"
+            :depth_level="depthLevel">
         </radio-field>
 
         <!-- Row Confirmation -->
@@ -317,6 +325,12 @@
                 parent = modelBuilder.getParentTableName(this.model.withoutParent == true);
 
                 return 'id-' + this.model.slug + this.field_key + '-' + modelBuilder.depth_level + '-' + parent + '-' + this.index + '-' + this.langslug;
+            },
+            depthLevel(){
+                //Get parent model builder
+                var modelBuilder = this.getModelBuilder();
+
+                return modelBuilder.depth_level;
             },
             getFieldKey()
             {
