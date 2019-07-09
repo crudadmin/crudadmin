@@ -722,13 +722,17 @@
             },
             //Returns if is model in single row mode
             isSingle(){
-                return this.model.minimum == 1 && this.model.maximum == 1;
+                var single = this.model.minimum == 1 && this.model.maximum == 1;
+
+                if ( single ) {
+                    this.row = this.rows.data[0]||this.emptyRowInstance();
+                    this.row;
+                }
+
+                return single;
             },
             canShowRows(){
                 if ( this.isSingle ){
-                    this.row = this.rows.data[0]||{};
-                    this.row;
-
                     this.enableOnlyFullScreen();
 
                     return false;
