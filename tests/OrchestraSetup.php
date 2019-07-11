@@ -3,6 +3,7 @@
 namespace Admin\Tests;
 
 use Admin\Core\Providers\AppServiceProvider as CoreServiceProvider;
+use Admin\Resources\Providers\AppServiceProvider as ResourcesServiceProvider;
 use Admin\Providers\AppServiceProvider as AdminServiceProvider;
 use Admin\Tests\App\User;
 use Illuminate\Support\Facades\File;
@@ -26,6 +27,7 @@ trait OrchestraSetup
     {
         return [
             CoreServiceProvider::class,
+            ResourcesServiceProvider::class,
             AdminServiceProvider::class,
         ];
     }
