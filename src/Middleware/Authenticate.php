@@ -33,7 +33,7 @@ class Authenticate
                 //Custom login path
                 if ( !($path = config('admin.authentication.login.path')) )
                 {
-                    $path = action('\Admin\Controllers\Auth\LoginController@showLoginForm');
+                    $path = admin_action('Auth\LoginController@showLoginForm');
                 }
 
                 return redirect()->guest( $path )->withErrors($errors);

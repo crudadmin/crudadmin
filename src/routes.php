@@ -10,18 +10,6 @@
 |
 */
 
-/*
- * Login routes
- */
-Route::get('/admin/login', 'Auth\LoginController@showLoginForm');
-Route::post('/admin/login', 'Auth\LoginController@login');
-Route::get('/admin/logout', 'Auth\LoginController@logout');
-
-Route::get('/admin/password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm');
-Route::post('/admin/password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
-Route::get('/admin/password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
-Route::post('/admin/password/reset', 'Auth\ResetPasswordController@reset');
-
 //Download files
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
 Route::get('/admin/download/file', 'DownloadController@index');
@@ -37,9 +25,6 @@ Route::get('/js/gettext-translates.js', 'GettextController@index');
  * Admin routes
  */
 Route::group(['middleware' => 'admin'], function(){
-    // Dashboard
-    Route::get('/admin', 'DashboardController@index');
-
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
     Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
@@ -55,8 +40,4 @@ Route::group(['middleware' => 'admin'], function(){
     Route::get('/admin/api/getTranslations/{id}', 'DataController@getTranslations');
     Route::post('/admin/api/updateTranslations/{id}', 'DataController@updateTranslations');
     Route::delete('/admin/api/delete', 'DataController@delete');
-
-    //CKFinder
-    Route::any('/admin/api/ckfinder/browser', 'CKFinderController@browserAction')->name('ckfinder_browser');
-    Route::any('/admin/api/ckfinder/connector', 'CKFinderController@requestAction')->name('ckfinder_connector');
 });

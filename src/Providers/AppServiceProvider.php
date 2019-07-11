@@ -48,11 +48,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         /*
-         * Bind variable to admin views path
-         */
-        $this->loadViewsFrom(__DIR__ . '/../Views', 'admin');
-
-        /*
          * Bind route provider after application boot, for correct route actions in localizations
          */
         $this->registerProviders([

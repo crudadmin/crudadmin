@@ -20,8 +20,6 @@ class LocalizationServiceProvider extends ServiceProvider {
     public function boot(Kernel $kernel)
     {
         $this->loadMiddlewares($kernel);
-
-        $this->loadTranslations();
     }
 
     //Register localization middleware
@@ -31,11 +29,5 @@ class LocalizationServiceProvider extends ServiceProvider {
             return;
 
         $kernel->prependMiddleware(LocalizationMiddleware::class);
-    }
-
-    //Load translations
-    private function loadTranslations()
-    {
-        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang/admin/', 'admin');
     }
 }

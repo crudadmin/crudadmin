@@ -170,7 +170,7 @@ class AdminInstallCommand extends Command
         ]);
 
         $this->line('<comment>+ Demo user created</comment>');
-        $this->line('<info>- Admin path:</info> <comment>'.action('\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
+        $this->line('<info>- Admin path:</info> <comment>'.admin_action('Auth\LoginController@showLoginForm').'</comment>');
         $this->line('<info>- Email:</info> <comment>'.$data['email'].'</comment>');
         $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
 
