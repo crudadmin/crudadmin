@@ -12,6 +12,11 @@ class AdminRows
 {
     protected $model = null;
 
+    /**
+     * Class constructor
+     *
+     * @param  Admin\Eloquent\AdminModel  $model
+     */
     public function __construct(AdminModel $model)
     {
         $this->model = $model;
