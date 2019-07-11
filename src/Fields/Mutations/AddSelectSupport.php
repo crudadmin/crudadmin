@@ -166,12 +166,12 @@ class AddSelectSupport extends MutationRule
     {
         $columns = [];
 
-        foreach ($fields as $field)
-        {
+        foreach ($fields as $field) {
             $properties = $this->getBelongsToProperties($field);
 
-            if ( count($properties) < 2 || $properties[0] != $table )
+            if ( count($properties) < 2 || $properties[0] != $table ) {
                 continue;
+            }
 
             $columns = array_merge($columns, $model->getRelationshipNameBuilder($properties[1]));
         }
