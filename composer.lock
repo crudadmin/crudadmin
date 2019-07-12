@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "crudadmin/framework",
-            "version": "2.0.3",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crudadmin/framework.git",
-                "reference": "6efaeecf25f912884cfd0b8301781506d684bf7d"
+                "reference": "8054ff0f120ca5210a4b84cf1780cf41281dc2ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crudadmin/framework/zipball/6efaeecf25f912884cfd0b8301781506d684bf7d",
-                "reference": "6efaeecf25f912884cfd0b8301781506d684bf7d",
+                "url": "https://api.github.com/repos/crudadmin/framework/zipball/8054ff0f120ca5210a4b84cf1780cf41281dc2ff",
+                "reference": "8054ff0f120ca5210a4b84cf1780cf41281dc2ff",
                 "shasum": ""
             },
             "require": {
@@ -68,7 +68,7 @@
                 "laravel",
                 "model"
             ],
-            "time": "2019-07-12T08:25:57+00:00"
+            "time": "2019-07-12T11:00:45+00:00"
         },
         {
             "name": "crudadmin/resources",
