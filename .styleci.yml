@@ -1,18 +1,3 @@
-preset: PSR2
-enabled:
-    - align_phpdoc
-    - binary_operator_spaces
-    - no_empty_statement
-    - phpdoc_to_comment
-    - phpdoc_types
-    - phpdoc_single_line_var_spacing
-    - phpdoc_scalar
-    - phpdoc_summary
-    - single_blank_line_before_namespace
-    - no_unused_imports
-    - length_ordered_imports
-    - no_blank_lines_after_class_opening
-    - no_blank_lines_after_phpdoc
-    - no_blank_lines_after_throw
-    - no_blank_lines_between_imports
-    - no_blank_lines_between_traits
+preset: laravel
+disabled:
+    - not_operator_with_successor_space
