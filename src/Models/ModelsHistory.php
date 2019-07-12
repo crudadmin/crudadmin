@@ -2,9 +2,8 @@
 
 namespace Admin\Models;
 
-use Admin\Models\Model;
-use Carbon\Carbon;
 use Admin;
+use Carbon\Carbon;
 
 class ModelsHistory extends Model
 {
@@ -54,10 +53,10 @@ class ModelsHistory extends Model
      */
     public function convertData($model, $data)
     {
-        foreach ($data as $key => $value)
-        {
-            if ( $value instanceof Carbon )
+        foreach ($data as $key => $value) {
+            if ($value instanceof Carbon) {
                 $data[$key] = $value->format('Y-m-d H:i:00');
+            }
         }
 
         ksort($data);
@@ -76,8 +75,9 @@ class ModelsHistory extends Model
     /*
      * Compare multidimensional array
      */
-    private function array_diff_recursive($array1, $array2) {
-        $aReturn = array();
+    private function array_diff_recursive($array1, $array2)
+    {
+        $aReturn = [];
 
         foreach ($array1 as $mKey => $mValue) {
             if (array_key_exists($mKey, $array2)) {
@@ -99,8 +99,9 @@ class ModelsHistory extends Model
 
         //Add missing values from second array
         foreach ($array2 as $key => $value) {
-            if ( ! array_key_exists($key, $array1) )
+            if (! array_key_exists($key, $array1)) {
                 $aReturn[$key] = $value;
+            }
         }
 
         return $aReturn;
@@ -114,7 +115,7 @@ class ModelsHistory extends Model
         $old_data = $model->getHistorySnapshot();
 
         //If row is editted, but does not exists in db history, then create his initial/original value, and changed value
-        if ( is_array($original) && count($old_data) == 0 ){
+        if (is_array($original) && count($old_data) == 0) {
             $this->pushChanges($model, $original, null, true);
 
             $old_data = $original;
@@ -126,22 +127,21 @@ class ModelsHistory extends Model
         $data = array_merge($data, $this->array_diff_recursive($model->attributesToArray(), $data));
 
         //Compare changes
-        foreach ($data as $key => $value)
-        {
-            if ( $this->canSkipFieldInHistory($model, $key) )
+        foreach ($data as $key => $value) {
+            if ($this->canSkipFieldInHistory($model, $key)) {
                 continue;
+            }
 
             $exists = array_key_exists($key, $old_data);
 
-            if ( !$exists && ! is_null($value) || $exists && $old_data[$key] != $value ){
+            if (! $exists && ! is_null($value) || $exists && $old_data[$key] != $value) {
                 $changes[$key] = $value;
             }
         }
 
         //Push empty values into missing keys in actual request
-        foreach (array_diff_key($old_data, $data) as $key => $value)
-        {
-            if ( $this->canSkipFieldInHistory($model, $key) ){
+        foreach (array_diff_key($old_data, $data) as $key => $value) {
+            if ($this->canSkipFieldInHistory($model, $key)) {
                 unset($changes[$key]);
             } else {
                 $changes[$key] = is_array($value) ? [] : '';
@@ -157,23 +157,27 @@ class ModelsHistory extends Model
     public function pushChanges($model, $data, $original = null, $initial = false)
     {
         foreach (['_id', '_order', '_method', '_model', 'language_id'] as $key) {
-            if ( array_key_exists($key, $data) )
+            if (array_key_exists($key, $data)) {
                 unset($data[$key]);
+            }
         }
 
         //Modify request data
         $data = $this->convertData($model, $data);
 
         //Compare and get new changes
-        if ( $initial !== true )
+        if ($initial !== true) {
             $data = $this->checkChanges($model, $data, $original);
+        }
 
         //If no changes
-        if ( count($data) == 0 )
+        if (count($data) == 0) {
             return;
+        }
 
-        if ( $initial === false )
+        if ($initial === false) {
             $user = auth()->guard('web')->user();
+        }
 
         $snap = [
             'user_id' => ! $initial && $user ? $user->getKey() : null,
@@ -183,8 +187,9 @@ class ModelsHistory extends Model
         ];
 
         //If is initial value
-        if ( $initial === true )
-            $snap += [ 'created_at' => $model->created_at ];
+        if ($initial === true) {
+            $snap += ['created_at' => $model->created_at];
+        }
 
         $row = $this->newInstance()->forceFill($snap);
         $row->save();
@@ -194,7 +199,7 @@ class ModelsHistory extends Model
 
     public function setAdminAttributes($attributes)
     {
-        $attributes['changed_fields'] = array_keys((array)json_decode($attributes['data']));
+        $attributes['changed_fields'] = array_keys((array) json_decode($attributes['data']));
 
         unset($attributes['data']);
 

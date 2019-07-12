@@ -3,15 +3,13 @@
 namespace Admin\Eloquent;
 
 use Admin;
-use Admin\Eloquent\Concerns\CanResetPassword;
-use Admin\Eloquent\AdminModel;
-use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
-use Schema;
+use Admin\Eloquent\Concerns\CanResetPassword;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class Authenticatable extends AdminModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
@@ -53,8 +51,9 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
 
     public function __construct(array $attributes = [])
     {
-        if ( Admin::isFrontend() )
+        if (Admin::isFrontend()) {
             $this->publishable = false;
+        }
 
         parent::__construct($attributes);
     }
@@ -64,22 +63,22 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function permissions()
     {
-        if ( Admin::isRolesEnabled() === false )
+        if (Admin::isRolesEnabled() === false) {
             return [];
+        }
 
         $key = 'users.'.$this->getKey().'.permissions';
 
         //Check for buffer
-        if ( Admin::has($key) )
+        if (Admin::has($key)) {
             return Admin::get($key);
+        }
 
         $models = [];
 
-        if ( $admin_groups = $this->adminsGroups )
-        {
-            foreach ($admin_groups as $group)
-            {
-                $models = array_merge($models, (array)$group->models);
+        if ($admin_groups = $this->adminsGroups) {
+            foreach ($admin_groups as $group) {
+                $models = array_merge($models, (array) $group->models);
             }
         }
 
@@ -92,17 +91,20 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     public function hasAccess($model)
     {
         //If roles are not enabled, allow everything
-        if ( Admin::isRolesEnabled() === false )
+        if (Admin::isRolesEnabled() === false) {
             return true;
+        }
 
         //If is super admin
-        if ( $this->hasAdminAccess() )
+        if ($this->hasAdminAccess()) {
             return true;
+        }
 
-        if ( is_object($model) )
+        if (is_object($model)) {
             $model = get_class($model);
-        else
+        } else {
             $model = trim($model, '/');
+        }
 
         return in_array($model, $this->permissions());
     }
@@ -128,12 +130,13 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function setPasswordAttribute($value)
     {
-        if ( $value && strlen($value) == 60)
+        if ($value && strlen($value) == 60) {
             $this->attributes['password'] = $value;
-        else if ( $value === null )
+        } elseif ($value === null) {
             $this->attributes['password'] = null;
-        else if ( $value || is_numeric($value) )
+        } elseif ($value || is_numeric($value)) {
             $this->attributes['password'] = bcrypt($value);
+        }
     }
 
     /*
@@ -141,8 +144,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function setEnabledAttribute($value)
     {
-        if ( Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard( $this->guard )->user()->getKey() && $this->enabled != $value )
-        {
+        if (Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard($this->guard)->user()->getKey() && $this->enabled != $value) {
             return Admin::push('errors.request', 'Nie je možné deaktivovať vlastný účet.');
         }
 
@@ -154,8 +156,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function setPermissionsAttribute($value)
     {
-        if ( Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard( $this->guard )->user()->getKey() && $this->permissions != $value )
-        {
+        if (Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard($this->guard)->user()->getKey() && $this->permissions != $value) {
             return Admin::push('errors.request', 'Nie je možné upravovať vlastne administrátorske práva.');
         }
 
@@ -164,11 +165,13 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
 
     public function getAdminUser()
     {
-        if ( $this->avatar )
+        if ($this->avatar) {
             $this->avatar = $this->avatar->resize(100, 100)->url;
+        }
 
-        if ( Admin::isRolesEnabled() )
+        if (Admin::isRolesEnabled()) {
             $this->load('adminsGroups');
+        }
 
         return $this->getAttributes() + $this->relationsToArray();
     }
@@ -179,15 +182,15 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     public function onMigrateEnd($table, $schema)
     {
         //Add remember token into user table
-        if ( ! $schema->hasColumn( $this->getTable(), 'remember_token') )
-        {
+        if (! $schema->hasColumn($this->getTable(), 'remember_token')) {
             $column = $table->rememberToken();
 
             //add remember token after this columns
-            if ( $schema->hasColumn( $this->getTable(), 'deleted_at') )
+            if ($schema->hasColumn($this->getTable(), 'deleted_at')) {
                 $column->before('deleted_at');
-            else if ( $schema->hasColumn( $this->getTable(), 'avatar') )
+            } elseif ($schema->hasColumn($this->getTable(), 'avatar')) {
                 $column->after('avatar');
+            }
         }
     }
 
@@ -196,8 +199,9 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function canApplyUserRoles()
     {
-        if ( ! Admin::isRolesEnabled() )
+        if (! Admin::isRolesEnabled()) {
             return false;
+        }
 
         return class_exists('\App\User') && ($this instanceof \App\User) || $this->withUserRoles == true;
     }
@@ -210,8 +214,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         /*
          * If is enabled admin groups
          */
-        if ( $this->canApplyUserRoles() )
-        {
+        if ($this->canApplyUserRoles()) {
             $fields->push([
                 'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',
                 'admins_groups' => 'name:admin::admin.admin-group|belongsToMany:admins_groups,name',

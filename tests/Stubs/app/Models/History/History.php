@@ -2,8 +2,8 @@
 
 namespace Admin\Tests\App\Models\History;
 
-use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
+use Admin\Eloquent\AdminModel;
 
 class History extends AdminModel
 {
@@ -43,7 +43,7 @@ class History extends AdminModel
                 'time' => 'name:my time field|type:time|required',
                 'checkbox' => 'name:my checkbox field|type:checkbox',
                 'radio' => 'name:my radio field|type:radio|options:c,d,b|required',
-            ])
+            ]),
         ];
     }
 }

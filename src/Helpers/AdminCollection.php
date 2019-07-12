@@ -2,17 +2,15 @@
 
 namespace Admin\Helpers;
 
-use \Illuminate\Database\Eloquent\Collection as BaseCollection;
+use Illuminate\Database\Eloquent\Collection as BaseCollection;
 
 class AdminCollection extends BaseCollection
 {
     //Reset admin model properties for correct displaying attributes
     protected function removeProperties()
     {
-        foreach ($this->items as $k => $row)
-        {
-            foreach (['name', 'title', 'localization', 'active'] as $buffer_key)
-            {
+        foreach ($this->items as $k => $row) {
+            foreach (['name', 'title', 'localization', 'active'] as $buffer_key) {
                 $row->setProperty($buffer_key, null);
             }
 

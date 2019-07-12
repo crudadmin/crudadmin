@@ -1,7 +1,7 @@
 <?php
+
 namespace Admin\Helpers;
 
-use Admin\Helpers\File;
 use Admin\Core\Helpers\AdminCore;
 
 class Admin extends AdminCore
@@ -27,7 +27,7 @@ class Admin extends AdminCore
      */
     public function isFrontend()
     {
-        return !$this->isAdmin() && !app()->runningInConsole();
+        return ! $this->isAdmin() && ! app()->runningInConsole();
     }
 
     /*
@@ -67,7 +67,7 @@ class Admin extends AdminCore
      */
     public function stub($stub)
     {
-        return __DIR__ . '/../Stubs/'.$stub.'.stub';
+        return __DIR__.'/../Stubs/'.$stub.'.stub';
     }
 
     /*
@@ -93,19 +93,18 @@ class Admin extends AdminCore
     {
         $composer_file = base_path('composer.lock');
 
-        if ( file_exists($composer_file) )
-        {
-            if ( !($data = file_get_contents(base_path('composer.lock'))) )
+        if (file_exists($composer_file)) {
+            if (! ($data = file_get_contents(base_path('composer.lock')))) {
                 return false;
+            }
 
             $json = json_decode($data);
 
-            foreach ([$json->packages, $json->{'packages-dev'}] as $list)
-            {
-                foreach ($list as $package)
-                {
-                    if ( $package->name == 'marekgogol/crudadmin' )
+            foreach ([$json->packages, $json->{'packages-dev'}] as $list) {
+                foreach ($list as $package) {
+                    if ($package->name == 'marekgogol/crudadmin') {
                         return $package->version;
+                    }
                 }
             }
         }
@@ -119,8 +118,9 @@ class Admin extends AdminCore
     public function getVersion()
     {
         //Return testing version
-        if ( $this->isTesting() )
+        if ($this->isTesting()) {
             return 'dev-test';
+        }
 
         return $this->getPackageVersion() ?: 'dev-master';
     }
@@ -152,9 +152,9 @@ class Admin extends AdminCore
     /*
      * Return directory for version file
      */
-    public function getAssetsVersionPath( $file = null )
+    public function getAssetsVersionPath($file = null)
     {
-        return public_path($this->getAdminAssetsPath().'/dist/version/' . $file);
+        return public_path($this->getAdminAssetsPath().'/dist/version/'.$file);
     }
 
     /*
@@ -164,8 +164,9 @@ class Admin extends AdminCore
     {
         $file = $this->getAssetsVersionPath('version.txt');
 
-        if ( ! file_exists($file) )
-            return null;
+        if (! file_exists($file)) {
+            return;
+        }
 
         return file_get_contents($file);
     }
@@ -175,17 +176,18 @@ class Admin extends AdminCore
      */
     public function publishAssetsVersion()
     {
-        $directory = Admin::getAssetsVersionPath();
+        $directory = self::getAssetsVersionPath();
 
         //Create directory if not exists
         File::makeDirs($directory);
 
-        $this->files->put($directory . 'version.txt', Admin::getVersion());
+        $this->files->put($directory.'version.txt', self::getVersion());
 
-        $htaccess = $directory . '.htaccess';
+        $htaccess = $directory.'.htaccess';
 
-        if ( ! file_exists($htaccess) )
+        if (! file_exists($htaccess)) {
             $this->files->put($htaccess, 'deny from all');
+        }
 
         $this->addGitignoreFiles();
     }
@@ -194,11 +196,10 @@ class Admin extends AdminCore
     {
         $gitignore = "*\n!.gitignore";
 
-        foreach ([public_path(Admin::getAdminAssetsPath()), public_path('uploads')] as $dir)
-        {
+        foreach ([public_path(self::getAdminAssetsPath()), public_path('uploads')] as $dir) {
             File::makeDirs($dir);
 
-            file_put_contents($dir . '/.gitignore', $gitignore);
+            file_put_contents($dir.'/.gitignore', $gitignore);
         }
     }
 
@@ -207,7 +208,7 @@ class Admin extends AdminCore
      */
     public function getComponentsPaths()
     {
-        return array_map(function($path){
+        return array_map(function ($path) {
             return base_or_relative_path($path);
         }, config('admin.components', []));
     }
@@ -217,25 +218,24 @@ class Admin extends AdminCore
      */
     public function getComponentsFiles()
     {
-        return $this->cache('fields_components', function(){
+        return $this->cache('fields_components', function () {
             $components = [];
 
             //Get components path and add absolute app path if is needed
             $configPaths = $this->getComponentsPaths();
 
             //Get all components
-            foreach ($configPaths as $path)
-            {
-                if ( ! file_exists($path) )
+            foreach ($configPaths as $path) {
+                if (! file_exists($path)) {
                     continue;
+                }
 
                 $files = $this->files->allFiles($path);
 
-                foreach ($files as $file)
-                {
+                foreach ($files as $file) {
                     $filename = array_slice(explode('.', basename($file)), 0, -1)[0];
 
-                    $components[strtolower($filename)] = (string)$file;
+                    $components[strtolower($filename)] = (string) $file;
                 }
             }
 
@@ -243,4 +243,3 @@ class Admin extends AdminCore
         });
     }
 }
-?>

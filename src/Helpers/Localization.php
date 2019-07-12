@@ -1,9 +1,10 @@
 <?php
+
 namespace Admin\Helpers;
 
+use Gettext;
 use Admin\Models\Language;
 use Illuminate\Support\Collection;
-use Gettext;
 
 class Localization
 {
@@ -20,8 +21,9 @@ class Localization
         $this->languages = new Collection;
 
         //Checks if is enabled multi language support
-        if ( ! \Admin::isEnabledLocalization() || app()->runningInConsole() == true )
+        if (! \Admin::isEnabledLocalization() || app()->runningInConsole() == true) {
             return false;
+        }
 
         $this->bootLanguages();
     }
@@ -30,8 +32,9 @@ class Localization
     {
         $this->booted = true;
 
-        if ( !($model = \Admin::getModelByTable('languages')) )
+        if (! ($model = \Admin::getModelByTable('languages'))) {
             return new Collection;
+        }
 
         return $this->languages = $model->all();
     }
@@ -39,13 +42,13 @@ class Localization
     public function boot()
     {
         //Checks if is enabled multi language support
-        if ( ! $this->isEnabled() )
+        if (! $this->isEnabled()) {
             return false;
+        }
 
-        if ( ! $this->isValidSegment() )
-        {
+        if (! $this->isValidSegment()) {
             //Update app localization for default language
-            $this->setLocale( $this->getDefaultLanguage()->slug );
+            $this->setLocale($this->getDefaultLanguage()->slug);
 
             return false;
         }
@@ -55,14 +58,14 @@ class Localization
 
     public function setLocale($locale)
     {
-        if ( $locale == $this->localization )
+        if ($locale == $this->localization) {
             return true;
+        }
 
         app()->setLocale($locale);
 
         //Switch gettext localization
-        if ( config('admin.gettext') === true )
-        {
+        if (config('admin.gettext') === true) {
             Gettext::setLocale($locale);
         }
 
@@ -78,9 +81,8 @@ class Localization
      */
     public function setDateLocale($locale)
     {
-        if ( class_exists( \Jenssegers\Date\Date::class ) )
-        {
-            \Jenssegers\Date\Date::setLocale( $locale );
+        if (class_exists(\Jenssegers\Date\Date::class)) {
+            \Jenssegers\Date\Date::setLocale($locale);
         }
     }
 
@@ -96,8 +98,7 @@ class Localization
 
     public function getLanguages($console = false)
     {
-        if ( $console === true && count($this->languages) == 0 )
-        {
+        if ($console === true && count($this->languages) == 0) {
             return $this->bootLanguages();
         }
 
@@ -108,8 +109,7 @@ class Localization
     {
         $this->checkForConsoleBoot();
 
-        if ( $this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first() )
-        {
+        if ($this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first()) {
             return $language;
         }
 
@@ -135,7 +135,7 @@ class Localization
 
     public function isValidSegment()
     {
-        return $this->isValid( request()->segment(1) );
+        return $this->isValid(request()->segment(1));
     }
 
     private function checkForConsoleBoot()
@@ -156,13 +156,14 @@ class Localization
 
         $segment = request()->segment(1);
 
-        if ( $this->isValidSegment() === false )
+        if ($this->isValidSegment() === false) {
             $language = $this->getDefaultLanguage();
-        else
+        } else {
             $language = $this->languages->where('slug', $segment)->first();
+        }
 
         //Update app localization
-        $this->setLocale( $language->slug );
+        $this->setLocale($language->slug);
 
         return $language;
     }
@@ -171,7 +172,7 @@ class Localization
     {
         $id = $this->isValidSegment() ? $id + 1 : $id;
 
-        return request()->segment( $id );
+        return request()->segment($id);
     }
 
     public function save($lang)
@@ -182,10 +183,10 @@ class Localization
 
     public function createLangSlug($slug)
     {
-        if ( $slug == 'en' )
+        if ($slug == 'en') {
             return 'en_US';
+        }
 
-        return $slug . '_' . strtoupper($slug);
+        return $slug.'_'.strtoupper($slug);
     }
 }
-?>

@@ -2,8 +2,8 @@
 
 namespace Admin\Tests\App\Models\Locales;
 
-use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
+use Admin\Eloquent\AdminModel;
 
 class ModelLocale extends AdminModel
 {
@@ -42,7 +42,7 @@ class ModelLocale extends AdminModel
                 'time' => 'name:my time field|type:time|required|locale',
                 'checkbox' => 'name:my checkbox field|type:checkbox|locale',
                 'radio' => 'name:my radio field|type:radio|options:c,d,b|required|locale',
-            ])
+            ]),
         ];
     }
 }

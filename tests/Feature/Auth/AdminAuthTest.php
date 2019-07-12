@@ -4,7 +4,6 @@ namespace Admin\Tests\Feature\Auth;
 
 use Admin\Tests\TestCase;
 use Admin\Tests\Concerns\DropDatabase;
-use Illuminate\Support\Facades\File;
 
 class AdminAuthTest extends TestCase
 {

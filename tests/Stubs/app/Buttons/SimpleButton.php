@@ -27,7 +27,7 @@ class SimpleButton extends Button
      */
     public function fire(AdminModel $row)
     {
-        $row->update([ 'field3' => 5 ]);
+        $row->update(['field3' => 5]);
 
         return $this->message('Your action is done!');
     }

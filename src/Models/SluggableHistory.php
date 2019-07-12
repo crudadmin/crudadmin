@@ -2,8 +2,6 @@
 
 namespace Admin\Models;
 
-use Admin\Models\Model;
-
 class SluggableHistory extends Model
 {
     /*

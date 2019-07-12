@@ -2,20 +2,16 @@
 
 namespace Admin\Controllers;
 
-use Illuminate\Http\Request;
-
 use Ajax;
 use Admin;
 use Localization;
-use App\Http\Requests;
-use Admin\Controllers\Controller as BaseController;
 use Admin\Fields\Group;
 use Admin\Helpers\AdminRows;
-use DB;
+use Illuminate\Http\Request;
+use Admin\Controllers\Controller as BaseController;
 
 class LayoutController extends BaseController
 {
-
     public function index()
     {
         return [
@@ -44,7 +40,6 @@ class LayoutController extends BaseController
                 'update_translations' => action('\Admin\Controllers\DataController@updateTranslations', [':id']),
             ],
         ];
-
     }
 
     /*
@@ -54,8 +49,9 @@ class LayoutController extends BaseController
     {
         $path = config('admin.dashboard', resource_path('views/admin/dashboard.blade.php'));
 
-        if ( ! file_exists($path) )
+        if (! file_exists($path)) {
             return '';
+        }
 
         return view()->file($path)->render();
     }
@@ -68,19 +64,20 @@ class LayoutController extends BaseController
         $model = Admin::getModelByTable($table);
 
         //Check if user has allowed model
-        if ( !$model || ! auth()->guard('web')->user()->hasAccess( $model ) )
+        if (! $model || ! auth()->guard('web')->user()->hasAccess($model)) {
             Ajax::permissionsError();
+        }
 
-        if ( $parent_table == '0' )
+        if ($parent_table == '0') {
             $parent_table = null;
-        else {
+        } else {
             //Set parent row into model
             $parent_row = Admin::getModelByTable($parent_table)->withoutGlobalScopes()->find($subid);
 
             $model->withModelParentRow($parent_row);
         }
 
-        $data = (new AdminRows($model))->returnModelData( $parent_table, $subid, $langid, $limit, $page, $count );
+        $data = (new AdminRows($model))->returnModelData($parent_table, $subid, $langid, $limit, $page, $count);
 
         //Add token
         $data['token'] = csrf_token();
@@ -102,29 +99,33 @@ class LayoutController extends BaseController
      */
     private function updateOptionsForm($key, $field, &$fields)
     {
-        if ( ! array_key_exists('options', $field) )
+        if (! array_key_exists('options', $field)) {
             return;
+        }
 
         $data = [];
 
-        foreach ($field['options'] as $k => $v)
+        foreach ($field['options'] as $k => $v) {
             $data[] = [$k, $v];
+        }
 
         $fields[$key]['options'] = $data;
     }
 
     private function findEqualOptions($key, $field, &$fields)
     {
-        if ( ! array_key_exists('options', $field) || count($options = $field['options']) == 0 )
+        if (! array_key_exists('options', $field) || count($options = $field['options']) == 0) {
             return;
+        }
 
         foreach ($fields as $k => $f) {
-            if ( $key == $k || ! array_key_exists('options', $f) )
+            if ($key == $k || ! array_key_exists('options', $f)) {
                 continue;
+            }
 
             //If this set of options exists in other field already
-            if ( $options == $f['options'] ){
-                $fields[$key]['options'] = '$.' . $k;
+            if ($options == $f['options']) {
+                $fields[$key]['options'] = '$.'.$k;
             }
         }
     }
@@ -132,13 +133,13 @@ class LayoutController extends BaseController
     protected function getModelFields($model, $withOptions = false)
     {
         //If is first request into table, then load also all options from fields
-        if ( $withOptions === true )
+        if ($withOptions === true) {
             $model->withAllOptions();
+        }
 
         $fields = $model->getFields();
 
-        foreach ($fields as $key => $field)
-        {
+        foreach ($fields as $key => $field) {
             $this->updateOptionsForm($key, $field, $fields);
 
             $this->findEqualOptions($key, $field, $fields);
@@ -155,24 +156,25 @@ class LayoutController extends BaseController
         $count = count($belongsToModel);
 
         //If is model related recursive to itself
-        if ( $count == 1 && in_array(class_basename(get_class($model)), $belongsToModel) ){
+        if ($count == 1 && in_array(class_basename(get_class($model)), $belongsToModel)) {
             return false;
         }
 
         //If model is some child, or
-        if ( $count > 0 )
+        if ($count > 0) {
             return true;
+        }
 
         return false;
     }
 
     private function groupPrefix($key)
     {
-        return '#$_' . $key;
+        return '#$_'.$key;
     }
 
     /**
-     * Returns full app tree
+     * Returns full app tree.
      * @return [array]
      */
     public function getAppTree($initial_request = false)
@@ -184,59 +186,59 @@ class LayoutController extends BaseController
         $groups = [];
 
         //Bind pages into groups
-        foreach ($models as $model)
-        {
-            if ( $this->skipModelInTree($model) )
+        foreach ($models as $model) {
+            if ($this->skipModelInTree($model)) {
                 continue;
+            }
 
             //Check if user has allowed model
-            if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
+            if (! auth()->guard('web')->user()->hasAccess($model)) {
                 $model->setProperty('active', false);
+            }
 
             $page = $this->makePage($model, null, true, $initial_request);
 
-            if ( $model->hasModelGroup() )
-            {
+            if ($model->hasModelGroup()) {
                 $tree = $model->getModelGroupsTree();
                 $count = count($tree);
 
-                $reference =& $groups;
+                $reference = &$groups;
 
                 foreach ($tree as $i => $group) {
                     $group_key = $group['key'];
 
                     //If groups does not exist into x-dimensional array
-                    if ( ! array_key_exists($this->groupPrefix($group_key), $reference) )
-                        $reference[ $this->groupPrefix($group_key) ] = [
+                    if (! array_key_exists($this->groupPrefix($group_key), $reference)) {
+                        $reference[$this->groupPrefix($group_key)] = [
                             'name' => $group['name'],
                             'icon' => $group['icon'],
                             'submenu' => [],
                         ];
+                    }
 
-                    $reference =& $reference[$this->groupPrefix($group_key)]['submenu'];
+                    $reference = &$reference[$this->groupPrefix($group_key)]['submenu'];
 
                     //If is last group in array, then push model into group list
-                    if ( $i + 1 >= $count ){
-                        $reference[ $model->getTable() ] = $page;
+                    if ($i + 1 >= $count) {
+                        $reference[$model->getTable()] = $page;
                     }
                 }
 
                 unset($reference);
             } else {
-                $groups[ $model->getTable() ] = $page;
+                $groups[$model->getTable()] = $page;
             }
-
         }
 
-        return $this->addSlugPath( $groups );
+        return $this->addSlugPath($groups);
     }
 
     /**
-     * Return build model JSON instance
+     * Return build model JSON instance.
      * @param  object  $model          model instance
      * @param  object  $data           additional data for request
-     * @param  boolean $withChilds     return all model childs
-     * @param  boolean $layout_request if is first request for admin boot
+     * @param  bool $withChilds     return all model childs
+     * @param  bool $layout_request if is first request for admin boot
      * @return json
      */
     protected function makePage($model, $data = null, $withChilds = true, $initial_request = false, $withOptions = false)
@@ -245,21 +247,22 @@ class LayoutController extends BaseController
 
         $childs = [];
 
-        foreach ($childs_models as $child_model)
-        {
-            if ( $withChilds === false )
+        foreach ($childs_models as $child_model) {
+            if ($withChilds === false) {
                 continue;
+            }
 
             // Check if user has allowed model
-            if ( ! auth()->guard('web')->user()->hasAccess( $child_model ) )
+            if (! auth()->guard('web')->user()->hasAccess($child_model)) {
                 $child_model->setProperty('active', false);
+            }
 
             $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
 
-            $childs[ $child_model->getTable() ] = $child;
+            $childs[$child_model->getTable()] = $child;
         }
 
-        return array_merge((array)$data, [
+        return array_merge((array) $data, [
             'name' => $model->getProperty('name'),
             'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
@@ -296,20 +299,20 @@ class LayoutController extends BaseController
     {
         $data = [];
 
-        foreach ($pages as $key => $page)
-        {
+        foreach ($pages as $key => $page) {
             $data[$key] = $page;
 
-            if ( ! is_array($page) )
+            if (! is_array($page)) {
                 continue;
+            }
 
             $data[$key]['slug'] = $key;
             $data[$key]['table'] = $key;
 
-            foreach (['submenu', 'childs'] as $subkey)
-            {
-                if ( array_key_exists($subkey, $page) && count($page[$subkey]) > 0 )
+            foreach (['submenu', 'childs'] as $subkey) {
+                if (array_key_exists($subkey, $page) && count($page[$subkey]) > 0) {
                     $data[$key][$subkey] = $this->addSlugPath($page[$subkey]);
+                }
             }
         }
 
@@ -321,8 +324,9 @@ class LayoutController extends BaseController
      */
     protected function getLanguages()
     {
-        if ( ! Admin::isEnabledLocalization() )
+        if (! Admin::isEnabledLocalization()) {
             return [];
+        }
 
         return Localization::getLanguages();
     }

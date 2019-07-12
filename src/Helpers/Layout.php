@@ -14,7 +14,7 @@ class Layout
     public $available_positions = [
         'top', 'bottom',
         'form-top', 'form-bottom', 'form-header', 'form-footer',
-        'table-header', 'table-footer'
+        'table-header', 'table-footer',
     ];
 
     /*
@@ -38,5 +38,3 @@ class Layout
         return resource_path('views/admin/components/layouts');
     }
 }
-
-?>

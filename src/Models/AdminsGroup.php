@@ -2,8 +2,8 @@
 
 namespace Admin\Models;
 
-use Admin\Eloquent\AdminModel;
 use Admin;
+use Admin\Eloquent\AdminModel;
 
 class AdminsGroup extends AdminModel
 {
@@ -64,7 +64,7 @@ class AdminsGroup extends AdminModel
         $parents_basename = $model->getBelongsToRelation(true);
 
         //If has no more levels, or is recursive model
-        if ( count($parents) == 0 || in_array(class_basename(get_class($model)), $parents_basename) ){
+        if (count($parents) == 0 || in_array(class_basename(get_class($model)), $parents_basename)) {
             $tree[] = $model->getProperty('name');
 
             return implode(' > ', array_reverse($tree));
@@ -83,12 +83,12 @@ class AdminsGroup extends AdminModel
 
         $options = [];
 
-        foreach ($models as $migration => $path)
-        {
+        foreach ($models as $migration => $path) {
             $model = new $path;
 
-            if ( $model->getProperty('active') === true )
-                $options[ $path ] = $this->buildModelTree($model, []);
+            if ($model->getProperty('active') === true) {
+                $options[$path] = $this->buildModelTree($model, []);
+            }
         }
 
         setlocale(LC_COLLATE, 'sk_SK.utf8');
@@ -99,5 +99,4 @@ class AdminsGroup extends AdminModel
             'models' => $options,
         ];
     }
-
 }

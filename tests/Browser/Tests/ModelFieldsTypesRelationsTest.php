@@ -2,13 +2,11 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Carbon\Carbon;
-use Admin\Tests\App\Models\Fields\FieldsRelation;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Browser\Concerns\SeedTrait;
 use Admin\Tests\Concerns\DropDatabase;
-use Illuminate\Support\Facades\DB;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\Concerns\SeedTrait;
+use Admin\Tests\App\Models\Fields\FieldsRelation;
 
 class ModelFieldsTypesRelationsTest extends BrowserTestCase
 {
@@ -113,9 +111,9 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
             'relation1_id' => [4 => 'captain marvel'],
             'relation2_id' => [5 => 'my option aquaman 4'],
             'relation3_id' => [11 => 'my second option superman 20'],
-            'relation_multiple1' => [ ],
-            'relation_multiple2' => [ 9 => 'my option hellboy 8' ], //we want remove this item
-            'relation_multiple3' => [ 11 => 'second option superman 20', 10 => 'second option spider-man 18' ],
+            'relation_multiple1' => [],
+            'relation_multiple2' => [9 => 'my option hellboy 8'], //we want remove this item
+            'relation_multiple3' => [11 => 'second option superman 20', 10 => 'second option spider-man 18'],
         ];
     }
 

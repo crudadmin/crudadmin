@@ -2,11 +2,10 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Admin;
 use Ajax;
+use Admin;
 use Admin\Helpers\Button;
 use Admin\Helpers\Layout;
-use Admin\Eloquent\AdminModel;
 
 trait VueComponent
 {
@@ -19,20 +18,19 @@ trait VueComponent
 
         $components = [];
 
-        foreach ($fields as $key => $field)
-        {
-            if ( ! array_key_exists('component', $field) )
+        foreach ($fields as $key => $field) {
+            if (! array_key_exists('component', $field)) {
                 continue;
+            }
 
             $componentsNames = explode(',', $field['component']);
 
-            foreach ($componentsNames as $name)
-            {
-                if ( !($path = $this->getComponentRealPath($name)) )
-                {
+            foreach ($componentsNames as $name) {
+                if (! ($path = $this->getComponentRealPath($name))) {
                     //Disable throw error on initial admin boot request
-                    if ( $initial_request === true )
+                    if ($initial_request === true) {
                         continue;
+                    }
 
                     Ajax::error(sprintf(trans('admin::admin.component-missing'), $name, $key), null, null, 500);
                 }
@@ -55,7 +53,7 @@ trait VueComponent
         $template = $this->getTextBetweenTags($content, 'template');
 
         //Fixed CRLF for windows, js does not work with CRLF
-        $template = str_replace("\n", "", $template);
+        $template = str_replace("\n", '', $template);
         $template = str_replace(["\r\n", "\n", "\r"], '', $template);
 
         $script = $this->getTextBetweenTags($content, 'script');
@@ -77,7 +75,6 @@ trait VueComponent
         return trim($matches[1]);
     }
 
-
     /*
      * Check if component does exists in specific locations
      */
@@ -87,39 +84,38 @@ trait VueComponent
         $filename = str_replace('.', '/', $filename);
 
         //Try components from root of given component directories from config
-        $locations = array_map(function($path) use($filename) {
+        $locations = array_map(function ($path) use ($filename) {
             return trim_end($path, '/').'/'.$filename.'.vue';
         }, Admin::getComponentsPaths());
 
         //Try also files with absolute paths
-        if ( $originalFilename[0] == '/' )
-        {
+        if ($originalFilename[0] == '/') {
             $locations[] = $originalFilename.'.vue';
             $locations[] = $originalFilename;
         }
 
         //Try additional feature components path
-        if ( method_exists($this, 'getComponentPaths') )
+        if (method_exists($this, 'getComponentPaths')) {
             $locations[] = trim_end($this->getComponentPaths(), '/').'/'.$filename.'.vue';
+        }
 
         //Get component with directory from views path (in case someone would type admin/components/template.vue)
         $locations[] = resource_path('views/'.$filename.'.vue');
 
         //Try all possible combinations where would be stored component
-        foreach ($locations as $path)
-        {
-            if ( file_exists($path) )
+        foreach ($locations as $path) {
+            if (file_exists($path)) {
                 return $path;
+            }
         }
 
         //Get all loaded lowercase components
         $loadedComponents = Admin::getComponentsFiles();
 
         //Get component from loaded components list with lowercase file support
-        if ( array_key_exists($strtolower_filename = strtolower($filename), $loadedComponents) )
+        if (array_key_exists($strtolower_filename = strtolower($filename), $loadedComponents)) {
             return $loadedComponents[$strtolower_filename];
-
-        return null;
+        }
     }
 
     /*
@@ -130,7 +126,7 @@ trait VueComponent
         $path = $this->getComponentRealPath($filename);
 
         //Throw ajax error for button or layout component render
-        if ( $path === null && ( $this instanceof Button || $this instanceof Layout ) ){
+        if ($path === null && ($this instanceof Button || $this instanceof Layout)) {
             Ajax::error(sprintf(trans('admin::admin.component-missing'), $filename, ''), null, null, 500);
         }
 

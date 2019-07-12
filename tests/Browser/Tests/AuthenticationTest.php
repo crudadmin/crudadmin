@@ -3,9 +3,9 @@
 namespace Admin\Tests\Browser\Tests;
 
 use Admin\Tests\App\User;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
 use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Browser\BrowserTestCase;
 
 class AuthenticationTest extends BrowserTestCase
 {

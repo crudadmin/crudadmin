@@ -42,8 +42,9 @@ class ResetPassword extends Notification
 
     protected function getTranslate($key)
     {
-        if ( ($text = trans($key)) == $key )
+        if (($text = trans($key)) == $key) {
             return false;
+        }
 
         return $text;
     }
@@ -56,12 +57,13 @@ class ResetPassword extends Notification
      */
     public function toMail($notifiable)
     {
-        if ( method_exists($this->user, 'getResetLink') )
+        if (method_exists($this->user, 'getResetLink')) {
             $action = $this->user->getResetLink($this->token);
-        elseif ( $this->user instanceof \App\User )
+        } elseif ($this->user instanceof \App\User) {
             $action = admin_action('Auth\ResetPasswordController@showResetForm', $this->token);
-        else
+        } else {
             $action = route('password.reset', $this->token);
+        }
 
         return (new MailMessage)
             ->subject($this->getTranslate('passwords.email.subject') ?: 'Reset password')

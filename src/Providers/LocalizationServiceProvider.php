@@ -1,12 +1,13 @@
 <?php
+
 namespace Admin\Providers;
 
-use Admin\Middleware\LocalizationMiddleware;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
+use Admin\Middleware\LocalizationMiddleware;
 
-class LocalizationServiceProvider extends ServiceProvider {
-
+class LocalizationServiceProvider extends ServiceProvider
+{
     /**
      * Register the service provider.
      *
@@ -25,8 +26,9 @@ class LocalizationServiceProvider extends ServiceProvider {
     //Register localization middleware
     private function loadMiddlewares($kernel)
     {
-        if ( $kernel->hasMiddleware(LocalizationMiddleware::class) )
+        if ($kernel->hasMiddleware(LocalizationMiddleware::class)) {
             return;
+        }
 
         $kernel->prependMiddleware(LocalizationMiddleware::class);
     }

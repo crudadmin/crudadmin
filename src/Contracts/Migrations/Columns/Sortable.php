@@ -11,9 +11,9 @@ class Sortable extends Column
     public $column = '_order';
 
     /**
-     * Check if can apply given column
+     * Check if can apply given column.
      * @param  AdminModel  $model
-     * @return boolean
+     * @return bool
      */
     public function isEnabled(AdminModel $model)
     {
@@ -21,7 +21,7 @@ class Sortable extends Column
     }
 
     /**
-     * Register static column
+     * Register static column.
      * @param  Blueprint    $table
      * @param  AdminModel   $model
      * @param  bool         $update
@@ -30,24 +30,25 @@ class Sortable extends Column
     public function registerStaticColumn(Blueprint $table, AdminModel $model, bool $update, $columnExists = null)
     {
         //Check if is enabled sortable support and column does not exists
-        if ( $columnExists )
+        if ($columnExists) {
             return;
+        }
 
         //If column does not exists in existing table, then regenerate order position
-        if ( $update === true && !$columnExists )
+        if ($update === true && ! $columnExists) {
             $this->setOrderPosition($model);
+        }
 
-        return $table->integer($this->column)->unsigned();;
+        return $table->integer($this->column)->unsigned();
     }
 
     //Resave all rows in model for updating slug if needed
     protected function setOrderPosition($model)
     {
-        $this->registerAfterMigration($model, function() use ($model) {
+        $this->registerAfterMigration($model, function () use ($model) {
             $i = 0;
 
-            foreach ($model->get() as $row)
-            {
+            foreach ($model->get() as $row) {
                 $row->_order = $i++;
                 $row->save();
             }

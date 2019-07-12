@@ -2,11 +2,11 @@
 
 namespace Admin\Commands;
 
+use Admin;
+use Admin\Helpers\File;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
-use Admin\Helpers\File;
-use Admin;
 
 class AdminLayoutCommand extends GeneratorCommand
 {
@@ -55,22 +55,22 @@ class AdminLayoutCommand extends GeneratorCommand
         $this->copyBladeLayout();
 
         //Laravel 5.4 support
-        if ( method_exists($this, 'fire') )
+        if (method_exists($this, 'fire')) {
             parent::fire();
-        else
+        } else {
             parent::handle();
+        }
     }
 
     protected function copyBladeLayout()
     {
         $directory = resource_path('views/admin/'.($this->template_type == 'vuejs' ? 'components/layouts/' : null));
 
-        $path = $directory . $this->getLayoutName() . ($this->template_type == 'blade' ? '.blade.php' : '.vue');
+        $path = $directory.$this->getLayoutName().($this->template_type == 'blade' ? '.blade.php' : '.vue');
 
         File::makeDirs($directory);
 
-        if ( ! file_exists($path) )
-        {
+        if (! file_exists($path)) {
             $this->files->copy($this->getTemplateStub(), $path);
         }
     }
@@ -92,8 +92,9 @@ class AdminLayoutCommand extends GeneratorCommand
      */
     protected function getTemplateStub()
     {
-        if ( $this->template_type == 'vuejs' )
+        if ($this->template_type == 'vuejs') {
             return __DIR__.'/../Stubs/LayoutVueJs.stub';
+        }
 
         return __DIR__.'/../Stubs/LayoutBlade.stub';
     }
@@ -133,7 +134,7 @@ class AdminLayoutCommand extends GeneratorCommand
     }
 
     /**
-     * Get layout blade name
+     * Get layout blade name.
      *
      * @return string
      */
@@ -144,8 +145,9 @@ class AdminLayoutCommand extends GeneratorCommand
 
     protected function getLayoutResponse()
     {
-        if ( $this->template_type == 'blade' )
+        if ($this->template_type == 'blade') {
             return "view('admin.".$this->getLayoutName()."')";
+        }
 
         return '$this->component(\''.$this->getLayoutName().'.vue\')';
     }
@@ -157,7 +159,7 @@ class AdminLayoutCommand extends GeneratorCommand
      */
     protected function rootNamespace()
     {
-        return $this->laravel->getNamespace() . 'Admin\Layouts\\';
+        return $this->laravel->getNamespace().'Admin\Layouts\\';
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace Admin\Contracts\Migrations\Types;
 
-use Admin\Core\Migrations\Types\Type;
 use Admin\Core\Eloquent\AdminModel;
+use Admin\Core\Migrations\Types\Type;
 use Illuminate\Database\Schema\Blueprint;
 
 class ImaginaryType extends Type
@@ -14,10 +14,10 @@ class ImaginaryType extends Type
     public $hasColumn = false;
 
     /**
-     * Check if can apply given column
+     * Check if can apply given column.
      * @param  AdminModel  $model
      * @param  string      $key
-     * @return boolean
+     * @return bool
      */
     public function isEnabled(AdminModel $model, string $key)
     {
@@ -25,7 +25,7 @@ class ImaginaryType extends Type
     }
 
     /**
-     * Register column
+     * Register column.
      * @param  Blueprint    $table
      * @param  AdminModel   $model
      * @param  string       $key

@@ -2,9 +2,9 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Admin\Tests\Browser\BrowserTestCase;
-use Illuminate\Foundation\Auth\User;
 use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Auth\User;
+use Admin\Tests\Browser\BrowserTestCase;
 
 class MenuTest extends BrowserTestCase
 {

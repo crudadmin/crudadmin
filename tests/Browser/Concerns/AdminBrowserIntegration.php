@@ -2,15 +2,14 @@
 
 namespace Admin\Tests\Browser\Concerns;
 
-use Carbon\Carbon;
 use Exception;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
-use Facebook\WebDriver\Remote\LocalFileDetector;
 
 trait AdminBrowserIntegration
 {
     /**
-     * Open model page
+     * Open model page.
      * @param  class $model
      * @return object
      */
@@ -19,14 +18,14 @@ trait AdminBrowserIntegration
         $model = $this->getModelClass($model);
 
         $this->loginAs(User::first())
-             ->visit(admin_action('DashboardController@index') . '#/page/'.$model->getTable());
+             ->visit(admin_action('DashboardController@index').'#/page/'.$model->getTable());
 
         //Wait till page loads
         return $this->waitFor('h1');
     }
 
     /**
-     * Get table rows data in array
+     * Get table rows data in array.
      * @param  class $model
      * @param  string $wrapper
      * @return arrat
@@ -58,14 +57,13 @@ trait AdminBrowserIntegration
         $array = [];
 
         //Fix order of keys from row columns
-        foreach ($rows[0] as $item)
-        {
-            if ( ! array_key_exists($item[0], $array) )
+        foreach ($rows[0] as $item) {
+            if (! array_key_exists($item[0], $array)) {
                 $array[$item[0]] = [];
+            }
 
             //Set keys and values
-            foreach ($item[1] as $column)
-            {
+            foreach ($item[1] as $column) {
                 $array[$item[0]][$column[0]] = $column[1];
             }
         }
@@ -74,8 +72,8 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Change table rows limit
-     * @param  integer $limit
+     * Change table rows limit.
+     * @param  int $limit
      * @return void
      */
     public function changeRowsLimit($limit)
@@ -84,7 +82,7 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Change field value with event
+     * Change field value with event.
      * @param  string $selector
      * @param  string $value
      * @return object
@@ -102,7 +100,7 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Fill form with array values
+     * Fill form with array values.
      * @param  class $model
      * @param  array  $array
      * @param  string  $locale
@@ -115,8 +113,7 @@ trait AdminBrowserIntegration
 
         $wrapper = $wrapper ? $wrapper.' ' : '';
 
-        foreach ($array as $key => $value)
-        {
+        foreach ($array as $key => $value) {
             $formKey = $model->hasFieldParam($key, 'locale', true) ? $key.'['.$locale.']' : $key;
 
             //Set string value
@@ -132,26 +129,22 @@ trait AdminBrowserIntegration
             }
 
             //Set editor value
-            else if ( $model->isFieldType($key, ['longeditor', 'editor']) ) {
-                $this->with($wrapper.'textarea[name='.$formKey .']', function($browser) use ($key, $value, $formKey) {
-                    $browser->script('CKEDITOR.instances[$("[name=\''.$formKey .'\']").attr("id")].setData("'.$value.'")');
+            elseif ($model->isFieldType($key, ['longeditor', 'editor'])) {
+                $this->with($wrapper.'textarea[name='.$formKey.']', function ($browser) use ($key, $value, $formKey) {
+                    $browser->script('CKEDITOR.instances[$("[name=\''.$formKey.'\']").attr("id")].setData("'.$value.'")');
                 });
             }
 
             //Set select value
-            else if ( $model->isFieldType($key, ['select']) || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']) )
-            {
+            elseif ($model->isFieldType($key, ['select']) || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany'])) {
                 //Multiple select
-                if ( $model->hasFieldParam($key, ['multiple', 'array']) )
-                {
+                if ($model->hasFieldParam($key, ['multiple', 'array'])) {
                     //Select options in reversed order
-                    foreach ($value as $k => $option_value)
-                    {
+                    foreach ($value as $k => $option_value) {
                         $selected = $this->script("return $('select[name=\"{$formKey}[]\"]').val()")[0];
 
                         //If value is selected already, we wante unselect given value
-                        if ( $this->isAssoc($value) && in_array($k, $selected) )
-                        {
+                        if ($this->isAssoc($value) && in_array($k, $selected)) {
                             $this->script("$('{$wrapper}select[name=\"{$formKey}[]\"]').parents('.form-group').eq(0).find('.chosen-choices li.search-choice:contains(\"{$option_value}\") a').eq(0).click()");
                         }
 
@@ -172,20 +165,19 @@ trait AdminBrowserIntegration
                 //Single select
                 else {
                     //If is associative value with key, then we want only value
-                    if ( is_array($value) )
+                    if (is_array($value)) {
                         $value = array_values($value)[0];
+                    }
 
                     $this->setChosenValue('select[name="'.$formKey.'"]', $value);
                 }
             }
 
             //Set file value
-            else if ( $model->isFieldType($key, ['file']) )
-            {
+            elseif ($model->isFieldType($key, ['file'])) {
                 //Attach multiple files
-                if ( $model->hasFieldParam($key, 'multiple') )
-                {
-                    $this->attachMultiple($key.'[]', array_map(function($file){
+                if ($model->hasFieldParam($key, 'multiple')) {
+                    $this->attachMultiple($key.'[]', array_map(function ($file) {
                         return $this->getUploadFilePath($file);
                     }, $value));
                 }
@@ -197,23 +189,20 @@ trait AdminBrowserIntegration
             }
 
             //Set checkbox value
-            else if ( $model->isFieldType($key, ['checkbox']) ) {
+            elseif ($model->isFieldType($key, ['checkbox'])) {
                 $this->{$value === true || $value === 1 ? 'check' : 'uncheck'}($formKey);
             }
 
             //Set radio value
-            else if ( $model->isFieldType($key, ['radio']) ) {
+            elseif ($model->isFieldType($key, ['radio'])) {
                 $this->radio($formKey, $value);
             }
 
             //Set multiple date value
-            else if ( $model->isFieldType($key, 'date') )
-            {
+            elseif ($model->isFieldType($key, 'date')) {
                 //Fill multiple date
-                if ( $model->hasFieldParam($key, 'multiple') )
-                {
-                    foreach ($value as $date)
-                    {
+                if ($model->hasFieldParam($key, 'multiple')) {
+                    foreach ($value as $date) {
                         $this->clickDatePicker($date, '[data-field="'.$formKey.'"]');
                     }
                 }
@@ -229,8 +218,7 @@ trait AdminBrowserIntegration
             }
 
             //Set datetime value
-            else if ( $model->isFieldType($key, 'datetime') )
-            {
+            elseif ($model->isFieldType($key, 'datetime')) {
                 $date = explode(' ', $value);
 
                 //We need reset cursor before opening date and wait half of second till calendar opens
@@ -242,13 +230,12 @@ trait AdminBrowserIntegration
             }
 
             //Set multiple time value
-            else if ( $model->isFieldType($key, 'time') )
-            {
+            elseif ($model->isFieldType($key, 'time')) {
                 //Update multiple time value
-                if ( $model->hasFieldParam($key, 'multiple') )
-                {
-                    foreach ($value as $time)
-                       $this->clickTimePicker($time, '[data-field="'.$formKey.'"]');
+                if ($model->hasFieldParam($key, 'multiple')) {
+                    foreach ($value as $time) {
+                        $this->clickTimePicker($time, '[data-field="'.$formKey.'"]');
+                    }
                 }
 
                 //Open calendar and click on time
@@ -266,26 +253,28 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Get upload file path
+     * Get upload file path.
      * @param  string $file
      * @return string
      */
     private function getUploadFilePath($file)
     {
         //If is absolute path
-        if ( $file && $file[0] == '/' )
+        if ($file && $file[0] == '/') {
             return $file;
+        }
 
         //Return admin stub files path
-        if ( method_exists($this, 'getUploadStubPath') )
+        if (method_exists($this, 'getUploadStubPath')) {
             return trim_end($this->getUploadStubPath(), '/').'/'.$file;
+        }
 
         return __DIR__.'/../../Stubs/uploads/'.$file;
     }
 
     /**
-     * Open row by given id
-     * @param  integer $id
+     * Open row by given id.
+     * @param  int $id
      * @param  string/object $model
      * @return object
      */
@@ -323,7 +312,7 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Return selectors to validation error message and error parent class
+     * Return selectors to validation error message and error parent class.
      * @param  string $model
      * @param  string $key
      * @return array
@@ -334,7 +323,7 @@ trait AdminBrowserIntegration
         $key = $origKey;
 
         //Add multiple key selector if missing
-        if ( $model->hasFieldParam($key, ['multiple', 'array']) && strpos($key, '[]') === false ){
+        if ($model->hasFieldParam($key, ['multiple', 'array']) && strpos($key, '[]') === false) {
             $key .= '[]';
         }
 
@@ -342,35 +331,40 @@ trait AdminBrowserIntegration
         $selectorMessage = null;
         $selectorClass = null;
 
-        if ( $model->isFieldType($origKey, ['string', 'text', 'editor', 'integer', 'decimal', 'file', 'password', 'date', 'datetime', 'time']) )
+        if ($model->isFieldType($origKey, ['string', 'text', 'editor', 'integer', 'decimal', 'file', 'password', 'date', 'datetime', 'time'])) {
             $selectorMessage = "$('input[name=\"{$key}\"], textarea[name=\"{$key}\"]').parent()";
+        }
 
-        if ( $model->isFieldType($origKey, ['select']) )
+        if ($model->isFieldType($origKey, ['select'])) {
             $selectorMessage = "$('select[name=\"{$key}\"]').parent().parent()";
+        }
 
-        if ( $model->isFieldType($origKey, ['radio']) )
+        if ($model->isFieldType($origKey, ['radio'])) {
             $selectorMessage = "$('input[name=\"{$key}\"]').parent().parent().parent()";
+        }
 
-        if ( $model->isFieldType($origKey, ['file']) )
+        if ($model->isFieldType($origKey, ['file'])) {
             $selectorClass = "$('input[name=\"{$key}\"]').parent().parent()";
+        }
 
         //Checkbox can not be required field
-        if ( $model->isFieldType($origKey, ['checkbox']) )
+        if ($model->isFieldType($origKey, ['checkbox'])) {
             return false;
+        }
 
-        if ( ! $selectorMessage )
+        if (! $selectorMessage) {
             throw new Exception('Field ['.$key.'] in model ['.$model->getTable().'] is not valid type.');
-
+        }
         //Check if element does not
         return [
             'key' => $key,
             'errorClass' => $this->script('return '.($selectorClass ? $selectorClass : $selectorMessage).'.hasClass("has-error")')[0],
-            'errorMessage' => $this->script('return '.$selectorMessage.'.find("> span.help-block").length == 1')[0]
+            'errorMessage' => $this->script('return '.$selectorMessage.'.find("> span.help-block").length == 1')[0],
         ];
     }
 
     /**
-     * Submit new instance of form
+     * Submit new instance of form.
      */
     public function submitForm()
     {
@@ -380,7 +374,7 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Submit existing instance of row
+     * Submit existing instance of row.
      */
     public function saveForm()
     {
@@ -388,7 +382,7 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Close admin message alert
+     * Close admin message alert.
      * @return string
      */
     public function closeAlert()
@@ -399,19 +393,19 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Scroll to element
+     * Scroll to element.
      * @param  string $element
      * @return object
      */
     public function scrollToElement($element = null)
     {
-        $this->script('$("html, body").animate({ scrollTop: $("'.($element?:'body').'").offset().top }, 0);');
+        $this->script('$("html, body").animate({ scrollTop: $("'.($element ?: 'body').'").offset().top }, 0);');
 
         return $this;
     }
 
     /**
-     * Click datepicker value
+     * Click datepicker value.
      * @param  string $string d.m.Y
      * @param  string $selector
      * @return object
@@ -420,13 +414,13 @@ trait AdminBrowserIntegration
     {
         $date = Carbon::createFromFormat('d.m.Y', $date);
 
-        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int)$date->format('d').'"][data-month="'.((int)$date->format('m')-1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
+        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' td[data-date="'.(int) $date->format('d').'"][data-month="'.((int) $date->format('m') - 1).'"][data-year="'.$date->format('Y').'"]:visible\').click()');
 
         return $this;
     }
 
     /**
-     * Click datepicker value
+     * Click datepicker value.
      * @param  string $string d.m.Y
      * @param  string $selector
      * @return object
@@ -435,13 +429,13 @@ trait AdminBrowserIntegration
     {
         $time = explode(':', $time);
 
-        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' div[data-hour="'.(int)$time[0].'"][data-minute="'.(int)$time[1].'"]:visible\').click()');
+        $this->script('$(\''.($selector ?: 'body > .xdsoft_datetimepicker ').' div[data-hour="'.(int) $time[0].'"][data-minute="'.(int) $time[1].'"]:visible\').click()');
 
         return $this;
     }
 
     /**
-     * Set chosenjs select value
+     * Set chosenjs select value.
      * @param  string $selector
      * @param  string $value
      * @return object
@@ -472,7 +466,7 @@ trait AdminBrowserIntegration
     {
         $element = $this->resolver->resolveForAttachment($field);
 
-        $files = array_map(function($file){
+        $files = array_map(function ($file) {
             if (! is_file($file) || ! file_exists($file)) {
                 throw new Exception('You may only upload existing files: '.$file);
             }
@@ -486,7 +480,7 @@ trait AdminBrowserIntegration
     }
 
     /**
-     * Change form language
+     * Change form language.
      * @param  string $lang
      * @return object
      */

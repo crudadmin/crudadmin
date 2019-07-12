@@ -2,7 +2,6 @@
 
 namespace Admin\Tests\App\Models\Tree;
 
-use Admin\Fields\Group;
 use Admin\Eloquent\AdminModel;
 
 class Model2 extends AdminModel

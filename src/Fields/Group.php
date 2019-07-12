@@ -2,8 +2,8 @@
 
 namespace Admin\Fields;
 
-use Admin\Core\Fields\Group as BaseGroup;
 use Admin\Eloquent\AdminModel;
+use Admin\Core\Fields\Group as BaseGroup;
 
 /*
  * Check also available parameters from Admin\Core\Fields\Group
@@ -17,7 +17,7 @@ class Group extends BaseGroup
     public $model = null;
 
     /**
-     * Set width of group
+     * Set width of group.
      * @param  string/integer $width full/half/1,2,3,4,5,6,7,8,9,10,11,12
      * @return Group
      */
@@ -29,14 +29,15 @@ class Group extends BaseGroup
     }
 
     /**
-     * Group (font-awesome) icon
+     * Group (font-awesome) icon.
      * @param  string $icon
      * @return Group
      */
     public function icon($icon)
     {
-        if ( substr($icon, 0, 3) != 'fa-' )
+        if (substr($icon, 0, 3) != 'fa-') {
             $icon = 'fa-'.$icon;
+        }
 
         $this->icon = $icon;
 
@@ -44,7 +45,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Set related admin model as group relation
+     * Set related admin model as group relation.
      * @param  string $model
      * @return Group
      */
@@ -56,7 +57,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Set width of group
+     * Set width of group.
      * @param  integer/string $width
      * @return Group
      */
@@ -66,7 +67,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Make group represented as ta
+     * Make group represented as ta.
      * @param  array  $fields
      * @return Group
      */
@@ -77,7 +78,7 @@ class Group extends BaseGroup
         $tab = (new static($is_fields ? $fields : []))->width('full')->type('tab');
 
         //If tab is relation admin model child
-        if ( is_string($fields) ){
+        if (is_string($fields)) {
             $tab->model($fields);
         }
 
@@ -85,7 +86,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Make full width group
+     * Make full width group.
      * @param  array  $fields
      * @return Group
      */
@@ -95,7 +96,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Make half width grid group
+     * Make half width grid group.
      * @param  array  $fields
      * @return Group
      */
@@ -105,7 +106,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Make third width grid group
+     * Make third width grid group.
      * @param  array  $fields
      * @return Group
      */
@@ -116,13 +117,13 @@ class Group extends BaseGroup
 
     /**
      * Group which will inline all fields in group
-     * Fields will be in one row, and not in new row
+     * Fields will be in one row, and not in new row.
      * @param  array  $fields
      * @return Group
      */
     public function inline()
     {
-        $this->width = $this->width . '-inline';
+        $this->width = $this->width.'-inline';
 
         return $this;
     }
@@ -136,7 +137,7 @@ class Group extends BaseGroup
     }
 
     /**
-     * Returns groups of fields with correct order
+     * Returns groups of fields with correct order.
      * @param  [type] $model [description]
      * @return [type]        [description]
      */
@@ -145,4 +146,3 @@ class Group extends BaseGroup
         return \Fields::getFieldsGroups($model);
     }
 }
-?>

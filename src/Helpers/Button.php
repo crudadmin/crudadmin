@@ -2,9 +2,9 @@
 
 namespace Admin\Helpers;
 
-use Admin\Eloquent\Concerns\VueComponent;
 use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
+use Admin\Eloquent\Concerns\VueComponent;
 
 class Button
 {
@@ -87,7 +87,7 @@ class Button
     }
 
     /**
-     * Firing callback on press button for multiple items
+     * Firing callback on press button for multiple items.
      * @param  collection $rows
      */
     public function fireMultiple(Collection $rows)
@@ -100,8 +100,9 @@ class Button
      */
     public function message($message, $title = null, $type = 'success')
     {
-        if ( $title )
+        if ($title) {
             $this->message['title'] = $title;
+        }
 
         $this->message['message'] = $message;
         $this->message['type'] = $type;
@@ -131,8 +132,9 @@ class Button
      */
     public function error($message, $title = null)
     {
-        if ( ! $this->message['title'] )
+        if (! $this->message['title']) {
             $title = trans('admin::admin.warning');
+        }
 
         return $this->message($message, $title, 'danger')->accept(false);
     }
@@ -213,5 +215,3 @@ class Button
         return resource_path('views/admin/components/buttons');
     }
 }
-
-?>

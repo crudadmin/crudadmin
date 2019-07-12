@@ -2,8 +2,8 @@
 
 namespace Admin\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Validator;
+use Illuminate\Support\ServiceProvider;
 
 class ValidatorServiceProvider extends ServiceProvider
 {
@@ -18,12 +18,11 @@ class ValidatorServiceProvider extends ServiceProvider
          * Extensions rules for request
          * extensions:jpg,jpeg...
          */
-        Validator::extend('extensions', function($attribute, $value, $parameters) {
+        Validator::extend('extensions', function ($attribute, $value, $parameters) {
             return in_array($value->getClientOriginalExtension(), $parameters);
         });
 
-        Validator::replacer('extensions', function($message, $attribute, $rule, $parameters)
-        {
+        Validator::replacer('extensions', function ($message, $attribute, $rule, $parameters) {
             return str_replace(':values', implode(', ', $parameters), $message);
         });
     }

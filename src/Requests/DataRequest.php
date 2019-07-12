@@ -2,8 +2,6 @@
 
 namespace Admin\Requests;
 
-use Admin\Requests\Request;
-
 class DataRequest extends Request
 {
     /**

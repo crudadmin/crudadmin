@@ -2,8 +2,6 @@
 
 namespace Admin\Eloquent;
 
-use Admin\Eloquent\AdminModel;
-
 abstract class AdminRule
 {
     /*
@@ -17,44 +15,59 @@ abstract class AdminRule
      */
     public $frontend = false;
 
-
     /*
      * Validate on all events before row has been saved/created
      */
-    public function fire(AdminModel $row) { }
+    public function fire(AdminModel $row)
+    {
+    }
 
     /*
      * Validate on all events after row has been saved/created for receiving increments
      */
-    public function fired(AdminModel $row) { }
+    public function fired(AdminModel $row)
+    {
+    }
 
     /*
      * Validate on create event
      */
-    public function creating(AdminModel $row) { }
+    public function creating(AdminModel $row)
+    {
+    }
 
     /*
      * Validate on update event
      */
-    public function updating(AdminModel $row) { }
+    public function updating(AdminModel $row)
+    {
+    }
 
     /*
      * Run event after delete action
      */
-    public function deleting(AdminModel $row) { }
+    public function deleting(AdminModel $row)
+    {
+    }
 
     /*
      * Run event after create action
      */
-    public function created(AdminModel $row) { }
+    public function created(AdminModel $row)
+    {
+    }
 
     /*
      * Run event after update action
      */
-    public function updated(AdminModel $row) { }
+    public function updated(AdminModel $row)
+    {
+    }
 
     /*
      * Run event after delete action
      */
-    public function deleted(AdminModel $row) { }
+    public function deleted(AdminModel $row)
+    {
+    }
 }

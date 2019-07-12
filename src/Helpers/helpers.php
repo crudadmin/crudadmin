@@ -1,18 +1,20 @@
 <?php
-if ( ! function_exists('admin') ) {
+
+if (! function_exists('admin')) {
     function admin()
     {
         $guard = auth()->guard('web');
 
         //Check if is student logged
-        if( ! $guard->check() )
+        if (! $guard->check()) {
             return false;
+        }
 
         return $guard->user();
     }
 }
 
-if ( ! function_exists('trim_end') ) {
+if (! function_exists('trim_end')) {
     function trim_end($string, $trim)
     {
         while (substr($string, -strlen($trim)) == $trim) {
@@ -23,7 +25,6 @@ if ( ! function_exists('trim_end') ) {
     }
 }
 
-
 /*
  * Returns base or relative path
  */
@@ -33,4 +34,3 @@ function base_or_relative_path($path)
 
     return trim_end($path, '/');
 }
-?>

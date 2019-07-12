@@ -87,6 +87,5 @@ class FieldsGroup extends AdminModel
      */
     public function mutateFields($fields)
     {
-
     }
 }

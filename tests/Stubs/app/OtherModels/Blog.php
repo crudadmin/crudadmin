@@ -3,7 +3,6 @@
 namespace Admin\Tests\App\OtherModels;
 
 use Admin\Eloquent\AdminModel;
-use Admin\Fields\Group;
 
 class Blog extends AdminModel
 {
