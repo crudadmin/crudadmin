@@ -3,7 +3,6 @@
 namespace Admin\Tests\App\Models\Fields;
 
 use Admin\Eloquent\AdminModel;
-use Admin\Fields\Group;
 
 class FieldsType extends AdminModel
 {
@@ -49,6 +48,5 @@ class FieldsType extends AdminModel
      */
     public function mutateFields($fields)
     {
-
     }
 }

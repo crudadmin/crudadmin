@@ -3,7 +3,6 @@
 namespace Admin\Hashing;
 
 use Illuminate\Hashing\HashManager as DefaultHashManager;
-use Admin\Hashing\BcryptHasher;
 
 class HashManager extends DefaultHashManager
 {

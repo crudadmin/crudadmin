@@ -27,24 +27,29 @@ class AdminServiceProvider extends ServiceProvider
     private function loadGlobalModules()
     {
         //If user model does not exists, then load AdminUser model
-        if ( ! \Admin::getModelByTable('users') )
+        if (! \Admin::getModelByTable('users')) {
             \Admin::registerModel(\Admin\Models\User::class);
+        }
 
         //Localization enabled
-        if ( \Admin::isEnabledLocalization() )
+        if (\Admin::isEnabledLocalization()) {
             \Admin::registerModel(\Admin\Models\Language::class);
+        }
 
         //Admin groups
-        if ( \Admin::isRolesEnabled() )
+        if (\Admin::isRolesEnabled()) {
             \Admin::registerModel(\Admin\Models\AdminsGroup::class);
+        }
 
         //Models history
-        if ( \Admin::isHistoryEnabled() )
+        if (\Admin::isHistoryEnabled()) {
             \Admin::registerModel(\Admin\Models\ModelsHistory::class);
+        }
 
         //Sluggable history
-        if ( \Admin::isSluggableHistoryEnabled() )
+        if (\Admin::isSluggableHistoryEnabled()) {
             \Admin::registerModel(\Admin\Models\SluggableHistory::class);
+        }
     }
 
     /*
@@ -61,8 +66,9 @@ class AdminServiceProvider extends ServiceProvider
 
         //Merge selected properties with two dimensional array
         foreach (['models', 'custom_rules', 'global_rules'] as $property) {
-            if ( ! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config) )
+            if (! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config)) {
                 continue;
+            }
 
             $attributes = array_merge($config[$property], $crudAdminConfig[$property]);
 

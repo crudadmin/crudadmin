@@ -9,5 +9,4 @@ use Admin\Eloquent\AdminModel;
  */
 class Model extends AdminModel
 {
-
 }

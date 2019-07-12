@@ -2,10 +2,10 @@
 
 namespace Admin\Tests\Browser;
 
+use Laravel\Dusk\Browser;
+use Admin\Tests\Concerns\AdminIntegration;
 use Admin\Tests\Browser\Concerns\AdminBrowserAssertions;
 use Admin\Tests\Browser\Concerns\AdminBrowserIntegration;
-use Admin\Tests\Concerns\AdminIntegration;
-use Laravel\Dusk\Browser;
 
 class DuskBrowser extends Browser
 {

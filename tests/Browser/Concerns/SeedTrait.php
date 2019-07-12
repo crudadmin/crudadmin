@@ -2,8 +2,8 @@
 
 namespace Admin\Tests\Browser\Concerns;
 
-use Admin\Tests\App\Models\Articles\Article;
 use Admin\Tests\App\Models\Articles\Tag;
+use Admin\Tests\App\Models\Articles\Article;
 
 trait SeedTrait
 {
@@ -29,8 +29,7 @@ trait SeedTrait
 
         //Create 10 articles with movie names
         $i = 0;
-        foreach ($movies as $date => $movie)
-        {
+        foreach ($movies as $date => $movie) {
             factory(Article::class)->create([
                 'name' => $movie,
                 'score' => $i++,
@@ -43,20 +42,19 @@ trait SeedTrait
     private function createTagList()
     {
         $tags = [
-            ['type' => 'moovie', 'article_id' => 1 ],
-            ['type' => 'moovie', 'article_id' => 2 ],
-            ['type' => 'moovie', 'article_id' => 2 ],
-            ['type' => 'moovie', 'article_id' => 2 ],
-            ['type' => 'blog', 'article_id' => 2 ],
-            ['type' => 'blog', 'article_id' => 3 ],
-            ['type' => 'blog', 'article_id' => 4 ],
-            ['type' => 'article', 'article_id' => 5 ],
-            ['type' => 'article', 'article_id' => 6 ],
-            ['type' => 'article', 'article_id' => 7 ],
+            ['type' => 'moovie', 'article_id' => 1],
+            ['type' => 'moovie', 'article_id' => 2],
+            ['type' => 'moovie', 'article_id' => 2],
+            ['type' => 'moovie', 'article_id' => 2],
+            ['type' => 'blog', 'article_id' => 2],
+            ['type' => 'blog', 'article_id' => 3],
+            ['type' => 'blog', 'article_id' => 4],
+            ['type' => 'article', 'article_id' => 5],
+            ['type' => 'article', 'article_id' => 6],
+            ['type' => 'article', 'article_id' => 7],
         ];
 
-        foreach ($tags as $item)
-        {
+        foreach ($tags as $item) {
             Tag::create([
                 'type' => $item['type'],
                 'article_id' => $item['article_id'],
@@ -70,9 +68,9 @@ trait SeedTrait
             'relation1_id' => [9 => 'hellboy'],
             'relation2_id' => [8 => 'my option barefoot 7'],
             'relation3_id' => [10 => 'my second option spider-man 18'],
-            'relation_multiple1' => [ 5 => 'aquaman', 6 => 'star is born', 3 => 'shrek' ],
-            'relation_multiple2' => [ 9 => 'my option hellboy 8', 5 => 'my option aquaman 4', 11 => 'my option superman 10' ],
-            'relation_multiple3' => [ 12 => 'second option john wick 22' ],
+            'relation_multiple1' => [5 => 'aquaman', 6 => 'star is born', 3 => 'shrek'],
+            'relation_multiple2' => [9 => 'my option hellboy 8', 5 => 'my option aquaman 4', 11 => 'my option superman 10'],
+            'relation_multiple3' => [12 => 'second option john wick 22'],
         ];
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\App\Models\Tree\Model1;
 use Admin\Tests\Browser\BrowserTestCase;
-use Admin\Tests\Browser\DuskBrowser;
 use Admin\Tests\Browser\Concerns\SeedTrait;
-use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Articles\Article;
 
 class ModelActionsTest extends BrowserTestCase
 {
@@ -24,14 +24,13 @@ class ModelActionsTest extends BrowserTestCase
 
             //Check if is unpublished
             $browser->click('[data-id="10"] [data-button="publishable"]')->pause(100);
-            $this->assertNull( Article::find(10) );
+            $this->assertNull(Article::find(10));
 
             //Check if has been back published
             $browser->click('[data-id="10"] [data-button="publishable"]')->pause(100);
-            $this->assertTrue( Article::find(10)->published_at ? true : false );
+            $this->assertTrue(Article::find(10)->published_at ? true : false);
         });
     }
-
 
     /** @test */
     public function test_publishable_multiple_items_button()
@@ -122,8 +121,8 @@ class ModelActionsTest extends BrowserTestCase
     /** @test */
     public function test_multiple_custom_simple_button()
     {
-        Model1::create([ 'field1' => 'c', 'field2' => 'd', 'field3' => 'e', 'field4' => 'f' ]);
-        Model1::create([ 'field1' => 'a', 'field2' => 'b', 'field3' => 'c', 'field4' => 'd' ]);
+        Model1::create(['field1' => 'c', 'field2' => 'd', 'field3' => 'e', 'field4' => 'f']);
+        Model1::create(['field1' => 'a', 'field2' => 'b', 'field3' => 'c', 'field4' => 'd']);
 
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(Model1::class)->pause(100)
@@ -181,7 +180,6 @@ class ModelActionsTest extends BrowserTestCase
             $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
                     ->assertSeeIn('.modal .modal-body', 'Are you sure?')
                     ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
-
 
             //Check if action has not been processed
             //and table row is not rewrited with actual data

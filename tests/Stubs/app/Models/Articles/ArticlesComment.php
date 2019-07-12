@@ -2,7 +2,6 @@
 
 namespace Admin\Tests\App\Models\Articles;
 
-use Admin\Fields\Group;
 use Admin\Eloquent\AdminModel;
 
 class ArticlesComment extends AdminModel
@@ -19,7 +18,7 @@ class ArticlesComment extends AdminModel
 
     protected $title = 'This is comments relation test.';
 
-    protected $belongsToModel = [Article::class, ArticlesComment::class];
+    protected $belongsToModel = [Article::class, self::class];
 
     protected $sortable = false;
 

@@ -2,10 +2,10 @@
 
 namespace Admin\Providers;
 
+use Localization;
+use App\Core\Helpers\Language;
 use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use App\Core\Helpers\Language;
-use Localization;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -21,7 +21,7 @@ class RouteServiceProvider extends ServiceProvider
     protected $admin_namespace = 'Admin\Controllers';
 
     /**
-     * Multi languages localization support
+     * Multi languages localization support.
      * @var string/boolean
      */
     protected $localization = false;
@@ -68,14 +68,14 @@ class RouteServiceProvider extends ServiceProvider
             'namespace' => $this->admin_namespace,
             'middleware' => 'web',
         ], function ($router) {
-            require __DIR__ . '/../routes.php';
+            require __DIR__.'/../routes.php';
         });
 
         //Boot application routes language within prefix
-        foreach (config('admin.routes', []) as $route)
-        {
-            if ( ! file_exists($route_path = base_or_relative_path($route)) )
+        foreach (config('admin.routes', []) as $route) {
+            if (! file_exists($route_path = base_or_relative_path($route))) {
                 continue;
+            }
 
             $router->group([
                 'namespace' => $this->namespace,
@@ -85,6 +85,5 @@ class RouteServiceProvider extends ServiceProvider
                 require $route_path;
             });
         }
-
     }
 }

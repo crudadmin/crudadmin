@@ -3,10 +3,9 @@
 namespace Admin\Eloquent\Concerns;
 
 use File;
-use Admin\Helpers\File as AdminFile;
-use Spatie\ImageOptimizer\OptimizerChainFactory;
-use ImageCompressor;
 use Image;
+use ImageCompressor;
+use Admin\Helpers\File as AdminFile;
 
 trait Uploadable
 {
@@ -28,10 +27,11 @@ trait Uploadable
      */
     public function filePath($key, $file = null)
     {
-        $path = 'uploads/' . $this->getTable().'/'.$key;
+        $path = 'uploads/'.$this->getTable().'/'.$key;
 
-        if ( $file )
+        if ($file) {
             return $path.'/'.$file;
+        }
 
         return $path;
     }
@@ -43,11 +43,10 @@ trait Uploadable
     {
         $file = new AdminFile($path);
 
-        foreach ((array)explode(',', $resolution) as $dimentions)
-        {
+        foreach ((array) explode(',', $resolution) as $dimentions) {
             $dimentions = explode('x', strtolower($dimentions));
 
-            $file->resize( $dimentions[0], isset($dimentions[1]) ? $dimentions[1] : null, null, true);
+            $file->resize($dimentions[0], isset($dimentions[1]) ? $dimentions[1] : null, null, true);
         }
 
         return true;
@@ -56,8 +55,7 @@ trait Uploadable
     //Checks if is Image class avaiable
     protected function checkImagePackage()
     {
-        if ( ! class_exists('Image') )
-        {
+        if (! class_exists('Image')) {
             $this->error = '- Zmena obrázku nebola aplikovaná pre "'.$field.'", kedže rozšírenie pre spracovanie obrázkov nebolo nainštalované.';
 
             return false;
@@ -71,31 +69,31 @@ trait Uploadable
      */
     private function filePostProcess($field, $path, $file, $filename, $extension, $actions_steps = null)
     {
-        if ( ! $actions_steps )
+        if (! $actions_steps) {
             $actions_steps = $this->getFieldParam($field, 'resize');
+        }
 
-        if ( is_string($actions_steps) )
-        {
-            return $this->resizeCacheImages( public_path( $path.'/'.$filename ), $actions_steps);
+        if (is_string($actions_steps)) {
+            return $this->resizeCacheImages(public_path($path.'/'.$filename), $actions_steps);
         }
 
         //If is required some image post processing changes with Image class
-        if (is_array($actions_steps) && count($actions_steps) > 0 && $extension != 'svg'){
-            if ( ! $this->checkImagePackage() )
+        if (is_array($actions_steps) && count($actions_steps) > 0 && $extension != 'svg') {
+            if (! $this->checkImagePackage()) {
                 return false;
+            }
 
-            foreach ((array)$actions_steps as $dir => $actions)
-            {
+            foreach ((array) $actions_steps as $dir => $actions) {
                 $thumb_dir = is_numeric($dir) ? 'thumbs' : $dir;
 
                 //Creating new whumb directory with where will be store changed images
-                if (!file_exists($path.'/'.$thumb_dir))
+                if (! file_exists($path.'/'.$thumb_dir)) {
                     mkdir($path.'/'.$thumb_dir);
+                }
 
                 $image = Image::make($file);
 
-                foreach ((array)$actions as $name => $params)
-                {
+                foreach ((array) $actions as $name => $params) {
                     $params = AdminFile::paramsMutator($name, $params);
 
                     $image = call_user_func_array([$image, $name], $params);
@@ -127,8 +125,9 @@ trait Uploadable
             'audio/mpeg' => 'mp3',
         ];
 
-        if ( array_key_exists($mimeType, $replace) )
-            return $replace[ $mimeType ];
+        if (array_key_exists($mimeType, $replace)) {
+            return $replace[$mimeType];
+        }
 
         return false;
     }
@@ -140,17 +139,16 @@ trait Uploadable
     {
         $extension = File::extension($file);
 
-        if ( !empty( $extension ) )
+        if (! empty($extension)) {
             $filename = $this->filenameModifier($filename.'.'.$extension, $field);
+        }
 
         //Copy file from server, or directory into uploads for field
         File::copy($file, $path.'/'.$filename);
 
         //If file hasn't extension type from filename, then check file mimetype and guess file extension
-        if ( ! $extension )
-        {
-            if ( $extension = $this->guessExtension($path, $filename) )
-            {
+        if (! $extension) {
+            if ($extension = $this->guessExtension($path, $filename)) {
                 //Modified filename
                 $filename_with_extension = $this->filenameModifier($filename.'.'.$extension, $field);
 
@@ -162,29 +160,30 @@ trait Uploadable
 
         return [
             'filename' => $filename,
-            'extension' => $extension
+            'extension' => $extension,
         ];
     }
 
     private function filename($path, $file)
     {
         //If file exists and is not from server, when is from server make unique name
-        if ( method_exists($file, 'getClientOriginalName') )
+        if (method_exists($file, 'getClientOriginalName')) {
             $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        else
+        } else {
             $filename = uniqid();
+        }
 
-        $filename = substr( str_slug( $filename ), 0, 40);
+        $filename = substr(str_slug($filename), 0, 40);
 
         $extension = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : false;
 
         //If filename exists, then add number prefix of file
-        if ( $extension && File::exists($path.'/'.$filename.'.'.$extension) )
-        {
+        if ($extension && File::exists($path.'/'.$filename.'.'.$extension)) {
             $i = 0;
 
-            while(file_exists($path.'/'.$filename.'-'.$i.'.'.$extension))
+            while (file_exists($path.'/'.$filename.'-'.$i.'.'.$extension)) {
                 $i++;
+            }
 
             $filename = $filename.'-'.$i;
         }
@@ -198,26 +197,28 @@ trait Uploadable
     private function filenameModifier($filename, $field)
     {
         //Filename modifier
-        $method_filename_modifier = 'set' . studly_case($field) . 'Filename';
+        $method_filename_modifier = 'set'.studly_case($field).'Filename';
 
         //Check if exists filename modifier
-        if ( method_exists($this, $method_filename_modifier) )
+        if (method_exists($this, $method_filename_modifier)) {
             $filename = $this->{$method_filename_modifier}($filename);
+        }
 
         return $filename;
     }
 
     /**
-     * Automaticaly check, upload, and make resizing and other function on file object
+     * Automaticaly check, upload, and make resizing and other function on file object.
      * @param  string     $field         field name
      * @param  string     $path          upload path
      * @param  array|null $actions_steps resizing functions [ [ 'fit' => [ 100 ], 'dir' => 'someThumbDir' ], [ 'resize' => [ 100, 200 ] ] ]
      * @return object
      */
-    public function upload(string $field, $file, $path=null, array $actions_steps = null)
+    public function upload(string $field, $file, $path = null, array $actions_steps = null)
     {
-        if ( ! $path )
+        if (! $path) {
             $path = $this->filePath($field);
+        }
 
         //Get count of files in upload directory and set new filename
         $filename = $this->filename($path, $file, $field);
@@ -226,11 +227,9 @@ trait Uploadable
         AdminFile::makeDirs($path);
 
         //File input is file from request
-        if ( $file instanceof \Illuminate\Http\UploadedFile )
-        {
+        if ($file instanceof \Illuminate\Http\UploadedFile) {
             //If is file aviable, but is not valid
-            if ( !$file->isValid() )
-            {
+            if (! $file->isValid()) {
                 $this->error = '- Súbor "'.$field.'" nebol uložený na server, pre jeho chybnú štruktúru.';
 
                 return false;
@@ -250,11 +249,13 @@ trait Uploadable
         }
 
         //Compress images
-        if ( ! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension) )
+        if (! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension)) {
             return false;
+        }
 
-        if ( ! $this->filePostProcess($field, $path, $file, $filename, $extension, $actions_steps) )
+        if (! $this->filePostProcess($field, $path, $file, $filename, $extension, $actions_steps)) {
             return false;
+        }
 
         return new AdminFile($filename, $field, $this->getTable());
     }
@@ -265,61 +266,56 @@ trait Uploadable
     public function deleteFiles($key, $new_files = null)
     {
         //Remove fixed thumbnails
-        if ( ($file = $this->getValue($key)) && ! $this->hasFieldParam($key, 'multiple', true) )
-        {
-            $files = is_array($file) ? $file : [ $file ];
+        if (($file = $this->getValue($key)) && ! $this->hasFieldParam($key, 'multiple', true)) {
+            $files = is_array($file) ? $file : [$file];
 
             $is_allowed_deleting = config('admin.reduce_space', true) === true && $this->delete_files === true;
 
             //Remove also multiple uploded files
-            foreach ($files as $file)
-            {
+            foreach ($files as $file) {
                 $field = $this->getField($key);
 
-                if ( array_key_exists('resize', $field) && is_array($field['resize']) && $is_allowed_deleting )
-                {
-                    foreach ($field['resize'] as $method => $value)
-                    {
-                        if ( is_numeric($method) )
+                if (array_key_exists('resize', $field) && is_array($field['resize']) && $is_allowed_deleting) {
+                    foreach ($field['resize'] as $method => $value) {
+                        if (is_numeric($method)) {
                             $method = 'thumbs';
+                        }
 
                         $file->{$method}->delete();
                     }
                 }
 
-                $cache_path = AdminFile::adminModelCachePath($this->getTable().'/'.$key );
+                $cache_path = AdminFile::adminModelCachePath($this->getTable().'/'.$key);
                 $need_delete = $new_files === null
                                || is_array($new_files) && ! in_array($file->filename, array_flatten($new_files))
                                || is_string($new_files) && $file->filename != $new_files;
 
                 //Remove dynamicaly cached thumbnails
-                if ( file_exists($cache_path) && $need_delete )
-                {
-                    foreach ((array)scandir($cache_path) as $dir)
-                    {
+                if (file_exists($cache_path) && $need_delete) {
+                    foreach ((array) scandir($cache_path) as $dir) {
                         $path = $cache_path.'/'.$dir;
 
-                        if ( !in_array($dir, array('.', '..')) && is_dir($path) )
-                        {
+                        if (! in_array($dir, ['.', '..']) && is_dir($path)) {
                             $cache_file_path = $path.'/'.$file->filename;
 
                             //Remove cache file from compressed list
                             ImageCompressor::removeCompressedPath($cache_file_path);
 
                             //Remove resized image
-                            if ( file_exists($cache_file_path) )
+                            if (file_exists($cache_file_path)) {
                                 unlink($cache_file_path);
+                            }
 
                             //Remove also webp version of image
-                            if ( file_exists($cache_file_path .= '.webp') )
+                            if (file_exists($cache_file_path .= '.webp')) {
                                 unlink($cache_file_path);
+                            }
                         }
                     }
                 }
 
                 //Removing original files
-                if ( $need_delete && $is_allowed_deleting )
-                {
+                if ($need_delete && $is_allowed_deleting) {
                     $file->delete();
 
                     ImageCompressor::removeCompressedPath($file->basepath);
@@ -330,4 +326,3 @@ trait Uploadable
         return $this;
     }
 }
-?>

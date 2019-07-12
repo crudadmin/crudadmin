@@ -1,11 +1,12 @@
 <?php
+
 namespace Admin\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
 
-class GettextServiceProvider extends ServiceProvider {
-
+class GettextServiceProvider extends ServiceProvider
+{
     private $GettextBladeDirective = '<script src="<?php echo Gettext::getJSPlugin() ?>"></script>';
 
     /**

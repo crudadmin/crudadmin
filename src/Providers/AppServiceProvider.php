@@ -1,13 +1,12 @@
 <?php
+
 namespace Admin\Providers;
 
+use Admin;
 use Admin\Facades as Facades;
 use Admin\Helpers as Helpers;
 use Admin\Middleware as Middleware;
-
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Foundation\Http\Kernel;
-use Admin;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -48,20 +47,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         /*
-         * Bind variable to admin views path
-         */
-        $this->loadViewsFrom(__DIR__ . '/../Views', 'admin');
-
-        /*
          * Bind route provider after application boot, for correct route actions in localizations
          */
         $this->registerProviders([
-            RouteServiceProvider::class
+            RouteServiceProvider::class,
         ]);
 
         //Set admin locale
-        if ( \Admin::isAdmin() === true )
-        {
+        if (\Admin::isAdmin() === true) {
             app()->setLocale(config('admin.locale', 'sk'));
         }
     }
@@ -82,40 +75,36 @@ class AppServiceProvider extends ServiceProvider
 
     public function registerFacades()
     {
-        $this->app->booting(function()
-        {
+        $this->app->booting(function () {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
 
-            foreach ($this->facades as $alias => $facade)
-            {
+            foreach ($this->facades as $alias => $facade) {
                 $loader->alias($alias, $facade);
             }
-
         });
     }
 
     public function registerProviders($providers = null)
     {
-        foreach ($providers ?: $this->providers as $provider)
-        {
+        foreach ($providers ?: $this->providers as $provider) {
             app()->register($provider);
         }
     }
 
     public function bootRouteMiddleware()
     {
-        foreach ($this->routeMiddleware as $name => $middleware)
-        {
+        foreach ($this->routeMiddleware as $name => $middleware) {
             $router = $this->app['router'];
 
             /*
              * Support for laravel 5.3
              * does not know aliasMiddleware method
              */
-            if ( method_exists($router, 'aliasMiddleware') )
+            if (method_exists($router, 'aliasMiddleware')) {
                 $router->aliasMiddleware($name, $middleware);
-            else
+            } else {
                 $router->middleware($name, $middleware);
+            }
         }
     }
 }

@@ -2,13 +2,12 @@
 
 namespace Admin\Commands;
 
-use Illuminate\Console\Command;
 use Admin;
+use Artisan;
 use App\User;
-use Admin\Helpers\File;
+use Illuminate\Console\Command;
 use Admin\Models\User as BaseUser;
 use Illuminate\Console\ConfirmableTrait;
-use Artisan;
 
 class AdminInstallCommand extends Command
 {
@@ -23,12 +22,14 @@ class AdminInstallCommand extends Command
         ];
 
         //Use credentials from admin model
-        if ( $user )
+        if ($user) {
             $credentials = ($user->getProperty('demo') ?: []) + $credentials;
+        }
 
         //Set testing password
-        if ( app()->environment('testing') )
+        if (app()->environment('testing')) {
             $credentials['password'] = 'password';
+        }
 
         return $credentials;
     }
@@ -82,10 +83,10 @@ class AdminInstallCommand extends Command
     public function publishVendor()
     {
         //Copy vendor directories
-        Artisan::call('vendor:publish', [ '--tag' => 'admin.config' ]);
-        Artisan::call('vendor:publish', [ '--tag' => 'admin.resources' ]);
-        Artisan::call('vendor:publish', [ '--tag' => 'admin.migrations' ]);
-        Artisan::call('vendor:publish', [ '--tag' => 'admin.languages' ]);
+        Artisan::call('vendor:publish', ['--tag' => 'admin.config']);
+        Artisan::call('vendor:publish', ['--tag' => 'admin.resources']);
+        Artisan::call('vendor:publish', ['--tag' => 'admin.migrations']);
+        Artisan::call('vendor:publish', ['--tag' => 'admin.languages']);
 
         Admin::publishAssetsVersion();
 
@@ -96,20 +97,17 @@ class AdminInstallCommand extends Command
     {
         $migration = database_path('migrations/2014_10_12_000000_create_users_table.php');
 
-        if ( file_exists( $migration ) )
-        {
+        if (file_exists($migration)) {
             unlink($migration);
 
             $this->line('<comment>+ 2014_10_12_000000_create_users_table.php migration has been successfully removed</comment>');
         }
-
     }
 
     public function rewriteUserModel()
     {
         // Checks if model has been copied
-        if ( !file_exists(app_path('User.php')) || ! class_exists('App\User') || ! Admin::isAdminModel( new User ) )
-        {
+        if (! file_exists(app_path('User.php')) || ! class_exists('App\User') || ! Admin::isAdminModel(new User)) {
             Artisan::call('vendor:publish', [
                 '--tag' => 'admin.user',
                 '--force' => true,
@@ -119,14 +117,14 @@ class AdminInstallCommand extends Command
             $user_model = app_path('User.php');
 
             if (
-                !($content = @file_get_contents($user_model))
+                ! ($content = @file_get_contents($user_model))
                 || ! @file_put_contents($user_model, str_replace('Admin\Models;', config('admin.app_namespace').';', $content))
             ) {
                 $this->error('Some error with replacing namespace in User model...');
                 die;
             }
 
-            $this->line('<comment>+ User model has been successfully '.( class_exists('App\User') ? 'replaced' : 'created' ).'</comment>');
+            $this->line('<comment>+ User model has been successfully '.(class_exists('App\User') ? 'replaced' : 'created').'</comment>');
         }
     }
 
@@ -147,10 +145,11 @@ class AdminInstallCommand extends Command
 
     protected function getUserModel()
     {
-        if ( ! class_exists('App\User') || ! Admin::isAdminModel( new User ) )
+        if (! class_exists('App\User') || ! Admin::isAdminModel(new User)) {
             return new BaseUser;
-        else
+        } else {
             return new User;
+        }
     }
 
     public function createSuperUser()
@@ -160,8 +159,9 @@ class AdminInstallCommand extends Command
         $credentials = $this->getCredentials($user);
 
         //If user has been already created
-        if ( $user->where('email', $credentials['email'])->count() > 0 )
+        if ($user->where('email', $credentials['email'])->count() > 0) {
             return;
+        }
 
         //Demo user
         $user->create($data = $credentials + [
@@ -170,13 +170,15 @@ class AdminInstallCommand extends Command
         ]);
 
         $this->line('<comment>+ Demo user created</comment>');
-        $this->line('<info>- Admin path:</info> <comment>'.action('\Admin\Controllers\Auth\LoginController@showLoginForm').'</comment>');
+        $this->line('<info>- Admin path:</info> <comment>'.admin_action('Auth\LoginController@showLoginForm').'</comment>');
         $this->line('<info>- Email:</info> <comment>'.$data['email'].'</comment>');
         $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
 
         //Show additional columns in demo user
-        foreach ($user->getProperty('demo') ?: [] as $key => $value)
-            if ( ! in_array($key, ['email', 'password']) )
+        foreach ($user->getProperty('demo') ?: [] as $key => $value) {
+            if (! in_array($key, ['email', 'password'])) {
                 $this->line('<info>- '.ucfirst($key).':</info> <comment>'.$value.'</comment>');
+            }
+        }
     }
 }

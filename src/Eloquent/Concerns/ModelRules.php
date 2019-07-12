@@ -21,7 +21,7 @@ trait ModelRules
      */
     protected function getCachedAdminRuleClass($class)
     {
-        return Admin::cache($this->getTable() . $class, function() use ( $class ) {
+        return Admin::cache($this->getTable().$class, function () use ($class) {
             return new $class($this);
         });
     }
@@ -31,17 +31,13 @@ trait ModelRules
      */
     public function getAdminRules($callback)
     {
-        if ( $this->rules && is_array($this->rules) )
-        {
-            foreach ($this->rules as $class)
-            {
+        if ($this->rules && is_array($this->rules)) {
+            foreach ($this->rules as $class) {
                 $rule = $this->getCachedAdminRuleClass($class);
 
                 $callback($rule);
             }
         }
-
-        return null;
     }
 
     /*
@@ -50,12 +46,14 @@ trait ModelRules
     private function canRunRule($rule, $saved = false)
     {
         //If is not admin interface allowed, skip rules
-        if ( Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === false )
+        if (Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === false) {
             return false;
+        }
 
         //If is not frontend interface allowed, skip rules
-        if ( Admin::isFrontend() && (!property_exists($rule, 'frontend') || $rule->frontend === false) )
+        if (Admin::isFrontend() && (! property_exists($rule, 'frontend') || $rule->frontend === false)) {
             return false;
+        }
 
         return true;
     }
@@ -72,23 +70,33 @@ trait ModelRules
      */
     private function beforeSaveMethods($rule, $rules)
     {
-        if ( method_exists($rule, 'fire') )
+        if (method_exists($rule, 'fire')) {
             $rule->fire($this);
+        }
 
-        if ( in_array('creating', $rules) )
-            foreach (['create', 'creating'] as $method)
-                if ( method_exists($rule, $method) && ! $this->exists )
+        if (in_array('creating', $rules)) {
+            foreach (['create', 'creating'] as $method) {
+                if (method_exists($rule, $method) && ! $this->exists) {
                     $rule->{$method}($this);
+                }
+            }
+        }
 
-        if ( in_array('updating', $rules) )
-            foreach (['update', 'updating'] as $method)
-                if ( method_exists($rule, $method) && $this->exists )
+        if (in_array('updating', $rules)) {
+            foreach (['update', 'updating'] as $method) {
+                if (method_exists($rule, $method) && $this->exists) {
                     $rule->{$method}($this);
+                }
+            }
+        }
 
-        if ( in_array('deleting', $rules) )
-            foreach (['delete', 'deleting'] as $method)
-                if ( method_exists($rule, $method) && $this->isDeletingRow() )
+        if (in_array('deleting', $rules)) {
+            foreach (['delete', 'deleting'] as $method) {
+                if (method_exists($rule, $method) && $this->isDeletingRow()) {
                     $rule->{$method}($this);
+                }
+            }
+        }
     }
 
     /*
@@ -97,20 +105,27 @@ trait ModelRules
      */
     private function afterSaveMethods($rule, $rules, $exists)
     {
-        if ( method_exists($rule, 'fired') )
+        if (method_exists($rule, 'fired')) {
             $rule->fired($this);
+        }
 
-        if ( in_array('created', $rules) )
-            if ( method_exists($rule, 'created') && ! $exists )
+        if (in_array('created', $rules)) {
+            if (method_exists($rule, 'created') && ! $exists) {
                 $rule->created($this);
+            }
+        }
 
-        if ( in_array('updated', $rules) )
-            if ( method_exists($rule, 'updated') && $exists )
+        if (in_array('updated', $rules)) {
+            if (method_exists($rule, 'updated') && $exists) {
                 $rule->updated($this);
+            }
+        }
 
-        if ( in_array('deleted', $rules) )
-            if ( method_exists($rule, 'deleted') )
+        if (in_array('deleted', $rules)) {
+            if (method_exists($rule, 'deleted')) {
                 $rule->deleted($this);
+            }
+        }
     }
 
     /*
@@ -151,13 +166,14 @@ trait ModelRules
         //Get backup original, which will not be modified after saving state in rules
         $original = $this->backup_original ?: [];
 
-        $this->getAdminRules(function($rule) use($rules, $saved, $exists, $original) {
+        $this->getAdminRules(function ($rule) use ($rules, $saved, $exists, $original) {
             //Check if rule can be initialized
-            if ( ! $this->canRunRule($rule, $saved) )
+            if (! $this->canRunRule($rule, $saved)) {
                 return;
+            }
 
             //Methods after saved
-            if ( $saved === true ) {
+            if ($saved === true) {
                 //When need restore original attributes values from state before save,
                 //because sometimes in rules we want know old value. When we are creating new row
                 //then we need reset original value, because no previous state does not exist.

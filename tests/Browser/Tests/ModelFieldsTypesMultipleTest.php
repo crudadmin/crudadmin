@@ -3,11 +3,11 @@
 namespace Admin\Tests\Browser\Tests;
 
 use Carbon\Carbon;
-use Admin\Tests\App\Models\Fields\FieldsTypesMultiple;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\Concerns\DropUploads;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\App\Models\Fields\FieldsTypesMultiple;
 
 class ModelFieldsTypesMultipleTest extends BrowserTestCase
 {
@@ -104,7 +104,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                 Carbon::now()->format('d.m.Y'),
                 Carbon::now()->addDays(-1)->format('d.m.Y'),
             ],
-            'time_multiple' => [ '00:30', '02:00', '12:00', '14:00', '17:30', '20:00', '21:30', '22:00' ],
+            'time_multiple' => ['00:30', '02:00', '12:00', '14:00', '17:30', '20:00', '21:30', '22:00'],
         ];
     }
 
@@ -116,7 +116,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
             'date_multiple' => [
                 Carbon::now()->addDays(-2)->format('d.m.Y'),
             ],
-            'time_multiple' => [ '16:00' ],
+            'time_multiple' => ['16:00'],
         ];
     }
 
@@ -128,19 +128,20 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
         $row = ['id' => '1'] + $original;
 
         //Limit text with dots
-        foreach ($original as $key => $value)
-        {
+        foreach ($original as $key => $value) {
             //Join all array values with dots
-            if ( is_array($value) )
+            if (is_array($value)) {
                 $row[$key] = implode(', ', $value);
+            }
 
             //Set limit of strings
-            if ( is_string($row[$key]) )
+            if (is_string($row[$key])) {
                 $row[$key] = $this->strLimit($row[$key], 20);
+            }
         }
 
         //Overide file values with clickable texts
-        $row['file_multiple'] = implode(' , ', array_map(function($item){
+        $row['file_multiple'] = implode(' , ', array_map(function ($item) {
             return trans('admin::admin.show-image');
         }, $original['file_multiple']));
 

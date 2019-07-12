@@ -2,9 +2,9 @@
 
 namespace Admin\Helpers;
 
-use Admin\Helpers\File as AdminFile;
-use Admin\Eloquent\AdminModel;
 use Gettext;
+use Admin\Eloquent\AdminModel;
+use Admin\Helpers\File as AdminFile;
 
 class SEO
 {
@@ -35,8 +35,9 @@ class SEO
      */
     public function getDefault($key, $default = null)
     {
-        if ( array_key_exists($key, $this->default) )
+        if (array_key_exists($key, $this->default)) {
             return $this->default[$key] ?: $default;
+        }
 
         return $default;
     }
@@ -55,27 +56,25 @@ class SEO
         $is_object = $this->model instanceof AdminModel;
 
         //Check for values into model
-        if ( $is_object && $value = $this->model->getValue($key) )
+        if ($is_object && $value = $this->model->getValue($key)) {
             return $value;
+        }
 
         //Check for values into array
-        else if ( $this->model && array_key_exists($key, $this->model) && $value = $this->model[$key] )
+        elseif ($this->model && array_key_exists($key, $this->model) && $value = $this->model[$key]) {
             return $value;
+        }
 
         //Check for aliases values into model/array
-        if ( $this->model && array_key_exists($key, $aliases) )
-        {
+        if ($this->model && array_key_exists($key, $aliases)) {
             foreach ($aliases[$key] as $alias) {
                 if (
                     ($is_object && $value = $this->model->getValue($alias)) ||
-                    (!$is_object && array_key_exists($alias, $this->model) && $value = $this->model[$alias]) )
-                {
+                    (! $is_object && array_key_exists($alias, $this->model) && $value = $this->model[$alias])) {
                     return $value;
                 }
             }
         }
-
-        return null;
     }
 
     /*
@@ -91,8 +90,9 @@ class SEO
      */
     public function get($key, $default = null)
     {
-        if ( ! $this->model && ! $this->modified )
+        if (! $this->model && ! $this->modified) {
             return $default;
+        }
 
         //If model has seo model with specific value
         if (
@@ -100,12 +100,14 @@ class SEO
             && $this->model instanceof AdminModel
             && $this->model->seo
             && $value = $this->model->seo->getValue($key)
-        )
+        ) {
             return $value;
+        }
 
         //Get modified changes
-        if ( array_key_exists($key, $this->modified) )
+        if (array_key_exists($key, $this->modified)) {
             return $this->modified[$key];
+        }
 
         return $this->tryModelFields($key) ?: $default;
     }
@@ -131,7 +133,7 @@ class SEO
 
         $before = $this->get('title');
 
-        return ($before ? $before . ' - ' : '') . $title;
+        return ($before ? $before.' - ' : '').$title;
     }
 
     /*
@@ -180,24 +182,22 @@ class SEO
         $items = [];
 
         //If is set of admin images
-        if ( is_array($image) )
-        {
-            foreach ($image as $item)
-            {
-                if ( $item instanceof AdminFile )
+        if (is_array($image)) {
+            foreach ($image as $item) {
+                if ($item instanceof AdminFile) {
                     $items[] = $item->resize(1200, 630);
-                else if ( is_string($item) )
+                } elseif (is_string($item)) {
                     $items[] = $item;
+                }
             }
         }
 
         //If is single image
-        else if ( $image instanceof AdminFile ){
+        elseif ($image instanceof AdminFile) {
             $items[] = $image->resize(1200, 630);
-        }
-
-        else if ( is_string($image) )
+        } elseif (is_string($image)) {
             $items[] = $image;
+        }
 
         return $items;
     }
@@ -215,34 +215,36 @@ class SEO
     public function getMetaTags()
     {
         $lines = [
-            '<title>'.$this->secure(SEO::getTitle()).'</title>',
-            '<meta name="description" content="'.$this->secure(SEO::getDescription()).'">',
-            '<meta name="keywords" content="'.$this->secure(SEO::getKeywords()).'">',
+            '<title>'.$this->secure(self::getTitle()).'</title>',
+            '<meta name="description" content="'.$this->secure(self::getDescription()).'">',
+            '<meta name="keywords" content="'.$this->secure(self::getKeywords()).'">',
             '',
             '<!-- Hello, -->',
-            '<meta name="author" content="'.$this->secure(SEO::getAuthor('Marek Gogoľ - marekgogol.sk')).'">',
+            '<meta name="author" content="'.$this->secure(self::getAuthor('Marek Gogoľ - marekgogol.sk')).'">',
             '',
-            '<meta property="og:title" content="'.$this->secure(SEO::getTitle()).'">',
-            '<meta property="og:description" content="'.$this->secure(SEO::getDescription()).'">',
+            '<meta property="og:title" content="'.$this->secure(self::getTitle()).'">',
+            '<meta property="og:description" content="'.$this->secure(self::getDescription()).'">',
             '<meta property="og:locale" content="'.Gettext::getLocale(app()->getLocale()).'" />',
             '<meta property="og:type" content="website">',
             '<meta property="og:site_name" content="'.$this->secure(env('APP_NAME')).'">',
         ];
 
         //Push images into meta tags
-        foreach ($this->getImages() as $image)
+        foreach ($this->getImages() as $image) {
             $lines[] = '<meta property="og:image" content="'.$this->secure($image).'">';
+        }
 
         /*
          * Twitter tags
          */
         $lines = array_merge($lines, [
-            '<meta name="twitter:title" content="'.$this->secure(SEO::getTitle()).'" />',
-            '<meta name="twitter:description" content="'.$this->secure(SEO::getDescription()).'" />',
+            '<meta name="twitter:title" content="'.$this->secure(self::getTitle()).'" />',
+            '<meta name="twitter:description" content="'.$this->secure(self::getDescription()).'" />',
         ]);
 
-        foreach ($this->getImages() as $image)
+        foreach ($this->getImages() as $image) {
             $lines[] = '<meta name="twitter:image" content="'.$this->secure($image).'">';
+        }
 
         return $lines;
     }
@@ -257,5 +259,3 @@ class SEO
         echo "\n\t\t".implode("\n\t\t", $this->getMetaTags())."\n";
     }
 }
-
-?>

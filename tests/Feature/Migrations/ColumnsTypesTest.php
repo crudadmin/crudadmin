@@ -3,11 +3,11 @@
 namespace Admin\Tests\Feature\Migrations;
 
 use Admin;
-use Admin\Core\Tests\Concerns\MigrationAssertions;
-use Admin\Tests\App\Models\Fields\FieldsType;
-use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Fields\FieldsType;
+use Admin\Core\Tests\Concerns\MigrationAssertions;
 
 class ColumnsTypesTest extends TestCase
 {

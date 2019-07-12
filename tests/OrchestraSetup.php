@@ -2,10 +2,11 @@
 
 namespace Admin\Tests;
 
-use Admin\Core\Providers\AppServiceProvider as CoreServiceProvider;
-use Admin\Providers\AppServiceProvider as AdminServiceProvider;
 use Admin\Tests\App\User;
 use Illuminate\Support\Facades\File;
+use Admin\Providers\AppServiceProvider as AdminServiceProvider;
+use Admin\Core\Providers\AppServiceProvider as CoreServiceProvider;
+use Admin\Resources\Providers\AppServiceProvider as ResourcesServiceProvider;
 
 trait OrchestraSetup
 {
@@ -26,6 +27,7 @@ trait OrchestraSetup
     {
         return [
             CoreServiceProvider::class,
+            ResourcesServiceProvider::class,
             AdminServiceProvider::class,
         ];
     }
@@ -44,7 +46,7 @@ trait OrchestraSetup
     }
 
     /**
-     * Setup default admin environment
+     * Setup default admin environment.
      * @param  \IllumcreateApplicationinate\Foundation\Application  $app
      */
     protected function setAdminEnvironmentSetUp($app)
@@ -60,7 +62,7 @@ trait OrchestraSetup
         $app['config']->set('database.connections.mysql.password', 'secret');
 
         $app['config']->set('admin.passwords', [
-            '$2y$10$C6gRDQpH4suxhNbntXPsb.BCk0OKlOCncWUSwgOXgapxJnAtFd.ja' //"superpassword" in bcrypt form
+            '$2y$10$C6gRDQpH4suxhNbntXPsb.BCk0OKlOCncWUSwgOXgapxJnAtFd.ja', //"superpassword" in bcrypt form
         ]);
 
         // Rewrite default user model
@@ -91,28 +93,30 @@ trait OrchestraSetup
         //Load routes
         $this->loadRoutesFrom($app, $this->getStubPath('routes.php'));
         $app['config']->set('admin.routes', [
-            $this->getStubPath('routes.php')
+            $this->getStubPath('routes.php'),
         ]);
 
         //Load views
         $app['config']->set('view.paths', [
-            $this->getStubPath('views')
+            $this->getStubPath('views'),
         ]);
 
         //Register components path
         $app['config']->set('admin.components', [
-            $this->getStubPath('components')
+            $this->getStubPath('components'),
         ]);
 
         app()->setLocale(config('admin.locale', 'sk'));
 
         //Reset sqlite database files
-        if ( !file_exists($db_file = database_path('database.sqlite')) )
+        if (! file_exists($db_file = database_path('database.sqlite'))) {
             @file_put_contents($db_file, '');
+        }
 
         //Register all admin models by default
-        if ( $this->loadAllAdminModels === true )
+        if ($this->loadAllAdminModels === true) {
             $this->registerAllAdminModels();
+        }
     }
 
     /**
@@ -165,8 +169,9 @@ trait OrchestraSetup
         $resources = [];
 
         //Add publishable resources
-        foreach ($this->getPublishableResources() as $item)
+        foreach ($this->getPublishableResources() as $item) {
             $resources[] = $item;
+        }
 
         //Admin gettext languages
         $resources[] = $this->getBasePath().'/storage/app/lang';
@@ -188,8 +193,9 @@ trait OrchestraSetup
     public function unInstallAdmin()
     {
         //Remove all published resources
-        foreach ($this->getAdminResources() as $path)
+        foreach ($this->getAdminResources() as $path) {
             $this->deleteFileOrDirectory($path);
+        }
     }
 
     /*
@@ -197,10 +203,11 @@ trait OrchestraSetup
      */
     protected function deleteFileOrDirectory($path)
     {
-        if ( is_dir($path) )
+        if (is_dir($path)) {
             File::deleteDirectory($path);
-        else
+        } else {
             @unlink($path);
+        }
     }
 
     /*
@@ -209,7 +216,7 @@ trait OrchestraSetup
     public function registerAllAdminModels()
     {
         config()->set('admin.models', [
-            'Admin\Tests\App' => $this->getAppPath('/')
+            'Admin\Tests\App' => $this->getAppPath('/'),
         ]);
     }
 }

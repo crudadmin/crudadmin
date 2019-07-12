@@ -3,11 +3,11 @@
 namespace Admin\Core\Tests\Feature\Migrations;
 
 use AdminCore;
-use Admin\Core\Tests\Concerns\MigrationAssertions;
-use Admin\Tests\App\Models\Locales\ModelLocalization;
-use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Core\Tests\Concerns\MigrationAssertions;
+use Admin\Tests\App\Models\Locales\ModelLocalization;
 
 class StaticColumnsTest extends TestCase
 {

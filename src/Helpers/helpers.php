@@ -1,46 +1,20 @@
 <?php
 
-if ( ! function_exists('admin_asset') )
-{
-    function admin_asset($path, $root = false)
-    {
-        if (substr($path, 0, 7) == 'http://' || substr($path, 0, 8) == 'https://')
-            return $path;
-
-        return asset(($root == false ? Admin::getAdminAssetsPath() : '') . '/' . trim($path, '/'));
-    }
-}
-
-if ( ! function_exists('admin_action') )
-{
-    function admin_action($controller, $params = null)
-    {
-        return action('\Admin\Controllers\\'.$controller, $params);
-    }
-}
-
-if ( ! function_exists('isActiveController') )
-{
-    function isActiveController($controller, $text = null)
-    {
-        return \Admin\Helpers\Helper::isActive($controller, $text);
-    }
-}
-
-if ( ! function_exists('admin') ) {
+if (! function_exists('admin')) {
     function admin()
     {
         $guard = auth()->guard('web');
 
         //Check if is student logged
-        if( ! $guard->check() )
+        if (! $guard->check()) {
             return false;
+        }
 
         return $guard->user();
     }
 }
 
-if ( ! function_exists('trim_end') ) {
+if (! function_exists('trim_end')) {
     function trim_end($string, $trim)
     {
         while (substr($string, -strlen($trim)) == $trim) {
@@ -51,7 +25,6 @@ if ( ! function_exists('trim_end') ) {
     }
 }
 
-
 /*
  * Returns base or relative path
  */
@@ -61,4 +34,3 @@ function base_or_relative_path($path)
 
     return trim_end($path, '/');
 }
-?>

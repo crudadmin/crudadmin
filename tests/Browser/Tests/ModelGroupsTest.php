@@ -2,11 +2,10 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Admin\Tests\App\Models\Fields\FieldsGroup;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
 use Admin\Tests\Concerns\DropDatabase;
-use Admin\Tests\Concerns\DropUploads;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\App\Models\Fields\FieldsGroup;
 
 class ModelGroupsTest extends BrowserTestCase
 {

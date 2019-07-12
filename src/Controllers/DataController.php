@@ -2,15 +2,15 @@
 
 namespace Admin\Controllers;
 
-use Illuminate\Http\Request;
-use Admin\Requests\DataRequest;
-use Admin\Helpers\AdminRows;
-use Admin\Models\ModelsHistory;
-use Carbon\Carbon;
-use Gettext;
-use Admin;
-use Ajax;
 use DB;
+use Ajax;
+use Admin;
+use Gettext;
+use Carbon\Carbon;
+use Admin\Helpers\AdminRows;
+use Illuminate\Http\Request;
+use Admin\Models\ModelsHistory;
+use Admin\Requests\DataRequest;
 
 class DataController extends Controller
 {
@@ -22,8 +22,7 @@ class DataController extends Controller
         $model = Admin::getModelByTable($model)->getAdminRows();
 
         //Check if user has allowed model
-        if ( ! auth()->guard('web')->user()->hasAccess( $model ) )
-        {
+        if (! auth()->guard('web')->user()->hasAccess($model)) {
             Ajax::permissionsError();
         }
 
@@ -35,12 +34,11 @@ class DataController extends Controller
      */
     public function store(DataRequest $request)
     {
-        $model = $this->getModel( request()->get('_model') );
+        $model = $this->getModel(request()->get('_model'));
 
         //Checks for disabled publishing
-        if ( $model->getProperty('insertable') == false )
-        {
-            Ajax::error( trans('admin::admin.cannot-create') );
+        if ($model->getProperty('insertable') == false) {
+            Ajax::error(trans('admin::admin.cannot-create'));
         }
 
         $this->checkValidation($request);
@@ -53,10 +51,10 @@ class DataController extends Controller
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-created'));
 
-        Ajax::message( $message, null, $this->responseType(), [
+        Ajax::message($message, null, $this->responseType(), [
             'rows' => $data['rows'],
             'buttons' => $data['buttons'],
-        ] );
+        ]);
     }
 
     /*
@@ -64,8 +62,9 @@ class DataController extends Controller
      */
     public function show($model, $id, $history_id = null)
     {
-        if ( is_numeric($history_id) )
+        if (is_numeric($history_id)) {
             return $this->showDataFromHistory($model, $id, $history_id);
+        }
 
         $model = $this->getModel($model);
 
@@ -89,15 +88,14 @@ class DataController extends Controller
      */
     public function update(DataRequest $request)
     {
-        $model = $this->getModel( request()->get('_model') );
+        $model = $this->getModel(request()->get('_model'));
 
         //Checks for disabled publishing
-        if ( $model->getProperty('editable') == false )
-        {
-            Ajax::error( trans('admin::admin.cannot-edit') );
+        if ($model->getProperty('editable') == false) {
+            Ajax::error(trans('admin::admin.cannot-edit'));
         }
 
-        $row = $model->findOrFail( request()->get('_id') );
+        $row = $model->findOrFail(request()->get('_id'));
 
         $this->checkValidation($request, $row, true);
 
@@ -114,7 +112,7 @@ class DataController extends Controller
         $this->removeOverridenFiles($row, $changes);
 
         try {
-            $row->update( $changes );
+            $row->update($changes);
         } catch (\Illuminate\Database\QueryException $e) {
             return Ajax::mysqlError($e);
         }
@@ -122,8 +120,9 @@ class DataController extends Controller
         /*
          * Save into hustory
          */
-        if ( $model->getProperty('history') === true )
+        if ($model->getProperty('history') === true) {
             $row->historySnapshot($changes, $original);
+        }
 
         $this->updateBelongsToMany($model, $row);
 
@@ -131,8 +130,9 @@ class DataController extends Controller
         $row->restoreOriginalAttributes();
 
         //Fire on update event
-        if ( method_exists($model, 'onUpdate') )
+        if (method_exists($model, 'onUpdate')) {
             $row->onUpdate($row);
+        }
 
         //Check for model rules after row is already updated
         $row->checkForModelRules(['updated'], true);
@@ -140,9 +140,9 @@ class DataController extends Controller
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-save'));
 
-        Ajax::message( $message, null, $this->responseType(), [
+        Ajax::message($message, null, $this->responseType(), [
             'row' => $row->getMutatedAdminAttributes(),
-        ] );
+        ]);
     }
 
     /*
@@ -150,8 +150,7 @@ class DataController extends Controller
      */
     protected function insertRows($model, $request, $rows = [], $models = [])
     {
-        foreach ($request->allWithMutators() as $request_row)
-        {
+        foreach ($request->allWithMutators() as $request_row) {
             try {
                 //Create row into db
                 $row = (new $model)->create($request_row)->fresh();
@@ -166,12 +165,14 @@ class DataController extends Controller
             /*
              * Save into history
              */
-            if ( $model->getProperty('history') === true )
+            if ($model->getProperty('history') === true) {
                 $row->historySnapshot($request_row);
+            }
 
             //Fire on create event
-            if ( method_exists($model, 'onCreate') )
+            if (method_exists($model, 'onCreate')) {
                 $row->onCreate($row);
+            }
 
             //Check for model rules after row is already saved/created
             $row->checkForModelRules(['created'], true);
@@ -192,13 +193,11 @@ class DataController extends Controller
      */
     private function insertUnsavedChilds($row, $request)
     {
-        if ( $request->has('_save_children') )
-        {
-            foreach ($request->_save_children as $item)
-            {
+        if ($request->has('_save_children')) {
+            foreach ($request->_save_children as $item) {
                 $model = $this->getModel($item['table']);
 
-                $model->getConnection()->table($model->getTable())->where('id', $item['id'])->update([ $item['column'] => $row->getKey() ]);
+                $model->getConnection()->table($model->getTable())->where('id', $item['id'])->update([$item['column'] => $row->getKey()]);
             }
         }
     }
@@ -208,7 +207,7 @@ class DataController extends Controller
      */
     protected function getRequestErrors()
     {
-        return array_merge((array)Admin::get('errors'), (array)Admin::get('errors.request'));
+        return array_merge((array) Admin::get('errors'), (array) Admin::get('errors.request'));
     }
 
     /*
@@ -216,8 +215,9 @@ class DataController extends Controller
      */
     protected function responseMessage($sentense)
     {
-        if ( count($this->getRequestErrors()) )
-            return $sentense.' '.trans('admin::admin.with-errors').':<br>' . join($this->getRequestErrors(), '<br>');
+        if (count($this->getRequestErrors())) {
+            return $sentense.' '.trans('admin::admin.with-errors').':<br>'.implode($this->getRequestErrors(), '<br>');
+        }
 
         return $sentense.'.';
     }
@@ -232,26 +232,25 @@ class DataController extends Controller
      */
     protected function updateBelongsToMany($model, $row)
     {
-        foreach ($model->getFields() as $key => $field)
-        {
-            if ( array_key_exists('belongsToMany', $field) )
-            {
+        foreach ($model->getFields() as $key => $field) {
+            if (array_key_exists('belongsToMany', $field)) {
                 $properties = $model->getRelationProperty($key, 'belongsToMany');
 
                 DB::table($properties[3])->where($properties[6], $row->getKey())->delete();
 
-                if ( ! request()->has($key) )
+                if (! request()->has($key)) {
                     continue;
+                }
 
                 //Add relations
-                foreach (request($key) as $key => $id)
-                {
-                    if ( ! is_numeric($id) )
+                foreach (request($key) as $key => $id) {
+                    if (! is_numeric($id)) {
                         continue;
+                    }
 
                     $array = [];
-                    $array[ $properties[6] ] = $row->getKey();
-                    $array[ $properties[7] ] = $id;
+                    $array[$properties[6]] = $row->getKey();
+                    $array[$properties[7]] = $id;
 
                     DB::table($properties[3])->insert($array);
                 }
@@ -264,10 +263,8 @@ class DataController extends Controller
      */
     protected function removeFilesOnDelete($model)
     {
-        foreach ($model->getFields() as $key => $field)
-        {
-            if ( $model->isFieldType($key, 'file') )
-            {
+        foreach ($model->getFields() as $key => $field) {
+            if ($model->isFieldType($key, 'file')) {
                 $model->deleteFiles($key);
             }
         }
@@ -278,10 +275,8 @@ class DataController extends Controller
      */
     protected function removeOverridenFiles($model, $changes)
     {
-        foreach ($changes as $key => $change)
-        {
-            if ( $model->isFieldType($key, 'file') && !$model->hasFieldParam($key, 'multiple', false) )
-            {
+        foreach ($changes as $key => $change) {
+            if ($model->isFieldType($key, 'file') && ! $model->hasFieldParam($key, 'multiple', false)) {
                 $model->deleteFiles($key, $changes[$key]);
             }
         }
@@ -292,19 +287,23 @@ class DataController extends Controller
      */
     private function canDeleteRow($model, $row, $request)
     {
-        if ( $row->canDelete($row) !== true )
+        if ($row->canDelete($row) !== true) {
             return false;
+        }
 
-        if ( $model->getProperty('minimum') >= $model->localization( $request->get('language_id') )->count() )
+        if ($model->getProperty('minimum') >= $model->localization($request->get('language_id'))->count()) {
             return false;
+        }
 
-        if ( $model->getProperty('deletable') == false )
+        if ($model->getProperty('deletable') == false) {
             return false;
+        }
 
         $reserved = $model->getProperty('reserved');
 
-        if ( is_array($reserved) && in_array($row->getKey(), $reserved) )
+        if (is_array($reserved) && in_array($row->getKey(), $reserved)) {
             return false;
+        }
 
         return true;
     }
@@ -314,14 +313,14 @@ class DataController extends Controller
      */
     public function delete(Request $request)
     {
-        $model = $this->getModel( $request->get('model') );
+        $model = $this->getModel($request->get('model'));
 
         $rows = $model->whereIn($model->getKeyName(), $request->get('id', []))->get();
 
-        foreach ($rows as $row )
-        {
-            if ( ! $this->canDeleteRow($model, $row, $request) )
-                Ajax::error( trans('admin::admin.cannot-delete') );
+        foreach ($rows as $row) {
+            if (! $this->canDeleteRow($model, $row, $request)) {
+                Ajax::error(trans('admin::admin.cannot-delete'));
+            }
 
             $row->deleted_at = Carbon::now();
 
@@ -337,19 +336,20 @@ class DataController extends Controller
             $row->checkForModelRules(['deleted'], true);
 
             //Fire on delete events
-            if ( method_exists($model, 'onDelete') )
+            if (method_exists($model, 'onDelete')) {
                 $row->onDelete($row);
+            }
         }
 
         $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
 
-        if ( count($rows['rows']) == 0 && request('page') > 1 )
+        if (count($rows['rows']) == 0 && request('page') > 1) {
             $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1, 0);
+        }
 
-
-        Ajax::message( null, null, null, [
+        Ajax::message(null, null, null, [
             'rows' => $rows,
-        ] );
+        ]);
     }
 
     /*
@@ -357,12 +357,11 @@ class DataController extends Controller
      */
     public function togglePublishedAt(Request $request)
     {
-        $model = $this->getModel( $request->get('model') );
+        $model = $this->getModel($request->get('model'));
 
         //Checks for disabled publishing
-        if ( $model->getProperty('publishable') == false )
-        {
-            Ajax::error( trans('admin::admin.cannot-publicate') );
+        if ($model->getProperty('publishable') == false) {
+            Ajax::error(trans('admin::admin.cannot-publicate'));
         }
 
         $rows = $model->withUnpublished()
@@ -384,9 +383,10 @@ class DataController extends Controller
 
     private function getButtonResponse($button, $rows, $multiple, $ask)
     {
-        if ( $ask ){
+        if ($ask) {
             return $button->{ method_exists($button, 'ask') ? 'ask' : 'question' }($multiple === true ? $rows : $rows[0]);
-        } if ( $multiple ){
+        }
+        if ($multiple) {
             return $button->fireMultiple($rows);
         } else {
             return $button->fire($rows[0]);
@@ -400,15 +400,15 @@ class DataController extends Controller
     {
         $request = request('_button');
 
-        $model = $this->getModel( $request['model'] );
+        $model = $this->getModel($request['model']);
 
         $multiple = $request['multiple'] === true;
 
         $rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get();
 
-        $buttons = array_values(array_filter((array)$model->getProperty('buttons')));
+        $buttons = array_values(array_filter((array) $model->getProperty('buttons')));
 
-        $button = new $buttons[ $request['button_id'] ]($multiple ? null : $rows[0]);
+        $button = new $buttons[$request['button_id']]($multiple ? null : $rows[0]);
 
         $ask = $request['ask'] === true
                && (method_exists($button, 'ask') || method_exists($button, 'question'));
@@ -416,8 +416,9 @@ class DataController extends Controller
         $response = $this->getButtonResponse($button, $rows, $multiple, $ask);
 
         //On redirect response
-        if ( $response instanceof \Illuminate\Http\RedirectResponse )
+        if ($response instanceof \Illuminate\Http\RedirectResponse) {
             $button->redirect = $response->getTargetUrl();
+        }
 
         //If is ask mode requesion, then does not return updated rows data
         $rows = $ask ? [] : (new AdminRows($model))->returnModelData(
@@ -430,35 +431,34 @@ class DataController extends Controller
             $button->reloadAll ? false : $rows->pluck($model->getKeyName())->toArray()
         );
 
-        return Ajax::message( $button->message['message'], $button->message['title'], $button->message['type'], [
+        return Ajax::message($button->message['message'], $button->message['title'], $button->message['type'], [
             'component' => isset($button->message['component']) ? $button->message['component'] : null,
             'component_data' => isset($button->message['component_data']) ? $button->message['component_data'] : null,
             'rows' => $rows,
             'redirect' => $button->redirect,
             'ask' => $ask && $button->accept,
-        ] );
+        ]);
     }
 
     public function updateOrder()
     {
-        $model = $this->getModel( request('model') );
+        $model = $this->getModel(request('model'));
 
         //Checks for disabled sorting rows
-        if ( $model->getProperty('sortable') == false )
-        {
-            Ajax::error( trans('admin::admin.cannot-sort') );
+        if ($model->getProperty('sortable') == false) {
+            Ajax::error(trans('admin::admin.cannot-sort'));
         }
 
         //Update rows and theirs orders
-        foreach (request('rows') as $id => $order)
-        {
+        foreach (request('rows') as $id => $order) {
             //Update first row
-            $model->newInstance()->where('id', $id)->update([ '_order' => $order ]);
+            $model->newInstance()->where('id', $id)->update(['_order' => $order]);
         }
 
         //Fire on update order event
-        if ( method_exists($model, 'onUpdateOrder') )
+        if (method_exists($model, 'onUpdateOrder')) {
             return $model->onUpdateOrder();
+        }
     }
 
     /*
@@ -468,10 +468,10 @@ class DataController extends Controller
     {
         $rows = ModelsHistory::where('table', $model)
                             ->where('row_id', $id)
-                            ->with(['user' => function($query){
+                            ->with(['user' => function ($query) {
                                 $query->select(['id', 'username']);
                             }])
-                            ->get(['id', 'data', 'user_id', 'created_at'])->map(function($item){
+                            ->get(['id', 'data', 'user_id', 'created_at'])->map(function ($item) {
                                 return $item->getMutatedAdminAttributes();
                             });
 
@@ -487,7 +487,7 @@ class DataController extends Controller
 
         $translations = Gettext::getTranslations($language);
 
-        return response()->json( $translations );
+        return response()->json($translations);
     }
 
     /*

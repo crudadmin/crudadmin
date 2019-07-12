@@ -35,7 +35,7 @@ class QuestionButton extends Button
      */
     public function fire(AdminModel $row)
     {
-        $row->update([ 'field2' => 10 ]);
+        $row->update(['field2' => 10]);
 
         return $this->message('Your action is done!');
     }

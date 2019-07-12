@@ -1,11 +1,12 @@
 <?php
+
 namespace Admin\Providers;
 
-use Admin\Contracts\Commands\MutateAdminModelCommand;
 use Illuminate\Support\ServiceProvider;
+use Admin\Contracts\Commands\MutateAdminModelCommand;
 
-class CommandsServiceProvider extends ServiceProvider {
-
+class CommandsServiceProvider extends ServiceProvider
+{
     /**
      * Register the service provider.
      *
@@ -17,8 +18,6 @@ class CommandsServiceProvider extends ServiceProvider {
          * Register commands
          */
         $this->app->bind('gogol::admin.install', \Admin\Commands\AdminInstallCommand::class);
-
-        $this->app->bind('gogol::admin.update', \Admin\Commands\AdminUpdateCommand::class);
 
         $this->app->bind('gogol::admin.button', \Admin\Commands\AdminButtonCommand::class);
 
@@ -32,10 +31,8 @@ class CommandsServiceProvider extends ServiceProvider {
 
         $this->app->bind('gogol::admin.queue', \Admin\Commands\EnsureQueueListenerIsRunning::class);
 
-
         $this->commands([
             'gogol::admin.install',
-            'gogol::admin.update',
             'gogol::admin.button',
             'gogol::admin.rule',
             'gogol::admin.layout',

@@ -4,7 +4,6 @@ namespace Admin\Tests\Feature\Auth;
 
 use Admin\Tests\TestCase;
 use Admin\Tests\Concerns\DropDatabase;
-use Illuminate\Support\Facades\File;
 
 class AdminAuthTest extends TestCase
 {
@@ -20,11 +19,11 @@ class AdminAuthTest extends TestCase
     /** @test */
     public function check_if_is_demo_user_can_log_in()
     {
-        $response = $this->json('POST', action('\Admin\Controllers\Auth\LoginController@login'), [
+        $response = $this->json('POST', admin_action('Auth\LoginController@login'), [
             'email' => $this->credentials['email'],
             'password' => $this->credentials['password'],
         ]);
 
-        $response->assertRedirect(action('\Admin\Controllers\DashboardController@index'));
+        $response->assertRedirect(admin_action('DashboardController@index'));
     }
 }

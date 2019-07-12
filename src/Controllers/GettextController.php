@@ -2,10 +2,8 @@
 
 namespace Admin\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Http\Requests;
 use Gettext;
+use Illuminate\Http\Request;
 
 class GettextController extends Controller
 {

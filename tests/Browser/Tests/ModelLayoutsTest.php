@@ -2,10 +2,10 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Admin\Tests\App\Models\Tree\Model3;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
 use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Tree\Model3;
+use Admin\Tests\Browser\BrowserTestCase;
 
 class ModelLayoutsTest extends BrowserTestCase
 {

@@ -2,8 +2,8 @@
 
 namespace Admin\Tests\Feature\Model;
 
-use Admin\Tests\App\Models\Fields\FieldsType;
 use Admin\Tests\TestCase;
+use Admin\Tests\App\Models\Fields\FieldsType;
 
 class ModelFieldsTypesTest extends TestCase
 {

@@ -11,7 +11,7 @@ trait ModelLayoutBuilder
      */
     public function hasModelGroup()
     {
-        return is_string( $this->group ) && !empty($this->group);
+        return is_string($this->group) && ! empty($this->group);
     }
 
     /*
@@ -22,15 +22,15 @@ trait ModelLayoutBuilder
         $config = config('admin.groups', []);
 
         //If model has no group
-        if ( !($group_key = $this->group) )
-            return null;
+        if (! ($group_key = $this->group)) {
+            return;
+        }
 
         $group_tree = explode('.', $group_key);
 
         $tree = [];
 
         foreach ($group_tree as $i => $key) {
-
             $group_key = implode('.', array_slice($group_tree, 0, $i + 1));
 
             //Get group from config
@@ -57,16 +57,17 @@ trait ModelLayoutBuilder
 
         $models = Admin::getAdminModels();
 
-        foreach ($models as $model)
-        {
-            if ( ! $model->belongsToModel )
+        foreach ($models as $model) {
+            if (! $model->belongsToModel) {
                 continue;
+            }
 
             $belongsToModel = $model->getBelongsToRelation(true);
 
             //If some of eached models has actual model name in belongsToModel relationship, then add this model as child for actual model
-            if ( in_array($classname, $belongsToModel) )
+            if (in_array($classname, $belongsToModel)) {
                 $childs[] = $model;
+            }
         }
 
         return $childs;

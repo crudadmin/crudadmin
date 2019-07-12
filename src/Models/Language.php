@@ -3,7 +3,6 @@
 namespace Admin\Models;
 
 use Admin\Eloquent\Concerns\Gettextable;
-use Admin\Models\Model;
 
 class Language extends Model
 {

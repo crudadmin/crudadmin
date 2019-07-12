@@ -7,7 +7,8 @@ trait DropUploads
     /*
      * Drop all tables in database
      */
-    public function dropUploads(){
+    public function dropUploads()
+    {
         $this->deleteFileOrDirectory(public_path('uploads'));
     }
 }

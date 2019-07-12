@@ -2,7 +2,6 @@
 
 namespace Admin\Tests\App\Models\Articles;
 
-use Admin\Fields\Group;
 use Admin\Eloquent\AdminModel;
 
 class Tag extends AdminModel
