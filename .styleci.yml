@@ -9,3 +9,4 @@ enabled:
     - phpdoc_scalar
     - phpdoc_summary
     - single_blank_line_before_namespace
+    - no_unused_imports
