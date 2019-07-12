@@ -130,9 +130,11 @@ class ModelActionsTest extends BrowserTestCase
                     //Click multiple items and then press button action
                     ->click('tr[data-id="1"]')
                     ->click('tr[data-id="2"]')
-                    ->click('[data-action-list] button')->pause(50)
-                    ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')->pause(50)
-                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    ->click('[data-action-list] button')
+                    ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')
+                    ->whenAvailable('.modal .modal-footer', function() use($browser) {
+                        $browser->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    });
 
             //Check if action has been processed
             //and table rewrited with actual data
