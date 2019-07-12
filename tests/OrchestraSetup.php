@@ -11,7 +11,7 @@ use Admin\Resources\Providers\AppServiceProvider as ResourcesServiceProvider;
 trait OrchestraSetup
 {
     /*
-     * Register all admin models into each test
+     * Register all admin models into each test.
      */
     protected $loadAllAdminModels = false;
 
