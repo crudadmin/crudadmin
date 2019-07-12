@@ -47,11 +47,11 @@ class ModelActionsTest extends BrowserTestCase
                     ->click('tr[data-id="7"]')
                     ->click('[data-action-list] button')->pause(50)
                     ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')->pause(50);
-
-            //Check if row has been removed from table and from db
-            $this->assertNull(Article::find(10));
-            $this->assertNull(Article::find(7));
         });
+
+        //Check if row has been removed from table and from db
+        $this->assertNull(Article::find(10));
+        $this->assertNull(Article::find(7));
     }
 
     /** @test */
