@@ -12,14 +12,14 @@ class MutateAdminModelCommand
         /*
          * Mutate model namespaces
          */
-        AdminCore::event('admin.command.model.create.namespaces', function(&$namespaces, $command){
+        AdminCore::event('admin.command.model.create.namespaces', function (&$namespaces, $command) {
             $namespaces = ['use Admin\Eloquent\AdminModel', 'use Admin\Fields\Group'];
         });
 
         /*
          * Add model parameters into admin core model generator
          */
-        AdminCore::event('admin.command.model.create.parameters', function(&$parameters, $command){
+        AdminCore::event('admin.command.model.create.parameters', function (&$parameters, $command) {
             $parameters[] = '
             /*
              * Template name
@@ -32,8 +32,7 @@ class MutateAdminModelCommand
              */
             protected $title = \''.($command->option('title') ?: '').'\';';
 
-            if ( $command->option('group') )
-            {
+            if ($command->option('group')) {
                 $parameters[] = '
                 /*
                  * Group
@@ -41,8 +40,7 @@ class MutateAdminModelCommand
                 protected $group = \''.$command->option('group').'\';';
             }
 
-            if ( $command->option('single') )
-            {
+            if ($command->option('single')) {
                 $parameters[] = '
                 /*
                  * Single row in table, automatically set minimum and maximum to 1
@@ -50,8 +48,7 @@ class MutateAdminModelCommand
                 protected $single = true;';
             }
 
-            if ( $command->option('localization') )
-            {
+            if ($command->option('localization')) {
                 $parameters[] = '
                 /*
                  * Enable multilanguages
@@ -59,8 +56,7 @@ class MutateAdminModelCommand
                 protected $localization = true;';
             }
 
-            if ( $command->option('sortable') )
-            {
+            if ($command->option('sortable')) {
                 $parameters[] = '
                 /*
                  * Disabled sorting of rows
@@ -68,8 +64,7 @@ class MutateAdminModelCommand
                 protected $sortable = false;';
             }
 
-            if ( $command->option('publishable') )
-            {
+            if ($command->option('publishable')) {
                 $parameters[] = '
                 /*
                  * Disabled publishing rows
@@ -77,8 +72,7 @@ class MutateAdminModelCommand
                 protected $publishable = false;';
             }
 
-            if ( $command->option('minimum') )
-            {
+            if ($command->option('minimum')) {
                 $parameters[] = '
                 /*
                  * Minimum page rows
@@ -87,8 +81,7 @@ class MutateAdminModelCommand
                 protected $minimum = '.$this->option('minimum').';';
             }
 
-            if ( $command->option('maximum') )
-            {
+            if ($command->option('maximum')) {
                 $parameters[] = '
                 /*
                  * Maximum page rows
@@ -97,8 +90,7 @@ class MutateAdminModelCommand
                 protected $maximum = '.$this->option('maximum').';';
             }
 
-            if ( $this->isGalleryModel($command) )
-            {
+            if ($this->isGalleryModel($command)) {
                 $parameters[] = '
                 /*
                  * Additional model settings
@@ -109,17 +101,16 @@ class MutateAdminModelCommand
             }
         });
 
-        AdminCore::event('admin.command.model.create.fields', function(&$fields, $command){
+        AdminCore::event('admin.command.model.create.fields', function (&$fields, $command) {
             $locale = config('admin.locale', 'en');
 
             //Mutate name field, in example model from crudadmin we want placeholder attribute
             $fields['name'] = 'name:'.trans('admin.core::fields.name', [], $locale).'|placeholder:'.trans('admin.core::fields.placeholder', [], $locale).'|required|max:90';
 
             //If is gallery model, then return just one field
-            if ( $this->isGalleryModel($command) )
-            {
+            if ($this->isGalleryModel($command)) {
                 $fields = [
-                    'image' => 'name:'.trans('admin.core::fields.image', [], $locale).'|type:file|required|image|multirows'
+                    'image' => 'name:'.trans('admin.core::fields.image', [], $locale).'|type:file|required|image|multirows',
                 ];
             }
         });
@@ -127,7 +118,7 @@ class MutateAdminModelCommand
         /*
          * Add model comman d parameters into admin core model generator
          */
-        AdminCore::event('admin.command.model.create.options', function(&$options, $command){
+        AdminCore::event('admin.command.model.create.options', function (&$options, $command) {
             $options = array_merge($options, [
                 ['title', 't', InputOption::VALUE_OPTIONAL, 'Model title in administration'],
                 ['group', 'g', InputOption::VALUE_OPTIONAL, 'Model group in administration'],
@@ -136,11 +127,10 @@ class MutateAdminModelCommand
                 ['sortable', '', InputOption::VALUE_NONE, 'Model with disabled sorting of rows'],
                 ['publishable', 'p', InputOption::VALUE_NONE, 'Model with disabled publishing of rows'],
                 ['minimum', '', InputOption::VALUE_OPTIONAL, 'Minimum restriction of rows'],
-                ['maximum', '', InputOption::VALUE_OPTIONAL, 'Maximum restriction of rows']
+                ['maximum', '', InputOption::VALUE_OPTIONAL, 'Maximum restriction of rows'],
             ]);
         });
     }
-
 
     /*
      * Checks if is gallery model

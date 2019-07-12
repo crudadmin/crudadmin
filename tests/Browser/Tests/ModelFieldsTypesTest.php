@@ -3,11 +3,11 @@
 namespace Admin\Tests\Browser\Tests;
 
 use Carbon\Carbon;
-use Admin\Tests\App\Models\Fields\FieldsType;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\Concerns\DropUploads;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\App\Models\Fields\FieldsType;
 
 class ModelFieldsTypesTest extends BrowserTestCase
 {
@@ -55,7 +55,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->openRow(1)
                     ->assertHasFormValues(FieldsType::class, $row)
                     ->fillForm(FieldsType::class, [
-                        'password' => $this->getFormData('password')
+                        'password' => $this->getFormData('password'),
                     ])
                     ->saveForm()
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
@@ -158,8 +158,9 @@ class ModelFieldsTypesTest extends BrowserTestCase
         unset($row['editor']);
 
         //Limit text with dots
-        foreach ($row as $key => $value)
+        foreach ($row as $key => $value) {
             $row[$key] = str_limit($value, 20);
+        }
 
         $row['file'] = trans('admin::admin.show-image');
 

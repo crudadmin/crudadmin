@@ -2,17 +2,16 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Gettext;
-use Admin;
 use Ajax;
+use Admin;
+use Gettext;
 
 trait Gettextable
 {
     public function onCreate($row)
     {
         //Update gettext files...
-        if ( config('admin.gettext') === true )
-        {
+        if (config('admin.gettext') === true) {
             Gettext::createLocale($row->slug);
 
             Gettext::syncTranslates($row);
@@ -24,8 +23,7 @@ trait Gettextable
     public function onUpdate($row)
     {
         //Update gettext files...
-        if ( config('admin.gettext') === true )
-        {
+        if (config('admin.gettext') === true) {
             Gettext::renameLocale($row->original['slug'], $row->slug);
 
             Gettext::generateMoFiles($row->slug, $row);
@@ -39,9 +37,8 @@ trait Gettextable
     public function setPoeditPoFilename($filename)
     {
         //Regenerate mo files from po files
-        if ( config('admin.gettext') === true )
-        {
-            $this->attributes['poedit_mo'] = date('d-m-Y-h-i-s') . '.mo';
+        if (config('admin.gettext') === true) {
+            $this->attributes['poedit_mo'] = date('d-m-Y-h-i-s').'.mo';
         }
 
         return $filename;
@@ -54,13 +51,15 @@ trait Gettextable
     {
         $slug = str_slug($value);
 
-        if ( strlen(str_replace('-', '', $slug)) != 2 )
+        if (strlen(str_replace('-', '', $slug)) != 2) {
             Ajax::error('Zadali skratku jazyka v nesprávnom formáte.');
+        }
 
-        if ( ! $this->exists )
+        if (! $this->exists) {
             $this->attributes['slug'] = $slug;
-        else if ( $this->original['slug'] != $value )
+        } elseif ($this->original['slug'] != $value) {
             Admin::push('errors', 'Skratku jazyka nie je možné po jej vytvorení premenovať.');
+        }
     }
 
     /*
@@ -71,8 +70,9 @@ trait Gettextable
         /*
          * Checks for gettext support
          */
-        if ( config('admin.gettext') !== true )
+        if (config('admin.gettext') !== true) {
             return;
+        }
 
         $fields->push([
             'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|required_with:poedit_mo',
@@ -85,13 +85,12 @@ trait Gettextable
      */
     public function onMigrateEnd($table, $schema)
     {
-        if ( $this->withUnpublished()->count() == 0 )
-        {
+        if ($this->withUnpublished()->count() == 0) {
             $isLanguageTableSortable = Admin::getModelByTable('languages')->isSortable();
 
             $languages = [
-                [ 'name' => 'Slovenský', 'slug' => 'sk' ] + ($isLanguageTableSortable ? [ '_order' => 0 ] : []),
-                [ 'name' => 'Anglický', 'slug' => 'en' ] + ($isLanguageTableSortable ? [ '_order' => 1 ] : []),
+                ['name' => 'Slovenský', 'slug' => 'sk'] + ($isLanguageTableSortable ? ['_order' => 0] : []),
+                ['name' => 'Anglický', 'slug' => 'en'] + ($isLanguageTableSortable ? ['_order' => 1] : []),
             ];
 
             $this->insert($languages);

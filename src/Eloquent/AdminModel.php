@@ -3,18 +3,18 @@
 namespace Admin\Eloquent;
 
 use Admin;
-use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
-use Admin\Eloquent\Concerns\AdminModelTrait;
-use Admin\Eloquent\Concerns\HasAttributes;
-use Admin\Eloquent\Concerns\Historiable;
+use Localization;
 use Admin\Eloquent\Concerns\ModelIcons;
-use Admin\Eloquent\Concerns\ModelLayoutBuilder;
 use Admin\Eloquent\Concerns\ModelRules;
 use Admin\Eloquent\Concerns\Uploadable;
+use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\VueComponent;
 use Illuminate\Database\Eloquent\Builder;
+use Admin\Eloquent\Concerns\HasAttributes;
+use Admin\Eloquent\Concerns\AdminModelTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Localization;
+use Admin\Eloquent\Concerns\ModelLayoutBuilder;
+use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
 
 class AdminModel extends CoreAdminModel
 {
@@ -162,13 +162,12 @@ class AdminModel extends CoreAdminModel
      */
     public function scopeLocalization($query, $language_id = null)
     {
-        if ( ! $this->isEnabledLanguageForeign() )
+        if (! $this->isEnabledLanguageForeign()) {
             return $query;
+        }
 
-        if ( ! is_numeric( $language_id ) )
-        {
+        if (! is_numeric($language_id)) {
             $language_id = Localization::get()->getKey();
-
         }
 
         $query->where('language_id', $language_id);
@@ -187,7 +186,6 @@ class AdminModel extends CoreAdminModel
      */
     public function scopeAdminRows($query)
     {
-
     }
 
     /*
@@ -204,21 +202,19 @@ class AdminModel extends CoreAdminModel
         $this->initTrait();
 
         //Add sortable functions
-        static::addGlobalScope('order', function(Builder $builder) {
+        static::addGlobalScope('order', function (Builder $builder) {
             $builder->addSorting();
         });
 
-        /**
+        /*
          * Add global scope for publishing extepts admin interface
          */
-        if ( ! Admin::isAdmin() && $this->publishable == true )
-        {
-            static::addGlobalScope('publishable', function(Builder $builder) {
+        if (! Admin::isAdmin() && $this->publishable == true) {
+            static::addGlobalScope('publishable', function (Builder $builder) {
                 $builder->withPublished();
             });
         }
 
         parent::__construct($attributes);
     }
-
 }

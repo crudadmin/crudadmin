@@ -1,4 +1,5 @@
 <?php
+
 namespace Admin\Commands;
 
 use Illuminate\Console\Command;
@@ -38,7 +39,7 @@ class EnsureQueueListenerIsRunning extends Command
      */
     public function handle()
     {
-        if ( ! $this->isQueueListenerRunning()) {
+        if (! $this->isQueueListenerRunning()) {
             $this->comment('Queue listener is being started.');
 
             $pid = $this->startQueueListener();
@@ -56,7 +57,7 @@ class EnsureQueueListenerIsRunning extends Command
      */
     private function isQueueListenerRunning()
     {
-        if ( ! $pid = $this->getLastQueueListenerPID()) {
+        if (! $pid = $this->getLastQueueListenerPID()) {
             return false;
         }
 
@@ -78,7 +79,7 @@ class EnsureQueueListenerIsRunning extends Command
      */
     private function getLastQueueListenerPID()
     {
-        if ( ! file_exists($this->getPidFile()) ) {
+        if (! file_exists($this->getPidFile())) {
             return false;
         }
 
@@ -114,7 +115,7 @@ class EnsureQueueListenerIsRunning extends Command
 
         $tries = config('queue.admin.tries', 3);
 
-        $command = $cli. ' ' . base_path() . '/artisan queue:work --timeout='.$timeout.' --sleep='.$sleep.' --tries='.$tries.' > '.$log_path.' & echo $!';
+        $command = $cli.' '.base_path().'/artisan queue:work --timeout='.$timeout.' --sleep='.$sleep.' --tries='.$tries.' > '.$log_path.' & echo $!';
 
         $pid = exec($command);
 

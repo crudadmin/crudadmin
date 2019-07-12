@@ -37,7 +37,7 @@ class TemplateButton extends Button
      */
     public function fire(AdminModel $row)
     {
-        $row->update([ 'field4' => request('mood') ]);
+        $row->update(['field4' => request('mood')]);
 
         return $this->message('Your custom template action is done!');
     }

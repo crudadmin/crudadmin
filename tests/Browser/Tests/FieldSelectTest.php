@@ -2,13 +2,13 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Admin\Tests\App\Models\Articles\ArticlesComment;
-use Admin\Tests\App\Models\Fields\SelectType;
-use Admin\Tests\App\Models\Locales\ModelLocalization;
+use Laravel\Dusk\Browser;
+use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\Concerns\SeedTrait;
-use Admin\Tests\Concerns\DropDatabase;
-use Laravel\Dusk\Browser;
+use Admin\Tests\App\Models\Fields\SelectType;
+use Admin\Tests\App\Models\Articles\ArticlesComment;
+use Admin\Tests\App\Models\Locales\ModelLocalization;
 
 class FieldSelectTest extends BrowserTestCase
 {
@@ -18,8 +18,8 @@ class FieldSelectTest extends BrowserTestCase
     /** @test */
     public function test_language_select_options_filter()
     {
-        ModelLocalization::create([ 'name' => 'sk option', 'language_id' => 1 ]);
-        ModelLocalization::create([ 'name' => 'en option', 'language_id' => 2 ]);
+        ModelLocalization::create(['name' => 'sk option', 'language_id' => 1]);
+        ModelLocalization::create(['name' => 'en option', 'language_id' => 2]);
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
@@ -44,18 +44,18 @@ class FieldSelectTest extends BrowserTestCase
         $this->createArticleMoviesList();
 
         ArticlesComment::insert([
-            [ 'article_id' => 3, 'name' => 'comment 0' ],
-            [ 'article_id' => 9, 'name' => 'comment 1' ],
-            [ 'article_id' => 9, 'name' => 'comment 2' ],
-            [ 'article_id' => 8, 'name' => 'comment 3' ],
-            [ 'article_id' => 5, 'name' => 'comment 4' ],
+            ['article_id' => 3, 'name' => 'comment 0'],
+            ['article_id' => 9, 'name' => 'comment 1'],
+            ['article_id' => 9, 'name' => 'comment 2'],
+            ['article_id' => 8, 'name' => 'comment 3'],
+            ['article_id' => 5, 'name' => 'comment 4'],
         ]);
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
                     ->assertSelectValues(SelectType::class, 'select_filter_by_id', ['hellboy 8'])
                     ->assertDontSee('my filter by auto-table')
-                    ->fillForm(SelectType::class, [ 'select_filter_by_id' => 'hellboy 8' ])
+                    ->fillForm(SelectType::class, ['select_filter_by_id' => 'hellboy 8'])
                     ->assertSelectValues(SelectType::class, 'comments_id', ['comment 2 9', 'comment 1 9']);
         });
     }
@@ -63,8 +63,8 @@ class FieldSelectTest extends BrowserTestCase
     /** @test */
     public function test_add_row_relation_from_field()
     {
-        ModelLocalization::create([ 'name' => 'sk option', 'language_id' => 1 ]);
-        ModelLocalization::create([ 'name' => 'en option', 'language_id' => 2 ]);
+        ModelLocalization::create(['name' => 'sk option', 'language_id' => 1]);
+        ModelLocalization::create(['name' => 'en option', 'language_id' => 2]);
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
@@ -74,19 +74,19 @@ class FieldSelectTest extends BrowserTestCase
 
                     //Open relation model and create new row
                     ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
-                    ->fillForm(ModelLocalization::class, [ 'name' => 'new sk option value' ], 'sk')->submitForm()
+                    ->fillForm(ModelLocalization::class, ['name' => 'new sk option value'], 'sk')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
                     ->click('.modal-header button.close')->pause(300)
 
                     //Check if new created row is selected in select
                     ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'sk option'])
-                    ->assertHasFormValues(SelectType::class, [ 'langs_id' => 3 ], 'sk')
+                    ->assertHasFormValues(SelectType::class, ['langs_id' => 3], 'sk')
 
                     //On english language change check select options, then add english row and check new item in options
                     ->changeRowLanguage('en')
                     ->assertSelectValues(SelectType::class, 'langs_id', ['en option'])
                     ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
-                    ->fillForm(ModelLocalization::class, [ 'name' => 'new en option value' ], 'en')->submitForm()
+                    ->fillForm(ModelLocalization::class, ['name' => 'new en option value'], 'en')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
                     ->click('.modal-header button.close')->pause(300)
                     ->assertSelectValues(SelectType::class, 'langs_id', ['new en option value', 'en option'])

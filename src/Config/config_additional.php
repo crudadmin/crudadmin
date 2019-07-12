@@ -1,4 +1,5 @@
 <?php
+
 return [
     /*
      * Application namespace
@@ -35,7 +36,7 @@ return [
     /*
      * Addition gettext supported codes which are not includes native in administration ( sk_SK, cs_CZ ... )
      */
-    'gettext_supported_codes' => [ ],
+    'gettext_supported_codes' => [],
 
     /*
      * Permanently delete files after deleted row in db or after overridden uploaded files
@@ -75,14 +76,14 @@ return [
      * /en/route-a, /en/route-b ...
      */
     'routes' => [
-        'routes/web.php'
+        'routes/web.php',
     ],
 
     /*
      * Components directories
      */
     'components' => [
-        'resources/views/admin/components'
+        'resources/views/admin/components',
     ],
 
     /*

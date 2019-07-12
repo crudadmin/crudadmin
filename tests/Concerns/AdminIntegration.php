@@ -2,9 +2,6 @@
 
 namespace Admin\Tests\Concerns;
 
-use Admin\Tests\Concerns\DropDatabase;
-use Admin\Tests\Concerns\DropUploads;
-
 trait AdminIntegration
 {
     /**
@@ -36,7 +33,7 @@ trait AdminIntegration
     }
 
     /**
-     * Return object of class
+     * Return object of class.
      * @param  string/object $model
      * @return object
      */
@@ -50,22 +47,24 @@ trait AdminIntegration
      */
     protected function isAssoc(array $arr)
     {
-        if ([] === $arr)
+        if ([] === $arr) {
             return false;
+        }
 
-        if ( array_keys($arr) !== range(0, count($arr) - 1) )
+        if (array_keys($arr) !== range(0, count($arr) - 1)) {
             return true;
+        }
 
         return false;
     }
 
     /**
      * Parse select/multiselect values/keys to correct format
-     * Sometimes we need just select keys, or select values
+     * Sometimes we need just select keys, or select values.
      * @param  string/object    $model
      * @param  string           $key
      * @param  mixed            $value
-     * @param  boolean            $returnKey
+     * @param  bool            $returnKey
      * @return mixed
      */
     protected function parseSelectValue($model, $key, $value, $returnKey = false)
@@ -74,11 +73,9 @@ trait AdminIntegration
 
         if (
             ($model->isFieldType($key, 'select') || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany']))
-            && !$model->hasFieldParam($key, ['locale'], true)
-        )
-        {
-            if ( is_array($value) && $this->isAssoc($value) )
-            {
+            && ! $model->hasFieldParam($key, ['locale'], true)
+        ) {
+            if (is_array($value) && $this->isAssoc($value)) {
                 $items = $returnKey ? array_keys($value) : array_values($value);
 
                 $value = $model->hasFieldParam($key, ['belongsTo']) ? $items[0] : $items;
@@ -103,7 +100,7 @@ trait AdminIntegration
     }
 
     /**
-     * Merge created row, and updated data, and get result row
+     * Merge created row, and updated data, and get result row.
      * @param  string/object $model
      * @param  array  $row1
      * @param  array  $row2
@@ -115,34 +112,34 @@ trait AdminIntegration
 
         $row1 = $originalRow1;
 
-        foreach ($row2 as $key => $value)
-        {
-            if ( !is_array($row1[$key]) )
+        foreach ($row2 as $key => $value) {
+            if (! is_array($row1[$key])) {
                 $row1[$key] = $value;
-            else {
+            } else {
                 //We ned reset previous value if is select value or single relation type
                 if (
-                    ($model->isFieldType($key, 'select') && !$model->hasFieldParam($key, 'multiple'))
+                    ($model->isFieldType($key, 'select') && ! $model->hasFieldParam($key, 'multiple'))
                     || $model->hasFieldParam($key, ['belongsTo', 'belongsToMany'])
                 ) {
-                    foreach ($row1[$key] as $k => $v)
-                    {
+                    foreach ($row1[$key] as $k => $v) {
                         //If is multiple value, we want remove same previous selected value from list
                         //If is single value, we want remove previous value
-                        if ( !$model->hasFieldParam($key, ['array', 'multiple']) || array_key_exists($k, $row2[$key]) )
+                        if (! $model->hasFieldParam($key, ['array', 'multiple']) || array_key_exists($k, $row2[$key])) {
                             unset($row1[$key][$k]);
+                        }
                     }
                 }
 
                 //If value from second array does not exists in first given array, then push it to array 1
-                foreach ($value as $k => $v)
-                    if ( !in_array($v, $originalRow1[$key]) )
-                    {
-                        if ( $this->isAssoc($value) )
+                foreach ($value as $k => $v) {
+                    if (! in_array($v, $originalRow1[$key])) {
+                        if ($this->isAssoc($value)) {
                             $row1[$key][$k] = $v;
-                        else
+                        } else {
                             $row1[$key][] = $v;
+                        }
                     }
+                }
             }
         }
 

@@ -37,7 +37,7 @@ class FieldsRelation extends AdminModel
                 'relation_multiple1' => 'name:BelongsToMany (simple)|belongsToMany:articles,name|title:with single column|required',
                 'relation_multiple2' => 'name:BelongsToMany (column)|belongsToMany:articles,my option :name :score|title:with builded option by columns|required',
                 'relation_multiple3' => 'name:BelongsToMany (binded data)|belongsToMany:articles,second option :name :score|title:with builded option by columns and given rows|required',
-            ])
+            ]),
         ];
     }
 
@@ -47,7 +47,7 @@ class FieldsRelation extends AdminModel
 
     protected function options()
     {
-        $items = Article::take(3)->get()->map(function($item){
+        $items = Article::take(3)->get()->map(function ($item) {
             $item->score = $item->score * 2;
 
             return $item;
@@ -64,6 +64,5 @@ class FieldsRelation extends AdminModel
      */
     public function mutateFields($fields)
     {
-
     }
 }

@@ -3,17 +3,15 @@
 namespace Admin\Tests\Browser\Tests;
 
 use Admin;
-use Artisan;
-use Carbon\Carbon;
-use Admin\Tests\App\Models\Articles\Article;
-use Admin\Tests\App\Models\Articles\Tag;
-use Admin\Tests\App\Models\Fields\FieldsRelation;
-use Admin\Tests\App\Models\Fields\FieldsType;
-use Admin\Tests\App\Models\Tree\Model3;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Browser\Concerns\SeedTrait;
 use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\App\Models\Tree\Model3;
+use Admin\Tests\App\Models\Articles\Tag;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\Browser\Concerns\SeedTrait;
+use Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\App\Models\Fields\FieldsType;
+use Admin\Tests\App\Models\Fields\FieldsRelation;
 
 class TableRowsTest extends BrowserTestCase
 {
@@ -24,7 +22,7 @@ class TableRowsTest extends BrowserTestCase
     {
         return [
             'id', 'string', 'text', 'select', 'integer', 'decimal', 'file', 'date',
-            'datetime', 'time', 'checkbox', 'radio', 'custom'
+            'datetime', 'time', 'checkbox', 'radio', 'custom',
         ];
     }
 
@@ -62,7 +60,7 @@ class TableRowsTest extends BrowserTestCase
     public function test_small_grid_size()
     {
         //Create 100 articles
-        Model3::create([ 'field1' => 'test value' ]);
+        Model3::create(['field1' => 'test value']);
 
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(Model3::class)
@@ -92,14 +90,15 @@ class TableRowsTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
                     ->press(trans('admin::admin.rows-list'));
 
-                    $hide_columns = ['string', 'text', 'select', 'checkbox'];
+            $hide_columns = ['string', 'text', 'select', 'checkbox'];
 
-                    //Hide columns
-                    foreach ($hide_columns as $column)
-                        $browser->click('*[fields-list] input[data-column="'.$column.'"]');
+            //Hide columns
+            foreach ($hide_columns as $column) {
+                $browser->click('*[fields-list] input[data-column="'.$column.'"]');
+            }
 
-                    //Check if all columns except hidden are available
-                    $browser->assertVisibleColumnsList(FieldsType::class, array_diff($this->getColumnsList(), $hide_columns));
+            //Check if all columns except hidden are available
+            $browser->assertVisibleColumnsList(FieldsType::class, array_diff($this->getColumnsList(), $hide_columns));
         });
     }
 
@@ -118,18 +117,19 @@ class TableRowsTest extends BrowserTestCase
             $browser->openModelPage(FieldsRelation::class)
                     ->press(trans('admin::admin.rows-list'));
 
-                    $show_columns = ['relation1_id', 'relation_multiple1', 'relation_multiple2', 'relation_multiple3'];
+            $show_columns = ['relation1_id', 'relation_multiple1', 'relation_multiple2', 'relation_multiple3'];
 
-                    //Hide columns
-                    foreach ($show_columns as $column)
-                        $browser->click('*[fields-list] input[data-column="'.$column.'"]');
+            //Hide columns
+            foreach ($show_columns as $column) {
+                $browser->click('*[fields-list] input[data-column="'.$column.'"]');
+            }
 
-                    $visible = array_merge(['id', 'relation2_id', 'relation3_id'], $show_columns);
-                    asort($visible);
+            $visible = array_merge(['id', 'relation2_id', 'relation3_id'], $show_columns);
+            asort($visible);
 
-                    //Check if all columns except hidden are available
-                    //then wait 150ms for generating belongsToMany columns, and then test...
-                    $browser->pause(150)
+            //Check if all columns except hidden are available
+            //then wait 150ms for generating belongsToMany columns, and then test...
+            $browser->pause(150)
                             ->assertVisibleColumnsList(FieldsRelation::class, $visible)
                             ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
         });
@@ -138,9 +138,10 @@ class TableRowsTest extends BrowserTestCase
     //Parse data items into table row format
     private function getHiddenColumnsRowData($row)
     {
-        return array_map(function($item){
-            if ( is_array($item) )
+        return array_map(function ($item) {
+            if (is_array($item)) {
                 $item = implode(', ', $item);
+            }
 
             return is_string($item) ? $this->strLimit($item, 20) : $item;
         }, ['id' => 1] + $row);

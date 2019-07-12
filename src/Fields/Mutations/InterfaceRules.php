@@ -2,22 +2,21 @@
 
 namespace Admin\Fields\Mutations;
 
-use Fields;
 use Admin;
+use Fields;
 use Admin\Core\Fields\Mutations\MutationRule;
 
 class InterfaceRules extends MutationRule
 {
     public $attributes = ['inFrontend', 'inBackend', 'inAdmin', 'inConsole'];
 
-    public function update( $field )
+    public function update($field)
     {
-        foreach ($this->attributes as $attribute)
-        {
-            if ( array_key_exists($attribute, $field) )
-            {
-                if ( $this->canRegisterRules($attribute) )
+        foreach ($this->attributes as $attribute) {
+            if (array_key_exists($attribute, $field)) {
+                if ($this->canRegisterRules($attribute)) {
                     $field = $this->registerAttributes($field[$attribute], $field);
+                }
 
                 unset($field[$attribute]);
             }
@@ -31,14 +30,17 @@ class InterfaceRules extends MutationRule
      */
     private function canRegisterRules($type)
     {
-        if ( $type == 'inFrontend' && Admin::isFrontend() )
+        if ($type == 'inFrontend' && Admin::isFrontend()) {
             return true;
+        }
 
-        if ( in_array($type, ['inBackend', 'inAdmin']) && Admin::isAdmin() )
+        if (in_array($type, ['inBackend', 'inAdmin']) && Admin::isAdmin()) {
             return true;
+        }
 
-        if ( $type == 'inConsole' && app()->runningInConsole() )
+        if ($type == 'inConsole' && app()->runningInConsole()) {
             return true;
+        }
 
         return false;
     }
@@ -51,4 +53,3 @@ class InterfaceRules extends MutationRule
         return $field + Fields::mutate(FieldToArray::class, $rules);
     }
 }
-?>

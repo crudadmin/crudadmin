@@ -2,11 +2,11 @@
 
 namespace Admin\Tests\Browser\Tests;
 
-use Admin\Tests\App\Models\Articles\Article;
-use Admin\Tests\App\Models\Articles\ArticlesComment;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
 use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\App\Models\Articles\Article;
+use Admin\Tests\App\Models\Articles\ArticlesComment;
 
 class ModelRelationsTest extends BrowserTestCase
 {
@@ -20,10 +20,10 @@ class ModelRelationsTest extends BrowserTestCase
         //Create articles
         factory(Article::class, 5)->create();
         ArticlesComment::insert([
-            [ 'article_id' => 1, 'name' => 'comment 1' ],
-            [ 'article_id' => 1, 'name' => 'comment 2' ],
-            [ 'article_id' => 1, 'name' => 'comment 3' ],
-            [ 'article_id' => 2, 'name' => 'comment 1 of article 2' ],
+            ['article_id' => 1, 'name' => 'comment 1'],
+            ['article_id' => 1, 'name' => 'comment 2'],
+            ['article_id' => 1, 'name' => 'comment 3'],
+            ['article_id' => 2, 'name' => 'comment 1 of article 2'],
         ]);
 
         $this->browse(function (DuskBrowser $browser) {
@@ -38,7 +38,7 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertColumnRowData(ArticlesComment::class, 'id', [3, 2, 1])->pause(300)
 
                     //Fill form and save new related row.
-                    ->fillForm(ArticlesComment::class, [ 'name' => 'new related comment' ])
+                    ->fillForm(ArticlesComment::class, ['name' => 'new related comment'])
                     ->submitForm()->closeAlert()
 
                     //Check if new row has been given into table
@@ -48,7 +48,7 @@ class ModelRelationsTest extends BrowserTestCase
                     //Open created related row, and test recursivity support
                     ->openRow(5, ArticlesComment::class)
                     ->click('[tab-model="articles_comments"] [data-tabs][data-model="articles_comments"]')
-                    ->fillForm(ArticlesComment::class, [ 'name' => 'new recursive comment' ], null, '[data-depth="2"]')
+                    ->fillForm(ArticlesComment::class, ['name' => 'new recursive comment'], null, '[data-depth="2"]')
                     ->submitForm()->closeAlert()
                     ->assertSeeIn('[data-tabs][data-depth="0"][data-model="articles_comments"]', 'Comments (4)')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [5, 3, 2, 1], true, '[data-depth="1"]')
@@ -60,7 +60,7 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (1)')
                     ->click('[data-tabs][data-model="articles_comments"]')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [4])
-                    ->fillForm(ArticlesComment::class, [ 'name' => 'my second new related comment' ])
+                    ->fillForm(ArticlesComment::class, ['name' => 'my second new related comment'])
                     ->submitForm()->closeAlert()
 
                     //Assert if another relation has no related data
@@ -69,13 +69,13 @@ class ModelRelationsTest extends BrowserTestCase
 
             //Check if all data are correct
             $this->assertEquals([
-                [ "id" => 7, "article_id" => 2, "articles_comment_id" => null, "name" => "my second new related comment"],
-                [ "id" => 6, "article_id" => null, "articles_comment_id" => 5, "name" => "new recursive comment"],
-                [ "id" => 5, "article_id" => 1, "articles_comment_id" => null, "name" => "new related comment"],
-                [ "id" => 4, "article_id" => 2, "articles_comment_id" => null, "name" => "comment 1 of article 2"],
-                [ "id" => 3, "article_id" => 1, "articles_comment_id" => null, "name" => "comment 3"],
-                [ "id" => 2, "article_id" => 1, "articles_comment_id" => null, "name" => "comment 2"],
-                [ "id" => 1, "article_id" => 1, "articles_comment_id" => null, "name" => "comment 1"]
+                ['id' => 7, 'article_id' => 2, 'articles_comment_id' => null, 'name' => 'my second new related comment'],
+                ['id' => 6, 'article_id' => null, 'articles_comment_id' => 5, 'name' => 'new recursive comment'],
+                ['id' => 5, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'new related comment'],
+                ['id' => 4, 'article_id' => 2, 'articles_comment_id' => null, 'name' => 'comment 1 of article 2'],
+                ['id' => 3, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'comment 3'],
+                ['id' => 2, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'comment 2'],
+                ['id' => 1, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'comment 1'],
             ], ArticlesComment::select(['id', 'article_id', 'articles_comment_id', 'name'])->get()->toArray());
         });
     }

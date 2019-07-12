@@ -5,10 +5,10 @@ namespace Admin\Tests\Browser\Tests;
 use Gettext;
 use Gettext\Translations;
 use Admin\Models\Language;
-use Admin\Tests\Browser\BrowserTestCase;
+use Gettext\Generators\PhpArray;
 use Admin\Tests\Browser\DuskBrowser;
 use Admin\Tests\Concerns\DropDatabase;
-use Gettext\Generators\PhpArray;
+use Admin\Tests\Browser\BrowserTestCase;
 
 class ModelGettextTest extends BrowserTestCase
 {
@@ -36,9 +36,9 @@ class ModelGettextTest extends BrowserTestCase
     public function test_gettext_editor_and_text_on_page()
     {
         $excepted = [
-            "%d car" => [ "my %d yellow car", "my %d red cars" ],
-            "Translate 2" => [ "translated text" ],
-            "title meta" => [ "updated meta" ]
+            '%d car' => ['my %d yellow car', 'my %d red cars'],
+            'Translate 2' => ['translated text'],
+            'title meta' => ['updated meta'],
         ];
 
         $this->browse(function (DuskBrowser $browser) use ($excepted) {

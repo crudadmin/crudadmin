@@ -2,10 +2,10 @@
 
 namespace Admin\Commands;
 
+use Admin;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
-use Admin;
 
 class AdminComponentCommand extends GeneratorCommand
 {
@@ -31,7 +31,7 @@ class AdminComponentCommand extends GeneratorCommand
     protected $type = 'Field component';
 
     /**
-     * Template type
+     * Template type.
      * @var form-field/layout
      */
     protected $template_type = null;
@@ -56,10 +56,11 @@ class AdminComponentCommand extends GeneratorCommand
         $this->template_type = $this->choice('What type of component would you like?', ['form field', 'layout', 'button'], 0);
 
         //Laravel 5.4 support
-        if ( method_exists($this, 'fire') )
+        if (method_exists($this, 'fire')) {
             parent::fire();
-        else
+        } else {
             parent::handle();
+        }
     }
 
     /**
@@ -69,12 +70,13 @@ class AdminComponentCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        if ( $this->template_type == 'form field' )
+        if ($this->template_type == 'form field') {
             $stub = 'Component';
-        elseif ( $this->template_type == 'layout' )
+        } elseif ($this->template_type == 'layout') {
             $stub = 'LayoutVueJs';
-        elseif ( $this->template_type == 'button' )
+        } elseif ($this->template_type == 'button') {
             $stub = 'ButtonVuejsLayout';
+        }
 
         return __DIR__.'/../Stubs/'.$stub.'.stub';
     }
@@ -84,12 +86,13 @@ class AdminComponentCommand extends GeneratorCommand
      */
     protected function getDirType()
     {
-        if ( $this->template_type == 'form field' )
+        if ($this->template_type == 'form field') {
             return 'fields';
-        elseif ( $this->template_type == 'layout' )
+        } elseif ($this->template_type == 'layout') {
             return 'layouts';
-        elseif ( $this->template_type == 'button' )
+        } elseif ($this->template_type == 'button') {
             return 'buttons';
+        }
 
         return '';
     }
@@ -116,6 +119,6 @@ class AdminComponentCommand extends GeneratorCommand
 
         $type = $this->getDirType();
 
-        return resource_path('views/admin/components/' . $type . '/' . str_replace('\\', '/', $name) . '.vue');
+        return resource_path('views/admin/components/'.$type.'/'.str_replace('\\', '/', $name).'.vue');
     }
 }

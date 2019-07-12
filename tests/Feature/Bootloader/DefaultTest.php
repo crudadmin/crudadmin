@@ -3,8 +3,6 @@
 namespace Admin\Tests\Feature\Model;
 
 use Admin\Facades\Admin;
-use Admin\Eloquent\AdminModel;
-use Admin\Tests\App\OtherModels\Blog;
 use Admin\Tests\TestCase;
 
 class DefaultTest extends TestCase

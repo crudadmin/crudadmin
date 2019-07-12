@@ -29,9 +29,8 @@ class SimpleMultipleButton extends Button
      */
     public function fireMultiple(Collection $rows)
     {
-        foreach ($rows as $row)
-        {
-            $row->update([ 'field3' => 6 ]);
+        foreach ($rows as $row) {
+            $row->update(['field3' => 6]);
         }
 
         return $this->message('Your multiple action is done!');

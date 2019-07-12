@@ -2,12 +2,12 @@
 
 namespace Admin\Tests\Browser\Tests;
 
+use Admin\Tests\Browser\DuskBrowser;
+use Admin\Tests\Concerns\DropUploads;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\App\Models\Locales\ModelLocale;
 use Admin\Tests\App\Models\Locales\ModelLocalization;
-use Admin\Tests\Browser\BrowserTestCase;
-use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Concerns\DropDatabase;
-use Admin\Tests\Concerns\DropUploads;
 
 class ModelLocalizationTest extends BrowserTestCase
 {
@@ -24,25 +24,25 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->fillForm(ModelLocalization::class, [
                         'name' => 'sk name',
                     ])->submitForm()->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
-                    ->assertColumnRowData(ModelLocalization::class, 'name', [ 'sk name' ])
+                    ->assertColumnRowData(ModelLocalization::class, 'name', ['sk name'])
 
                     //Change into english language and check if table is empty
                     ->valueWithEvent('[data-global-language-switch]', 2, 'change')->pause(100);
-                    $this->assertEquals([], $browser->getRows(ModelLocalization::class));
+            $this->assertEquals([], $browser->getRows(ModelLocalization::class));
 
             //Add two rows into english language and check correct values
             $browser->fillForm(ModelLocalization::class, [
                         'name' => 'en name',
                     ])->submitForm()->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
-                    ->assertColumnRowData(ModelLocalization::class, 'name', [ 'en name' ])
+                    ->assertColumnRowData(ModelLocalization::class, 'name', ['en name'])
                     ->fillForm(ModelLocalization::class, [
                         'name' => 'en name second',
                     ])->submitForm()->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
-                    ->assertColumnRowData(ModelLocalization::class, 'name', [ 'en name second', 'en name' ]);
+                    ->assertColumnRowData(ModelLocalization::class, 'name', ['en name second', 'en name']);
 
             //Change back to slovak language, and check correct rows
             $browser->valueWithEvent('[data-global-language-switch]', 1, 'change')->pause(100)
-                    ->assertColumnRowData(ModelLocalization::class, 'name', [ 'sk name' ]);
+                    ->assertColumnRowData(ModelLocalization::class, 'name', ['sk name']);
         });
     }
 
@@ -116,8 +116,7 @@ class ModelLocalizationTest extends BrowserTestCase
     {
         $data = [];
 
-        foreach ($row_sk as $key => $value)
-        {
+        foreach ($row_sk as $key => $value) {
             $data[$key]['sk'] = $value;
             $data[$key]['en'] = $row_en[$key];
         }
@@ -175,8 +174,9 @@ class ModelLocalizationTest extends BrowserTestCase
         unset($row['editor']);
 
         //Limit text with dots
-        foreach ($row as $key => $value)
+        foreach ($row as $key => $value) {
             $row[$key] = str_limit($value, 20);
+        }
 
         $row['file'] = trans('admin::admin.show-image');
 

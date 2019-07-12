@@ -3,11 +3,11 @@
 namespace Admin\Tests\Browser\Tests;
 
 use Admin\Models\ModelsHistory;
-use Admin\Tests\App\Models\History\History;
-use Admin\Tests\Browser\BrowserTestCase;
 use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\Concerns\DropUploads;
+use Admin\Tests\Concerns\DropDatabase;
+use Admin\Tests\Browser\BrowserTestCase;
+use Admin\Tests\App\Models\History\History;
 
 class ModelHistoryTest extends BrowserTestCase
 {
@@ -136,10 +136,8 @@ class ModelHistoryTest extends BrowserTestCase
     {
         $data = [];
 
-        foreach ($row1 as $key => $value)
-        {
-            if ( (new History)->hasFieldParam($key, 'locale', true) )
-            {
+        foreach ($row1 as $key => $value) {
+            if ((new History)->hasFieldParam($key, 'locale', true)) {
                 $data[$key][$langs[1]] = $row2[$key];
                 $data[$key][$langs[0]] = $value;
             } else {

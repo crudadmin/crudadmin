@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert as PHPUnit;
 trait FeatureAssertions
 {
     /**
-     * Parse given data into database format
+     * Parse given data into database format.
      * @param  string/object $model
      * @param  array  $data
      * @param  string  $locale
@@ -19,18 +19,16 @@ trait FeatureAssertions
     {
         $model = $this->getModelClass($model);
 
-        foreach ($data as $key => $value)
-        {
+        foreach ($data as $key => $value) {
             //Data from belongs to many column are not stored in actual table
-            if ( $model->hasFieldParam($key, ['belongsToMany']) ){
+            if ($model->hasFieldParam($key, ['belongsToMany'])) {
                 unset($data[$key]);
                 continue;
             }
 
             //Update checkbox values
-            if ( $model->isFieldType($key, 'checkbox') ) {
-                if ( $model->hasFieldParam($key, ['locale'], true) )
-                {
+            if ($model->isFieldType($key, 'checkbox')) {
+                if ($model->hasFieldParam($key, ['locale'], true)) {
                     foreach (array_wrap($data[$key]) as $k => $v) {
                         $data[$key][$k] = $v === true ? 1 : 0;
                     }
@@ -40,13 +38,10 @@ trait FeatureAssertions
             }
 
             //Update filled date format into date format from db
-            if ( $model->isFieldType($key, 'date') && ! $model->hasFieldParam($key, ['locale'], true) )
-            {
+            if ($model->isFieldType($key, 'date') && ! $model->hasFieldParam($key, ['locale'], true)) {
                 //Update multiple date field
-                if ( $model->hasFieldParam($key, 'multiple') )
-                {
-                    foreach ($value as $k => $date)
-                    {
+                if ($model->hasFieldParam($key, 'multiple')) {
+                    foreach ($value as $k => $date) {
                         $data[$key][$k] = Carbon::createFromFormat('d.m.Y', $date)->format($model->getFieldParam($key, 'date_format'));
                     }
                 }
@@ -58,14 +53,12 @@ trait FeatureAssertions
             }
 
             //Update filled datetime format into date format from db
-            if ( $model->isFieldType($key, 'datetime') && ! $model->hasFieldParam($key, ['locale'], true) )
-            {
+            if ($model->isFieldType($key, 'datetime') && ! $model->hasFieldParam($key, ['locale'], true)) {
                 $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('Y-m-d H:i:s') : null;
             }
 
             //Update filled time format into date format from db
-            if ( $model->isFieldType($key, 'time') && ! $model->hasFieldParam($key, ['multiple', 'locale'], true) )
-            {
+            if ($model->isFieldType($key, 'time') && ! $model->hasFieldParam($key, ['multiple', 'locale'], true)) {
                 $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('H:i:s') : null;
             }
 
@@ -73,9 +66,8 @@ trait FeatureAssertions
             $data[$key] = $this->parseSelectValue($model, $key, $data[$key], true);
 
             //Set value as locale value
-            if ( $model->hasFieldParam($key, 'locale', true) && $locale )
-            {
-                $data[$key] = [ $locale => $data[$key] ];
+            if ($model->hasFieldParam($key, 'locale', true) && $locale) {
+                $data[$key] = [$locale => $data[$key]];
             }
         }
 
@@ -83,7 +75,7 @@ trait FeatureAssertions
     }
 
     /**
-     * Parse given data into relationship fields format
+     * Parse given data into relationship fields format.
      * @param  string/object $model
      * @param  array  $data
      * @return array
@@ -92,11 +84,9 @@ trait FeatureAssertions
     {
         $model = $this->getModelClass($model);
 
-        foreach ($data as $key => $value)
-        {
+        foreach ($data as $key => $value) {
             //Allow just columns with belongsToMany field type
-            if ( !$model->hasFieldParam($key, ['belongsToMany']) )
-            {
+            if (! $model->hasFieldParam($key, ['belongsToMany'])) {
                 unset($data[$key]);
                 continue;
             }
@@ -109,7 +99,7 @@ trait FeatureAssertions
     }
 
     /**
-     * Fields belongsToMany values into db for given model
+     * Fields belongsToMany values into db for given model.
      * @param  string/class $model
      * @param  array $data
      * @return void
@@ -120,22 +110,20 @@ trait FeatureAssertions
 
         $data = $this->buildRelationData($model, $data);
 
-        foreach ($data as $fieldKey => $values)
-        {
-            foreach ($values as $value)
-            {
+        foreach ($data as $fieldKey => $values) {
+            foreach ($values as $value) {
                 $properties = $model->getRelationProperty($fieldKey, 'belongsToMany');
 
                 DB::table($properties[3])->insert([
                     $properties[6] => 1,
-                    $properties[7] => $value
+                    $properties[7] => $value,
                 ]);
             }
         }
     }
 
     /**
-     * Sort locale keys by asc
+     * Sort locale keys by asc.
      * @param  string/object $model
      * @param  arrat $data
      * @return array
@@ -144,20 +132,20 @@ trait FeatureAssertions
     {
         $model = $this->getModelClass($model);
 
-        foreach ($data as $key => $value)
-        {
-            if ( $model->hasFieldParam($key, 'locale', true) )
+        foreach ($data as $key => $value) {
+            if ($model->hasFieldParam($key, 'locale', true)) {
                 ksort($data[$key]);
+            }
         }
 
         return $data;
     }
 
     /**
-     * Check if row exists
+     * Check if row exists.
      * @param  string/object $model
      * @param  array  $data
-     * @param  integer  $id
+     * @param  int  $id
      * @return void
      */
     public function assertRowExists($model, $originalData = [], $id = null)
@@ -181,10 +169,10 @@ trait FeatureAssertions
     }
 
     /**
-     * Check given data represented as field relationships exists in actual row
+     * Check given data represented as field relationships exists in actual row.
      * @param  string/object $model
      * @param  array  $data
-     * @param  integer  $id
+     * @param  int  $id
      * @return void
      */
     public function assertRowRelationsExists($model, $data = [], $id = null)
@@ -195,8 +183,7 @@ trait FeatureAssertions
 
         $actual = [];
 
-        foreach ($expected as $key => $value)
-        {
+        foreach ($expected as $key => $value) {
             $properties = $model->getRelationProperty($key, 'belongsToMany');
 
             $actual[$key] = DB::table($properties[3])->where($properties[6], $id)->get()->pluck($properties[7])->toArray();

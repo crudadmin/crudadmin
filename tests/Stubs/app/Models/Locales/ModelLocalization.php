@@ -3,7 +3,6 @@
 namespace Admin\Tests\App\Models\Locales;
 
 use Admin\Eloquent\AdminModel;
-use Admin\Fields\Group;
 
 class ModelLocalization extends AdminModel
 {

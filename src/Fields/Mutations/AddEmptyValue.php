@@ -8,11 +8,10 @@ class AddEmptyValue extends MutationRule
 {
     public $attributes = 'value';
 
-    public function update( $field )
+    public function update($field)
     {
         $field['value'] = null;
 
         return $field;
     }
 }
-?>

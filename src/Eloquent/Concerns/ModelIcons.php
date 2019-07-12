@@ -84,24 +84,24 @@ trait ModelIcons
         ];
     }
 
-
     /*
      * Automatically returns model icon
      */
     public function getModelIcon()
     {
-        if ( $this->icon )
+        if ($this->icon) {
             return $this->icon;
+        }
 
         $icons = $this->getIconList();
 
         //If is not disabled automatic icons
-        if ( config('admin.icons', true) !== false )
-        {
+        if (config('admin.icons', true) !== false) {
             $name = Str::singular(last(explode('_', $this->getTable())));
 
-            if ( array_key_exists($name, $icons) )
+            if (array_key_exists($name, $icons)) {
                 return $icons[$name];
+            }
         }
 
         return 'fa-link';

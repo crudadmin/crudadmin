@@ -1,10 +1,11 @@
 <?php
+
 namespace Admin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class ImageCompressorServiceProvider extends ServiceProvider {
-
+class ImageCompressorServiceProvider extends ServiceProvider
+{
     /**
      * Register the service provider.
      *

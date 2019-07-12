@@ -3,9 +3,9 @@
 namespace Admin\Tests\Feature\Model;
 
 use Admin\Facades\Admin;
+use Admin\Tests\TestCase;
 use Admin\Eloquent\AdminModel;
 use Admin\Tests\App\OtherModels\Blog;
-use Admin\Tests\TestCase;
 
 class MethodTest extends TestCase
 {
@@ -33,7 +33,6 @@ class MethodTest extends TestCase
     {
         $this->assertTrue(Admin::isAdminModel(new Blog));
     }
-
 
     /** @test */
     public function check_if_has_admin_model()

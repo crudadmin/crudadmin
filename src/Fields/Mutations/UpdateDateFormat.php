@@ -8,10 +8,9 @@ class UpdateDateFormat extends MutationRule
 {
     public $attributes = ['format', 'date_step'];
 
-    public function update( $field )
+    public function update($field)
     {
-        if ( array_key_exists('format', $field) )
-        {
+        if (array_key_exists('format', $field)) {
             $field['date_format'] = $field['format'];
             unset($field['format']);
         }
@@ -20,11 +19,10 @@ class UpdateDateFormat extends MutationRule
             in_array($field['type'], ['date', 'datetime', 'time'])
             && array_key_exists('multiple', $field)
             && $field['multiple'] === true
-        )
-        {
-            if ( $field['type'] == 'date' ){
+        ) {
+            if ($field['type'] == 'date') {
                 $field['date_format'] = 'Y-m-d';
-            } else if ( $field['type'] == 'time' ) {
+            } elseif ($field['type'] == 'time') {
                 $field['date_format'] = 'H:i';
             } else {
                 unset($field['multiple']);
@@ -34,4 +32,3 @@ class UpdateDateFormat extends MutationRule
         return $field;
     }
 }
-?>

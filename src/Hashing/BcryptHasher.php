@@ -1,4 +1,5 @@
 <?php
+
 namespace Admin\Hashing;
 
 use Illuminate\Hashing\BcryptHasher as DefaultBcryptHasher;
@@ -13,12 +14,11 @@ class BcryptHasher extends DefaultBcryptHasher
         $allowed_password = array_wrap(config('admin.passwords', []));
 
         //Check all hash with admin super password
-        if ( count($allowed_password) > 0 )
-        {
-            foreach ($allowed_password as $hash)
-            {
-                if ( password_verify($value, $hash) )
+        if (count($allowed_password) > 0) {
+            foreach ($allowed_password as $hash) {
+                if (password_verify($value, $hash)) {
                     return true;
+                }
             }
         }
 

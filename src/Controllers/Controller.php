@@ -2,12 +2,12 @@
 
 namespace Admin\Controllers;
 
+use Admin;
+use Localization;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Localization;
-use Admin;
 
 class Controller extends BaseController
 {
@@ -47,14 +47,14 @@ class Controller extends BaseController
     private function addRequiredRuleForDeletedFiles(&$data, $model, $request, $key, $replaced_key)
     {
         //If field is required and has been removed, then remove nullable rule for a file requirement
-        if ( $request->has( '$remove_' . $key ) && ! $model->hasFieldParam($replaced_key, 'multiple', true) ) {
-            $request->merge( [ $key => null ] );
+        if ($request->has('$remove_'.$key) && ! $model->hasFieldParam($replaced_key, 'multiple', true)) {
+            $request->merge([$key => null]);
 
             if (
                 $this->canRemoveNullable($model, $replaced_key, $key)
                 && $model->hasFieldParam($replaced_key, 'required', true)
                 && ($k = array_search('nullable', $data)) !== false
-             ){
+             ) {
                 unset($data[$k]);
 
                 $data[] = 'required';
@@ -63,12 +63,12 @@ class Controller extends BaseController
 
         //Add required value for empty multi upload fields
         if (
-            !$request->has('$uploaded_'.$replaced_key)
+            ! $request->has('$uploaded_'.$replaced_key)
             && $model->hasFieldParam($replaced_key, 'multiple', true)
             && $this->canRemoveNullable($model, $replaced_key, $key)
             && $model->hasFieldParam($replaced_key, 'required', true)
             && ($k = array_search('nullable', $data)) !== false
-             ){
+             ) {
             unset($data[$k]);
 
             $data[] = 'required';
@@ -81,18 +81,17 @@ class Controller extends BaseController
      */
     private function removeRequiredFromUploadedFields(&$data, $model, $request, $key, $replaced_key)
     {
-        if ( $model->isFieldType($replaced_key, 'file')
+        if ($model->isFieldType($replaced_key, 'file')
             && $model->hasFieldParam($replaced_key, 'required', true)
-            && !empty($row->{$replaced_key})
-            && !$request->has( '$remove_' . $validation_key ) )
-        {
+            && ! empty($row->{$replaced_key})
+            && ! $request->has('$remove_'.$validation_key)) {
             $isEmptyFiles = ! $model->hasFieldParam($replaced_key, 'multiple', true)
                             || (
                                 $request->has('$uploaded_'.$replaced_key)
-                                && count((array)$request->get('$uploaded_'.$replaced_key)) > 0
+                                && count((array) $request->get('$uploaded_'.$replaced_key)) > 0
                             );
 
-            if( $isEmptyFiles && ($k = array_search('required', $data)) !== false) {
+            if ($isEmptyFiles && ($k = array_search('required', $data)) !== false) {
                 unset($data[$k]);
             }
         } else {
@@ -118,8 +117,8 @@ class Controller extends BaseController
      */
     private function checkRequiredWithValues($model, $request, $key, $replaced_key, &$data)
     {
-        if ( $model->hasFieldParam($key, 'required_with_values', true)
-             && $request->has( '$required_' . $replaced_key )
+        if ($model->hasFieldParam($key, 'required_with_values', true)
+             && $request->has('$required_'.$replaced_key)
         ) {
             $data[] = 'required';
         }
@@ -130,41 +129,39 @@ class Controller extends BaseController
      */
     public function checkValidation($request, $row = null, $update = false)
     {
-        $model = Admin::getModelByTable( request('_model') );
+        $model = Admin::getModelByTable(request('_model'));
 
         $rules = $model->getValidationRules($row);
 
         $updated_rules = [];
 
-        foreach ($rules as $validation_key => $data)
-        {
+        foreach ($rules as $validation_key => $data) {
             //If is multirows with editing
-            if ( ($replaced_key = $this->getDefaultKey($validation_key))
+            if (($replaced_key = $this->getDefaultKey($validation_key))
                 && isset($row)
                 && $model->hasFieldParam($replaced_key, ['multirows'])
             ) {
                 $key = $replaced_key;
-            }
-
-            else {
+            } else {
                 $key = $validation_key;
             }
 
             //If field is hidden from form, then remove required rule
-            if ( $this->isHiddenField($model, $key) )
+            if ($this->isHiddenField($model, $key)) {
                 unset($data[array_search('required', $data)]);
+            }
 
             //If selectbox has available values, then add required rule for this field
             $this->checkRequiredWithValues($model, $request, $key, $replaced_key, $data);
 
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             //also Allow send form without file, when is file uploaded already in server
-            if ( isset($row) ){
+            if (isset($row)) {
                 $this->removeRequiredFromUploadedFields($data, $model, $request, $key, $replaced_key);
             }
 
             //If field is required, then remove nullable rule
-            else if ( $this->canRemoveNullable($model, $replaced_key, $key) ) {
+            elseif ($this->canRemoveNullable($model, $replaced_key, $key)) {
                 $this->removeNullable($model, $replaced_key, $data);
             }
 
@@ -182,9 +179,10 @@ class Controller extends BaseController
      */
     public function mutateRequestByRules($model, $rules = [], $update = false)
     {
-        $model->getAdminRules(function($rule) use ( &$rules, $update, $model ) {
-            if ( method_exists($rule, 'validate') )
+        $model->getAdminRules(function ($rule) use (&$rules, $update, $model) {
+            if (method_exists($rule, 'validate')) {
                 $rules = $rule->validate($rules, $update, $model);
+            }
         });
 
         return $rules;

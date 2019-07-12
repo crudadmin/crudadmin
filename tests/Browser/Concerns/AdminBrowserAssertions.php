@@ -8,10 +8,10 @@ use PHPUnit\Framework\Assert as PHPUnit;
 trait AdminBrowserAssertions
 {
     /**
-     * Check row exists in table rows
+     * Check row exists in table rows.
      * @param  class $model
      * @param  array $array
-     * @param  integer  $id
+     * @param  int  $id
      * @return object
      */
     public function assertTableRowExists($model, $row = [], $id = null)
@@ -19,25 +19,27 @@ trait AdminBrowserAssertions
         $model = $this->getModelClass($model);
 
         //Mutate given rows data
-        foreach ($row as $key => $value)
-        {
+        foreach ($row as $key => $value) {
             //Update checkbox values
-            if ( $model->isFieldType($key, ['checkbox']) )
+            if ($model->isFieldType($key, ['checkbox'])) {
                 $row[$key] = $value ? trans('admin::admin.yes') : trans('admin::admin.no');
+            }
 
             //Get field select values
             $row[$key] = $this->parseSelectValue($model, $key, $row[$key]);
 
             //Everything need to be string
-            if ( is_array($row[$key]) )
+            if (is_array($row[$key])) {
                 $row[$key] = implode(', ', $row[$key]);
-            else if ( is_numeric($row[$key]) )
-                $row[$key] = (string)$row[$key];
+            } elseif (is_numeric($row[$key])) {
+                $row[$key] = (string) $row[$key];
+            }
         }
 
         //Get id from row, if is not given
-        if ( ! $id )
+        if (! $id) {
             $id = $row['id'];
+        }
 
         $actual = $this->getRows($model)[$id];
 
@@ -47,9 +49,8 @@ trait AdminBrowserAssertions
         return $this;
     }
 
-
     /**
-     * Check row data are sorted in specific order
+     * Check row data are sorted in specific order.
      * @param  class $model
      * @param  string $column
      * @param  string  $type
@@ -61,24 +62,24 @@ trait AdminBrowserAssertions
 
         $rows = $this->getRows($model);
 
-        $actual = array_map(function($item) use ($column) {
+        $actual = array_map(function ($item) use ($column) {
             return $item[$column];
         }, $rows);
 
         $excepted = $actual;
 
         //Sort date values by given type
-        if ( $model->isFieldType($column, ['date', 'datetime']) )
-        {
+        if ($model->isFieldType($column, ['date', 'datetime'])) {
             $this->sortDateTimes($excepted, $type == 'asc');
         }
 
         //Sort texts and numbers by given type
         else {
-            if ( $type == 'desc' )
+            if ($type == 'desc') {
                 arsort($excepted);
-            else
+            } else {
                 asort($excepted);
+            }
         }
 
         PHPUnit::assertEquals($actual, $excepted, 'Sorting columns for column ['.$column.'] does not work in ['.$type.'] order.');
@@ -87,14 +88,14 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Sort date and datetimes
+     * Sort date and datetimes.
      * @param  array   $dates
-     * @param  boolean $asc
+     * @param  bool $asc
      * @return array
      */
     private function sortDateTimes($dates = [], $asc = true)
     {
-        return usort($dates, function($a, $b) use ($asc) {
+        return usort($dates, function ($a, $b) use ($asc) {
             $a = explode(' ', $a);
             $b = explode(' ', $b);
 
@@ -114,7 +115,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if form has filled form values
+     * Check if form has filled form values.
      * @param  class $model
      * @param  array  $array
      * @param  string  $locale
@@ -124,17 +125,15 @@ trait AdminBrowserAssertions
     {
         $model = $this->getModelClass($model);
 
-        foreach ($array as $key => $value)
-        {
+        foreach ($array as $key => $value) {
             //Editor and file are not binding row values for now
-            if ( $model->isFieldType($key, ['editor', 'file']) )
+            if ($model->isFieldType($key, ['editor', 'file'])) {
                 continue;
+            }
 
             //Update date multiple values
-            if ( $model->isFieldType($key, 'date') && $model->hasFieldParam($key, 'multiple') )
-            {
-                foreach ($value as $k => $date)
-                {
+            if ($model->isFieldType($key, 'date') && $model->hasFieldParam($key, 'multiple')) {
+                foreach ($value as $k => $date) {
                     $value[$k] = Carbon::createFromFormat('d.m.Y', $date)->format($model->getFieldParam($key, 'date_format'));
                 }
             }
@@ -152,7 +151,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if form is empty and has no values
+     * Check if form is empty and has no values.
      * @param  class  $model
      * @param  string $locale
      * @return object
@@ -161,8 +160,7 @@ trait AdminBrowserAssertions
     {
         $model = $this->getModelClass($model);
 
-        foreach ($model->getFields() as $key => $value)
-        {
+        foreach ($model->getFields() as $key => $value) {
             //Check if input has empty value
             $this->assertEmptyValue($model, $key, $locale);
         }
@@ -171,7 +169,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if given input in model is empty
+     * Check if given input in model is empty.
      * @param  class $model
      * @param  string  $key
      * @param  string  $locale
@@ -201,14 +199,14 @@ trait AdminBrowserAssertions
         $value = $this->vueAttribute('@model-builder', $valueKey = 'model.fields.'.$key.'.value');
 
         //Check vuejs row value
-        if ( $locale && is_array($row) ) {
+        if ($locale && is_array($row)) {
             $this->assertVue($rowKey.'.'.$locale, null, '@model-builder');
         } else {
             $this->assertVue($rowKey, null, '@model-builder');
         }
 
         //Check vuejs field value
-        if ( $locale && is_array($value) ) {
+        if ($locale && is_array($value)) {
             $this->assertVue($valueKey.'.'.$locale, null, '@model-builder');
         } else {
             $this->assertVue($valueKey, null, '@model-builder');
@@ -217,9 +215,8 @@ trait AdminBrowserAssertions
         return $this;
     }
 
-
     /**
-     * Check if element has class
+     * Check if element has class.
      * @param  class $element
      * @param  array  $class
      * @return object
@@ -230,8 +227,9 @@ trait AdminBrowserAssertions
 
         //If value is empty, we want check if attribute is equal to empty string
         //if query value is empty string, this means that attribute is available
-        if ( $value === null )
+        if ($value === null) {
             $value = '';
+        }
 
         PHPUnit::assertSame(
             $query, $value,
@@ -242,7 +240,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if element does not have class
+     * Check if element does not have class.
      * @param  class $element
      * @param  string  $attribute
      * @param  string  $value
@@ -255,7 +253,7 @@ trait AdminBrowserAssertions
         //If we want check if attribute does not exists
         //then we need check query value, if value is empty string, this means that atribute is available
         //in this case we need change query to null, for passing test
-        $query = $value === null ? ($query === "" ? null : "") : $query;
+        $query = $value === null ? ($query === '' ? null : '') : $query;
 
         PHPUnit::assertNotSame(
             $query, $value,
@@ -266,7 +264,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if element has class
+     * Check if element has class.
      * @param  class $element
      * @param  array  $class
      * @return object
@@ -275,7 +273,7 @@ trait AdminBrowserAssertions
     {
         $query = $this->script('return $(\''.$element.'\').eq(0).attr("class")');
 
-        $classes = count($query) > 0 ? explode(' ', (string)$query[0]) : [];
+        $classes = count($query) > 0 ? explode(' ', (string) $query[0]) : [];
 
         PHPUnit::assertContains(
             $class, $classes,
@@ -286,7 +284,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if element does not have class
+     * Check if element does not have class.
      * @param  class $element
      * @param  array  $class
      * @return object
@@ -295,7 +293,7 @@ trait AdminBrowserAssertions
     {
         $query = $this->script('return $(\''.$element.'\').eq(0).attr("class")');
 
-        $classes = count($query) > 0 ? explode(' ', (string)$query[0]) : [];
+        $classes = count($query) > 0 ? explode(' ', (string) $query[0]) : [];
 
         PHPUnit::assertNotContains(
             $class, $classes,
@@ -306,7 +304,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if given field is visible in columns list
+     * Check if given field is visible in columns list.
      * @param  class $model
      * @param  array  $array
      * @return object
@@ -320,7 +318,7 @@ trait AdminBrowserAssertions
         })");
 
         PHPUnit::assertEquals(
-            $columns[0], array_map(function($item){
+            $columns[0], array_map(function ($item) {
                 return 'th-'.$item;
             }, array_values(array_merge($excepted, ['options-buttons']))),
             'Table ['.$model->getTable().'] does not match excepted columns list'
@@ -330,11 +328,11 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if values of all rows from one field in specific column contains of given data
+     * Check if values of all rows from one field in specific column contains of given data.
      * @param  class $model
      * @param  string $column
      * @param  array $excepted
-     * @param  boolean $equals
+     * @param  bool $equals
      * @param  string $wrapper
      * @return object
      */
@@ -350,17 +348,17 @@ trait AdminBrowserAssertions
 
         PHPUnit::{$equals ? 'assertEquals' : 'assertNotEquals'}(
             $excepted,
-            array_values(array_map(function($item) use($column) {
+            array_values(array_map(function ($item) use ($column) {
                 return $item[$column];
             }, $rows)),
-            "Column [{$column}] in model [{$model->getTable()}] does ".($equals ? 'not ' : '')."contains of given values."
+            "Column [{$column}] in model [{$model->getTable()}] does ".($equals ? 'not ' : '').'contains of given values.'
         );
 
         return $this;
     }
 
     /**
-     * Check if values in specific columns does not contains of given data
+     * Check if values in specific columns does not contains of given data.
      * @param  class $model
      * @param  string $column
      * @param  array $excepted
@@ -373,9 +371,8 @@ trait AdminBrowserAssertions
         return $this;
     }
 
-
     /**
-     * Check if given select has correct values
+     * Check if given select has correct values.
      * @param  class $model
      * @param  string $key
      * @param  array $excepted
@@ -399,18 +396,18 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if input does have validation error
+     * Check if input does have validation error.
      * @param  class $model
      * @param  array $array
      * @return object
      */
     public function assertDoesNotHaveValidationError($model, $fields)
     {
-        foreach ($fields as $key)
-        {
+        foreach ($fields as $key) {
             //Skip non validation inputs
-            if ( ($selectors = $this->getValidationErrorSelectors($model, $key)) === false )
+            if (($selectors = $this->getValidationErrorSelectors($model, $key)) === false) {
                 continue;
+            }
 
             PHPUnit::assertFalse($selectors['errorClass'], 'Field ['.$selectors['key'].'] does have validation error class.');
             PHPUnit::assertFalse($selectors['errorMessage'], 'Field ['.$selectors['key'].'] does have validation error message.');
@@ -420,18 +417,18 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if input have validation error
+     * Check if input have validation error.
      * @param  class $model
      * @param  array $array
      * @return object
      */
     public function assertHasValidationError($model, $fields)
     {
-        foreach ($fields as $key)
-        {
+        foreach ($fields as $key) {
             //Skip non validation inputs
-            if ( ($selectors = $this->getValidationErrorSelectors($model, $key)) === false )
+            if (($selectors = $this->getValidationErrorSelectors($model, $key)) === false) {
                 continue;
+            }
 
             PHPUnit::assertTrue($selectors['errorClass'], 'Field ['.$selectors['key'].'] does not have validation error class.');
             PHPUnit::assertTrue($selectors['errorMessage'], 'Field ['.$selectors['key'].'] does not have validation error message.');
@@ -441,7 +438,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if success message exists
+     * Check if success message exists.
      * @return string
      */
     public function assertSeeSuccess($message, $seconds = null)
@@ -449,11 +446,11 @@ trait AdminBrowserAssertions
         $this->waitForText($message ?: trans('admin::admin.success-created'), $seconds)
              ->assertSee($message ?: trans('admin::admin.success-created'));
 
-         return $this;
+        return $this;
     }
 
-   /**
-     * Check if given element exists
+    /**
+     * Check if given element exists.
      * @param  string  $query
      * @return void
      */
@@ -467,7 +464,7 @@ trait AdminBrowserAssertions
     }
 
     /**
-     * Check if given element does not exists
+     * Check if given element does not exists.
      * @param  string  $query
      * @return void
      */

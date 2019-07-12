@@ -2,7 +2,7 @@
 
 namespace Admin\Tests\App\Layouts;
 
-use \Admin\Helpers\Layout;
+use Admin\Helpers\Layout;
 
 class FormTopLayout extends Layout
 {

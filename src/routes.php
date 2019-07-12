@@ -24,7 +24,7 @@ Route::get('/js/gettext-translates.js', 'GettextController@index');
 /*
  * Admin routes
  */
-Route::group(['middleware' => 'admin'], function(){
+Route::group(['middleware' => 'admin'], function () {
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
     Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');

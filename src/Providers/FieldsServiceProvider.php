@@ -2,14 +2,14 @@
 
 namespace Admin\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Fields;
 use Admin\Fields\Mutations;
 use Admin\Contracts\Migrations\Types;
 use Admin\Contracts\Migrations\Columns;
-use Fields;
+use Illuminate\Support\ServiceProvider;
 
-class FieldsServiceProvider extends ServiceProvider {
-
+class FieldsServiceProvider extends ServiceProvider
+{
     /**
      * Register the service provider.
      *
@@ -21,7 +21,7 @@ class FieldsServiceProvider extends ServiceProvider {
         Fields::addAttribute([
             'title', 'placeholder', 'hidden', 'disabled', 'orderBy', 'limit', 'multirows',
             'invisible', 'component', 'column_name', 'removeFromForm', 'hideFromForm', 'phone_link',
-            'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate'
+            'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate',
         ]);
 
         //Add CrudAdmin additional column type

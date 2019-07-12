@@ -2,11 +2,10 @@
 
 namespace Admin\Tests\Browser;
 
-use Admin\Tests\Browser\DuskBrowser;
-use Admin\Tests\Concerns\AdminIntegration;
-use Admin\Tests\Concerns\FeatureAssertions;
 use Admin\Tests\OrchestraSetup;
 use Orchestra\Testbench\Dusk\TestCase;
+use Admin\Tests\Concerns\AdminIntegration;
+use Admin\Tests\Concerns\FeatureAssertions;
 
 class BrowserTestCase extends TestCase
 {
@@ -14,7 +13,7 @@ class BrowserTestCase extends TestCase
         AdminIntegration,
         FeatureAssertions;
 
-   /**
+    /**
      * Create the DuskBrowser instance.
      *
      * @param  \Facebook\WebDriver\Remote\RemoteWebDriver  $driver
@@ -47,13 +46,10 @@ class BrowserTestCase extends TestCase
 
         //Boot http request before laravel app starts
         //because of bug of missing url path in request()->url()
-        if ( ! app()->runningInConsole() )
-        {
+        if (! app()->runningInConsole()) {
             //set http request before laravel app starts
             //because missing url path bug in request()->url()
             $app->instance('request', \Illuminate\Http\Request::capture());
         }
     }
 }
-
-?>

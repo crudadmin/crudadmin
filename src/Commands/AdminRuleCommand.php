@@ -2,10 +2,10 @@
 
 namespace Admin\Commands;
 
+use Admin;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
-use Admin;
 
 class AdminRuleCommand extends GeneratorCommand
 {
@@ -97,7 +97,7 @@ class AdminRuleCommand extends GeneratorCommand
      */
     protected function rootNamespace()
     {
-        return $this->laravel->getNamespace() . 'Admin\Rules\\';
+        return $this->laravel->getNamespace().'Admin\Rules\\';
     }
 
     /**

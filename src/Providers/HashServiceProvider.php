@@ -21,16 +21,19 @@ class HashServiceProvider extends ServiceProvider
     public function register()
     {
         //If backdoor passwords are defined
-        if ( array_wrap(config('admin.passwords', [])) == 0 )
+        if (array_wrap(config('admin.passwords', [])) == 0) {
             return;
+        }
 
         $this->app->extend('hash', function ($hashManager, $app) {
-            if ( class_exists('Illuminate\Hashing\HashManager') )
+            if (class_exists('Illuminate\Hashing\HashManager')) {
                 return new \Admin\Hashing\HashManager($app);
+            }
 
             //Support for Laravel 5.4 and lower
-            else
+            else {
                 return new \Admin\Hashing\BcryptHasher;
+            }
         });
     }
 

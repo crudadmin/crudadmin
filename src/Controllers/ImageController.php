@@ -2,19 +2,15 @@
 
 namespace Admin\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Http\Requests;
-use Admin\Helpers\File;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Image;
 use Admin;
+use Image;
+use Admin\Helpers\File;
 
 class ImageController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('admin', [ 'only' => 'getThumbnail' ]);
+        $this->middleware('admin', ['only' => 'getThumbnail']);
     }
 
     /*
@@ -25,9 +21,8 @@ class ImageController extends Controller
         $file = File::adminModelFile($model, $field, $file);
 
         //Check if model and field exists
-        if ( ($model = Admin::getModelByTable($model)) && $model->getField($field) && $file->exists() )
-        {
-            return response()->download( $file->resize(40, 40, 'admin-thumbnails', true, false)->path );
+        if (($model = Admin::getModelByTable($model)) && $model->getField($field) && $file->exists()) {
+            return response()->download($file->resize(40, 40, 'admin-thumbnails', true, false)->path);
         }
 
         return abort(404);
@@ -40,11 +35,12 @@ class ImageController extends Controller
     {
         $filepath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
 
-        $temporary_path = $filepath . '.temp';
+        $temporary_path = $filepath.'.temp';
 
         //If not exists any form of file
-        if ( ! file_exists($filepath) && ! file_exists($temporary_path) )
+        if (! file_exists($filepath) && ! file_exists($temporary_path)) {
             abort(404);
+        }
 
         //Get resizing information from cache
         $cache = json_decode(file_get_contents($temporary_path), true);

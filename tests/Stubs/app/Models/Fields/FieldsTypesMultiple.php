@@ -3,7 +3,6 @@
 namespace Admin\Tests\App\Models\Fields;
 
 use Admin\Eloquent\AdminModel;
-use Admin\Fields\Group;
 
 class FieldsTypesMultiple extends AdminModel
 {

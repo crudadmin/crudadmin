@@ -2,10 +2,10 @@
 
 namespace Admin\Commands;
 
+use Admin;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
-use Admin;
 
 class AdminButtonCommand extends GeneratorCommand
 {
@@ -97,7 +97,7 @@ class AdminButtonCommand extends GeneratorCommand
      */
     protected function rootNamespace()
     {
-        return $this->laravel->getNamespace() . 'Admin\Buttons\\';
+        return $this->laravel->getNamespace().'Admin\Buttons\\';
     }
 
     /**

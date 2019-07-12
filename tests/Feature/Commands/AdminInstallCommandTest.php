@@ -30,15 +30,16 @@ class AdminInstallCommandTest extends TestCase
     /** @test */
     public function check_if_is_published_resources()
     {
-        foreach ($this->getPublishableResources() as $path)
+        foreach ($this->getPublishableResources() as $path) {
             $this->assertFileExists($path);
+        }
     }
 
     /** @test */
     public function check_if_is_demo_user_has_been_created()
     {
         $this->assertDatabaseHas('users', [
-            'email' => $this->credentials['email']
+            'email' => $this->credentials['email'],
         ]);
     }
 }
