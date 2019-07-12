@@ -13,6 +13,7 @@ addons:
 install:
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction
+  - ./vendor/bin/dusk-updater update
 
 cache:
   directories:
