@@ -1,1 +1,11 @@
-preset: laravel
+preset: PSR2
+enabled:
+    - align_phpdoc
+    - binary_operator_spaces
+    - no_empty_statement
+    - phpdoc_to_comment
+    - phpdoc_types
+    - phpdoc_single_line_var_spacing
+    - phpdoc_scalar
+    - phpdoc_summary
+    - single_blank_line_before_namespace
