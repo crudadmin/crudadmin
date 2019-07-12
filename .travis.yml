@@ -1,0 +1,16 @@
+dist: xenial
+language: php
+
+php:
+    - '7.2'
+
+services:
+  - mysql
+
+install:
+  - travis_retry composer install --no-interaction
+
+before_install:
+  - mysql -e 'CREATE DATABASE crudadmin_v2_test;'
+
+script: vendor/bin/phpunit
