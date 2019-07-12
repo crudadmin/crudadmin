@@ -306,6 +306,9 @@ trait AdminBrowserIntegration
      */
     public function jsClick($selector)
     {
+        $a = $this->script('return [$("'.str_replace('"', "'", $selector).'"), "'.str_replace('"', "'", $selector).'"]');
+        var_dump($a);
+
         $this->script('$("'.str_replace('"', "'", $selector).'")[0].click()');
 
         return $this;
