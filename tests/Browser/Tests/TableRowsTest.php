@@ -117,21 +117,21 @@ class TableRowsTest extends BrowserTestCase
             $browser->openModelPage(FieldsRelation::class)
                     ->press(trans('admin::admin.rows-list'));
 
-            $show_columns = ['relation1_id', 'relation_multiple1', 'relation_multiple2', 'relation_multiple3'];
+            $showColumns = ['relation1_id', 'relation_multiple1', 'relation_multiple2', 'relation_multiple3'];
 
-            //Hide columns
-            foreach ($show_columns as $column) {
+            //Hide/show columns from list
+            foreach ($showColumns as $column) {
                 $browser->click('*[fields-list] input[data-column="'.$column.'"]');
             }
 
-            $visible = array_merge(['id', 'relation2_id', 'relation3_id'], $show_columns);
+            //Add visible columns into column list
+            $visible = array_merge(['id', 'relation2_id', 'relation3_id'], $showColumns);
             asort($visible);
 
             //Check if all columns except hidden are available
-            //then wait 150ms for generating belongsToMany columns, and then test...
-            $browser->pause(150)
-                            ->assertVisibleColumnsList(FieldsRelation::class, $visible)
-                            ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
+            $browser->waitForText('second option john w...') //wait till last column value in relation_multiple3 will be loaded
+                    ->assertVisibleColumnsList(FieldsRelation::class, $visible)
+                    ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
         });
     }
 
@@ -160,11 +160,13 @@ class TableRowsTest extends BrowserTestCase
             $this->assertCount(10, $browser->getRows(FieldsType::class));
 
             //Paginate on 50 items, wait for and check if rows changed
-            $browser->changeRowsLimit(50)->pause(100);
+            $browser->changeRowsLimit(50)
+                    ->waitFor('tr[data-id="51"]'); //rows are in reversed order
             $this->assertCount(50, $browser->getRows(FieldsType::class));
 
             //Paginate on 100 items, wait for and check if rows changed
-            $browser->changeRowsLimit(100)->pause(100);
+            $browser->changeRowsLimit(100)
+                    ->waitFor('tr[data-id="10"]'); //rows are in reversed order
             $this->assertCount(100, $browser->getRows(FieldsType::class));
 
             //Check if same limit is set after page reload
@@ -182,18 +184,21 @@ class TableRowsTest extends BrowserTestCase
             $browser->openModelPage(Article::class);
 
             //Search for word
-            $browser->type('[data-search-bar] input[data-search-text]', 'man')->pause(400)
+            $browser->type('[data-search-bar] input[data-search-text]', 'man')
+                    ->waitUntilMissing('tr[data-id="12"]') //wait until john wick dissapear
                     ->assertColumnRowData(Article::class, 'name', ['superman', 'spider-man', 'hastrman', 'aquaman']);
 
             //Search by column
             $browser->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="score"] a')
-                    ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)->pause(400)
+                    ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)
+                    ->waitUntilMissing('tr[data-id="7"]')->waitFor('tr[data-id="10"]') //wait until superman dissapear from previous search
                     ->assertColumnRowData(Article::class, 'name', ['spider-man']);
 
             //Search by interval from 9 to 11
             $browser->click('[data-interval] button')
-                    ->type('[data-search-bar] input[data-search-interval-text]', 11)->pause(400)
+                    ->type('[data-search-bar] input[data-search-interval-text]', 11)
+                    ->waitFor('tr[data-id="12"]') //wait for john wick
                     ->assertColumnRowData(Article::class, 'name', ['john wick', 'superman', 'spider-man']);
 
             //Close interval and test searching by date
@@ -201,13 +206,15 @@ class TableRowsTest extends BrowserTestCase
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="created_at"] a')
                     ->click('[data-search-bar] input[data-search-date]')->pause(100)
-                    ->clickDatePicker(date('16.m.Y'))->pause(100)
+                    ->clickDatePicker(date('16.m.Y'))
+                    ->waitFor('tr[data-id="6"]') //wait for star is born will be loaded
                     ->assertColumnRowData(Article::class, 'name', ['star is born']);
 
             //Search by interval date 16 to 20
             $browser->click('[data-interval] button')
-                    ->click('[data-search-bar] input[data-search-interval-date]')->pause(300)
-                    ->clickDatePicker(date('20.m.Y'))->pause(300)
+                    ->click('[data-search-bar] input[data-search-interval-date]')->pause(100)
+                    ->clickDatePicker(date('20.m.Y'))
+                    ->waitFor('tr[data-id="9"]') //wait till hellboy will be loaded
                     ->assertColumnRowData(Article::class, 'name', ['hellboy', 'barefoot', 'hastrman', 'star is born']);
         });
     }
@@ -225,12 +232,14 @@ class TableRowsTest extends BrowserTestCase
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="type"] a')
                     ->setChosenValue('[data-search-bar] [data-search-select]', 'moovie')
+                    ->waitUntilMissing('tr[data-id="10"]') //wait until missing last item which wont be in search
                     ->assertColumnRowData(Tag::class, 'article_id', ['avengers', 'avengers', 'avengers', 'titanic'])
 
                     //Test belongsTo relation filter
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="article_id"] a')
                     ->setChosenValue('[data-search-bar] [data-search-select]', 'avengers')
+                    ->waitFor('tr[data-id="5"]')->waitUntilMissing('tr[data-id="1"]') //wait will blog row will be loaded
                     ->assertColumnRowData(Tag::class, 'type', ['blog', 'moovie', 'moovie', 'moovie']);
         });
     }
@@ -242,7 +251,8 @@ class TableRowsTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(Article::class)
-                    ->changeRowsLimit(5)->pause(100);
+                    ->changeRowsLimit(5)
+                    ->waitUntilMissing('tr[data-id="1"]'); //Wait until missing last row in table
 
             //Check if pagination has correct number of pages
             $browser->assertHasClass('[data-pagination] li:contains(1)', 'active');
@@ -250,17 +260,20 @@ class TableRowsTest extends BrowserTestCase
             $this->assertCount(3, $paginationItems);
 
             //Test next page button
-            $browser->click('[data-pagination-next] a')->pause(100)
+            $browser->click('[data-pagination-next] a')
+                    ->waitUntilMissing('tr[data-id="12"]') //wait until first row in previous page will be missing (john-wick)
                     ->assertHasClass('[data-pagination] li:contains(2)', 'active')
                     ->assertColumnRowData(Article::class, 'name', ['hastrman', 'star is born', 'aquaman', 'captain marvel', 'shrek']);
 
             //Test prev page button
-            $browser->click('[data-pagination-prev] a')->pause(100)
+            $browser->click('[data-pagination-prev] a')
                     ->assertHasClass('[data-pagination] li:contains(1)', 'active')
+                    ->waitUntilMissing('tr[data-id="7"]') //wait until first row in previous page will be missing (hastrman)
                     ->assertColumnRowData(Article::class, 'name', ['john wick', 'superman', 'spider-man', 'hellboy', 'barefoot']);
 
             //Test number page button
-            $browser->jsClick('[data-pagination] li:contains(3) a')->pause(100)
+            $browser->jsClick('[data-pagination] li:contains(3) a')
+                    ->waitUntilMissing('tr[data-id="12"]') //wait until first row in previous page will be missing (john-wick)
                     ->assertHasClass('[data-pagination] li:contains(3)', 'active')
                     ->assertColumnRowData(Article::class, 'name', ['avengers', 'titanic']);
         });

@@ -20,8 +20,8 @@ trait AdminBrowserIntegration
         $this->loginAs(User::first())
              ->visit(admin_action('DashboardController@index').'#/page/'.$model->getTable());
 
-        //Wait till page loads
-        return $this->waitFor('h1');
+        //Wait till page loads and loader will disappear
+        return $this->waitFor('h1')->waitUntilMissing('.overlay');
     }
 
     /**
@@ -370,7 +370,7 @@ trait AdminBrowserIntegration
     {
         return $this->waitFor('button[data-action-type="create"]')
                     ->press(trans('admin::admin.send'))
-                    ->waitUntilMissing('button[data-action-type="loading"]');
+                    ->waitUntilMissing('button[data-action-type="loading"]')->pause(200);
     }
 
     /**
@@ -387,7 +387,9 @@ trait AdminBrowserIntegration
      */
     public function closeAlert()
     {
-        $this->press(trans('admin::admin.close'));
+        $this->whenAvailable('.modal', function($modal){
+            $this->press(trans('admin::admin.close'));
+        });
 
         return $this;
     }
@@ -488,5 +490,24 @@ trait AdminBrowserIntegration
     {
         return $this->click('[data-form-language-switch] > button')->pause(100)
                     ->click('[data-form-language-switch] li[data-slug="'.$lang.'"]');
+    }
+
+    /**
+     * Wait for the given selector to be visible.
+     *
+     * @param  string  $selector
+     * @param  int  $seconds
+     * @return $this
+     * @throws \Facebook\WebDriver\Exception\TimeOutException
+     */
+    public function waitForElement($selector, $seconds = null)
+    {
+        $message = $this->formatTimeOutMessage('Waited %s seconds for selector', $selector);
+
+        return $this->waitUsing($seconds, 100, function () use ($selector) {
+            $element = $this->script("return $('".str_replace("'", "\'", $selector)."').length");
+
+            return $element[0] > 0;
+        }, $message);
     }
 }

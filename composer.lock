@@ -72,16 +72,16 @@
         },
         {
             "name": "crudadmin/resources",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/crudadmin/resources.git",
-                "reference": "d5b4a6cdf402dadd4fcb8f2f7fc660f5d9dec0e8"
+                "reference": "4dd43fe5d82dd55570744a51063d045c552c87d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/crudadmin/resources/zipball/d5b4a6cdf402dadd4fcb8f2f7fc660f5d9dec0e8",
-                "reference": "d5b4a6cdf402dadd4fcb8f2f7fc660f5d9dec0e8",
+                "url": "https://api.github.com/repos/crudadmin/resources/zipball/4dd43fe5d82dd55570744a51063d045c552c87d1",
+                "reference": "4dd43fe5d82dd55570744a51063d045c552c87d1",
                 "shasum": ""
             },
             "require": {
@@ -132,7 +132,7 @@
                 "laravel",
                 "model"
             ],
-            "time": "2019-07-12T08:35:20+00:00"
+            "time": "2019-07-13T09:04:19+00:00"
         },
         {
             "name": "doctrine/annotations",

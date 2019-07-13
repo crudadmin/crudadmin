@@ -20,15 +20,19 @@ class ModelActionsTest extends BrowserTestCase
         $this->createArticleMoviesList();
 
         $this->browse(function (DuskBrowser $browser) {
-            $browser->openModelPage(Article::class)->pause(100);
+            $browser->openModelPage(Article::class)
 
-            //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="publishable"]')->pause(100);
-            $this->assertNull(Article::find(10));
+                    //Check if is unpublished
+                    ->click('[data-id="10"] [data-button="publishable"]')
+                    ->whenAvailable('[data-id="10"] [data-button="publishable"][data-published="false"]', function(){
+                        $this->assertNull(Article::find(10));
+                    })
 
-            //Check if has been back published
-            $browser->click('[data-id="10"] [data-button="publishable"]')->pause(100);
-            $this->assertTrue(Article::find(10)->published_at ? true : false);
+                    //Check if has been back published
+                    ->click('[data-id="10"] [data-button="publishable"]')
+                    ->whenAvailable('[data-id="10"] [data-button="publishable"][data-published="true"]', function(){
+                        $this->assertTrue(Article::find(10)->published_at ? true : false);
+                    });
         });
     }
 
@@ -40,18 +44,19 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100)
+            $browser->openModelPage(Article::class)
 
                     //Check which item we want delete
                     ->click('tr[data-id="10"]')
                     ->click('tr[data-id="7"]')
-                    ->click('[data-action-list] button')->pause(50)
-                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')->pause(50);
-
-            //Check if row has been removed from table and from db
-            $this->assertNull(Article::find(10));
-            $this->assertNull(Article::find(7));
+                    ->click('[data-action-list] button')
+                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')
+                    ->waitFor('[data-id="10"] [data-button="publishable"][data-published="false"]');
         });
+
+        //Check if row has been removed from table and from db
+        $this->assertNull(Article::find(10));
+        $this->assertNull(Article::find(7));
     }
 
     /** @test */
@@ -62,10 +67,10 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100);
+            $browser->openModelPage(Article::class)
 
-            //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="show"]')->pause(100)
+                    //Check if is unpublished
+                    ->click('[data-id="10"] [data-button="show"]')->pause(100)
                     ->assertSeeIn('.modal .modal-title', trans('admin::admin.row-info-n').' 10')
                     ->assertSeeIn('.modal .modal-body', trans('admin::admin.created-at').': '.$article->created_at->format('d.m.Y H:i'))
                     ->assertSeeIn('.modal .modal-body', trans('admin::admin.last-change').': '.$article->updated_at->format('d.m.Y H:i'))
@@ -81,11 +86,12 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100);
+            $browser->openModelPage(Article::class)
 
-            //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="delete"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')->pause(50);
+                    //Check if is unpublished
+                    ->click('[data-id="10"] [data-button="delete"]')
+                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
+                    ->waitUntilMissing('[data-id="10"]');
 
             //Check if row has been removed from table and from db
             $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));
@@ -101,14 +107,16 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100)
+            $browser->openModelPage(Article::class)
 
                     //Check which item we want delete
                     ->click('tr[data-id="10"]')
                     ->click('tr[data-id="7"]')
-                    ->click('[data-action-list] button')->pause(50)
-                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')->pause(50)
-                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')->pause(50);
+                    ->click('[data-action-list] button')
+                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')
+                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
+                    ->waitUntilMissing('.modal')
+                    ->waitUntilMissing('tr[data-id="10"]'); //Wait untill one of removed row will be missing in rows table
 
             //Check if row has been removed from table and from db
             $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));
@@ -125,14 +133,16 @@ class ModelActionsTest extends BrowserTestCase
         Model1::create(['field1' => 'a', 'field2' => 'b', 'field3' => 'c', 'field4' => 'd']);
 
         $this->browse(function (DuskBrowser $browser) {
-            $browser->openModelPage(Model1::class)->pause(100)
+            $browser->openModelPage(Model1::class)
 
                     //Click multiple items and then press button action
                     ->click('tr[data-id="1"]')
                     ->click('tr[data-id="2"]')
-                    ->click('[data-action-list] button')->pause(50)
-                    ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')->pause(50)
-                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    ->click('[data-action-list] button')
+                    ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')
+                    ->whenAvailable('.modal .modal-footer', function() use($browser) {
+                        $browser->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    });
 
             //Check if action has been processed
             //and table rewrited with actual data
@@ -151,11 +161,13 @@ class ModelActionsTest extends BrowserTestCase
         ]);
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->openModelPage(Model1::class)->pause(100);
+            $browser->openModelPage(Model1::class)
 
-            //Click on button action
-            $browser->click('[data-id="1"] [data-button="action-SimpleButton"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    //Click on button action
+                    ->click('[data-id="1"] [data-button="action-SimpleButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        $modal->jsClick('.modal .modal-footer button:contains("Zatvoriť")');
+                    });
 
             //Check if action has been processed
             //and table rewrited with actual data
@@ -174,12 +186,14 @@ class ModelActionsTest extends BrowserTestCase
         ]);
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->openModelPage(Model1::class)->pause(100);
+            $browser->openModelPage(Model1::class)
 
-            //Click on button action
-            $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
-                    ->assertSeeIn('.modal .modal-body', 'Are you sure?')
-                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    //Click on button action
+                    ->click('[data-id="1"] [data-button="action-QuestionButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        $modal->assertSeeIn('.modal-body', 'Are you sure?')
+                              ->jsClick('.modal .modal-footer button:contains("Zatvoriť")');
+                    });
 
             //Check if action has not been processed
             //and table row is not rewrited with actual data
@@ -187,9 +201,12 @@ class ModelActionsTest extends BrowserTestCase
             $browser->assertColumnRowDataNotEquals(Model1::class, 'field2', [10]);
 
             //Click and accept alert button, then check if data has been processed
-            $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("Potvrdiť")')->pause(50);
-            $browser->assertColumnRowData(Model1::class, 'field2', [10]);
+            $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')
+                    ->whenAvailable('.modal', function() use($browser) {
+                        $browser->jsClick('.modal .modal-footer button:contains("Potvrdiť")')
+                                ->pause(300)
+                                ->assertColumnRowData(Model1::class, 'field2', [10]);
+                    });
         });
     }
 
@@ -204,21 +221,24 @@ class ModelActionsTest extends BrowserTestCase
         ]);
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->openModelPage(Model1::class)->pause(100);
+            $browser->openModelPage(Model1::class)
 
-            //Click on button action
-            $browser->click('[data-id="1"] [data-button="action-TemplateButton"]')->pause(100)
+                    //Click on button action
+                    ->click('[data-id="1"] [data-button="action-TemplateButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        //Check if template modal renders correctly
+                        $modal
+                            ->assertSeeIn('.modal-body label', 'How are you? This is my custom component.')
 
-                    //Check if template modal renders correctly
-                    ->assertSeeIn('.modal-body label', 'How are you? This is my custom component.')
+                            //Type value into field and check if vuejs interactivity works
+                            ->type('.modal-body input', 'good, awesome.')
+                            ->assertSeeIn('.modal-body h2', 'I have good, awesome. mood.')
 
-                    //Type value into field and check if vuejs interactivity works
-                    ->type('.modal .modal-body input', 'good, awesome.')
-                    ->assertSeeIn('.modal .modal-body h2', 'I have good, awesome. mood.')
-
-                    //Accept and check if success message appears
-                    ->jsClick('.modal .modal-footer button:contains("Potvrdiť")')->pause(50)
-                    ->assertSeeIn('.modal .modal-body', 'Your custom template action is done!')
+                            //Accept and check if success message appears
+                            ->jsClick('.modal-footer button:contains("Potvrdiť")')
+                            ->waitForText('Your custom template action is done!')
+                            ->assertSeeIn('.modal-body', 'Your custom template action is done!');
+                    })
 
                     //Check if button has ben processed and data changed
                     ->assertColumnRowData(Model1::class, 'field4', ['good, awesome.']);

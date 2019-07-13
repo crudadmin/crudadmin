@@ -27,7 +27,8 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['sk name'])
 
                     //Change into english language and check if table is empty
-                    ->valueWithEvent('[data-global-language-switch]', 2, 'change')->pause(100);
+                    ->valueWithEvent('[data-global-language-switch]', 2, 'change')
+                    ->waitUntilMissing('[data-id="1"]');
             $this->assertEquals([], $browser->getRows(ModelLocalization::class));
 
             //Add two rows into english language and check correct values
@@ -41,7 +42,8 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['en name second', 'en name']);
 
             //Change back to slovak language, and check correct rows
-            $browser->valueWithEvent('[data-global-language-switch]', 1, 'change')->pause(100)
+            $browser->valueWithEvent('[data-global-language-switch]', 1, 'change')
+                    ->waitFor('[data-id="1"]')
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['sk name']);
         });
     }
