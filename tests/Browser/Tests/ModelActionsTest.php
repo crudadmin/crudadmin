@@ -44,7 +44,7 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100)
+            $browser->openModelPage(Article::class)
 
                     //Check which item we want delete
                     ->click('tr[data-id="10"]')
@@ -67,10 +67,10 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100);
+            $browser->openModelPage(Article::class)
 
-            //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="show"]')->pause(100)
+                    //Check if is unpublished
+                    ->click('[data-id="10"] [data-button="show"]')->pause(100)
                     ->assertSeeIn('.modal .modal-title', trans('admin::admin.row-info-n').' 10')
                     ->assertSeeIn('.modal .modal-body', trans('admin::admin.created-at').': '.$article->created_at->format('d.m.Y H:i'))
                     ->assertSeeIn('.modal .modal-body', trans('admin::admin.last-change').': '.$article->updated_at->format('d.m.Y H:i'))
@@ -86,10 +86,10 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100);
+            $browser->openModelPage(Article::class)
 
-            //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="delete"]')
+                    //Check if is unpublished
+                    ->click('[data-id="10"] [data-button="delete"]')
                     ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
                     ->waitUntilMissing('[data-id="10"]');
 
@@ -107,7 +107,7 @@ class ModelActionsTest extends BrowserTestCase
         $article = Article::find(10);
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
-            $browser->openModelPage(Article::class)->pause(100)
+            $browser->openModelPage(Article::class)
 
                     //Check which item we want delete
                     ->click('tr[data-id="10"]')
@@ -131,7 +131,7 @@ class ModelActionsTest extends BrowserTestCase
         Model1::create(['field1' => 'a', 'field2' => 'b', 'field3' => 'c', 'field4' => 'd']);
 
         $this->browse(function (DuskBrowser $browser) {
-            $browser->openModelPage(Model1::class)->pause(100)
+            $browser->openModelPage(Model1::class)
 
                     //Click multiple items and then press button action
                     ->click('tr[data-id="1"]')
@@ -159,10 +159,10 @@ class ModelActionsTest extends BrowserTestCase
         ]);
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->openModelPage(Model1::class)->pause(100);
+            $browser->openModelPage(Model1::class)
 
-            //Click on button action
-            $browser->click('[data-id="1"] [data-button="action-SimpleButton"]')->pause(100)
+                    //Click on button action
+                    ->click('[data-id="1"] [data-button="action-SimpleButton"]')->pause(100)
                     ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
 
             //Check if action has been processed
@@ -182,10 +182,10 @@ class ModelActionsTest extends BrowserTestCase
         ]);
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->openModelPage(Model1::class)->pause(100);
+            $browser->openModelPage(Model1::class)
 
-            //Click on button action
-            $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
+                    //Click on button action
+                    ->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
                     ->assertSeeIn('.modal .modal-body', 'Are you sure?')
                     ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
 
@@ -212,10 +212,10 @@ class ModelActionsTest extends BrowserTestCase
         ]);
 
         $this->browse(function (DuskBrowser $browser) use ($row) {
-            $browser->openModelPage(Model1::class)->pause(100);
+            $browser->openModelPage(Model1::class)
 
-            //Click on button action
-            $browser->click('[data-id="1"] [data-button="action-TemplateButton"]')->pause(100)
+                    //Click on button action
+                    ->click('[data-id="1"] [data-button="action-TemplateButton"]')->pause(100)
 
                     //Check if template modal renders correctly
                     ->assertSeeIn('.modal-body label', 'How are you? This is my custom component.')
