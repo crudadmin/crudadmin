@@ -20,15 +20,19 @@ class ModelActionsTest extends BrowserTestCase
         $this->createArticleMoviesList();
 
         $this->browse(function (DuskBrowser $browser) {
-            $browser->openModelPage(Article::class)->pause(100);
+            $browser->openModelPage(Article::class)
 
-            //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="publishable"]')->pause(100);
-            $this->assertNull(Article::find(10));
+                    //Check if is unpublished
+                    ->click('[data-id="10"] [data-button="publishable"]')
+                    ->whenAvailable('[data-id="10"] [data-button="publishable"][data-published="false"]', function(){
+                        $this->assertNull(Article::find(10));
+                    })
 
-            //Check if has been back published
-            $browser->click('[data-id="10"] [data-button="publishable"]')->pause(100);
-            $this->assertTrue(Article::find(10)->published_at ? true : false);
+                    //Check if has been back published
+                    ->click('[data-id="10"] [data-button="publishable"]')
+                    ->whenAvailable('[data-id="10"] [data-button="publishable"][data-published="true"]', function(){
+                        $this->assertTrue(Article::find(10)->published_at ? true : false);
+                    });
         });
     }
 

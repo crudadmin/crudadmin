@@ -10,16 +10,16 @@ services:
 addons:
    chrome: stable
 
-install:
+before_install:
+  - mysql -e 'CREATE DATABASE crudadmin_v2_test;'
   - travis_retry composer self-update
+
+install:
   - travis_retry composer install --no-interaction
+  - travis_retry composer update crudadmin/resources crudadmin/framework --no-interaction
   - ./vendor/bin/dusk-updater update
 
 cache:
   directories:
     - $HOME/.composer/cache
-
-before_install:
-  - mysql -e 'CREATE DATABASE crudadmin_v2_test;'
-
 script: vendor/bin/phpunit --stop-on-fail
