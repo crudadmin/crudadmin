@@ -56,7 +56,7 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertColumnRowData(ArticlesComment::class, 'id', [6], true, '[data-depth="2"]')
 
                     //Open second row, and check relations data
-                    ->openRow(2, Article::class)->pause(100)
+                    ->openRow(2, Article::class)->pause(200)
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (1)')
                     ->click('[data-tabs][data-model="articles_comments"]')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [4])
