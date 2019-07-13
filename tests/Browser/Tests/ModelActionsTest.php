@@ -112,9 +112,10 @@ class ModelActionsTest extends BrowserTestCase
                     //Check which item we want delete
                     ->click('tr[data-id="10"]')
                     ->click('tr[data-id="7"]')
-                    ->click('[data-action-list] button')->pause(50)
-                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')->pause(50)
-                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')->pause(50);
+                    ->click('[data-action-list] button')
+                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')
+                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
+                    ->waitUntilMissing('.modal');
 
             //Check if row has been removed from table and from db
             $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));
