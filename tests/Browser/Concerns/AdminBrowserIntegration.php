@@ -20,8 +20,8 @@ trait AdminBrowserIntegration
         $this->loginAs(User::first())
              ->visit(admin_action('DashboardController@index').'#/page/'.$model->getTable());
 
-        //Wait till page loads
-        return $this->waitFor('h1');
+        //Wait till page loads and loader will disappear
+        return $this->waitFor('h1')->waitUntilMissing('.overlay');
     }
 
     /**

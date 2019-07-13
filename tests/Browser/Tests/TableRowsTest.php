@@ -129,7 +129,7 @@ class TableRowsTest extends BrowserTestCase
             asort($visible);
 
             //Check if all columns except hidden are available
-            $browser->waitForText('second option john wick 22') //wait till last column value in relation_multiple3 will be loaded
+            $browser->waitForText('second option john w...') //wait till last column value in relation_multiple3 will be loaded
                     ->assertVisibleColumnsList(FieldsRelation::class, $visible)
                     ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
         });
