@@ -115,7 +115,8 @@ class ModelActionsTest extends BrowserTestCase
                     ->click('[data-action-list] button')
                     ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')
                     ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
-                    ->waitUntilMissing('.modal');
+                    ->waitUntilMissing('.modal')
+                    ->waitUntilMissing('tr[data-id="10"]'); //Wait untill one of removed row will be missing in rows table
 
             //Check if row has been removed from table and from db
             $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));
