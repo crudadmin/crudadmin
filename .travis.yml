@@ -22,4 +22,4 @@ cache:
 before_install:
   - mysql -e 'CREATE DATABASE crudadmin_v2_test;'
 
-script: vendor/bin/phpunit --filter test_multiple_custom_simple_button --stop-on-fail
+script: vendor/bin/phpunit --stop-on-fail
