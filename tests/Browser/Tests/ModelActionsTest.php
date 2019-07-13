@@ -49,8 +49,9 @@ class ModelActionsTest extends BrowserTestCase
                     //Check which item we want delete
                     ->click('tr[data-id="10"]')
                     ->click('tr[data-id="7"]')
-                    ->click('[data-action-list] button')->pause(50)
-                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')->pause(50);
+                    ->click('[data-action-list] button')
+                    ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')
+                    ->waitFor('[data-id="10"] [data-button="publishable"][data-published="false"]');
         });
 
         //Check if row has been removed from table and from db
