@@ -370,7 +370,7 @@ trait AdminBrowserIntegration
     {
         return $this->waitFor('button[data-action-type="create"]')
                     ->press(trans('admin::admin.send'))
-                    ->waitUntilMissing('button[data-action-type="loading"]');
+                    ->waitUntilMissing('button[data-action-type="loading"]')->pause(100);
     }
 
     /**

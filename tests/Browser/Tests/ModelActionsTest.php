@@ -202,10 +202,10 @@ class ModelActionsTest extends BrowserTestCase
 
             //Click and accept alert button, then check if data has been processed
             $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')
-                    ->whenAvailable('.modal', function($modal){
-                        $modal->jsClick('.modal .modal-footer button:contains("Potvrdiť")')
-                              ->waitUntilMissing('.modal')
-                              ->assertColumnRowData(Model1::class, 'field2', [10]);
+                    ->whenAvailable('.modal', function() use($browser) {
+                        $browser->jsClick('.modal .modal-footer button:contains("Potvrdiť")')
+                                ->pause(300)
+                                ->assertColumnRowData(Model1::class, 'field2', [10]);
                     });
         });
     }

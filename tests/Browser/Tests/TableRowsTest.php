@@ -129,7 +129,7 @@ class TableRowsTest extends BrowserTestCase
             asort($visible);
 
             //Check if all columns except hidden are available
-            $browser->waitFor('th.th-relation_multiple3')
+            $browser->waitForText('aquaman') //wait till value in relation_multiple1 column will be loaded
                     ->assertVisibleColumnsList(FieldsRelation::class, $visible)
                     ->assertTableRowExists(FieldsRelation::class, $this->getHiddenColumnsRowData($row));
         });
@@ -232,14 +232,14 @@ class TableRowsTest extends BrowserTestCase
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="type"] a')
                     ->setChosenValue('[data-search-bar] [data-search-select]', 'moovie')
-                    ->waitUntilMissing('tr[data-id="10"]') //wait until missing last item whoch wont be in search
+                    ->waitUntilMissing('tr[data-id="10"]') //wait until missing last item which wont be in search
                     ->assertColumnRowData(Tag::class, 'article_id', ['avengers', 'avengers', 'avengers', 'titanic'])
 
                     //Test belongsTo relation filter
                     ->click('[data-search-bar] button.dropdown-toggle')
                     ->click('[data-search-bar] [data-field="article_id"] a')
                     ->setChosenValue('[data-search-bar] [data-search-select]', 'avengers')
-                    ->waitUntilMissing('tr[data-id="1"]') //wait until missing titanic from previous search
+                    ->waitFor('tr[data-id="5"]') //wait will blog row will be loaded
                     ->assertColumnRowData(Tag::class, 'type', ['blog', 'moovie', 'moovie', 'moovie']);
         });
     }
