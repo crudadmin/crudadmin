@@ -491,4 +491,23 @@ trait AdminBrowserIntegration
         return $this->click('[data-form-language-switch] > button')->pause(100)
                     ->click('[data-form-language-switch] li[data-slug="'.$lang.'"]');
     }
+
+    /**
+     * Wait for the given selector to be visible.
+     *
+     * @param  string  $selector
+     * @param  int  $seconds
+     * @return $this
+     * @throws \Facebook\WebDriver\Exception\TimeOutException
+     */
+    public function waitForElement($selector, $seconds = null)
+    {
+        $message = $this->formatTimeOutMessage('Waited %s seconds for selector', $selector);
+
+        return $this->waitUsing($seconds, 100, function () use ($selector) {
+            $element = $this->script("return $('".str_replace("'", "\'", $selector)."').length");
+
+            return $element[0] > 0;
+        }, $message);
+    }
 }

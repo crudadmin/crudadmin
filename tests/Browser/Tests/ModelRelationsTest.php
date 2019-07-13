@@ -30,7 +30,8 @@ class ModelRelationsTest extends BrowserTestCase
             $browser->openModelPage(Article::class)
 
                     //Open row, and load related model data, also check if count of loaded data is correct
-                    ->openRow(1)->pause(200)
+                    ->openRow(1)
+                    ->waitForElement('[data-tabs][data-model="articles_comments"]:contains("Comments (3)"):visible')
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (3)')
 
                     //Click on related model and check given data
@@ -56,7 +57,8 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertColumnRowData(ArticlesComment::class, 'id', [6], true, '[data-depth="2"]')
 
                     //Open second row, and check relations data
-                    ->openRow(2, Article::class)->pause(200)
+                    ->openRow(2, Article::class)
+                    ->waitForElement('[data-tabs][data-model="articles_comments"]:contains("Comments (1)"):visible')
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (1)')
                     ->click('[data-tabs][data-model="articles_comments"]')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [4])
