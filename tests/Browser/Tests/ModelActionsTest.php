@@ -162,8 +162,10 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Model1::class)
 
                     //Click on button action
-                    ->click('[data-id="1"] [data-button="action-SimpleButton"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    ->click('[data-id="1"] [data-button="action-SimpleButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        $modal->jsClick('.modal .modal-footer button:contains("Zatvoriť")');
+                    });
 
             //Check if action has been processed
             //and table rewrited with actual data
@@ -185,9 +187,11 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Model1::class)
 
                     //Click on button action
-                    ->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
-                    ->assertSeeIn('.modal .modal-body', 'Are you sure?')
-                    ->jsClick('.modal .modal-footer button:contains("Zatvoriť")')->pause(50);
+                    ->click('[data-id="1"] [data-button="action-QuestionButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        $modal->assertSeeIn('.modal-body', 'Are you sure?')
+                              ->jsClick('.modal .modal-footer button:contains("Zatvoriť")');
+                    });
 
             //Check if action has not been processed
             //and table row is not rewrited with actual data
@@ -195,9 +199,12 @@ class ModelActionsTest extends BrowserTestCase
             $browser->assertColumnRowDataNotEquals(Model1::class, 'field2', [10]);
 
             //Click and accept alert button, then check if data has been processed
-            $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("Potvrdiť")')->pause(50);
-            $browser->assertColumnRowData(Model1::class, 'field2', [10]);
+            $browser->click('[data-id="1"] [data-button="action-QuestionButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        $modal->jsClick('.modal .modal-footer button:contains("Potvrdiť")')
+                              ->waitUntilMissing('.modal')
+                              ->assertColumnRowData(Model1::class, 'field2', [10]);
+                    });
         });
     }
 
@@ -215,18 +222,21 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Model1::class)
 
                     //Click on button action
-                    ->click('[data-id="1"] [data-button="action-TemplateButton"]')->pause(100)
+                    ->click('[data-id="1"] [data-button="action-TemplateButton"]')
+                    ->whenAvailable('.modal', function($modal){
+                        //Check if template modal renders correctly
+                        $modal
+                            ->assertSeeIn('.modal-body label', 'How are you? This is my custom component.')
 
-                    //Check if template modal renders correctly
-                    ->assertSeeIn('.modal-body label', 'How are you? This is my custom component.')
+                            //Type value into field and check if vuejs interactivity works
+                            ->type('.modal-body input', 'good, awesome.')
+                            ->assertSeeIn('.modal-body h2', 'I have good, awesome. mood.')
 
-                    //Type value into field and check if vuejs interactivity works
-                    ->type('.modal .modal-body input', 'good, awesome.')
-                    ->assertSeeIn('.modal .modal-body h2', 'I have good, awesome. mood.')
-
-                    //Accept and check if success message appears
-                    ->jsClick('.modal .modal-footer button:contains("Potvrdiť")')->pause(50)
-                    ->assertSeeIn('.modal .modal-body', 'Your custom template action is done!')
+                            //Accept and check if success message appears
+                            ->jsClick('.modal-footer button:contains("Potvrdiť")')
+                            ->waitForText('Your custom template action is done!')
+                            ->assertSeeIn('.modal-body', 'Your custom template action is done!');
+                    })
 
                     //Check if button has ben processed and data changed
                     ->assertColumnRowData(Model1::class, 'field4', ['good, awesome.']);

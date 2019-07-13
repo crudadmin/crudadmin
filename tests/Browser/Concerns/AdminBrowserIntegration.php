@@ -387,7 +387,9 @@ trait AdminBrowserIntegration
      */
     public function closeAlert()
     {
-        $this->press(trans('admin::admin.close'));
+        $this->whenAvailable('.modal', function($modal){
+            $this->press(trans('admin::admin.close'));
+        });
 
         return $this;
     }
