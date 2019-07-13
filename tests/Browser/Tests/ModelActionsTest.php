@@ -89,8 +89,9 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Article::class)->pause(100);
 
             //Check if is unpublished
-            $browser->click('[data-id="10"] [data-button="delete"]')->pause(100)
-                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')->pause(50);
+            $browser->click('[data-id="10"] [data-button="delete"]')
+                    ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
+                    ->waitUntilMissing('[data-id="10"]');
 
             //Check if row has been removed from table and from db
             $this->assertArrayNotHasKey(10, $browser->getRows(Article::class));

@@ -23,4 +23,4 @@ cache:
   directories:
     - $HOME/.composer/cache
 
-script: vendor/bin/phpunit --stop-on-fail
+script: vendor/bin/phpunit
