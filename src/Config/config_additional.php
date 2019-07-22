@@ -116,4 +116,9 @@ return [
         'time' => 'date_format:H:i|nullable',
         'json' => 'hidden',
     ],
+
+    /*
+     * Resources/ui service provider
+     */
+    'resources_provider' => Admin\Resources\Providers\AppServiceProvider::class,
 ];

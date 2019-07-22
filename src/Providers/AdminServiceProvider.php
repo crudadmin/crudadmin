@@ -14,8 +14,6 @@ class AdminServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('admin', \Admin\Helpers\Admin::class);
-
-        $this->mergeAdminConfigs();
     }
 
     public function boot()
@@ -49,30 +47,6 @@ class AdminServiceProvider extends ServiceProvider
         //Sluggable history
         if (\Admin::isSluggableHistoryEnabled()) {
             \Admin::registerModel(\Admin\Models\SluggableHistory::class);
-        }
-    }
-
-    /*
-     * Merge crudadmin config with esolutions config
-     */
-    private function mergeAdminConfigs($key = 'admin')
-    {
-        //Additional CrudAdmin Config
-        $crudAdminConfig = require __DIR__.'/../Config/config_additional.php';
-
-        $config = $this->app['config']->get($key, []);
-
-        $this->app['config']->set($key, array_merge($crudAdminConfig, $config));
-
-        //Merge selected properties with two dimensional array
-        foreach (['models', 'custom_rules', 'global_rules'] as $property) {
-            if (! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config)) {
-                continue;
-            }
-
-            $attributes = array_merge($config[$property], $crudAdminConfig[$property]);
-
-            $this->app['config']->set($key.'.'.$property, $attributes);
         }
     }
 }
