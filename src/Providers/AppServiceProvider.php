@@ -11,6 +11,7 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     protected $providers = [
+        FieldsServiceProvider::class,
         AdminServiceProvider::class,
         LocalizationServiceProvider::class,
         GettextServiceProvider::class,
@@ -19,7 +20,6 @@ class AppServiceProvider extends ServiceProvider
         PasswordResetServiceProvider::class,
         ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
-        FieldsServiceProvider::class,
         SEOServiceProvider::class,
         HashServiceProvider::class,
     ];
@@ -66,9 +66,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeAdminConfigs();
+
         $this->registerFacades();
 
-        $this->registerProviders();
+        $this->registerProviders(array_merge([
+            config('admin.resources_provider')
+        ], $this->providers));
 
         $this->bootRouteMiddleware();
     }
@@ -84,9 +88,9 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    public function registerProviders($providers = null)
+    public function registerProviders(array $providers)
     {
-        foreach ($providers ?: $this->providers as $provider) {
+        foreach ($providers as $provider) {
             app()->register($provider);
         }
     }
@@ -105,6 +109,30 @@ class AppServiceProvider extends ServiceProvider
             } else {
                 $router->middleware($name, $middleware);
             }
+        }
+    }
+
+    /*
+     * Merge crudadmin config with esolutions config
+     */
+    private function mergeAdminConfigs($key = 'admin')
+    {
+        //Additional CrudAdmin Config
+        $crudAdminConfig = require __DIR__.'/../Config/config_additional.php';
+
+        $config = $this->app['config']->get($key, []);
+
+        $this->app['config']->set($key, array_merge($crudAdminConfig, $config));
+
+        //Merge selected properties with two dimensional array
+        foreach (['models', 'custom_rules', 'global_rules'] as $property) {
+            if (! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config)) {
+                continue;
+            }
+
+            $attributes = array_merge($config[$property], $crudAdminConfig[$property]);
+
+            $this->app['config']->set($key.'.'.$property, $attributes);
         }
     }
 }

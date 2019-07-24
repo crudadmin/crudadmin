@@ -4,7 +4,7 @@ namespace Admin\Helpers;
 
 use Gettext;
 use Admin\Eloquent\AdminModel;
-use Admin\Helpers\File as AdminFile;
+use Admin\Core\Helpers\File as AdminFile;
 
 class SEO
 {
