@@ -249,7 +249,10 @@ trait Uploadable
         }
 
         //Compress images
-        if (! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension)) {
+        if (
+            $this->imageCompression !== false
+            && ! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension)
+        ) {
             return false;
         }
 
