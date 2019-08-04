@@ -2,18 +2,27 @@
 
 namespace Admin\Helpers;
 
-use Cache;
-use Storage;
-use Localization;
-use Gettext\Translations;
-use Gettext\Generators\Json;
 use App\Core\Models\Language;
+use Cache;
 use Gettext\Extractors\PhpCode;
-use Illuminate\Support\Collection;
+use Gettext\Generators\Json;
+use Gettext\Merge;
+use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Collection;
+use Localization;
+use Storage;
 
 class Gettext
 {
+    /*
+     * Flags for translations
+     */
+    const GETTEXT_FLAGS = [
+        'javascript' => 'js-flag', //translation is from javascript/vuejs template
+        'missing' => 'missing-in-source', //missing translation from source
+    ];
+
     protected $filesystem;
 
     protected $basepath = 'storage/app/lang';
@@ -232,6 +241,21 @@ class Gettext
         //Get all plural forms
         $string = JSON::toString($translations);
         $array = json_decode($string);
+
+        $this->addPluralsIntoResponse($array, $translations);
+        $this->addMissingIntoResponse($array, $translations);
+
+        return $array;
+    }
+
+    /**
+     * Add plurals into translations array
+     *
+     * @param  object  $array
+     * @param  Gettext\Translations  $translations
+     */
+    private function addPluralsIntoResponse($array, Translations $translations)
+    {
         $array->plurals = [];
 
         foreach ($translations as $translation) {
@@ -239,8 +263,23 @@ class Gettext
                 $array->plurals[] = $translation->getOriginal();
             }
         }
+    }
 
-        return $array;
+    /**
+     * Add missing translations into translations array
+     *
+     * @param  object  $array
+     * @param  Gettext\Translations  $translations
+     */
+    private function addMissingIntoResponse($array, Translations $translations)
+    {
+        $array->missing = [];
+
+        foreach ($translations as $translation) {
+            if (in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags())) {
+                $array->missing[] = $translation->getOriginal();
+            }
+        }
     }
 
     /*
@@ -435,7 +474,7 @@ class Gettext
 
             if ($type && $sources = Translations::{'from'.$type.'File'}((string) $file, $this->getDecoderOptions())) {
                 if (in_array($type, ['JsCode', 'VueJs'])) {
-                    $sources = $this->setJSComment($sources, $file);
+                    $sources = $this->setJSFlag($sources, $file);
                 }
 
                 $translations->mergeWith($sources);
@@ -446,10 +485,10 @@ class Gettext
     /*
      * Add into translate, that given text is from js file
      */
-    private function setJSComment($translates, $file)
+    private function setJSFlag($translates, $file)
     {
         foreach ($translates as $translate) {
-            $translate->addComment($file->getFileName());
+            $translate->addFlag(self::GETTEXT_FLAGS['javascript']);
         }
 
         return $translates;
@@ -512,6 +551,37 @@ class Gettext
         return false;
     }
 
+    /**
+     * Add or remove missing flags for translations. Also disable/enable this translations.
+     *
+     * @param  Gettext\Translation  $translations
+     * @param  Gettext\Translation  $loadedTranslations
+     * @return void
+     */
+    public function markMissingTranslations($translations, $loadedTranslations)
+    {
+        //All missing translations from existing po files mark as missing in comments
+        foreach ($translations as $key => $translation) {
+            //If translation does not exists in new loaded string,
+            if ( ! array_key_exists($key, $loadedTranslations) ) {
+                //if is not marked as missing already
+                if ( ! in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags()) ) {
+                    $translation->addFlag(self::GETTEXT_FLAGS['missing']);
+                }
+            }
+
+            //If text does exists, but is marked as does not exists
+            elseif ( in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags()) ) {
+                $flags = array_diff($translation->getFlags(), ['missing-in-source']);
+                $translation->deleteFlags();
+
+                foreach ($flags as $flag) {
+                    $translation->addFlags($flag);
+                }
+            }
+        }
+    }
+
     /*
      * Collect all translations in application and merge them with existing/new translation files
      */
@@ -525,14 +595,22 @@ class Gettext
             $this->createLocale($language->slug);
         }
 
+        $loadedTranslations = new Translations;
+
         $translations = Translations::fromPoFile($po_path);
 
         $views_paths = $this->getSourcePaths();
 
         //Foreach all gettext source directories
         foreach ($views_paths as $path) {
-            $this->mergeDirectoryTranslations($path, $translations);
+            $this->mergeDirectoryTranslations($path, $loadedTranslations);
         }
+
+        //Mark and disable missing translations
+        $this->markMissingTranslations($translations, $loadedTranslations);
+
+        //Load all loaded translations with old translations
+        $translations->mergeWith($loadedTranslations);
 
         $this->rebuildGettextFiles($language, $translations);
 
