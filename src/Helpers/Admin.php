@@ -102,7 +102,7 @@ class Admin extends AdminCore
 
             foreach ([$json->packages, $json->{'packages-dev'}] as $list) {
                 foreach ($list as $package) {
-                    if ($package->name == 'marekgogol/crudadmin') {
+                    if ($package->name == 'crudadmin/crudadmin') {
                         return $package->version;
                     }
                 }
