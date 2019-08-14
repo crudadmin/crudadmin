@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://travis-ci.org/crudadmin/crudadmin"><img src="https://api.travis-ci.com/crudadmin/crudadmin.svg" alt="Build Status"></a>
+<a href="https://travis-ci.com/crudadmin/crudadmin"><img src="https://api.travis-ci.com/crudadmin/crudadmin.svg" alt="Build Status"></a>
 <a href="https://packagist.org/packages/crudadmin/crudadmin"><img src="https://poser.pugx.org/crudadmin/crudadmin/v/stable.svg" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/crudadmin/crudadmin"><img src="https://poser.pugx.org/crudadmin/crudadmin/license.svg" alt="License"></a>
 </p>

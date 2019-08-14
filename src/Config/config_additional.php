@@ -28,6 +28,8 @@ return [
         'app/Http',
         'app/Http/Controllers',
         'app/Http/Middleware',
+        'app/Mail',
+        'app/Notifications',
         'resources/views',
         'resources/assets/js',
         'resources/js',
