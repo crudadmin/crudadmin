@@ -53,10 +53,21 @@ class FieldSelectTest extends BrowserTestCase
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
+
+                    //Test default values in filter select
                     ->assertSelectValues(SelectType::class, 'select_filter_by_id', ['hellboy 8'])
                     ->assertDontSee('my filter by auto-table')
                     ->fillForm(SelectType::class, ['select_filter_by_id' => 'hellboy 8'])
-                    ->assertSelectValues(SelectType::class, 'comments_id', ['comment 2 9', 'comment 1 9']);
+                    ->assertSelectValues(SelectType::class, 'comments_id', ['comment 2 9', 'comment 1 9'])
+
+                    //Test save form, and check if values are reseted, and then again available
+                    ->fillForm(SelectType::class, ['score_input' => 6])
+                    ->assertSelectValues(SelectType::class, 'select_filter_by_id', ['hastrman 6'])
+                    ->fillForm(SelectType::class, ['select_filter_by_id' => 'hastrman 6'])
+                    ->submitForm()->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
+
+                    //After save, check if default value is again seted
+                    ->assertSelectValues(SelectType::class, 'select_filter_by_id', ['hellboy 8']);
         });
     }
 
