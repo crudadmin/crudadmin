@@ -3,8 +3,9 @@
 namespace Admin\Fields\Mutations;
 
 use Admin;
-use Fields;
+use Admin\Core\Fields\Mutations\FieldToArray;
 use Admin\Core\Fields\Mutations\MutationRule;
+use Fields;
 
 class InterfaceRules extends MutationRule
 {
