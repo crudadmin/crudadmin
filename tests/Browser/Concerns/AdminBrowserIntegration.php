@@ -9,6 +9,17 @@ use Illuminate\Foundation\Auth\User;
 trait AdminBrowserIntegration
 {
     /**
+     * Returns model builder selector for laravel dusk
+     *
+     * @param  Admin\Eloquent\AdminModel  $model
+     * @return string
+     */
+    public function getModelBuilderSelector($model)
+    {
+        return '@model-builder"][data-model="'.$model->getTable();
+    }
+
+    /**
      * Open model page.
      * @param  class $model
      * @return object

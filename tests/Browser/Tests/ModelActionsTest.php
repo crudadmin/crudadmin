@@ -136,8 +136,8 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Model1::class)
 
                     //Click multiple items and then press button action
-                    ->click('tr[data-id="1"]')
-                    ->click('tr[data-id="2"]')
+                    ->click('tr[data-id="1"] td[data-field="id"]')
+                    ->click('tr[data-id="2"] td[data-field="id"]')
                     ->click('[data-action-list] button')
                     ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')
                     ->whenAvailable('.modal .modal-footer', function() use($browser) {

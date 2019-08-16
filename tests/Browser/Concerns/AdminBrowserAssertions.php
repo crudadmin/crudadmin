@@ -143,8 +143,8 @@ trait AdminBrowserAssertions
 
             $hasLocale = $model->hasFieldParam($key, 'locale', true);
 
-            $this->assertVue('row.'.$key.($locale && $hasLocale ? '.'.$locale : ''), $value, '@model-builder');
-            $this->assertVue('model.fields.'.$key.'.value'.($locale && $hasLocale ? '.'.$locale : ''), $value, '@model-builder');
+            $this->assertVue('row.'.$key.($locale && $hasLocale ? '.'.$locale : ''), $value, $this->getModelBuilderSelector($model));
+            $this->assertVue('model.fields.'.$key.'.value'.($locale && $hasLocale ? '.'.$locale : ''), $value, $this->getModelBuilderSelector($model));
         }
 
         return $this;
@@ -178,6 +178,7 @@ trait AdminBrowserAssertions
     public function assertEmptyValue($model, $key, $locale = null)
     {
         $model = $this->getModelClass($model);
+        $modelBuilder = $this->getModelBuilderSelector($model);
 
         //Create multiple key selector for multiple type fields
         $selectorKey = $locale ? $key.'['.$locale.']' : '';
@@ -195,21 +196,21 @@ trait AdminBrowserAssertions
         //Check javascript input value
         PHPUnit::assertEquals($expected, $actual, 'Input ['.$selectorKey.'] is not empty in ['.$model->getTable().'] form.');
 
-        $row = $this->vueAttribute('@model-builder', $rowKey = 'row.'.$key);
-        $value = $this->vueAttribute('@model-builder', $valueKey = 'model.fields.'.$key.'.value');
+        $row = $this->vueAttribute($modelBuilder, $rowKey = 'row.'.$key);
+        $value = $this->vueAttribute($modelBuilder, $valueKey = 'model.fields.'.$key.'.value');
 
         //Check vuejs row value
         if ($locale && is_array($row)) {
-            $this->assertVue($rowKey.'.'.$locale, null, '@model-builder');
+            $this->assertVue($rowKey.'.'.$locale, null, $modelBuilder);
         } else {
-            $this->assertVue($rowKey, null, '@model-builder');
+            $this->assertVue($rowKey, null, $modelBuilder);
         }
 
         //Check vuejs field value
         if ($locale && is_array($value)) {
-            $this->assertVue($valueKey.'.'.$locale, null, '@model-builder');
+            $this->assertVue($valueKey.'.'.$locale, null, $modelBuilder);
         } else {
-            $this->assertVue($valueKey, null, '@model-builder');
+            $this->assertVue($valueKey, null, $modelBuilder);
         }
 
         return $this;
