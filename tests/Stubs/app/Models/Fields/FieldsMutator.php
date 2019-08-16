@@ -17,6 +17,8 @@ class FieldsMutator extends AdminModel
      */
     protected $name = 'Fields mutators';
 
+    protected $group = 'fields';
+
     /*
      * Automatic form and database generation
      * @name - field name

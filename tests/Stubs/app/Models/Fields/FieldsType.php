@@ -16,6 +16,8 @@ class FieldsType extends AdminModel
      */
     protected $name = 'Fields types';
 
+    protected $group = 'fields';
+
     /*
      * Automatic form and database generation
      * @name - field name

@@ -18,6 +18,8 @@ class FieldsRelation extends AdminModel
      */
     protected $name = 'Fields relations';
 
+    protected $group = 'fields';
+
     /*
      * Automatic form and database generation
      * @name - field name
