@@ -170,7 +170,7 @@ trait AdminModelTrait
         //Remove hidden fields
         foreach ($this->getFields() as $key => $field) {
             //Skip hidden fields and fields with long values
-            if ($this->hasFieldParam($key, 'hidden', true)) {
+            if ($this->hasFieldParam($key, 'hidden', true) && in_array($key, $fields) ) {
                 unset($fields[array_search($key, $fields)]);
             }
         }
