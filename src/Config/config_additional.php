@@ -11,8 +11,8 @@ return [
      */
     'models' => [
         'App' => app_path(),
-        'App/Model' => app_path('Model'),
-        'App/Eloquent' => app_path('Eloquent'),
+        'App\Model' => app_path('Model'),
+        'App\Eloquent' => app_path('Eloquent'),
     ],
 
     /*
