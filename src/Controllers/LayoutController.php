@@ -74,7 +74,7 @@ class LayoutController extends BaseController
             //Set parent row into model
             $parent_row = Admin::getModelByTable($parent_table)->withoutGlobalScopes()->find($subid);
 
-            $model->withModelParentRow($parent_row);
+            $model->setParentRow($parent_row);
         }
 
         $data = (new AdminRows($model))->returnModelData($parent_table, $subid, $langid, $limit, $page, $count);
