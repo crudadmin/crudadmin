@@ -263,6 +263,8 @@ class AdminRows
         //Filter rows by language id and parent id
         $query->filterByParentOrLanguage($subid, $langid, $parent_table);
 
+        $query->filterByParentGroup();
+
         if (is_callable($callback)) {
             call_user_func_array($callback, [$query]);
         }
@@ -416,7 +418,10 @@ class AdminRows
                     }
                 }, $parent_table);
 
-                $all_rows_data = $this->model->adminRows()->filterByParentOrLanguage($subid, $langid, $parent_table);
+                $all_rows_data = $this->model->adminRows()
+                                             ->filterByParentOrLanguage($subid, $langid, $parent_table)
+                                             ->filterByParentGroup();
+
             }
 
             $data = [

@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
+use Fields;
 use Carbon\Carbon;
 use Admin\Helpers\AdminCollection;
 use Illuminate\Database\Eloquent\Builder;
@@ -212,6 +213,46 @@ trait AdminModelTrait
                 $query->whereNull($this->getForeignColumn($this->getTable()));
             }
         }
+    }
+
+    /**
+     * Filter admin rows by parent group settings
+     */
+    public function scopeFilterByParentGroup($query)
+    {
+        //If is no admin parent model
+        if ( !$parent = $this->getParentRow() )
+            return;
+
+        $groups = $parent->getFieldsGroups();
+
+        foreach ($this->flattenGroups($groups) as $group) {
+            if ( $group instanceof Admin\Fields\Group && $group->getModel() === $this->getTable() && $closure = $group->getWhere() ) {
+                return $closure($query, $this->getParentRow());
+            }
+        }
+    }
+
+    /**
+     * Flatten fields model groups
+     *
+     * @param  mixed  $groups
+     * @param  array|null  $array
+     * @return array
+     */
+    public function flattenGroups($groups, $array = [])
+    {
+        if ( !is_array($groups) ) {
+            return $array;
+        }
+
+        foreach ($groups as $group) {
+            if ( Fields::isFieldGroup($group) ) {
+                $array = array_merge($array, [$group], $this->flattenGroups($group->fields));
+            }
+        }
+
+        return $array;
     }
 
     /*

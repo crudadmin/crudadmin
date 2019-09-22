@@ -10,11 +10,63 @@ use Admin\Core\Fields\Group as BaseGroup;
  */
 class Group extends BaseGroup
 {
+    /**
+     * Width of group
+     *
+     * @var  string
+     */
     public $width = 'full';
 
+    /**
+     * Icon of group
+     *
+     * @var  string|null
+     */
     public $icon = null;
 
+    /**
+     * Model of tab group for relationship support
+     *
+     * @var  string|null
+     */
     public $model = null;
+
+    /**
+     * Where query for model relationship in tab group
+     *
+     * @var  Closure
+     */
+    public $where = null;
+
+    /**
+     * Returns icon of group
+     *
+     * @return  string
+     */
+    public function getIcon()
+    {
+        return $this->icon;
+    }
+
+    /**
+     * Returns model of groups
+     *
+     * @return  string
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    /**
+     * Returns where closure for tabs relationships
+     *
+     * @return Closure
+     */
+    public function getWhere()
+    {
+        return $this->where;
+    }
 
     /**
      * Set width of group.
@@ -124,6 +176,19 @@ class Group extends BaseGroup
     public function inline()
     {
         $this->width = $this->width.'-inline';
+
+        return $this;
+    }
+
+    /**
+     * Set where query for tab group relationship
+     *
+     * @param  Closure  $closure
+     * @return Group
+     */
+    public function where(\Closure $closure)
+    {
+        $this->where = $closure;
 
         return $this;
     }
