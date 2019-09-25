@@ -131,7 +131,6 @@ class ModelLocalizationTest extends BrowserTestCase
         $data = [
             'string' => 'This is my string example value',
             'text' => 'This is my text example value',
-            'editor' => '<p>This is my editor <strong>example</strong> value</p>',
             'select' => 'option a',
             'integer' => '10',
             'decimal' => '11.50',
@@ -141,6 +140,7 @@ class ModelLocalizationTest extends BrowserTestCase
             'time' => date('H:00'),
             'checkbox' => true,
             'radio' => 'b',
+            'editor' => '<p>This is my editor <strong>example</strong> value</p>',
         ];
 
         return isset($key) ? $data[$key] : $data;
