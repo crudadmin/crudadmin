@@ -66,17 +66,19 @@ trait AdminModelTrait
         //because we do need loaded all models to perform
         //this features...
         if (Admin::isLoaded() === true) {
-            //Remove hidden when is required in admin
-            $this->removeHidden();
+            $this->cachableFieldsProperties(function($fields){
+                //Remove hidden when is required in admin
+                $this->removeHidden($fields);
+            });
         }
     }
 
     /*
      * Set selectbox field to automatic json format
      */
-    protected function makeCastable()
+    protected function makeCastable($fields)
     {
-        parent::makeCastable();
+        parent::makeCastable($fields);
 
         //Add cast for order field
         if ($this->isSortable()) {
@@ -87,9 +89,9 @@ trait AdminModelTrait
     /**
      * Set fillable property for laravel model from admin fields.
      */
-    protected function makeFillable()
+    protected function makeFillable($fields)
     {
-        parent::makeFillable();
+        parent::makeFillable($fields);
 
         //Allow language foreign
         if ($this->isEnabledLanguageForeign()) {
@@ -111,17 +113,13 @@ trait AdminModelTrait
     /*
      * Remove uneccessary properties from model in administration
      */
-    protected function removeHidden()
+    protected function removeHidden($fields)
     {
-        if (Admin::isAdmin() == false) {
-            return;
-        }
-
         if ($this->getTable() == 'users') {
             return;
         }
 
-        $columns = array_merge(array_keys($this->getFields()), ['id', 'created_at', 'updated_at', 'published_at', 'deleted_at', '_order', 'slug', 'language_id']);
+        $columns = array_merge(array_keys($fields), ['id', 'created_at', 'updated_at', 'published_at', 'deleted_at', '_order', 'slug', 'language_id']);
 
         foreach ($columns as $column) {
             if (in_array($column, $this->hidden)) {
