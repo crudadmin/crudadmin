@@ -37,11 +37,18 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsType::class, $row)
 
                     //Check if custom component is modified properly
+                    //Also check if row events has been triggered properly
                     ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with my custom value value.')
+                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'my custom value')
+                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'true')
 
                     //Check if form has been successfully saved
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
+
+                    //Check if component values are reseted after new row has been created
+                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'no value')
+                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'no value')
 
                     //Check if form values has been successfully reseted after save and validation errors are gone
                     ->closeAlert()
@@ -54,6 +61,12 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     //Open row, update it, and check if still has same values after update without changing anything
                     ->openRow(1)
                     ->assertHasFormValues(FieldsType::class, $row)
+
+                    //Check if row events has been triggered on new row open
+                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'my custom value')
+                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'true')
+
+                    //Update row and check if has same values
                     ->fillForm(FieldsType::class, [
                         'password' => $this->getFormData('password'),
                     ])

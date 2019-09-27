@@ -360,12 +360,16 @@ class AdminRows
         foreach ((array) $this->model->getProperty('layouts') as $key => $class) {
             //Load inline template
             if ($this->isInlineTemplateKey($key)) {
-                $layouts[] = [
-                    'name' => 'AnonymousLayout'.$i.strtoupper($key[0]).Str::camel(substr($key, 1)),
-                    'type' => 'vuejs',
-                    'position' => $key,
-                    'view' => (new Layout)->renderVueJs($class),
-                ];
+                $classes = array_wrap($class);
+
+                foreach ($classes as $componentName) {
+                    $layouts[] = [
+                        'name' => strtoupper($componentName[0]).Str::camel(substr($componentName, 1)).'_'.$i.'AnonymousLayout',
+                        'type' => 'vuejs',
+                        'position' => $key,
+                        'view' => (new Layout)->renderVueJs($componentName),
+                    ];
+                }
             }
 
             //Load template with layout class
