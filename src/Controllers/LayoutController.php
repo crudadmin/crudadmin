@@ -156,7 +156,10 @@ class LayoutController extends BaseController
         $count = count($belongsToModel);
 
         //If is model related recursive to itself
-        if ($count == 1 && in_array(class_basename(get_class($model)), $belongsToModel)) {
+        if (
+            ($count == 1 && in_array(class_basename(get_class($model)), $belongsToModel))
+            || $model->getProperty('inMenu', false) === true
+        ) {
             return false;
         }
 
@@ -200,6 +203,7 @@ class LayoutController extends BaseController
 
             if ($model->hasModelGroup()) {
                 $tree = $model->getModelGroupsTree();
+
                 $count = count($tree);
 
                 $reference = &$groups;

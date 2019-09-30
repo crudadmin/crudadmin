@@ -138,6 +138,11 @@ class AdminModel extends CoreAdminModel
     protected $inTab = true;
 
     /*
+     * Show model in menu even if is relation
+     */
+    protected $inMenu = false;
+
+    /*
      * If child model can be added without parent model
      */
     protected $withoutParent = false;
