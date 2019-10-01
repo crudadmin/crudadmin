@@ -125,6 +125,9 @@ trait AdminModelTrait
      */
     protected function removeHidden()
     {
+        if ( Admin::isAdmin() == false )
+            return;
+
         if ($this instanceof Authenticatable) {
             $this->hidden = [];
 
