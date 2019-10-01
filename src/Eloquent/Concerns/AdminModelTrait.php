@@ -3,9 +3,10 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
-use Fields;
-use Carbon\Carbon;
+use Admin\Eloquent\Authenticatable;
 use Admin\Helpers\AdminCollection;
+use Carbon\Carbon;
+use Fields;
 use Illuminate\Database\Eloquent\Builder;
 
 trait AdminModelTrait
@@ -124,7 +125,16 @@ trait AdminModelTrait
      */
     protected function removeHidden()
     {
-        if ($this->getTable() == 'users') {
+        if ($this instanceof Authenticatable) {
+            $this->hidden = [];
+
+            foreach ($this->getFields() as $key => $field) {
+                //Hide all password fields
+                if ( $this->isFieldType($key, 'password') ) {
+                    $this->hidden[] = $key;
+                }
+            }
+
             return;
         }
 
