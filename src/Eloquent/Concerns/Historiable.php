@@ -10,7 +10,7 @@ trait Historiable
     /*
      * Save actual model row into history
      */
-    public function historySnapshot($request, $original = null)
+    public function historySnapshot($request = [], $original = null)
     {
         return Admin::getModel('ModelsHistory')->pushChanges($this, $request, $original);
     }

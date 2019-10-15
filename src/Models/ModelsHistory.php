@@ -124,7 +124,7 @@ class ModelsHistory extends Model
         $changes = [];
 
         //Get also modified field by mutators, which are not in request
-        $data = array_merge($data, $this->array_diff_recursive($model->attributesToArray(), $data));
+        $data = array_merge($this->array_diff_recursive($model->attributesToArray(), $data), $data);
 
         //Compare changes
         foreach ($data as $key => $value) {
@@ -156,6 +156,10 @@ class ModelsHistory extends Model
      */
     public function pushChanges($model, $data, $original = null, $initial = false)
     {
+        //We need reset all hidden fields for history
+        //We want monitor all fields...
+        $model = (clone $model)->setHidden([]);
+
         foreach (['_id', '_order', '_method', '_model', 'language_id'] as $key) {
             if (array_key_exists($key, $data)) {
                 unset($data[$key]);
