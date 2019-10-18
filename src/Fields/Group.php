@@ -55,7 +55,10 @@ class Group extends BaseGroup
      */
     public function getModel()
     {
-        return $this->model;
+        if ( ! $this->model )
+            return;
+
+        return (new $this->model)->getTable();
     }
 
     /**
@@ -103,7 +106,7 @@ class Group extends BaseGroup
      */
     public function model($model)
     {
-        $this->model = (new $model)->getTable();
+        $this->model = $model;
 
         return $this;
     }
