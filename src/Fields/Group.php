@@ -25,11 +25,18 @@ class Group extends BaseGroup
     public $icon = null;
 
     /**
-     * Model of tab group for relationship support
+     * Model table name of tab group for relationship support
      *
      * @var  string|null
      */
     public $model = null;
+
+    /**
+     * Namespace of model relation
+     *
+     * @var  string|null
+     */
+    public $modelNamespace = null;
 
     /**
      * Where query for model relationship in tab group
@@ -55,10 +62,17 @@ class Group extends BaseGroup
      */
     public function getModel()
     {
-        if ( ! $this->model || ! class_exists($this->model) )
+        if ( ! $this->modelNamespace || ! class_exists($this->modelNamespace) ) {
             return;
+        }
 
-        return (new $this->model)->getTable();
+        //If table name is cached already
+        if ( $this->model ) {
+            return $this->model;
+        }
+
+        //Cache table name
+        return $this->model = (new $this->modelNamespace)->getTable();
     }
 
     /**
@@ -106,7 +120,7 @@ class Group extends BaseGroup
      */
     public function model($model)
     {
-        $this->model = $model;
+        $this->modelNamespace = $model;
 
         return $this;
     }
@@ -209,11 +223,9 @@ class Group extends BaseGroup
      */
     public function build()
     {
-        $object = clone $this;
+        //Set model table name into group
+        $this->getModel();
 
-        if ( $model = $this->getModel() )
-            $object->model = $model;
-
-        return $object;
+        return $this;
     }
 }
