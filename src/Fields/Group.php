@@ -55,7 +55,7 @@ class Group extends BaseGroup
      */
     public function getModel()
     {
-        if ( ! $this->model )
+        if ( ! $this->model || ! class_exists($this->model) )
             return;
 
         return (new $this->model)->getTable();
@@ -204,13 +204,16 @@ class Group extends BaseGroup
         return $this->type == 'tab';
     }
 
-    /**
-     * Returns groups of fields with correct order.
-     * @param  [type] $model [description]
-     * @return [type]        [description]
+    /*
+     * Build group class
      */
-    public static function build(AdminModel $model)
+    public function build()
     {
-        return \Fields::getFieldsGroups($model);
+        $object = clone $this;
+
+        if ( $model = $this->getModel() )
+            $object->model = $model;
+
+        return $object;
     }
 }

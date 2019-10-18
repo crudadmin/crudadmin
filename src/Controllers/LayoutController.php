@@ -288,7 +288,7 @@ class LayoutController extends BaseController
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
             'fields' => $this->getModelFields($model, $withOptions),
-            'fields_groups' => Group::build($model),
+            'fields_groups' => $model->getFieldsGroups(),
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
             'components' => $model->getFieldsComponents($initial_request),
