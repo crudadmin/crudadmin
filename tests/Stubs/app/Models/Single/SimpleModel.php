@@ -1,28 +1,23 @@
 <?php
 
-namespace Admin\Tests\App\Models\Articles;
+namespace Admin\Tests\App\Models\Single;
 
 use Admin\Eloquent\AdminModel;
+use Admin\Fields\Group;
 
-class ArticlesComment extends AdminModel
+class SimpleModel extends AdminModel
 {
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2019-05-04 12:10:15';
+    protected $migration_date = '2019-10-22 11:10:04';
 
     /*
      * Template name
      */
-    protected $name = 'Comments';
+    protected $name = 'Model with inParent';
 
-    protected $title = 'This is comments relation test.';
-
-    protected $belongsToModel = [Article::class, self::class];
-
-    protected $sortable = false;
-
-    protected $withoutParent = true;
+    protected $group = 'single';
 
     /*
      * Automatic form and database generation
@@ -34,7 +29,8 @@ class ArticlesComment extends AdminModel
     public function fields()
     {
         return [
-            'name' => 'name:Comment|type:string',
+            'name' => 'name:Article name|type:string',
+            'content' => 'name:Content data|type:text|required',
         ];
     }
 }

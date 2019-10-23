@@ -145,4 +145,16 @@ trait AdminIntegration
 
         return $row1;
     }
+
+    /*
+     * Return keys inParent mode, with table keys prefix
+     */
+    public function prefixModeKeys($model, $keys)
+    {
+        $model = $this->getModelClass($model);
+
+        return array_map(function($key) use($model) {
+            return $model->getModelFormPrefix($key);
+        }, $keys);
+    }
 }

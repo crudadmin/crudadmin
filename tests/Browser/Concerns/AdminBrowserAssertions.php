@@ -144,7 +144,11 @@ trait AdminBrowserAssertions
             $hasLocale = $model->hasFieldParam($key, 'locale', true);
 
             $this->assertVue('row.'.$key.($locale && $hasLocale ? '.'.$locale : ''), $value, $this->getModelBuilderSelector($model));
-            $this->assertVue('model.fields.'.$key.'.value'.($locale && $hasLocale ? '.'.$locale : ''), $value, $this->getModelBuilderSelector($model));
+
+            //If we want check id in assigned model data, we dont check it in field values, because ID nevers exists
+            if ( $key !== 'id' ) {
+                $this->assertVue('model.fields.'.$key.'.value'.($locale && $hasLocale ? '.'.$locale : ''), $value, $this->getModelBuilderSelector($model));
+            }
         }
 
         return $this;
@@ -183,6 +187,7 @@ trait AdminBrowserAssertions
         //Create multiple key selector for multiple type fields
         $selectorKey = $locale ? $key.'['.$locale.']' : '';
         $selectorKey = ($isMultiple = $model->hasFieldParam($key, ['multiple'])) ? $key.'[]' : $key;
+        $selectorKey = $this->modifyInParentKey($model, $selectorKey);
 
         //In some types of elements we need search for checked elements
         $stateSelector = $model->isFieldType($key, ['radio', 'checkbox']) ? ':checked' : '';

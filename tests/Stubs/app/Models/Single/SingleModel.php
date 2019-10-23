@@ -3,6 +3,7 @@
 namespace Admin\Tests\App\Models\Single;
 
 use Admin\Eloquent\AdminModel;
+use Admin\Fields\Group;
 
 class SingleModel extends AdminModel
 {
@@ -18,6 +19,8 @@ class SingleModel extends AdminModel
 
     protected $single = true;
 
+    protected $group = 'single';
+
     /*
      * Automatic form and database generation
      * @name - field name
@@ -29,7 +32,9 @@ class SingleModel extends AdminModel
     {
         return [
             'name' => 'name:Article name|type:string',
-            'content' => 'name:Content data|type:text',
+            'content' => 'name:Content data|type:text|required',
+            'file' => 'name:file|type:file',
+            'date' => 'name:datum|type:date',
         ];
     }
 }

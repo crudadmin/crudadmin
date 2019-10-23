@@ -87,10 +87,16 @@ class FieldSelectTest extends BrowserTestCase
                     ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
                     ->fillForm(ModelLocalization::class, ['name' => 'new sk option value'], 'sk')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
+
+                    //Update existing row
+                    ->openRow(1, ModelLocalization::class)
+                    ->fillForm(ModelLocalization::class, ['name' => 'updated existing sk row'], 'sk')
+                    ->saveForm()->closeAlert()->click('button[data-create-new-row]')
+
                     ->click('.modal-header button.close')->pause(300)
 
                     //Check if new created row is selected in select
-                    ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'sk option'])
+                    ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'updated existing sk row'])
                     ->assertHasFormValues(SelectType::class, ['langs_id' => 3], 'sk')
 
                     //On english language change check select options, then add english row and check new item in options
@@ -104,7 +110,7 @@ class FieldSelectTest extends BrowserTestCase
 
                     //On changing language to slovak, check options
                     ->changeRowLanguage('sk')
-                    ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'sk option']);
+                    ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'updated existing sk row']);
         });
     }
 }

@@ -126,6 +126,7 @@ trait AdminBrowserIntegration
 
         foreach ($array as $key => $value) {
             $formKey = $model->hasFieldParam($key, 'locale', true) ? $key.'['.$locale.']' : $key;
+            $formKey = $this->modifyInParentKey($model, $formKey);
 
             //Set string value
             if (
@@ -297,7 +298,7 @@ trait AdminBrowserIntegration
         $this->click($selector = '.buttons-options'.$modelSelector.' button[data-button="edit"][data-id="'.$id.'"]');
 
         //Wait till row will be opened
-        $this->waitFor($selector.'.btn-success');
+        $this->waitFor($selector.'.btn-success', 100);
 
         return $this;
     }
@@ -323,6 +324,27 @@ trait AdminBrowserIntegration
     }
 
     /**
+     * If is single model in relation support, add table prefix before key
+     * @param  string|object $model
+     * @param  string $key
+     * @return string
+     */
+    public function modifyInParentKey($model, $key)
+    {
+        $model = $this->getModelClass($model);
+
+        if (
+            $model->getProperty('single') === true
+            && $model->getProperty('inParent') === true
+            && $model->getBelongsToRelation()
+        ){
+            $key = $model->getModelFormPrefix($key);
+        }
+
+        return $key;
+    }
+
+    /**
      * Return selectors to validation error message and error parent class.
      * @param  string $model
      * @param  string $key
@@ -337,6 +359,8 @@ trait AdminBrowserIntegration
         if ($model->hasFieldParam($key, ['multiple', 'array']) && strpos($key, '[]') === false) {
             $key .= '[]';
         }
+
+        $key = $this->modifyInParentKey($model, $key);
 
         //Reset error message selector and error class selector
         $selectorMessage = null;
@@ -366,6 +390,7 @@ trait AdminBrowserIntegration
         if (! $selectorMessage) {
             throw new Exception('Field ['.$key.'] in model ['.$model->getTable().'] is not valid type.');
         }
+
         //Check if element does not
         return [
             'key' => $key,
@@ -377,9 +402,16 @@ trait AdminBrowserIntegration
     /**
      * Submit new instance of form.
      */
-    public function submitForm()
+    public function submitForm($model = null)
     {
-        return $this->waitFor('button[data-action-type="create"]')
+        $prefix = '';
+
+        //If model is given, then restrict only given model button
+        if ( $model && $model = $this->getModelClass($model) ) {
+            $prefix = '[data-footer="'.$model->getTable().'"] ';
+        }
+
+        return $this->waitFor($prefix.'button[data-action-type="create"]')
                     ->press(trans('admin::admin.send'))
                     ->waitUntilMissing('button[data-action-type="loading"]')->pause(200);
     }
@@ -389,7 +421,9 @@ trait AdminBrowserIntegration
      */
     public function saveForm()
     {
-        return $this->waitFor('button[data-action-type="update"]')->press(trans('admin::admin.save'));
+        return $this->waitFor('button[data-action-type="update"]')
+                    ->press(trans('admin::admin.save'))
+                    ->waitUntilMissing('button[data-action-type="loading"]');
     }
 
     /**

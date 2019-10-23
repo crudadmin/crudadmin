@@ -30,14 +30,14 @@ Route::group(['middleware' => 'admin'], function () {
     Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
 
     //Requests
-    Route::get('/admin/api/show/{model}/{id}/{subid?}', 'DataController@show');
-    Route::post('/admin/api/store', 'DataController@store');
-    Route::put('/admin/api/update', 'DataController@update');
-    Route::post('/admin/api/buttonAction', 'DataController@buttonAction');
-    Route::post('/admin/api/togglePublishedAt', 'DataController@togglePublishedAt');
-    Route::post('/admin/api/updateOrder', 'DataController@updateOrder');
-    Route::get('/admin/api/getHistory/{model}/{id}', 'DataController@getHistory');
-    Route::get('/admin/api/getTranslations/{id}', 'DataController@getTranslations');
-    Route::post('/admin/api/updateTranslations/{id}', 'DataController@updateTranslations');
-    Route::delete('/admin/api/delete', 'DataController@delete');
+    Route::get('/admin/api/show/{model}/{id}/{subid?}', 'Crud\DataController@show');
+    Route::post('/admin/api/store', 'Crud\InsertController@store');
+    Route::put('/admin/api/update', 'Crud\UpdateController@update');
+    Route::post('/admin/api/buttonAction', 'Crud\DataController@buttonAction');
+    Route::post('/admin/api/togglePublishedAt', 'Crud\DataController@togglePublishedAt');
+    Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
+    Route::get('/admin/api/getHistory/{model}/{id}', 'Crud\DataController@getHistory');
+    Route::get('/admin/api/getTranslations/{id}', 'GettextController@getTranslations');
+    Route::post('/admin/api/updateTranslations/{id}', 'GettextController@updateTranslations');
+    Route::delete('/admin/api/delete', 'Crud\DataController@delete');
 });

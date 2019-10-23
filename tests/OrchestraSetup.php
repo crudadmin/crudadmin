@@ -73,6 +73,7 @@ trait OrchestraSetup
             'level1' => 'My tree level 1',
             'level1.level2' => 'My subtree level',
             'level1.level2.level3' => 'My sub-subtree level',
+            'single' => 'Single model',
         ]);
 
         //Allow history module

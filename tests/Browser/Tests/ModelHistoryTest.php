@@ -41,6 +41,7 @@ class ModelHistoryTest extends BrowserTestCase
                     ->changeRowLanguage('en')
                     ->fillForm(History::class, $updatedRow, 'en')
                     ->saveForm()
+
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()->pause(300);
 

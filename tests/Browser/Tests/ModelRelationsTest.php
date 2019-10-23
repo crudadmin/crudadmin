@@ -48,12 +48,12 @@ class ModelRelationsTest extends BrowserTestCase
 
                     //Open created related row, and test recursivity support
                     ->openRow(5, ArticlesComment::class)
-                    ->click('[tab-model="articles_comments"] [data-tabs][data-model="articles_comments"]')
+                    ->jsClick('[data-tab-model="articles_comments"] [data-tabs][data-model="articles_comments"]:not([default-tab])')
                     ->fillForm(ArticlesComment::class, ['name' => 'new recursive comment'], null, '[data-depth="2"]')
                     ->submitForm()->closeAlert()
                     ->assertSeeIn('[data-tabs][data-depth="0"][data-model="articles_comments"]', 'Comments (4)')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [5, 3, 2, 1], true, '[data-depth="1"]')
-                    ->assertSeeIn('[data-tabs][data-depth="1"][data-model="articles_comments"]', 'Comments (1)')
+                    ->assertSeeIn('[data-tabs][data-depth="1"][data-model="articles_comments"]:not([default-tab])', 'Comments (1)')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [6], true, '[data-depth="2"]')
 
                     //Open second row, and check relations data
@@ -78,6 +78,42 @@ class ModelRelationsTest extends BrowserTestCase
                 ['id' => 3, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'comment 3'],
                 ['id' => 2, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'comment 2'],
                 ['id' => 1, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'comment 1'],
+            ], ArticlesComment::select(['id', 'article_id', 'articles_comment_id', 'name'])->get()->toArray());
+        });
+    }
+
+    public function test_add_first_child_relations_and_then_parent()
+    {
+        $articleRow = ['name' => 'my test article', 'score' => 5];
+
+        $this->browse(function (DuskBrowser $browser) use ($articleRow) {
+            $browser->openModelPage(Article::class)
+                    //Click on related model and check given data
+                    ->click('[data-tabs][data-model="articles_comments"]')
+
+                    //Add 2 related comments
+                    ->fillForm(ArticlesComment::class, ['name' => 'new related comment'])->submitForm()->closeAlert()
+                    ->fillForm(ArticlesComment::class, ['name' => 'new related comment 1'])->submitForm()->closeAlert()
+
+                    //Check if new row has been given into table
+                    ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (2)')
+                    // ->assertColumnRowData(ArticlesComment::class, 'id', [2, 1])
+
+                    //Open default tab
+                    ->jsClick('[data-tabs][data-model="articles"]:contains('.trans('admin::admin.general-tab').')')
+
+                    //Open created related row, and test recursivity support
+                    ->fillForm(Article::class, $articleRow)
+                    ->submitForm(Article::class)->closeAlert()
+
+                    //Assert if another relation has no related data
+                    ->openRow(1, Article::class)
+                    ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (2)');
+
+            //Check if all data are correct
+            $this->assertEquals([
+                ['id' => 2, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'new related comment 1'],
+                ['id' => 1, 'article_id' => 1, 'articles_comment_id' => null, 'name' => 'new related comment'],
             ], ArticlesComment::select(['id', 'article_id', 'articles_comment_id', 'name'])->get()->toArray());
         });
     }

@@ -123,6 +123,11 @@ class AdminModel extends CoreAdminModel
     protected $single = false;
 
     /*
+     * Is single relation model merged with parent form
+     */
+    protected $inParent = false;
+
+    /*
      * History feature for model
      */
     protected $history = false;

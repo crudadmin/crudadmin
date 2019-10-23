@@ -382,4 +382,15 @@ trait AdminModelTrait
     {
         return resource_path('views/admin/components/fields');
     }
+
+    /*
+     * Return form keys prefix for given model
+     */
+    public function getModelFormPrefix($key = '')
+    {
+        if ( $this->getProperty('inParent') === false )
+            return $key;
+
+        return '$'.$this->getTable().'_'.$key;
+    }
 }

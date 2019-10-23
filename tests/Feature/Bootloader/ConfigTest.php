@@ -38,6 +38,8 @@ class ConfigTest extends TestCase
             '2019-07-14 12:10:05' => 'Admin\Tests\App\Models\History\History',
             '2019-09-16 11:10:04' => 'Admin\Tests\App\Models\Single\SingleModel',
             '2019-09-16 11:15:04' => 'Admin\Tests\App\Models\Single\SingleModelRelation',
+            '2019-10-16 11:15:04' => 'Admin\Tests\App\Models\Single\SingleModelGroupRelation',
+            '2019-10-22 11:10:04' => 'Admin\Tests\App\Models\Single\SimpleModel',
         ]);
     }
 }
