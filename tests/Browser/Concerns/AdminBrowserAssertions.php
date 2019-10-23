@@ -119,15 +119,16 @@ trait AdminBrowserAssertions
      * @param  class $model
      * @param  array  $array
      * @param  string  $locale
+     * @param  bool  $withAllFields
      * @return object
      */
-    public function assertHasFormValues($model, $array = [], $locale = null)
+    public function assertHasFormValues($model, $array = [], $locale = null, $withAllFields = false)
     {
         $model = $this->getModelClass($model);
 
         foreach ($array as $key => $value) {
             //Editor and file are not binding row values for now
-            if ($model->isFieldType($key, ['editor', 'file'])) {
+            if ($model->isFieldType($key, ['editor', 'file']) || $withAllFields === true) {
                 continue;
             }
 

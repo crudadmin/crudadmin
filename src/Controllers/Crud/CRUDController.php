@@ -5,8 +5,10 @@ namespace Admin\Controllers\Crud;
 use Admin;
 use Admin\Controllers\Controller;
 use Admin\Requests\DataRequest;
-use Localization;
 use Ajax;
+use Illuminate\Validation\ValidationException;
+use Localization;
+use Validator;
 
 class CRUDController extends Controller
 {
@@ -41,18 +43,7 @@ class CRUDController extends Controller
             if ( $child->getProperty('inParent') === false )
                 continue;
 
-            $childRequest = new DataRequest;
-
-            foreach ($request->all() as $key => $value) {
-                //Remove all form inputs which does not belongs to actual child request
-                if ( strpos($key, $child->getModelFormPrefix()) !== false ) {
-                    $childRequest->merge([
-                        str_replace($child->getModelFormPrefix(), '', $key) => $value
-                    ]);
-
-                    $request->replace($request->except($key));
-                }
-            }
+            $childRequest = $this->getChildRequest($child, $request);
 
             $childRequest->applyMutators($child);
 
@@ -63,6 +54,25 @@ class CRUDController extends Controller
         }
 
         return $requests;
+    }
+
+    /*
+     * Return cleaned child request
+     */
+    public function getChildRequest($child, $request)
+    {
+        $childRequest = new DataRequest;
+
+        foreach ($request->all() as $key => $value) {
+            //Remove all form inputs which does not belongs to actual child request
+            if ( strpos($key, $child->getModelFormPrefix()) !== false ) {
+                $childRequest->merge([
+                    str_replace($child->getModelFormPrefix(), '', $key) => $value
+                ]);
+            }
+        }
+
+        return $childRequest;
     }
 
 
@@ -187,54 +197,84 @@ class CRUDController extends Controller
     {
         $rows = [];
 
-        $table = request('_model');
+        $table = $request->get('_model');
 
         $model = Admin::getModelByTable($table);
 
-        //If is updating row, then load parent row for correct request rules
-        //Because if some fields are filled, they may not be required, etc..
-        $row = $update ? ($rows[$table] = $model->findOrFail(request('_id'))) : null;
-
         //Get parent validation rules
-        $rules = $this->getValidationRulesByAdminModel($model, $row, $request, $update);
+        $parentValidationErrors = $this->getParentValidationErrors($model, $rows, $request, $update, $table);
 
         //Get childs rules of parent model
-        $childRules = $this->getChildRules($model, $rows, $request, $update);
+        $childValidation = $this->getChildValidationErrors($model, $rows, $request, $update);
 
-        //Add additional child rules into parent request
-        $rules = array_merge($rules, $childRules);
+        //All validation errors
+        $errors = array_merge($parentValidationErrors, $childValidation);
 
-        //Wohoo, validate
-        $this->validate($request, $rules);
+        //Throw validation error
+        if ( count($errors) ) {
+            $error = ValidationException::withMessages($errors);
+
+            throw $error;
+        }
 
         //Return all validated model rows
         return $rows;
     }
 
     /*
-     * Add additional child relation rules
+     * Return parent validation errors
      */
-    public function getChildRules($model, &$rows, $request, $update = false)
+    public function getParentValidationErrors($model, &$rows, $request, $update, $table)
     {
-        $rules = [];
+        //If is updating row, then load parent row for correct request rules
+        //Because if some fields are filled, they may not be required, etc..
+        $row = $update ? ($rows[$table] = $model->findOrFail($request->get('_id'))) : null;
+
+        $rules = $this->getValidationRulesByAdminModel($model, $row, $request, $update);
+
+        return $this->testRequestValidation($rules, $request, $model);
+    }
+
+    /*
+     * Return parent validation errors
+     */
+    public function getChildValidationErrors($model, &$rows, $request, $update = false)
+    {
+        $errors = [];
 
         foreach ($model->getModelChilds() as $child) {
             if ( $child->getProperty('inParent') === false )
                 continue;
 
+            $childRequest = $this->getChildRequest($child, $request);
+
             //If is updating of existing row, then check if relation does exists in database
             $row = $update ? (
-                $rows[$child->getTable()] = $child->find(request($child->getModelFormPrefix('_id')))
+                $rows[$child->getTable()] = $child->find($childRequest->get('_id'))
             ) : null;
 
             //Get child relation validation for specific row
             $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $update);
 
-            //Add child rules into rules set
-            $rules = array_merge($childRules, $rules);
+            $errors = array_merge($errors, $this->testRequestValidation($childRules, $childRequest, $child));
         }
 
-        return $rules;
+        return $errors;
+    }
+
+    public function testRequestValidation($rules, $request, $model)
+    {
+        $errors = [];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ( $validator->fails() ) {
+            foreach ($validator->errors()->messages() as $key => $validationErrors) {
+                $errors[$model->getModelFormPrefix($key)] = $validationErrors;
+            }
+        }
+
+        return $errors;
     }
 
     /*
@@ -255,9 +295,6 @@ class CRUDController extends Controller
             } else {
                 $key = $validation_key;
             }
-
-            //Add inParent prefix
-            $key = $model->getModelFormPrefix($key);
 
             //If field is hidden from form, then remove required rule
             if ($this->isHiddenField($model, $originalKey)) {
@@ -282,7 +319,7 @@ class CRUDController extends Controller
         }
 
         //Check for additional validation mutator
-        $updatedRules = $this->mutateRequestByRules($model, $updatedRules, $update);
+        $updatedRules = $this->mutateRequestByRules($model, $updatedRules, $update, $request);
 
         return $updatedRules;
     }
@@ -290,11 +327,11 @@ class CRUDController extends Controller
     /*
      * Mutate admin validation request
      */
-    public function mutateRequestByRules($model, $rules = [], $update = false)
+    public function mutateRequestByRules($model, $rules = [], $update = false, $request = null)
     {
-        $model->getAdminRules(function ($rule) use (&$rules, $update, $model) {
+        $model->getAdminRules(function ($rule) use (&$rules, $update, $model, $request) {
             if (method_exists($rule, 'validate')) {
-                $rules = $rule->validate($rules, $update, $model);
+                $rules = $rule->validate($rules, $update, $model, $request);
             }
         });
 

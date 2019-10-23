@@ -57,17 +57,26 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
         $this->assertRowExists(FieldsTypesMultiple::class, $row);
     }
 
+    private function getRowWithOneRemovedFile($row)
+    {
+        unset($row['file_multiple'][1]);
+        $row['file_multiple'] = array_values($row['file_multiple']);
+
+        return $row;
+    }
+
     /** @test */
     public function test_fields_types_multiple_update_existing_row()
     {
         $create = $this->getFormData();
         $update = $this->getFormDataUpdated();
         $rowUpdated = $this->createUpdatedRecord(FieldsTypesMultiple::class, $create, $update);
+        $rowWithoutFile = $this->getRowWithOneRemovedFile($rowUpdated);
 
         //Create sample row
         FieldsTypesMultiple::create($this->buildDbData(FieldsTypesMultiple::class, $create));
 
-        $this->browse(function (DuskBrowser $browser) use ($create, $update, $rowUpdated) {
+        $this->browse(function (DuskBrowser $browser) use ($create, $update, $rowUpdated, $rowWithoutFile) {
             $browser->openModelPage(FieldsTypesMultiple::class)
                     //Open row and check if has correct values
                     ->openRow(1)
@@ -78,10 +87,15 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsTypesMultiple::class, $rowUpdated)
 
                     //Wait one second for proper component state and save updated row and check if has correct values
-                    ->saveForm()
-                    ->assertSeeSuccess(trans('admin::admin.success-save'))
-                    ->closeAlert()
+                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()
                     ->assertHasFormValues(FieldsTypesMultiple::class, $rowUpdated)
+
+                    //Remove one item from file upload, and save form 2 times, because if something happens
+                    //with missing file, it will be obvious after 2 form saves.
+                    ->jsClick('[data-field="file_multiple"] .chosen-choices li:contains(image3.jpg) a')->pause(300)
+                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()->pause(300)
+                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()
+                    ->assertHasFormValues(FieldsTypesMultiple::class, $rowWithoutFile, null, true)
 
                     //Reset form after update and check for empty values
                     ->press(trans('admin::admin.new-row'))
@@ -89,10 +103,10 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Check if table contains of correct column values
                     ->pause(100)
-                    ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($rowUpdated));
+                    ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($rowWithoutFile));
         });
 
-        $this->assertRowExists(FieldsTypesMultiple::class, $rowUpdated);
+        $this->assertRowExists(FieldsTypesMultiple::class, $rowWithoutFile);
     }
 
     public function getFormData()
