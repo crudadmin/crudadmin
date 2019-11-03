@@ -47,7 +47,7 @@ class User extends Authenticatable
     {
         return [
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
-            'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:30|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
+            'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:60|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
             'password' => 'name:Heslo|type:password|confirmed|min:4|max:40|'.(isset($row) ? '' : '|required'),
             'avatar' => 'name:Profilová fotografia|type:file|image',
             'enabled' => 'name:Aktívny|type:checkbox|default:1',

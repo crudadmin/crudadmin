@@ -323,9 +323,7 @@ trait AdminModelTrait
      */
     public function getAdminRows()
     {
-        $this->addGlobalScope('adminRows', function (Builder $builder) {
-            $builder->adminRows();
-        });
+        $this->adminRows();
 
         return $this;
     }
