@@ -207,7 +207,7 @@ trait Sluggable
         $slugcolumn = $this->getProperty('sluggable');
 
         //Set slug
-        if ( array_key_exists($slugcolumn, $array) )
+        if ( array_key_exists($slugcolumn, $array) && mb_strlen($array[$slugcolumn], 'UTF-8') > 0 )
         {
             $slug = $this->makeSlug($array[ $slugcolumn ]);
 
