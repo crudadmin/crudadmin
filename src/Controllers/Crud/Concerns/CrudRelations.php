@@ -9,7 +9,7 @@ trait CRUDRelations
     /*
      * Add/update belongs to many rows into pivot table from selectbox
      */
-    protected function updateBelongsToMany($model, $row)
+    protected function updateBelongsToMany($model, $row, $request)
     {
         foreach ($model->getFields() as $key => $field) {
             if (array_key_exists('belongsToMany', $field)) {
@@ -17,12 +17,12 @@ trait CRUDRelations
 
                 DB::table($properties[3])->where($properties[6], $row->getKey())->delete();
 
-                if (! request()->has($key)) {
+                if (! $request->has($key)) {
                     continue;
                 }
 
                 //Add relations
-                foreach (request($key) as $key => $id) {
+                foreach ($request->get($key) as $key => $id) {
                     if (! is_numeric($id)) {
                         continue;
                     }
