@@ -548,7 +548,7 @@ class Admin
             {
                 foreach ($list as $package)
                 {
-                    if ( $package->name == 'marekgogol/crudadmin' )
+                    if ( $package->name == 'crudadmin/crudadmin' )
                         return $package->version;
                 }
             }
