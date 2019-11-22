@@ -91,7 +91,7 @@ class InsertController extends CRUDController
                     return Ajax::mysqlError($e);
                 }
 
-                $this->updateBelongsToMany($model, $row);
+                $this->updateBelongsToMany($model, $row, $request);
 
                 $this->insertUnsavedChilds($row, $request);
 
