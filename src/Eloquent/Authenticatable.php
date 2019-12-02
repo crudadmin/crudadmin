@@ -169,7 +169,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             $this->avatar = $this->avatar->resize(100, 100)->url;
         }
 
-        if (Admin::isRolesEnabled()) {
+        if ($this->canApplyUserRoles()) {
             $this->load('adminsGroups');
         }
 
