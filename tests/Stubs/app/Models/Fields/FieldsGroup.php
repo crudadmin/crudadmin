@@ -46,7 +46,7 @@ class FieldsGroup extends AdminModel
                 Group::tab([
                     'field10' => 'name:my field 10|required',
                     'field11' => 'name:my field 11|required',
-                ])->id('my_tab')->icon('fa-gifht')->name('my tab 3'),
+                ])->id('my_tab')->icon('fa-gift')->name('my tab 3'),
                 'my tab 4' => Group::tab([
                     'field12' => 'name:my field 12|required',
                     'field13' => 'name:my field 13|required',

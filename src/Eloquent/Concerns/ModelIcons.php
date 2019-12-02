@@ -42,6 +42,8 @@ trait ModelIcons
             'statistic' => 'fa-chart-pie',
             'analysis' => 'fa-chart-pie',
             'delivery' => 'fa-truck',
+            'service' => 'fa-bars',
+            'sector' => 'fa-bars',
             'category' => 'fa-bars',
             'department' => 'fa-bars',
             'about' => 'fa-info',
