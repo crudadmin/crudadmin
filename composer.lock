@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dd71d50df889afa429a2336cd4c47396",
+    "content-hash": "a7ea8c0b45d6d83f312cf9f37a544073",
     "packages": [
         {
             "name": "crudadmin/framework",

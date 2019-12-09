@@ -96,6 +96,7 @@ class ModelRelationsTest extends BrowserTestCase
                     ->fillForm(ArticlesComment::class, ['name' => 'new related comment 1'])->submitForm()->closeAlert()
 
                     //Check if new row has been given into table
+                    ->waitForElement('[data-tabs][data-model="articles_comments"]:contains("Comments (2)"):visible')
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (2)')
                     // ->assertColumnRowData(ArticlesComment::class, 'id', [2, 1])
 
@@ -108,6 +109,7 @@ class ModelRelationsTest extends BrowserTestCase
 
                     //Assert if another relation has no related data
                     ->openRow(1, Article::class)
+                    ->waitForElement('[data-tabs][data-model="articles_comments"]:contains("Comments (2)"):visible')
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (2)');
 
             //Check if all data are correct
