@@ -30,6 +30,7 @@ class AuthenticationTest extends BrowserTestCase
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->visit(admin_action('Auth\LoginController@showLoginForm'))
+                    ->assertSee('My Admin123')
                     ->type('email', $this->credentials['email'])
                     ->type('password', 'superpassword')
                     ->press(trans('admin::admin.login'))

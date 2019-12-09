@@ -2,10 +2,13 @@
 
 namespace Admin\Tests\Browser;
 
-use Admin\Tests\OrchestraSetup;
-use Orchestra\Testbench\Dusk\TestCase;
+use Admin\Tests\Browser\Concerns\SendDebugMail;
 use Admin\Tests\Concerns\AdminIntegration;
 use Admin\Tests\Concerns\FeatureAssertions;
+use Admin\Tests\OrchestraSetup;
+use Orchestra\Testbench\Dusk\TestCase;
+use Mail;
+use File;
 
 class BrowserTestCase extends TestCase
 {
@@ -37,6 +40,19 @@ class BrowserTestCase extends TestCase
 
         $this->unInstallAdmin();
         $this->installAdmin();
+    }
+
+    protected function tearDown(): void
+    {
+        if ( env('MAIL_DEVELOPER') ) {
+            Mail::to(env('MAIL_DEVELOPER'))->send(new SendDebugMail);
+
+            //Remove sent screenshoots
+            $files = File::allFiles('tests/Browser/screenshots');
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
     }
 
     protected function getEnvironmentSetUp($app)
