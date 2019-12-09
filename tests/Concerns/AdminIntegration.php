@@ -30,6 +30,11 @@ trait AdminIntegration
         if (isset($uses[DropUploads::class])) {
             $this->dropUploads();
         }
+
+        //Registers own event for dropping uploads data after test
+        if (isset($uses[DebugTravis::class])) {
+            $this->sendMails();
+        }
     }
 
     /**
