@@ -28,7 +28,14 @@ class SendDebugMail extends Mailable
     public function build()
     {
         $files = File::allFiles('tests/Browser/screenshots');
+        $logs = File::allFiles(storage_path('logs'));
 
-        return $this->view('dusk_failure', compact('files'));
+        $mail = $this->view('dusk_failure', compact('files'));
+
+        foreach ($logs as $file) {
+            $mail->attach($file);
+        }
+
+        return $mail;
     }
 }
