@@ -154,6 +154,7 @@ trait OrchestraSetup
             $this->getBasePath().'/resources/lang/sk',
             $this->getBasePath().'/public/vendor/crudadmin/dist/version',
             $this->getBasePath().'/public/vendor/crudadmin/css',
+            $this->getBasePath().'/public/vendor/crudadmin/js',
         ];
     }
 
