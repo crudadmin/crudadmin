@@ -35,6 +35,7 @@ class BrowserTestCase extends TestCase
 
         $this->withFactories(__DIR__.'/../Factories');
 
+        $this->unInstallAdmin();
         $this->installAdmin();
     }
 
