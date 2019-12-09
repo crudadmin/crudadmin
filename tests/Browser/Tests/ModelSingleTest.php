@@ -83,6 +83,7 @@ class ModelSingleTest extends BrowserTestCase
 
                     //Open added rows
                     ->openRow(1, SimpleModel::class)
+                    ->waitUntilVue('row.name', 'This is my string example value', $browser->getModelBuilderSelector(SingleModelGroupRelation::class))
                     ->assertHasFormValues(SimpleModel::class, $row + ['id' => 1])
                     ->assertHasFormValues(SingleModelGroupRelation::class, $inParentRow + ['id' => 1])
 
@@ -105,6 +106,7 @@ class ModelSingleTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($row, $inParentRow) {
             $browser->openModelPage(SingleModel::class)
+                    ->waitForText('Single model relation (0)')
                     ->clickLink('inParent relation')
 
                     //Fill and save inParent form

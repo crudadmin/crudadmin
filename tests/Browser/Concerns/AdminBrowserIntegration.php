@@ -16,6 +16,8 @@ trait AdminBrowserIntegration
      */
     public function getModelBuilderSelector($model)
     {
+        $model = $this->getModelClass($model);
+
         return '@model-builder"][data-model="'.$model->getTable();
     }
 
@@ -32,7 +34,8 @@ trait AdminBrowserIntegration
              ->visit(admin_action('DashboardController@index').'#/page/'.$model->getTable());
 
         //Wait till page loads and loader will disappear
-        return $this->waitFor('h1')->waitUntilMissing('.overlay');
+        return $this->waitFor('h1')
+                    ->waitUntilMissing('.box .overlay');
     }
 
     /**

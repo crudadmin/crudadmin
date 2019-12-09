@@ -43,16 +43,18 @@ class ModelHistoryTest extends BrowserTestCase
                     ->saveForm()
 
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
-                    ->closeAlert()->pause(300);
+                    ->closeAlert();
 
             //Check if updated row snapshot correctly exists
             $rowSnapshot = $this->getHistoryRow(2, $this->createLangArray($updatedRow, $row, ['en', 'sk']));
             $this->assertRowExists(ModelsHistory::class, $rowSnapshot, 2);
 
             //Open history switcher
-            $browser->click('[data-id="1"] [data-button="history"]')->pause(400)
-                    ->assertSeeIn('[data-history-id="1"] td[data-changes-length]', count($row))
-                    ->assertSeeIn('[data-history-id="2"] td[data-changes-length]', count($updatedRow));
+            $browser->click('[data-id="1"] [data-button="history"]')
+                    ->whenAvailable('.modal', function($modal) use($row, $updatedRow) {
+                        $modal->assertSeeIn('[data-history-id="1"] td[data-changes-length]', count($row))
+                              ->assertSeeIn('[data-history-id="2"] td[data-changes-length]', count($updatedRow));
+                    });
 
             //Open first row values and check editor values, also check history button state
             $browser->click('[data-history-id="1"] button')->pause(1000)->scrollToElement()
@@ -66,8 +68,11 @@ class ModelHistoryTest extends BrowserTestCase
                     ->assertHasClass('[data-id="1"] [data-button="history"]', 'enabled-history');
 
             //Open actual history row and check values
-            $browser->click('[data-id="1"] [data-button="history"]')->pause(400)
-                    ->click('[data-history-id="2"] button')->pause(500)
+            $browser->click('[data-id="1"] [data-button="history"]')
+                    ->whenAvailable('.modal', function($modal) use($row, $updatedRow) {
+                        $modal->click('[data-history-id="2"] button');
+                    })
+                    ->waitUntilMissing('.modal')
                     ->assertHasFormValues(History::class, $updatedRow, 'en');
 
             //Also check colorized changes
@@ -122,10 +127,10 @@ class ModelHistoryTest extends BrowserTestCase
     public function getUpdatedRow()
     {
         return [
-            'string' => 'this is my updated string value',
+            'string' => 'This is my updated string value',
             'decimal' => '5.20',
-            'text' => 'this is my updated text value',
-            'editor' => '<p>this is my updated locale editor value</p>',
+            'text' => 'This is my updated text value',
+            'editor' => '<p>This is my updated locale editor value</p>',
             'time' => '15:00',
         ];
     }
