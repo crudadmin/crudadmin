@@ -300,6 +300,8 @@ trait AdminBrowserIntegration
         //Wait till row will be opened
         $this->waitFor($selector.'.btn-success', 100);
 
+        $this->resetFocus();
+
         return $this;
     }
 
@@ -413,7 +415,7 @@ trait AdminBrowserIntegration
 
         return $this->waitFor($prefix.'button[data-action-type="create"]')
                     ->press(trans('admin::admin.send'))
-                    ->waitUntilMissing('button[data-action-type="loading"]')->pause(200);
+                    ->waitUntilMissing('button[data-action-type="updating"]')->pause(200);
     }
 
     /**
@@ -423,7 +425,7 @@ trait AdminBrowserIntegration
     {
         return $this->waitFor('button[data-action-type="update"]')
                     ->press(trans('admin::admin.save'))
-                    ->waitUntilMissing('button[data-action-type="loading"]');
+                    ->waitUntilMissing('button[data-action-type="updating"]');
     }
 
     /**
