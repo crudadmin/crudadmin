@@ -14,6 +14,7 @@ trait ModelIcons
             'gallery' => 'fa-file-image',
             'photo' => 'fa-file-image',
             'form' => 'fa-wpforms',
+            'submission' => 'fa-wpforms',
             'user' => 'fa-users',
             'news' => 'far fa-newspaper',
             'bulletin' => 'far fa-newspaper',
@@ -83,6 +84,9 @@ trait ModelIcons
             'contract' => 'far fa-file-alt',
             'place' => 'fa-map-marker',
             'company' => 'far fa-building',
+            'field' => 'fa-keyboard',
+            'chart' => 'fa-chart-line',
+            'risk' => 'fa-chart-line',
         ];
     }
 

@@ -21,7 +21,7 @@ class FieldsServiceProvider extends ServiceProvider
         Fields::addAttribute([
             'title', 'placeholder', 'hidden', 'disabled', 'orderBy', 'limit', 'multirows',
             'invisible', 'component', 'column_name', 'removeFromForm', 'hideFromForm', 'phone_link',
-            'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate',
+            'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate', 'removeFromFormIf', 'removeFromFormIfNot'
         ]);
 
         //Add CrudAdmin additional column type

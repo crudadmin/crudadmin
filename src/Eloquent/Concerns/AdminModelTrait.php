@@ -63,6 +63,9 @@ trait AdminModelTrait
         //Checks if is model in sortable mode
         $this->setOrder();
 
+        //Remove visible fields in model
+        $this->removeVisible();
+
         //If admin models has been loaded
         //because we do need loaded all models to perform
         //this features...
@@ -157,6 +160,17 @@ trait AdminModelTrait
                 }
             }
         }
+    }
+
+    /*
+     * Remove uneccessary visible properties from model in administration
+     */
+    protected function removeVisible()
+    {
+        if ( Admin::isAdmin() == false )
+            return;
+
+        $this->visible = [];
     }
 
     /*
