@@ -486,9 +486,26 @@ class AdminMigrationCommand extends Command
 
         $prefix = $languages->first()->slug;
 
-        $model->getConnection()->table( $model->getTable() )->whereRaw('NOT JSON_VALID('.$key.')')->update([
-            $key => DB::raw( 'CONCAT("{\"'.$prefix.'\": \"", REPLACE(REPLACE(REPLACE('.$key.', \'"\', \'\\\\"\'), \'\r\', \'\'), \'\n\', \'\'), "\"}")' )
-        ]);
+        $toJson = 'CONCAT("{\"'.$prefix.'\": \"",
+            REPLACE(
+                REPLACE(
+                    REPLACE(
+                        REPLACE(
+                            '.$key.',
+                            \'"\', \'\\\\"\'
+                        ),
+                    \'\r\', \'\'),
+                \'\t\', \'\'),
+            \'\n\', \'\')
+        , "\"}")';
+
+        $model->getConnection()
+                ->table( $model->getTable() )
+                ->whereRaw('NOT JSON_VALID('.$key.')')
+                ->whereRaw('JSON_VALID('.$toJson.')')
+                ->update([
+                    $key => DB::raw($toJson)
+                ]);
     }
 
     /*
