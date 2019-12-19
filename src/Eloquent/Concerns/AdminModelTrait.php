@@ -405,4 +405,22 @@ trait AdminModelTrait
 
         return '$'.$this->getTable().'_'.$key;
     }
+
+    /**
+     * Clone the model into a new, non-existing instance.
+     * We need replicate model without _order column.
+     * If we would keep previous _order, new row will have same order...
+     * And this will cause weird behaviour in administration...
+     *
+     * @param  array|null  $except
+     * @return static
+     */
+    public function replicate(array $except = null)
+    {
+        if ( $this->isSortable() ) {
+            return parent::replicate(array_merge($except ?: [], ['_order']));
+        }
+
+        return parent::replicate($except);
+    }
 }
