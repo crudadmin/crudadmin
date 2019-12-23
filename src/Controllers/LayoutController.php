@@ -16,6 +16,7 @@ class LayoutController extends BaseController
     {
         return [
             'version' => Admin::getVersion(),
+            'version_resources' => Admin::getResourcesVersion(),
             'version_assets' => Admin::getAssetsVersion(),
             'license_key' => config('admin.license_key'),
             'user' => auth()->guard('web')->user()->getAdminUser(),

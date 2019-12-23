@@ -89,7 +89,7 @@ class Admin extends AdminCore
     /*
      * Returns version of package from packagelist
      */
-    protected function getPackageVersion()
+    protected function getPackageVersion($packageName)
     {
         $composer_file = base_path('composer.lock');
 
@@ -102,7 +102,7 @@ class Admin extends AdminCore
 
             foreach ([$json->packages, $json->{'packages-dev'}] as $list) {
                 foreach ($list as $package) {
-                    if ($package->name == 'crudadmin/crudadmin') {
+                    if ($package->name == $packageName) {
                         return $package->version;
                     }
                 }
@@ -122,7 +122,15 @@ class Admin extends AdminCore
             return 'dev-test';
         }
 
-        return $this->getPackageVersion() ?: 'dev-master';
+        return $this->getPackageVersion('crudadmin/crudadmin') ?: 'dev-master';
+    }
+
+    /*
+     * Returns version of package
+     */
+    public function getResourcesVersion()
+    {
+        return $this->getPackageVersion('crudadmin/resources') ?: 'dev-master';
     }
 
     /*
@@ -181,7 +189,7 @@ class Admin extends AdminCore
         //Create directory if not exists
         File::makeDirs($directory);
 
-        $this->files->put($directory.'version.txt', self::getVersion());
+        $this->files->put($directory.'version.txt', self::getResourcesVersion());
 
         $htaccess = $directory.'.htaccess';
 

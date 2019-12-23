@@ -54,7 +54,7 @@ class DataController extends CRUDController
      */
     private function canDeleteRow($model, $row, $request)
     {
-        if ($row->canDelete($row) !== true) {
+        if ($row->canDelete() !== true) {
             return false;
         }
 

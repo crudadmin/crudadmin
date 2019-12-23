@@ -201,7 +201,7 @@ class AdminModel extends CoreAdminModel
     /*
      * Check if user can delete row
      */
-    public function canDelete($row)
+    public function canDelete()
     {
         return true;
     }
