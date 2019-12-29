@@ -92,7 +92,11 @@ class Localization
 
         return \Admin::isEnabledLocalization()
             && app()->runningInConsole() == false
+
+            //We does not want to enable localization in administration. Also for routes rendering
             && $segment != 'admin'
+
+            //We also does not need to load translations in uploads folder
             && $segment != 'uploads';
     }
 

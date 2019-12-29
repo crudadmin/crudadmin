@@ -2,6 +2,7 @@
 
 namespace Admin\Providers;
 
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,6 +16,8 @@ class SEOServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('seo', \Admin\Helpers\SEO::class);
+
+        $this->registerRouteMacros();
     }
 
     public function boot()
@@ -38,10 +41,23 @@ class SEOServiceProvider extends ServiceProvider
         /*
          * Create directives for setting an SEO property
          */
-        foreach (['title', 'description', 'keywords', 'image', 'author'] as $key) {
+        foreach (['title', 'description', 'keywords', 'image', 'author', 'seogroup'] as $key) {
             Blade::directive($key, function ($value) use ($key) {
                 return "<?php SEO::set('$key', $value) ?>";
             });
         }
+    }
+
+    /*
+     * Add support for
+     * Route::get('/', ...)->seo(...)
+     */
+    public function registerRouteMacros()
+    {
+        Route::macro('seo', function($param = null){
+            $this->action['seo'] = $param ?: [];
+
+            return $this;
+        });
     }
 }

@@ -66,6 +66,11 @@ return [
     'history' => false,
 
     /*
+     * Allow seo module
+     */
+    'seo' => false,
+
+    /*
      * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel
      * Useful to login into clients accounts with one password.
      */

@@ -48,5 +48,10 @@ class AdminServiceProvider extends ServiceProvider
         if (\Admin::isSluggableHistoryEnabled()) {
             \Admin::registerModel(\Admin\Models\SluggableHistory::class);
         }
+
+        //Seo
+        if (\Admin::isSeoEnabled()) {
+            \Admin::registerModel(\Admin\Models\Seo::class);
+        }
     }
 }

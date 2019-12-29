@@ -64,6 +64,10 @@ class LayoutController extends BaseController
     {
         $model = Admin::getModelByTable($table);
 
+        $initialOpeningRequest = $count == 0;
+
+        $data = [];
+
         //Check if user has allowed model
         if (! $model || ! auth()->guard('web')->user()->hasAccess($model)) {
             Ajax::permissionsError();
@@ -78,18 +82,34 @@ class LayoutController extends BaseController
             $model->setParentRow($parent_row);
         }
 
-        $data = (new AdminRows($model))->returnModelData($parent_table, $subid, $langid, $limit, $page, $count);
+        //On initial admin request
+        if ( $initialOpeningRequest === true && method_exists($model, 'beforeInitialAdminRequest') ) {
+            $data = array_merge($data, $model->beforeInitialAdminRequest() ?: []);
+        }
+
+        //Add rows data
+        $data = array_merge(
+            $data,
+            (new AdminRows($model))->returnModelData($parent_table, $subid, $langid, $limit, $page, $count)
+        );
 
         //Add token
         $data['token'] = csrf_token();
 
-        return $this->makePage(
+        //Add model data
+        $data['model'] = $this->makePage(
             $model,
-            $data,
             false,
             false,
-            $count == 0
+            $initialOpeningRequest
         );
+
+        //Modify intiial request data
+        if ( $initialOpeningRequest === true && method_exists($model, 'afterInitialAdminRequest') ) {
+            return $model->afterInitialAdminRequest($data);
+        }
+
+        return $data;
     }
 
     /*
@@ -200,7 +220,7 @@ class LayoutController extends BaseController
                 $model->setProperty('active', false);
             }
 
-            $page = $this->makePage($model, null, true, $initial_request);
+            $page = $this->makePage($model, true, $initial_request);
 
             if ($model->hasModelGroup()) {
                 $tree = $model->getModelGroupsTree();
@@ -241,12 +261,11 @@ class LayoutController extends BaseController
     /**
      * Return build model JSON instance.
      * @param  object  $model          model instance
-     * @param  object  $data           additional data for request
      * @param  bool $withChilds     return all model childs
      * @param  bool $layout_request if is first request for admin boot
      * @return json
      */
-    protected function makePage($model, $data = null, $withChilds = true, $initial_request = false, $withOptions = false)
+    protected function makePage($model, $withChilds = true, $initial_request = false, $withOptions = false)
     {
         $childs_models = $model->getModelChilds();
 
@@ -267,7 +286,7 @@ class LayoutController extends BaseController
             $childs[$child_model->getTable()] = $child;
         }
 
-        return array_merge((array) $data, [
+        return [
             'name' => $model->getProperty('name'),
             'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
@@ -295,7 +314,7 @@ class LayoutController extends BaseController
             'localization' => $model->isEnabledLanguageForeign(),
             'components' => $model->getFieldsComponents($initial_request),
             'submenu' => [],
-        ]);
+        ];
     }
 
     /*

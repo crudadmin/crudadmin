@@ -63,6 +63,14 @@ class Admin extends AdminCore
     }
 
     /*
+     * Check if is seo enabled
+     */
+    public function isSeoEnabled()
+    {
+        return config('admin.seo', false);
+    }
+
+    /*
      * Get stub path
      */
     public function stub($stub)

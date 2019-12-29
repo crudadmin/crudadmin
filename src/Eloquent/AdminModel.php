@@ -3,18 +3,19 @@
 namespace Admin\Eloquent;
 
 use Admin;
-use Localization;
+use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Admin\Eloquent\Concerns\AdminModelTrait;
+use Admin\Eloquent\Concerns\HasAttributes;
+use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\ModelIcons;
+use Admin\Eloquent\Concerns\ModelLayoutBuilder;
 use Admin\Eloquent\Concerns\ModelRules;
 use Admin\Eloquent\Concerns\Uploadable;
-use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Eloquent\Modules\SeoModule;
 use Illuminate\Database\Eloquent\Builder;
-use Admin\Eloquent\Concerns\HasAttributes;
-use Admin\Eloquent\Concerns\AdminModelTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Admin\Eloquent\Concerns\ModelLayoutBuilder;
-use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Localization;
 
 class AdminModel extends CoreAdminModel
 {
@@ -166,6 +167,18 @@ class AdminModel extends CoreAdminModel
      * Model icon
      */
     protected $icon = null;
+
+    /*
+     * Has available seo module
+     */
+    protected $seo = false;
+
+    /*
+     * Admin modules
+     */
+    protected $modules = [
+        SeoModule::class
+    ];
 
     /*
      * Filter rows by selected language
