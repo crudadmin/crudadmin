@@ -217,7 +217,7 @@ class LayoutController extends BaseController
 
             //Check if user has allowed model
             if (! auth()->guard('web')->user()->hasAccess($model)) {
-                $model->setProperty('active', false);
+                $model->setProperty('disableModel', true);
             }
 
             $page = $this->makePage($model, true, $initial_request);
@@ -278,7 +278,7 @@ class LayoutController extends BaseController
 
             // Check if user has allowed model
             if (! auth()->guard('web')->user()->hasAccess($child_model)) {
-                $child_model->setProperty('active', false);
+                $child_model->setProperty('disableModel', true);
             }
 
             $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
@@ -290,7 +290,7 @@ class LayoutController extends BaseController
             'name' => $model->getProperty('name'),
             'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
-            'active' => $model->getProperty('active'),
+            'active' => $model->getProperty('disableModel') ? false : $model->getProperty('active'),
             'foreign_column' => $model->getForeignColumn(),
             'without_parent' => $model->getProperty('withoutParent') ?: false,
             'in_tab' => $model->getProperty('inTab') ?: false,

@@ -76,7 +76,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
 
         $models = [];
 
-        if ($admin_groups = $this->adminsGroups) {
+        if ($admin_groups = $this->roles) {
             foreach ($admin_groups as $group) {
                 $models = array_merge($models, (array) $group->models);
             }
@@ -170,7 +170,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         }
 
         if ($this->canApplyUserRoles()) {
-            $this->load('adminsGroups');
+            $this->load('roles');
         }
 
         return $this->getAttributes() + $this->relationsToArray();
@@ -217,7 +217,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         if ($this->canApplyUserRoles()) {
             $fields->push([
                 'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',
-                'admins_groups' => 'name:admin::admin.admin-group|belongsToMany:admins_groups,name',
+                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name',
             ]);
         }
     }

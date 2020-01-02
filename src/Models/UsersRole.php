@@ -5,7 +5,7 @@ namespace Admin\Models;
 use Admin;
 use Admin\Eloquent\AdminModel;
 
-class AdminsGroup extends AdminModel
+class UsersRole extends AdminModel
 {
     /*
      * Model created date, for ordering tables in database and in user interface
@@ -77,7 +77,7 @@ class AdminsGroup extends AdminModel
         return $this->buildModelTree($parent, $tree);
     }
 
-    public function options()
+    public function getModelsOptions()
     {
         $models = Admin::getAdminModelNamespaces();
 
@@ -95,8 +95,13 @@ class AdminsGroup extends AdminModel
 
         uasort($options, 'strcoll');
 
+        return $options;
+    }
+
+    public function options()
+    {
         return [
-            'models' => $options,
+            'models' => $this->getModelsOptions(),
         ];
     }
 }
