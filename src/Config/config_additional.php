@@ -91,6 +91,7 @@ return [
      */
     'components' => [
         'resources/views/admin/components',
+        __DIR__.'/../Resources/components',
     ],
 
     /*
@@ -128,4 +129,9 @@ return [
      * Resources/ui service provider
      */
     'resources_provider' => Admin\Resources\Providers\AppServiceProvider::class,
+
+    /*
+     * Allow admin roles
+     */
+    'admin_roles' => false,
 ];

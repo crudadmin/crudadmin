@@ -399,9 +399,9 @@ class AdminRows
     public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null, $id = false)
     {
         try {
-            $without_parent = $parent_table && (int) $subid == 0;
+            $withoutData = $parent_table && (int) $subid == 0 || !admin()->hasAccess($this->model, 'read');
 
-            if (! $without_parent) {
+            if (! $withoutData) {
                 $paginated_rows_data = $this->getRowsData($subid, $langid, function ($query) use ($limit, $page, $count, $id) {
 
                     //Get specific id
@@ -429,10 +429,10 @@ class AdminRows
             }
 
             $data = [
-                'rows' => $without_parent ? [] : $this->getBaseRows($paginated_rows_data),
-                'count' => $without_parent ? 0 : $this->checkForSearching($all_rows_data)->count(),
+                'rows' => $withoutData ? [] : $this->getBaseRows($paginated_rows_data),
+                'count' => $withoutData ? 0 : $this->checkForSearching($all_rows_data)->count(),
                 'page' => $page,
-                'buttons' => $without_parent ? [] : $this->generateButtonsProperties($paginated_rows_data),
+                'buttons' => $withoutData ? [] : $this->generateButtonsProperties($paginated_rows_data),
                 'layouts' => $this->getLayouts($count),
             ];
         } catch (\Illuminate\Database\QueryException $e) {

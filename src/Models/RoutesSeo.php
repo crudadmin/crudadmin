@@ -41,15 +41,15 @@ class RoutesSeo extends AdminModel
     {
         return [
             // 'Url adresa' => Group::fields([
-                'url' => 'name:Url adresa|index|disabled|required',
-                // 'new_url' => 'name:Nová url adresa|index',
-                'group' => 'name:Skupina|index|invisible',
+                'url' => 'name:admin::admin.seoroutes-url|index|disabled|required',
+                // 'new_url' => 'name:admin::admin.seoroutes-newurl|index',
+                'group' => 'name:admin::admin.seoroutes-group|index|invisible',
             // ])->inline(),
             'Meta tagy' => Group::fields([
-                'title' => 'name:Titulok stránky',
-                'keywords' => 'name:Kľúčové slova',
-                'description' => 'name:Popis stránky|type:text|max:400',
-                'image' => 'name:Obrázky stránky|image|multiple',
+                'title' => 'name:admin::admin.seoroutes-title',
+                'keywords' => 'name:admin::admin.seoroutes-keywords',
+                'description' => 'name:admin::admin.seoroutes-description|type:text|max:400',
+                'image' => 'name:admin::admin.seoroutes-description|image|multiple',
             ]),
         ];
     }

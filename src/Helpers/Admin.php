@@ -43,7 +43,7 @@ class Admin extends AdminCore
      */
     public function isRolesEnabled()
     {
-        return config('admin.admin_groups', false);
+        return config('admin.admin_groups', false) || config('admin.admin_roles', false);
     }
 
     /*

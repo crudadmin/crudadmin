@@ -61,7 +61,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     /*
      * Get all allowed models from all groups which user owns
      */
-    public function permissions()
+    public function getUserPermissions()
     {
         if (Admin::isRolesEnabled() === false) {
             return [];
@@ -78,7 +78,18 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
 
         if ($admin_groups = $this->roles) {
             foreach ($admin_groups as $group) {
-                $models = array_merge($models, (array) $group->models);
+                $permissions = (array) json_decode($group->permissions ?: '{}', true);
+
+                //Remove all disabled permissions
+                foreach ($permissions as $modelKey => $model) {
+                    foreach ($model as $permissionKey => $state) {
+                        if ( $state === false ) {
+                            unset($permissions[$modelKey][$permissionKey]);
+                        }
+                    }
+                }
+
+                $models = array_merge($models, $permissions);
             }
         }
 
@@ -88,7 +99,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     /*
      * Check if has user allowed model by namespace
      */
-    public function hasAccess($model)
+    public function hasAccess($model, $permissionKey = true)
     {
         //If roles are not enabled, allow everything
         if (Admin::isRolesEnabled() === false) {
@@ -106,7 +117,18 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             $model = trim($model, '/');
         }
 
-        return in_array($model, $this->permissions());
+        $permissions = $this->getUserPermissions();
+
+        //Check if any permission is present
+        if ( $permissionKey === true ) {
+            //Check if has at least one true permission
+            if ( array_key_exists($model, $permissions) && count(array_keys($permissions[$model])) > 0 )
+                return true;
+
+            return false;
+        }
+
+        return array_key_exists($model, $permissions) && @$permissions[$model][$permissionKey] === true;
     }
 
     /*
@@ -217,7 +239,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         if ($this->canApplyUserRoles()) {
             $fields->push([
                 'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',
-                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name',
+                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd',
             ]);
         }
     }

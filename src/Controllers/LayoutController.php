@@ -19,7 +19,7 @@ class LayoutController extends BaseController
             'version_resources' => Admin::getResourcesVersion(),
             'version_assets' => Admin::getAssetsVersion(),
             'license_key' => config('admin.license_key'),
-            'user' => auth()->guard('web')->user()->getAdminUser(),
+            'user' => admin()->getAdminUser(),
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
             'gettext' => config('admin.gettext', false),
@@ -69,7 +69,7 @@ class LayoutController extends BaseController
         $data = [];
 
         //Check if user has allowed model
-        if (! $model || ! auth()->guard('web')->user()->hasAccess($model)) {
+        if (! $model || ! admin()->hasAccess($model)) {
             Ajax::permissionsError();
         }
 
@@ -84,7 +84,7 @@ class LayoutController extends BaseController
 
         //On initial admin request
         if ( $initialOpeningRequest === true && method_exists($model, 'beforeInitialAdminRequest') ) {
-            $data = array_merge($data, $model->beforeInitialAdminRequest() ?: []);
+            $data['model'] = $model->beforeInitialAdminRequest();
         }
 
         //Add rows data
@@ -97,16 +97,19 @@ class LayoutController extends BaseController
         $data['token'] = csrf_token();
 
         //Add model data
-        $data['model'] = $this->makePage(
-            $model,
-            false,
-            false,
-            $initialOpeningRequest
+        $data['model'] = array_merge(
+            @$data['model'] ?: [],
+            $this->makePage(
+                $model,
+                false,
+                false,
+                $initialOpeningRequest
+            )
         );
 
         //Modify intiial request data
         if ( $initialOpeningRequest === true && method_exists($model, 'afterInitialAdminRequest') ) {
-            return $model->afterInitialAdminRequest($data);
+            $data['model'] = $model->afterInitialAdminRequest($data['model']);
         }
 
         return $data;
@@ -216,7 +219,7 @@ class LayoutController extends BaseController
             }
 
             //Check if user has allowed model
-            if (! auth()->guard('web')->user()->hasAccess($model)) {
+            if (! admin()->hasAccess($model)) {
                 $model->setProperty('disableModel', true);
             }
 
@@ -277,7 +280,7 @@ class LayoutController extends BaseController
             }
 
             // Check if user has allowed model
-            if (! auth()->guard('web')->user()->hasAccess($child_model)) {
+            if (! admin()->hasAccess($child_model)) {
                 $child_model->setProperty('disableModel', true);
             }
 
@@ -286,7 +289,7 @@ class LayoutController extends BaseController
             $childs[$child_model->getTable()] = $child;
         }
 
-        return [
+        $data = [
             'name' => $model->getProperty('name'),
             'icon' => $model->getModelIcon(),
             'settings' => $model->getModelSettings(),
@@ -313,8 +316,27 @@ class LayoutController extends BaseController
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
             'components' => $model->getFieldsComponents($initial_request),
+            'permissions' => $this->checkPermissions($model),
             'submenu' => [],
         ];
+
+        //Mutate all parameters
+        if ( method_exists($model, 'adminModelRender') ) {
+            $data = $model->adminModelRender($data);
+        }
+
+        return $data;
+    }
+
+    protected function checkPermissions($model)
+    {
+        $permissions = [];
+
+        foreach ($model->getModelPermissions() as $permissionKey => $name) {
+            $permissions[$permissionKey] = admin()->hasAccess($model, $permissionKey);
+        }
+
+        return $permissions;
     }
 
     /*

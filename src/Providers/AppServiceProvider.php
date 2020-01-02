@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
     protected $routeMiddleware = [
         'admin' => Middleware\Authenticate::class,
         'admin.guest' => Middleware\RedirectIfAuthenticated::class,
+        'hasAdminRole' => Middleware\HasAdminRole::class,
     ];
 
     /**

@@ -180,7 +180,7 @@ class ModelsHistory extends Model
         }
 
         if ($initial === false) {
-            $user = auth()->guard('web')->user();
+            $user = admin();
         }
 
         $snap = [

@@ -31,13 +31,13 @@ Route::group(['middleware' => 'admin'], function () {
 
     //Requests
     Route::get('/admin/api/show/{model}/{id}/{subid?}', 'Crud\DataController@show');
-    Route::post('/admin/api/store', 'Crud\InsertController@store');
-    Route::put('/admin/api/update', 'Crud\UpdateController@update');
+    Route::post('/admin/api/store', 'Crud\InsertController@store')->middleware('hasAdminRole:insert');
+    Route::put('/admin/api/update', 'Crud\UpdateController@update')->middleware('hasAdminRole:update');
     Route::post('/admin/api/buttonAction', 'Crud\DataController@buttonAction');
-    Route::post('/admin/api/togglePublishedAt', 'Crud\DataController@togglePublishedAt');
+    Route::post('/admin/api/togglePublishedAt', 'Crud\DataController@togglePublishedAt')->middleware('hasAdminRole:publishable');
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
     Route::get('/admin/api/getHistory/{model}/{id}', 'Crud\DataController@getHistory');
     Route::get('/admin/api/getTranslations/{id}', 'GettextController@getTranslations');
     Route::post('/admin/api/updateTranslations/{id}', 'GettextController@updateTranslations');
-    Route::delete('/admin/api/delete', 'Crud\DataController@delete');
+    Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
 });

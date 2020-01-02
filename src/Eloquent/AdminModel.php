@@ -181,6 +181,33 @@ class AdminModel extends CoreAdminModel
     ];
 
     /*
+     * Returns model permissions for admin roles
+     */
+    public function getModelPermissions()
+    {
+        $permissions = [
+            'read' => trans('admin::admin.roles-read'),
+        ];
+
+        if ( $this->insertable ) {
+            $permissions['insert'] = trans('admin::admin.roles-insert');
+        }
+
+
+        $permissions['update'] = trans('admin::admin.roles-update');
+
+        if ( $this->publishable ) {
+            $permissions['publishable'] = trans('admin::admin.roles-publishable');
+        }
+
+        if ( $this->deletable ) {
+            $permissions['delete'] = trans('admin::admin.roles-delete');
+        }
+
+        return $permissions;
+    }
+
+    /*
      * Filter rows by selected language
      */
     public function scopeLocalization($query, $language_id = null)

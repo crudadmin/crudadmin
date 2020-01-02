@@ -20,7 +20,7 @@ class CRUDController extends Controller
         $model = Admin::getModelByTable($model)->getAdminRows();
 
         //Check if user has allowed model
-        if (! auth()->guard('web')->user()->hasAccess($model)) {
+        if (! admin()->hasAccess($model)) {
             Ajax::permissionsError();
         }
 
