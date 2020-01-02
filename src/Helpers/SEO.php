@@ -5,9 +5,10 @@ namespace Admin\Helpers;
 use Admin\Core\Helpers\File as AdminFile;
 use Admin\Eloquent\AdminModel;
 use Facades\Admin\Helpers\SEOService;
-use Admin\Models\Seo as SeoModel;
+use Admin\Models\RoutesSeo;
 use Gettext;
 use Route;
+use Admin;
 
 class SEO
 {
@@ -142,12 +143,17 @@ class SEO
 
     public function loadSeoRow()
     {
+        //If seo table is not enabled
+        if ( Admin::isSeoEnabled() === false ) {
+            return;
+        }
+
         //If seo row has been loaded
         if ( $this->seoRow || $this->seoRow === false ) {
             return $this->seoRow ?: null;
         }
 
-        $this->seoRows = SeoModel::select(['url', 'group', 'title', 'keywords', 'description', 'image'])
+        $this->seoRows = RoutesSeo::select(['url', 'group', 'title', 'keywords', 'description', 'image'])
                             ->where(function($query){
                                 $query->where('url', $this->getRouteUrl())
                                       ->orWhere('url', $this->getPathInfo());

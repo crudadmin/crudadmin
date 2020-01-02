@@ -51,7 +51,7 @@ class AdminServiceProvider extends ServiceProvider
 
         //Seo
         if (\Admin::isSeoEnabled()) {
-            \Admin::registerModel(\Admin\Models\Seo::class);
+            \Admin::registerModel(\Admin\Models\RoutesSeo::class);
         }
     }
 }

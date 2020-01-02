@@ -6,7 +6,7 @@ use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 use Facades\Admin\Helpers\SEOService;
 
-class Seo extends AdminModel
+class RoutesSeo extends AdminModel
 {
     /*
      * Model created date, for ordering tables in database and in user interface

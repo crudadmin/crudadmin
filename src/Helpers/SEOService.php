@@ -2,9 +2,9 @@
 
 namespace Admin\Helpers;
 
-use Admin\Models\Seo;
-use Localization;
 use Admin;
+use Admin\Models\RoutesSeo;
+use Localization;
 
 class SEOService
 {
@@ -28,7 +28,7 @@ class SEOService
     {
         $routes = $this->loadAllSeoRoutes();
 
-        $existingRoutes = Seo::select(['id', 'url', 'group'])
+        $existingRoutes = RoutesSeo::select(['id', 'url', 'group'])
                             ->whereIn('url', array_keys($routes))
                             ->orWhereNotNull('group')
                             ->get();
@@ -52,7 +52,7 @@ class SEOService
 
     public function createSeoRoute($route, $routeUri)
     {
-        return Seo::create([
+        return RoutesSeo::create([
             'url' => $routeUri,
             'group' => @$route->action['seo']['group'],
         ]);
