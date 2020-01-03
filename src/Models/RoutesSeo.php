@@ -49,7 +49,7 @@ class RoutesSeo extends AdminModel
                 'title' => 'name:admin::admin.seoroutes-title',
                 'keywords' => 'name:admin::admin.seoroutes-keywords',
                 'description' => 'name:admin::admin.seoroutes-description|type:text|max:400',
-                'image' => 'name:admin::admin.seoroutes-description|image|multiple',
+                'image' => 'name:admin::admin.seoroutes-images|image|multiple',
             ]),
         ];
     }
