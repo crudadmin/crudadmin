@@ -72,7 +72,7 @@ trait VueComponent
 
         preg_match("/\<$tagname.*?\>(.*?)\<\/$tagname\>/s", $string, $matches);
 
-        return trim($matches[1]);
+        return trim(@$matches[1]);
     }
 
     /*

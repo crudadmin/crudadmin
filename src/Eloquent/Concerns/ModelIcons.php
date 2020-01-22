@@ -87,6 +87,7 @@ trait ModelIcons
             'field' => 'fa-keyboard',
             'chart' => 'fa-chart-line',
             'risk' => 'fa-chart-line',
+            'tax' => 'fa-hand-holding-usd',
         ];
     }
 

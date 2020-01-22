@@ -139,8 +139,13 @@ class DataController extends CRUDController
         $data = [];
 
         foreach ($rows as $row) {
+            //We want disable all rules, because in this state
+            //are loaded only needed columns for publishing fields.
+            //and rules could break, because in rule may be needed more columns than this two.
+            $row->disableAllAdminRules(true);
             $row->published_at = $row->published_at == null ? Carbon::now() : null;
             $row->save();
+            $row->disableAllAdminRules(false);
 
             $data[$row->getKey()] = $row->published_at ? $row->published_at->toDateTimeString() : null;
         }

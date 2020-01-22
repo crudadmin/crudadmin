@@ -66,6 +66,9 @@ trait AdminModelTrait
         //Remove visible fields in model
         $this->removeVisible();
 
+        //Remove appends
+        $this->removeAppends();
+
         //If admin models has been loaded
         //because we do need loaded all models to perform
         //this features...
@@ -171,6 +174,17 @@ trait AdminModelTrait
             return;
 
         $this->visible = [];
+    }
+
+    /*
+     * Remove uneccessary appends properties from model in administration
+     */
+    protected function removeAppends()
+    {
+        if ( Admin::isAdmin() == false )
+            return;
+
+        $this->appends = [];
     }
 
     /*

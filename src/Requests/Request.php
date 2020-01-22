@@ -216,7 +216,7 @@ abstract class Request extends FormRequest
             return $data;
         }
 
-        return $this->has($key) && $this->get($key) == 1 ? 1 : 0;
+        return $this->has($key) && in_array($this->get($key), [1, 'on']) ? 1 : 0;
     }
 
     //If is no value for checkbox, then automaticaly add zero value

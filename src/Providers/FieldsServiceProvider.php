@@ -10,6 +10,12 @@ use Illuminate\Support\ServiceProvider;
 
 class FieldsServiceProvider extends ServiceProvider
 {
+    protected $allFields = [
+        'title', 'placeholder', 'hidden', 'orderBy', 'limit', 'multirows', 'defaultByOption', 'tooltip',
+        'invisible', 'component', 'column_name', 'phone_link', 'ifExists', 'ifDoesntExists', 'hideOnUpdate', 'hideOnCreate',
+        'disabled' => true, 'readonly' => true, 'removeFromForm' => true, 'hideFromForm' => true, 'removeField' => true, 'hideField' => true,
+    ];
+
     /**
      * Register the service provider.
      *
@@ -18,11 +24,7 @@ class FieldsServiceProvider extends ServiceProvider
     public function boot()
     {
         //Register global crudadmin fields attributes
-        Fields::addAttribute([
-            'title', 'placeholder', 'hidden', 'disabled', 'orderBy', 'limit', 'multirows',
-            'invisible', 'component', 'column_name', 'removeFromForm', 'hideFromForm', 'phone_link',
-            'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate', 'removeFromFormIf', 'removeFromFormIfNot'
-        ]);
+        $this->registerAllFields();
 
         //Add CrudAdmin additional column type
         Fields::addColumnTypeBefore([
@@ -48,5 +50,25 @@ class FieldsServiceProvider extends ServiceProvider
             Mutations\UpdateDateFormat::class,
             Mutations\AddEmptyValue::class,
         ]);
+    }
+
+    /**
+     * Register all fields with attribute types
+     *
+     * @return  void
+     */
+    public function registerAllFields()
+    {
+        foreach ($this->allFields as $key => $field) {
+            if ( $field === true ) {
+                Fields::addAttribute($key);
+
+                foreach (['If', 'IfNot', 'IfIn', 'IfNotIn'] as $postfix) {
+                    Fields::addAttribute($key.$postfix);
+                }
+            } else {
+                Fields::addAttribute($field);
+            }
+        }
     }
 }

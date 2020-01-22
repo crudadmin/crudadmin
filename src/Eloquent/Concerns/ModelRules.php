@@ -17,6 +17,11 @@ trait ModelRules
     private $backup_original = null;
 
     /*
+     * Disable all admin rules
+     */
+    private $disableAllAdminRules = false;
+
+    /*
      * Returns cached admin rule class
      */
     protected function getCachedAdminRuleClass($class)
@@ -40,11 +45,29 @@ trait ModelRules
         }
     }
 
+    /**
+     * Disable all admin rules
+     *
+     * @param  bool  $state
+     * @return this
+     */
+    public function disableAllAdminRules($state = true)
+    {
+        $this->disableAllAdminRules = $state;
+
+        return $this;
+    }
+
     /*
      * Check if rule can be initialized in interface types
      */
-    private function canRunRule($rule, $saved = false)
+    private function canRunRule($rule)
     {
+        //If rules are disabled
+        if ( $this->disableAllAdminRules === true ) {
+            return false;
+        }
+
         //If is not admin interface allowed, skip rules
         if (Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === false) {
             return false;
