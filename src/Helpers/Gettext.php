@@ -115,7 +115,10 @@ class Gettext
         putenv('LC_COLLATE='.$locale);
         putenv('LANGUAGE='.$locale);
         setlocale(LC_ALL, $locale.'.UTF-8');
-        setlocale(LC_MESSAGES, $locale.'.UTF-8');
+        //In windows may not be definted this variable
+        if ( defined('LC_MESSAGES') ) {
+            setlocale(LC_MESSAGES, $locale.'.UTF-8');
+        }
         setlocale(LC_COLLATE, $locale.'.UTF-8');
         bindtextdomain($domain, $this->getGettextPath());
         textdomain($domain);
