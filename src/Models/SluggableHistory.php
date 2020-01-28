@@ -39,14 +39,18 @@ class SluggableHistory extends Model
         'slug_localized' => 'name:Slug localized|type:json',
     ];
 
-    /*
+    /**
      * Save slug value from model
+     *
+     * @param  AdminModel  $model
+     * @param  mixed  $value
+     * @return  void
      */
-    public static function snapshot($model)
+    public static function snapshot($model, $value = null)
     {
         $value = $model->hasLocalizedSlug()
-                    ? json_decode($model->attributes['slug'])
-                    : $model->attributes['slug'];
+                    ? json_decode(($value ?: $model->attributes['slug']))
+                    : ($value ?: $model->attributes['slug']);
 
         self::create([
             'table' => $model->getTable(),
