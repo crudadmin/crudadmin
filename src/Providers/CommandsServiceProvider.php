@@ -31,6 +31,8 @@ class CommandsServiceProvider extends ServiceProvider
 
         $this->app->bind('gogol::admin.queue', \Admin\Commands\EnsureQueueListenerIsRunning::class);
 
+        $this->app->bind('gogol::admin.dev', \Admin\Commands\AdminDevelopmentCommand::class);
+
         $this->commands([
             'gogol::admin.install',
             'gogol::admin.button',
@@ -39,6 +41,7 @@ class CommandsServiceProvider extends ServiceProvider
             'gogol::admin.component',
             'gogol::admin.compress',
             'gogol::admin.queue',
+            'gogol::admin.dev',
         ]);
     }
 
