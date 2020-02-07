@@ -13,6 +13,7 @@ class AppServiceProvider extends ServiceProvider
     protected $providers = [
         FieldsServiceProvider::class,
         AdminServiceProvider::class,
+        EventsServiceProvider::class,
         LocalizationServiceProvider::class,
         GettextServiceProvider::class,
         ValidatorServiceProvider::class,
