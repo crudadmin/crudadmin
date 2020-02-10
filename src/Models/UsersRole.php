@@ -4,6 +4,7 @@ namespace Admin\Models;
 
 use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\Concerns\ModelUsersRoles;
+use DB;
 
 class UsersRole extends AdminModel
 {
@@ -12,7 +13,7 @@ class UsersRole extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2016-07-09 17:00:00';
+    protected $migration_date = '2016-07-09 18:12:00';
 
     /*
      * Template name
@@ -63,4 +64,10 @@ class UsersRole extends AdminModel
     protected $settings = [
         'grid.default' => 'small',
     ];
+
+    public function onTableCreate()
+    {
+        //When roles table is created, set all users as super admins.
+        DB::table('users')->update(['permissions' => 1]);
+    }
 }
