@@ -53,6 +53,7 @@ class Language extends Model
     public function settings()
     {
         return [
+            'dates' => false,
             'title.insert' => trans('admin::admin.languages-add-new'),
             'title.update' => trans('admin::admin.languages-update'),
         ];

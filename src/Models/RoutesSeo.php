@@ -62,6 +62,7 @@ class RoutesSeo extends AdminModel
     public function settings()
     {
         return [
+            'dates' => false,
             'title.update' => ':url',
         ];
     }
