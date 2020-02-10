@@ -229,6 +229,14 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     }
 
     /*
+     * If is logged user with super admin access
+     */
+    public function hasAllowedRole()
+    {
+        return ($admin = admin()) && (admin()->hasAdminAccess() || admin()->hasAccess(Admin\Models\UsersRole::class, 'update'));
+    }
+
+    /*
      * Add additional fields
      */
     public function mutateFields($fields)
@@ -238,8 +246,8 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
          */
         if ($this->canApplyUserRoles()) {
             $fields->push([
-                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0',
-                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd',
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|'.($this->hasAllowedRole() ? '' : 'hideFromForm'),
+                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd|'.($this->hasAllowedRole() ? '' : 'hideFromForm'),
             ]);
         }
     }
