@@ -59,7 +59,10 @@ class RoutesSeo extends AdminModel
         SEOService::rebuildTree();
     }
 
-    protected $settings = [
-        'title.update' => 'Upravujete adresu :url'
-    ];
+    public function settings()
+    {
+        return [
+            'title.update' => ':url',
+        ];
+    }
 }
