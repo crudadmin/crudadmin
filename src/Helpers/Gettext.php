@@ -298,9 +298,9 @@ class Gettext
             $timestamp = filemtime($localization->poedit_po->path);
         }
 
-        return action('\Admin\Controllers\GettextController@index')
+        return asset(action('\Admin\Controllers\GettextController@index', null, false)
                     .'?lang='.($localization ? $localization->slug : '')
-                    .'&t='.$timestamp;
+                    .'&t='.$timestamp);
     }
 
     /*
