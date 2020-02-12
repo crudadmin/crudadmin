@@ -4,7 +4,7 @@ namespace Admin\Controllers;
 
 use Admin;
 use Gettext;
-use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class GettextController extends Controller
 {
@@ -19,10 +19,15 @@ class GettextController extends Controller
 
         $js = view('admin::partials.gettext-translates', compact('translations'))->render();
 
-        return response($js)->withHeaders([
+        $response = new Response($js, 200, [
             'Content-Type' => 'application/javascript; charset=utf-8',
             'Cache-Control' => 'max-age=2592000,public',
         ]);
+
+        //We does not want cookies send by this request
+        //Because some CDN may not cache request with cookies
+        $response->send();
+        die;
     }
 
     /*
