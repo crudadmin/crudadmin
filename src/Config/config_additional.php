@@ -134,4 +134,9 @@ return [
      * Allow admin roles
      */
     'admin_roles' => false,
+
+    /*
+     * If uploaded images will dissapear, they will be replaced with stock image
+     */
+    'rewrite_missing_upload_images' => env('ADMIN_REWRITE_MISSING_IMAGES', true),
 ];
