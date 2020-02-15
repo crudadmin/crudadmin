@@ -184,7 +184,9 @@
         this.onChangeSelect();
 
         this.$nextTick(function(){
-          $('#'+this.getId).ckEditors();
+          if ( this.isEditor ) {
+            $('#'+this.getId).ckEditors();
+          }
         });
 
         this.addMultipleFilesSupport(true);
@@ -457,13 +459,22 @@
           this.$nextTick(function () {
             //After change value, update same value in ckeditor
             if ( ['editor', 'longeditor'].indexOf(field.type) > -1 ){
-              var editor = CKEDITOR.instances[this.getId];
+              var editor = CKEDITOR.instances[this.getId],
+                  value = '';
 
-              //If is editor not ready yet, then wait for ready state
-              editor.setData( field.value ? field.value : '' );
-              editor.on('instanceReady', function(){
-                editor.setData( field.value ? field.value : '' );
-              });
+              if ( this.hasLocale && this.field.value && this.langslug in this.field.value ){
+                value = this.field.value[this.langslug];
+              } else {
+                value = this.field.value;
+              }
+
+              if ( editor ) {
+                //If is editor not ready yet, then wait for ready state
+                editor.setData( value ? value : '' );
+                editor.on('instanceReady', function(){
+                  editor.setData( value ? value : '' );
+                });
+              }
             }
 
             //Update datepickers
