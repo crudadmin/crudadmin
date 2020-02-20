@@ -51,6 +51,11 @@ class Language extends Model
     protected $delete_files = false;
 
     /*
+     * Where will be located po/mo files in storage lang directory
+     */
+    public $gettextDirectory = 'gettext';
+
+    /*
      * Automatic form and database generation
      */
     protected function fields($row)
@@ -67,5 +72,13 @@ class Language extends Model
     public function hasGettextSupport()
     {
         return config('admin.gettext') === true;
+    }
+
+    /*
+     * From this files will be loaded all translates
+     */
+    public function sourcePaths()
+    {
+        return config('admin.gettext_source_paths', []);
     }
 }

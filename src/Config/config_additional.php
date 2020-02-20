@@ -36,6 +36,17 @@ return [
     ],
 
     /*
+     * Directories for loading gettext translations
+     */
+    'gettext_admin_source_paths' => [
+        __DIR__.'/../',
+        base_path('vendor/crudadmin/resources/src/Resources/js'),
+        base_path('vendor/crudadmin/resources/src/Resources/lang/sk'),
+        base_path('vendor/crudadmin/resources/src/Resources/views'),
+        base_path('vendor/crudadmin/resources/src/Controllers'),
+    ],
+
+    /*
      * Addition gettext supported codes which are not includes native in administration ( sk_SK, cs_CZ ... )
      */
     'gettext_supported_codes' => [],

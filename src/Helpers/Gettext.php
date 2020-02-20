@@ -11,7 +11,9 @@ use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use Localization;
+use AdminLocalization;
 use Storage;
+use Admin;
 
 class Gettext
 {
@@ -27,6 +29,10 @@ class Gettext
 
     protected $basepath = 'storage/app/lang';
 
+    protected $gettextDir = 'gettext';
+
+    protected $sourcePaths = [];
+
     protected $supported_codes = ['fr_FR', 'sr_RS', 'es_ES', 'kl_GL', 'ts_ZA', 'ar_IQ', 'ti_ET', 'tt_RU', 'de_DE', 'es_CL', 'sw_TZ', 'lv_LV', 'cs_CZ', 'cz' => 'cs_CZ', 'ur_IN', 'id_ID', 'ar_QA', 'ks_IN', 'ar_YE', 'lg_UG', 'fo_FO', 'ka_GE', 'aa_DJ', 'es_UY', 'en_US', 'sq_MK', 'os_RU', 'so_DJ', 'ja_JP', 'ar_KW', 'ca_ES', 'gl_ES', 'eo_US', 'nb_NO', 'af_ZA', 'nl_BE', 'pa_IN', 'es_US', 'sd_IN', 'li_BE', 'pt_PT', 'nl_NL', 'is_IS', 'br_FR', 'sq_AL', 'so_ET', 'es_VE', 'gu_IN', 'ar_DZ', 'sc_IT', 'tt_RU', 'ca_FR', 'aa_ER', 'ar_SY', 'ff_SN', 'kk_KZ', 'dz_BT', 'bo_CN', 'mg_MG', 'zh_CN', 'ar_LY', 'th_TH', 'sv_FI', 'fi_FI', 'ar_IN', 'ta_IN', 'br_FR', 'kn_IN', 'eu_FR', 'az_AZ', 'zu_ZA', 'ar_EG', 'st_ZA', 'so_KE', 'hy_AM', 'bn_BD', 'rw_RW', 'my_MM', 'es_CU', 'ar_OM', 'he_IL', 'pl_PL', 'mt_MT', 'ht_HT', 'bg_BG', 'mn_MN', 'ps_AF', 'ru_UA', 'cv_RU', 'ms_MY', 'ar_BH', 'oc_FR', 'te_IN', 'wa_BE', 'nr_ZA', 'ar_JO', 'iu_CA', 'eu_ES', 'ko_KR', 'et_EE', 'tg_TJ', 'uk_UA', 've_ZA', 'yo_NG', 'wo_SN', 'mi_NZ', 'ga_IE', 'ku_TR', 'fy_DE', 'tl_PH', 'ne_NP', 'fy_NL', 'ga_IE', 'se_NO', 'bs_BA', 'aa_ET', 'es_SV', 'ca_ES', 'tn_ZA', 'xh_ZA', 'ca_IT', 'es_CO', 'lb_LU', 'tr_TR', 'sa_IN', 'pa_PK', 'POSIX', 'nn_NO', 'el_CY', 'uz_UZ', 'es_BO', 'es_EC', 'bo_IN', 'sv_SE', 'es_CR', 'as_IN', 'lo_LA', 'zh_SG', 'sl_SI', 'ug_CN', 'gv_GB', 'hr_HR', 'yi_US', 'cy_GB', 'dv_MV', 'or_IN', 'es_PA', 'pt_PT', 'bn_IN', 'ru_RU', 'be_BY', 'es_HN', 'zh_TW', 'an_ES', 'eu_FR', 'ik_CA', 'ti_ER', 'ar_TN', 'ur_PK', 'om_KE', 'fi_FI', 'ar_AE', 'it_IT', 'sd_PK', 'es_AR', 'gl_ES', 'ml_IN', 'sd_IN', 'fa_IR', 'es_DO', 'es_GT', 'km_KH', 'ig_NG', 'wa_BE', 'es_NI', 'pt_BR', 'ro_RO', 'el_GR', 'be_BY', 'gd_GB', 'ha_NG', 'vi_VN', 'nl_AW', 'ky_KG', 'ks_IN', 'tr_CY', 'eu_ES', 'li_NL', 'nl_NL', 'mr_IN', 'uz_UZ', 'om_ET', 'es_PR', 'kw_GB', 'zh_HK', 'ug_CN', 'nl_BE', 'ar_SA', 'sk_SK', 'hu_HU', 'sv_FI', 'ta_LK', 'hi_IN', 'it_CH', 'es_PY', 'ar_MA', 'lt_LT', 'so_SO', 'am_ET', 'da_DK', 'ca_ES', 'mk_MK', 'sw_KE', 'iw_IL', 'es_MX', 'si_LK', 'ca_AD', 'ss_ZA', 'tk_TM', 'ar_SD', 'it_IT', 'es_PE', 'ar_LB', 'el_GR', 'aa_ER'];
 
     private $modification_timestamp = null;
@@ -36,6 +42,14 @@ class Gettext
         $this->filesystem = new Filesystem;
     }
 
+    public function setGettextPropertiesModel($model)
+    {
+        $this->gettextDir = $model->gettextDirectory;
+        $this->sourcePaths = $model->sourcePaths();
+
+        return $this;
+    }
+
     public function getBasePath($path = null)
     {
         return base_path($this->basepath.'/'.$path);
@@ -43,7 +57,7 @@ class Gettext
 
     public function getGettextPath($path = null)
     {
-        return $this->getBasePath('gettext/'.$path);
+        return $this->getBasePath($this->gettextDir.'/'.$path);
     }
 
     public function getLocalePath($locale, $file = null)
@@ -51,11 +65,9 @@ class Gettext
         return $this->getGettextPath($locale.'/LC_MESSAGES/'.$file);
     }
 
-    public function getSourcePaths($blade_files = true)
+    public function getSourcePaths()
     {
-        $paths = config('admin.gettext_source_paths', []);
-
-        return $paths;
+        return $this->sourcePaths;
     }
 
     public function getSupportedCodes()
@@ -89,19 +101,21 @@ class Gettext
         return false;
     }
 
-    public function setLocale($locale)
+    public function setLocale($language = null, $defaultLanguage = null)
     {
-        if (! ($language = \Localization::getLanguages()->where('slug', $locale)->first())) {
+        //Try backup default language
+        if (!$language || $language->poedit_mo == null) {
+            $language = $defaultLanguage;
+        }
+
+        //If language or mo file is not present
+        if (!$language || $language->poedit_mo == null) {
             return false;
         }
 
-        if ($language->poedit_mo == null) {
-            $language = \Localization::getDefaultLanguage();
-        }
+        $this->setGettextPropertiesModel($language);
 
-        if ($language->poedit_mo == null) {
-            return false;
-        }
+        $locale = $language->slug;
 
         $domain = explode('.', $language->poedit_mo);
         $domain = $domain[0];
@@ -233,6 +247,8 @@ class Gettext
      */
     public function getTranslations($language)
     {
+        $this->setGettextPropertiesModel($language);
+
         $this->checkIfIsUpToDate($language);
 
         $locale = $this->getLocale($language->slug);
@@ -258,6 +274,8 @@ class Gettext
      */
     public function checkIfIsUpToDate($language)
     {
+        $this->setGettextPropertiesModel($language);
+
         $locale = $this->getLocale($language->slug);
 
         $po_path = $this->getLocalePath($locale, $locale.'.po');
@@ -311,9 +329,13 @@ class Gettext
     /*
      * Return js plugin for translates
      */
-    public function getJSPlugin()
+    public function getJSPlugin($table = null)
     {
-        $localization = Localization::get();
+        if ( $table == 'admin_languages' ) {
+            $localization = AdminLocalization::get();
+        } else {
+            $localization = Localization::get();
+        }
 
         $timestamp = 0;
 
@@ -323,14 +345,25 @@ class Gettext
 
         return asset(action('\Admin\Controllers\GettextController@index', null, false)
                     .'?lang='.($localization ? $localization->slug : '')
-                    .'&t='.$timestamp);
+                    .'&t='.$timestamp
+                    .($table ? '&t='.$table : '')
+        );
     }
 
     /*
      * Return all js translations
      */
-    public function getJSTranslations($lang)
+    public function getJSTranslations($lang, $table = null)
     {
+        //Set gettext properties by table. Support for admin translates...
+        if ( $table ) {
+            if ( !($model = Admin::getModelByTable($table)) ) {
+                abort(404);
+            }
+
+            $this->setGettextPropertiesModel($model);
+        }
+
         $locale = $this->getLocale($lang);
 
         $po_path = $this->getLocalePath($locale, $locale.'.po');
@@ -371,6 +404,8 @@ class Gettext
      */
     public function updateTranslations($language, $changes)
     {
+        $this->setGettextPropertiesModel($language);
+
         $locale = $this->getLocale($language->slug);
 
         $po_path = $this->getLocalePath($locale, $locale.'.po');
@@ -410,6 +445,8 @@ class Gettext
      */
     public function rebuildGettextFiles($language, $translations)
     {
+        $this->setGettextPropertiesModel($language);
+
         $locale = $this->getLocale($language->slug);
 
         $this->setTranslationsHeaders($translations, $locale);
@@ -428,7 +465,7 @@ class Gettext
         $translations->toMoFile($mo_path);
         $translations->toPoFile($po_path);
 
-        //Copy generated mo into uploads folder for avaiable download mo file
+        //Copy generated po into uploads folder for avaiable download mo file
         copy($po_path, $language->filePath('poedit_po', $po_filename));
 
         $this->removeOldMoFiles($locale, $mo_filename);
@@ -529,7 +566,7 @@ class Gettext
             return $this->modification_timestamp;
         }
 
-        $views_paths = $this->getSourcePaths(false);
+        $views_paths = $this->getSourcePaths();
 
         //Get list of modified files
         $modified = [];

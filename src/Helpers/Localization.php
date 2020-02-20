@@ -48,7 +48,7 @@ class Localization
 
         if (! $this->isValidSegment()) {
             //Update app localization for default language
-            $this->setLocale($this->getDefaultLanguage()->slug);
+            $this->setLocale($this->getDefaultLanguage());
 
             return false;
         }
@@ -56,8 +56,10 @@ class Localization
         return $this->get()->slug;
     }
 
-    public function setLocale($locale)
+    public function setLocale($language)
     {
+        $locale = $language->slug;
+
         if ($locale == $this->localization) {
             return true;
         }
@@ -66,7 +68,7 @@ class Localization
 
         //Switch gettext localization
         if (config('admin.gettext') === true) {
-            Gettext::setLocale($locale);
+            Gettext::setLocale($language);
         }
 
         $this->setDateLocale($locale);
@@ -167,7 +169,7 @@ class Localization
         }
 
         //Update app localization
-        $this->setLocale($language->slug);
+        $this->setLocale($language);
 
         return $language;
     }

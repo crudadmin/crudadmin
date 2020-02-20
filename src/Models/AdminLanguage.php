@@ -3,6 +3,7 @@
 namespace Admin\Models;
 
 use Admin\Eloquent\Concerns\Gettextable;
+use Admin;
 
 class AdminLanguage extends Model
 {
@@ -45,6 +46,19 @@ class AdminLanguage extends Model
     protected $delete_files = false;
 
     /*
+     * Check if this module is enabled for this user
+     */
+    public function active()
+    {
+        return Admin::isRolesEnabled() === false || admin() && admin()->hasAdminAccess();
+    }
+
+    /*
+     * Where will be located po/mo files in storage lang directory
+     */
+    public $gettextDirectory = 'gettext_admin';
+
+    /*
      * Automatic form and database generation
      */
     protected function fields($row)
@@ -53,5 +67,13 @@ class AdminLanguage extends Model
             'name' => 'name:admin::admin.languages-name|placeholder:admin::admin.languages-title|required|max:25',
             'slug' => 'name:admin::admin.languages-prefix|placeholder:admin::admin.languages-prefix-title|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
         ];
+    }
+
+    /*
+     * From this files will be loaded all translates
+     */
+    public function sourcePaths()
+    {
+        return config('admin.gettext_admin_source_paths', []);
     }
 }

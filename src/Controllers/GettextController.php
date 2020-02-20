@@ -15,7 +15,7 @@ class GettextController extends Controller
      */
     public function index()
     {
-        $translations = Gettext::getJSTranslations(request('lang'));
+        $translations = Gettext::getJSTranslations(request('lang'), request('t'));
 
         $js = view('admin::partials.gettext-translates', compact('translations'))->render();
 

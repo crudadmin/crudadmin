@@ -4,7 +4,9 @@ namespace Admin\Middleware;
 
 use Closure;
 use Localization;
+use AdminLocalization;
 use Illuminate\Http\RedirectResponse;
+use Admin;
 
 class LocalizationMiddleware
 {
@@ -13,6 +15,13 @@ class LocalizationMiddleware
         $segment = $request->segment(1);
 
         $remove_default = config('admin.localization_remove_default');
+
+        //We want boot admin localization
+        if ( Admin::isAdmin() ){
+            AdminLocalization::setLocale(config('admin.locale'));
+
+            return $next($request);
+        }
 
         //Checks if is enabled multulanguages
         if (! Localization::isEnabled()) {

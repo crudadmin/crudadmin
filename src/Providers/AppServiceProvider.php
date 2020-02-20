@@ -30,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         'Ajax' => Helpers\Ajax::class,
         'Gettext' => Facades\Gettext::class,
         'Localization' => Facades\Localization::class,
+        'AdminLocalization' => Facades\AdminLocalization::class,
         'SEO' => Facades\SEOFacade::class,
         'ImageCompressor' => Facades\ImageCompressor::class,
         'Image' => \Intervention\Image\Facades\Image::class,
@@ -55,11 +56,6 @@ class AppServiceProvider extends ServiceProvider
         $this->registerProviders([
             RouteServiceProvider::class,
         ]);
-
-        //Set admin locale
-        if (\Admin::isAdmin() === true) {
-            app()->setLocale(config('admin.locale', 'sk'));
-        }
     }
 
     /**

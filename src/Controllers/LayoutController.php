@@ -23,7 +23,7 @@ class LayoutController extends BaseController
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
             'gettext' => config('admin.gettext', false),
-            'locale' => config('admin.locale', app()->getLocale()),
+            'locale' => app()->getLocale(),
             'localization' => trans('admin::admin'),
             'dashboard' => $this->getDashBoard(),
             'requests' => [

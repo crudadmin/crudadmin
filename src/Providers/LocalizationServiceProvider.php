@@ -16,6 +16,7 @@ class LocalizationServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('localization', \Admin\Helpers\Localization::class);
+        $this->app->bind('localization.admin', \Admin\Helpers\AdminLocalization::class);
     }
 
     public function boot(Kernel $kernel)
