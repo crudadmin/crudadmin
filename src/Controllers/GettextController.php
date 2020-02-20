@@ -30,12 +30,17 @@ class GettextController extends Controller
         die;
     }
 
+    public function getTranslationRow($id, $table)
+    {
+        return Admin::getModelByTable($table ?: 'languages')->findOrFail($id);
+    }
+
     /*
      * Return all translations for specifics language
      */
-    public function getTranslations($id)
+    public function getTranslations($id, $table)
     {
-        $language = Admin::getModel('Language')->findOrFail($id);
+        $language = $this->getTranslationRow($id, $table);
 
         $translations = Gettext::getTranslations($language);
 
@@ -45,12 +50,24 @@ class GettextController extends Controller
     /*
      * Update translations for specific language
      */
-    public function updateTranslations($id)
+    public function updateTranslations($id, $table)
     {
-        $language = Admin::getModel('Language')->findOrFail($id);
+        $language = $this->getTranslationRow($id, $table);
 
         $changes = json_decode(request('changes'));
 
         Gettext::updateTranslations($language, $changes);
+    }
+
+    /*
+     * Download updated poedit file
+     */
+    public function downloadTranslations($id, $table)
+    {
+        $language = $this->getTranslationRow($id, $table);
+
+        Gettext::checkIfIsUpToDate($language);
+
+        return response()->download($language->poedit_po->basepath);
     }
 }

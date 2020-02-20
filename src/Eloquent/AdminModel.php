@@ -12,6 +12,7 @@ use Admin\Eloquent\Concerns\ModelLayoutBuilder;
 use Admin\Eloquent\Concerns\ModelRules;
 use Admin\Eloquent\Concerns\Uploadable;
 use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Eloquent\Modules\AdminCustomizationModule;
 use Admin\Eloquent\Modules\SeoModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,7 +27,6 @@ class AdminModel extends CoreAdminModel
         VueComponent,
         Historiable,
         Uploadable,
-        ModelIcons,
         SoftDeletes;
 
     /*
@@ -177,7 +177,8 @@ class AdminModel extends CoreAdminModel
      * Admin modules
      */
     protected $modules = [
-        SeoModule::class
+        SeoModule::class,
+        AdminCustomizationModule::class,
     ];
 
     /*

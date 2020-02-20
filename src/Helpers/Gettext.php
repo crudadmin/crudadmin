@@ -225,19 +225,19 @@ class Gettext
         return date('d-m-Y-h-i-s').'.mo';
     }
 
+    /**
+     * Return translations array
+     *
+     * @param  Admin\Eloquent\AdminModel  $language
+     * @return  array
+     */
     public function getTranslations($language)
     {
+        $this->checkIfIsUpToDate($language);
+
         $locale = $this->getLocale($language->slug);
 
         $po_path = $this->getLocalePath($locale, $locale.'.po');
-
-        //Check if actual language has been modified sync last source changes
-        $can_sync = $this->compareCacheKey('lang_modification.'.$locale);
-
-        //If file does not exists, then sync and generate translations
-        if (! file_exists($po_path) || $can_sync) {
-            $this->syncTranslates($language);
-        }
 
         $translations = Translations::fromPoFile($po_path);
 
@@ -249,6 +249,29 @@ class Gettext
         $this->addMissingIntoResponse($array, $translations);
 
         return $array;
+    }
+
+    /**
+     * Check if given locale is up to date
+     *
+     * @param  Admin\Eloquent\AdminModel  $language
+     */
+    public function checkIfIsUpToDate($language)
+    {
+        $locale = $this->getLocale($language->slug);
+
+        $po_path = $this->getLocalePath($locale, $locale.'.po');
+
+        //Check if actual language has been modified sync last source changes
+        $canSync = $this->compareCacheKey('lang_modification.'.$locale);
+
+        if ((
+            !$po_path || ! file_exists($po_path) //If poPath does not exists
+            || !$language->poedit_po || !$language->poedit_po->exists()) //if language poPath does not exists
+            || $canSync //if sync key has been changes
+        ) {
+            $this->syncTranslates($language);
+        }
     }
 
     /**
@@ -379,7 +402,7 @@ class Gettext
     private function setTranslationsHeaders($translations, $locale)
     {
         $translations->setLanguage($locale);
-        $translations->setHeader('Project-Id-Version', 'Translations powered by CrudAdmin.com');
+        $translations->setHeader('Project-Id-Version', 'Translations powered by CrudAdmin.com for '.request()->getHost().' project.');
     }
 
     /*

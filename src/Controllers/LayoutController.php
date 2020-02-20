@@ -37,8 +37,8 @@ class LayoutController extends BaseController
                 'buttonAction' => action('\Admin\Controllers\Crud\DataController@buttonAction'),
                 'download' => action('\Admin\Controllers\DownloadController@index'),
                 'rows' => action('\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
-                'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id']),
-                'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id']),
+                'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id', ':table']),
+                'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id', ':table']),
             ],
         ];
     }
@@ -291,7 +291,7 @@ class LayoutController extends BaseController
 
         $data = [
             'name' => $model->getProperty('name'),
-            'icon' => $model->getModelIcon(),
+            'icon' => $model->getProperty('icon'),
             'settings' => $model->getModelSettings(),
             'active' => $model->getProperty('disableModel') ? false : $model->getProperty('active'),
             'foreign_column' => $model->getForeignColumn(),
@@ -319,6 +319,12 @@ class LayoutController extends BaseController
             'permissions' => $this->checkPermissions($model),
             'submenu' => [],
         ];
+
+        $model->runAdminModules(function($module) use (&$data) {
+            if ( method_exists($module, 'adminModelRender') ) {
+                $module->adminModelRender($data);
+            }
+        });
 
         //Mutate all parameters
         if ( method_exists($model, 'adminModelRender') ) {
