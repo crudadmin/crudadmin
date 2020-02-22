@@ -35,8 +35,11 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         //Boot web multi languages support
-        if ( Localization::canBootAutomatically() ) {
-            $this->localization = Localization::boot();
+        if ( Localization::canBootAutomatically() && $segment = Localization::boot() ) {
+            //We need redirect all routes to given segment
+            if ( Localization::isValidSegment() ) {
+                $this->localization = $segment;
+            }
         }
 
         parent::boot();

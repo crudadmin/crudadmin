@@ -50,7 +50,7 @@ class LocalizationMiddleware
 
         $removeDefault = config('admin.localization_remove_default');
 
-        if (! Localization::isValidSegment() ) {
+        if ( Localization::isValidSegment() === false ) {
             $redirect = session()->has('locale') && Localization::isValid(session()->get('locale'))
                             ? session()->get('locale')
                             : Localization::getDefaultLanguage()->slug;
