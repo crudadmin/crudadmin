@@ -3,6 +3,9 @@
 namespace Admin\Controllers;
 
 use Admin;
+use AdminLocalization;
+use Admin\Helpers\Localization\LocalizationHelper;
+use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -11,11 +14,11 @@ class GettextController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param  string  $localizationClass
      */
-    public function index()
+    public function index($localizationClass = 'Localization')
     {
-        $translations = Gettext::getJSTranslations(request('lang'), request('t'));
+        $translations = JSTranslations::getJSTranslations(request('lang'), $localizationClass::getModel());
 
         $js = view('admin::partials.gettext-translates', compact('translations'))->render();
 
@@ -30,6 +33,16 @@ class GettextController extends Controller
         die;
     }
 
+    /**
+     * Returns admin translates
+     *
+     * @return  [type]
+     */
+    public function adminIndex()
+    {
+        return $this->index(AdminLocalization::class);
+    }
+
     public function getTranslationRow($id, $table)
     {
         return Admin::getModelByTable($table ?: 'languages')->findOrFail($id);
@@ -42,7 +55,7 @@ class GettextController extends Controller
     {
         $language = $this->getTranslationRow($id, $table);
 
-        $translations = Gettext::getTranslations($language);
+        $translations = JSTranslations::getTranslations($language);
 
         return response()->json($translations);
     }
@@ -56,7 +69,7 @@ class GettextController extends Controller
 
         $changes = json_decode(request('changes'));
 
-        Gettext::updateTranslations($language, $changes);
+        JSTranslations::updateTranslations($language, $changes);
     }
 
     /*
@@ -66,7 +79,7 @@ class GettextController extends Controller
     {
         $language = $this->getTranslationRow($id, $table);
 
-        Gettext::checkIfIsUpToDate($language);
+        JSTranslations::checkIfIsUpToDate($language);
 
         return response()->download($language->poedit_po->basepath);
     }

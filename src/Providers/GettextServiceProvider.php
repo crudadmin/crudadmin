@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 
 class GettextServiceProvider extends ServiceProvider
 {
-    private $GettextBladeDirective = '<script src="<?php echo Gettext::getJSPlugin() ?>"></script>';
+    private $GettextBladeDirective = '<script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>';
 
     /**
      * Register the service provider.

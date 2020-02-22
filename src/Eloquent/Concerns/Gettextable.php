@@ -34,10 +34,6 @@ trait Gettextable
         //Update gettext files...
         if ($this->hasGettextSupport()) {
             Gettext::createLocale($row->slug);
-
-            Gettext::syncTranslates($row);
-
-            Gettext::generateMoFiles($row->slug, $row);
         }
     }
 
@@ -45,9 +41,7 @@ trait Gettextable
     {
         //Update gettext files...
         if ($this->hasGettextSupport()) {
-            Gettext::renameLocale($row->original['slug'], $row->slug);
-
-            Gettext::generateMoFiles($row->slug, $row);
+            Gettext::generateMoFile($row->slug, $row->getPoPath());
         }
     }
 
@@ -91,14 +85,12 @@ trait Gettextable
         /*
          * Checks for gettext support
          */
-        if (config('admin.gettext') !== true) {
-            return;
+        if ( $this->hasGettextSupport() ) {
+            $fields->push([
+                'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|hidden',
+            ]);
         }
 
-        $fields->push([
-            'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|hidden',
-            'poedit_mo' => 'name:admin::admin.languages-mo-name|type:string|max:30|invisible',
-        ]);
     }
 
     /*
@@ -118,6 +110,9 @@ trait Gettextable
         }
     }
 
+    /*
+     * Download pofile
+     */
     public function setAdminAttributes($attributes)
     {
         $url = action('\Admin\Controllers\GettextController@downloadTranslations', [$this->getKey(), $this->getTable()]);

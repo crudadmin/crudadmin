@@ -2,178 +2,68 @@
 
 namespace Admin\Helpers;
 
-use Gettext;
+use Admin\Eloquent\AdminModel;
+use Admin\Helpers\Localization\LocalizationHelper;
+use Admin\Helpers\Localization\LocalizationInterface;
 use Admin\Models\Language;
+use Gettext;
 use Illuminate\Support\Collection;
 
-class Localization
+class Localization extends LocalizationHelper implements LocalizationInterface
 {
-    protected $languages;
-
-    protected $localization = null;
-
-    protected $default_localization = null;
-
-    protected $booted = false;
-
-    public function __construct()
-    {
-        $this->languages = new Collection;
-
-        //Checks if is enabled multi language support
-        if (! \Admin::isEnabledLocalization() || app()->runningInConsole() == true) {
-            return false;
-        }
-
-        $this->bootLanguages();
-    }
-
-    public function bootLanguages()
-    {
-        $this->booted = true;
-
-        if (! ($model = \Admin::getModelByTable('languages'))) {
-            return new Collection;
-        }
-
-        return $this->languages = $model->all();
-    }
-
-    public function boot()
-    {
-        //Checks if is enabled multi language support
-        if (! $this->isEnabled()) {
-            return false;
-        }
-
-        if (! $this->isValidSegment()) {
-            //Update app localization for default language
-            $this->setLocale($this->getDefaultLanguage());
-
-            return false;
-        }
-
-        return $this->get()->slug;
-    }
-
-    public function setLocale($language)
-    {
-        $locale = $language->slug;
-
-        if ($locale == $this->localization) {
-            return true;
-        }
-
-        app()->setLocale($locale);
-
-        //Switch gettext localization
-        if (config('admin.gettext') === true) {
-            Gettext::setLocale($language);
-        }
-
-        $this->setDateLocale($locale);
-
-        $this->localization = $locale;
-    }
-
-    /*
-     * Automatically set locale for date package if is available in package list
-     * https://github.com/jenssegers/date
-     * \Jenssegers\Date\Date
+    /**
+     * Table of eloquent
+     *
+     * @return  string
      */
-    public function setDateLocale($locale)
+    public function getModel()
     {
-        if (class_exists(\Jenssegers\Date\Date::class)) {
-            \Jenssegers\Date\Date::setLocale($locale);
-        }
+        return new Language;
     }
 
-    public function isEnabled()
+    /**
+     * Returns locale identifier
+     *
+     * @return string
+     */
+    public function getLocaleIdentifier()
     {
-        $segment = request()->segment(1);
-
-        return \Admin::isEnabledLocalization()
-            && app()->runningInConsole() == false
-
-            //We does not want to enable localization in administration. Also for routes rendering
-            && $segment != 'admin'
-
-            //We also does not need to load translations in uploads folder
-            && $segment != 'uploads';
+        return request()->segment(1);
     }
 
-    public function getLanguages($console = false)
+    /**
+     * Localization is disabled in console
+     *
+     * @return  bool
+     */
+    public function isActive()
     {
-        if ($console === true && count($this->languages) == 0) {
-            return $this->bootLanguages();
-        }
-
-        return $this->languages;
+        return \Admin::isEnabledLocalization();
     }
 
-    public function getDefaultLanguage()
+    /**
+     * We can boot languages automatically if is not in console mode
+     *
+     * @return  bool
+     */
+    public function canBootAutomatically()
     {
-        $this->checkForConsoleBoot();
+        $segment = $this->getLocaleIdentifier();
 
-        if ($this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first()) {
-            return $language;
-        }
-
-        return $this->getFirstLanguage();
+        return (
+            $this->isActive() &&
+            app()->runningInConsole() === false
+            && \Admin::isAdmin() === false
+            && $segment != 'uploads'
+        );
     }
 
-    public function setDefaultLocale($prefix)
-    {
-        $this->default_localization = $prefix;
-    }
-
-    public function getFirstLanguage()
-    {
-        $this->checkForConsoleBoot();
-
-        return $this->languages->first();
-    }
-
-    public function isValid($segment)
-    {
-        return $this->languages->where('slug', $segment)->count() == 1;
-    }
-
-    public function isValidSegment()
-    {
-        return $this->isValid(request()->segment(1));
-    }
-
-    private function checkForConsoleBoot()
-    {
-        if (
-            $this->booted === false
-            && \Admin::isEnabledLocalization() === true
-            && app()->runningInConsole() === true
-        ) {
-            $this->bootLanguages();
-        }
-    }
-
-    public function get()
-    {
-        //Fix for requesting data from console
-        $this->checkForConsoleBoot();
-
-        $segment = request()->segment(1);
-
-        if ($this->isValidSegment() === false) {
-            $language = $this->getDefaultLanguage();
-        } else {
-            $language = $this->languages->where('slug', $segment)->first();
-        }
-
-        //Update app localization
-        $this->setLocale($language);
-
-        return $language;
-    }
-
+    /**
+     * Returns url segment according to prefix language in url
+     *
+     * @param  int  $id
+     * @return  string
+     */
     public function segment($id)
     {
         $id = $this->isValidSegment() ? $id + 1 : $id;
@@ -181,18 +71,34 @@ class Localization
         return request()->segment($id);
     }
 
+    /**
+     * Save localization
+     *
+     * @param  string  $lang
+     */
     public function save($lang)
     {
         session(['locale' => $lang]);
         session()->save();
     }
 
-    public function createLangSlug($slug)
+    /**
+     * Returns controller parh for
+     *
+     * @return  string
+     */
+    public function gettextJsResourcesMethod()
     {
-        if ($slug == 'en') {
-            return 'en_US';
-        }
+        return 'index';
+    }
 
-        return $slug.'_'.strtoupper($slug);
+    /**
+     * Check if gettext module is allowed for this localizaiton
+     *
+     * @return  bool
+     */
+    public function isGettextAllowed()
+    {
+        return config('admin.gettext');
     }
 }

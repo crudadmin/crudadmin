@@ -2,8 +2,10 @@
 
 namespace Admin\Models;
 
-use Admin\Eloquent\Concerns\Gettextable;
 use Admin;
+use Admin\Eloquent\Concerns\Gettextable;
+use Admin\Helpers\File;
+use Admin\Helpers\Localization\ResourcesGettext;
 
 class AdminLanguage extends Model
 {
@@ -75,5 +77,24 @@ class AdminLanguage extends Model
     public function sourcePaths()
     {
         return config('admin.gettext_admin_source_paths', []);
+    }
+
+    /**
+     * We does not want files paths in gettext poedit files
+     *
+     * @return  void
+     */
+    public function loadGettextFilesWithReferences()
+    {
+        return false;
+    }
+
+    public function getPoPath()
+    {
+        if ( ! $this->poedit_po ) {
+            return new File((new ResourcesGettext)->getPoPath($this->slug));
+        }
+
+        return $this->poedit_po;
     }
 }

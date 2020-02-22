@@ -2,30 +2,54 @@
 
 namespace Admin\Helpers;
 
+use Admin;
+use Admin\Helpers\Localization\LocalizationHelper;
+use Admin\Helpers\Localization\LocalizationInterface;
+use Admin\Helpers\Localization\ResourcesGettext;
+use Admin\Models\AdminLanguage;
 use Gettext;
-use Admin\Resources\Helpers\ResourcesGettext;
+use Illuminate\Support\Collection;
 
-class AdminLocalization
+class AdminLocalization extends LocalizationHelper implements LocalizationInterface
 {
-    protected $languages;
-
-    protected $default_localization = null;
-
-    protected $booted = false;
-
-    public function get()
+    /**
+     * Table of eloquent
+     *
+     * @return  string
+     */
+    public function getModel()
     {
-        $this->bootLanguages();
+        return new AdminLanguage;
+    }
 
-        $segment = $this->default_localization; //add cache or default...
+    /**
+     * Returns locale identifier
+     *
+     * @return string
+     */
+    public function getLocaleIdentifier()
+    {
+        return config('admin.locale');
+    }
 
-        if ($this->isValid($segment) === false) {
-            $language = $this->getDefaultLanguage();
-        } else {
-            $language = $this->languages->where('slug', $segment)->first();
-        }
+    /**
+     * Admin localization is enabled only in admin interface
+     *
+     * @return  bool
+     */
+    public function isActive()
+    {
+        return Admin::isEnabledAdminLocalization();
+    }
 
-        return $language;
+    /**
+     * We can boot languages automatically if is admin interface
+     *
+     * @return  bool
+     */
+    public function canBootAutomatically()
+    {
+        return $this->isActive() && Admin::isAdmin() === true;
     }
 
     public function isValid($segment)
@@ -33,44 +57,47 @@ class AdminLocalization
         return $this->languages->where('slug', $segment)->count() == 1;
     }
 
-    public function bootLanguages()
+    /**
+     * Returns controller parh for
+     *
+     * @return  string
+     */
+    public function gettextJsResourcesMethod()
     {
-        $this->booted = true;
+        return 'adminIndex';
+    }
 
-        if (! ($model = \Admin::getModelByTable('admin_languages'))) {
-            return new Collection;
+    /**
+     * Returns empty default collection of language
+     *
+     * @return  Collection
+     */
+    public function defaultCollection()
+    {
+        if ( $this->isActive() === false ) {
+            return collect([
+                new AdminLanguage([
+                    'slug' => $this->getLocaleIdentifier(),
+                ])
+            ]);
         }
 
-        return $this->languages = $model->all();
+        return parent::defaultCollection();
     }
 
-    public function getDefaultLanguage()
+    /**
+     * Gettext for admin is allowed all the time
+     *
+     * @return  bool
+     */
+    public function isGettextAllowed()
     {
-        return $this->getFirstLanguage();
+        return true;
     }
 
-    public function getFirstLanguage()
+    public function beforeGettextBind($language)
     {
-        $this->bootLanguages();
-
-        return $this->languages->first();
-    }
-
-    public function setLocale($locale)
-    {
-        $this->default_localization = $locale;
-
-        $this->bootLanguages();
-
-        app()->setLocale($locale);
-
-        $gettextLocale = Gettext::getLocale($locale);
-
-        $language = $this->get();
-
         //Switch gettext localization
         (new ResourcesGettext)->syncResourceLocales($language);
-
-        Gettext::setLocale($language, $this->getDefaultLanguage());
     }
 }

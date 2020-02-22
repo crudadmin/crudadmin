@@ -39,6 +39,14 @@ class Admin extends AdminCore
     }
 
     /*
+     * Returns if is in config allowed multi languages support
+     */
+    public function isEnabledAdminLocalization()
+    {
+        return config('admin.admin_localization', false);
+    }
+
+    /*
      * Check if admin roles are enabled
      */
     public function isRolesEnabled()

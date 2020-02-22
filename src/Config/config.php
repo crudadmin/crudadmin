@@ -38,4 +38,9 @@ return [
      * Gettext support
      */
     'gettext' => false,
+
+    /*
+     * Admin locale (en|sk|cs)
+     */
+    'locale' => 'sk',
 ];

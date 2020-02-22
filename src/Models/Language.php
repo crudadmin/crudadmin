@@ -81,4 +81,14 @@ class Language extends Model
     {
         return config('admin.gettext_source_paths', []);
     }
+
+    public function loadGettextFilesWithReferences()
+    {
+        return true;
+    }
+
+    public function getPoPath()
+    {
+        return $this->poedit_po;
+    }
 }

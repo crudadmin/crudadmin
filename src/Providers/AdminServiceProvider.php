@@ -35,7 +35,9 @@ class AdminServiceProvider extends ServiceProvider
         }
 
         //Admin translations
-        \Admin::registerModel(\Admin\Models\AdminLanguage::class);
+        if (\Admin::isEnabledAdminLocalization()) {
+            \Admin::registerModel(\Admin\Models\AdminLanguage::class);
+        }
 
         //Admin groups
         if (\Admin::isRolesEnabled()) {

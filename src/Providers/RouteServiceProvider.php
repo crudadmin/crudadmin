@@ -34,8 +34,10 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //Boot multi languages support
-        $this->localization = Localization::boot();
+        //Boot web multi languages support
+        if ( Localization::canBootAutomatically() ) {
+            $this->localization = Localization::boot();
+        }
 
         parent::boot();
     }
