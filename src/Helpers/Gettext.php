@@ -4,12 +4,13 @@ namespace Admin\Helpers;
 
 use Admin;
 use AdminLocalization;
+use Admin\Helpers\File;
+use Facades\Admin\Helpers\Localization\JSTranslations;
 use Admin\Helpers\Localization\LocalizationHelper;
 use App\Core\Models\Language;
 use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
-use Admin\Helpers\File;
 use Localization;
 
 class Gettext
@@ -203,6 +204,11 @@ class Gettext
     public function getJSPlugin($localizationClass = 'Localization')
     {
         $language = $localizationClass::get();
+
+        //If is allowed frontend web editor, check for for newest translates
+        if ( isAllowedEditorMode() ) {
+            JSTranslations::checkIfIsUpToDate($language);
+        }
 
         $timestamp = 0;
 
