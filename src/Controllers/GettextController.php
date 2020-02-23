@@ -43,9 +43,14 @@ class GettextController extends Controller
         return $this->index(AdminLocalization::class);
     }
 
-    public function getTranslationRow($id, $table)
+    public function getTranslationRow($idOrSlug, $table)
     {
-        return Admin::getModelByTable($table ?: 'languages')->findOrFail($id);
+        $model = Admin::getModelByTable($table ?: 'languages');
+        if ( is_numeric($idOrSlug) ) {
+            return $model->findOrFail($idOrSlug);
+        }
+
+        return $model->where('slug', $idOrSlug)->firstOrFail();
     }
 
     /*
@@ -63,11 +68,11 @@ class GettextController extends Controller
     /*
      * Update translations for specific language
      */
-    public function updateTranslations($id, $table)
+    public function updateTranslations($id, $table = null)
     {
         $language = $this->getTranslationRow($id, $table);
 
-        $changes = json_decode(request('changes'));
+        $changes = request('changes', []);
 
         JSTranslations::updateTranslations($language, $changes);
     }

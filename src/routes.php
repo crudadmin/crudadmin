@@ -39,7 +39,7 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::get('/admin/api/getHistory/{model}/{id}', 'Crud\DataController@getHistory');
     Route::get('/admin/api/getTranslations/{id}/{table?}', 'GettextController@getTranslations');
     Route::get('/admin/api/download-translations/{id}/{table}', 'GettextController@downloadTranslations');
-    Route::post('/admin/api/updateTranslations/{id}/{table}', 'GettextController@updateTranslations');
+    Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
 
     //Admin gettext translates

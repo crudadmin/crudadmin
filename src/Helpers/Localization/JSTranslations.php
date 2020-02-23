@@ -4,6 +4,7 @@ namespace Admin\Helpers\Localization;
 
 use Admin\Helpers\File;
 use Cache;
+use Carbon\Carbon;
 use Gettext;
 use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
@@ -415,7 +416,7 @@ class JSTranslations
         Gettext::setTranslationsHeaders($translations, $locale);
 
         //Create uploads po file
-        $poFilename = $locale.'-'.date('d-m-Y-h-i-s').'.po';
+        $poFilename = $locale.'-'.time().'.po';
         $uploadedPoPath = $language->filePath('poedit_po', $poFilename);
 
         //Get storage po file path
@@ -433,10 +434,12 @@ class JSTranslations
             return;
         }
 
-        //Copy generated po into uploads folder for avaiable download mo file
-        @copy($poPath, $uploadedPoPath);
-
         if ( $language->exists ) {
+            @unlink($language->poedit_po->basepath);
+
+            //Copy generated po into uploads folder for avaiable download mo file
+            @copy($poPath, $uploadedPoPath);
+
             $language->update(['poedit_po' => $poFilename]);
         }
 

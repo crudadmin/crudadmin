@@ -13,6 +13,7 @@ class GettextServiceProvider extends ServiceProvider
         <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
 
         <?php if ( admin() ) { ?>
+        <script>window.CACSRFToken = "<?php echo csrf_token(); ?>";</script>
         <link rel="stylesheet" href="<?php echo admin_asset(\'/css/frontend.css?v=\'.Admin::getAssetsVersion()) ?>">
         <?php } ?>
         ';
