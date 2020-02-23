@@ -79,7 +79,7 @@ class LocalizationHelper
      */
     public function getDefaultLanguage()
     {
-        $this->bootInConsole();
+        $this->getLanguages();
 
         if ($language = $this->getBySlug($this->defaultLocalization)) {
             return $language;

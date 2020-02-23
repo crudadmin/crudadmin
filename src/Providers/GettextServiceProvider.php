@@ -7,7 +7,16 @@ use Illuminate\Support\ServiceProvider;
 
 class GettextServiceProvider extends ServiceProvider
 {
-    private $GettextBladeDirective = '<script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>';
+    public function getBladeDirective()
+    {
+        return '
+        <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
+
+        <?php if ( admin() ) { ?>
+        <link rel="stylesheet" href="<?php echo admin_asset(\'/css/frontend.css?v=\'.Admin::getAssetsVersion()) ?>">
+        <?php } ?>
+        ';
+    }
 
     /**
      * Register the service provider.
@@ -30,11 +39,11 @@ class GettextServiceProvider extends ServiceProvider
     private function registerBladeDirectives()
     {
         Blade::directive('translates', function ($model) {
-            return $this->GettextBladeDirective;
+            return $this->getBladeDirective();
         });
 
         Blade::directive('gettext', function ($model) {
-            return $this->GettextBladeDirective;
+            return $this->getBladeDirective();
         });
     }
 }
