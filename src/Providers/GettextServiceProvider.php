@@ -11,9 +11,9 @@ class GettextServiceProvider extends ServiceProvider
     {
         return '
         <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
-
-        <?php if ( isAllowedEditorMode() ) { ?>
+<?php if ( isAllowedEditorMode() ) { ?>
         <script>window.CACSRFToken = "<?php echo csrf_token(); ?>";</script>
+        <script src="<?php echo admin_asset(\'/js/TranslatableEditor.js?v=\'.Admin::getAssetsVersion()) ?>"></script>
         <link rel="stylesheet" href="<?php echo admin_asset(\'/css/frontend.css?v=\'.Admin::getAssetsVersion()) ?>">
         <?php } ?>
         ';
