@@ -10,6 +10,7 @@ use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
 use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
+use \Illuminate\Support\Facades\Blade;
 
 class JSTranslations
 {
@@ -19,6 +20,7 @@ class JSTranslations
     const GETTEXT_FLAGS = [
         'javascript' => 'js-flag', //translation is from javascript/vuejs template
         'missing' => 'missing-in-source', //missing translation from source
+        'isRaw' => 'raw-text', //missing translation from source
     ];
 
     protected $filesystem;
@@ -59,20 +61,52 @@ class JSTranslations
         }
 
         return Cache::rememberForever($key, function () use ($poPath) {
-            $items = new Translations;
+            $translations = Translations::fromPoFile($poPath);
+
+            return JSON::toString($translations);
+        });
+    }
+
+    /**
+     * Return all raw js translations
+     *
+     * @param  string  $lang
+     * @param  string  $localizationClass
+     * @return  string
+     */
+    public function getRawJSTranslations($lang, $model)
+    {
+        Gettext::setGettextPropertiesModel($model);
+
+        $locale = Gettext::getLocale($lang);
+
+        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+
+        if (! file_exists($poPath)) {
+            return '[]';
+        }
+
+        $timestamp = filemtime($poPath);
+
+        $key = 'js_bundleRaw';
+
+        //If we need restore cached translations data
+        if ($this->compareCacheKey($key.'_'.$lang, $timestamp)) {
+            Cache::forget($key);
+        }
+
+        return Cache::rememberForever($key, function () use ($poPath) {
+            $rawTranslations = [];
 
             $translations = Translations::fromPoFile($poPath);
 
             foreach ($translations as $translation) {
-                $comment = strtolower(implode('', $translation->getComments()));
-
-                //Push js translates into translations collection
-                if (strpos($comment, '.vue') !== false || strpos($comment, '.js') !== false) {
-                    $items[] = $translation;
+                if ( in_array(self::GETTEXT_FLAGS['isRaw'], $translation->getFlags()) ) {
+                    $rawTranslations[] = $translation->getOriginal();
                 }
             }
 
-            return JSON::toString($translations);
+            return json_encode($rawTranslations);
         });
     }
 
@@ -347,6 +381,11 @@ class JSTranslations
                     $sources = $this->setJSFlag($sources, $file);
                 }
 
+                //Get raw texts
+                if (in_array($type, ['Blade'])) {
+                    $sources = $this->markRawStrings($sources, $file);
+                }
+
                 //We does not want references in AdminLanguages.
                 //Refernces are location of translates in given files
                 if ( $withReferences === false ) {
@@ -360,6 +399,35 @@ class JSTranslations
         }
     }
 
+    public function markRawStrings($sources, $file)
+    {
+        if ( strpos($file, 'clinic') !== false ) {
+            $content = $file->getContents();
+
+            $rawTexts = [];
+
+            //Get all raw outputs
+            preg_match_all('/\{\!\!(.*?)\!\!\}/', $content, $matches);
+
+            foreach (@$matches[1] ?: [] as $sentence) {
+                preg_match_all("/(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\\'|[^'])+'))/is", $sentence, $quotas);
+
+                $rawTexts = array_merge($rawTexts, array_map(function($item){
+                    return substr($item, 1, -1);
+                }, $quotas[0]));
+            }
+
+            //Check all sources, if are in given raw elements
+            foreach ($sources as $source) {
+                if ( in_array($source->getOriginal(), $rawTexts) ) {
+                    $source->addFlag(self::GETTEXT_FLAGS['isRaw']);
+                }
+            }
+        }
+
+        return $sources;
+    }
+
     /*
      * Return modified options for adding _ parser
      */
@@ -367,7 +435,7 @@ class JSTranslations
     {
         return [
             'functions' => PhpCode::$options['functions'] + ['_' => 'gettext'],
-            'facade' => \Illuminate\Support\Facades\Blade::class,
+            'facade' => Blade::class,
         ];
     }
 

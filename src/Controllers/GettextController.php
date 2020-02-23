@@ -20,7 +20,13 @@ class GettextController extends Controller
     {
         $translations = JSTranslations::getJSTranslations(request('lang'), $localizationClass::getModel());
 
-        $js = view('admin::partials.gettext-translates', compact('translations'))->render();
+        if ( isAllowedEditorMode() ) {
+            $rawTranslations = JSTranslations::getRawJSTranslations(request('lang'), $localizationClass::getModel());
+        } else {
+            $rawTranslations = '[]';
+        }
+
+        $js = view('admin::partials.gettext-translates', compact('translations', 'rawTranslations'))->render();
 
         $response = new Response($js, 200, [
             'Content-Type' => 'application/javascript; charset=utf-8',
