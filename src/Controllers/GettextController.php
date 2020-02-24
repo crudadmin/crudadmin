@@ -114,10 +114,10 @@ class GettextController extends Controller
 
         EditorMode::setState($state);
 
-        if ( EditorMode::isActive() ) {
+        if ( request('response') ) {
             return $this->index('Localization', $lang);
         }
 
-        return '0';
+        return EditorMode::isActive() ? 1 : 0;
     }
 }

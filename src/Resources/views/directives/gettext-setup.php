@@ -5,6 +5,7 @@
 window.CAEditorConfig = {
     active : <?php echo EditorMode::isActive() ? 'true' : 'false' ?>,
     requests : {
+        admin : '<?php echo url('/admin') ?>',
         changeState : '<?php echo action('\Admin\Controllers\GettextController@updateEditorState', $lang->slug) ?>',
         updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->slug) ?>'
     },
