@@ -11,6 +11,7 @@ use App\Core\Models\Language;
 use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
+use EditorMode;
 use Localization;
 
 class Gettext
@@ -206,7 +207,7 @@ class Gettext
         $language = $localizationClass::get();
 
         //If is allowed frontend web editor, check for for newest translates
-        if ( isAllowedEditorMode() ) {
+        if ( EditorMode::isActive() ) {
             JSTranslations::checkIfIsUpToDate($language);
         }
 
@@ -220,7 +221,7 @@ class Gettext
         return asset(action('\Admin\Controllers\GettextController@'.$localizationClass::gettextJsResourcesMethod(), null, false)
                     .'?lang='.($language ? $language->slug : '')
                     .'&t='.$timestamp
-                    .'&a='.(isAllowedEditorMode() ? Admin::getAssetsVersion() : 0)
+                    .'&a='.(EditorMode::isActive() ? Admin::getAssetsVersion() : 0)
         );
     }
 

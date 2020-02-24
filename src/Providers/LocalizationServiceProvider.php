@@ -2,9 +2,9 @@
 
 namespace Admin\Providers;
 
+use Admin\Middleware\LocalizationMiddleware;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider;
-use Admin\Middleware\LocalizationMiddleware;
 
 class LocalizationServiceProvider extends ServiceProvider
 {
@@ -17,6 +17,7 @@ class LocalizationServiceProvider extends ServiceProvider
     {
         $this->app->bind('localization', \Admin\Helpers\Localization::class);
         $this->app->bind('localization.admin', \Admin\Helpers\AdminLocalization::class);
+        $this->app->bind('localization.editormode', \Admin\Helpers\Localization\EditorMode::class);
     }
 
     public function boot(Kernel $kernel)

@@ -41,26 +41,7 @@ class JSTranslations
      */
     public function getJSTranslations($lang, $model)
     {
-        Gettext::setGettextPropertiesModel($model);
-
-        $locale = Gettext::getLocale($lang);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
-
-        if (! file_exists($poPath)) {
-            return '[]';
-        }
-
-        $timestamp = filemtime($poPath);
-
-        $key = 'js_bundle';
-
-        //If we need restore cached translations data
-        if ($this->compareCacheKey($key.'_'.$lang, $timestamp)) {
-            Cache::forget($key);
-        }
-
-        return Cache::rememberForever($key, function () use ($poPath) {
+        return $this->getCachableTranslates($lang, $model, 'jsBundle', function ($poPath) {
             $translations = Translations::fromPoFile($poPath);
 
             return JSON::toString($translations);
@@ -76,6 +57,32 @@ class JSTranslations
      */
     public function getRawJSTranslations($lang, $model)
     {
+        return $this->getCachableTranslates($lang, $model, 'jsBundleRaw', function ($poPath) {
+            $rawTranslations = [];
+
+            $translations = Translations::fromPoFile($poPath);
+
+            foreach ($translations as $translation) {
+                if ( in_array(self::GETTEXT_FLAGS['isRaw'], $translation->getFlags()) ) {
+                    $rawTranslations[] = $translation->getOriginal();
+                }
+            }
+
+            return json_encode($rawTranslations);
+        });
+    }
+
+    /**
+     * Get translates by actual version of resources
+     *
+     * @param  string  $lang
+     * @param  AdminModel  $model
+     * @param  string  $cacheKey
+     * @param  closure  $callback
+     * @return  string
+     */
+    public function getCachableTranslates($lang, $model, $cacheKey, $callback)
+    {
         Gettext::setGettextPropertiesModel($model);
 
         $locale = Gettext::getLocale($lang);
@@ -88,25 +95,13 @@ class JSTranslations
 
         $timestamp = filemtime($poPath);
 
-        $key = 'js_bundleRaw';
-
         //If we need restore cached translations data
-        if ($this->compareCacheKey($key.'_'.$lang, $timestamp)) {
-            Cache::forget($key);
+        if ($this->compareCacheKey($cacheKey.'.'.$lang, $timestamp)) {
+            Cache::forget($cacheKey);
         }
 
-        return Cache::rememberForever($key, function () use ($poPath) {
-            $rawTranslations = [];
-
-            $translations = Translations::fromPoFile($poPath);
-
-            foreach ($translations as $translation) {
-                if ( in_array(self::GETTEXT_FLAGS['isRaw'], $translation->getFlags()) ) {
-                    $rawTranslations[] = $translation->getOriginal();
-                }
-            }
-
-            return json_encode($rawTranslations);
+        return Cache::rememberForever($cacheKey, function() use ($callback, $poPath) {
+            return $callback($poPath);
         });
     }
 
@@ -135,7 +130,7 @@ class JSTranslations
                 $translation->deleteFlags();
 
                 foreach ($flags as $flag) {
-                    $translation->addFlags($flag);
+                    $translation->addFlag($flag);
                 }
             }
         }
@@ -401,27 +396,25 @@ class JSTranslations
 
     public function markRawStrings($sources, $file)
     {
-        if ( strpos($file, 'clinic') !== false ) {
-            $content = $file->getContents();
+        $content = $file->getContents();
 
-            $rawTexts = [];
+        $rawTexts = [];
 
-            //Get all raw outputs
-            preg_match_all('/\{\!\!(.*?)\!\!\}/', $content, $matches);
+        //Get all raw outputs
+        preg_match_all('/\{\!\!(.*?)\!\!\}/', $content, $matches);
 
-            foreach (@$matches[1] ?: [] as $sentence) {
-                preg_match_all("/(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\\'|[^'])+'))/is", $sentence, $quotas);
+        foreach (@$matches[1] ?: [] as $sentence) {
+            preg_match_all("/(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\\'|[^'])+'))/is", $sentence, $quotas);
 
-                $rawTexts = array_merge($rawTexts, array_map(function($item){
-                    return substr($item, 1, -1);
-                }, $quotas[0]));
-            }
+            $rawTexts = array_merge($rawTexts, array_map(function($item){
+                return substr($item, 1, -1);
+            }, $quotas[0]));
+        }
 
-            //Check all sources, if are in given raw elements
-            foreach ($sources as $source) {
-                if ( in_array($source->getOriginal(), $rawTexts) ) {
-                    $source->addFlag(self::GETTEXT_FLAGS['isRaw']);
-                }
+        //Check all sources, if are in given raw elements
+        foreach ($sources as $source) {
+            if ( in_array($source->getOriginal(), $rawTexts) ) {
+                $source->addFlag(self::GETTEXT_FLAGS['isRaw']);
             }
         }
 

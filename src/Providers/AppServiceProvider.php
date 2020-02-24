@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
         'Gettext' => Facades\Gettext::class,
         'Localization' => Facades\Localization::class,
         'AdminLocalization' => Facades\AdminLocalization::class,
+        'EditorMode' => Facades\EditorMode::class,
         'SEO' => Facades\SEOFacade::class,
         'ImageCompressor' => Facades\ImageCompressor::class,
         'Image' => \Intervention\Image\Facades\Image::class,
@@ -50,6 +51,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /*
+         * Bind variable to admin views path
+         */
+        $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'admin.crud');
+
         /*
          * Bind route provider after application boot, for correct route actions in localizations
          */

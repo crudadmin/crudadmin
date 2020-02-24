@@ -34,8 +34,3 @@ function base_or_relative_path($path)
 
     return trim_end($path, '/');
 }
-
-function isAllowedEditorMode()
-{
-    return admin();
-}

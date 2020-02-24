@@ -8,6 +8,7 @@ use Admin\Helpers\Localization\LocalizationHelper;
 use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
 use Symfony\Component\HttpFoundation\Response;
+use EditorMode;
 
 class GettextController extends Controller
 {
@@ -16,17 +17,19 @@ class GettextController extends Controller
      *
      * @param  string  $localizationClass
      */
-    public function index($localizationClass = 'Localization')
+    public function index($localizationClass = 'Localization', $lang = null)
     {
-        $translations = JSTranslations::getJSTranslations(request('lang'), $localizationClass::getModel());
+        $lang = request('lang', $lang);
 
-        if ( isAllowedEditorMode() ) {
-            $rawTranslations = JSTranslations::getRawJSTranslations(request('lang'), $localizationClass::getModel());
+        $translations = JSTranslations::getJSTranslations($lang, $localizationClass::getModel());
+
+        if ( EditorMode::isActive() ) {
+            $rawTranslations = JSTranslations::getRawJSTranslations($lang, $localizationClass::getModel());
         } else {
             $rawTranslations = '[]';
         }
 
-        $js = view('admin::partials.gettext-translates', compact('translations', 'rawTranslations'))->render();
+        $js = view('admin.crud::translates', compact('translations', 'rawTranslations'))->render();
 
         $response = new Response($js, 200, [
             'Content-Type' => 'application/javascript; charset=utf-8',
@@ -41,14 +44,19 @@ class GettextController extends Controller
 
     /**
      * Returns admin translates
-     *
-     * @return  [type]
      */
     public function adminIndex()
     {
         return $this->index(AdminLocalization::class);
     }
 
+    /**
+     * Returns translation row by given table
+     *
+     * @param  string/number  $idOrSlug
+     * @param  string  $table
+     * @return  AdminModel|null
+     */
     public function getTranslationRow($idOrSlug, $table)
     {
         $model = Admin::getModelByTable($table ?: 'languages');
@@ -93,5 +101,23 @@ class GettextController extends Controller
         JSTranslations::checkIfIsUpToDate($language);
 
         return response()->download($language->poedit_po->basepath);
+    }
+
+    /**
+     * Update state
+     *
+     * @return
+     */
+    public function updateEditorState($lang)
+    {
+        $state = request('state');
+
+        EditorMode::setState($state);
+
+        if ( EditorMode::isActive() ) {
+            return $this->index('Localization', $lang);
+        }
+
+        return '0';
     }
 }

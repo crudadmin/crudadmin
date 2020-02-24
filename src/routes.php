@@ -19,7 +19,7 @@ Route::get('/uploads/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageContr
 Route::get('/uploads/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
 
 //Gettext js translates
-Route::get('/js/gettext-translates.js', 'GettextController@index');
+Route::get('/js/ca-translates.js', 'GettextController@index');
 
 /*
  * Admin routes
@@ -43,5 +43,6 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
 
     //Admin gettext translates
-    Route::get('/admin/js/gettext-translates.js', 'GettextController@adminIndex');
+    Route::post('/admin/translates/editable/{lang}', 'GettextController@updateEditorState');
+    Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');
 });
