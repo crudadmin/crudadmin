@@ -59,7 +59,7 @@ class SEO
             return $value;
 
         //Check for values into array
-        else if ( $this->model && array_key_exists($key, $this->model) && $value = $this->model[$key] )
+        else if ( $this->model && array_key_exists($key, $this->model->getAttributes()) && $value = $this->model[$key] )
             return $value;
 
         //Check for aliases values into model/array
@@ -68,7 +68,7 @@ class SEO
             foreach ($aliases[$key] as $alias) {
                 if (
                     ($is_object && $value = $this->model->getValue($alias)) ||
-                    (!$is_object && array_key_exists($alias, $this->model) && $value = $this->model[$alias]) )
+                    (!$is_object && array_key_exists($alias, $this->model->getAttributes()) && $value = $this->model[$alias]) )
                 {
                     return $value;
                 }
