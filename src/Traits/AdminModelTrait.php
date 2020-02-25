@@ -433,9 +433,9 @@ trait AdminModelTrait
      */
     public function getFieldType($key)
     {
-        $field = $this->getField($key);
-
-        return $field['type'];
+        if ( $field = $this->getField($key) ) {
+            return $field['type'];
+        }
     }
 
     /*

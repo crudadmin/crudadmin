@@ -735,7 +735,7 @@ class AdminMigrationCommand extends Command
 
         if ( count($ids_in_reference_table) > 0 )
         {
-            $this->line('<comment>+ Here are some ids from '.$reference_table.' table:</comment> '.implode($ids_in_reference_table->toArray(), ', '));
+            $this->line('<comment>+ Here are some ids from '.$reference_table.' table:</comment> '.implode(', ', $ids_in_reference_table->toArray()));
 
             //Define ids for existing rows
             do {

@@ -1,5 +1,5 @@
 {
-    "name": "marekgogol/crudadmin",
+    "name": "crudadmin/crudadmin",
     "type": "library",
     "description": "Dynamically Laravel CRUD administration with automatic database migrations",
     "keywords": ["migrations", "database", "framework", "crud", "admin", "administration", "automatic", "laravel", "form"],
