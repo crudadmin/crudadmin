@@ -471,8 +471,16 @@
               if ( editor ) {
                 //If is editor not ready yet, then wait for ready state
                 editor.setData( value ? value : '' );
-                editor.on('instanceReady', function(){
-                  editor.setData( value ? value : '' );
+                editor.on('instanceReady', () => {
+                    if ( this.onReadyInstance ){
+                        clearTimeout(this.onReadyInstance);
+                    }
+
+                    this.onReadyInstance = setTimeout(() => {
+                        if ( _.trim(editor.getData()) != _.trim(value) ) {
+                            editor.setData(value);
+                        }
+                    }, 20);
                 });
               }
             }
