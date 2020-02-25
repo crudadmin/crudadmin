@@ -117,7 +117,7 @@ class JSTranslations
         //All missing translations from existing po files mark as missing in comments
         foreach ($translations as $key => $translation) {
             //If translation does not exists in new loaded string,
-            if ( ! array_key_exists($key, $loadedTranslations) ) {
+            if ( ! array_key_exists($key, (array)$loadedTranslations) ) {
                 //if is not marked as missing already
                 if ( ! in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags()) ) {
                     $translation->addFlag(self::GETTEXT_FLAGS['missing']);
