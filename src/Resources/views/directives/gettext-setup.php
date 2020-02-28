@@ -1,4 +1,5 @@
 <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
+<script src="<?php echo admin_asset('/js/Gettextable.js') ?>"></script>
 
 <?php if ( EditorMode::isEnabled() && ($lang = Localization::get()) ){ ?>
 <script>
