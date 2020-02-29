@@ -259,6 +259,30 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             'tax' => [
                 'icon' => 'fa-hand-holding-usd'
             ],
+            'time' => [
+                'icon' => 'fa-clock-o',
+                'settings' => [
+                    'title' => [
+                        'create' => _('Nový čas'),
+                        'update' => _('Upravujete čas č. :id'),
+                    ],
+                    'buttons' => [
+                        'create' => _('Nový čas'),
+                    ],
+                ],
+            ],
+            'appointment' => [
+                'icon' => 'fa-calendar-check',
+                'settings' => [
+                    'title' => [
+                        'create' => _('Nová rezervácia'),
+                        'update' => _('Upravujete rezerváciu č. :id'),
+                    ],
+                    'buttons' => [
+                        'create' => _('Nová rezervácia'),
+                    ],
+                ],
+            ],
         ];
     }
 

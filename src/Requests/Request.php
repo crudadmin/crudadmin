@@ -2,11 +2,12 @@
 
 namespace Admin\Requests;
 
-use File;
 use Admin;
-use Localization;
+use Admin\Core\Fields\Mutations\FieldToArray;
 use Carbon\Carbon;
+use File;
 use Illuminate\Foundation\Http\FormRequest;
+use Localization;
 
 abstract class Request extends FormRequest
 {
@@ -17,6 +18,8 @@ abstract class Request extends FormRequest
     private $errors = [];
 
     private $model = false;
+
+    private $rewritedRules = null;
 
     //Checks if is multiple or one file
     protected function getFilesInArray($key)
@@ -246,11 +249,28 @@ abstract class Request extends FormRequest
 
     private function getFieldsByRequest($fields = null)
     {
+        $modelFields = $this->model->getFields();
+
+        //Rewrite original model properties,
+        //with properties given by original and additional/rewrited request rules
+        if ( is_array($this->rewritedRules) ) {
+            foreach ($this->rewritedRules as $field => $rules) {
+                $rules = (new FieldToArray)->update($rules);
+
+                //Rewrite each rule key which is not missing in model
+                foreach ($rules as $rKey => $value) {
+                    if ( array_key_exists($field, $modelFields) && array_key_exists($rKey, $modelFields[$field]) ) {
+                        $modelFields[$field][$rKey] = $value;
+                    }
+                }
+            }
+        }
+
         //Get fields by request
         if ($fields) {
-            return array_intersect_key($this->model->getFields(), array_flip($fields));
+            return array_intersect_key($modelFields, array_flip($fields));
         } else {
-            return $this->model->getFields();
+            return $modelFields;
         }
     }
 
@@ -310,10 +330,13 @@ abstract class Request extends FormRequest
         }
     }
 
-    public function applyMutators($model, array $fields = null)
+    public function applyMutators($model, array $fields = null, $rules = null)
     {
         //Set model object
         $this->model = $model;
+
+        //Set rewrited rules
+        $this->rewritedRules = $rules;
 
         $fields = $this->getFieldsByRequest($fields);
 

@@ -34,3 +34,13 @@ function base_or_relative_path($path)
 
     return trim_end($path, '/');
 }
+
+/*
+ * Add email/phone encryption numbers
+ */
+if ( ! function_exists('encryptText') ) {
+    function encryptText($text)
+    {
+        return base64_encode('XYQ'.base64_encode($text));
+    }
+}
