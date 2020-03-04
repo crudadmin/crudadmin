@@ -79,7 +79,7 @@ class Controller extends BaseController
      * If field has required rule, but file is already uploaded in the server, then
      * remove required rule, because file is not now required
      */
-    private function removeRequiredFromUploadedFields(&$data, $model, $request, $key, $replaced_key)
+    private function removeRequiredFromUploadedFields(&$data, $model, $request, $key, $replaced_key, $row, $validation_key)
     {
         if ( $model->isFieldType($replaced_key, 'file')
             && $model->hasFieldParam($replaced_key, 'required', true)
@@ -160,7 +160,7 @@ class Controller extends BaseController
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             //also Allow send form without file, when is file uploaded already in server
             if ( isset($row) ){
-                $this->removeRequiredFromUploadedFields($data, $model, $request, $key, $replaced_key);
+                $this->removeRequiredFromUploadedFields($data, $model, $request, $key, $replaced_key, $row, $validation_key);
             }
 
             //If field is required, then remove nullable rule
