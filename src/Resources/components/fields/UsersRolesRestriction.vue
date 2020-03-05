@@ -4,7 +4,8 @@
         <table class="table">
             <thead>
                 <th>{{ trans('roles-module') }}</th>
-                <th v-for="(permission, permission_key) in getRolesPermissions">{{ permission.name }}</th>
+                <th v-for="(permission, permission_key) in getBasePermissions">{{ permission.name }}</th>
+                <th>{{ _('Ostatné') }}</th>
                 <th>{{ trans('roles-all') }}</th>
             </thead>
             <tbody>
@@ -12,11 +13,28 @@
                     <td>
                         <span :style="{ marginLeft : (row.depth * 20)+'px' }">{{ row.name }}</span>
                     </td>
-                    <td v-for="(permission, permission_key) in getRolesPermissions">
+                    <td v-for="(permission, permission_key) in getBasePermissions">
                         <label class="checkbox" v-if="hasModelPermission(row, permission_key)" data-toggle="tooltip" :title="permissionTitle(row, permission_key)">
                             <input type="checkbox" @change="togglePermissionValue(row, permission_key)" class="ios-switch" :class="checkboxColor(row, permission_key)" :checked="hasTurnedPermission(row.key, permission_key)">
                             <div><div></div></div>
                         </label>
+                    </td>
+                    <td>
+                        <div class="userRolesFormGroup__other" v-if="hasOtherPermissions(row)">
+                            <i class="fas fa-ellipsis-h" :class="{ active : hasActiveOneOtherRoles(row), activeAll : hasActiveAllOtherRoles(row) }"></i>
+
+                            <div class="userRolesFormGroup__other__wrapper">
+                                <ul>
+                                    <li v-for="(permission, permission_key) in getOtherPermissions(row)">
+                                        <span @click="togglePermissionValue(row, permission_key)">{{ permission.name }}</span>
+                                        <label class="checkbox" v-if="hasModelPermission(row, permission_key)" data-toggle="tooltip" :title="permissionTitle(row, permission_key)">
+                                            <input type="checkbox" @change="togglePermissionValue(row, permission_key)" class="ios-switch" :class="checkboxColor(row, permission_key)" :checked="hasTurnedPermission(row.key, permission_key)">
+                                            <div><div></div></div>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <label class="checkbox" data-toggle="tooltip" :title="permissionTitle(row, 'all')">
@@ -34,17 +52,27 @@
 export default {
     props : ['field_key', 'field', 'row', 'model'],
 
+    data(){
+        return {
+            baseFields : ['read', 'insert', 'update', 'publishable', 'delete'],
+            staticFields : ['all'],
+        }
+    },
+
     computed: {
         permissions(){
             return JSON.parse(this.field.value||'{}');
         },
-        getRolesPermissions(){
+        getBasePermissions(){
             var tree = this.modelTree,
                 permissions = {};
 
             for ( var i = 0; i < tree.length; i++ ) {
-                for ( var key in this.exceptGroups(tree[i].permissions) ) {
-                    permissions[key] = tree[i].permissions[key];
+                for ( var key in tree[i].permissions ) {
+                    //Allow only base roles
+                    if ( this.baseFields.indexOf(key) > -1 ){
+                        permissions[key] = tree[i].permissions[key];
+                    }
                 }
             }
 
@@ -92,6 +120,20 @@ export default {
     },
 
     methods: {
+        getOtherPermissions(row){
+            var other = {};
+
+            for ( var key in row.permissions ){
+                if ( this.baseFields.indexOf(key) === -1 && this.staticFields.indexOf(key) == -1 ){
+                    other[key] = row.permissions[key];
+                }
+            }
+
+            return other;
+        },
+        hasOtherPermissions(row){
+            return Object.keys(this.getOtherPermissions(row)).length > 0;
+        },
         checkboxColor(row, permission_key){
             if ( row.permissions[permission_key].danger == true ) {
                 return ['red'];
@@ -99,11 +141,13 @@ export default {
 
             return ['green'];
         },
-        exceptGroups(groups){
+        exceptStatic(groups){
             groups = _.cloneDeep(groups);
 
-            if ( groups.all ) {
-                delete groups.all;
+            for ( var i = 0; i < this.staticFields.length; i++ ){
+                if ( groups[this.staticFields[i]] ) {
+                    delete groups[this.staticFields[i]];
+                }
             }
 
             return groups;
@@ -135,16 +179,34 @@ export default {
 
             this.setPermissions(permissions);
         },
-        hasAllPermissionsTurnedOn(row){
-            var permissions = this.permissions;
+        hasAllPermissionsTurnedOn(row, otherPermissions){
+            var permissions = this.permissions,
+                onCheck = this.exceptStatic(otherPermissions||row.permissions);
 
-            for ( var key in this.exceptGroups(row.permissions) ) {
+            for ( var key in onCheck ) {
                 if ( ! this.hasTurnedPermission(row.key, key) ){
                     return false;
                 }
             }
 
             return true;
+        },
+        hasActiveOneOtherRoles(row){
+            var otherPermissions = this.getOtherPermissions(row);
+
+            //If is checked at least one permissions
+            for ( var key in otherPermissions ){
+                if ( this.hasTurnedPermission(row.key, key) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        hasActiveAllOtherRoles(row){
+            var otherPermissions = this.getOtherPermissions(row);
+
+            return this.hasAllPermissionsTurnedOn(row, otherPermissions);
         },
         toggleAll(row){
             var permissions = this.permissions,

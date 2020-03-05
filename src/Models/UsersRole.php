@@ -63,6 +63,7 @@ class UsersRole extends AdminModel
 
     protected $settings = [
         'grid.default' => 'small',
+        'grid.big.disabled' => true,
     ];
 
     public function onTableCreate()
