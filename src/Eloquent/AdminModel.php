@@ -6,6 +6,7 @@ use Admin;
 use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
 use Admin\Eloquent\Concerns\AdminModelTrait;
 use Admin\Eloquent\Concerns\HasAttributes;
+use Admin\Eloquent\Concerns\HasPermissions;
 use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\ModelIcons;
 use Admin\Eloquent\Concerns\ModelLayoutBuilder;
@@ -23,6 +24,7 @@ class AdminModel extends CoreAdminModel
     use AdminModelTrait,
         ModelLayoutBuilder,
         HasAttributes,
+        HasPermissions,
         ModelRules,
         VueComponent,
         Historiable,
@@ -181,30 +183,13 @@ class AdminModel extends CoreAdminModel
         AdminCustomizationModule::class,
     ];
 
-    /*
-     * Returns model permissions for admin roles
+    /**
+     * You can modify model default permissions in this method
+     *
+     * @param  array  $permissions
      */
-    public function getModelPermissions()
+    public function setModelPermissions($permissions)
     {
-        $permissions = [
-            'read' => trans('admin::admin.roles-read'),
-        ];
-
-        if ( $this->insertable ) {
-            $permissions['insert'] = trans('admin::admin.roles-insert');
-        }
-
-
-        $permissions['update'] = trans('admin::admin.roles-update');
-
-        if ( $this->publishable ) {
-            $permissions['publishable'] = trans('admin::admin.roles-publishable');
-        }
-
-        if ( $this->deletable ) {
-            $permissions['delete'] = trans('admin::admin.roles-delete');
-        }
-
         return $permissions;
     }
 

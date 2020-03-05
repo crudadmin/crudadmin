@@ -216,6 +216,16 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         }
     }
 
+    /**
+     * Check if end class is user model
+     *
+     * @return  bool
+     */
+    public function isUserClass()
+    {
+        return $this->getTable() === 'users';
+    }
+
     /*
      * Check if model can apply user roles
      */
@@ -225,7 +235,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             return false;
         }
 
-        return class_exists('\App\User') && ($this instanceof \App\User) || $this->withUserRoles == true;
+        return $this->isUserClass() || $this->withUserRoles == true;
     }
 
     /*
@@ -248,9 +258,27 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
          */
         if ($this->canApplyUserRoles()) {
             $fields->push([
-                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|'.($this->hasAllowedRole() ? '' : 'hideFromForm'),
-                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd|'.($this->hasAllowedRole() ? '' : 'hideFromForm'),
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|'.($this->hasAllowedRole() ? '' : 'invisible'),
+                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd|'.($this->hasAllowedRole() ? '' : 'invisible'),
             ]);
         }
+    }
+
+    /*
+     * Update permissions titles
+     */
+    public function setModelPermissions($permissions)
+    {
+        //We does not want mutate titles in other than user model
+        if ( $this->isUserClass() == false ){
+            return $permissions;
+        }
+
+        //Set alert tooltips when editing permission group
+        $permissions['update']['title'] = _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť prihlasovacie údaje ktorémukoľvek administrátorovi.');
+        $permissions['update']['danger'] = true;
+        $permissions['all']['title'] = $permissions['update']['title'];
+
+        return $permissions;
     }
 }

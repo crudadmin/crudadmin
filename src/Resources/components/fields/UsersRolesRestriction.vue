@@ -4,7 +4,7 @@
         <table class="table">
             <thead>
                 <th>{{ trans('roles-module') }}</th>
-                <th v-for="(permission, permission_key) in getRolesPermissions">{{ permission }}</th>
+                <th v-for="(permission, permission_key) in getRolesPermissions">{{ permission.name }}</th>
                 <th>{{ trans('roles-all') }}</th>
             </thead>
             <tbody>
@@ -13,13 +13,13 @@
                         <span :style="{ marginLeft : (row.depth * 20)+'px' }">{{ row.name }}</span>
                     </td>
                     <td v-for="(permission, permission_key) in getRolesPermissions">
-                        <label class="checkbox" v-if="hasModelPermission(row, permission_key)" data-toggle="tooltip" :title="permission">
-                            <input type="checkbox" @change="togglePermissionValue(row, permission_key)" class="ios-switch green" :checked="hasTurnedPermission(row.key, permission_key)">
+                        <label class="checkbox" v-if="hasModelPermission(row, permission_key)" data-toggle="tooltip" :title="permissionTitle(row, permission_key)">
+                            <input type="checkbox" @change="togglePermissionValue(row, permission_key)" class="ios-switch" :class="checkboxColor(row, permission_key)" :checked="hasTurnedPermission(row.key, permission_key)">
                             <div><div></div></div>
                         </label>
                     </td>
                     <td>
-                        <label class="checkbox">
+                        <label class="checkbox" data-toggle="tooltip" :title="permissionTitle(row, 'all')">
                             <input type="checkbox" @click="toggleAll(row)" :checked="hasAllPermissionsTurnedOn(row)" class="ios-switch green" value="1">
                             <div><div></div></div>
                         </label>
@@ -43,7 +43,7 @@ export default {
                 permissions = {};
 
             for ( var i = 0; i < tree.length; i++ ) {
-                for ( var key in tree[i].permissions ) {
+                for ( var key in this.exceptGroups(tree[i].permissions) ) {
                     permissions[key] = tree[i].permissions[key];
                 }
             }
@@ -63,7 +63,7 @@ export default {
                         key : key,
                         depth : 0,
                         tree : row.tree,
-                        permissions : row.permissions
+                        permissions : row.permissions,
                     });
                 }
 
@@ -78,7 +78,7 @@ export default {
                                 key : key,
                                 depth : row.tree.length,
                                 tree : row.tree,
-                                permissions : row.permissions
+                                permissions : row.permissions,
                             });
                         }
                     }
@@ -92,6 +92,31 @@ export default {
     },
 
     methods: {
+        checkboxColor(row, permission_key){
+            if ( row.permissions[permission_key].danger == true ) {
+                return ['red'];
+            }
+
+            return ['green'];
+        },
+        exceptGroups(groups){
+            groups = _.cloneDeep(groups);
+
+            if ( groups.all ) {
+                delete groups.all;
+            }
+
+            return groups;
+        },
+        permissionTitle(row, permission_key){
+            var obj = row.permissions[permission_key];
+
+            if ( ! obj ){
+                return;
+            }
+
+            return (obj.name ? obj.name : '') + (obj.title ? ((obj.name ? ' - ' : '') + obj.title) : '');
+        },
         hasModelPermission(row, permission_key){
             return permission_key in row.permissions;
         },
@@ -113,7 +138,7 @@ export default {
         hasAllPermissionsTurnedOn(row){
             var permissions = this.permissions;
 
-            for ( var key in row.permissions ) {
+            for ( var key in this.exceptGroups(row.permissions) ) {
                 if ( ! this.hasTurnedPermission(row.key, key) ){
                     return false;
                 }

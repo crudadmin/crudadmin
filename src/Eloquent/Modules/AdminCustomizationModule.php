@@ -2,9 +2,11 @@
 
 namespace Admin\Eloquent\Modules;
 
+use Admin;
+use AdminLocalization;
 use Admin\Core\Eloquent\Concerns\AdminModelModule;
 use Admin\Core\Eloquent\Concerns\AdminModelModuleSupport;
-use Admin;
+use Gettext\Translations;
 
 class AdminCustomizationModule extends AdminModelModule implements AdminModelModuleSupport
 {
@@ -18,15 +20,15 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
         return [
             'article' => [
                 'icon' => 'fa-file-alt',
-                'settings.title.create' => _('Nový článok'),
-                'settings.title.update' => _('Upravujete článok č. :id'),
-                'settings.buttons.create' => _('Nový článok'),
+                'settings.title.create' => $this->t(_('Nový článok')),
+                'settings.title.update' => $this->t(_('Upravujete článok č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
             'blog' => [
                 'icon' => 'fa-file-alt',
-                'settings.title.create' => _('Nový článok'),
-                'settings.title.update' => _('Upravujete článok č. :id'),
-                'settings.buttons.create' => _('Nový článok'),
+                'settings.title.create' => $this->t(_('Nový článok')),
+                'settings.title.update' => $this->t(_('Upravujete článok č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
             'gallery' => [
                 'icon' => 'fa-file-image'
@@ -41,7 +43,10 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'icon' => 'fa-wpforms'
             ],
             'user' => [
-                'icon' => 'fa-users'
+                'icon' => 'fa-users',
+                'settings.title.create' => $this->t(_('Nový používateľ')),
+                'settings.title.update' => $this->t(_('Upravujete používateľa č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový používateľ')),
             ],
             'news' => [
                 'icon' => 'far fa-newspaper'
@@ -263,11 +268,11 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'icon' => 'fa-clock-o',
                 'settings' => [
                     'title' => [
-                        'create' => _('Nový čas'),
-                        'update' => _('Upravujete čas č. :id'),
+                        'create' => $this->t(_('Nový čas')),
+                        'update' => $this->t(_('Upravujete čas č. :id')),
                     ],
                     'buttons' => [
-                        'create' => _('Nový čas'),
+                        'create' => $this->t(_('Nový čas')),
                     ],
                 ],
             ],
@@ -275,11 +280,11 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'icon' => 'fa-calendar-check',
                 'settings' => [
                     'title' => [
-                        'create' => _('Nová rezervácia'),
-                        'update' => _('Upravujete rezerváciu č. :id'),
+                        'create' => $this->t(_('Nová rezervácia')),
+                        'update' => $this->t(_('Upravujete rezerváciu č. :id')),
                     ],
                     'buttons' => [
-                        'create' => _('Nová rezervácia'),
+                        'create' => $this->t(_('Nová rezervácia')),
                     ],
                 ],
             ],
@@ -291,6 +296,66 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
         return str_singular(last(explode('_', $this->getModel()->getTable())));
     }
 
+    /*
+     * Check if given text is translated in given language mutation
+     */
+    public function hasTranslatedValue($value)
+    {
+        //If is not string type, we can allow this value
+        if ( ! is_string($value) ) {
+            return true;
+        }
+
+        //We want cache all text value
+        return Admin::cache('models.customization.translation.'.$value, function() use ($value) {
+            $translations = Admin::cache('models.customization.loadedTranslations', function(){
+                $adminLang = AdminLocalization::get();
+
+                //If is selected same language what is in sources files
+                if ( $adminLang->slug == 'sk' ) {
+                    return false;
+                }
+
+                //If language PO file does not exists
+                if ( ($poPath = $adminLang->getPoPath())->exists() == false ){
+                    return false;
+                }
+
+                return Translations::fromPoFile($poPath->basepath);
+            });
+
+            //We can allow this value if translations are not available
+            if ( $translations === false ) {
+                return true;
+            }
+
+            //If translation has not been found
+            if ( !($translation = $translations->find(null, $value)) ) {
+                return true;
+            }
+
+            //If translated value has not been found
+            return $translation->hasTranslation() === true;
+        });
+    }
+
+    /**
+     * Check if given text has translated value in actual admin language
+     * If not, this text wont be setted as customized value
+     *
+     * @param  string  $value
+     * @return  string
+     */
+    public function t($value)
+    {
+        if ( $this->hasTranslatedValue($value) ) {
+            return $value;
+        }
+
+        //This key will be skipped
+        return '$$SKIP:continue';
+    }
+
     public function adminModelRender(&$response = [])
     {
         $data = $this->getModelData();
@@ -299,6 +364,11 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
 
         if (array_key_exists($name, $data)) {
             foreach ($data[$name] as $key => $value) {
+                //We want skip untranslated value
+                if ( $value === '$$SKIP:continue' ) {
+                    continue;
+                }
+
                 if ( array_get($response, $key) == null ) {
                     array_set($response, $key, $value);
                 }
