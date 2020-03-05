@@ -45,6 +45,7 @@ class FieldsServiceProvider extends ServiceProvider
         //We need register fields mutators into crudadmin core
         Fields::addMutation([
             Mutations\InterfaceRules::class,
+            Mutations\PermissionsSupport::class,
             Mutations\AddSelectSupport::class,
             Mutations\AddLocalizationSupport::class,
             Mutations\UpdateDateFormat::class,

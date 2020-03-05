@@ -70,44 +70,42 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         $key = 'users.'.$this->getKey().'.permissions';
 
         //Check for buffer
-        if (Admin::has($key)) {
-            return Admin::get($key);
-        }
+        return Admin::cache($key, function(){
+            $models = [];
 
-        $models = [];
+            if ($admin_groups = $this->roles) {
+                foreach ($admin_groups as $group) {
+                    $permissions = (array) json_decode($group->permissions ?: '{}', true);
 
-        if ($admin_groups = $this->roles) {
-            foreach ($admin_groups as $group) {
-                $permissions = (array) json_decode($group->permissions ?: '{}', true);
-
-                //Remove all disabled permissions
-                foreach ($permissions as $modelKey => $model) {
-                    foreach ($model as $permissionKey => $state) {
-                        if ( $state === false ) {
-                            unset($permissions[$modelKey][$permissionKey]);
+                    //Remove all disabled permissions
+                    foreach ($permissions as $modelKey => $model) {
+                        foreach ($model as $permissionKey => $state) {
+                            if ( $state === false ) {
+                                unset($permissions[$modelKey][$permissionKey]);
+                            }
                         }
                     }
+
+                    $models = array_merge($models, $permissions);
                 }
-
-                $models = array_merge($models, $permissions);
             }
-        }
 
-        return Admin::set($key, $models);
+            return $models;
+        });
     }
 
-    /*
+    /**
      * Check if has user allowed model by namespace
+     *
+     * @param  string  $model classpath... Eg: \App\User
+     * @param  bool|string  $permissionKey (if string is given, will check specific permission type). If true is given, will check if has at least one permission type.
+     * @return  bool
      */
     public function hasAccess($model, $permissionKey = true)
     {
         //If roles are not enabled, allow everything
-        if (Admin::isRolesEnabled() === false) {
-            return true;
-        }
-
-        //If is super admin
-        if ($this->hasAdminAccess()) {
+        //Or if is user type set as SuperAdmin
+        if (Admin::isRolesEnabled() === false || $this->hasAdminAccess()) {
             return true;
         }
 
@@ -122,13 +120,26 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         //Check if any permission is present
         if ( $permissionKey === true ) {
             //Check if has at least one true permission
-            if ( array_key_exists($model, $permissions) && count(array_keys($permissions[$model])) > 0 )
+            if ( array_key_exists($model, $permissions) && count(array_keys($permissions[$model])) > 0 ) {
                 return true;
+            }
 
             return false;
         }
 
         return array_key_exists($model, $permissions) && @$permissions[$model][$permissionKey] === true;
+    }
+
+    /**
+     * Check if user has access to model by table name
+     *
+     * @return  bool
+     */
+    public function hasAccessByTable($table, $permissionKey = null)
+    {
+        $classname = get_class(Admin::getModelByTable($table));
+
+        return $this->hasAccess($classname, $permissionKey);
     }
 
     /*
@@ -239,16 +250,6 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     }
 
     /*
-     * If is logged user with super admin access
-     */
-    public function hasAllowedFullAccessRole()
-    {
-        return ($admin = admin()) && (
-            admin()->hasAdminAccess() || admin()->hasAccess(Admin\Models\UsersRole::class, 'update')
-        );
-    }
-
-    /*
      * Add additional fields
      */
     public function mutateFields($fields)
@@ -258,8 +259,8 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
          */
         if ($this->canApplyUserRoles()) {
             $fields->push([
-                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|'.($this->hasAllowedFullAccessRole() ? '' : 'invisible'),
-                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd|'.($this->hasAllowedFullAccessRole() ? '' : 'invisible'),
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|hasNotAccess:users_roles.update,invisible',
+                'roles' => 'name:admin::admin.admin-group|belongsToMany:users_roles,name|canAdd|hasNotAccess:users_roles.update,invisible',
             ]);
         }
     }
