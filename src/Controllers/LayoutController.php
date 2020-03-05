@@ -232,7 +232,7 @@ class LayoutController extends BaseController
             }
 
             //Check if user has allowed model
-            if (! admin()->hasAccess($model)) {
+            if (! admin()->hasAccess($model, 'read') && ! admin()->hasAccess($model, 'insert')) {
                 $model->setProperty('disableModel', true);
             }
 
