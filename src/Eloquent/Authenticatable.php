@@ -259,11 +259,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
          */
         if ($this->canApplyUserRoles()) {
             $fields->pushAfter('enabled', [
-                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|hasNotAccess:users_roles.update,invisible',
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|hasNotAccess:users.full_access,invisible',
             ]);
 
             $fields->push([
-                'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:users_roles,name|canAdd|hasNotAccess:users_roles.update,invisible',
+                'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:users_roles,name|canAdd|hasNotAccess:users.roles,invisible',
             ]);
         }
     }
@@ -281,6 +281,22 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         //Set alert tooltips when editing permission group
         $permissions['update']['title'] = _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť prihlasovacie údaje ktorémukoľvek administrátorovi.');
         $permissions['update']['danger'] = true;
+
+        //Add full access changing support
+        $permissions['full_access'] = [
+            'name' => _('Nastavenie plného prístupu'),
+            'title' => _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže nastaviť ktorémukoľvek účtu plný prístup do administrácie.'),
+            'danger' => true,
+        ];
+
+        //Add full access changing support
+        $permissions['roles'] = [
+            'name' => _('Priradenie skupín'),
+            'title' => _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť priradenie rol pre konkrétnych užívateľov.'),
+            'danger' => true,
+        ];
+
+        //Update title for all
         $permissions['all']['title'] = $permissions['update']['title'];
 
         return $permissions;

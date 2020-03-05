@@ -77,7 +77,9 @@ class UsersRole extends AdminModel
      */
     public function setModelPermissions($permissions)
     {
-        $permissions['update']['title'] = _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť právomoci akejkoľvek skupine a administrátorom.');
+        $permissions['insert']['danger'] = true;
+
+        $permissions['update']['title'] = _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť právomoci akejkoľvek skupine.');
         $permissions['update']['danger'] = true;
         $permissions['all']['title'] = $permissions['update']['title'];
 
