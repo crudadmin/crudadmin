@@ -34,9 +34,24 @@ class PermissionsSupport extends MutationRule
 
         $accessRule = explode('.', $query[0]);
 
+        //If table and model is the same. We want get namespace of actual model
+        if ( $accessRule[0] === $this->getModel()->getTable() ) {
+            $classname = get_class($this->getModel());
+        }
+
+        //We need find model by table. Which is other by actual model.
+        else if ( $model = Admin::getModelByTable($accessRule[0]) ) {
+            $classname = get_class($model);
+        }
+
+        //Model has not been found, or is not bootstraped yet.
+        else {
+            $classname = null;
+        }
+
         return [
             'rules' => [
-                'table' => $accessRule[0],
+                'classname' => $classname,
                 'permissions' => array_slice($accessRule, 1),
             ],
             'attribute' => implode(',', array_slice($query, 1)),
@@ -59,7 +74,7 @@ class PermissionsSupport extends MutationRule
 
         //If at least one is not present. User does not have permission to given rules
         foreach ($query['rules']['permissions'] as $permissionKey) {
-            if ( admin()->hasAccessByTable($query['rules']['table'], $permissionKey) === false ) {
+            if ( admin()->hasAccess($query['rules']['classname'], $permissionKey) === false ) {
                 $hasAccess = false;
             }
         }
