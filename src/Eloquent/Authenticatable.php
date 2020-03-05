@@ -147,7 +147,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function hasAdminAccess()
     {
-        return $this->permissions == 1;
+        return Admin::isRolesEnabled() === false || $this->permissions == 1;
     }
 
     /*

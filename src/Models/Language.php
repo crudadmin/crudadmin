@@ -30,11 +30,6 @@ class Language extends Model
     protected $group = 'settings';
 
     /*
-     * Acivate/deactivate model in administration
-     */
-    protected $active = true;
-
-    /*
      * Minimum page rows
      * Default = 0
      */

@@ -2,7 +2,6 @@
 
 namespace Admin\Models;
 
-use Admin;
 use Admin\Eloquent\Concerns\Gettextable;
 use Admin\Helpers\File;
 use Admin\Helpers\Localization\ResourcesGettext;
@@ -30,11 +29,6 @@ class AdminLanguage extends Model
     protected $group = 'settings';
 
     /*
-     * Acivate/deactivate model in administration
-     */
-    protected $active = true;
-
-    /*
      * Minimum page rows
      * Default = 0
      */
@@ -55,7 +49,7 @@ class AdminLanguage extends Model
      */
     public function active()
     {
-        return Admin::isRolesEnabled() === false || admin() && admin()->hasAdminAccess();
+        return admin() && admin()->hasAdminAccess();
     }
 
     /*

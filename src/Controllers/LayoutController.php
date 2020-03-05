@@ -195,7 +195,7 @@ class LayoutController extends BaseController
         //If is model related recursive to itself
         if (
             ($count == 1 && in_array(class_basename(get_class($model)), $belongsToModel))
-            || $model->getProperty('inMenu', false) === true
+            || $model->getProperty('inMenu') === true
         ) {
             return false;
         }
@@ -313,6 +313,7 @@ class LayoutController extends BaseController
             'foreign_column' => $model->getForeignColumn(),
             'without_parent' => $model->getProperty('withoutParent') ?: false,
             'in_tab' => $model->getProperty('inTab') ?: false,
+            'in_menu' => $model->getProperty('inMenu', false),
             'hidden_tabs' => $model->getProperty('hidden_tabs') ?: [],
             'reserved' => $model->getProperty('reserved') ?: false,
             'title' => $model->getProperty('title'),

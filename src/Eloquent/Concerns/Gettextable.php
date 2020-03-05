@@ -12,6 +12,7 @@ trait Gettextable
     {
         return [
             'dates' => false,
+            'increments' => false,
             'title.insert' => trans('admin::admin.languages-add-new'),
             'title.update' => trans('admin::admin.languages-update'),
             'columns.downloadpo.name' => _('Súbory s prekladmi'),
