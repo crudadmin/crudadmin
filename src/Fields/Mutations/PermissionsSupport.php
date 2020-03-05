@@ -34,6 +34,11 @@ class PermissionsSupport extends MutationRule
 
         $accessRule = explode('.', $query[0]);
 
+        //If table is missing. Use actual models permissions key
+        if ( count($accessRule) == 1 ) {
+            $accessRule = [$this->getModel()->getTable(), $accessRule[0]];
+        }
+
         //If table and model is the same. We want get namespace of actual model
         if ( $accessRule[0] === $this->getModel()->getTable() ) {
             $classname = get_class($this->getModel());

@@ -259,11 +259,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
          */
         if ($this->canApplyUserRoles()) {
             $fields->pushAfter('enabled', [
-                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|hasNotAccess:users.full_access,invisible',
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|hasNotAccess:full_access,invisible',
             ]);
 
             $fields->push([
-                'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:users_roles,name|canAdd|hasNotAccess:users.roles,invisible',
+                'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:users_roles,name|canAdd|hasNotAccess:roles,invisible',
             ]);
         }
     }
