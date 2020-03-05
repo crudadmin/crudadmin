@@ -19,7 +19,10 @@ class AdminLanguage extends Model
     /*
      * Template name
      */
-    protected $name = 'Preklady administrácie';
+    public function name()
+    {
+        return _('Preklady administrácie');
+    }
 
     /*
      * Group

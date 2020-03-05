@@ -13,6 +13,12 @@ trait CRUDRelations
     {
         foreach ($model->getFields() as $key => $field) {
             if (array_key_exists('belongsToMany', $field)) {
+                //If field was deleted from request
+                //We does not want update this value.
+                if ( $request->isRemovedFieldFromRequest($key) === true ){
+                    continue;
+                }
+
                 $properties = $model->getRelationProperty($key, 'belongsToMany');
 
                 DB::table($properties[3])->where($properties[6], $row->getKey())->delete();

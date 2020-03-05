@@ -249,7 +249,9 @@ abstract class Request extends FormRequest
 
     private function getFieldsByRequest($fields = null)
     {
-        $modelFields = $this->model->getFields();
+        //We need load refreshed fields. Because after session boot
+        //fields may be changed.
+        $modelFields = $this->model->getFields(null, true);
 
         //Rewrite original model properties,
         //with properties given by original and additional/rewrited request rules
@@ -317,6 +319,31 @@ abstract class Request extends FormRequest
         }
     }
 
+    /**
+     * Check if given field is removed from request
+     *
+     * @return  bool
+     */
+    public function isRemovedFieldFromRequest($key)
+    {
+        return $this->model->hasFieldParam($key, ['removeFromForm', 'invisible', 'disabled'], true) === true;
+    }
+
+    /*
+     * Remove fields which are turned off in administration
+     * For example has removeFromForm, etc...
+     * This fields must not been edited! Also because of security purposes.
+     */
+    protected function removeMissingFields($fields = null)
+    {
+        foreach ($fields as $key => $field) {
+            //Allow remove only "removed" fields from dom.
+            if ($this->isRemovedFieldFromRequest($key)) {
+                $this->replace($this->except($key));
+            }
+        }
+    }
+
     protected function resetMultipleSelects($fields = null)
     {
         foreach ($fields as $key => $field) {
@@ -348,6 +375,7 @@ abstract class Request extends FormRequest
         $this->emptyLocalesToNull($fields);
         $this->resetMultipleSelects($fields);
         $this->removeEmptyPassword($fields);
+        $this->removeMissingFields($fields);
 
         return count($this->errors) == 0;
     }

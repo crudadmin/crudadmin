@@ -57,54 +57,67 @@ class LayoutController extends BaseController
         return view()->file($path)->render();
     }
 
+    /**
+     * Set parent table into actual selected child model in admin
+     *
+     * @param  string  &$parentTable
+     * @param  int  $subid
+     */
+    private function setParentModelIntoEloquent(&$parentTable, $subid)
+    {
+        if ($parentTable == '0') {
+            $parentTable = null;
+        } else {
+            //Set parent row into model
+            $parentRow = Admin::getModelByTable($parentTable)->withoutGlobalScopes()->find($subid);
+
+            $model->setParentRow($parentRow);
+        }
+    }
+
     /*
      * Returns paginated rows and all required model informations
      */
-    public function getRows($table, $parent_table, $subid, $langid, $limit, $page, $count)
+    public function getRows($table, $parentTable, $subid, $langid, $limit, $page, $count)
     {
         $model = Admin::getModelByTable($table);
 
         $initialOpeningRequest = $count == 0;
-
-        $data = [];
 
         //Check if user has allowed model
         if (! $model || ! admin()->hasAccess($model)) {
             Ajax::permissionsError();
         }
 
-        if ($parent_table == '0') {
-            $parent_table = null;
-        } else {
-            //Set parent row into model
-            $parent_row = Admin::getModelByTable($parent_table)->withoutGlobalScopes()->find($subid);
+        //Set parent row
+        $this->setParentModelIntoEloquent($parentTable, $subid);
 
-            $model->setParentRow($parent_row);
-        }
+        $data = [];
+
+        //Model tree need to be generated at first order
+        //Because we want refresh all fields property by booted session.
+        $modelTree = $this->makePage(
+            $model,
+            false,
+            false,
+            $initialOpeningRequest
+        );
 
         //On initial admin request
         if ( $initialOpeningRequest === true && method_exists($model, 'beforeInitialAdminRequest') ) {
             $data['model'] = $model->beforeInitialAdminRequest();
         }
 
-        //Add rows data
-        $data = array_merge(
-            $data,
-            (new AdminRows($model))->returnModelData($parent_table, $subid, $langid, $limit, $page, $count)
-        );
-
         //Add token
         $data['token'] = csrf_token();
 
         //Add model data
-        $data['model'] = array_merge(
-            @$data['model'] ?: [],
-            $this->makePage(
-                $model,
-                false,
-                false,
-                $initialOpeningRequest
-            )
+        $data['model'] = array_merge(@$data['model'] ?: [], $modelTree);
+
+        //Add rows data
+        $data = array_merge(
+            $data,
+            (new AdminRows($model))->returnModelData($parentTable, $subid, $langid, $limit, $page, $count)
         );
 
         //Modify intiial request data
@@ -161,7 +174,7 @@ class LayoutController extends BaseController
             $model->withAllOptions();
         }
 
-        $fields = $model->getFields(null, true);
+        $fields = $model->getFields();
 
         foreach ($fields as $key => $field) {
             $this->updateOptionsForm($key, $field, $fields);
@@ -270,8 +283,11 @@ class LayoutController extends BaseController
      */
     protected function makePage($model, $withChilds = true, $initial_request = false, $withOptions = false)
     {
-        $childs_models = $model->getModelChilds();
+        //We need refresh fields for actual fields rules. Modified eg. by session.
+        //(some admin rules may not have available all fields. Or some properties may be changed)
+        $model->getFields(null, true);
 
+        $childs_models = $model->getModelChilds();
         $childs = [];
 
         foreach ($childs_models as $child_model) {
