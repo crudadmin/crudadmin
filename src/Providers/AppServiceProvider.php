@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
         PasswordResetServiceProvider::class,
         ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
+        FrontendEditorServiceProvider::class,
         SEOServiceProvider::class,
         HashServiceProvider::class,
     ];
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         'Localization' => Facades\Localization::class,
         'AdminLocalization' => Facades\AdminLocalization::class,
         'EditorMode' => Facades\EditorMode::class,
+        'FrontendEditor' => Facades\FrontendEditor::class,
         'SEO' => Facades\SEOFacade::class,
         'ImageCompressor' => Facades\ImageCompressor::class,
         'Image' => \Intervention\Image\Facades\Image::class,

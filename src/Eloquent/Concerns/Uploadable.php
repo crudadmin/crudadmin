@@ -264,7 +264,18 @@ trait Uploadable
     }
 
     /*
+     * Check if files can be permamently deleted
+     */
+    public function canPermanentlyDeleteFiles()
+    {
+        return config('admin.reduce_space', true) === true && $this->delete_files === true;
+    }
+
+    /**
      * Remove all uploaded files in existing field attribute
+     *
+     * @param  string  $key
+     * @param  string|array  $new_files remove only files which are not in array, or given string.
      */
     public function deleteFiles($key, $new_files = null)
     {
@@ -272,7 +283,7 @@ trait Uploadable
         if (($file = $this->getValue($key)) && ! $this->hasFieldParam($key, 'multiple', true)) {
             $files = is_array($file) ? $file : [$file];
 
-            $is_allowed_deleting = config('admin.reduce_space', true) === true && $this->delete_files === true;
+            $is_allowed_deleting = $this->canPermanentlyDeleteFiles();
 
             //Remove also multiple uploded files
             foreach ($files as $file) {

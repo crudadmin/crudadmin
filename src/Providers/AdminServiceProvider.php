@@ -58,5 +58,10 @@ class AdminServiceProvider extends ServiceProvider
         if (\Admin::isSeoEnabled()) {
             \Admin::registerModel(\Admin\Models\RoutesSeo::class);
         }
+
+        //Frontend editor
+        if ( \Admin::isEnabledFrontendEditor() ) {
+            \Admin::registerModel(\Admin\Models\StaticImage::class);
+        }
     }
 }

@@ -79,6 +79,14 @@ class Admin extends AdminCore
     }
 
     /*
+     * Check if is frontend editor extension enabled
+     */
+    public function isEnabledFrontendEditor()
+    {
+        return config('admin.frontend_editor', true);
+    }
+
+    /*
      * Get stub path
      */
     public function stub($stub)

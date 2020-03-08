@@ -8,12 +8,13 @@ window.CAEditorConfig = {
     requests : {
         admin : '<?php echo url('/admin') ?>',
         changeState : '<?php echo action('\Admin\Controllers\GettextController@updateEditorState', $lang->slug) ?>',
-        updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->slug) ?>'
+        updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->slug) ?>',
+        updateImage : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateImage') ?>',
     },
     token : "<?php echo csrf_token() ?>"
 };
 </script>
 
-<script src="<?php echo admin_asset('/js/TranslatableEditor.js?v='.Admin::getAssetsVersion()) ?>"></script>
+<script src="<?php echo admin_asset('/js/FrontendEditor.js?v='.Admin::getAssetsVersion()) ?>"></script>
 <link rel="stylesheet" href="<?php echo admin_asset('/css/frontend.css?v='.Admin::getAssetsVersion()) ?>">
 <?php } ?>
