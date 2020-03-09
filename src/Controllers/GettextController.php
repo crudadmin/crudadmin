@@ -24,7 +24,7 @@ class GettextController extends Controller
 
         $translations = JSTranslations::getJSTranslations($lang, $localizationClass::getModel());
 
-        if ( EditorMode::isActive() ) {
+        if ( EditorMode::isActiveTranslatable() ) {
             $rawTranslations = JSTranslations::getRawJSTranslations($lang, $localizationClass::getModel());
         } else {
             $rawTranslations = '[]';
@@ -121,7 +121,7 @@ class GettextController extends Controller
 
         EditorMode::setState($state);
 
-        if ( request('response') ) {
+        if ( request('response') && EditorMode::isActiveTranslatable() ) {
             return $this->index('Localization', $lang);
         }
 

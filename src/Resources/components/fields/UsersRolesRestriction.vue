@@ -70,7 +70,7 @@ export default {
             for ( var i = 0; i < tree.length; i++ ) {
                 for ( var key in tree[i].permissions ) {
                     //Allow only base roles
-                    if ( this.baseFields.indexOf(key) > -1 ){
+                    if ( this.baseFields.indexOf(key) > -1 && tree[i].permissions[key].name ){
                         permissions[key] = tree[i].permissions[key];
                     }
                 }

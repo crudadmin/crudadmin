@@ -207,7 +207,7 @@ class Gettext
         $language = $localizationClass::get();
 
         //If is allowed frontend web editor, check for for newest translates
-        if ( EditorMode::isActive() ) {
+        if ( EditorMode::isActiveTranslatable() ) {
             JSTranslations::checkIfIsUpToDate($language);
         }
 
@@ -221,7 +221,7 @@ class Gettext
         return asset(action('\Admin\Controllers\GettextController@'.$localizationClass::gettextJsResourcesMethod(), null, false)
                     .'?lang='.($language ? $language->slug : '')
                     .'&t='.$timestamp
-                    .'&a='.(EditorMode::isActive() ? Admin::getAssetsVersion() : 0)
+                    .'&a='.(EditorMode::isActiveTranslatable() ? Admin::getAssetsVersion() : 0)
         );
     }
 

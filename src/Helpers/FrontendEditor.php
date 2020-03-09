@@ -50,12 +50,12 @@ class FrontendEditor
         }
 
         //If key and default image is present
-        else {
+        else if ( is_string($defaultImageOrSizes) ) {
             $defaultImageOrSizes = asset(str_replace(asset('/'), '', $defaultImageOrSizes));
         }
 
         //If only image is present
-        if ( $defaultImageOrSizes === null ) {
+        if ( $defaultImageOrSizes == null ) {
             $keyOrImage = str_replace(asset('/'), '', $keyOrImage);
 
             $defaultImageOrSizes = asset($keyOrImage);
@@ -92,7 +92,7 @@ class FrontendEditor
 
         //Build image query from default asset image
         else {
-            $image = $this->buildImageQuery($defaultImage, null, $imageRow->getTable(), 'image', $imageRow->getKey());
+            $image = $this->buildImageQuery($defaultImage, $sizes, $imageRow->getTable(), 'image', $imageRow->getKey());
         }
 
         return $image;
@@ -103,7 +103,8 @@ class FrontendEditor
         //Check if is active and has edit access to given model
         if (
             !$this->isActive()
-            || !($model = Admin::getModelByTable($table)) || admin()->hasAccess(get_class($model), 'update') === false
+            || !($model = Admin::getModelByTable($table))
+            || (admin()->hasAccess(get_class($model), 'update') === false)
         ) {
             return $url;
         }

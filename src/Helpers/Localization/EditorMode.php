@@ -27,7 +27,15 @@ class EditorMode
      */
     public function isActive()
     {
-        return $this->hasAccess() && session($this->sessionEditorKey, false) === true;
+        return session($this->sessionEditorKey, false) === true;
+    }
+
+    /*
+     * Is active mode
+     */
+    public function isActiveTranslatable()
+    {
+        return $this->hasAccess() && $this->isActive();
     }
 
     public function setState($state)
