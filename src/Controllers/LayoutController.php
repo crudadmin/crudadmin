@@ -63,13 +63,15 @@ class LayoutController extends BaseController
      * @param  string  &$parentTable
      * @param  int  $subid
      */
-    private function setParentModelIntoEloquent(&$parentTable, $subid)
+    private function setParentModelIntoEloquent($model, &$parentTable, $subid)
     {
         if ($parentTable == '0') {
             $parentTable = null;
         } else {
             //Set parent row into model
-            $parentRow = Admin::getModelByTable($parentTable)->withoutGlobalScopes()->find($subid);
+            $parentRow = Admin::getModelByTable($parentTable)
+                                ->withoutGlobalScopes()
+                                ->find($subid);
 
             $model->setParentRow($parentRow);
         }
@@ -90,7 +92,7 @@ class LayoutController extends BaseController
         }
 
         //Set parent row
-        $this->setParentModelIntoEloquent($parentTable, $subid);
+        $this->setParentModelIntoEloquent($model, $parentTable, $subid);
 
         $data = [];
 
