@@ -83,6 +83,11 @@ class FrontendEditor
         //Find image row, or create new one
         if (!($imageRow = $images->where('key', $key)->first())){
             $imageRow = StaticImage::create([ 'key' => $key ]);
+
+            //We need save created row into collection
+            //Because this key may be used on the site many times. And it will
+            //cause multiple rows creation.
+            $this->staticImages->push($imageRow);
         }
 
         //Returns resized image

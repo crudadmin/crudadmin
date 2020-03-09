@@ -44,3 +44,13 @@ if ( ! function_exists('encryptText') ) {
         return base64_encode('XYQ'.base64_encode($text));
     }
 }
+
+/*
+ * Uploadable helper
+ */
+if ( ! function_exists('uploadable') ) {
+    function uploadable()
+    {
+        return FrontendEditor::uploadable(...func_get_args());
+    }
+}

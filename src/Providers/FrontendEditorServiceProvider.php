@@ -28,7 +28,7 @@ class FrontendEditorServiceProvider extends ServiceProvider
     private function registerBladeDirectives()
     {
         Blade::directive('uploadable', function ($expression) {
-            return '<?php echo FrontendEditor::uploadable('.$expression.') ?>';
+            return '<?php echo uploadable('.$expression.') ?>';
         });
     }
 }
