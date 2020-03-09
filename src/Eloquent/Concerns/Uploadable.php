@@ -248,10 +248,12 @@ trait Uploadable
             $extension = $response['extension'];
         }
 
+        $filePath = public_path($path).'/'.$filename;
+
         //Compress images
         if (
             $this->imageCompression !== false
-            && ! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension)
+            && ! ImageCompressor::compressOriginalImage($filePath, null, $extension)
         ) {
             return false;
         }
@@ -260,7 +262,7 @@ trait Uploadable
             return false;
         }
 
-        return new AdminFile($filename, $field, $this->getTable());
+        return AdminFile::adminModelFile($this->getTable(), $field, $filename, $this->getKey());
     }
 
     /*

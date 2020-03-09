@@ -3,6 +3,7 @@
 namespace Admin\Helpers;
 
 use Admin\Models\StaticImage;
+use Admin;
 
 class FrontendEditor
 {
@@ -12,13 +13,23 @@ class FrontendEditor
     private $staticImages = null;
 
     /**
+     *  Also allow only if has permissions
+     *
+     * @return  bool
+     */
+    public function hasAccess()
+    {
+        return admin() && admin()->hasAccess(StaticImage::class, 'uploadable');
+    }
+
+    /**
      * Check if given user has access to edit images
      *
      * @return  bool
      */
-    private function hasAccess()
+    public function isActive()
     {
-        return admin() ? true : '';
+        return Admin::isFrontend() && $this->hasAccess() ? true : false;
     }
 
     /**
@@ -63,34 +74,75 @@ class FrontendEditor
      */
     public function getUploadableImagePath($key, array $sizes = null, $defaultImage = null)
     {
-        $images = $this->getStaticImages();
+        if ( ! $this->isActive() ){
+            return $defaultImage;
+        }
 
-        $image = $images->where('key', $key)->first();
+        $images = $this->fetchStaticImages();
 
-        $image = $image && $image->image->exists() ? (
-            is_array($sizes) ? $image->image->resize(...$sizes)->url : $image->image->url
-        ) : $defaultImage;
+        //Find image row, or create new one
+        if (!($imageRow = $images->where('key', $key)->first())){
+            $imageRow = StaticImage::create([ 'key' => $key ]);
+        }
 
-        if ( $this->hasAccess() ){
-            return $this->buildImageQuery($key, $image, $sizes);
+        //Returns resized image
+        if ( $imageRow->image && $imageRow->image->exists() ) {
+            $image = is_array($sizes) ? $imageRow->image->resize(...$sizes)->url : $imageRow->image->url;
+        }
+
+        //Build image query from default asset image
+        else {
+            $image = $this->buildImageQuery($defaultImage, null, $imageRow->getTable(), 'image', $imageRow->getKey());
         }
 
         return $image;
     }
 
-    private function buildImageQuery($key, $image, $sizes)
+    public function buildImageQuery($url, $sizes, $table, $fieldName, $rowId)
     {
-        $startQueryWith = (strpos($image, '?') === false ? '?' : '&');
+        //Check if is active and has edit access to given model
+        if (
+            !$this->isActive()
+            || !($model = Admin::getModelByTable($table)) || admin()->hasAccess(get_class($model), 'update') === false
+        ) {
+            return $url;
+        }
 
-        return $image.$startQueryWith.'ca_img_key='.$key.(is_array($sizes) ? '&sizes='.implode(',', $sizes) : '');
+        $startQueryWith = (strpos($url, '?') === false ? '?' : '&');
+
+        $query = [
+            'ca_table_name' => $table,
+            'ca_field_name' => $fieldName,
+            'ca_row_id' => $rowId,
+            'ca_hash' => $this->makeHash($table, $fieldName, $rowId),
+        ];
+
+        if ( is_array($sizes) ) {
+            $query['sizes'] = implode(',', $sizes);
+        }
+
+        return $url.$startQueryWith.http_build_query($query);
     }
 
-    private function getStaticImages()
+    /**
+     * Generate hash of params
+     *
+     * @param  string  $table
+     * @param  string  $fieldName
+     * @param  int  $rowId
+     * @return  string
+     */
+    public function makeHash($table, $fieldName, $rowId)
+    {
+        return sha1(env('APP_KEY').'?:'.$table.$fieldName.$rowId);
+    }
+
+    private function fetchStaticImages()
     {
         if ( $this->staticImages ) {
             return $this->staticImages;
         }
 
-        return $this->staticImages = StaticImage::select(['key', 'image'])->get();
+        return $this->staticImages = StaticImage::select(['id', 'key', 'image'])->get();
     }
 }

@@ -11,6 +11,11 @@ trait HasPermissions
      */
     public function defaultModelPermissions()
     {
+        //Inactive model does not have any default permissions
+        if ( $this->getProperty('active') === false ){
+            return [];
+        }
+
         $permissions = [
             'read' => [
                 'name' => trans('admin::admin.roles-read'),

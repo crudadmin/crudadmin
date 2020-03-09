@@ -16,7 +16,7 @@ class StaticImage extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Static images';
+    protected $name = 'Úprava obrázkov';
 
     protected $insertable = false;
 
@@ -40,5 +40,15 @@ class StaticImage extends AdminModel
             'image' => 'name:Obrázok|image',
             'alt' => 'name:Alt|'.(Admin::isEnabledLocalization() ? 'locale' : ''),
         ];
+    }
+
+    public function setModelPermissions($permissions)
+    {
+        $permissions['uploadable'] = [
+            'name' => _('Úprava obrázkov na webe'),
+            'title' => _('Pri prechádzani webu bude môcť prihláseny administrátor upravovať obrázky pomocou upravovateľského módu, no len k modulom s prístupom úpravy.'),
+        ];
+
+        return $permissions;
     }
 }

@@ -3,6 +3,9 @@
 namespace Admin\Controllers;
 
 use Admin\Models\StaticImage;
+use Admin;
+use FrontendEditor;
+use Ajax;
 
 class FrontendEditorController extends Controller
 {
@@ -13,34 +16,53 @@ class FrontendEditorController extends Controller
      */
     public function updateImage()
     {
-        $row = StaticImage::validateRequest(['image']);
+        $model = Admin::getModelByTable(request('table'));
 
-        //If row exists, update it
-        if ( ($imageRow = StaticImage::where('key', request('key'))->first()) ){
-            //We want delete previous image
-            $imageRow->deleteFiles('image', $row['image']);
+        $fieldKey = request('key');
 
-            $imageRow->update($row);
-        } else {
-            $imageRow = StaticImage::create($row);
+        $rowId = request('id');
+
+        //Check permission access and hashes of given properties:
+        if (
+            FrontendEditor::hasAccess() == false
+            || FrontendEditor::makeHash($model->getTable(), $fieldKey, $rowId) != request('hash')
+            || ! admin()->hasAccess($model, 'update')
+            || ! $model->isFieldType($fieldKey, 'file')
+        ) {
+            Ajax::permissionsError();
         }
+
+        $row = $model->validateRequest([ $fieldKey ]);
+
+        //Find row
+        $imageRow = $model->findOrFail($rowId);
+
+        //We want delete previous image
+        $imageRow->deleteFiles($fieldKey, $row[$fieldKey]);
+
+        $imageRow->update([ $fieldKey => $row[$fieldKey] ]);
 
         //Try return resized image
-        if ( ($sizes = request('sizes')) && $image = $this->returnResizedImage($imageRow, $sizes) ) {
-            return $image;
+        if ( ($sizes = request('sizes')) && $image = $this->returnResizedImage($imageRow, $fieldKey, $sizes) ) {
+            return response()->json([
+                'url' => $image,
+            ]);
         }
 
-        return $imageRow->image->url;
+        return response()->json([
+            'url' => $imageRow->{$fieldKey}->url,
+        ]);
     }
 
     /**
      * Return resized image
      *
      * @param  AdminModel  $imageRow
+     * @param  string  $fieldKey
      * @param  string  $sizes
      * @return  string
      */
-    private function returnResizedImage($imageRow, $sizes)
+    private function returnResizedImage($imageRow,  $fieldKey, $sizes)
     {
         $sizes = explode(',', $sizes);
         $sizes = array_map(function($size){
@@ -59,7 +81,7 @@ class FrontendEditorController extends Controller
                 $sizes = array_merge($sizes, [null, true]);
             }
 
-            return $imageRow->image->resize(...$sizes);
+            return $imageRow->{$fieldKey}->resize(...$sizes)->url;
         }
     }
 }

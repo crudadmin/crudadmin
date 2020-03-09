@@ -3,6 +3,7 @@
 namespace Admin\Helpers\Localization;
 
 use Admin;
+use Localization;
 
 class EditorMode
 {
@@ -13,9 +14,12 @@ class EditorMode
      *
      * @return  bool
      */
-    public function isEnabled()
+    public function hasAccess($localization = Localization::class)
     {
-        return admin() && Admin::isEnabledLocalization();
+        return (
+            admin() && admin()->hasAccess(get_class($localization::getModel()), 'update')
+            && Admin::isEnabledLocalization()
+        );
     }
 
     /*
@@ -23,7 +27,7 @@ class EditorMode
      */
     public function isActive()
     {
-        return $this->isEnabled() && session($this->sessionEditorKey, false) === true;
+        return $this->hasAccess() && session($this->sessionEditorKey, false) === true;
     }
 
     public function setState($state)

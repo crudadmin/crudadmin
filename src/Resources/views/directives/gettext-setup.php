@@ -1,15 +1,20 @@
 <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
 <script src="<?php echo admin_asset('/js/Gettextable.js') ?>"></script>
 
-<?php if ( EditorMode::isEnabled() && ($lang = Localization::get()) ){ ?>
+<?php if ( (EditorMode::isActive() || FrontendEditor::isActive()) ){ ?>
 <script>
 window.CAEditorConfig = {
-    active : <?php echo EditorMode::isActive() ? 'true' : 'false' ?>,
+    active : <?php echo admin() ? 'true' : 'false' ?>,
+    translatable : <?php echo EditorMode::isActive() ? 'true' : 'false' ?>,
+    uploadable : <?php echo FrontendEditor::isActive() ? 'true' : 'false' ?>,
     requests : {
         admin : '<?php echo url('/admin') ?>',
+        updateImage : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateImage') ?>',
+
+<?php if ( $lang = Localization::get() ){ ?>
         changeState : '<?php echo action('\Admin\Controllers\GettextController@updateEditorState', $lang->slug) ?>',
         updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->slug) ?>',
-        updateImage : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateImage') ?>',
+<?php } ?>
     },
     token : "<?php echo csrf_token() ?>"
 };

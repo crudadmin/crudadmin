@@ -88,7 +88,7 @@ trait Gettextable
          */
         if ( $this->hasGettextSupport() ) {
             $fields->push([
-                'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|extensions:po|hidden',
+                'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|hasNotAccess:languages.update,invisible|extensions:po|hidden',
             ]);
         }
 
@@ -121,5 +121,12 @@ trait Gettextable
         $attributes['downloadpo'] = '<a href="'.$url.'" target="_blank">'._('Stiahnuť súbor s prekladmi').'</a>';
 
         return $attributes;
+    }
+
+    public function setModelPermissions($permissions)
+    {
+        $permissions['update']['title'] = _('Administrátor bude môcť na webe taktiež spravovať všetky texty pomocou upravovateľského módu.');
+
+        return $permissions;
     }
 }

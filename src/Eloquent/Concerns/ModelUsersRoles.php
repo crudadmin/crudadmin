@@ -37,9 +37,11 @@ trait ModelUsersRoles
         foreach ($models as $migration => $path) {
             $model = new $path;
 
-            if ($model->getProperty('active') === true) {
+            $permissions = $permissions = $model->getModelPermissions();
+
+            if (count($permissions) > 0) {
                 $options[$path] = [
-                    'permissions' => $model->getModelPermissions(),
+                    'permissions' => $permissions,
                     'name' => $model->getProperty('name'),
                     'tree' => $this->buildModelTree($model, []),
                 ];

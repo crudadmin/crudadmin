@@ -9,6 +9,7 @@ use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
 use Symfony\Component\HttpFoundation\Response;
 use EditorMode;
+use Ajax;
 
 class GettextController extends Controller
 {
@@ -57,9 +58,15 @@ class GettextController extends Controller
      * @param  string  $table
      * @return  AdminModel|null
      */
-    public function getTranslationRow($idOrSlug, $table)
+    public function getTranslationRow($idOrSlug, $table, $permission = null)
     {
         $model = Admin::getModelByTable($table ?: 'languages');
+
+        //If user does not have permissions
+        if ( !admin() || !admin()->hasAccess(get_class($model), $permission ?: 'read') ) {
+            Ajax::permissionsError();
+        }
+
         if ( is_numeric($idOrSlug) ) {
             return $model->findOrFail($idOrSlug);
         }
@@ -72,7 +79,7 @@ class GettextController extends Controller
      */
     public function getTranslations($id, $table)
     {
-        $language = $this->getTranslationRow($id, $table);
+        $language = $this->getTranslationRow($id, $table, 'read');
 
         $translations = JSTranslations::getTranslations($language);
 
@@ -84,7 +91,7 @@ class GettextController extends Controller
      */
     public function updateTranslations($id, $table = null)
     {
-        $language = $this->getTranslationRow($id, $table);
+        $language = $this->getTranslationRow($id, $table, 'update');
 
         $changes = request('changes', []);
 
@@ -96,7 +103,7 @@ class GettextController extends Controller
      */
     public function downloadTranslations($id, $table)
     {
-        $language = $this->getTranslationRow($id, $table);
+        $language = $this->getTranslationRow($id, $table, 'read');
 
         JSTranslations::checkIfIsUpToDate($language);
 
