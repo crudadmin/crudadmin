@@ -115,19 +115,27 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             $model = trim($model, '/');
         }
 
-        $permissions = $this->getUserPermissions();
-
-        //Check if any permission is present
-        if ( $permissionKey === true ) {
-            //Check if has at least one true permission
-            if ( array_key_exists($model, $permissions) && count(array_keys($permissions[$model])) > 0 ) {
-                return true;
-            }
-
-            return false;
+        //Check specific role ID
+        if ( is_numeric($permissionKey) ) {
+            return $this->roles->where('id', $permissionKey)->count() > 0;
         }
 
-        return array_key_exists($model, $permissions) && @$permissions[$model][$permissionKey] === true;
+        //Check available permission rule from every role
+        else {
+            $permissions = $this->getUserPermissions();
+
+            //Check if any permission is present
+            if ( $permissionKey === true ) {
+                //Check if has at least one true permission
+                if ( array_key_exists($model, $permissions) && count(array_keys($permissions[$model])) > 0 ) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            return array_key_exists($model, $permissions) && @$permissions[$model][$permissionKey] === true;
+        }
     }
 
     /**
