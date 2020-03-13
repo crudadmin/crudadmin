@@ -6,8 +6,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ValidationException extends \Illuminate\Http\Exceptions\HttpResponseException
 {
-    public function __consturct(Response $response)
+    public function __construct(Response $response)
     {
-        parent::__consturct($response);
+        parent::__construct($response);
     }
 }
