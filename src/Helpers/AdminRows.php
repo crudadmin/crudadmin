@@ -148,6 +148,11 @@ class AdminRows
                             elseif ($this->model->hasFieldParam($column, 'belongsTo')) {
                                 $relation = explode(',', $this->model->getField($column)['belongsTo']);
 
+                                //If is build relation from multiple columns
+                                if ( isset($relation[1]) && strpos($relation[1], ':') !== false ){
+                                    return;
+                                }
+
                                 $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($columns, $relation, $queries) {
                                     foreach ($queries as $query) {
                                         foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
