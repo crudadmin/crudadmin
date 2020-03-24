@@ -12,7 +12,6 @@
 
 //Download files
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
-Route::get('/admin/download/file', 'DownloadController@index');
 
 //Image thumbnails
 Route::get('/uploads/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
@@ -46,4 +45,7 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::post('/admin/frontend-editor/static-image', 'FrontendEditorController@updateImage');
     Route::post('/admin/translates/editable/{lang}', 'GettextController@updateEditorState');
     Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');
+
+    //Downloading files from uploads in administration
+    Route::get('/admin/download/file', 'DownloadController@index');
 });
