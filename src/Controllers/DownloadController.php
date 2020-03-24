@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class DownloadController extends Controller
 {
-    public function construct()
+    public function __construct()
     {
-        $this->muddleware('auth', ['except' => 'signedDownload']);
+        $this->middleware('auth', ['except' => 'signedDownload']);
     }
 
     public function getPath($file = null)
