@@ -87,7 +87,11 @@ class File
      */
     public static function adminModelFile($model, $field, $file)
     {
-        return new static('uploads/' . $model . '/' . $field . '/' . $file);
+        $parts = [basename($model), basename($field), basename($file)];
+        $parts = array_filter($parts);
+        $parts = implode('/', $parts);
+
+        return new static('uploads/'.$parts);
     }
 
     /*
@@ -114,16 +118,18 @@ class File
     public function download( $displayableInBrowser = false )
     {
         //If is possible open file in browser, then return right path of file and not downloading path
-        if ( $displayableInBrowser )
-        {
-            if ( in_array($this->extension, (array)$displayableInBrowser) )
+        if ( $displayableInBrowser ) {
+            if ( in_array($this->extension, (array)$displayableInBrowser) ) {
                 return $this->url;
+            }
         }
 
-        $path = substr($this->path, 8);
-        $action = action( '\Gogol\Admin\Controllers\DownloadController@signedDownload', self::getHash( $path ) );
+        $origPath = substr($this->path, 8);
+        $path = explode('/', $origPath);
 
-        return $action . '?file=' . urlencode($path);
+        $action = action( '\Gogol\Admin\Controllers\DownloadController@signedDownload', self::getHash($origPath) );
+
+        return $action.'?model='.urlencode($path[0]).'&field='.urlencode($path[1]).'&file='.urlencode($path[2]);
     }
 
     /*
@@ -198,8 +204,7 @@ class File
         static::makeDirs($cache_path);
 
         //If file exists
-        if ( file_exists($filepath) )
-        {
+        if ( file_exists($filepath) ) {
             $relative_filepath = self::adminModelCachePath($directory.'/'.$hash.'/'.$this->filename, false);
 
             return new static($relative_filepath);
@@ -217,7 +222,7 @@ class File
                 ]));
             }
 
-            return new static($filepath);
+            return new static(str_replace(public_path('/'), '', $filepath));
         }
 
         //Set image for processing
@@ -241,8 +246,9 @@ class File
             $this->createWebp($filepath);
 
         //Return image object
-        if ( $return_object )
+        if ( $return_object ){
             return $image;
+        }
 
         return new static($filepath);
     }
@@ -263,8 +269,7 @@ class File
      */
     public function resize($width = null, $height = null, $directory = null, $force = false, $webp = true)
     {
-        if ( is_numeric($width) && is_numeric($height) )
-        {
+        if ( is_numeric($width) && is_numeric($height) ) {
             $action = 'fit';
         } else {
             $action = 'resize';

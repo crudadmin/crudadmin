@@ -24,7 +24,6 @@ Route::post('/admin/password/reset', 'Auth\ResetPasswordController@reset');
 
 //Download files
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
-Route::get('/admin/download/file', 'DownloadController@index');
 
 //Image thumbnails
 Route::get('/uploads/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
@@ -55,4 +54,6 @@ Route::group(['middleware' => 'admin'], function(){
     Route::get('/admin/api/getTranslations/{id}', 'DataController@getTranslations');
     Route::post('/admin/api/updateTranslations/{id}', 'DataController@updateTranslations');
     Route::delete('/admin/api/delete', 'DataController@delete');
+
+    Route::get('/admin/download/file', 'DownloadController@index');
 });
