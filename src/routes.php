@@ -12,7 +12,6 @@
 
 //Download files
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
-Route::get('/admin/download/file', 'DownloadController@index');
 
 //Image thumbnails
 Route::get('/uploads/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
@@ -40,4 +39,6 @@ Route::group(['middleware' => 'admin'], function () {
     Route::get('/admin/api/getTranslations/{id}', 'GettextController@getTranslations');
     Route::post('/admin/api/updateTranslations/{id}', 'GettextController@updateTranslations');
     Route::delete('/admin/api/delete', 'Crud\DataController@delete');
+
+    Route::get('/admin/download/file', 'DownloadController@index');
 });
