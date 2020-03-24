@@ -24,7 +24,7 @@ class DownloadController extends Controller
         $realPath = dirname(realpath($file->basepath));
 
         //Alow download only from uploads folder
-        if ( substr($realPath, 0, strlen($publicPath)) != public_path('uploads') ){
+        if ( substr($realPath, 0, strlen($publicPath)) != $publicPath ){
             abort(404);
         }
 
