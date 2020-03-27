@@ -29,7 +29,7 @@ class AdminLocalization extends LocalizationHelper implements LocalizationInterf
      */
     public function getLocaleIdentifier()
     {
-        return config('admin.locale');
+        return config('admin.locale', 'sk');
     }
 
     /**

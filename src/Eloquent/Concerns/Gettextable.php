@@ -67,13 +67,13 @@ trait Gettextable
     {
         $slug = str_slug($value);
 
-        if (strlen(str_replace('-', '', $slug)) != 2) {
+        if (request()->expectsJson() && strlen(str_replace('-', '', $slug)) != 2) {
             Ajax::error(_('Zadali skratku jazyka v nesprávnom formáte.'));
         }
 
         if (! $this->exists) {
             $this->attributes['slug'] = $slug;
-        } elseif ($this->original['slug'] != $value) {
+        } elseif ($this->original['slug'] != $value && request()->expectsJson()) {
             Admin::push('errors', _('Skratku jazyka nie je možné po jej vytvorení premenovať.'));
         }
     }
