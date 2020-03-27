@@ -38,13 +38,17 @@ class ImageController extends Controller
      */
     public function resizeImage($a = null, $b = null, $c = null, $d = null, $e = null)
     {
-        $filepath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
+        $cacheFilePath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
 
-        $temporary_path = $filepath . '.temp';
+        $temporary_path = $cacheFilePath . '.temp';
 
         //If not exists any form of file
-        if ( ! file_exists($filepath) || ! file_exists($temporary_path) )
+        if (
+            ! file_exists($cacheFilePath) && ! file_exists($temporary_path)
+            || ! file_exists($temporary_path)
+        ) {
             abort(404);
+        }
 
         //Get resizing information from cache
         $cache = json_decode(file_get_contents($temporary_path), true);
