@@ -43,4 +43,9 @@ return [
      * Admin locale (en|sk|cs)
      */
     'locale' => 'sk',
+
+    /*
+     * Frontend editor for simple text translates
+     */
+    'frontend_editor' => false,
 ];

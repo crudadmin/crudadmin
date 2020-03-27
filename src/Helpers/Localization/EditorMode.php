@@ -27,7 +27,7 @@ class EditorMode
      */
     public function isActive()
     {
-        return session($this->sessionEditorKey, false) === true;
+        return Admin::isEnabledFrontendEditor() && session($this->sessionEditorKey, false) === true;
     }
 
     /*

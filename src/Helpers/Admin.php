@@ -83,7 +83,7 @@ class Admin extends AdminCore
      */
     public function isEnabledFrontendEditor()
     {
-        return config('admin.frontend_editor', true);
+        return config('admin.frontend_editor', false);
     }
 
     /*

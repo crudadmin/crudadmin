@@ -4,6 +4,7 @@
 <?php if ( (EditorMode::isActive() || FrontendEditor::isActive()) ){ ?>
 <script>
 window.CAEditorConfig = {
+    enabled : <?php echo Admin::isEnabledFrontendEditor() ? 'true' : 'false' ?>,
     active : <?php echo EditorMode::isActive() ? 'true' : 'false' ?>,
     translatable : <?php echo EditorMode::isActiveTranslatable() ? 'true' : 'false' ?>,
     uploadable : <?php echo FrontendEditor::isActive() ? 'true' : 'false' ?>,
