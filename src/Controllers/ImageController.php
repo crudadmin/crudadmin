@@ -43,7 +43,7 @@ class ImageController extends Controller
         $temporary_path = $filepath . '.temp';
 
         //If not exists any form of file
-        if ( ! file_exists($filepath) && ! file_exists($temporary_path) )
+        if ( ! file_exists($filepath) || ! file_exists($temporary_path) )
             abort(404);
 
         //Get resizing information from cache
