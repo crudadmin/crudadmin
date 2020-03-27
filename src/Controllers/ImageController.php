@@ -33,12 +33,16 @@ class ImageController extends Controller
      */
     public function resizeImage($a = null, $b = null, $c = null, $d = null, $e = null)
     {
-        $filepath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
+        $cacheFilePath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
 
-        $temporary_path = $filepath.'.temp';
+        $temporary_path = $cacheFilePath.'.temp';
 
-        //If not exists any form of file
-        if (! file_exists($filepath) || ! file_exists($temporary_path)) {
+        //If does not exists cache path, but also does not exists cached image already
+        //But alsot if cached image exists, and temorary path does not exists
+        if (
+            ! file_exists($cacheFilePath) && ! file_exists($temporary_path)
+            || ! file_exists($temporary_path)
+        ) {
             abort(404);
         }
 
