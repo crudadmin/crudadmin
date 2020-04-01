@@ -28,10 +28,11 @@ trait Uploadable
      */
     public function filePath($key, $file = null)
     {
-        $path = 'uploads/' . $this->getTable().'/'.$key;
+        $path = public_path('uploads/' . $this->getTable().'/'.$key);
 
-        if ( $file )
+        if ( $file ) {
             return $path.'/'.$file;
+        }
 
         return $path;
     }
@@ -216,8 +217,9 @@ trait Uploadable
      */
     public function upload(string $field, $file, $path=null, array $actions_steps = null)
     {
-        if ( ! $path )
+        if ( ! $path ) {
             $path = $this->filePath($field);
+        }
 
         //Get count of files in upload directory and set new filename
         $filename = $this->filename($path, $file, $field);
@@ -250,8 +252,9 @@ trait Uploadable
         }
 
         //Compress images
-        if ( ! ImageCompressor::compressOriginalImage(public_path($path).'/'.$filename, null, $extension) )
+        if ( ! ImageCompressor::compressOriginalImage($path.'/'.$filename, null, $extension) ){
             return false;
+        }
 
         if ( ! $this->filePostProcess($field, $path, $file, $filename, $extension, $actions_steps) )
             return false;

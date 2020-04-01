@@ -4,6 +4,7 @@ namespace Gogol\Admin\Helpers;
 
 use Image;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Log;
 
 class ImageCompressor
 {
@@ -55,7 +56,13 @@ class ImageCompressor
                 ($is_png = in_array($extension, ['png']))
             )
         ) {
-            $image = Image::make($file);
+            try {
+                $image = Image::make($file);
+            } catch (\Exception $e) {
+                dd($file);
+                Log::error($e);
+                return false;
+            }
 
             //Check maximum resolution and resize if is bigger
             $resized = $this->resizeMaxResolution($image);
