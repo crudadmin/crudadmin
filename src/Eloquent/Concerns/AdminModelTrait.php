@@ -223,7 +223,7 @@ trait AdminModelTrait
             }
 
             if ($column) {
-                $query->where($column, $subid);
+                $query->parentRelationship($column, $subid);
             }
         }
 
