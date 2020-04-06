@@ -25,15 +25,15 @@ class CheckDevEmailWhitelist
      */
     public function handle($event)
     {
-        //We want allow this only in local dev mode
-        if ( app()->environment('local') === false ) {
+        //We want allow this only in local dev mode and debug mode
+        if ( app()->environment('local') === false || env('APP_DEBUG') === false ) {
             return;
         }
 
-        $whitelist = explode(',', env('MAIL_DEV_WHITELIST') ?: '');
+        $whitelist = array_filter(explode(',', env('MAIL_DEV_WHITELIST') ?: ''));
 
         //If is not local environment, skip this listener.
-        if ( !is_array($whitelist) || count($whitelist) ==- 0 ) {
+        if ( !is_array($whitelist) || count($whitelist) == 0 ) {
             return;
         }
 
