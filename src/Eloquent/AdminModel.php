@@ -198,6 +198,19 @@ class AdminModel extends CoreAdminModel
     {
     }
 
+    /**
+     * Query for rows displayed rows of parent relationship belongsToModel
+     *
+     * @param  Builder  $query
+     * @param  string  $column
+     * @param  int  $id
+     * @return void
+     */
+    public function scopeParentRelationship($query, $column, $id)
+    {
+        $query->where($column, $id);
+    }
+
     /*
      * Check if user can delete row
      */
