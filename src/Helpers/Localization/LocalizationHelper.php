@@ -2,9 +2,12 @@
 
 namespace Admin\Helpers\Localization;
 
+use Admin;
 use Admin\Eloquent\AdminModel;
-use Illuminate\Support\Collection;
+use Event;
 use Gettext;
+use Illuminate\Foundation\Events\LocaleUpdated;
+use Illuminate\Support\Collection;
 
 class LocalizationHelper
 {
@@ -41,6 +44,11 @@ class LocalizationHelper
 
         if ( $this->canBootAutomatically() ) {
             $this->boot();
+
+            //Listen on app()->setLocale event from laravel
+            Event::listen(LocaleUpdated::class, function($event){
+                $this->onLaravelLocaleChange($event);
+            });
         }
     }
 
@@ -60,6 +68,21 @@ class LocalizationHelper
         $this->getLanguages();
 
         return $this->get()->slug;
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @param  object  $event
+     * @return void
+     */
+    public function onLaravelLocaleChange($locale)
+    {
+        if ( ! $locale->locale ){
+            return;
+        }
+
+        $this->setLocale($locale->locale, false);
     }
 
     /**
@@ -164,15 +187,14 @@ class LocalizationHelper
      * Set locale by language
      *
      * @param  string|null  $locale
+     * @param  Bool  $updateLaravelLocale
      */
-    public function setLocale($locale)
+    public function setLocale($locale, $updateLaravelLocale = true)
     {
         //We does not want to set same locale 2 times
         if ($locale == $this->localization) {
             return true;
         }
-
-        app()->setLocale($locale);
 
         //Switch gettext localization
         if ( $this->isGettextAllowed() ) {
@@ -195,9 +217,15 @@ class LocalizationHelper
             }
         }
 
-        $this->setDateLocale($locale);
 
         $this->localization = $locale;
+
+        $this->setDateLocale($locale);
+
+        //If laravel locale is set to other than given one
+        if ( $updateLaravelLocale === true && app()->getLocale() != $locale ) {
+            app()->setLocale($locale);
+        }
     }
 
     /*

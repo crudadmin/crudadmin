@@ -20,27 +20,32 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
         return [
             'article' => [
                 'icon' => 'fa-file-alt',
+                'settings.title.rows' => $this->t(_('Zoznam článkov')),
                 'settings.title.create' => $this->t(_('Nový článok')),
                 'settings.title.update' => $this->t(_('Upravujete článok č. :id')),
                 'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
             'blog' => [
                 'icon' => 'fa-file-alt',
+                'settings.title.rows' => $this->t(_('Zoznam článkov')),
                 'settings.title.create' => $this->t(_('Nový článok')),
                 'settings.title.update' => $this->t(_('Upravujete článok č. :id')),
                 'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
             'gallery' => [
-                'icon' => 'fa-file-image'
+                'icon' => 'fa-file-image',
             ],
             'photo' => [
-                'icon' => 'fa-file-image'
+                'icon' => 'fa-file-image',
             ],
             'form' => [
-                'icon' => 'fa-wpforms'
+                'icon' => 'fa-wpforms',
+            ],
+            'inquiry' => [
+                'icon' => 'fa-wpforms',
             ],
             'submission' => [
-                'icon' => 'fa-wpforms'
+                'icon' => 'fa-wpforms',
             ],
             'user' => [
                 'icon' => 'fa-users',
@@ -49,220 +54,238 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'settings.buttons.create' => $this->t(_('Nový používateľ')),
             ],
             'news' => [
-                'icon' => 'far fa-newspaper'
+                'icon' => 'far fa-newspaper',
             ],
             'bulletin' => [
-                'icon' => 'far fa-newspaper'
+                'icon' => 'far fa-newspaper',
             ],
             'client' => [
-                'icon' => 'fa-address-book'
+                'icon' => 'fa-address-book',
             ],
             'partner' => [
-                'icon' => 'fa-address-book'
+                'icon' => 'fa-address-book',
             ],
             'contact' => [
-                'icon' => 'fa-address-card'
+                'icon' => 'fa-address-card',
+            ],
+            'person' => [
+                'icon' => 'fa-address-card',
+                'settings.title.create' => $this->t(_('Nová osoba')),
+                'settings.title.update' => $this->t(_('Upravujete osobu č. :id')),
+                'settings.buttons.create' => $this->t(_('Nová osoba')),
             ],
             'language' => [
-                'icon' => 'fa-globe'
+                'icon' => 'fa-globe',
             ],
             'calculator' => [
-                'icon' => 'fa-calculator'
+                'icon' => 'fa-calculator',
             ],
             'insurance' => [
-                'icon' => 'fa-university'
+                'icon' => 'fa-university',
             ],
             'car' => [
-                'icon' => 'fa-car'
+                'icon' => 'fa-car',
             ],
             'bus' => [
-                'icon' => 'fa-bus'
+                'icon' => 'fa-bus',
             ],
             'motorcycle' => [
-                'icon' => 'fa-motorcycle'
+                'icon' => 'fa-motorcycle',
             ],
             'bicycle' => [
-                'icon' => 'fa-bicycle'
+                'icon' => 'fa-bicycle',
             ],
             'term' => [
-                'icon' => 'far fa-check-square'
+                'icon' => 'far fa-check-square',
+                'settings.title.create' => $this->t(_('Nové podmienky')),
+                'settings.title.update' => $this->t(_('Upravujete podmienky č. :id')),
+                'settings.buttons.create' => $this->t(_('Vytvoriť nové podmienky')),
             ],
             'vop' => [
-                'icon' => 'far fa-check-square'
+                'icon' => 'far fa-check-square',
             ],
             'setting' => [
-                'icon' => 'fa-cog'
+                'icon' => 'fa-cog',
             ],
             'hour' => [
-                'icon' => 'far fa-clock'
+                'icon' => 'far fa-clock',
             ],
             'product' => [
-                'icon' => 'fa-shopping-basket'
+                'icon' => 'fa-shopping-basket',
             ],
             'basket' => [
-                'icon' => 'fa-shopping-basket'
+                'icon' => 'fa-shopping-basket',
             ],
             'store' => [
-                'icon' => 'fa-shopping-cart'
+                'icon' => 'fa-shopping-cart',
             ],
             'order' => [
-                'icon' => 'fa-credit-card'
+                'icon' => 'fa-credit-card',
             ],
             'payment' => [
-                'icon' => 'fa-credit-card'
+                'icon' => 'fa-credit-card',
             ],
             'song' => [
-                'icon' => 'fa-music'
+                'icon' => 'fa-music',
             ],
             'region' => [
-                'icon' => 'fa-map-marker-alt'
+                'icon' => 'fa-map-marker-alt',
             ],
             'city' => [
-                'icon' => 'fa-map-marker-alt'
+                'icon' => 'fa-map-marker-alt',
             ],
             'statistic' => [
-                'icon' => 'fa-chart-pie'
+                'icon' => 'fa-chart-pie',
             ],
             'analysis' => [
-                'icon' => 'fa-chart-pie'
+                'icon' => 'fa-chart-pie',
             ],
             'delivery' => [
-                'icon' => 'fa-truck'
+                'icon' => 'fa-truck',
             ],
             'service' => [
-                'icon' => 'fa-bars'
+                'icon' => 'fa-bars',
             ],
             'sector' => [
-                'icon' => 'fa-bars'
+                'icon' => 'fa-bars',
             ],
             'category' => [
-                'icon' => 'fa-bars'
+                'icon' => 'fa-bars',
+                'settings.title.create' => $this->t(_('Nová kategória')),
+                'settings.title.update' => $this->t(_('Upravujete kategóriu č. :id')),
+                'settings.buttons.create' => $this->t(_('Nová kategória')),
             ],
             'department' => [
-                'icon' => 'fa-bars'
+                'icon' => 'fa-bars',
             ],
             'about' => [
-                'icon' => 'fa-info'
+                'icon' => 'fa-info',
             ],
             'student' => [
-                'icon' => 'fa-users'
+                'icon' => 'fa-users',
             ],
             'team' => [
-                'icon' => 'fa-users'
+                'icon' => 'fa-users',
+                'settings.title.create' => $this->t(_('Nový člen')),
+                'settings.title.update' => $this->t(_('Upravujete člena č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový člen')),
             ],
             'grade' => [
-                'icon' => 'fa-graduation-cap'
+                'icon' => 'fa-graduation-cap',
             ],
             'college' => [
-                'icon' => 'fa-graduation-cap'
+                'icon' => 'fa-graduation-cap',
             ],
             'faculty' => [
-                'icon' => 'fa-graduation-cap'
+                'icon' => 'fa-graduation-cap',
             ],
             'application' => [
-                'icon' => 'fa-wpforms'
+                'icon' => 'fa-wpforms',
             ],
             'social' => [
-                'icon' => 'fa-share-alt'
+                'icon' => 'fa-share-alt',
             ],
             'pdf' => [
-                'icon' => 'far fa-file-pdf'
+                'icon' => 'far fa-file-pdf',
             ],
             'certificate' => [
-                'icon' => 'fa-certificate'
+                'icon' => 'fa-certificate',
             ],
             'slider' => [
-                'icon' => 'fa-th-large'
+                'icon' => 'fa-th-large',
             ],
             'complaint' => [
-                'icon' => 'fa-sync'
+                'icon' => 'fa-sync',
             ],
             'brand' => [
-                'icon' => 'fa-tags'
+                'icon' => 'fa-tags',
             ],
             'curriculum' => [
-                'icon' => 'fa-book'
+                'icon' => 'fa-book',
             ],
             'download' => [
-                'icon' => 'fa-download'
+                'icon' => 'fa-download',
             ],
             'work' => [
-                'icon' => 'fa-briefcase'
+                'icon' => 'fa-briefcase',
             ],
             'faq' => [
-                'icon' => 'far fa-question-circle'
+                'icon' => 'far fa-question-circle',
             ],
             'vote' => [
-                'icon' => 'far fa-question-circle'
+                'icon' => 'far fa-question-circle',
             ],
             'pool' => [
-                'icon' => 'far fa-question-circle'
+                'icon' => 'far fa-question-circle',
             ],
             'subject' => [
-                'icon' => 'fa-tasks'
+                'icon' => 'fa-tasks',
             ],
             'import' => [
-                'icon' => 'fa-upload'
+                'icon' => 'fa-upload',
             ],
             'invoice' => [
-                'icon' => 'far fa-file-alt'
+                'icon' => 'far fa-file-alt',
             ],
             'proform' => [
-                'icon' => 'far fa-file-alt'
+                'icon' => 'far fa-file-alt',
             ],
             'export' => [
-                'icon' => 'fa-download'
+                'icon' => 'fa-download',
             ],
             'manufacturer' => [
-                'icon' => 'far fa-building'
+                'icon' => 'far fa-building',
             ],
             'contractor' => [
-                'icon' => 'far fa-handshake'
+                'icon' => 'far fa-handshake',
             ],
             'pricing' => [
-                'icon' => 'fa-sliders-h'
+                'icon' => 'fa-sliders-h',
             ],
             'country' => [
-                'icon' => 'fa-flag'
+                'icon' => 'fa-flag',
+                'settings.title.create' => $this->t(_('Nová krajina')),
+                'settings.title.update' => $this->t(_('Upravujete krajinu č. :id')),
+                'settings.buttons.create' => $this->t(_('Nová krajina')),
             ],
             'review' => [
-                'icon' => 'far fa-commenting'
+                'icon' => 'far fa-commenting',
             ],
             'office' => [
-                'icon' => 'fa-building'
+                'icon' => 'fa-building',
             ],
             'param' => [
-                'icon' => 'fa-gear'
+                'icon' => 'fa-gear',
             ],
             'report' => [
-                'icon' => 'fa-table'
+                'icon' => 'fa-table',
             ],
             'stopwatch' => [
-                'icon' => 'far fa-clock'
+                'icon' => 'far fa-clock',
             ],
             'watch' => [
-                'icon' => 'far fa-clock'
+                'icon' => 'far fa-clock',
             ],
             'contract' => [
-                'icon' => 'far fa-file-alt'
+                'icon' => 'far fa-file-alt',
             ],
             'place' => [
-                'icon' => 'fa-map-marker'
+                'icon' => 'fa-map-marker',
             ],
             'company' => [
-                'icon' => 'far fa-building'
+                'icon' => 'far fa-building',
             ],
             'field' => [
-                'icon' => 'fa-keyboard'
+                'icon' => 'fa-keyboard',
             ],
             'chart' => [
-                'icon' => 'fa-chart-line'
+                'icon' => 'fa-chart-line',
             ],
             'risk' => [
-                'icon' => 'fa-chart-line'
+                'icon' => 'fa-chart-line',
             ],
             'tax' => [
-                'icon' => 'fa-hand-holding-usd'
+                'icon' => 'fa-hand-holding-usd',
             ],
             'time' => [
                 'icon' => 'fa-clock-o',

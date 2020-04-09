@@ -6,6 +6,7 @@ use Admin\Core\Helpers\File as AdminFile;
 use Admin\Eloquent\AdminModel;
 use Facades\Admin\Helpers\SEOService;
 use Admin\Models\RoutesSeo;
+use Localization;
 use Gettext;
 use Route;
 use Admin;
@@ -155,8 +156,8 @@ class SEO
 
         $this->seoRows = RoutesSeo::select(['url', 'group', 'title', 'keywords', 'description', 'image'])
                             ->where(function($query){
-                                $query->where('url', $this->getRouteUrl())
-                                      ->orWhere('url', $this->getPathInfo());
+                                $query->where('url', $this->withoutLocalizedSlug($this->getRouteUrl()))
+                                      ->orWhere('url', $this->withoutLocalizedSlug($this->getPathInfo()));
                             })
                             ->when($this->getSeoGroup(), function($query, $group){
                                 $query->orWhere('group', $group);
@@ -169,6 +170,17 @@ class SEO
         $this->seoRow = $this->seoRows->where('url', '!=', '/')->first() ?: false;
 
         return $this->seoRow;
+    }
+
+    private function withoutLocalizedSlug($url)
+    {
+        $parts = explode('/', trim($url, '/'));
+
+        if ( Localization::isValidSegment() ){
+            $parts = array_slice($parts, 1);
+        }
+
+        return '/'.implode('/', $parts);
     }
 
     public function getPathInfo()

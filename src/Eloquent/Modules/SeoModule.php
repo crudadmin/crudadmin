@@ -45,12 +45,14 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
             ])->inline()->add('hidden')]);
         }
 
-        $fields->push(Group::tab(array_merge($items, [
+        $seoTab = Group::tab(array_merge($items, [
             'meta_title' => 'name:Titulok stránky'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             'meta_keywords' => 'name:Kľúčové slova'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             'meta_description' => 'name:Popis stránky|type:text|max:400'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             'meta_image' => 'name:Obrázky stránky|image|multiple',
-        ]))->add('hidden')->name('Meta tagy')->icon('fa-info'));
+        ]))->add('hidden')->name('Meta tagy')->icon('fa-info')->id('seo_tab');
+
+        $fields->push($seoTab);
     }
 
     /*
@@ -58,15 +60,17 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
      */
     public function mutateBootedFields(&$fields, $row, $model)
     {
-        $isLocalized = @$fields[$model->getProperty('sluggable')]['locale'] ?: false;
+        if ( $model->hasSluggable() ){
+            $isLocalized = @$fields[$model->getProperty('sluggable')]['locale'] ?: false;
 
-        //If sluggable column has locale attribute, we need add this attribute also into slug column
-        if ( $model->hasSluggable() && $isLocalized ) {
-            $fields['slug']['locale'] = true;
+            //If sluggable column has locale attribute, we need add this attribute also into slug column
+            if ( $model->hasSluggable() && $isLocalized ) {
+                $fields['slug']['locale'] = true;
+            }
+
+            //Use json unique, or basic column unique method
+            $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
         }
-
-        //Use json unique, or basic column unique method
-        $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
 
         return $fields;
     }

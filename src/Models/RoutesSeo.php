@@ -5,6 +5,7 @@ namespace Admin\Models;
 use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 use Facades\Admin\Helpers\SEOService;
+use Admin;
 
 class RoutesSeo extends AdminModel
 {
@@ -46,9 +47,9 @@ class RoutesSeo extends AdminModel
                 'group' => 'name:admin::admin.seoroutes-group|index|invisible',
             // ])->inline(),
             'Meta tagy' => Group::fields([
-                'title' => 'name:admin::admin.seoroutes-title',
-                'keywords' => 'name:admin::admin.seoroutes-keywords',
-                'description' => 'name:admin::admin.seoroutes-description|type:text|max:400',
+                'title' => 'name:admin::admin.seoroutes-title'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+                'keywords' => 'name:admin::admin.seoroutes-keywords'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+                'description' => 'name:admin::admin.seoroutes-description|type:text|max:400'.(Admin::isEnabledLocalization() ? '|locale' : ''),
                 'image' => 'name:admin::admin.seoroutes-images|image|multiple',
             ]),
         ];
