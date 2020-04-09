@@ -288,6 +288,29 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                     ],
                 ],
             ],
+            'lector' => [
+                'icon' => 'fa-user-graduate',
+                'settings' => [
+                    'title' => [
+                        'create' => $this->t(_('Nový lektor')),
+                        'update' => $this->t(_('Upravujete lektora č. :id')),
+                    ],
+                    'buttons' => [
+                        'create' => $this->t(_('Nový lektor')),
+                    ],
+                ],
+            ],
+            'training' => [
+                'settings' => [
+                    'title' => [
+                        'create' => $this->t(_('Nový tréning')),
+                        'update' => $this->t(_('Upravujete tréning č. :id')),
+                    ],
+                    'buttons' => [
+                        'create' => $this->t(_('Nový tréning')),
+                    ],
+                ],
+            ],
         ];
     }
 

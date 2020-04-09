@@ -2,7 +2,9 @@
 
 namespace Admin\Providers;
 
+use Admin\Requests\Validators\UniqueJsonValidator;
 use Illuminate\Support\ServiceProvider;
+use Validator;
 
 class AdminServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,7 @@ class AdminServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadGlobalModules();
+        $this->loadValidators();
     }
 
     //Register admin language model
@@ -63,5 +66,10 @@ class AdminServiceProvider extends ServiceProvider
         if ( \Admin::isEnabledFrontendEditor() ) {
             \Admin::registerModel(\Admin\Models\StaticImage::class);
         }
+    }
+
+    private function loadValidators()
+    {
+        Validator::extend('unique_json', UniqueJsonValidator::class.'@validate', trans('validation.unique'));
     }
 }

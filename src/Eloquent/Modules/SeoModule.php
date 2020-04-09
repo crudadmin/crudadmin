@@ -5,6 +5,8 @@ namespace Admin\Eloquent\Modules;
 use Admin\Core\Eloquent\Concerns\AdminModelModule;
 use Admin\Core\Eloquent\Concerns\AdminModelModuleSupport;
 use Admin\Fields\Group;
+use Illuminate\Validation\Rule;
+use Admin;
 
 class SeoModule extends AdminModelModule implements AdminModelModuleSupport
 {
@@ -13,13 +15,15 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
         /*
          * Hide meta images from array
          */
-        $this->getModel()->addHidden([
-            'slug_dynamic',
-            'meta_title',
-            'meta_keywords',
-            'meta_description',
-            'meta_image',
-        ]);
+        if ( Admin::isFrontend() ) {
+            $this->getModel()->makeHidden([
+                'slug_dynamic',
+                'meta_title',
+                'meta_keywords',
+                'meta_description',
+                'meta_image',
+            ]);
+        }
     }
 
     public function isActive($model)
@@ -42,10 +46,28 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
         }
 
         $fields->push(Group::tab(array_merge($items, [
-            'meta_title' => 'name:Titulok stránky',
-            'meta_keywords' => 'name:Kľúčové slova',
-            'meta_description' => 'name:Popis stránky|type:text|max:400',
+            'meta_title' => 'name:Titulok stránky'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+            'meta_keywords' => 'name:Kľúčové slova'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+            'meta_description' => 'name:Popis stránky|type:text|max:400'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             'meta_image' => 'name:Obrázky stránky|image|multiple',
         ]))->add('hidden')->name('Meta tagy')->icon('fa-info'));
+    }
+
+    /*
+     * When all fields are already initialized, we can slightly mutate their parameters in this state.
+     */
+    public function mutateBootedFields(&$fields, $row, $model)
+    {
+        $isLocalized = @$fields[$model->getProperty('sluggable')]['locale'] ?: false;
+
+        //If sluggable column has locale attribute, we need add this attribute also into slug column
+        if ( $model->hasSluggable() && $isLocalized ) {
+            $fields['slug']['locale'] = true;
+        }
+
+        //Use json unique, or basic column unique method
+        $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
+
+        return $fields;
     }
 }

@@ -18,6 +18,11 @@ return [
     'name' => 'My Admin',
 
     /*
+     * Admin locale (en|sk|cs)
+     */
+    'locale' => 'sk',
+
+    /*
      * License key
      */
     'license_key' => 'campaign2019',
@@ -40,12 +45,17 @@ return [
     'gettext' => false,
 
     /*
-     * Admin locale (en|sk|cs)
-     */
-    'locale' => 'sk',
-
-    /*
      * Frontend editor for simple text translates
      */
     'frontend_editor' => false,
+
+    /*
+     * Seo module for all routes
+     */
+    'seo' => false,
+
+    /*
+     * Slugs History for 302 redirects of changed slugs
+     */
+    'sluggable_history' => false,
 ];

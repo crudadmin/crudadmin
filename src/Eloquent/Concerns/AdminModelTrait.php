@@ -100,6 +100,11 @@ trait AdminModelTrait
         if ($this->isSortable()) {
             $this->casts['_order'] = 'integer';
         }
+
+        //Add cast into localized slug column
+        if ( $this->hasLocalizedSlug() ){
+            $this->casts['slug'] = 'json';
+        }
     }
 
     /**

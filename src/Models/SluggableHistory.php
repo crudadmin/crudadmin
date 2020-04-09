@@ -48,9 +48,11 @@ class SluggableHistory extends Model
      */
     public static function snapshot($model, $value = null)
     {
+        $slugValue = $value ?: $model->getAttribute('slug');
+
         $value = $model->hasLocalizedSlug()
-                    ? json_decode(($value ?: $model->attributes['slug']))
-                    : ($value ?: $model->attributes['slug']);
+                    ? (is_array($slugValue) ? $slugValue : json_decode($slugValue))
+                    : $slugValue;
 
         self::create([
             'table' => $model->getTable(),
