@@ -44,7 +44,7 @@ class File
 
         $this->extension = $this->getExtension( $this->filename );
 
-        $this->path = $path;
+        $this->path = str_replace(public_path('/'), '', $path);
 
         $this->basepath = public_path(str_replace(public_path(), '', $path));
 
@@ -124,7 +124,8 @@ class File
             }
         }
 
-        $origPath = substr($this->path, 8);
+        $origPath = trim($this->path, '/');
+        $origPath = substr($origPath, 8);
         $path = explode('/', $origPath);
 
         $action = action( '\Gogol\Admin\Controllers\DownloadController@signedDownload', self::getHash($origPath) );
