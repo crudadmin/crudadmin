@@ -197,6 +197,9 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             'complaint' => [
                 'icon' => 'fa-sync',
             ],
+            'synchronization' => [
+                'icon' => 'fa-sync',
+            ],
             'brand' => [
                 'icon' => 'fa-tags',
             ],
@@ -241,6 +244,12 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             ],
             'pricing' => [
                 'icon' => 'fa-sliders-h',
+            ],
+            'history' => [
+                'icon' => 'fa-history',
+            ],
+            'log' => [
+                'icon' => 'fa-history',
             ],
             'country' => [
                 'icon' => 'fa-flag',
