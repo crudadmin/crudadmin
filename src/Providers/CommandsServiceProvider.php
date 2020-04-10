@@ -21,6 +21,8 @@ class CommandsServiceProvider extends ServiceProvider
 
         $this->app->bind('gogol::admin.button', \Admin\Commands\AdminButtonCommand::class);
 
+        $this->app->bind('gogol::admin.account', \Admin\Commands\AdminAccountCommand::class);
+
         $this->app->bind('gogol::admin.rule', \Admin\Commands\AdminRuleCommand::class);
 
         $this->app->bind('gogol::admin.layout', \Admin\Commands\AdminLayoutCommand::class);
@@ -36,6 +38,7 @@ class CommandsServiceProvider extends ServiceProvider
         $this->commands([
             'gogol::admin.install',
             'gogol::admin.button',
+            'gogol::admin.account',
             'gogol::admin.rule',
             'gogol::admin.layout',
             'gogol::admin.component',
