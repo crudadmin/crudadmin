@@ -326,7 +326,10 @@ abstract class Request extends FormRequest
      */
     public function isRemovedFieldFromRequest($key)
     {
-        return $this->model->hasFieldParam($key, ['removeFromForm', 'invisible', 'disabled'], true) === true;
+        return (
+            $this->model->hasFieldParam($key, ['removeFromForm', 'invisible', 'disabled'], true) === true
+            && $this->model->hasFieldParam($key, ['keepInRequest'], true) === false
+        );
     }
 
     /*

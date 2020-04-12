@@ -7,8 +7,9 @@ use Admin\Controllers\Crud\Concerns\CRUDRelations;
 use Admin\Controllers\Crud\Concerns\CRUDResponse;
 use Admin\Helpers\AdminRows;
 use Admin\Requests\DataRequest;
-use Ajax;
 use Illuminate\Http\Request;
+use Admin;
+use Ajax;
 
 class InsertController extends CRUDController
 {
@@ -138,16 +139,38 @@ class InsertController extends CRUDController
             }, (array)$row->getModelChilds());
 
             foreach ((array)json_decode($request->_save_children) as $item) {
-                //If model has been gived which is not child of parent model
-                if ( !in_array($item->table, $allowedChilds) )
+                if ( !($relationModel = Admin::getModelByTable($item->table)) ) {
+                    Ajax::error(sprintf(_('Relácie pre model %s neexistuje.'), $item->table));
+                }
+
+                $isGlobalRelation = $relationModel->getProperty('globalRelation');
+
+                //If unknown model has been which is not child of parent model.
+                //But this given model has not globalRelation support
+                if ( !in_array($item->table, $allowedChilds) && $isGlobalRelation === false ) {
                     continue;
+                }
 
                 //Get model, and check if user has access to given model
                 $model = $this->getModel($item->table);
 
-                $relationKey = $model->getForeignColumn($row->getTable());
+                if ( !($relationKey = $model->getForeignColumn($row->getTable())) ) {
+                    //If given relation table model has not turned global relation support
+                    if ( !$isGlobalRelation ) {
+                        Ajax::error();
+                    }
 
-                $model->getConnection()->table($model->getTable())->where('id', $item->id)->update([$relationKey => $row->getKey()]);
+                    $relationKey = '_row_id';
+                }
+
+                //Update unrelated rows to actually created model
+                $model->getConnection()->table($model->getTable())->where('id', $item->id)->update(
+                    array_merge([
+                        $relationKey => $row->getKey()
+                    ], $isGlobalRelation ? [
+                        '_table' => $row->getTable()
+                    ] : [])
+                );
             }
         }
     }

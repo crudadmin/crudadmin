@@ -160,7 +160,7 @@ class ModelsHistory extends Model
         //We want monitor all fields...
         $model = (clone $model)->setHidden([]);
 
-        foreach (['_id', '_order', '_method', '_model', 'language_id'] as $key) {
+        foreach (['_id', '_order', '_method', '_model', '_table', '_row_id', 'language_id'] as $key) {
             if (array_key_exists($key, $data)) {
                 unset($data[$key]);
             }

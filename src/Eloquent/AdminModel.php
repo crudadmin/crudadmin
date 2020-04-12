@@ -14,6 +14,7 @@ use Admin\Eloquent\Concerns\ModelRules;
 use Admin\Eloquent\Concerns\Uploadable;
 use Admin\Eloquent\Concerns\VueComponent;
 use Admin\Eloquent\Modules\AdminCustomizationModule;
+use Admin\Eloquent\Modules\GlobalRelationModule;
 use Admin\Eloquent\Modules\SeoModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -178,11 +179,17 @@ class AdminModel extends CoreAdminModel
     protected $seo = false;
 
     /*
+     * This model can be assigned to any other model without specific relation key
+     */
+    protected $globalRelation = false;
+
+    /*
      * Admin modules
      */
     protected $modules = [
         SeoModule::class,
         AdminCustomizationModule::class,
+        GlobalRelationModule::class,
     ];
 
     /**

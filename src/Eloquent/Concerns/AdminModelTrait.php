@@ -255,8 +255,15 @@ trait AdminModelTrait
                 $column = array_values($column)[0];
             }
 
+            //Find by relationship
             if ($column) {
                 $query->where($column, $subid);
+            }
+
+            //Find by global relationship
+            else if ( $this->getProperty('globalRelation') === true ) {
+                $query->where('_table', $parent_table)
+                      ->where('_row_id', $subid);
             }
         }
 
