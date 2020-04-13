@@ -1,6 +1,6 @@
 <template>
     <div class="sitebuilder__add form-group" :class="{ '--selected' : value ? true : false }">
-        <h2>{{ field.name }}</h2>
+        <h2 v-if="!value">{{ field.name }}</h2>
 
         <div class="sb_add_items">
             <div class="row">
