@@ -4,6 +4,7 @@ namespace Admin\Contracts\Sitebuilder\Types;
 
 use Admin\Contracts\Sitebuilder\SBType;
 use Admin\Contracts\Sitebuilder\TypeInterface;
+use Admin;
 
 class Editor extends SBType implements TypeInterface
 {
@@ -37,7 +38,7 @@ class Editor extends SBType implements TypeInterface
     public function getFields()
     {
         return [
-            'value' => 'name:Obsah bloku|type:editor|required',
+            'value' => 'name:Obsah bloku|type:editor|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
         ];
     }
 }

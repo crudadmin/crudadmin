@@ -4,6 +4,7 @@ namespace Admin\Contracts\Sitebuilder\Types;
 
 use Admin\Contracts\Sitebuilder\SBType;
 use Admin\Contracts\Sitebuilder\TypeInterface;
+use Admin;
 
 class Text extends SBType implements TypeInterface
 {
@@ -37,7 +38,7 @@ class Text extends SBType implements TypeInterface
     public function getFields()
     {
         return [
-            'value' => 'name:Hodnota bloku|type:text|required',
+            'value' => 'name:Hodnota bloku|type:text|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
         ];
     }
 }
