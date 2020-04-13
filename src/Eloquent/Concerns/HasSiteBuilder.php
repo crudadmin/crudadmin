@@ -8,7 +8,7 @@ trait HasSiteBuilder
 {
     public function renderBuilder()
     {
-        $resposne = [];
+        $response = [];
 
         $rows = SiteBuilder::whereGlobalRelation($this)->get();
 
