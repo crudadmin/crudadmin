@@ -30,7 +30,7 @@ class GettextController extends Controller
             $rawTranslations = '[]';
         }
 
-        $js = view('admin.crud::translates', compact('translations', 'rawTranslations'))->render();
+        $js = view('admin::translates', compact('translations', 'rawTranslations'))->render();
 
         $response = new Response($js, 200, [
             'Content-Type' => 'application/javascript; charset=utf-8',

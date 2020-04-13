@@ -50,6 +50,12 @@ return [
     'frontend_editor' => false,
 
     /*
+     * Sitebuilder support into fields.
+     * Group::sitebuilder()
+     */
+    'sitebuilder' => false,
+
+    /*
      * Seo module for all routes
      */
     'seo' => false,

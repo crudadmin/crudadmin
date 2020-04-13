@@ -318,6 +318,7 @@ class LayoutController extends BaseController
             'in_tab' => $model->getProperty('inTab') ?: false,
             'in_menu' => $model->getProperty('inMenu', false),
             'hidden_tabs' => $model->getProperty('hidden_tabs') ?: [],
+            'hidden_groups' => $model->getProperty('hidden_groups') ?: [],
             'reserved' => $model->getProperty('reserved') ?: false,
             'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),

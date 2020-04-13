@@ -9,7 +9,7 @@ class GettextServiceProvider extends ServiceProvider
 {
     public function getBladeDirective()
     {
-        return file_get_contents(view('admin.crud::directives.gettext-setup')->getPath());
+        return file_get_contents(view('admin::directives.gettext-setup')->getPath());
     }
 
     /**

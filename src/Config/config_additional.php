@@ -150,4 +150,14 @@ return [
      * If uploaded images will dissapear, they will be replaced with stock image
      */
     'rewrite_missing_upload_images' => env('ADMIN_REWRITE_MISSING_IMAGES', true),
+
+    /*
+     * All available sitebuilder types
+     */
+    'sitebuilder_types' => [
+        Admin\Contracts\Sitebuilder\Types\Editor::class,
+        Admin\Contracts\Sitebuilder\Types\Text::class,
+        Admin\Contracts\Sitebuilder\Types\Image::class,
+        Admin\Contracts\Sitebuilder\Types\Iframe::class,
+    ],
 ];

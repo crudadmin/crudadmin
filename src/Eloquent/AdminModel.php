@@ -7,6 +7,7 @@ use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
 use Admin\Eloquent\Concerns\AdminModelTrait;
 use Admin\Eloquent\Concerns\HasAttributes;
 use Admin\Eloquent\Concerns\HasPermissions;
+use Admin\Eloquent\Concerns\HasSiteBuilder;
 use Admin\Eloquent\Concerns\Historiable;
 use Admin\Eloquent\Concerns\ModelIcons;
 use Admin\Eloquent\Concerns\ModelLayoutBuilder;
@@ -30,7 +31,8 @@ class AdminModel extends CoreAdminModel
         VueComponent,
         Historiable,
         Uploadable,
-        SoftDeletes;
+        SoftDeletes,
+        HasSiteBuilder;
 
     /*
      * Template name

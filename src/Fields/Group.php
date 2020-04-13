@@ -2,8 +2,10 @@
 
 namespace Admin\Fields;
 
-use Admin\Eloquent\AdminModel;
 use Admin\Core\Fields\Group as BaseGroup;
+use Admin\Eloquent\AdminModel;
+use Admin\Models\SiteBuilder;
+use Admin;
 
 /*
  * Check also available parameters from Admin\Core\Fields\Group
@@ -152,6 +154,20 @@ class Group extends BaseGroup
         }
 
         return $tab;
+    }
+
+    /**
+     * Create sitebuilder tab
+     *
+     * @return  Group
+     */
+    public static function builder()
+    {
+        if ( Admin::isEnabledSitebuilder() ) {
+            return self::tab(SiteBuilder::class)->icon('fa-th')->id('sitebuilder');
+        }
+
+        return [];
     }
 
     /**

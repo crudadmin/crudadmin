@@ -66,6 +66,11 @@ class AdminServiceProvider extends ServiceProvider
         if ( \Admin::isEnabledFrontendEditor() ) {
             \Admin::registerModel(\Admin\Models\StaticImage::class);
         }
+
+        //Sitebuilder support
+        if ( \Admin::isEnabledSitebuilder() ) {
+            \Admin::registerModel(\Admin\Models\SiteBuilder::class);
+        }
     }
 
     private function loadValidators()

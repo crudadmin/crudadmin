@@ -87,6 +87,14 @@ class Admin extends AdminCore
     }
 
     /*
+     * Check if is frontend editor extension enabled
+     */
+    public function isEnabledSitebuilder()
+    {
+        return config('admin.sitebuilder', false);
+    }
+
+    /*
      * Get stub path
      */
     public function stub($stub)
