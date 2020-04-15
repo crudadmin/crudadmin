@@ -25,9 +25,11 @@ trait Uploadable
     /*
      * Returns path for uploaded files from actual model
      */
-    public function filePath($key, $file = null)
+    public function filePath($key, $file = null, $relative = false)
     {
-        $path = 'uploads/'.$this->getTable().'/'.$key;
+        $directory = 'uploads/'.$this->getTable().'/'.$key;
+
+        $path = $relative ? $directory : public_path($directory);
 
         if ($file) {
             return $path.'/'.$file;
@@ -132,10 +134,16 @@ trait Uploadable
         return false;
     }
 
-    /*
+    /**
      * Upload file from local directory or server
+     *
+     * @param  string  $file
+     * @param  string  $filename
+     * @param  string  $uploadPath / destinationPath
+     * @param  string  $field
+     * @return  array
      */
-    private function uploadFileFromLocal($file, $filename, $path, $field)
+    private function uploadFileFromLocal($file, $filename, $uploadPath, $field)
     {
         $extension = File::extension($file);
 
@@ -144,15 +152,15 @@ trait Uploadable
         }
 
         //Copy file from server, or directory into uploads for field
-        File::copy($file, $path.'/'.$filename);
+        File::copy($file, $uploadPath.'/'.$filename);
 
         //If file hasn't extension type from filename, then check file mimetype and guess file extension
         if (! $extension) {
-            if ($extension = $this->guessExtension($path, $filename)) {
+            if ($extension = $this->guessExtension($uploadPath, $filename)) {
                 //Modified filename
                 $filename_with_extension = $this->filenameModifier($filename.'.'.$extension, $field);
 
-                File::move($path.'/'.$filename, $path.'/'.$filename_with_extension);
+                File::move($uploadPath.'/'.$filename, $uploadPath.'/'.$filename_with_extension);
 
                 $filename = $filename_with_extension;
             }
@@ -209,22 +217,24 @@ trait Uploadable
 
     /**
      * Automaticaly check, upload, and make resizing and other function on file object.
+     *
      * @param  string     $field         field name
-     * @param  string     $path          upload path
+     * @param  string     $file          file to upload/download from server
+     * @param  string     $uploadPath    upload path
      * @param  array|null $actions_steps resizing functions [ [ 'fit' => [ 100 ], 'dir' => 'someThumbDir' ], [ 'resize' => [ 100, 200 ] ] ]
      * @return object
      */
-    public function upload(string $field, $file, $path = null, array $actions_steps = null)
+    public function upload(string $field, $file, $uploadPath = null, array $actions_steps = null)
     {
-        if (! $path) {
-            $path = $this->filePath($field);
+        if (! $uploadPath) {
+            $uploadPath = $this->filePath($field);
         }
 
         //Get count of files in upload directory and set new filename
-        $filename = $this->filename($path, $file, $field);
+        $filename = $this->filename($uploadPath, $file, $field);
 
         //If dirs does not exists, create it
-        AdminFile::makeDirs($path);
+        AdminFile::makeDirs($uploadPath);
 
         //File input is file from request
         if ($file instanceof \Illuminate\Http\UploadedFile) {
@@ -240,15 +250,15 @@ trait Uploadable
             $filename = $this->filenameModifier($filename.'.'.$extension, $field);
 
             //Move photo from request to directory
-            $file = $file->move($path, $filename);
+            $file = $file->move($uploadPath, $filename);
         } else {
-            $response = $this->uploadFileFromLocal($file, $filename, $path, $field);
+            $response = $this->uploadFileFromLocal($file, $filename, $uploadPath, $field);
 
             $filename = $response['filename'];
             $extension = $response['extension'];
         }
 
-        $filePath = public_path($path).'/'.$filename;
+        $filePath = $uploadPath.'/'.$filename;
 
         //Compress images
         if (
@@ -258,7 +268,7 @@ trait Uploadable
             return false;
         }
 
-        if (! $this->filePostProcess($field, $path, $file, $filename, $extension, $actions_steps)) {
+        if (! $this->filePostProcess($field, $uploadPath, $file, $filename, $extension, $actions_steps)) {
             return false;
         }
 

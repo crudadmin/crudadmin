@@ -22,14 +22,14 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'icon' => 'fa-file-alt',
                 'settings.title.rows' => $this->t(_('Zoznam článkov')),
                 'settings.title.create' => $this->t(_('Nový článok')),
-                'settings.title.update' => $this->t(_('Upravujete článok č. :id')),
+                'settings.title.update' => $this->t(_(':name')),
                 'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
             'blog' => [
                 'icon' => 'fa-file-alt',
                 'settings.title.rows' => $this->t(_('Zoznam článkov')),
                 'settings.title.create' => $this->t(_('Nový článok')),
-                'settings.title.update' => $this->t(_('Upravujete článok č. :id')),
+                'settings.title.update' => $this->t(_(':name')),
                 'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
             'gallery' => [

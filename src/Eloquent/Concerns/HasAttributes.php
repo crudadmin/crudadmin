@@ -5,6 +5,7 @@ namespace Admin\Eloquent\Concerns;
 use Admin;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use DateTimeInterface;
 
 trait HasAttributes
 {
@@ -119,6 +120,22 @@ trait HasAttributes
         return $attributes;
     }
 
+    /**
+     * Prepare a date for array / JSON serialization.
+     *
+     * @param  \DateTimeInterface  $date
+     * @return string
+     */
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        //We need seriale dates for administration in old format
+        if ( Admin::isAdmin() ) {
+            return $date->format($this->getDateFormat());
+        }
+
+        return parent::serializeDate($date);
+    }
+
     /*
      * Casts datetime/date/time values
      */
@@ -136,6 +153,7 @@ trait HasAttributes
             $attributes[$key] = $attributes[$key]
                                 ? (new Carbon($attributes[$key]))->format($field['date_format'])
                                 : null;
+
         }
 
         /*

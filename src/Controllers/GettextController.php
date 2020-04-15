@@ -63,7 +63,7 @@ class GettextController extends Controller
         $model = Admin::getModelByTable($table ?: 'languages');
 
         //If user does not have permissions
-        if ( !admin() || !admin()->hasAccess(get_class($model), $permission ?: 'read') ) {
+        if ( !admin() || !admin()->hasAccess($model, $permission ?: 'read') ) {
             Ajax::permissionsError();
         }
 
