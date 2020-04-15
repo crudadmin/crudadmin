@@ -253,11 +253,13 @@ abstract class Request extends FormRequest
 
     private function getFieldsByRequest($fields = null)
     {
+        $mutatedFields = $this->model->getFields(null, true);
+
         //Get fields by request
         if ( $fields )
-            return array_intersect_key($this->model->getFields(), array_flip($fields));
+            return array_intersect_key($mutatedFields, array_flip($fields));
         else
-            return $this->model->getFields();
+            return $mutatedFields;
     }
 
     protected function emptyStringsToNull($fields = null)
