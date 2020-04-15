@@ -135,7 +135,7 @@ class LayoutController extends BaseController
         if ( $withOptions === true )
             $model->withAllOptions();
 
-        $fields = $model->getFields();
+        $fields = $model->getFields(null, true);
 
         foreach ($fields as $key => $field)
         {
