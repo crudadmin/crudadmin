@@ -33,6 +33,20 @@ class SBType
     }
 
     /**
+     * Has block wrapper
+     *
+     * @return  bool
+     */
+    public function hasWrapper()
+    {
+        if ( property_exists($this, 'wrapper') ) {
+            return $this->wrapper;
+        }
+
+        return true;
+    }
+
+    /**
      * Get mutated fields. Remove required properties, and replace them with required_if,type,xy
      *
      * @return  array
@@ -92,6 +106,10 @@ class SBType
         ])->render();
 
         //Render block view and pass block data into...
-        return view('admin::sitebuilder/block', compact('content', 'increment'));
+        if ( $this->hasWrapper() === true ) {
+            return view('admin::sitebuilder/block', compact('content', 'increment'));
+        }
+
+        return $content;
     }
 }
