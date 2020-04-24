@@ -1,0 +1,60 @@
+<?php
+
+namespace DummyNamespace;
+
+use Admin\Contracts\Sitebuilder\SBType;
+use Admin\Contracts\Sitebuilder\TypeInterface;
+use Admin;
+
+class DummyClassName extends SBType implements TypeInterface
+{
+    /**
+     * Columns and group prefix for given type builder type
+     *
+     * @var  string
+     */
+    protected $prefix = 'DummyPrefix';
+
+    /**
+     * Returns icon name from font-awesome library
+     *
+     * @return  string
+     */
+    protected $icon = 'fa-file-image';
+
+    /**
+     * Wrap block content into block wrapper
+     *
+     * @var  bool
+     */
+    protected $wrapper = true;
+
+    /**
+     * Disable block wrapper
+     *
+     * @var  bool
+     */
+    protected $groupBlocks = false;
+
+    /*
+     * Name of given sitebuilder
+     */
+    public function getName()
+    {
+        return _('DummyClassName');
+    }
+
+    /**
+     * All registred fields into given group
+     *
+     * @return  array|Admin\Fields\Group
+     */
+    public function getFields()
+    {
+        return [
+            'name' => 'name:Názov bloku|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+            'image' => 'name:Obrázok|type:file|image|required',
+            'value' => 'name:Hodnota bloku|type:editor|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+        ];
+    }
+}

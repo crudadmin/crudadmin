@@ -27,6 +27,8 @@ class CommandsServiceProvider extends ServiceProvider
 
         $this->app->bind('gogol::admin.layout', \Admin\Commands\AdminLayoutCommand::class);
 
+        $this->app->bind('gogol::admin.sitebuilderblock', \Admin\Commands\AdminSitebuilderBlockCommand::class);
+
         $this->app->bind('gogol::admin.component', \Admin\Commands\AdminComponentCommand::class);
 
         $this->app->bind('gogol::admin.compress', \Admin\Commands\AdminCompressUploadsCommand::class);
@@ -41,6 +43,7 @@ class CommandsServiceProvider extends ServiceProvider
             'gogol::admin.account',
             'gogol::admin.rule',
             'gogol::admin.layout',
+            'gogol::admin.sitebuilderblock',
             'gogol::admin.component',
             'gogol::admin.compress',
             'gogol::admin.queue',

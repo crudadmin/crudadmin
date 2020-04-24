@@ -59,6 +59,7 @@ class SiteBuilder extends AdminModel
         'title.update' => 'Upravujete blok',
         'title.rows' => 'Zoznam blokov',
         'buttons.create' => 'Pridať nový blok',
+        'buttons.insert' => 'Pridať blok',
         'pagination.limit' => 20,
         'columns._block_name.name' => 'Typ bloku',
         'columns._block_value.name' => 'Hodnota',
