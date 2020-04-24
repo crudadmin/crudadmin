@@ -236,7 +236,9 @@ class SEO
 
         $before = $this->get('title');
 
-        return ($before ? $before.' - ' : '').$title;
+        $separator = $before.' '.config('admin.seo_separator', '-').' ';
+
+        return ($before ? $separator : '').$title;
     }
 
     /*

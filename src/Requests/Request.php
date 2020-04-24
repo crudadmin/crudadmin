@@ -339,6 +339,11 @@ abstract class Request extends FormRequest
      */
     protected function removeMissingFields($fields = null)
     {
+        //Allow this feature only in administration
+        if ( Admin::isAdmin() === false ) {
+            return;
+        }
+
         foreach ($fields as $key => $field) {
             //Allow remove only "removed" fields from dom.
             if ($this->isRemovedFieldFromRequest($key)) {
