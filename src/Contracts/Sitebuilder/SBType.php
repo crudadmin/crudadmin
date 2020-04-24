@@ -8,6 +8,40 @@ use Admin\Eloquent\AdminModel;
 class SBType
 {
     /**
+     * Wrap block content into block wrapper
+     *
+     * @var  bool
+     */
+    protected $wrapper = true;
+
+    /**
+     * Group all block of same type into one block wrapper
+     *
+     * @var  bool
+     */
+    protected $groupBlocks = false;
+
+    /**
+     * Wrap block content into block wrapper
+     *
+     * @return  bool
+     */
+    public function hasWrapper()
+    {
+        return $this->wrapper;
+    }
+
+    /**
+     * Group all block of same type into one block wrapper
+     *
+     * @return  bool
+     */
+    public function hasGroupedBlocks()
+    {
+        return $this->groupBlocks;
+    }
+
+    /**
      * Columns and group prefix for given type builder type.
      * Receive it from prefix property, or generate by class name
      *
@@ -30,20 +64,6 @@ class SBType
     public function getIcon()
     {
         return $this->icon;
-    }
-
-    /**
-     * Has block wrapper
-     *
-     * @return  bool
-     */
-    public function hasWrapper()
-    {
-        if ( property_exists($this, 'wrapper') ) {
-            return $this->wrapper;
-        }
-
-        return true;
     }
 
     /**
@@ -75,6 +95,8 @@ class SBType
      * Render block view by given row data model
      *
      * @param  AdminModel  $row
+     * @param  int  $increment
+     *
      * @return  void
      */
     public function renderView(AdminModel $row, int $increment = null)
@@ -101,15 +123,9 @@ class SBType
         }
 
         //Pass data into view model and render it
-        $content = view('admin::sitebuilder/'.$this->getPrefix(), $data + [
+        return view('admin::sitebuilder/'.$this->getPrefix(), $data + [
+            'increment' => $increment,
             'row' => $row,
         ])->render();
-
-        //Render block view and pass block data into...
-        if ( $this->hasWrapper() === true ) {
-            return view('admin::sitebuilder/block', compact('content', 'increment'));
-        }
-
-        return $content;
     }
 }
