@@ -6,7 +6,7 @@ use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 use Admin;
 
-class StaticImage extends AdminModel
+class StaticContent extends AdminModel
 {
     /*
      * Model created date, for ordering tables in database and in user interface
@@ -16,7 +16,7 @@ class StaticImage extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'Statické obrázky na webe';
+    protected $name = 'Statický obsah';
 
     protected $insertable = false;
 
@@ -38,7 +38,7 @@ class StaticImage extends AdminModel
         return [
             'key' => 'name:Image key|index',
             'image' => 'name:Obrázok|image',
-            'alt' => 'name:Alt|'.(Admin::isEnabledLocalization() ? 'locale' : ''),
+            'url' => 'name:Url adresa',
         ];
     }
 

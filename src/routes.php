@@ -42,6 +42,7 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
 
     //Admin gettext translates
+    Route::post('/admin/frontend-editor/static-link', 'FrontendEditorController@updateLink');
     Route::post('/admin/frontend-editor/static-image', 'FrontendEditorController@updateImage');
     Route::post('/admin/translates/editable/{lang}', 'GettextController@updateEditorState');
     Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');

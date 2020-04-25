@@ -8,8 +8,10 @@ window.CAEditorConfig = {
     active : <?php echo EditorMode::isActive() ? 'true' : 'false' ?>,
     translatable : <?php echo EditorMode::isActiveTranslatable() ? 'true' : 'false' ?>,
     uploadable : <?php echo FrontendEditor::isActive() ? 'true' : 'false' ?>,
+    linkable : <?php echo FrontendEditor::isActive() ? 'true' : 'false' ?>,
     requests : {
         admin : '<?php echo url('/admin') ?>',
+        updateLink : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateLink') ?>',
         updateImage : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateImage') ?>',
 
 <?php if ( $lang = Localization::get() ){ ?>

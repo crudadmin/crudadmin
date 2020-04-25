@@ -2,10 +2,10 @@
 
 namespace Admin\Controllers;
 
-use Admin\Models\StaticImage;
 use Admin;
-use FrontendEditor;
+use Admin\Models\StaticContent;
 use Ajax;
+use FrontendEditor;
 
 class FrontendEditorController extends Controller
 {
@@ -52,6 +52,48 @@ class FrontendEditorController extends Controller
         return response()->json([
             'url' => $imageRow->{$fieldKey}->url,
         ]);
+    }
+
+    public function updateLink()
+    {
+        //Check permission access and hashes of given properties:
+        if ( FrontendEditor::hasAccess() == false ) {
+            Ajax::permissionsError();
+        }
+
+        //We does not want save host url. If is same, we want trim this host...
+        //Also when url is empty, we want point to page root
+        $url = $this->prepareUrl(request('url'));
+
+        $staticRow = StaticContent::findOrFail(request('id'));
+        $staticRow->url = $url;
+        $staticRow->save();
+
+        return $staticRow->url;
+    }
+
+    private function prepareUrl($url)
+    {
+        $actualHost = request()->getScheme().'://'.request()->getHost();
+
+        $url = str_replace($actualHost, '', $url);
+
+        //We want add slash at the end of url
+        if (
+            //If url does not start with protocol
+            !(
+                substr($url, 0, 2) == '//' ||
+                substr($url, 0, 7) == 'http://' ||
+                substr($url, 0, 8) == 'https://'
+            )
+
+            //If url does not start with slash, we want add slas at the beggining
+            && substr($url, 0, 1) != '/'
+         ){
+            $url = '/'.$url;
+        }
+
+        return $url;
     }
 
     /**

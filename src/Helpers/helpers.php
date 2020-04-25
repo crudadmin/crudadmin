@@ -54,3 +54,13 @@ if ( ! function_exists('uploadable') ) {
         return FrontendEditor::uploadable(...func_get_args());
     }
 }
+
+/*
+ * Linkable helper helper
+ */
+if ( ! function_exists('linkable') ) {
+    function linkable()
+    {
+        return FrontendEditor::linkable(...func_get_args());
+    }
+}

@@ -64,7 +64,7 @@ class AdminServiceProvider extends ServiceProvider
 
         //Frontend editor
         if ( \Admin::isEnabledFrontendEditor() ) {
-            \Admin::registerModel(\Admin\Models\StaticImage::class);
+            \Admin::registerModel(\Admin\Models\StaticContent::class);
         }
 
         //Sitebuilder support
