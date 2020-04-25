@@ -89,6 +89,9 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             'bus' => [
                 'icon' => 'fa-bus',
             ],
+            'color' => [
+                'icon' => 'fa-palette',
+            ],
             'motorcycle' => [
                 'icon' => 'fa-motorcycle',
             ],
@@ -110,8 +113,17 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             'hour' => [
                 'icon' => 'far fa-clock',
             ],
+            'parameter' => [
+                'icon' => 'fa-filter',
+                'settings.title.create' => $this->t(_('Nový parameter')),
+                'settings.title.update' => $this->t(_('Upravujete parameter č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový parameter')),
+            ],
             'product' => [
                 'icon' => 'fa-shopping-basket',
+                'settings.title.create' => $this->t(_('Nový produkt')),
+                'settings.title.update' => $this->t(_('Upravujete produkt č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový produkt')),
             ],
             'basket' => [
                 'icon' => 'fa-shopping-basket',
