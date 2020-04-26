@@ -32,6 +32,13 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'settings.title.update' => $this->t(_(':name')),
                 'settings.buttons.create' => $this->t(_('Nový článok')),
             ],
+            'author' => [
+                'icon' => 'fa-user-tag',
+                'settings.title.rows' => $this->t(_('Zoznam autorov')),
+                'settings.title.create' => $this->t(_('Nový autor')),
+                'settings.title.update' => $this->t(_('Upravujete autora č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový autor')),
+            ],
             'gallery' => [
                 'icon' => 'fa-file-image',
             ],
@@ -73,6 +80,12 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'settings.title.create' => $this->t(_('Nová osoba')),
                 'settings.title.update' => $this->t(_('Upravujete osobu č. :id')),
                 'settings.buttons.create' => $this->t(_('Nová osoba')),
+            ],
+            'banner' => [
+                'icon' => 'far fa-images',
+                'settings.title.create' => $this->t(_('Nový baner')),
+                'settings.title.update' => $this->t(_('Upravujete baner č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový baner')),
             ],
             'language' => [
                 'icon' => 'fa-globe',
