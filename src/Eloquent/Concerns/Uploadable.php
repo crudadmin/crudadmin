@@ -260,10 +260,7 @@ trait Uploadable
         $filePath = $uploadPath.'/'.$filename;
 
         //Compress images
-        if (
-            $this->imageCompression !== false
-            && ! ImageCompressor::compressOriginalImage($filePath, null, $extension)
-        ) {
+        if (! $this->compressOriginalImage($filePath, $extension)) {
             return false;
         }
 
@@ -272,6 +269,21 @@ trait Uploadable
         }
 
         return AdminFile::adminModelFile($this->getTable(), $field, $filename, $this->getKey());
+    }
+
+    public function compressOriginalImage($path, $extension)
+    {
+        if ( $this->getProperty('imageLossyCompression') === true ) {
+            $imageMaximumProportions = $this->getProperty('imageMaximumProportions');
+
+            ImageCompressor::tryLossyCompression($path, null, $extension, $imageMaximumProportions);
+        }
+
+        if ( $this->getProperty('imageLosslessCompression') === true ) {
+            ImageCompressor::tryShellCompression($path);
+        }
+
+        return true;
     }
 
     /*

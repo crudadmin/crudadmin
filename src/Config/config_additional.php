@@ -57,14 +57,29 @@ return [
     'reduce_space' => true,
 
     /*
-     * Image loss compression
+     * Automaticaly resize in aspect ratio all uploaded images which exceed given resolutions
      */
-    'image_compression_quality' => 85,
+    'image_auto_resize' => true,
+    'image_max_width' => 1920,
+    'image_max_height' => 1200,
+
+    /*
+     * Image lossy compression in %.
+     * Eg. 85|true|false
+     */
+    'image_lossy_compression_quality' => 85,
 
     /*
      * Image lossless compression
+     * true/false
      */
     'image_lossless_compression' => true,
+
+    /*
+     * Automatically create webp image for all resized resource
+     * true/false
+     */
+    'image_webp' => false,
 
     /*
      * Allow slug history table for 301 redirect from old slugs to new slugs

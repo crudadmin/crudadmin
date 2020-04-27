@@ -186,6 +186,22 @@ class AdminModel extends CoreAdminModel
     protected $globalRelation = false;
 
     /*
+     * Compress all uploaded images with lossy compression
+     */
+    protected $imageLossyCompression = true;
+
+    /*
+     * Compress all uploaded images with lossy compression.
+     * Is automatically disabled when lossyCompression is off
+     */
+    protected $imageMaximumProportions = true;
+
+    /*
+     * Compress all uploaded images with lossless compression
+     */
+    protected $imageLosslessCompression = true;
+
+    /*
      * Admin modules
      */
     protected $modules = [

@@ -11,14 +11,14 @@ class ImageCompressor
      * Check if compressed image is not bigger than uploade one,
      * if is not, save compressed image.
      */
-    private function compareFilesizeAndSave($dest_path, $data, $orig_image)
+    private function compareFilesizeAndSave($destPath, $data, $orig_image)
     {
         //If encoded jpeg image is smaller than original
         if (strlen($data) > $orig_image->filesize()) {
             return;
         }
 
-        @file_put_contents($dest_path, $data);
+        @file_put_contents($destPath, $data);
     }
 
     private function imageExtExists()
@@ -27,17 +27,18 @@ class ImageCompressor
     }
 
     /**
-     * Compress original file size and.
-     * @param  [type] $file      [description]
-     * @param  [type] $extension [description]
-     * @return [type]            [description]
+     * Compress original image with loss compression
+     *
+     * @param  string  $file
+     * @param  string  $destPath
+     * @param  string|null  $extension
+     * @param  string  $imageMaximumProportions
+     * @return  void
      */
-    public function compressOriginalImage($file, $dest_path = null, $extension = null)
+    public function tryLossyCompression($file, $destPath, $extension = null, $imageMaximumProportions = true)
     {
         //Set destination file
-        if (! $dest_path) {
-            $dest_path = (string) $file;
-        }
+        $destPath = $destPath ?: (string)$file;
 
         //If extension is empty
         if (! $extension) {
@@ -47,9 +48,9 @@ class ImageCompressor
 
         //Default compression quality
         $defaultQuality = 85;
-        $qualityCompression = config('admin.image_compression', $defaultQuality);
+        $qualityCompression = config('admin.image_lossy_compression_quality', $defaultQuality);
 
-        //Set default compress quality if is set to true
+        //Set default compress quality in config is true
         if ($qualityCompression === true) {
             $qualityCompression = $defaultQuality;
         }
@@ -60,37 +61,30 @@ class ImageCompressor
         if (
             $this->imageExtExists()
             && (
-                ($is_jpg = in_array($extension, ['jpg', 'jpeg'])) ||
-                ($is_png = in_array($extension, ['png']))
+                ($isJpeg = in_array($extension, ['jpg', 'jpeg'])) ||
+                ($isPng = in_array($extension, ['png']))
             )
         ) {
             $image = Image::make($file);
 
-            //Check maximum resolution and resize if is bigger
-            $resized = $this->resizeMaxResolution($image);
+            //Check maximum resolution and resize if is bigger...
+            $resized = $imageMaximumProportions === true ? $this->resizeMaxResolution($image) : false;
 
-            //Resize jpeg images
-            if (isset($is_jpg) && $is_jpg === true && ($resized === true || $qualityCompression !== false)) {
-                $encoded_image = $image->encode('jpg', $qualityCompression === false ? 100 : $qualityCompression);
+            //Encode JPEG images when has been resized, or should be compressed
+            if (isset($isJpeg) && $isJpeg === true && ($resized === true || $qualityCompression !== false)) {
+                $encodedImage = $image->encode('jpg', $qualityCompression === false ? 100 : $qualityCompression);
             }
 
-            //Resize png image
-            if (isset($is_png) && $is_png === true && $resized === true) {
-                $encoded_image = $image->encode('png');
+            //Encode PNG image if has been resized
+            if (isset($isPng) && $isPng === true && $resized === true) {
+                $encodedImage = $image->encode('png');
             }
 
             //Save if has been modified and filesize is smaller then uploaded file
-            if (isset($encoded_image)) {
-                $this->compareFilesizeAndSave($dest_path, $encoded_image, $image);
+            if (isset($encodedImage)) {
+                $this->compareFilesizeAndSave($destPath, $encodedImage, $image);
             }
         }
-
-        //Optimize images
-        if (config('admin.image_lossless_compression', true)) {
-            $this->tryShellCompression($file, $dest_path);
-        }
-
-        return true;
     }
 
     /*
@@ -104,25 +98,28 @@ class ImageCompressor
     /*
      * Compress images with shell libraries
      */
-    public function tryShellCompression($source_path, $dest_path = null)
+    public function tryShellCompression($sourcePath, $destPath = null)
     {
-        if (! $dest_path) {
-            $dest_path = $source_path;
+        //If lossless compression is disabled
+        if ( config('admin.image_lossless_compression', true) === false ){
+            return;
         }
 
+        $destPath = $destPath ?: (string)$sourcePath;
+
         //Check if file exists
-        if (! file_exists($source_path)) {
+        if (! file_exists($sourcePath)) {
             return false;
         }
 
         //Compress with linux commands if available
         try {
-            $orig_size = $this->getFilesize($source_path);
+            $origSize = $this->getFilesize($sourcePath);
 
             $optimizerChain = OptimizerChainFactory::create();
-            $optimizerChain->optimize($source_path, $dest_path);
+            $optimizerChain->optimize($sourcePath, $destPath);
 
-            $this->addCompressedPath($source_path, $dest_path, $orig_size);
+            $this->addCompressedPath($sourcePath, $destPath, $origSize);
 
             return true;
         } catch (\Exception $e) {
@@ -141,23 +138,23 @@ class ImageCompressor
     /*
      * Add compressed file into compressed list
      */
-    public function addCompressedPath($source_path, $dest_path, $orig_size)
+    public function addCompressedPath($sourcePath, $destPath, $origSize)
     {
-        $source_path = str_replace(public_path('uploads/'), '', $source_path);
+        $sourcePath = str_replace(public_path('uploads/'), '', $sourcePath);
 
-        @file_put_contents($this->getCompressedListPath(), $source_path.':'.$orig_size."\n", FILE_APPEND);
+        @file_put_contents($this->getCompressedListPath(), $sourcePath.':'.$origSize."\n", FILE_APPEND);
     }
 
     /*
      * Add compressed file into compressed list
      */
-    public function removeCompressedPath($source_path)
+    public function removeCompressedPath($sourcePath)
     {
         $compressed_path = $this->getCompressedListPath();
-        $source_path = str_replace(public_path('uploads/'), '', $source_path);
+        $sourcePath = str_replace(public_path('uploads/'), '', $sourcePath);
 
         $data = @file_get_contents($compressed_path);
-        $data = str_replace($source_path.':', '-:', $data);
+        $data = str_replace($sourcePath.':', '-:', $data);
 
         @file_put_contents($compressed_path, $data);
     }
@@ -189,13 +186,13 @@ class ImageCompressor
         $resized = false;
 
         //Check if images can be automatically resized
-        if (! ($can_resize = config('admin.upload_auto_resize', true))) {
+        if (! ($can_resize = config('admin.image_auto_resize', true))) {
             return false;
         }
 
         //Max dimensions
-        $max_width = config('admin.upload_max_width', 1920);
-        $max_height = config('admin.upload_max_height', 1200);
+        $max_width = config('admin.image_max_width', 1920);
+        $max_height = config('admin.image_max_height', 1200);
 
         $aspectRatio = function ($constraint) {
             $constraint->aspectRatio();
