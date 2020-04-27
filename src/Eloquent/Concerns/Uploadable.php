@@ -69,11 +69,9 @@ trait Uploadable
     /*
      * Postprocess images
      */
-    private function filePostProcess($field, $path, $file, $filename, $extension, $actions_steps = null)
+    private function filePostProcess($field, $path, $file, $filename, $extension)
     {
-        if (! $actions_steps) {
-            $actions_steps = $this->getFieldParam($field, 'resize');
-        }
+        $actions_steps = $this->getFieldParam($field, 'resize');
 
         if (is_string($actions_steps)) {
             return $this->resizeCacheImages(public_path($path.'/'.$filename), $actions_steps);
@@ -143,26 +141,31 @@ trait Uploadable
      * @param  string  $field
      * @return  array
      */
-    private function uploadFileFromLocal($file, $filename, $uploadPath, $field)
+    private function uploadFileFromLocal($file, $origFilename, $uploadPath, $field)
     {
-        $extension = File::extension($file);
+        \Admin::start();
 
-        if (! empty($extension)) {
+        $filename = $origFilename;
+
+        //If extension is available, we want mutate file name
+        if ($extension = File::extension($file)) {
             $filename = $this->filenameModifier($filename.'.'.$extension, $field);
         }
 
         //Copy file from server, or directory into uploads for field
         File::copy($file, $uploadPath.'/'.$filename);
 
-        //If file hasn't extension type from filename, then check file mimetype and guess file extension
-        if (! $extension) {
-            if ($extension = $this->guessExtension($uploadPath, $filename)) {
+        //If file is url adress, we want verify extension type
+        if ( filter_var($file, FILTER_VALIDATE_URL) && !file_exists($file) ) {
+            $gussedExtension = $this->guessExtension($uploadPath, $filename);
+
+            if ( $gussedExtension != $extension ) {
                 //Modified filename
-                $filename_with_extension = $this->filenameModifier($filename.'.'.$extension, $field);
+                $newExtension = $this->filenameModifier($origFilename.'.'.$gussedExtension, $field);
 
-                File::move($uploadPath.'/'.$filename, $uploadPath.'/'.$filename_with_extension);
+                File::move($uploadPath.'/'.$filename, $uploadPath.'/'.$newExtension);
 
-                $filename = $filename_with_extension;
+                $filename = $newExtension;
             }
         }
 
@@ -218,17 +221,13 @@ trait Uploadable
     /**
      * Automaticaly check, upload, and make resizing and other function on file object.
      *
-     * @param  string     $field         field name
-     * @param  string     $file          file to upload/download from server
-     * @param  string     $uploadPath    upload path
-     * @param  array|null $actions_steps resizing functions [ [ 'fit' => [ 100 ], 'dir' => 'someThumbDir' ], [ 'resize' => [ 100, 200 ] ] ]
+     * @param  string     $field         field key
+     * @param  string\UploadedFile     $file          file to upload/download from server
      * @return object
      */
-    public function upload(string $field, $file, $uploadPath = null, array $actions_steps = null)
+    public function upload(string $field, $file)
     {
-        if (! $uploadPath) {
-            $uploadPath = $this->filePath($field);
-        }
+        $uploadPath = $this->filePath($field);
 
         //Get count of files in upload directory and set new filename
         $filename = $this->filename($uploadPath, $file, $field);
@@ -268,7 +267,7 @@ trait Uploadable
             return false;
         }
 
-        if (! $this->filePostProcess($field, $uploadPath, $file, $filename, $extension, $actions_steps)) {
+        if (! $this->filePostProcess($field, $uploadPath, $file, $filename, $extension)) {
             return false;
         }
 

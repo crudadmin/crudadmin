@@ -180,4 +180,21 @@ trait HasAttributes
 
         return $attributes;
     }
+
+    /**
+     * Set a given attribute on the model.
+     *
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return mixed
+     */
+    public function setAttribute($key, $value)
+    {
+        //We want file name from file helper
+        if ( $value instanceof Admin\Core\Helpers\File ){
+            $value = $value->filename;
+        }
+
+        return parent::setAttribute($key, $value);
+    }
 }
