@@ -43,7 +43,7 @@ class FrontendEditor
             return $this->staticContent;
         }
 
-        return $this->staticContent = StaticContent::select(['id', 'key', 'image', 'url'])->get();
+        return $this->staticContent = StaticContent::select(['id', 'key', 'image', 'filesize', 'url'])->get();
     }
 
     public function findByKeyOrCreate($key)

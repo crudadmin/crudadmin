@@ -143,8 +143,6 @@ trait Uploadable
      */
     private function uploadFileFromLocal($file, $origFilename, $uploadPath, $field)
     {
-        \Admin::start();
-
         $filename = $origFilename;
 
         //If extension is available, we want mutate file name
@@ -177,16 +175,27 @@ trait Uploadable
 
     private function filename($path, $file)
     {
+        $extension = null;
+
         //If file exists and is not from server, when is from server make unique name
         if (method_exists($file, 'getClientOriginalName')) {
             $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         } else {
-            $filename = uniqid();
+            $pathinfo = @pathinfo(basename($file));
+            $filename = @$pathinfo['filename'] ?: uniqid();
+
+            if ( @$pathinfo['extension'] ){
+                $extension = $pathinfo['extension'];
+            }
         }
 
+        //Trim filename
         $filename = substr(str_slug($filename), 0, 40);
 
-        $extension = method_exists($file, 'getClientOriginalExtension') ? $file->getClientOriginalExtension() : false;
+        //If extension is from request
+        if ( method_exists($file, 'getClientOriginalExtension') ) {
+            $extension = $file->getClientOriginalExtension();
+        }
 
         //If filename exists, then add number prefix of file
         if ($extension && File::exists($path.'/'.$filename.'.'.$extension)) {
@@ -223,9 +232,10 @@ trait Uploadable
      *
      * @param  string     $field         field key
      * @param  string\UploadedFile     $file          file to upload/download from server
+     * @param  bool     $compression
      * @return object
      */
-    public function upload(string $field, $file)
+    public function upload(string $field, $file, $compression = true)
     {
         $uploadPath = $this->filePath($field);
 
@@ -260,7 +270,7 @@ trait Uploadable
         $filePath = $uploadPath.'/'.$filename;
 
         //Compress images
-        if (! $this->compressOriginalImage($filePath, $extension)) {
+        if ($compression == true && ! $this->compressOriginalImage($filePath, $extension)) {
             return false;
         }
 
