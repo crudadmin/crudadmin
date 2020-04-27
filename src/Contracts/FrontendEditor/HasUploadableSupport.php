@@ -51,7 +51,7 @@ trait HasUploadableSupport
      */
     public function getUploadableImagePath($key, array $sizes = null, $defaultImage = null)
     {
-        if ( ! $this->isActive() ){
+        if ( ! Admin::isEnabledFrontendEditor() ){
             return $defaultImage;
         }
 
