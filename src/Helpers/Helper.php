@@ -50,7 +50,7 @@ class Helper
         if (is_array($routes)) {
             $result = (in_array(self::currentRoute(), $routes) || in_array(self::currentRoute(true)[0], $routes));
         } else {
-            $result = ($routes == self::currentRoute() || $routes == self::currentRoute(true)[0]);
+            $result = ($routes == self::currentRoute() || $routes == @self::currentRoute(true)[0]);
         }
 
         if ($text == false) {
