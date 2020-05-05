@@ -511,6 +511,8 @@
             this.hasShowedError = true;
             this.$root.errorResponseLayer(response, null);
           }
+
+          console.error(response);
         });
       },
       destroyTimeout(){
@@ -535,14 +537,15 @@
           for ( var key in fields )
           {
             //Update filterBy for each model
-            if ( 'filterBy' in (model.fields[key]||{}) && model.fields[key].filterBy ){
+            if ( 'filterBy' in (model.fields[key]||{}) && (model.fields[key]||{}).filterBy ){
               this.$set('model.fields.'+key+'.filterBy', model.fields[key].filterBy);
-            } else if ( 'filterBy' in this.model.fields[key]||{} ){
+            } else if ( 'filterBy' in (this.model.fields[key]||{}) ){
               delete this.model.fields[key].filterBy;
             }
 
             //Update options
             if (
+              this.model.fields[key] &&
               'options' in this.model.fields[key]
               && (
                 typeof fields[key].options === 'string'
