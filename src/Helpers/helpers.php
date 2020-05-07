@@ -64,3 +64,16 @@ if ( ! function_exists('linkable') ) {
         return FrontendEditor::linkable(...func_get_args());
     }
 }
+
+/*
+ * Use given url, but in languages add language prefix
+ */
+if ( !function_exists('localeUrl') ) {
+    function localeUrl($path) {
+        if ( Localization::isValidSegment() ) {
+            return url(Localization::get()->getSlug().'/'.$path);
+        }
+
+        return url($path);
+    }
+}
