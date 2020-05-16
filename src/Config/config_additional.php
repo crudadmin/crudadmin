@@ -30,6 +30,8 @@ return [
         'app/Http/Middleware',
         'app/Mail',
         'app/Notifications',
+        'app/Model',
+        'app/Eloquent',
         'resources/views',
         'resources/assets/js',
         'resources/js',
