@@ -30,7 +30,9 @@ if (! function_exists('trim_end')) {
  */
 function base_or_relative_path($path)
 {
-    $path = $path[0] == '/' ? $path : base_path($path);
+    if ( substr($path, 0, strlen(base_path())) != base_path() ) {
+        $path = base_path($path);
+    }
 
     return trim_end($path, '/');
 }

@@ -351,6 +351,7 @@ trait AdminModelTrait
     {
         $string = $this->getValue($field);
 
+        $string = html_entity_decode($string);
         $string = strip_tags($string);
         $string = preg_replace("/(\n|\s|&nbsp;)+/u", ' ', $string);
         $string = trim($string, ' ');
