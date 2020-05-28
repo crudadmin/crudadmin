@@ -30,7 +30,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertHasValidationError(FieldsType::class, $fieldKeys)
 
                     //Check if custom component renders properly
-                    ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with empty value.')
+                    ->assertSeeInFragment('[data-field="custom"] p', 'This is my first custom component for field my custom field, with empty value.')
 
                     //Check if form values has been successfully filled
                     ->fillForm(FieldsType::class, $row)
@@ -38,17 +38,17 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Check if custom component is modified properly
                     //Also check if row events has been triggered properly
-                    ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with my custom value value.')
-                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'my custom value')
-                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'true')
+                    ->assertSeeInFragment('[data-field="custom"] p', 'This is my first custom component for field my custom field, with my custom value value.')
+                    ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'my custom value')
+                    ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'true')
 
                     //Check if form has been successfully saved
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
 
                     //Check if component values are reseted after new row has been created
-                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'no value')
-                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'no value')
+                    ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'no value')
+                    ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'no value')
 
                     //Check if form values has been successfully reseted after save and validation errors are gone
                     ->closeAlert()
@@ -63,8 +63,8 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsType::class, $row)
 
                     //Check if row events has been triggered on new row open
-                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'my custom value')
-                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'true')
+                    ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'my custom value')
+                    ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'true')
 
                     //Update row and check if has same values
                     ->fillForm(FieldsType::class, [
@@ -125,8 +125,8 @@ class ModelFieldsTypesTest extends BrowserTestCase
             'text' => 'This is my text example value',
             'editor' => '<p>This is my editor <strong>example</strong> value</p>',
             'select' => 'option a',
-            'integer' => '10',
-            'decimal' => '11.50',
+            'integer' => 10,
+            'decimal' => 11.51,
             'file' => 'image1.jpg',
             'password' => 'password_test',
             'date' => date('d.m.Y'),

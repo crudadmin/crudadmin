@@ -30,7 +30,12 @@ if (! function_exists('trim_end')) {
  */
 function base_or_relative_path($path)
 {
-    if ( substr($path, 0, strlen(base_path())) != base_path() ) {
+    //Check if is absolute path and does exists.
+    //Also we need check windows and unix support format, and also check if is not other than base path
+    if (
+        substr($path, 0, strlen(base_path())) != base_path()
+        && file_exists(base_path(dirname($path)))
+    ) {
         $path = base_path($path);
     }
 

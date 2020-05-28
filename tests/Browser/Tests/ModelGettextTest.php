@@ -25,9 +25,7 @@ class ModelGettextTest extends BrowserTestCase
     {
         $language = Language::where('slug', 'en')->first();
 
-        $mo_file = Gettext::getLocalePath('en_US', $language->poedit_mo);
-
-        $translates = Translations::fromMoFile($mo_file);
+        $translates = Translations::fromPoFile($language->poedit_po->basepath);
 
         return array_slice(PhpArray::generate($translates)['messages'][''], 1);
     }
@@ -38,6 +36,7 @@ class ModelGettextTest extends BrowserTestCase
         $excepted = [
             '%d car' => ['my %d yellow car', 'my %d red cars'],
             'Translate 2' => ['translated text'],
+            'Hello world' => [''],
             'title meta' => ['updated meta'],
         ];
 
@@ -54,6 +53,7 @@ class ModelGettextTest extends BrowserTestCase
 
             //Check if mo files has been successfully updated
             $translates = $this->getEnTranslates();
+
             $this->assertEquals($excepted, $translates);
 
             //Check if translates has been successfully updated without change
@@ -66,11 +66,24 @@ class ModelGettextTest extends BrowserTestCase
             $translates = $this->getEnTranslates();
             $this->assertEquals($excepted, $translates);
 
+            //Load first slovak translate
+            $browser->click('[data-id="1"] [data-button="gettext"]')
+                    ->waitForText(trans('admin::admin.gettext-update'))
+                    ->press(trans('admin::admin.gettext-save'))
+                    ->waitUntilMissing('.gettext-table .modal-body');
+
+            //Test en version
             $browser->visit('/en/?cars=2')
                     ->assertSee('Hello world')
                     ->assertSee('translated text')
                     ->assertSee('my 2 red cars')
                     ->assertSourceHas('<meta property="og:title" content="updated meta">');
+
+            //Test sk version
+            $browser->visit('/')->refresh()
+                    ->assertSee('Translate 2')
+                    ->assertSee('1 car')
+                    ->assertSourceHas('<meta property="og:title" content="title meta">');
         });
     }
 }

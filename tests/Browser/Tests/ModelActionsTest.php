@@ -68,8 +68,6 @@ class ModelActionsTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($article) {
             $browser->openModelPage(Article::class)
-
-                    //Check if is unpublished
                     ->click('[data-id="10"] [data-button="show"]')->pause(100)
                     ->assertSeeIn('.modal .modal-title', trans('admin::admin.row-info-n').' 10')
                     ->assertSeeIn('.modal .modal-body', trans('admin::admin.created-at').': '.$article->created_at->format('d.m.Y H:i'))

@@ -45,8 +45,8 @@ class Model1 extends AdminModel
             'update' => 'Upravujete záznam č. :id, :field1',
         ],
         'buttons' => [
-            'insert' => 'Vytvoriť nový záznam',
-            'create' => 'Odoslať nový záznam',
+            'create' => 'Vytvoriť nový záznam',
+            'insert' => 'Odoslať nový záznam',
             'update' => 'Upraviť starý záznam',
         ],
         'columns' => [

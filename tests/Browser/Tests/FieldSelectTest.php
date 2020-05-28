@@ -84,16 +84,15 @@ class FieldSelectTest extends BrowserTestCase
                     ->assertElementExists('[data-field="langs_id"] [data-add-relation-row]')
 
                     //Open relation model and create new row
-                    ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
+                    ->jsClick('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
                     ->fillForm(ModelLocalization::class, ['name' => 'new sk option value'], 'sk')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
 
                     //Update existing row
                     ->openRow(1, ModelLocalization::class)
                     ->fillForm(ModelLocalization::class, ['name' => 'updated existing sk row'], 'sk')
-                    ->saveForm()->closeAlert()->click('button[data-create-new-row]')
-
-                    ->click('.modal-header button.close')->pause(400) //need be duration, because of bug when changing language
+                    ->saveForm()->closeAlert()->jsClick('[data-form="model_localizations"] button[data-create-new-row]')
+                    ->jsClick('.modal-header button.close')->pause(400) //need be duration, because of bug when changing language
 
                     //Check if new created row is selected in select
                     ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'updated existing sk row'])
@@ -102,11 +101,10 @@ class FieldSelectTest extends BrowserTestCase
                     //On english language change check select options, then add english row and check new item in options
                     ->changeRowLanguage('en')
                     ->assertSelectValues(SelectType::class, 'langs_id', ['en option'])
-                    ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
+                    ->jsClick('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
                     ->fillForm(ModelLocalization::class, ['name' => 'new en option value'], 'en')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
                     ->click('.modal-header button.close')->pause(400) //need be duration, because of bug when changing language
-
                     ->assertSelectValues(SelectType::class, 'langs_id', ['new en option value', 'en option'])
 
                     //On changing language to slovak, check options

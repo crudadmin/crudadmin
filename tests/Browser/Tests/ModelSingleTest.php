@@ -22,6 +22,8 @@ class ModelSingleTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($row, $inParentRow) {
             $browser->openModelPage(SingleModel::class)
+                    //We need wait till editor will be loaded
+                    ->pause(100)
 
                     //Test create new single row
                     ->fillForm(SingleModel::class, $row)

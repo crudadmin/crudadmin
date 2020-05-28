@@ -120,7 +120,7 @@ class ModelGroupsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsGroup::class)
                     ->submitForm()
-                    ->waitForText(trans('validation.required'), 2)
+                    ->waitForElement('span.help-block', 2)
                     ->assertHasAttribute('li:contains("my tab 1")', 'has-error')
                     ->assertHasAttribute('li:contains("my tab 2")', 'has-error')
                     ->assertHasAttribute('li:contains("my tab 3")', 'has-error')
@@ -134,10 +134,10 @@ class ModelGroupsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsGroup::class)
                     ->submitForm()
-                    ->waitForText(trans('validation.required'), 2)
+                    ->waitForElement('span.help-block', 2)
 
                     //On click into input, groups error should be disabled
-                    ->click('input[name="field2"]')
+                    ->jsClick('input[name="field2"]')
                     ->assertHasNotAttribute('li:contains("my tab 1")', 'has-error')
 
                     //On click into tab, error should be disabled
@@ -173,7 +173,7 @@ class ModelGroupsTest extends BrowserTestCase
             $browser->openModelPage(FieldsGroup::class)
                     ->clickLink('my tab 4')
                     ->submitForm()
-                    ->waitForText(trans('validation.required'), 2)
+                    ->waitForElement('span.help-block', 2)
                     ->assertHasAttribute('li:contains("my tab 4")', 'has-error')
 
                     //Checl all tabs states on click into child tab

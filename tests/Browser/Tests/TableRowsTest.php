@@ -190,7 +190,7 @@ class TableRowsTest extends BrowserTestCase
 
             //Search by column
             $browser->click('[data-search-bar] button.dropdown-toggle')
-                    ->click('[data-search-bar] [data-field="score"] a')
+                    ->click('[data-search-bar] [data-field="score"]')
                     ->valueWithEvent('[data-search-bar] input[data-search-text]', 9)
                     ->waitUntilMissing('tr[data-id="7"]')->waitFor('tr[data-id="10"]') //wait until superman dissapear from previous search
                     ->assertColumnRowData(Article::class, 'name', ['spider-man']);
@@ -204,7 +204,7 @@ class TableRowsTest extends BrowserTestCase
             //Close interval and test searching by date
             $browser->click('[data-interval] button')
                     ->click('[data-search-bar] button.dropdown-toggle')
-                    ->click('[data-search-bar] [data-field="created_at"] a')
+                    ->click('[data-search-bar] [data-field="created_at"]')
                     ->click('[data-search-bar] input[data-search-date]')->pause(100)
                     ->clickDatePicker(date('16.m.Y'))
                     ->waitFor('tr[data-id="6"]') //wait for star is born will be loaded
@@ -230,14 +230,14 @@ class TableRowsTest extends BrowserTestCase
 
                     //Test select filter
                     ->click('[data-search-bar] button.dropdown-toggle')
-                    ->click('[data-search-bar] [data-field="type"] a')
+                    ->click('[data-search-bar] [data-field="type"]')
                     ->setChosenValue('[data-search-bar] [data-search-select]', 'moovie')
                     ->waitUntilMissing('tr[data-id="10"]') //wait until missing last item which wont be in search
                     ->assertColumnRowData(Tag::class, 'article_id', ['avengers', 'avengers', 'avengers', 'titanic'])
 
                     //Test belongsTo relation filter
                     ->click('[data-search-bar] button.dropdown-toggle')
-                    ->click('[data-search-bar] [data-field="article_id"] a')
+                    ->click('[data-search-bar] [data-field="article_id"]')
                     ->setChosenValue('[data-search-bar] [data-search-select]', 'avengers')
                     ->waitFor('tr[data-id="5"]')->waitUntilMissing('tr[data-id="1"]') //wait will blog row will be loaded
                     ->assertColumnRowData(Tag::class, 'type', ['blog', 'moovie', 'moovie', 'moovie']);

@@ -483,4 +483,13 @@ trait AdminBrowserAssertions
 
         return $this;
     }
+
+    public function assertSeeInFragment($element, $text)
+    {
+        $elements = $this->script('return $(\''.$element.':contains(\\\''.$text.'\\\')\').length');
+
+        PHPUnit::assertTrue($elements[0] > 0, 'Element ['.$element.'] is not visible.');
+
+        return $this;
+    }
 }

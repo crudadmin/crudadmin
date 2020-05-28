@@ -41,8 +41,8 @@ class ModelSettingsTest extends BrowserTestCase
                         'field2' => '<a href="#">Text</a>',
                         'field5' => 'my non existing colu...',
                     ])
-                    ->assertSeeIn('[data-table-rows] thead', 'Test field')
-                    ->assertSeeIn('[data-table-rows] thead', 'My imaginary column');
+                    ->assertSeeIn('[data-table-rows] thead', 'TEST FIELD')
+                    ->assertSeeIn('[data-table-rows] thead', 'MY IMAGINARY COLUMN');
         });
     }
 }

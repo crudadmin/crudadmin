@@ -17,6 +17,8 @@ class FieldsGroup extends AdminModel
      */
     protected $name = 'Fields groups & tabs';
 
+    protected $group = 'fields';
+
     /*
      * Automatic form and database generation
      * @name - field name

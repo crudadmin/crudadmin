@@ -92,8 +92,8 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Remove one item from file upload, and save form 2 times, because if something happens
                     //with missing file, it will be obvious after 2 form saves.
-                    ->jsClick('[data-field="file_multiple"] .chosen-choices li:contains(image3.jpg) a')->pause(300)
-                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()->pause(300)
+                    ->jsClick('[data-field="file_multiple"] .chosen-choices li:contains(image3.jpg) a')->pause(400)
+                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()->pause(400)
                     ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()
                     ->assertHasFormValues(FieldsTypesMultiple::class, $rowWithoutFile, null, true)
 

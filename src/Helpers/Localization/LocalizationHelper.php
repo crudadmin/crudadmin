@@ -211,8 +211,11 @@ class LocalizationHelper
             }
 
             //If language and translations data are present
-            if ($language && $language->getPoPath() && $language->getPoPath()->exists()) {
-                Gettext::setGettextPropertiesModel($language);
+            if ($language) {
+                if ( $language->getPoPath() && $language->getPoPath()->exists() ) {
+                    Gettext::setGettextPropertiesModel($language);
+                }
+
                 Gettext::setLocale($language->slug, $language->getPoPath());
             }
         }

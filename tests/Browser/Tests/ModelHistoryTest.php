@@ -96,6 +96,10 @@ class ModelHistoryTest extends BrowserTestCase
 
         ksort($row);
 
+        if ( isset($row['checkbox']) ) {
+            $row['checkbox'] = $row['checkbox'] ? 1 : 0;
+        }
+
         return [
             'id' => $id,
             'table' => (new History)->getTable(),

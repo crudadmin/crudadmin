@@ -494,7 +494,7 @@ class JSTranslations
         $translations->toPoFile($poPath);
 
         //If fresh generated storage po_file is same with existing po file in uploads folder
-        if ( @md5_file($poPath) === @md5_file($language->getPoPath()) ) {
+        if ( @md5_file($poPath) === @md5_file($language->getPoPath()->basepath) ) {
             return;
         }
 

@@ -89,7 +89,7 @@ class ModelRelationsTest extends BrowserTestCase
         $this->browse(function (DuskBrowser $browser) use ($articleRow) {
             $browser->openModelPage(Article::class)
                     //Click on related model and check given data
-                    ->click('[data-tabs][data-model="articles_comments"]')
+                    ->click('[data-tabs][data-model="articles_comments"] a')
 
                     //Add 2 related comments
                     ->fillForm(ArticlesComment::class, ['name' => 'new related comment'])->submitForm()->closeAlert()
@@ -99,9 +99,8 @@ class ModelRelationsTest extends BrowserTestCase
                     ->waitForElement('[data-tabs][data-model="articles_comments"]:contains("Comments (2)"):visible')
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (2)')
                     // ->assertColumnRowData(ArticlesComment::class, 'id', [2, 1])
-
                     //Open default tab
-                    ->jsClick('[data-tabs][data-model="articles"]:contains('.trans('admin::admin.general-tab').')')
+                    ->jsClick('[data-tabs][data-model="articles"] a:contains('.trans('admin::admin.general-tab').')')
 
                     //Open created related row, and test recursivity support
                     ->fillForm(Article::class, $articleRow)

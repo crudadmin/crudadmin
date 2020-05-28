@@ -96,13 +96,10 @@ class Gettext
      * @param  string  $locale
      * @param  string  $poPath
      */
-    public function setLocale($locale = null, $poPath)
+    public function setLocale($locale = null, $poPath = null)
     {
         //Regenerate mo files if pofile has been changed
-        if (
-            ! ($locale = $this->getLocale($locale))
-            || ($poTimestamp = $this->generateMoFile($locale, $poPath)) === false
-        ) {
+        if ( ! ($locale = $this->getLocale($locale)) ) {
             return false;
         }
 
@@ -116,8 +113,17 @@ class Gettext
             setlocale(LC_MESSAGES, $locale.'.UTF-8');
         }
         setlocale(LC_COLLATE, $locale.'.UTF-8');
-        bindtextdomain($poTimestamp, $this->getGettextPath());
-        textdomain($poTimestamp);
+
+        //Bind domains if are available
+        if ( $poPath && ($poTimestamp = $this->generateMoFile($locale, $poPath)) !== false) {
+            bindtextdomain($poTimestamp, $this->getGettextPath());
+            textdomain($poTimestamp);
+        }
+    }
+
+    public function resetLocale()
+    {
+
     }
 
     public function createLocale($locale)

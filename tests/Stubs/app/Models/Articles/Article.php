@@ -34,4 +34,8 @@ class Article extends AdminModel
             'image' => 'name:Image|type:file|image',
         ];
     }
+
+    protected $settings = [
+        'dates' => true,
+    ];
 }
