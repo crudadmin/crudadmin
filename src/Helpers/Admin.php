@@ -123,9 +123,9 @@ class Admin extends AdminCore
      */
     protected function getPackageVersion($packageName)
     {
-        $composer_file = base_path('composer.lock');
+        $composerFile = base_path('composer.lock');
 
-        if (file_exists($composer_file)) {
+        if (file_exists($composerFile)) {
             if (! ($data = file_get_contents(base_path('composer.lock')))) {
                 return false;
             }
@@ -162,6 +162,10 @@ class Admin extends AdminCore
      */
     public function getResourcesVersion()
     {
+        if ($this->isTesting()) {
+            return 'dev-test';
+        }
+
         return $this->getPackageVersion('crudadmin/resources') ?: 'dev-master';
     }
 

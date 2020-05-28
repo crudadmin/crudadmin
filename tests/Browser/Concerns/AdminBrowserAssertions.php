@@ -324,10 +324,14 @@ trait AdminBrowserAssertions
             return $(this).attr('class')
         })");
 
+
+        $tableColumns = array_map(function ($item) {
+            return 'th-'.$item;
+        }, array_values(array_merge($excepted, ['options-buttons'])));
+        $tableColumns = array_merge(['select-row-checkbox'], $tableColumns);
+
         PHPUnit::assertEquals(
-            $columns[0], array_map(function ($item) {
-                return 'th-'.$item;
-            }, array_values(array_merge($excepted, ['options-buttons']))),
+            $columns[0], $tableColumns,
             'Table ['.$model->getTable().'] does not match excepted columns list'
         );
 

@@ -57,18 +57,6 @@ class TableRowsTest extends BrowserTestCase
     }
 
     /** @test */
-    public function test_small_grid_size()
-    {
-        //Create 100 articles
-        Model3::create(['field1' => 'test value']);
-
-        $this->browse(function (DuskBrowser $browser) {
-            $browser->openModelPage(Model3::class)
-                    ->assertHasClass('li[data-size="small"]', 'active');
-        });
-    }
-
-    /** @test */
     public function test_available_columns()
     {
         //Create 100 articles
@@ -289,7 +277,8 @@ class TableRowsTest extends BrowserTestCase
                     ->changeRowsLimit(5)->pause(100);
 
             $paginationItems = $browser->script('return $("[data-pagination] li:not([data-pagination-next]):not([data-pagination-prev])")')[0];
-            $this->assertCount(15, $paginationItems);
+
+            $this->assertCount(12, $paginationItems);
         });
     }
 
