@@ -38,26 +38,27 @@ class ImageController extends Controller
      */
     public function resizeImage($a = null, $b = null, $c = null, $d = null, $e = null)
     {
-        $cacheFilePath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
+        $filepath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
 
-        $temporary_path = $cacheFilePath . '.temp';
+        $temporary_path = $filepath . '.temp';
 
-        //If not exists any form of file
-        if (
-            ! file_exists($cacheFilePath) && ! file_exists($temporary_path)
-            || ! file_exists($temporary_path)
-        ) {
+        try {
+            //Get resizing information from cache
+            $cache = @json_decode(@file_get_contents($temporary_path), true);
+
+            //If not exists any form of file
+            if ( !@$cache['original_path'] || ! file_exists($cache['original_path']) || ! file_exists($temporary_path) ) {
+                abort(404);
+            }
+
+            //Resize image
+            $file = (new File($cache['original_path']))->image($cache['mutators'], null, true, true);
+
+            //Remove temporary file with settings
+            @unlink($temporary_path);
+        } catch (\Exception $e) {
             abort(404);
         }
-
-        //Get resizing information from cache
-        $cache = json_decode(file_get_contents($temporary_path), true);
-
-        //Resize image
-        $file = (new File($cache['original_path']))->image($cache['mutators'], null, true, true);
-
-        //Remove temporary file with settings
-        @unlink($temporary_path);
 
         //Return resized image response
         return $file->response();
