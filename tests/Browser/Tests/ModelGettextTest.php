@@ -42,6 +42,7 @@ class ModelGettextTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($excepted) {
             $browser->openModelPage(Language::class)
+                    ->resize(1920, 1080)
                     ->click('[data-id="2"] [data-button="gettext"]')
                     ->waitForText(trans('admin::admin.gettext-update'))
                     ->valueWithEvent('table td:contains("title meta") + td textarea', 'updated meta')
