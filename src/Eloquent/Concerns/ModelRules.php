@@ -69,16 +69,16 @@ trait ModelRules
         }
 
         //If is not admin interface allowed, skip rules
-        if (Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === false) {
-            return false;
+        if (Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === true) {
+            return true;
         }
 
         //If is not frontend interface allowed, skip rules
-        if (Admin::isFrontend() && (! property_exists($rule, 'frontend') || $rule->frontend === false)) {
-            return false;
+        if (Admin::isFrontend() && property_exists($rule, 'frontend') && $rule->frontend === true) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     private function isDeletingRow()
