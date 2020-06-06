@@ -1,6 +1,16 @@
 <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
 <script src="<?php echo admin_asset('/js/Gettextable.js') ?>"></script>
 
+<?php if ( count($_visibleRoutes = EditorMode::getVisibleRoutes()) > 0 ) { ?>
+<script type="text/javascript">
+window.CAVisibleRoutes = {
+<?php foreach ($_visibleRoutes as $_action => $_url): ?>
+    '<?php echo encryptText($_action) ?>': '<?php echo $_url ?>',
+<?php endforeach ?>
+}
+</script>
+<?php } ?>
+
 <?php if ( (EditorMode::isActive() || FrontendEditor::isActive()) ){ ?>
 <script>
 window.CAEditorConfig = {

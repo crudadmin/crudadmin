@@ -5,6 +5,7 @@ namespace Admin\Providers;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use EditorMode;
 
 class SEOServiceProvider extends ServiceProvider
 {
@@ -56,6 +57,16 @@ class SEOServiceProvider extends ServiceProvider
     {
         Route::macro('seo', function($param = null){
             $this->action['seo'] = $param ?: [];
+
+            return $this;
+        });
+
+        Route::macro('visible', function($param = null){
+            $url = url($this->uri);
+            $controller = str_replace($this->action['namespace'], '', $this->action['controller']);
+            $controller = ltrim($controller, '\\');
+
+            EditorMode::addVisibleRoute($controller, $url);
 
             return $this;
         });

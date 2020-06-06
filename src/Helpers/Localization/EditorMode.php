@@ -9,6 +9,8 @@ class EditorMode
 {
     private $sessionEditorKey = 'CAEditor.state';
 
+    protected $visibleRoutes = [];
+
     /**
      * Is enabled and allowed
      *
@@ -42,5 +44,24 @@ class EditorMode
     {
         session()->put($this->sessionEditorKey, $state);
         session()->save();
+    }
+
+    /**
+     * Add visible routes in view templates
+     *
+     * @param  string  $action
+     * @param  string  $url
+     */
+    public function addVisibleRoute($action, $url)
+    {
+        $this->visibleRoutes[$action] = $url;
+    }
+
+    /*
+     * Returns visible routes in view templates
+     */
+    public function getVisibleRoutes()
+    {
+        return $this->visibleRoutes ?: [];
     }
 }

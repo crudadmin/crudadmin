@@ -48,7 +48,7 @@ function base_or_relative_path($path)
 if ( ! function_exists('encryptText') ) {
     function encryptText($text)
     {
-        return base64_encode('XYQ'.base64_encode($text));
+        return substr(base64_encode('XYQ'.base64_encode($text)), 0, -2);
     }
 }
 
