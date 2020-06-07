@@ -40,6 +40,12 @@ class FrontendEditorController extends Controller
         //We want delete previous image
         $imageRow->deleteFiles($fieldKey, $row[$fieldKey]);
 
+        //We need reset filesize for static content, when new image is uploaded
+        //because images with defined file size are only used from assets
+        if ( $imageRow instanceof StaticContent ) {
+            $imageRow->filesize = null;
+        }
+
         $imageRow->update([ $fieldKey => $row[$fieldKey] ]);
 
         //Try return resized image
