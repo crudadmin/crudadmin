@@ -34,6 +34,7 @@ trait Gettextable
     {
         //Update gettext files...
         if ($this->hasGettextSupport()) {
+            Gettext::setGettextPropertiesModel($this);
             Gettext::createLocale($row->slug);
         }
     }
@@ -42,6 +43,7 @@ trait Gettextable
     {
         //Update gettext files...
         if ($this->hasGettextSupport()) {
+            Gettext::setGettextPropertiesModel($this);
             Gettext::generateMoFile($row->slug, $row->getPoPath());
         }
     }
