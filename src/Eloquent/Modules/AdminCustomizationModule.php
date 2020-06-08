@@ -345,6 +345,18 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                     ],
                 ],
             ],
+            'booking' => [
+                'icon' => 'fa-calendar-check',
+                'settings' => [
+                    'title' => [
+                        'create' => $this->t(_('Nová rezervácia')),
+                        'update' => $this->t(_('Upravujete rezerváciu č. :id')),
+                    ],
+                    'buttons' => [
+                        'create' => $this->t(_('Nová rezervácia')),
+                    ],
+                ],
+            ],
             'lector' => [
                 'icon' => 'fa-user-graduate',
                 'settings' => [
