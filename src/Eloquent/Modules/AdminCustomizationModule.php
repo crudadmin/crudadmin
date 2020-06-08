@@ -461,11 +461,19 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                     continue;
                 }
 
-                if ( array_get($response, $key) == null ) {
+                $actualValue = array_get($response, $key);
+
+                if ( !$actualValue || is_array($actualValue) ) {
+                    //Merge defined values with default values
+                    if ( is_array($actualValue) ){
+                        $value = array_merge($value, $actualValue);
+                    }
+
                     array_set($response, $key, $value);
                 }
             }
         }
+
 
         return $response;
     }
