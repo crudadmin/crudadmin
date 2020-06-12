@@ -4,8 +4,9 @@ namespace Admin\Eloquent\Concerns;
 
 use Admin;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use DateTimeInterface;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 trait HasAttributes
 {
@@ -196,5 +197,18 @@ trait HasAttributes
         }
 
         return parent::setAttribute($key, $value);
+    }
+
+    /**
+     * Get the model's raw original attribute values.
+     * Backward support for Laravel 6.0
+     *
+     * @param  string|null  $key
+     * @param  mixed  $default
+     * @return mixed|array
+     */
+    public function getRawOriginal($key = null, $default = null)
+    {
+        return Arr::get($this->original, $key, $default);
     }
 }
