@@ -1,7 +1,11 @@
 <template>
   <div class="box">
     <div class="box-header box-limit">
-      <h3 class="box-title">{{ title }} <small>({{ rows.count }})</small></h3>
+      <h3 class="box-title">
+        {{ title }}
+        <small>({{ rows.count }})</small>
+        <a data-toggle="tooltip" title="Automatická synchronizácia záznamov v tabuľke je vypnutá" class="box-header--synchronize" @click="loadRows(true)" v-if="isEnabledAutoSync == false"><i class="fa fa-refresh"></i> Synchronizácia vypnutá</a>
+      </h3>
 
       <div class="form-group pull-right" v-if="isPaginationEnabled" :title="trans('rows-count')">
         <select @change="changeLimit" class="form-control" v-model="pagination.limit">
@@ -261,6 +265,15 @@
     },
 
     computed: {
+      isEnabledAutoSync(){
+          var limit = this.isPaginationEnabled ? this.pagination.limit : 0,
+              refreshingRowsLimit = 50;
+
+          return !(
+              this.rows.count > 0 && this.model.maximum === 1 ||
+              this.rows.count > refreshingRowsLimit && parseInt(limit) > refreshingRowsLimit
+          );
+      },
       availableButtons(){
         var buttons = {};
 
@@ -522,10 +535,8 @@
       initTimeout(indicator, force){
         this.destroyTimeout();
 
-        var limit = this.isPaginationEnabled ? this.pagination.limit : 0;
-
         //Disable autorefreshing when is one row
-        if ( (this.rows.count > 0 && this.model.maximum === 1 || this.rows.count > 50 && parseInt(limit) > 50) && force !== true )
+        if ( this.isEnabledAutoSync == false && force !== true )
           return;
 
         this.updateTimeout = setTimeout(function(){
