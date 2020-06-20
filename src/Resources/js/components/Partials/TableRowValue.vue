@@ -1,5 +1,5 @@
 <template>
-  <div v-if="fieldValue != null">
+  <div v-if="hasFieldValue">
 
     <!-- File -->
     <div v-if="isFile(field)" class="filesList">
@@ -18,15 +18,26 @@
 import File from '../Partials/File.vue';
 
 export default {
-    props : ['model', 'item', 'field', 'name', 'image'],
+    props : ['model', 'item', 'field', 'name', 'image', 'columns', 'settings'],
 
     components : { File },
 
+    /*
+     * Performance tests
+     */
+    // created(){
+    //     this.$a = window.startTest();
+    // },
+
+    // ready(){
+    //     window.endTest(this.$a);
+    // },
+
     filters: {
       stringLimit(string, key){
-        var limit = this.getFieldLimit(key, Object.keys(this.$parent.columns).length < 5 ? 40 : 20);
+        var limit = this.getFieldLimit(key, Object.keys(this.columns).length < 5 ? 40 : 20);
 
-        if ( limit != 0 && string.length > limit && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) !== false )
+        if ( limit != 0 && string.length > limit && this.settings.encode !== false )
           return string.substr(0, limit) + '...';
 
         return string;
@@ -35,21 +46,21 @@ export default {
         var isReal = this.isRealField(key);
 
         //Check if column can be encoded
-        if ( isReal && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) == true )
+        if ( isReal && this.settings.encode == true )
         {
           string = $(document.createElement('div')).text(string).html();
         }
 
-        if ( is_title && this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
+        if ( is_title && this.settings.encode === false )
           return '';
 
-        if ( this.isRealField(key) && this.model.fields[key].type == 'text' && parseInt(this.model.fields[key].limit) === 0)
+        if ( this.isRealField(key) && this.settings.field.type == 'text' && parseInt(this.settings.field.limit) === 0)
         {
           return string.replace(/\n/g, '<br>');
         }
 
         //Is phone number
-        if ( this.isRealField(key) && this.model.fields[key].type == 'string' && ('phone' in this.model.fields[key] || 'phone_link' in this.model.fields[key]) )
+        if ( this.isRealField(key) && this.settings.field.type == 'string' && ('phone' in this.settings.field || 'phone_link' in this.settings.field) )
         {
           return '<a href="tel:'+string+'">'+string+'</a>';
         }
@@ -57,7 +68,7 @@ export default {
         return string;
       },
       encodedTitle(string, key){
-        if ( this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true) === false )
+        if ( this.settings.encode === false )
           return '';
 
         return string;
@@ -65,9 +76,12 @@ export default {
     },
 
     computed: {
+      hasFieldValue(){
+          return _.isNil(this.fieldValue) === false;
+      },
       fieldValue()
       {
-        var field = this.field in this.model.fields ? this.model.fields[this.field] : null,
+        var field = this.settings.field,
             row = this.item,
             rowValue = this.field in row ? this.getMutatedValue(row[this.field], field) : '';
 
@@ -132,8 +146,8 @@ export default {
           }
         }
 
-        var add_before = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_before'),
-            add_after = this.$root.getModelProperty(this.model, 'settings.columns.'+this.field+'.add_after');
+        var add_before = this.settings.add_before,
+            add_after = this.settings.add_after;
 
         //If is object
         if ( typeof rowValue == 'object' )
@@ -156,7 +170,7 @@ export default {
         if ( field && 'locale' in field )
         {
           //Get default language
-          var dslug = this.$root.languages[0].slug;
+          var dslug = this.settings.default_slug;
 
           if ( value && typeof value === 'object' )
           {
@@ -183,23 +197,22 @@ export default {
         if ( value === 0 )
           return 0;
 
-        return value||'';
+        return value;
       },
       getLanguageSelectOptions(array, model){
-        model = this.$root.models_list[model];
+        model = this.settings.models_list[model];
 
         var filter =  model && model.localization ? {
           language_id : this.$root.language_id,
         } : {};
 
-        return this.$root.languageOptions(array, this.model.fields[this.field], filter, false);
+        return this.$root.languageOptions(array, this.settings.field, filter, false);
       },
       isFile(field){
-
         if ( !(field in this.model.fields) )
           return false;
 
-        if ( this.model.fields[field].type == 'file' && this.isEncodedValue(field) )
+        if ( this.settings.field.type == 'file' && this.isEncodedValue(field) )
           return true;
 
         return false;
@@ -225,19 +238,18 @@ export default {
 
         if ( this.isRealField(key) )
         {
-          var field = this.model.fields[key];
+          var field = this.settings.field;
 
           return 'limit' in field ? field.limit : defaultLimit;
         } else {
-          return this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.limit', defaultLimit);
+          return this.settings.limit == 0 ? 0 : (this.settings.limit||defaultLimit);
         }
       },
       trans(key){
         return this.$root.trans(key);
       },
-      isEncodedValue(key)
-      {
-        return this.$root.getModelProperty(this.model, 'settings.columns.'+key+'.encode', true);
+      isEncodedValue(key) {
+        return this.settings.encode;
       }
     }
 }

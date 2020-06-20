@@ -209,22 +209,38 @@
                     },
                     //Check specifics property in model
                     getModelProperty(model, key, value){
-                        var path = key.split('.');
+                        var path = key.split('.'),
+                            obj = model;
 
-                        if ( ! model )
-                            return null;
-
-                        for ( var i = 0; i < path.length; i++ )
-                        {
-                            if ( ! ( path[i] in model ) )
-                            {
-                                return value ? value : null;
-                            }
-
-                            model = model[path[i]];
+                        if ( !model._settings ) {
+                            model._settings = {};
                         }
 
-                        return model;
+                        //Return from cache
+                        if ( key in model._settings ) {
+                            obj = model._settings[key];
+                        }
+
+                        //Find data in object
+                        else {
+                            for ( var i = 0; i < path.length; i++ ) {
+                                if ( ! ( path[i] in obj ) ) {
+                                    obj = undefined;
+                                    break;
+                                }
+
+                                obj = obj[path[i]];
+                            }
+                        }
+
+                        //Save into cache
+                        model._settings[key] = obj;
+
+                        if ( obj === undefined ) {
+                            return !_.isNil(value) ? value : null
+                        }
+
+                        return obj;
                     },
                     /*
                      * Get translates

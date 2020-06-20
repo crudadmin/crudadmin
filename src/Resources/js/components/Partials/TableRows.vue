@@ -24,7 +24,15 @@
           </td>
 
           <td v-for="(field, name) in columns" @click="checkRow(item.id, field)" v-bind:class="['td-'+field, { image_field : isImageField(field) } ]">
-            <table-row-value :field="field" :name="name" :item="item" :model="model" :image="isImageField(field)"></table-row-value>
+            <table-row-value
+              :settings="getCachableColumnsSettings(field)"
+              :columns="columns"
+              :field="field"
+              :name="name"
+              :item="item"
+              :model="model"
+              :image="isImageField(field)">
+            </table-row-value>
           </td>
 
           <td class="buttons-options" v-bind:class="[ 'additional-' + buttonsCount(item) ]">
@@ -239,6 +247,30 @@
       },
 
       methods: {
+        /*
+         * We need cache all settings for columns, for better performance
+         */
+        getCachableColumnsSettings(field){
+            if ( ! this._cacheColumnSettings ) {
+                this._cacheColumnSettings = {};
+            }
+
+            if ( field in this._cacheColumnSettings ){
+                return this._cacheColumnSettings[field];
+            }
+
+            var settings = {
+                encode : this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.encode', true),
+                add_before : this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.add_before'),
+                add_after : this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.add_after'),
+                field : this.model.fields[field],
+                limit : this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.limit'),
+                default_slug : this.$root.languages[0].slug,
+                models_list : this.$root.models_list,
+            };
+
+            return this._cacheColumnSettings[field] = settings;
+        },
         toggleAllCheckboxes(){
           var ids = this.rows.data.map(item => item.id);
 
