@@ -10,8 +10,8 @@
     ],
     "require": {
         "php": ">=7.1",
-        "crudadmin/framework": "^3.0.21|dev-3.0-dev",
-        "crudadmin/resources" : "^3.0.6|dev-3.0-dev",
+        "crudadmin/framework": "^3.0.51",
+        "crudadmin/resources" : "^3.0.6",
         "laravel/framework": "^5.4|^6.0|^7.0",
         "laravel/ui": "^1.0|^2.0",
         "gettext/gettext": "^4.6"
