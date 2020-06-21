@@ -63,7 +63,11 @@ class AdminRows
     private function getDateFormat($column, $value)
     {
         try {
-            return Carbon::createFromFormat($this->model->getField($column)['date_format'] ?: 'd.m.Y', $value);
+            $field = $this->model->getField($column);
+
+            $fromFormat = (isset($field['date_format']) ? $field['date_format'] : '') ?: 'd.m.Y';
+
+            return Carbon::createFromFormat($fromFormat, $value);
         } catch (\Exception $e) {
             return;
         }

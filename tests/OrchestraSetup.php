@@ -51,8 +51,9 @@ trait OrchestraSetup
      */
     protected function setAdminEnvironmentSetUp($app)
     {
-        //Bind app path
-        $app['path'] = $this->getStubPath('app');
+        //Bind app path, BECAUSE we does not want use
+        //app directory in orchestra vendor location... We want use Stub folder
+        $app->useAppPath($this->getStubPath('app'));
 
         $app['config']->set('app.debug', true);
 
@@ -63,7 +64,6 @@ trait OrchestraSetup
         // Rewrite default user model
         $app['config']->set('auth.providers.users.model', User::class);
 
-        // Setup default database to use sqlite :memory:
         $app['config']->set('admin.app_namespace', 'Admin\Tests\App');
 
         //Add submenu tree settings
