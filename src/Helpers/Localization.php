@@ -8,6 +8,7 @@ use Admin\Helpers\Localization\LocalizationInterface;
 use Admin\Models\Language;
 use Gettext;
 use Illuminate\Support\Collection;
+use Admin\Helpers\File;
 
 class Localization extends LocalizationHelper implements LocalizationInterface
 {
@@ -54,7 +55,7 @@ class Localization extends LocalizationHelper implements LocalizationInterface
             $this->isActive() &&
             app()->runningInConsole() === false
             && \Admin::isAdmin() === false
-            && $segment != 'uploads'
+            && $segment != File::getUploadsDirectory()
         );
     }
 

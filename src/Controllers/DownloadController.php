@@ -20,7 +20,7 @@ class DownloadController extends Controller
 
         $file = File::adminModelFile($model, $field, $file);
 
-        $publicPath = public_path('uploads');
+        $publicPath = public_path(File::getUploadsDirectory());
         $realPath = dirname(realpath($file->basepath));
 
         //Alow download only from uploads folder

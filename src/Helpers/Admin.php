@@ -240,7 +240,7 @@ class Admin extends AdminCore
     {
         $gitignore = "*\n!.gitignore";
 
-        foreach ([public_path(self::getAdminAssetsPath()), public_path('uploads')] as $dir) {
+        foreach ([public_path(self::getAdminAssetsPath()), public_path(File::getUploadsDirectory())] as $dir) {
             File::makeDirs($dir);
 
             file_put_contents($dir.'/.gitignore', $gitignore);

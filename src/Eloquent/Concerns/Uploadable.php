@@ -27,7 +27,7 @@ trait Uploadable
      */
     public function filePath($key, $file = null, $relative = false)
     {
-        $directory = 'uploads/'.$this->getTable().'/'.$key;
+        $directory = AdminFile::getUploadsDirectory().'/'.$this->getTable().'/'.$key;
 
         $path = $relative ? $directory : public_path($directory);
 

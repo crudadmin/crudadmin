@@ -4,6 +4,7 @@ namespace Admin\Helpers;
 
 use Image;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Admin\Helpers\File;
 
 class ImageCompressor
 {
@@ -132,7 +133,7 @@ class ImageCompressor
      */
     public function getCompressedListPath()
     {
-        return public_path('uploads/.compressed');
+        return public_path(File::getUploadsDirectory().'/.compressed');
     }
 
     /*
@@ -140,7 +141,7 @@ class ImageCompressor
      */
     public function addCompressedPath($sourcePath, $destPath, $origSize)
     {
-        $sourcePath = str_replace(public_path('uploads/'), '', $sourcePath);
+        $sourcePath = str_replace(public_path(File::getUploadsDirectory().'/'), '', $sourcePath);
 
         @file_put_contents($this->getCompressedListPath(), $sourcePath.':'.$origSize."\n", FILE_APPEND);
     }
@@ -151,7 +152,7 @@ class ImageCompressor
     public function removeCompressedPath($sourcePath)
     {
         $compressed_path = $this->getCompressedListPath();
-        $sourcePath = str_replace(public_path('uploads/'), '', $sourcePath);
+        $sourcePath = str_replace(public_path(File::getUploadsDirectory().'/'), '', $sourcePath);
 
         $data = @file_get_contents($compressed_path);
         $data = str_replace($sourcePath.':', '-:', $data);

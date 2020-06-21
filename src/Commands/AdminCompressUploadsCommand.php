@@ -43,7 +43,7 @@ class AdminCompressUploadsCommand extends Command
      */
     private function getUploadsPath()
     {
-        return public_path('uploads');
+        return public_path(File::getUploadsDirectory());
     }
 
     /*

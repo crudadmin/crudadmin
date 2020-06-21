@@ -14,8 +14,8 @@
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
 
 //Image thumbnails
-Route::get('/uploads/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
-Route::get('/uploads/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
+Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
+Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
 
 //Gettext js translates
 Route::get('/js/ca-translates.js', 'GettextController@index');

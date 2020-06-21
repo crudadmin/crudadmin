@@ -35,25 +35,25 @@ class ImageController extends Controller
     {
         $cacheFilePath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
 
-        $temporary_path = $cacheFilePath.'.temp';
+        $temporaryPath = File::getTemporaryFilename($cacheFilePath);
 
         //If does not exists cache path, but also does not exists cached image already
         //But alsot if cached image exists, and temorary path does not exists
         if (
-            ! file_exists($cacheFilePath) && ! file_exists($temporary_path)
-            || ! file_exists($temporary_path)
+            ! file_exists($cacheFilePath) && ! file_exists($temporaryPath)
+            || ! file_exists($temporaryPath)
         ) {
             abort(404);
         }
 
         //Get resizing information from cache
-        $cache = json_decode(file_get_contents($temporary_path), true);
+        $cache = json_decode(file_get_contents($temporaryPath), true);
 
         //Resize image
-        $file = (new File($cache['original_path']))->image($cache['mutators'], null, true, true);
+        $file = (new File(public_path($cache['original_path'])))->image($cache['mutators'], null, true, true);
 
         //Remove temporary file with settings
-        @unlink($temporary_path);
+        @unlink($temporaryPath);
 
         //Return resized image response
         return $file->response();
