@@ -6,6 +6,7 @@ use Ajax;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Admin\Eloquent\AdminModel;
+use Admin;
 
 class AdminRows
 {
@@ -201,7 +202,17 @@ class AdminRows
     private function getNamesBuilder($relation, $columns = [])
     {
         if (array_key_exists(1, $relation) && count($columns) > 1) {
-            return $this->model->getRelationshipNameBuilder($relation[1]);
+            $model = Admin::getModelByTable($relation[0]);
+
+            $relationColumns = $this->model->getRelationshipNameBuilder($relation[1]);
+
+            return array_filter($relationColumns, function($column) use ($model) {
+                if ( in_array($column, ['id', $model->getKeyName()]) ) {
+                    return true;
+                }
+
+                return $model->getField($column) ? true : false;
+            });
         } else {
             return ['id'];
         }
@@ -418,7 +429,7 @@ class AdminRows
                     }
 
                     //Search in rows
-                    $this->checkForSearching($query, $this->model);
+                    $this->checkForSearching($query);
 
                     //Paginate rows
                     if ($id == false) {
