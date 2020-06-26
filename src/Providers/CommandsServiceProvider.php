@@ -37,6 +37,8 @@ class CommandsServiceProvider extends ServiceProvider
 
         $this->app->bind('gogol::admin.dev', \Admin\Commands\AdminDevelopmentCommand::class);
 
+        $this->app->bind('gogol::admin.clean', \Admin\Commands\AdminCleanUploadsCommand::class);
+
         $this->commands([
             'gogol::admin.install',
             'gogol::admin.button',
@@ -48,6 +50,7 @@ class CommandsServiceProvider extends ServiceProvider
             'gogol::admin.compress',
             'gogol::admin.queue',
             'gogol::admin.dev',
+            'gogol::admin.clean',
         ]);
     }
 
