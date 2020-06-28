@@ -16,6 +16,7 @@
       </thead>
       <tbody data-model="{{ model.slug }}">
         <tr v-for="(key, item) in rowsdata" :data-index="item.id" v-drag-and-drop drag-start="beforeUpdateOrder" drag-end="endDraggind" drop="updateOrder">
+          <td class="checkbox-td" v-if="multipleCheckbox">
             <div class="checkbox-box" @click="checkRow(item.id)">
               <input type="checkbox" :checked="checked.indexOf(item.id) > -1">
               <span class="checkmark"></span>
