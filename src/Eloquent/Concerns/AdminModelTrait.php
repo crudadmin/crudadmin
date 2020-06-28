@@ -8,6 +8,7 @@ use Admin\Helpers\AdminCollection;
 use Carbon\Carbon;
 use Fields;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 trait AdminModelTrait
 {
@@ -273,6 +274,33 @@ trait AdminModelTrait
                 $query->whereNull($this->getForeignColumn($this->getTable()));
             }
         }
+
+        //Use custom scopes for admin rows
+        if ( is_array($scopes = request('scopes')) && count($scopes) ) {
+            foreach ($scopes as $scope => $attributes) {
+                if ( method_exists($this, 'scope'.$scope) ){
+                    $params = explode(';', $attributes);
+
+                    $query->{$scope}(...$params);
+                }
+            }
+        }
+    }
+
+    public function scopeFilterByParentField($query, $parentTable, $fieldKey, $id)
+    {
+        $model = Admin::getModelByTable($parentTable);
+        $field = $model->getField($fieldKey);
+        $relationType = isset($field['belongsToMany']) ? 'belongsToMany' : 'belongsTo';
+
+        $relationProperties = $model->getRelationProperty($fieldKey, $relationType);
+
+        $query->whereExists(function($query) use ($relationProperties, $id) {
+            $query->select(DB::raw(1))
+                  ->from($relationProperties[3])
+                  ->whereRaw($relationProperties[3].'.'.$relationProperties[7].'='.$relationProperties[0].'.id')
+                  ->where($relationProperties[6], $id);
+        });
     }
 
     /**
