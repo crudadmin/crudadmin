@@ -15,8 +15,7 @@
         </tr>
       </thead>
       <tbody data-model="{{ model.slug }}">
-        <tr v-for="(key, item) in rowsdata" :data-index="item.id" v-drag-and-drop drag-start="beforeUpdateOrder" drop="updateOrder">
-          <td class="checkbox-td" v-if="multipleCheckbox">
+        <tr v-for="(key, item) in rowsdata" :data-index="item.id" v-drag-and-drop drag-start="beforeUpdateOrder" drag-end="endDraggind" drop="updateOrder">
             <div class="checkbox-box" @click="checkRow(item.id)">
               <input type="checkbox" :checked="checked.indexOf(item.id) > -1">
               <span class="checkmark"></span>
@@ -390,8 +389,11 @@
         },
         beforeUpdateOrder(dragged){
           this.$parent.destroyTimeout();
-
           this.dragging = true;
+        },
+        endDraggind(){
+          //Disable sorting when is used sorting columns
+          this.enableDraggind();
         },
         enableDraggind(){
           this.$parent.initTimeout(false);
@@ -399,8 +401,7 @@
         },
         updateOrder(dragged, dropped){
           //Disable sorting when is used sorting columns
-          if ( this.orderby[0] != '_order' )
-          {
+          if ( this.orderby[0] != '_order' ) {
             this.enableDraggind();
             return;
           }
