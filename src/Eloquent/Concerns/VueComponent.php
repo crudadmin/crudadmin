@@ -12,34 +12,40 @@ trait VueComponent
     /*
      * Return parsed field component, or multiple components
      */
-    public function getFieldsComponents($initial_request = false)
+    public function getFieldsComponents($initialRequest = false)
     {
         $fields = $this->getFields();
 
         $components = [];
 
         foreach ($fields as $key => $field) {
-            if (! array_key_exists('component', $field)) {
-                continue;
-            }
-
-            $componentsNames = explode(',', $field['component']);
-
-            foreach ($componentsNames as $name) {
-                if (! ($path = $this->getComponentRealPath($name))) {
-                    //Disable throw error on initial admin boot request
-                    if ($initial_request === true) {
-                        continue;
-                    }
-
-                    Ajax::error(sprintf(trans('admin::admin.component-missing'), $name, $key), null, null, 500);
-                }
-
-                $components[strtolower($name)] = $this->renderVuejsComponent($path);
-            }
+            $this->importComponentFromAttribute($initialRequest, 'component', $key, $field, $components);
+            $this->importComponentFromAttribute($initialRequest, 'sub_component', $key, $field, $components);
         }
 
         return $components;
+    }
+
+    private function importComponentFromAttribute($initialRequest, $attribute, $key, $field, &$components)
+    {
+        if (! array_key_exists($attribute, $field)) {
+            return;
+        }
+
+        $componentsNames = explode(',', $field[$attribute]);
+
+        foreach ($componentsNames as $name) {
+            if (! ($path = $this->getComponentRealPath($name))) {
+                //Disable throw error on initial admin boot request
+                if ($initialRequest === true) {
+                    return;
+                }
+
+                Ajax::error(sprintf(trans('admin::admin.component-missing'), $name, $key), null, null, 500);
+            }
+
+            $components[strtolower($name)] = $this->renderVuejsComponent($path);
+        }
     }
 
     /*

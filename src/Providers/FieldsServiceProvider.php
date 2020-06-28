@@ -12,7 +12,7 @@ class FieldsServiceProvider extends ServiceProvider
 {
     protected $allFields = [
         'title', 'placeholder', 'hidden', 'orderBy', 'limit', 'multirows', 'defaultByOption', 'tooltip',
-        'invisible', 'component', 'column_name', 'phone_link', 'ifExists', 'ifDoesntExists', 'hideOnUpdate', 'hideOnCreate', 'keepInRequest',
+        'invisible', 'component', 'sub_component', 'column_name', 'phone_link', 'ifExists', 'ifDoesntExists', 'hideOnUpdate', 'hideOnCreate', 'keepInRequest',
         'disabled' => true, 'readonly' => true, 'removeFromForm' => true, 'hideFromForm' => true, 'removeField' => true, 'hideField' => true,
     ];
 
