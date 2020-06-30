@@ -131,8 +131,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app['config']->set($key, array_merge($crudAdminConfig, $config));
 
-        //Merge selected properties with two dimensional array
-        foreach (['models', 'custom_rules', 'global_rules'] as $property) {
+        //Merge selected properties with one/two dimensional array
+        foreach (['models', 'custom_rules', 'global_rules', 'gettext_source_paths'] as $property) {
             if (! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config)) {
                 continue;
             }
