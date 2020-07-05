@@ -68,6 +68,9 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             ],
             'client' => [
                 'icon' => 'fa-address-book',
+                'settings.title.create' => $this->t(_('Nový klient')),
+                'settings.title.update' => $this->t(_('Upravujete klienta č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový klient')),
             ],
             'partner' => [
                 'icon' => 'fa-address-book',
@@ -197,6 +200,18 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             ],
             'grade' => [
                 'icon' => 'fa-graduation-cap',
+            ],
+            'group' => [
+                'icon' => 'fa-layer-group',
+                'settings.title.create' => $this->t(_('Nová skupina')),
+                'settings.title.update' => $this->t(_('Upravujete skupinu č. :id')),
+                'settings.buttons.create' => $this->t(_('Nová skupina')),
+            ],
+            'type' => [
+                'icon' => 'fa-layer-group',
+                'settings.title.create' => $this->t(_('Nový typ')),
+                'settings.title.update' => $this->t(_('Upravujete typ č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový typ')),
             ],
             'college' => [
                 'icon' => 'fa-graduation-cap',
