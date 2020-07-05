@@ -87,20 +87,22 @@ trait HasAttributes
                  * Casts decimal format
                  */
                 if ($field['type'] == 'decimal' && ! is_null($attributes[$key])) {
+                    $decimalLength = $this->getDecimalLength($key);
+
                     //Parse locale values
                     if ($this->hasFieldParam($key, 'locale', true)) {
                         foreach (array_wrap($attributes[$key]) as $k => $v) {
                             if (is_null($v)) {
                                 unset($attributes[$key][$k]);
                             } else {
-                                $attributes[$key][$k] = number_format($v, 2, '.', '');
+                                $attributes[$key][$k] = number_format($v, $decimalLength[1], '.', '');
                             }
                         }
                     }
 
                     //Parse simple values
                     else {
-                        $attributes[$key] = number_format($attributes[$key], 2, '.', '');
+                        $attributes[$key] = number_format($attributes[$key], $decimalLength[1], '.', '');
                     }
                 }
 
