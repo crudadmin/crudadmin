@@ -98,6 +98,7 @@ class TableRowsTest extends BrowserTestCase
 
         //Create testing rows with belongsToMany relations
         $row = $this->getFieldsRelationFormData();
+
         FieldsRelation::create($this->buildDbData(FieldsRelation::class, $row));
         $this->saveFieldRelationsValues(FieldsRelation::class, $row);
 

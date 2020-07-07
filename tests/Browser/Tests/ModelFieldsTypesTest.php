@@ -107,7 +107,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsType::class, $rowUpdated)
 
                     //Reset form after update and check for empty values
-                    ->press(trans('admin::admin.new-row'))
+                    ->press(_('Nový typ'))
                     ->assertFormIsEmpty(FieldsType::class)
 
                     //Check if table contains of correct column values
