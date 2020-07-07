@@ -2,12 +2,13 @@
 
 namespace Admin\Fields\Mutations;
 
-use DB;
-use Ajax;
 use Admin;
-use Illuminate\Support\Collection;
 use Admin\Core\Contracts\DataStore;
 use Admin\Core\Fields\Mutations\MutationRule;
+use Ajax;
+use DB;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class AddSelectSupport extends MutationRule
 {
@@ -102,23 +103,74 @@ class AddSelectSupport extends MutationRule
         }
 
         //If relationship table has localizations
-        if (($model = Admin::getModelByTable($properties[0])) && $model->isEnabledLanguageForeign()) {
-            $columns[] = 'language_id';
+        if ($model = Admin::getModelByTable($properties[0])) {
+            if ( $model->isEnabledLanguageForeign() ) {
+                $columns[] = 'language_id';
+            }
         }
 
-        return array_unique($columns);
+
+        return $columns;
+    }
+
+    /**
+     * You can define your custom column builds in belongsTo/belongsToMany props
+     * with belongsToColumns function located in parent table.
+     *
+        'identifier' => [
+            'columns' => 'column_a,column_b',
+            'render' => function($row){
+                return $row->column_a.$row->column_b;
+            },
+        ],
+
+        or
+
+        'identifier' => function($row){
+            return $row->column_a.$row->column_b;
+        ],
+     *
+     *
+     * @param  array  $columns
+     * @param  AdminModel  $model
+     *
+     * return array
+     */
+    public function addBelongsToCustomColumnsSupport(&$columns, $model)
+    {
+        $customColumns = [];
+
+        if ( method_exists($model, 'belongsToColumns') ){
+            $definedColumnProps = $model->belongsToColumns();
+
+            foreach ($columns as $key => $column) {
+                if ( array_key_exists($column, $definedColumnProps) ){
+                    //We need remove original column
+                    unset($columns[$key]);
+
+                    //We need register all required columns
+                    if ( is_array($definedColumnProps[$column]) && $loadColumns = @$definedColumnProps[$column]['columns'] ) {
+                        $customColumns[$column] = array_merge($columns, explode(',', $loadColumns));
+                    } else {
+                        $customColumns[$column] = ['*'];
+                    }
+                }
+            }
+        }
+
+        return $customColumns;
     }
 
     /*
      * Check if column exists in array
      */
-    private function existsColumn($column, $load_columns, $option)
+    private function existsColumn($column, $loadColumns, $option)
     {
         if (! $option || ! Admin::isAdmin()) {
             return;
         }
 
-        if (count($load_columns) == 2 && strpos($column, ':') === false && ! array_key_exists($column, $option)) {
+        if (count($loadColumns) == 2 && strpos($column, ':') === false && ! array_key_exists($column, $option)) {
             Ajax::error('Nie je možné načítať tabuľku, keďže stĺpec <strong>'.$properties[1].'</strong> v tabuľke <strong>'.$properties[0].'</strong> neexistuje.', null, null, 500);
         }
     }
@@ -190,45 +242,82 @@ class AddSelectSupport extends MutationRule
 
         //When is defined column which will be in selectbox
         if (count($properties) >= 2 && strtolower($properties[1]) != 'null') {
+            $relationModel = Admin::getModelByTable($properties[0]);
+
             //Get all columns from each field witch belongsTo relation
-            $load_columns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);
+            $loadColumns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);
 
-            $load_columns = $this->getColumnsByProperties($properties, $field, $load_columns, $fields);
+            $loadColumns = $this->getColumnsByProperties($properties, $field, $loadColumns, $fields);
 
-            $load_columns = array_unique($load_columns);
+            $customColumns = $this->addBelongsToCustomColumnsSupport($loadColumns, $relationModel);
+
+            $loadColumns = array_unique($loadColumns);
 
             //Get data from table, and bind them info buffer for better performance
-            $options = $this->cache('selects.options.'.$properties[0], function () use ($properties, $model, $load_columns) {
-                $load_columns[] = 'id';
+            $options = $this->cache('selects.options.'.$properties[0], function () use ($relationModel, $properties, $loadColumns, $customColumns) {
+                $loadColumns[] = 'id';
 
-                if ($model = Admin::getModelByTable($properties[0])) {
-                    return $model->select($load_columns)->get()->toArray();
+                if ($relationModel) {
+                    //Add all custom columns into list of loading actual columns
+                    $modelColumns = array_merge(Arr::flatten(array_values($customColumns)), $loadColumns);
+
+                    //All columns, or required
+                    $modelColumns = in_array('*', $modelColumns) ? ['*'] : $modelColumns;
+
+                    return $relationModel->select($modelColumns)->get()->toArray();
                 }
 
-                return DB::table($properties[0])->select($load_columns)->whereNull('deleted_at')->get();
+                return DB::table($properties[0])->select($loadColumns)->whereNull('deleted_at')->get();
             });
 
             //If is unknown belongs to column
             if (count($options) > 0) {
-                $this->existsColumn($properties[1], $load_columns, $options[0]);
+                $this->existsColumn($properties[1], $loadColumns, $options[0]);
             }
 
             if ($options !== false) {
-                $key = isset($properties[2]) ? $properties[2] : 'id';
-
-                foreach ($options as $option) {
-                    $option = (array) $option;
-
-                    foreach ($load_columns as $column) {
-                        $rows[$option[$key]][$column] = $option[$column];
-                    }
-                }
+                $this->buildOptionsRow($rows, $options, $properties, $relationModel, $loadColumns, $customColumns);
             }
         }
 
         $field['options'] = $rows;
 
         return $field;
+    }
+
+    private function buildOptionsRow(&$rows, $options, $properties, $relationModel, $loadColumns, $customColumns)
+    {
+        $key = isset($properties[2]) ? $properties[2] : 'id';
+
+        $definedColumnProps = $relationModel && method_exists($relationModel, 'belongsToColumns') ? $relationModel->belongsToColumns() : null;
+
+        foreach ($options as $option) {
+            $option = (array) $option;
+
+            /*
+             * Build option row from given columns
+             */
+            foreach ($loadColumns as $column) {
+                $rows[$option[$key]][$column] = @$option[$column];
+            }
+
+            /*
+             * Build custom option column value from parent belongsToColumns method
+             */
+            foreach ($customColumns as $column => $loadCustomColumns) {
+                if ( $definedColumnProps && array_key_exists($column, $definedColumnProps) ){
+                    $columnProp = $definedColumnProps[$column];
+
+                    if ( is_array($columnProp) ) {
+                        $modelRow = $relationModel->forceFill($option);
+
+                        $rows[$option[$key]][$column] = $columnProp['render']($modelRow);
+                    } else if ( is_callable($columnProp) ) {
+                        $rows[$option[$key]][$column] = $columnProp();
+                    }
+                }
+            }
+        }
     }
 
     private function makeOptionsFromSimpleArray($options)

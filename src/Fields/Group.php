@@ -47,6 +47,14 @@ class Group extends BaseGroup
      */
     public $where = null;
 
+    /*
+     * Forward methods to support nonstatic/stattic...
+     * origMethodName => alias
+     */
+    protected $forwardCalls = [
+        'inline' => 'inlineFields',
+    ];
+
     /**
      * Returns icon of group
      *
@@ -94,6 +102,11 @@ class Group extends BaseGroup
      */
     public function width($width = 'full')
     {
+        //Add inline property into existing inline group
+        if ( strpos($this->width, '-inline') ) {
+            $width .= '-inline';
+        }
+
         $this->width = $width;
 
         return $this;
@@ -201,19 +214,6 @@ class Group extends BaseGroup
     }
 
     /**
-     * Group which will inline all fields in group
-     * Fields will be in one row, and not in new row.
-     * @param  array  $fields
-     * @return Group
-     */
-    public function inline()
-    {
-        $this->width = $this->width.'-inline';
-
-        return $this;
-    }
-
-    /**
      * Set where query for tab group relationship
      *
      * @param  Closure  $closure
@@ -244,4 +244,20 @@ class Group extends BaseGroup
 
         return $this;
     }
+
+    /**
+     * Group which will inline all fields in group
+     * Fields will be in one row, and not in new row.
+     * @param  array  $fields
+     * @return Group
+     */
+    public function inlineFields(array $fields = null)
+    {
+        if ( is_array($fields) && count($fields) ){
+            $this->fields = $fields;
+        }
+
+        return $this->width($this->width.'-inline');
+    }
+
 }
