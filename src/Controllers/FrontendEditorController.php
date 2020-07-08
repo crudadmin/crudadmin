@@ -78,7 +78,8 @@ class FrontendEditorController extends Controller
             Ajax::permissionsError();
         }
 
-        $row = $model->validateRequest([ $fieldKey ]);
+        //Get content value
+        $content = request('content');
 
         //Find row
         $contentRow = $model->findOrFail($rowId);
@@ -92,12 +93,12 @@ class FrontendEditorController extends Controller
                 $value = [];
             }
 
-            $value[request('language')] = $row[$fieldKey];
+            $value[request('language')] = $content;
         }
 
         //Update base field (non localized)
         else {
-            $value = $row[$fieldKey];
+            $value = $content;
         }
 
         $contentRow->update([
