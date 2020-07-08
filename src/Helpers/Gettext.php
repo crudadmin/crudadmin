@@ -227,7 +227,7 @@ class Gettext
         return asset(action('\Admin\Controllers\GettextController@'.$localizationClass::gettextJsResourcesMethod(), null, false)
                     .'?lang='.($language ? $language->slug : '')
                     .'&t='.$timestamp
-                    .'&a='.(EditorMode::isActiveTranslatable() ? Admin::getAssetsVersion() : 0)
+                    .'&a='.(EditorMode::isActiveTranslatable() ? hashAdminVersionName(Admin::getAssetsVersion()) : 0)
         );
     }
 
