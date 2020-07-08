@@ -44,6 +44,7 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     //Admin gettext translates
     Route::post('/admin/frontend-editor/static-link', 'FrontendEditorController@updateLink');
     Route::post('/admin/frontend-editor/static-image', 'FrontendEditorController@updateImage');
+    Route::post('/admin/frontend-editor/update-content', 'FrontendEditorController@updateContent');
     Route::post('/admin/translates/editable/{lang}', 'GettextController@updateEditorState');
     Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');
 

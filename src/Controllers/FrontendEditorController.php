@@ -60,6 +60,55 @@ class FrontendEditorController extends Controller
         ]);
     }
 
+    public function updateContent()
+    {
+        $model = Admin::getModelByTable(request('model'));
+
+        $fieldKey = request('key');
+
+        $rowId = request('id');
+
+        //Check permission access and hashes of given properties:
+        if (
+            FrontendEditor::hasAccess() == false
+            || FrontendEditor::makeHash($model->getTable(), $fieldKey, $rowId) != request('hash')
+            || ! admin()->hasAccess($model, 'update')
+            || ! $model->isFieldType($fieldKey, ['editor', 'longeditor'])
+        ) {
+            Ajax::permissionsError();
+        }
+
+        $row = $model->validateRequest([ $fieldKey ]);
+
+        //Find row
+        $contentRow = $model->findOrFail($rowId);
+
+        //Update localized field
+        if ( $model->hasFieldParam($fieldKey, 'locale', true) ) {
+            $value = $contentRow->getAttribute($fieldKey);
+
+            //If content is empty
+            if ( !is_array($value) ){
+                $value = [];
+            }
+
+            $value[request('language')] = $row[$fieldKey];
+        }
+
+        //Update base field (non localized)
+        else {
+            $value = $row[$fieldKey];
+        }
+
+        $contentRow->update([
+            $fieldKey => $value
+        ]);
+
+        return response()->json([
+            'data' => 1,
+        ]);
+    }
+
     public function updateLink()
     {
         //Check permission access and hashes of given properties:

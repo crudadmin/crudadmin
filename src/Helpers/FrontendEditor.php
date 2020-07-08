@@ -5,12 +5,14 @@ namespace Admin\Helpers;
 use Admin;
 use Admin\Contracts\FrontendEditor\HasLinkableSupport;
 use Admin\Contracts\FrontendEditor\HasUploadableSupport;
+use Admin\Contracts\FrontendEditor\HasEditorSupport;
 use Admin\Models\StaticContent;
 
 class FrontendEditor
 {
     use HasUploadableSupport,
-        HasLinkableSupport;
+        HasLinkableSupport,
+        HasEditorSupport;
 
     /*
      * Load all static images

@@ -24,6 +24,7 @@ class GettextController extends Controller
 
         $translations = JSTranslations::getJSTranslations($lang, $localizationClass::getModel());
 
+        //Return original translations for editor purposes
         if ( EditorMode::isActiveTranslatable() ) {
             $rawTranslations = JSTranslations::getRawJSTranslations($lang, $localizationClass::getModel());
         } else {
