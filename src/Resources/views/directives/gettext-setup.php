@@ -39,6 +39,6 @@ window.CAEditorConfig = {
 <!-- We need admin props for CKEditor boot -->
 <?php echo $__env->make('admin::partials.crudadmin-props', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
-<script src="<?php echo admin_asset('/js/FrontendEditor.js?v='.Admin::getAssetsVersion()) ?>"></script>
-<link rel="stylesheet" href="<?php echo admin_asset('/css/frontend.css?v='.Admin::getAssetsVersion()) ?>">
+<script src="<?php echo admin_asset('/js/FrontendEditor.js') ?>"></script>
+<link rel="stylesheet" href="<?php echo admin_asset('/css/frontend.css') ?>">
 <?php } ?>
