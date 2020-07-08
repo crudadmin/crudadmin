@@ -32,7 +32,14 @@ class FrontendEditorServiceProvider extends ServiceProvider
         });
 
         Blade::directive('editor', function ($expression) {
-            return '<?php echo FrontendEditor::editor('.$expression.') ?>';
+            //Does not wrap into gettext, when is already gettext or variable...
+            if (
+                substr($expression, 0, 1) == '$'
+                || (substr($expression, 0, 2) == '_(') && substr($expression, -1) == ')') {
+                return '<?php echo FrontendEditor::editor('.$expression.') ?>';
+            }
+
+            return '<?php echo FrontendEditor::editor(_('.$expression.')) ?>';
         });
     }
 }
