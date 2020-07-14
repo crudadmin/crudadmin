@@ -26,7 +26,7 @@ class ModelsHistory extends Model
     /*
      * Acivate/deactivate model in administration
      */
-    protected $active = false;
+    protected $inMenu = false;
 
     protected $sortable = false;
 
@@ -47,6 +47,24 @@ class ModelsHistory extends Model
         'user' => 'name:Administrator|belongsTo:users,id',
         'data' => 'name:Data|type:text',
     ];
+
+    /*
+     * Update permissions titles
+     */
+    public function setModelPermissions($permissions)
+    {
+        return [
+            'read' => [
+                'name' => _('Zobrazovanie histórie'),
+                'title' => _('Možnosť zobrázenia zmien pri všetkých záznamoch'),
+            ],
+            'delete' => [
+                'name' => _('Mazanie histórie'),
+                'title' => _('Možnosť mazať zmeny v histórii pri všetkych záznamoch'),
+                'danger' => true,
+            ],
+        ];
+    }
 
     /*
      * Modify all request data

@@ -4,7 +4,6 @@ namespace Admin\Controllers\Crud;
 
 use Admin\Controllers\Crud\CRUDController;
 use Admin\Helpers\AdminRows;
-use Admin\Models\ModelsHistory;
 use Ajax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -231,22 +230,5 @@ class DataController extends CRUDController
         if (method_exists($model, 'onUpdateOrder')) {
             return $model->onUpdateOrder();
         }
-    }
-
-    /*
-     * Return history rows
-     */
-    public function getHistory($model, $id)
-    {
-        $rows = ModelsHistory::where('table', $model)
-                            ->where('row_id', $id)
-                            ->with(['user' => function ($query) {
-                                $query->select(['id', 'username']);
-                            }])
-                            ->get(['id', 'data', 'user_id', 'created_at'])->map(function ($item) {
-                                return $item->getMutatedAdminAttributes();
-                            });
-
-        return $rows;
     }
 }

@@ -35,7 +35,8 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::post('/admin/api/buttonAction', 'Crud\DataController@buttonAction');
     Route::post('/admin/api/togglePublishedAt', 'Crud\DataController@togglePublishedAt')->middleware('hasAdminRole:publishable');
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
-    Route::get('/admin/api/getHistory/{model}/{id}', 'Crud\DataController@getHistory');
+    Route::get('/admin/api/history/get/{model}/{id}', 'HistoryController@getHistory');
+    Route::post('/admin/api/history/remove', 'HistoryController@removeFromHistory');
     Route::get('/admin/api/getTranslations/{id}/{table?}', 'GettextController@getTranslations');
     Route::get('/admin/api/download-translations/{id}/{table}', 'GettextController@downloadTranslations');
     Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');
