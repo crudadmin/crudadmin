@@ -87,7 +87,7 @@ class ModelsHistory extends Model
      */
     private function canSkipFieldInHistory($model, $key)
     {
-        return ! $model->getField($key) || $model->hasFieldParam($key, 'disabled', true);
+        return ! $model->getField($key) || $model->hasFieldParam($key, ['disabled', 'imaginary'], true) || $model->isFieldType($key, 'imaginary');
     }
 
     /*
