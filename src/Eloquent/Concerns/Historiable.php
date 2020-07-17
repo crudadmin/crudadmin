@@ -15,10 +15,15 @@ trait Historiable
         return Admin::getModel('ModelsHistory')->pushChanges($this, $request, $original);
     }
 
-    /*
+    /**
      * Foreach all rows in history, and get acutal data status
+     *
+     * @param  int|null  $max_id
+     * @param  int|null  $id
+     * @param  bool  $returnChangresTree
+     * @return  array
      */
-    public function getHistorySnapshot($max_id = null, $id = null)
+    public function getHistorySnapshot($max_id = null, $id = null, $returnChangresTree = false)
     {
         if (! ($changes = ModelsHistory::where('table', $this->getTable())->where('row_id', $id ?: $this->getKey())->where(function ($query) use ($max_id) {
             if ($max_id) {
@@ -28,8 +33,9 @@ trait Historiable
             return [];
         }
 
-        $data = [];
+        $versions = [];
 
+        $data = [];
         foreach ($changes as $row) {
             $array = (array) json_decode($row['data']);
 
@@ -44,6 +50,13 @@ trait Historiable
 
                 $data[$key] = $value;
             }
+
+            $versions[] = $data;
+        }
+
+        //Return all versions tree
+        if ( $returnChangresTree === true ){
+            return $versions;
         }
 
         return $data;

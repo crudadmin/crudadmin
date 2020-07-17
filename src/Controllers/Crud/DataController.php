@@ -31,9 +31,12 @@ class DataController extends CRUDController
     {
         $model = $this->getModel($model);
 
-        $row = $model->getHistorySnapshot($history_id, $id);
+        $changesTree = $model->getHistorySnapshot($history_id, $id, true);
 
-        return $model->forceFill($row)->setProperty('skipBelongsToMany', true)->getMutatedAdminAttributes();
+        return [
+            'row' => $model->forceFill($changesTree[count($changesTree) - 1])->setProperty('skipBelongsToMany', true)->getMutatedAdminAttributes(),
+            'previous' => ($previous = @$changesTree[count($changesTree) - 2]) ? $model->forceFill($previous)->setProperty('skipBelongsToMany', true)->getMutatedAdminAttributes() : [],
+        ];
     }
 
     /*
