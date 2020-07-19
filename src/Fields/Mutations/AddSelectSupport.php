@@ -3,10 +3,12 @@
 namespace Admin\Fields\Mutations;
 
 use Admin;
+use Admin\Contracts\Migrations\Types\ImaginaryType;
 use Admin\Core\Contracts\DataStore;
 use Admin\Core\Fields\Mutations\MutationRule;
 use Ajax;
 use DB;
+use Fields;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -102,10 +104,23 @@ class AddSelectSupport extends MutationRule
             $columns = array_merge($fillBy, $columns);
         }
 
-        //If relationship table has localizations
         if ($model = Admin::getModelByTable($properties[0])) {
+            //If relationship table has localizations
             if ( $model->isEnabledLanguageForeign() ) {
                 $columns[] = 'language_id';
+            }
+
+            //We want add defaultByOption fields into column list
+            //This fields must exists
+            if ( array_key_exists('defaultByOption', $field) ) {
+                $column = explode(',', $field['defaultByOption'])[0];
+
+                if (
+                    $model->getField($column)
+                    && !(Fields::getColumnType($model, $column) instanceof ImaginaryType)
+                ) {
+                    $columns[] = $column;
+                }
             }
         }
 
