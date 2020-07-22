@@ -20,7 +20,7 @@ trait CRUDResponse
     protected function responseMessage($sentense)
     {
         if (count($this->getRequestErrors())) {
-            return $sentense.' '.trans('admin::admin.with-errors').':<br>'.implode($this->getRequestErrors(), '<br>');
+            return $sentense.' '.trans('admin::admin.with-errors').':<br>'.implode('<br>', $this->getRequestErrors());
         }
 
         return $sentense.'.';
