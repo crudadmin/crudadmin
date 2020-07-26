@@ -32,10 +32,6 @@ trait HasLinkableSupport
      */
     public function getLinkabkePath($key, $url = null)
     {
-        if ( ! $this->isActive() ){
-            return $url;
-        }
-
         $linkRow = $this->findByKeyOrCreate($key);
 
         //Get modified url
