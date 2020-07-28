@@ -130,7 +130,7 @@ class DataController extends CRUDController
 
         //Checks for disabled publishing
         if ($model->getProperty('publishable') == false) {
-            Ajax::error(trans('admin::admin.cannot-publicate'));
+            Ajax::error(trans('admin::admin.cannot-publish'));
         }
 
         $rows = $model->withUnpublished()
@@ -141,6 +141,8 @@ class DataController extends CRUDController
         $data = [];
 
         foreach ($rows as $row) {
+            $row->checkForModelRules([$row->published_at ? 'unpublishing' : 'publishing']);
+
             //We want disable all rules, because in this state
             //are loaded only needed columns for publishing fields.
             //and rules could break, because in rule may be needed more columns than this two.
@@ -148,6 +150,8 @@ class DataController extends CRUDController
             $row->published_at = $row->published_at == null ? Carbon::now() : null;
             $row->save();
             $row->disableAllAdminRules(false);
+
+            $row->checkForModelRules([$row->published_at ? 'published' : 'unpublished'], true);
 
             $data[$row->getKey()] = $row->published_at ? $row->published_at->toDateTimeString() : null;
         }

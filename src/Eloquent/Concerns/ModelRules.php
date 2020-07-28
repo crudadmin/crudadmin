@@ -120,6 +120,18 @@ trait ModelRules
                 }
             }
         }
+
+        if (in_array($method = 'unpublishing', $rules)) {
+            if (method_exists($rule, $method)) {
+                $rule->{$method}($this);
+            }
+        }
+
+        if (in_array($method = 'publishing', $rules)) {
+            if (method_exists($rule, $method)) {
+                $rule->{$method}($this);
+            }
+        }
     }
 
     /*
@@ -147,6 +159,18 @@ trait ModelRules
         if (in_array('deleted', $rules)) {
             if (method_exists($rule, 'deleted')) {
                 $rule->deleted($this);
+            }
+        }
+
+        if (in_array($method = 'unpublished', $rules)) {
+            if (method_exists($rule, $method)) {
+                $rule->{$method}($this);
+            }
+        }
+
+        if (in_array($method = 'published', $rules)) {
+            if (method_exists($rule, $method)) {
+                $rule->{$method}($this);
             }
         }
     }
