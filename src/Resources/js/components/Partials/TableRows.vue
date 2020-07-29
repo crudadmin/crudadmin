@@ -265,7 +265,7 @@
                 add_after : this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.add_after'),
                 field : this.model.fields[field],
                 limit : this.$root.getModelProperty(this.model, 'settings.columns.'+field+'.limit'),
-                default_slug : this.$root.languages[0].slug,
+                default_slug : this.$root.languages.length ? this.$root.languages[0].slug : null,
                 models_list : this.$root.models_list,
             };
 
