@@ -10,6 +10,7 @@ use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
 use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
+use \SplFileInfo;
 use \Illuminate\Support\Facades\Blade;
 
 class JSTranslations
@@ -281,7 +282,7 @@ class JSTranslations
                 continue;
             }
 
-            foreach ($this->filesystem->allFiles($path) as $file) {
+            foreach ($this->getAllPathFiles($path) as $file) {
                 $modified[filemtime($file)] = (string) $file;
             }
         }
@@ -371,7 +372,7 @@ class JSTranslations
         }
 
         //Foreach all files and merge translations by file type
-        foreach ($this->filesystem->allFiles($path) as $file) {
+        foreach ($this->getAllPathFiles($path) as $file) {
             $type = $this->getCollectorType($file);
 
             if ($type && $sources = Translations::{'from'.$type.'File'}((string) $file, $this->getDecoderOptions())) {
@@ -394,6 +395,15 @@ class JSTranslations
 
                 $translations->mergeWith($sources);
             }
+        }
+    }
+
+    private function getAllPathFiles($path)
+    {
+        if ( is_dir($path) ) {
+            return $this->filesystem->allFiles($path);
+        } else {
+            return [ new SplFileInfo($path) ];
         }
     }
 

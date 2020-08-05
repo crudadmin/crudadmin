@@ -9,6 +9,7 @@ use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
 use Symfony\Component\HttpFoundation\Response;
 use EditorMode;
+use Localization;
 use Ajax;
 
 class GettextController extends Controller
@@ -22,16 +23,7 @@ class GettextController extends Controller
     {
         $lang = request('lang', $lang);
 
-        $translations = JSTranslations::getJSTranslations($lang, $localizationClass::getModel());
-
-        //Return original translations for editor purposes
-        if ( EditorMode::isActiveTranslatable() ) {
-            $rawTranslations = JSTranslations::getRawJSTranslations($lang, $localizationClass::getModel());
-        } else {
-            $rawTranslations = '[]';
-        }
-
-        $js = view('admin::translates', compact('translations', 'rawTranslations'))->render();
+        $js = $this->getJavascript($localizationClass, $lang);
 
         $response = new Response($js, 200, [
             'Content-Type' => 'application/javascript; charset=utf-8',
@@ -42,6 +34,33 @@ class GettextController extends Controller
         //Because some CDN may not cache request with cookies
         $response->send();
         die;
+    }
+
+    public function getJavascript($localizationClass = 'Localization', $lang = null)
+    {
+        $translations = JSTranslations::getJSTranslations($lang, $localizationClass::getModel());
+
+        //Return original translations for editor purposes
+        if ( EditorMode::isActiveTranslatable() ) {
+            $rawTranslations = JSTranslations::getRawJSTranslations($lang, $localizationClass::getModel());
+        } else {
+            $rawTranslations = '[]';
+        }
+
+        return view('admin::translates', compact('translations', 'rawTranslations'))->render();
+    }
+
+    public function getJson($lang = null)
+    {
+        if ( config('admin.gettext_json', false) === false ){
+            abort(404);
+        }
+
+        $lang = $lang ?: Localization::get()->slug;
+
+        $translations = JSTranslations::getJSTranslations($lang, Localization::getModel());
+
+        return $translations;
     }
 
     /**

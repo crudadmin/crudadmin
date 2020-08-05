@@ -13,31 +13,11 @@ window.CAVisibleRoutes = {
 
 <?php if ( (EditorMode::isActive() || FrontendEditor::isActive()) ){ ?>
 <script>
-window.CAEditorConfig = {
-    language : '<?php echo ($lang = Localization::get()) ? $lang->slug : '' ?>',
-    enabled : <?php echo Admin::isEnabledFrontendEditor() ? 'true' : 'false' ?>,
-    active : <?php echo EditorMode::isActive() ? 'true' : 'false' ?>,
-    translatable : <?php echo EditorMode::isActiveTranslatable() ? 'true' : 'false' ?>,
-    uploadable : <?php echo FrontendEditor::isActive() ? 'true' : 'false' ?>,
-    linkable : <?php echo FrontendEditor::isActive() ? 'true' : 'false' ?>,
-    requests : {
-        admin : '<?php echo url('/admin') ?>',
-        updateLink : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateLink') ?>',
-        updateContent : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateContent') ?>',
-        updateImage : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateImage') ?>',
+<?php echo $__env->make('admin::directives.frontendeditor', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
-<?php if ( $lang = Localization::get() ){ ?>
-        changeState : '<?php echo action('\Admin\Controllers\GettextController@updateEditorState', $lang->slug) ?>',
-        updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->slug) ?>',
-<?php } ?>
-    },
-    ckeditor_path : '<?php echo admin_asset('/plugins/ckeditor/ckeditor.js') ?>',
-    token : '<?php echo csrf_token() ?>'
-};
-</script>
-
-<!-- We need admin props for CKEditor boot -->
+/* We need admin props for CKEditor boot */
 <?php echo $__env->make('admin::partials.crudadmin-props', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+</script>
 
 <script src="<?php echo admin_asset('/js/FrontendEditor.js') ?>"></script>
 <link rel="stylesheet" href="<?php echo admin_asset('/css/frontend.css') ?>">

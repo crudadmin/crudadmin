@@ -19,6 +19,7 @@ Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{params1?}/{pa
 
 //Gettext js translates
 Route::get('/js/ca-translates.js', 'GettextController@index');
+Route::get('/js/ca-translates-json.js', 'GettextController@getJson');
 
 /*
  * Admin routes
