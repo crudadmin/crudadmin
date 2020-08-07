@@ -58,7 +58,7 @@ trait ModelLayoutBuilder
         $models = Admin::getAdminModels();
 
         foreach ($models as $model) {
-            if (! $model->belongsToModel) {
+            if (! $model->getProperty('belongsToModel')) {
                 continue;
             }
 

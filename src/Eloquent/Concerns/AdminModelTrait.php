@@ -351,7 +351,7 @@ trait AdminModelTrait
         if (
             Admin::isEnabledLocalization() &&
             (
-                $this->getTable() != 'languages' && $this->belongsToModel == null && $this->localization === true
+                $this->getTable() != 'languages' && $this->getProperty('belongsToModel') == null && $this->localization === true
                 || $this->localization === true
             )
         ) {
