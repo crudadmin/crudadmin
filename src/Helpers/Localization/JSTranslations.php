@@ -298,6 +298,10 @@ class JSTranslations
      */
     private function compareCacheKey($key, $timestamp = null)
     {
+        $gettextPathsHash = md5(implode(';', config('admin.gettext_source_paths', [])));
+
+        $key .= $gettextPathsHash;
+
         $timestamp = $timestamp ?: $this->getSourceModificationTimestamp();
 
         //If no modify time is in cache

@@ -10,19 +10,28 @@ use Admin;
 
 class SeoModule extends AdminModelModule implements AdminModelModuleSupport
 {
+    /*
+     * This may be accessed from application API...
+     */
+    public static $metaKeys = [
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+        'meta_image',
+    ];
+
     public function boot()
     {
         /*
          * Hide meta images from array
          */
-        if ( Admin::isFrontend() ) {
-            $this->getModel()->makeHidden([
+        if (
+            Admin::isFrontend()
+            && $this->getModel()->getProperty('seoVisible') === false
+        ) {
+            $this->getModel()->makeHidden(array_merge([
                 'slug_dynamic',
-                'meta_title',
-                'meta_keywords',
-                'meta_description',
-                'meta_image',
-            ]);
+            ], self::$metaKeys));
         }
     }
 

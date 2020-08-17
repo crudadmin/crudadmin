@@ -181,6 +181,11 @@ class AdminModel extends CoreAdminModel
     protected $seo = false;
 
     /*
+     * Visible seo attributes in toArray()
+     */
+    protected $seoVisible = false;
+
+    /*
      * This model can be assigned to any other model without specific relation key
      */
     protected $globalRelation = false;
