@@ -153,9 +153,16 @@ class AdminRows
                             elseif ($this->model->hasFieldParam($column, 'belongsTo')) {
                                 $relation = explode(',', $this->model->getField($column)['belongsTo']);
 
-                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($columns, $relation, $queries) {
+                                $byColumns = $this->getNamesBuilder($relation, $columns);
+
+                                //We does not have columns for filter
+                                if ( count($byColumns) == 0 ){
+                                    return;
+                                }
+
+                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
                                     foreach ($queries as $query) {
-                                        foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
+                                        foreach ($byColumns as $key => $selector) {
                                             if ($selector == 'id') {
                                                 $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
                                             } else {
@@ -167,9 +174,16 @@ class AdminRows
                             } elseif ($this->model->hasFieldParam($column, 'belongsToMany')) {
                                 $relation = explode(',', $this->model->getField($column)['belongsToMany']);
 
-                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($columns, $relation, $queries) {
+                                $byColumns = $this->getNamesBuilder($relation, $columns);
+
+                                //We does not have columns for filter
+                                if ( count($byColumns) == 0 ){
+                                    return;
+                                }
+
+                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
                                     foreach ($queries as $query) {
-                                        foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
+                                        foreach ($byColumns as $key => $selector) {
                                             if ($selector == 'id') {
                                                 $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
                                             } else {
@@ -183,7 +197,7 @@ class AdminRows
                             //Find by fulltext in query string
                             else {
                                 //Search for all inserted words
-                                foreach ($queries as $query) {
+                                foreach ($queries as $key => $query) {
                                     $builder->where($column, 'like', '%'.$query.'%');
                                 }
                             }
