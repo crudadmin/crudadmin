@@ -18,7 +18,7 @@ class UsersRole extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'admin::admin.user-groups';
+    protected $name = 'Skupiny právomoci';
 
     /*
      * Template title
@@ -61,10 +61,16 @@ class UsersRole extends AdminModel
         ];
     }
 
-    protected $settings = [
-        'grid.default' => 'small',
-        'grid.big.disabled' => true,
-    ];
+    public function settings()
+    {
+        return [
+            'buttons.create' => _('Nová skupina'),
+            'title.create' => _('Nová používateľska skupina'),
+            'title.update' => _('Upravujete skupinu č. :id'),
+            'grid.default' => 'small',
+            'grid.big.disabled' => true,
+        ];
+    }
 
     public function onTableCreate()
     {

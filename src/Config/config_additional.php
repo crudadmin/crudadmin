@@ -12,6 +12,7 @@ return [
     'models' => [
         'App' => app_path(),
         'App\Model' => app_path('Model'),
+        'App\Models' => app_path('Models'),
         'App\Eloquent' => app_path('Eloquent'),
     ],
 
