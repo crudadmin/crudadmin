@@ -123,7 +123,9 @@ class FrontendEditorController extends Controller
 
         $staticRow = StaticContent::findOrFail(request('id'));
 
-        if ( Admin::isEnabledLocalization() && $lang = request('language') ) {
+        $isLocalized = ($lang = request('language')) && Admin::isEnabledLocalization();
+
+        if ( $isLocalized ) {
             $urls = array_wrap($staticRow->getAttribute('url'));
 
             $urls[$lang] = $url;
@@ -135,7 +137,7 @@ class FrontendEditorController extends Controller
 
         $staticRow->save();
 
-        return $staticRow->url;
+        return $isLocalized ? $staticRow->getAttribute('url')[$lang] : $staticRow->url;
     }
 
     private function prepareUrl($url)
