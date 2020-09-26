@@ -97,7 +97,7 @@ class JSTranslations
         $timestamp = filemtime($poPath);
 
         //Set cache key for specific language
-        $cacheKey = '.'.$lang;
+        $cacheKey .= '.'.$lang;
 
         //If we need restore cached translations data
         if ($this->compareCacheKey($cacheKey, $timestamp)) {
