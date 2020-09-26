@@ -64,7 +64,7 @@ trait HasUploadableSupport
 
         //Build image query from default asset image
         else {
-            $defaultImage = $this->compressImage($defaultImage, $imageRow) ?: $defaultImage;
+            $defaultImage = $this->compressImage($defaultImage, $imageRow, $sizes) ?: $defaultImage;
 
             $image = $this->buildImageQuery($defaultImage, $sizes, $imageRow->getTable(), 'image', $imageRow->getKey());
         }
@@ -92,7 +92,7 @@ trait HasUploadableSupport
         return true;
     }
 
-    public function compressImage($defaultImage, $imageRow)
+    public function compressImage($defaultImage, $imageRow, $sizes)
     {
         $basepath = public_path(str_replace(asset('/'), '', $defaultImage));
 
@@ -109,6 +109,8 @@ trait HasUploadableSupport
             'image' => $file,
             'filesize' => filesize($basepath),
         ]);
+
+        return is_array($sizes) ? $imageRow->image->resize(...$sizes)->url : $imageRow->image->url;
     }
 
     /*
