@@ -16,23 +16,42 @@ class FrontendEditorController extends Controller
      */
     public function updateImage()
     {
-        $model = Admin::getModelByTable(request('table'));
+        $model = Admin::getModelByTable(request('_table'));
 
-        $fieldKey = request('key');
+        $fieldKey = request('_key');
 
-        $rowId = request('id');
+        $rowId = request('_id');
 
         //Check permission access and hashes of given properties:
         if (
             FrontendEditor::hasAccess() == false
-            || FrontendEditor::makeHash($model->getTable(), $fieldKey, $rowId) != request('hash')
+            || FrontendEditor::makeHash($model->getTable(), $fieldKey, $rowId) != request('_hash')
             || ! admin()->hasAccess($model, 'update')
             || ! $model->isFieldType($fieldKey, 'file')
         ) {
             Ajax::permissionsError();
         }
 
-        $row = $model->validateRequest([ $fieldKey ]);
+
+        //Validate by isImage content type. We can upload also basic files
+        if ( $model instanceof StaticContent ) {
+            $isImage = request('_is_image') == 1;
+
+            $rules = [
+                $fieldKey => 'file|'.(
+                    $isImage ?
+                        'image'
+                        : ('extensions:'.config('admin.uploadable_allowed_extensions'))
+                )
+            ];
+
+            $row = $model->validateRequest($rules);
+        }
+
+        //Validate by model field
+        else {
+            $row = $model->validateRequest([ $fieldKey ]);
+        }
 
         //Find row
         $imageRow = $model->findOrFail($rowId);
@@ -49,7 +68,7 @@ class FrontendEditorController extends Controller
         $imageRow->update([ $fieldKey => $row[$fieldKey] ]);
 
         //Try return resized image
-        if ( ($sizes = request('sizes')) && $image = $this->returnResizedImage($imageRow, $fieldKey, $sizes) ) {
+        if ( ($sizes = request('_sizes')) && $image = $this->returnResizedImage($imageRow, $fieldKey, $sizes) ) {
             return response()->json([
                 'url' => $image,
             ]);

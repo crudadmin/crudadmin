@@ -1,3 +1,3 @@
-<div sitebuilder-block increment="{{ $increment }}" increment_block_type="{{ $typeIncrement }}" type="{{ $block->getPrefix() }}" id="{{ $row->getKey() }}">
+<div sitebuilder-block increment="{{ $increment }}" type="{{ $block->getPrefix() }}" {{ $increment %2===0 ? 'even' : 'odd' }}>
     {!! $content !!}
 </div>

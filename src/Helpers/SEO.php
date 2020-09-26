@@ -59,7 +59,7 @@ class SEO
     private function tryModelFields($key)
     {
         $aliases = [
-            'title' => ['meta_title', 'title', 'name', 'username'],
+            'title' => ['meta_title', 'name', 'title', 'username'],
             'description' => ['meta_description', 'description', 'content'],
             'image' => ['meta_image', 'image', 'images', 'avatar'],
             'keywords' => ['meta_keywords', 'keywords'],

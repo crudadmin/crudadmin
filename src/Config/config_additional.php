@@ -170,6 +170,11 @@ return [
     'rewrite_missing_upload_images' => env('ADMIN_REWRITE_MISSING_IMAGES', true),
 
     /*
+     * Fow uploads which are not image type
+     */
+    'uploadable_allowed_extensions' => '7z,aiff,asf,avi,bmp,csv,svg,doc,docx,fla,flv,gif,gz,gzip,jpeg,jpg,mid,mov,mp3,mp4,m4a,mpc,mpeg,mpg,ods,odt,pdf,png,ppt,pptx,pxd,qt,ram,rar,rm,rmi,rmvb,rtf,sdc,sitd,swf,sxc,sxw,tar,tgz,tif,tiff,txt,vsd,wav,wma,wmv,xls,xlsx,zip,xml',
+
+    /*
      * All available sitebuilder types
      */
     'sitebuilder_types' => [

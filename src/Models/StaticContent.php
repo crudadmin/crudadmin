@@ -37,7 +37,7 @@ class StaticContent extends AdminModel
     {
         return [
             'key' => 'name:Image key|index',
-            'image' => 'name:Obrázok|image',
+            'image' => 'name:Obrázok|type:file',
             'filesize' => 'name:Filesize|type:integer',
             'url' => 'name:Url adresa|max:1000',
         ];
