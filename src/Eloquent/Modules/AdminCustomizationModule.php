@@ -72,6 +72,12 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'settings.title.update' => $this->t(_('Upravujete klienta č. :id')),
                 'settings.buttons.create' => $this->t(_('Nový klient')),
             ],
+            'address' => [
+                'icon' => 'fa-address-book',
+                'settings.title.create' => $this->t(_('Nová adresa')),
+                'settings.title.update' => $this->t(_('Upravujete adresu č. :id')),
+                'settings.buttons.create' => $this->t(_('Nová adresa')),
+            ],
             'partner' => [
                 'icon' => 'fa-address-book',
             ],
@@ -113,6 +119,12 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             ],
             'bicycle' => [
                 'icon' => 'fa-bicycle',
+            ],
+            'favourite' => [
+                'icon' => 'fa-heart',
+            ],
+            'favorite' => [
+                'icon' => 'fa-heart',
             ],
             'term' => [
                 'icon' => 'far fa-check-square',

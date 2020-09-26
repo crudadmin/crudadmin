@@ -122,7 +122,17 @@ class FrontendEditorController extends Controller
         $url = $this->prepareUrl(request('url'));
 
         $staticRow = StaticContent::findOrFail(request('id'));
-        $staticRow->url = $url;
+
+        if ( Admin::isEnabledLocalization() && $lang = request('language') ) {
+            $urls = array_wrap($staticRow->getAttribute('url'));
+
+            $urls[$lang] = $url;
+
+            $staticRow->url = $urls;
+        } else {
+            $staticRow->url = $url;
+        }
+
         $staticRow->save();
 
         return $staticRow->url;

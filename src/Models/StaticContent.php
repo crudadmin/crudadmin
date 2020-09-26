@@ -43,6 +43,16 @@ class StaticContent extends AdminModel
         ];
     }
 
+    public function mutateFields($fields)
+    {
+        //For localized websites we need make url localized
+        if ( Admin::isEnabledLocalization() ){
+            $fields->field('url', function($field){
+                $field->locale = true;
+            });
+        }
+    }
+
     public function setModelPermissions($permissions)
     {
         $permissions['update'] = [
