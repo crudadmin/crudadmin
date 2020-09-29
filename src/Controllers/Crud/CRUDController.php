@@ -6,12 +6,17 @@ use Admin;
 use Admin\Controllers\Controller;
 use Admin\Requests\DataRequest;
 use Ajax;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Localization;
 use Validator;
 
 class CRUDController extends Controller
 {
+    protected $requiredFields = [
+        'required_if', 'required_unless', 'required_with', 'required_with_all', 'required_without', 'required_without_all'
+    ];
+
     /*
      * Get model object by model name, and check user permissions for this model
      */
@@ -138,6 +143,43 @@ class CRUDController extends Controller
         }
     }
 
+    /**
+     * Check if given field is required in request
+     *
+     * @param  Admin\Eloquent\AdminModel  $model
+     * @param  string  $key
+     * @param  Request  $request
+     * @return  bool
+     */
+    private function isKeyRequired($model, $key, $request)
+    {
+        if ( $model->hasFieldParam($key, 'required', true) ) {
+            return true;
+        }
+
+        $field = $model->getField($key);
+
+        //We want check, if this field with empty value will pass validation
+        //when some of required rules are applied. If it won't, we can consider this field as required.
+        foreach ($this->requiredFields as $rule) {
+            if ( isset($field[$rule]) ) {
+                $data = [
+                    $key => null,
+                ] + $request->all();
+
+                $validator = Validator::make($data, [
+                    $key => $rule.':'.$field[$rule]
+                ]);
+
+                if ( $validator->fails() ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     /*
      * If field has required rule, but file is already uploaded in the server, then
      * remove required rule, because file is not now required
@@ -146,7 +188,7 @@ class CRUDController extends Controller
     {
         if (
             $model->isFieldType($originalKey, 'file')
-            && $model->hasFieldParam($originalKey, 'required', true)
+            && $this->isKeyRequired($model, $originalKey, $request)
             && ! empty($row->{$originalKey})
             && ! $request->has('$remove_'.$key)
         ) {
@@ -156,8 +198,19 @@ class CRUDController extends Controller
                                 && count((array) $request->get('$uploaded_'.$originalKey)) > 0
                             );
 
-            if ($isEmptyFiles && ($k = array_search('required', $data)) !== false) {
-                unset($data[$k]);
+            if ($isEmptyFiles) {
+                if ( ($k = array_search('required', $data)) !== false ) {
+                    unset($data[$k]);
+                }
+
+                //We want remove all additional required rules from this multiple field
+                foreach ($this->requiredFields as $rule) {
+                    foreach ($data as $fk => $fieldRule) {
+                        if ( starts_with($fieldRule, $rule.':') ) {
+                            unset($data[$fk]);
+                        }
+                    }
+                }
             }
         } else {
             $this->addRequiredRuleForDeletedFiles($data, $model, $request, $key, $originalKey);
