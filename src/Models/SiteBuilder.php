@@ -5,6 +5,7 @@ namespace Admin\Models;
 use Admin;
 use Admin\Contracts\Sitebuilder\SiteBuilderService;
 use Admin\Core\Fields\Mutations\FieldToArray;
+use Admin\Core\Helpers\File;
 use Admin\Eloquent\AdminModel;
 use Admin\Fields\Group;
 use Facades\Admin\Helpers\SEOService;
@@ -128,9 +129,15 @@ class SiteBuilder extends AdminModel
             if ( in_array($fieldType, ['string', 'text', 'longtext', 'editor', 'longeditor', 'integer', 'decimal', 'select']) ) {
                 return $this->makeDescription($fieldKey, 100);
             } elseif ( in_array($fieldType, ['file']) && @$field['image'] === true ) {
-                $image = $value->resize(40, 40)->url;
+                $images = [];
 
-                return '<img src="'.$image.'">';
+                foreach (array_wrap($value) as $image) {
+                    if ( $image instanceof File ) {
+                        $images[] = '<img src="'.$image->resize(40, 40)->url.'">';
+                    }
+                }
+
+                return implode(' ', $images);
             }
         }
     }
