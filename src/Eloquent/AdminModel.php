@@ -19,6 +19,7 @@ use Admin\Eloquent\Modules\GlobalRelationModule;
 use Admin\Eloquent\Modules\SeoModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Localization;
 
 class AdminModel extends CoreAdminModel
@@ -214,6 +215,24 @@ class AdminModel extends CoreAdminModel
         AdminCustomizationModule::class,
         GlobalRelationModule::class,
     ];
+
+    /**
+     * Boot the soft deleting trait for a model.
+     *
+     * @return void
+     */
+    public static function bootSoftDeletes()
+    {
+        $model = (new static);
+
+        //Enable soft deletes when timestamps are turned on or column deleted_at is available
+        if (
+            $model->timestamps === true
+            || $model->getField($model->getDeletedAtColumn())
+        ) {
+            static::addGlobalScope(new SoftDeletingScope);
+        }
+    }
 
     /**
      * You can modify model default permissions in this method

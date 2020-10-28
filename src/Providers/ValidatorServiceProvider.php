@@ -19,6 +19,10 @@ class ValidatorServiceProvider extends ServiceProvider
          * extensions:jpg,jpeg...
          */
         Validator::extend('extensions', function ($attribute, $value, $parameters) {
+            if ( ! $value || !is_object($value)){
+                return false;
+            }
+
             return in_array($value->getClientOriginalExtension(), $parameters);
         });
 

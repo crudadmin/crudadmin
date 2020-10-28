@@ -267,13 +267,18 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
          */
         if ($this->canApplyUserRoles()) {
             $fields->pushAfter('enabled', [
-                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|hasNotAccess:full_access,invisible',
+                'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|tooltip:'.$this->getFullAccessMessage().'|hasNotAccess:full_access,invisible',
             ]);
 
             $fields->push([
                 'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:users_roles,name|canAdd|hasNotAccess:roles,invisible',
             ]);
         }
+    }
+
+    private function getFullAccessMessage()
+    {
+        return _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému.');
     }
 
     /*
@@ -287,7 +292,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         }
 
         //Set alert tooltips when editing permission group
-        $permissions['update']['title'] = _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť prihlasovacie údaje ktorémukoľvek administrátorovi.');
+        $permissions['update']['title'] = $this->getFullAccessMessage().' '._('Taktiež môže zmeniť prihlasovacie údaje ktorémukoľvek administrátorovi.');
         $permissions['update']['danger'] = true;
 
         //Add full access changing support
