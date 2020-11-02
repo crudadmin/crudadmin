@@ -226,10 +226,7 @@ class AdminModel extends CoreAdminModel
         $model = (new static);
 
         //Enable soft deletes when timestamps are turned on or column deleted_at is available
-        if (
-            $model->timestamps === true
-            || $model->getField($model->getDeletedAtColumn())
-        ) {
+        if ( $model->hasSoftDeletes() ) {
             static::addGlobalScope(new SoftDeletingScope);
         }
     }

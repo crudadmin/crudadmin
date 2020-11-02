@@ -478,4 +478,14 @@ trait AdminModelTrait
 
         return parent::replicate($except);
     }
+
+    /**
+     * Has been soft deletes enabled?
+     *
+     * @return  bool
+     */
+    public function hasSoftDeletes()
+    {
+        return $this->timestamps === true || $this->getField($this->getDeletedAtColumn()) ? true : false;
+    }
 }

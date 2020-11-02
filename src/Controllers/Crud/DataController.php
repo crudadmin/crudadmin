@@ -96,7 +96,11 @@ class DataController extends CRUDController
             $row->checkForModelRules(['deleting']);
 
             //Remove row from db (softDeletes)
-            $row->delete();
+            if ( $model->hasSoftDeletes() ) {
+                $row->delete();
+            } else {
+                $row->forceDelete();
+            }
 
             //Remove uploaded files
             $this->removeFilesOnDelete($row);
