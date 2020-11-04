@@ -9,6 +9,15 @@ use Fields;
 
 class PermissionsSupport extends MutationRule
 {
+    /**
+     * Usage:
+     *
+     * hasAccess:permission_name_of_actual_table,attribute
+     * hasAccess:other_table.permission_name,attributeA
+     * hasAccess:other_table.permission_name,attributeA,attributeB      => access to given permission key with multiple attrs
+     * hasAccess:*,attributeA                                           => full access to actual model
+     * hasAccess:other_table.*,attributeA,attributeB                    => full access to given model table
+     */
     public $attributes = ['hasAccess', 'hasNotAccess'];
 
     public function update($field)
@@ -54,12 +63,14 @@ class PermissionsSupport extends MutationRule
             $classname = null;
         }
 
+        $attributes = implode('|', array_slice($query, 1));
+
         return [
             'rules' => [
                 'classname' => $classname,
                 'permissions' => array_slice($accessRule, 1),
             ],
-            'attribute' => implode(',', array_slice($query, 1)),
+            'attribute' => $attributes,
         ];
     }
 

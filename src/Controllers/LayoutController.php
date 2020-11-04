@@ -230,6 +230,9 @@ class LayoutController extends BaseController
 
         //Bind pages into groups
         foreach ($models as $model) {
+            //We need refresh new instance of given model, because on logged user state there may be updated some properties
+            $model = $model->newInstance();
+
             if ($this->skipModelInTree($model)) {
                 continue;
             }

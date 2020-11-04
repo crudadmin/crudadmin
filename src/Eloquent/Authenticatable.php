@@ -134,8 +134,44 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
                 return false;
             }
 
+            //Full table access (we need use ===, because true == '*')
+            else if ( $permissionKey === '*' ){
+                return $this->hassFullAccessToModel($permissions, $model);
+            }
+
             return array_key_exists($model, $permissions) && @$permissions[$model][$permissionKey] === true;
         }
+    }
+
+    /**
+     * Check if user has all available permissions to given table
+     *
+     * @param  array  $permissions
+     * @param  string  $model
+     *
+     * @return  bool
+     */
+    private function hassFullAccessToModel($permissions, $model)
+    {
+        //We need retrieve model without booting
+        $foundModel = array_values(array_filter(Admin::getAdminModels(), function($item) use ($model) {
+            return get_class($item) == $model;
+        }));
+
+        //If user does not have any permissions for given model, or model has not been found
+        if ( count($foundModel) === false || !array_key_exists($model, $permissions) ){
+            return false;
+        }
+
+        $allModelPermissionsKeys = array_keys($foundModel[0]->getModelPermissions());
+
+        foreach ($allModelPermissionsKeys as $key) {
+            if ( @$permissions[$model][$key] !== true ){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

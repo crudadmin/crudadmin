@@ -126,7 +126,7 @@ trait AdminModelTrait
      */
     protected function makeSingle()
     {
-        if ($this->single === true) {
+        if ($this->getProperty('single') === true) {
             $this->minimum = 1;
             $this->maximum = 1;
         }
