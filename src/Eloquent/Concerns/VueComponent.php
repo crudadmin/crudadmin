@@ -21,6 +21,7 @@ trait VueComponent
         foreach ($fields as $key => $field) {
             $this->importComponentFromAttribute($initialRequest, 'component', $key, $field, $components);
             $this->importComponentFromAttribute($initialRequest, 'sub_component', $key, $field, $components);
+            $this->importComponentFromAttribute($initialRequest, 'column_component', $key, $field, $components);
         }
 
         return $components;
@@ -41,10 +42,12 @@ trait VueComponent
                     return;
                 }
 
-                Ajax::error(sprintf(trans('admin::admin.component-missing'), $name, $key), null, null, 500);
+                return;
             }
 
-            $components[strtolower($name)] = $this->renderVuejsComponent($path);
+            if ( $data = $this->renderVuejsComponent($path) ) {
+                $components[strtolower($name)] = $data;
+            }
         }
     }
 
@@ -133,7 +136,7 @@ trait VueComponent
 
         //Throw ajax error for button or layout component render
         if ($path === null && ($this instanceof Button || $this instanceof Layout)) {
-            Ajax::error(sprintf(trans('admin::admin.component-missing'), $filename, ''), null, null, 500);
+            return;
         }
 
         return $this->renderVuejsComponent($path);
