@@ -52,4 +52,5 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
 
     //Downloading files from uploads in administration
     Route::get('/admin/download/file', 'DownloadController@index');
+    Route::get('/admin/user/download/{hash}', 'DownloadController@securedUserDownload');
 });

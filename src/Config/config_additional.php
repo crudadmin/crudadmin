@@ -132,7 +132,8 @@ return [
         'belongsToMany' => 'type:select|array|multiple',
         'multiple' => 'array',
         'multirows' => 'array',
-        'invisible' => 'hidden|removeFromForm',
+        'inaccessible' => 'invisible|inaccessible',
+        'invisible' => 'hidden|removeFromForm|invisible',
         'unsigned' => 'min:0',
     ],
 

@@ -3,8 +3,9 @@
 namespace Admin\Helpers;
 
 use Admin\Eloquent\AdminModel;
-use Illuminate\Support\Collection;
 use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Helpers\SecureDownloader;
+use Illuminate\Support\Collection;
 
 class Button
 {
@@ -106,6 +107,13 @@ class Button
 
         $this->message['message'] = $message;
         $this->message['type'] = $type;
+
+        return $this;
+    }
+
+    public function download($basepath)
+    {
+        $this->redirect = (new SecureDownloader($basepath))->getDownloadPath();
 
         return $this;
     }

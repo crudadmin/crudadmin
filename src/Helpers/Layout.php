@@ -14,7 +14,7 @@ class Layout
     public $available_positions = [
         'top', 'bottom',
         'form-top', 'form-bottom', 'form-header', 'form-footer',
-        'table-header', 'table-footer',
+        'table-header', 'table-header-actions', 'table-footer',
     ];
 
     /*

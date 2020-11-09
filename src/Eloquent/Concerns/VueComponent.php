@@ -135,8 +135,8 @@ trait VueComponent
         $path = $this->getComponentRealPath($filename);
 
         //Throw ajax error for button or layout component render
-        if ($path === null && ($this instanceof Button || $this instanceof Layout)) {
-            return;
+        if ($path === null) {
+            return $filename;
         }
 
         return $this->renderVuejsComponent($path);

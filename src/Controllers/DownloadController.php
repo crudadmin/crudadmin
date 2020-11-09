@@ -3,6 +3,7 @@
 namespace Admin\Controllers;
 
 use Admin\Helpers\File;
+use Admin\Helpers\SecureDownloader;
 use Illuminate\Http\Request;
 
 class DownloadController extends Controller
@@ -58,5 +59,16 @@ class DownloadController extends Controller
         }
 
         return $this->index();
+    }
+
+    public function securedUserDownload()
+    {
+        $hash = request('hash');
+
+        if ( !(SecureDownloader::getSessionBasePath($hash)) ){
+            return abort(404);
+        }
+
+        return response()->download(SecureDownloader::getSessionBasePath($hash));
     }
 }

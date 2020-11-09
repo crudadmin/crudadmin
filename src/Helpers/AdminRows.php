@@ -397,6 +397,7 @@ class AdminRows
                         'type' => 'vuejs',
                         'position' => $key,
                         'view' => (new Layout)->renderVueJs($componentName),
+                        'component_name' => $componentName,
                     ];
                 }
             }
