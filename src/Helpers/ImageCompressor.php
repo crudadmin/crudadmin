@@ -2,9 +2,9 @@
 
 namespace Admin\Helpers;
 
-use Image;
-use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Admin\Helpers\CustomImageOptimizerChainFactory;
 use Admin\Helpers\File;
+use Image;
 
 class ImageCompressor
 {
@@ -117,7 +117,7 @@ class ImageCompressor
         try {
             $origSize = $this->getFilesize($sourcePath);
 
-            $optimizerChain = OptimizerChainFactory::create();
+            $optimizerChain = CustomImageOptimizerChainFactory::create();
             $optimizerChain->optimize($sourcePath, $destPath);
 
             $this->addCompressedPath($sourcePath, $destPath, $origSize);
