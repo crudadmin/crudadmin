@@ -343,7 +343,6 @@ class LayoutController extends BaseController
             'components' => $model->getFieldsComponents($initial_request),
             'permissions' => $this->checkPermissions($model),
             'submenu' => [],
-            'scopes' => [],
         ];
 
         $model->runAdminModules(function($module) use (&$data) {
