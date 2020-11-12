@@ -54,6 +54,7 @@ class SiteBuilder extends AdminModel
         'increments' => false,
         'autoreset' => false,
         'grid.header' => false,
+        'search.enabled' => false,
         'grid.default' => 'half',
         'table.switchcolumns' => false,
         'title.create' => 'Pridajte nový blok',
