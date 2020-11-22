@@ -67,7 +67,7 @@ class AdminLanguage extends Model
     {
         return [
             'name' => 'name:admin::admin.languages-name|placeholder:admin::admin.languages-title|required|max:25',
-            'slug' => 'name:admin::admin.languages-prefix|placeholder:admin::admin.languages-prefix-title|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
+            'slug' => 'name:admin::admin.languages-prefix|placeholder:admin::admin.languages-prefix-title|required|size:2|unique:admin_languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
         ];
     }
 
