@@ -2,13 +2,15 @@
 
 namespace Admin\Controllers;
 
-use Ajax;
 use Admin;
-use Localization;
+use AdminLocalization;
+use Admin\Controllers\Controller as BaseController;
 use Admin\Fields\Group;
 use Admin\Helpers\AdminRows;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
+use Ajax;
 use Illuminate\Http\Request;
-use Admin\Controllers\Controller as BaseController;
+use Localization;
 
 class LayoutController extends BaseController
 {
@@ -22,6 +24,8 @@ class LayoutController extends BaseController
             'user' => admin()->getAdminUser(),
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
+            'admin_languages' => $this->getAdminLanguages(),
+            'admin_language' => admin()->language,
             'gettext' => config('admin.gettext', false),
             'locale' => app()->getLocale(),
             'localization' => trans('admin::admin'),
@@ -39,6 +43,7 @@ class LayoutController extends BaseController
                 'download' => action('\Admin\Controllers\DownloadController@index'),
                 'rows' => action('\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
                 'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id', ':table']),
+                'switch_locale' => action('\Admin\Controllers\GettextController@switchAdminLanguage', [':id']),
                 'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id', ':table']),
             ],
         ];
@@ -179,10 +184,17 @@ class LayoutController extends BaseController
 
         $fields = $model->getFields();
 
+        //Translate model fields
         foreach ($fields as $key => $field) {
             $this->updateOptionsForm($key, $field, $fields);
 
             $this->findEqualOptions($key, $field, $fields);
+
+            foreach ($field as $k => $value) {
+                if ( in_array($k, AdminResourcesSyncer::$fieldsTranslatableKeys) ){
+                    $fields[$key][$k] = AdminResourcesSyncer::translate($value);
+                }
+            }
         }
 
         return $fields;
@@ -312,7 +324,8 @@ class LayoutController extends BaseController
         }
 
         $data = [
-            'name' => $model->getProperty('name'),
+            'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
+            'title' => AdminResourcesSyncer::translate($model->getProperty('title')),
             'icon' => $model->getProperty('icon'),
             'settings' => $model->getModelSettings(),
             'active' => $model->getProperty('disableModel') ? false : $model->getProperty('active'),
@@ -324,7 +337,6 @@ class LayoutController extends BaseController
             'hidden_tabs' => $model->getProperty('hidden_tabs') ?: [],
             'hidden_groups' => $model->getProperty('hidden_groups') ?: [],
             'reserved' => $model->getProperty('reserved') ?: false,
-            'title' => $model->getProperty('title'),
             'columns' => $model->getBaseFields(),
             'inParent' => $model->getProperty('inParent') ?: false,
             'minimum' => $model->getProperty('minimum'),
@@ -407,5 +419,17 @@ class LayoutController extends BaseController
         }
 
         return Localization::getLanguages();
+    }
+
+   /*
+     * Returns all admin languages
+     */
+    protected function getAdminLanguages()
+    {
+        if (! Admin::isEnabledAdminLocalization()) {
+            return [];
+        }
+
+        return AdminLocalization::getLanguages();
     }
 }

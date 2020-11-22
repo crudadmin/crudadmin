@@ -32,6 +32,7 @@ return [
         'app/Mail',
         'app/Notifications',
         'app/Model',
+        'app/Models',
         'app/Eloquent',
         'resources/views',
         'resources/assets/js',
@@ -42,7 +43,11 @@ return [
      * Directories for loading gettext translations
      */
     'gettext_admin_source_paths' => [
+        'app/Admin',
+        'app/Model',
+        'app/Models',
         __DIR__.'/../',
+        storage_path('app/lang/cache'),
         base_path('vendor/crudadmin/resources/src/Resources/js'),
         base_path('vendor/crudadmin/resources/src/Resources/lang/sk'),
         base_path('vendor/crudadmin/resources/src/Resources/views'),

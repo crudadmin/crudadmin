@@ -310,6 +310,15 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
                 'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:users_roles,name|canAdd|hasNotAccess:roles,invisible',
             ]);
         }
+
+        /*
+         * Added user language preference
+         */
+        if ( Admin::isEnabledAdminLocalization() ){
+            $fields->push([
+                'language' => 'name:Predvolený jazyk|belongsTo:admin_languages,name|invisible'
+            ]);
+        }
     }
 
     private function getFullAccessMessage()

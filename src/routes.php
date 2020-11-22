@@ -18,8 +18,8 @@ Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{model}/{field
 Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
 
 //Gettext js translates
-Route::get('/js/ca-translates.js', 'GettextController@index');
-Route::get('/js/ca-translates-json.js', 'GettextController@getJson');
+Route::get('/vendor/js/ca-translates.js', 'GettextController@index');
+Route::get('/vendor/js/ca-translates-json.js', 'GettextController@getJson');
 
 /*
  * Admin routes
@@ -38,6 +38,7 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
     Route::get('/admin/api/history/get/{model}/{id}', 'HistoryController@getHistory');
     Route::post('/admin/api/history/remove', 'HistoryController@removeFromHistory');
+    Route::get('/admin/api/translation/switch/{id}', 'GettextController@switchAdminLanguage');
     Route::get('/admin/api/getTranslations/{id}/{table?}', 'GettextController@getTranslations');
     Route::get('/admin/api/download-translations/{id}/{table}', 'GettextController@downloadTranslations');
     Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');

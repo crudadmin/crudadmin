@@ -29,6 +29,12 @@ class AdminLocalization extends LocalizationHelper implements LocalizationInterf
      */
     public function getLocaleIdentifier()
     {
+        //Returns user language
+        if ( admin() && admin()->language && $slug = admin()->language->slug ){
+            return $slug;
+        }
+
+        //Or return default language
         return config('admin.locale', 'sk');
     }
 

@@ -79,8 +79,10 @@ class Localization extends LocalizationHelper implements LocalizationInterface
      */
     public function save($lang)
     {
-        session(['locale' => $lang]);
-        session()->save();
+        if ( $this->isValid($lang) ) {
+            session(['locale' => $lang]);
+            session()->save();
+        }
     }
 
     /**

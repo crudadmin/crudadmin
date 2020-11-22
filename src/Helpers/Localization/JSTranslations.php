@@ -337,6 +337,11 @@ class JSTranslations
             Gettext::createLocale($language->slug);
         }
 
+        //Run trigger before files sync build
+        if ( method_exists($language, 'beforeGettextFilesSync') ){
+            $language->beforeGettextFilesSync();
+        }
+
         $loadedTranslations = new Translations;
 
         $translations = Translations::fromPoFile($poPath);

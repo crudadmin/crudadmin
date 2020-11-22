@@ -147,4 +147,13 @@ class GettextController extends Controller
 
         return EditorMode::isActive() ? 1 : 0;
     }
+
+    public function switchAdminLanguage($languageId)
+    {
+        admin()->update([
+            'language_id' => $languageId
+        ]);
+
+        return 1;
+    }
 }

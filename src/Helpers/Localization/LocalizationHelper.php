@@ -154,11 +154,20 @@ class LocalizationHelper
         //Fix for requesting data from console
         $this->bootInConsole();
 
-        $segment = $this->getLocaleIdentifier();
+        //Return by selected localization
+        if ( $this->localization ) {
+            $language = $this->getBySlug($this->localization);
+        }
 
-        if ($this->isValidSegment() === false) {
+        //Return by default localization
+        else if ($this->isValidSegment() === false) {
             $language = $this->getDefaultLanguage();
-        } else {
+        }
+
+        //Return by identifier
+        else {
+            $segment = $this->getLocaleIdentifier();
+
             $language = $this->getBySlug($segment);
         }
 
@@ -231,6 +240,11 @@ class LocalizationHelper
         }
     }
 
+    public function getLocale()
+    {
+        return $this->localization;
+    }
+
     /*
      * Automatically set locale for date package if is available in package list
      * https://github.com/jenssegers/date
@@ -272,7 +286,16 @@ class LocalizationHelper
             return $this->defaultCollection();
         }
 
-        return $this->languages = $model->all();
+        //We want publish models also in administration. Because publishable scope
+        //is skipped in admin, we want add it manually.
+        if (
+            $model->hasGlobalScope('publishable') === false
+            && $model->getProperty('publishable') == true
+        ){
+            $model = $model->withPublished();
+        }
+
+        return $this->languages = $model->get();
     }
 
     /**

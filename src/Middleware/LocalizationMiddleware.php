@@ -37,7 +37,9 @@ class LocalizationMiddleware
 
         //We need boot localization without admin eloquent
         else {
-            AdminLocalization::setLocale(AdminLocalization::getLocaleIdentifier());
+            AdminLocalization::setLocale(
+                AdminLocalization::getLocaleIdentifier()
+            );
         }
     }
 
@@ -50,20 +52,30 @@ class LocalizationMiddleware
 
         $removeDefault = config('admin.localization_remove_default');
 
-        if ( Localization::isValidSegment() === false ) {
-            $redirect = session()->has('locale') && Localization::isValid(session()->get('locale'))
-                            ? session()->get('locale')
+        //Redirect to default url, or saved from session if is wrong segment
+        //Wrong segment can be also if browser has not any slug,
+        //but user has saved other language than default. In this case we want redirect user
+        //to the saved language from session.
+        if ( Localization::isValidSegment() === false && request()->segment(1) != 'vendor' ) {
+            $redirect = session()->has('locale') && Localization::isValid(session('locale'))
+                            ? session('locale')
                             : Localization::getDefaultLanguage()->slug;
 
             //Checks if is set default language
             if ($redirect != Localization::getDefaultLanguage()->slug || $removeDefault == false) {
-                return new RedirectResponse(url($redirect), 301, ['Vary' => 'Accept-Language']);
+                return new RedirectResponse(url($redirect), 302, ['Vary' => 'Accept-Language']);
             }
-        } elseif ($segment == Localization::getDefaultLanguage()->slug && $removeDefault == true) {
+        }
+
+        //If user has same segment as default url, we want redirect user to /
+        elseif ($segment == Localization::getDefaultLanguage()->slug && $removeDefault == true) {
             Localization::save($segment);
 
-            return new RedirectResponse('/', 301, ['Vary' => 'Accept-Language']);
-        } elseif (! session()->has('locale') || session()->get('locale') != $segment) {
+            return new RedirectResponse('/', 302, ['Vary' => 'Accept-Language']);
+        }
+
+        //Save segment
+        elseif (! session()->has('locale') || session('locale') != $segment) {
             Localization::save($segment);
         }
 

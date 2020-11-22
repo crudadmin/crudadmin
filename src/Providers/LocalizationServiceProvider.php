@@ -4,6 +4,7 @@ namespace Admin\Providers;
 
 use Admin\Middleware\LocalizationMiddleware;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
 class LocalizationServiceProvider extends ServiceProvider
@@ -20,18 +21,14 @@ class LocalizationServiceProvider extends ServiceProvider
         $this->app->bind('localization.editormode', \Admin\Helpers\Localization\EditorMode::class);
     }
 
-    public function boot(Kernel $kernel)
+    public function boot(Kernel $kernel, Router $router)
     {
-        $this->loadMiddlewares($kernel);
+        $this->loadMiddlewares($kernel, $router);
     }
 
     //Register localization middleware
-    private function loadMiddlewares($kernel)
+    private function loadMiddlewares($kernel, $router)
     {
-        if ($kernel->hasMiddleware(LocalizationMiddleware::class)) {
-            return;
-        }
-
-        $kernel->prependMiddleware(LocalizationMiddleware::class);
+        $router->pushMiddlewareToGroup('web', LocalizationMiddleware::class);
     }
 }

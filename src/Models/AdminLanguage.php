@@ -2,8 +2,10 @@
 
 namespace Admin\Models;
 
+use Admin\Admin\Rules\CanDeleteDefaultAdminLanguage;
 use Admin\Eloquent\Concerns\Gettextable;
 use Admin\Helpers\File;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
 use Admin\Helpers\Localization\ResourcesGettext;
 
 class AdminLanguage extends Model
@@ -18,10 +20,7 @@ class AdminLanguage extends Model
     /*
      * Template name
      */
-    public function name()
-    {
-        return _('Preklady administrácie');
-    }
+    protected $name = 'Preklady administrácie';
 
     /*
      * Group
@@ -45,17 +44,21 @@ class AdminLanguage extends Model
     protected $delete_files = false;
 
     /*
+     * Where will be located po/mo files in storage lang directory
+     */
+    public $gettextDirectory = 'gettext_admin';
+
+    protected $rules = [
+        CanDeleteDefaultAdminLanguage::class,
+    ];
+
+    /*
      * Check if this module is enabled for this user
      */
     public function active()
     {
         return admin() && admin()->hasAdminAccess();
     }
-
-    /*
-     * Where will be located po/mo files in storage lang directory
-     */
-    public $gettextDirectory = 'gettext_admin';
 
     /*
      * Automatic form and database generation
@@ -93,5 +96,11 @@ class AdminLanguage extends Model
         }
 
         return $this->poedit_po;
+    }
+
+    public function beforeGettextFilesSync()
+    {
+        //Switch gettext localization
+        (new AdminResourcesSyncer)->syncModelTranslations();
     }
 }

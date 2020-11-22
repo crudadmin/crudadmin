@@ -2,8 +2,8 @@
 
 namespace Admin\Helpers\Localization;
 
-use Facades\Admin\Helpers\Localization\JSTranslations;
 use Cache;
+use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
 use Gettext\Translations;
 
