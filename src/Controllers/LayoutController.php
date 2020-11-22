@@ -25,7 +25,7 @@ class LayoutController extends BaseController
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
             'admin_languages' => $this->getAdminLanguages(),
-            'admin_language' => admin()->language,
+            'admin_language' => admin()->language ? admin()->language : AdminLocalization::get(),
             'gettext' => config('admin.gettext', false),
             'locale' => app()->getLocale(),
             'localization' => trans('admin::admin'),
