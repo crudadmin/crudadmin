@@ -28,7 +28,9 @@ trait AdminModelTrait
         if ($this->exists == false) {
             //Add auto order incement into row, when row is not in database yet
             if ($this->isSortable() && ! array_key_exists('_order', $this->attributes)) {
-                $this->attributes['_order'] = $this->withTrashed()->count();
+                $this->attributes['_order'] = $this->when($this->hasSoftDeletes(), function($query){
+                    $query->withTrashed();
+                })->count();
             }
 
             //Add auto publishing rows
