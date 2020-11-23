@@ -184,6 +184,9 @@ class DataController extends CRUDController
 
         $model = $this->getModel($request['model']);
 
+        //We need refresh button fields for given user for correct permissions
+        $model->getFields(null, true);
+
         $multiple = $request['multiple'] === true;
 
         $rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get();
