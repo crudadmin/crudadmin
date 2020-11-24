@@ -67,6 +67,7 @@ class AdminRows
             $field = $this->model->getField($column);
 
             $fromFormat = (isset($field['date_format']) ? $field['date_format'] : '') ?: 'd.m.Y';
+            $fromFormat = @explode(' ', $fromFormat)[0];
 
             return Carbon::createFromFormat($fromFormat, $value);
         } catch (\Exception $e) {
@@ -79,133 +80,149 @@ class AdminRows
      */
     protected function checkForSearching($query)
     {
-        if (request()->has('query') || request()->has('query_to')) {
-            $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query'))));
-            $search_to = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query_to'))));
-            $column = request('column');
+        $search = request('search');
 
-            if ($this->isDateColumn($column)) {
-                if (request('query')) {
-                    $date = $this->getDateFormat($column, $search);
-                }
-
-                if (request('query_to')) {
-                    $date_to = $this->getDateFormat($column, $search_to);
-                }
-
-                if (isset($date) && ! isset($date_to)) {
-                    $query->whereDate($column, $date->format('Y-m-d'));
-                }
-
-                if (! isset($date) && isset($date_to)) {
-                    $query->whereDate($column, '<=', $date_to->format('Y-m-d'));
-                }
-
-                if (isset($date) && isset($date_to)) {
-                    $query->whereDate($column, '>=', $date->format('Y-m-d'))
-                          ->whereDate($column, '<=', $date_to->format('Y-m-d'));
-                }
-
-                if (! isset($date) && ! isset($date_to)) {
-                    $query->whereRaw('0');
-                }
-            }
-
-            //If is more than 3 chars for searching
-            elseif (strlen($search) >= 3 || ($this->isSelectColumn($column) || is_numeric($search)) || $search_to) {
-                $columns = array_merge(array_keys($this->model->getFields()), ['id']);
-                $queries = explode(' ', $search);
-
-                //If is valid column
-                if (in_array($column, $columns)) {
-                    $columns = [$column];
-                }
-
-                //Search scope
-                $query->where(function ($builder) use ($columns, $queries, $search, $search_to) {
-                    foreach ($columns as $key => $column) {
-                        //Search in all columns
-                        $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to) {
-                            //If is imaginarry field, skip whole process
-                            if ( $this->model->isFieldType($column, 'imaginary') || $this->model->hasFieldParam($column, 'imaginary') ) {
-                                return;
-                            } elseif ($search_to) {
-                                $builder->where(function ($builder) use ($column, $search, $search_to) {
-                                    if (! isset($search) && isset($search_to)) {
-                                        $builder->where($column, '<=', $search_to);
-                                    }
-
-                                    if (isset($search) && isset($search_to)) {
-                                        $builder->where($column, '>=', $search)
-                                                ->where($column, '<=', $search_to);
-                                    }
-                                });
-                            }
-
-                            //Find exact id, value
-                            elseif ($this->isPrimaryKey($column, $columns)) {
-                                foreach ($queries as $query) {
-                                    $builder->where($column, $query);
-                                }
-                            }
-
-                            //Find by data in relation
-                            elseif ($this->model->hasFieldParam($column, 'belongsTo')) {
-                                $relation = explode(',', $this->model->getField($column)['belongsTo']);
-
-                                $byColumns = $this->getNamesBuilder($relation, $columns);
-
-                                //We does not have columns for filter
-                                if ( count($byColumns) == 0 ){
-                                    return;
-                                }
-
-                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
-                                    foreach ($queries as $query) {
-                                        foreach ($byColumns as $key => $selector) {
-                                            if ($selector == 'id') {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                                            } else {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                                            }
-                                        }
-                                    }
-                                });
-                            } elseif ($this->model->hasFieldParam($column, 'belongsToMany')) {
-                                $relation = explode(',', $this->model->getField($column)['belongsToMany']);
-
-                                $byColumns = $this->getNamesBuilder($relation, $columns);
-
-                                //We does not have columns for filter
-                                if ( count($byColumns) == 0 ){
-                                    return;
-                                }
-
-                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
-                                    foreach ($queries as $query) {
-                                        foreach ($byColumns as $key => $selector) {
-                                            if ($selector == 'id') {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                                            } else {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-
-                            //Find by fulltext in query string
-                            else {
-                                //Search for all inserted words
-                                foreach ($queries as $key => $query) {
-                                    $builder->where($column, 'like', '%'.$query.'%');
-                                }
-                            }
-                        });
-                    }
-                });
-            }
+        if ( !is_array($search) || count($search) == 0 ){
+            return $query;
         }
+
+        foreach ($search as $item) {
+            $itemQuery = @$item['query'];
+            $itemQueryTo = @$item['query_to'];
+            $column = @$item['column'];
+
+            if (!($itemQuery || $itemQueryTo)) {
+                continue;
+            }
+
+            $query->where(function($query) use ($itemQuery, $itemQueryTo, $column) {
+                $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', $itemQuery)));
+                $search_to = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', $itemQueryTo)));
+
+                if ($this->isDateColumn($column)) {
+                    if ($itemQuery) {
+                        $date = $this->getDateFormat($column, $search);
+                    }
+
+                    if ($itemQueryTo) {
+                        $date_to = $this->getDateFormat($column, $search_to);
+                    }
+
+                    if (isset($date) && ! isset($date_to)) {
+                        $query->whereDate($column, $date->format('Y-m-d'));
+                    }
+
+                    if (! isset($date) && isset($date_to)) {
+                        $query->whereDate($column, '<=', $date_to->format('Y-m-d'));
+                    }
+
+                    if (isset($date) && isset($date_to)) {
+                        $query->whereDate($column, '>=', $date->format('Y-m-d'))
+                              ->whereDate($column, '<=', $date_to->format('Y-m-d'));
+                    }
+
+                    if (! isset($date) && ! isset($date_to)) {
+                        $query->whereRaw('0');
+                    }
+                }
+
+                //If is more than 3 chars for searching
+                elseif (strlen($search) >= 3 || ($this->isSelectColumn($column) || is_numeric($search)) || $search_to) {
+                    $columns = array_merge(array_keys($this->model->getFields()), ['id']);
+                    $queries = explode(' ', $search);
+
+                    //If is valid column
+                    if (in_array($column, $columns)) {
+                        $columns = [$column];
+                    }
+
+                    //Search scope
+                    $query->where(function ($builder) use ($columns, $queries, $search, $search_to) {
+                        foreach ($columns as $key => $column) {
+                            //Search in all columns
+                            $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to) {
+                                //If is imaginarry field, skip whole process
+                                if ( $this->model->isFieldType($column, 'imaginary') || $this->model->hasFieldParam($column, 'imaginary') ) {
+                                    return;
+                                } elseif ($search_to) {
+                                    $builder->where(function ($builder) use ($column, $search, $search_to) {
+                                        if (! isset($search) && isset($search_to)) {
+                                            $builder->where($column, '<=', $search_to);
+                                        }
+
+                                        if (isset($search) && isset($search_to)) {
+                                            $builder->where($column, '>=', $search)
+                                                    ->where($column, '<=', $search_to);
+                                        }
+                                    });
+                                }
+
+                                //Find exact id, value
+                                elseif ($this->isPrimaryKey($column, $columns)) {
+                                    foreach ($queries as $query) {
+                                        $builder->where($column, $query);
+                                    }
+                                }
+
+                                //Find by data in relation
+                                elseif ($this->model->hasFieldParam($column, 'belongsTo')) {
+                                    $relation = explode(',', $this->model->getField($column)['belongsTo']);
+
+                                    $byColumns = $this->getNamesBuilder($relation, $columns);
+
+                                    //We does not have columns for filter
+                                    if ( count($byColumns) == 0 ){
+                                        return;
+                                    }
+
+                                    $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
+                                        foreach ($queries as $query) {
+                                            foreach ($byColumns as $key => $selector) {
+                                                if ($selector == 'id') {
+                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
+                                                } else {
+                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
+                                                }
+                                            }
+                                        }
+                                    });
+                                } elseif ($this->model->hasFieldParam($column, 'belongsToMany')) {
+                                    $relation = explode(',', $this->model->getField($column)['belongsToMany']);
+
+                                    $byColumns = $this->getNamesBuilder($relation, $columns);
+
+                                    //We does not have columns for filter
+                                    if ( count($byColumns) == 0 ){
+                                        return;
+                                    }
+
+                                    $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
+                                        foreach ($queries as $query) {
+                                            foreach ($byColumns as $key => $selector) {
+                                                if ($selector == 'id') {
+                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
+                                                } else {
+                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+
+                                //Find by fulltext in query string
+                                else {
+                                    //Search for all inserted words
+                                    foreach ($queries as $key => $query) {
+                                        $builder->where($column, 'like', '%'.$query.'%');
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
 
         return $query;
     }
