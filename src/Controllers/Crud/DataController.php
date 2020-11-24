@@ -114,10 +114,26 @@ class DataController extends CRUDController
             }
         }
 
-        $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page'), 0);
+        $rows = (new AdminRows($model))->returnModelData(
+            request('parent'),
+            request('subid'),
+            request('language_id'),
+            request('limit'),
+            request('page'),
+            0
+        );
 
+        //We need load data from previous page, if given page is empty
         if (count($rows['rows']) == 0 && request('page') > 1) {
-            $rows = (new AdminRows($model))->returnModelData(request('parent'), request('subid'), request('language_id'), request('limit'), request('page') - 1, 0);
+            $rows = (new AdminRows($model))->returnModelData(
+                request('parent'),
+                request('subid'),
+                request('language_id'),
+                request('limit'),
+                request('page')
+                 1,
+                 0
+             );
         }
 
         Ajax::message(null, null, null, [

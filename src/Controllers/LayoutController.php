@@ -8,6 +8,8 @@ use Admin\Controllers\Controller as BaseController;
 use Admin\Fields\Group;
 use Admin\Helpers\AdminRows;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
+use Admin\Helpers\SecureDownloader;
+use Admin\Helpers\SheetDownloader;
 use Ajax;
 use Illuminate\Http\Request;
 use Localization;
@@ -131,6 +133,17 @@ class LayoutController extends BaseController
         //Modify intiial request data
         if ( $initialOpeningRequest === true && method_exists($model, 'afterInitialAdminRequest') ) {
             $data['model'] = $model->afterInitialAdminRequest($data['model']);
+        }
+
+        //Download sheet table
+        if ( request('download') == 1 ){
+            $sheet = new SheetDownloader($model, $data['rows']);
+
+            $path = $sheet->generate();
+
+            return [
+                'download' => (new SecureDownloader($path))->getDownloadPath(true),
+            ];
         }
 
         return $data;

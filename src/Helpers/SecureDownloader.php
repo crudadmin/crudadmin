@@ -20,11 +20,12 @@ class SecureDownloader
         return sha1($this->basepath);
     }
 
-    public function getDownloadPath()
+    public function getDownloadPath($removeAfterDownload = false)
     {
         session()->put(self::$sessionKey.'.'.$this->getHash(), [
             'basepath' => $this->basepath,
             'signature' => Crypt::encryptString($this->basepath),
+            'delete' => $removeAfterDownload,
         ]);
 
         session()->save();
@@ -32,7 +33,7 @@ class SecureDownloader
         return action('\Admin\Controllers\DownloadController@securedUserDownload', $this->getHash());
     }
 
-    public static function getSessionBasePath(string $hash)
+    public static function getSessionBaseData(string $hash)
     {
         $data = session()->get(self::$sessionKey.'.'.$hash);
 
@@ -42,7 +43,14 @@ class SecureDownloader
 
         //If signed basepath is okay
         if ( Crypt::decryptString($data['signature']) == $data['basepath'] ){
-            return $data['basepath'];
+            return $data;
         }
+    }
+
+    public static function getSessionBasePath(string $hash)
+    {
+        $data = self::getSessionBaseData($hash);
+
+        return @$data['basepath'];
     }
 }

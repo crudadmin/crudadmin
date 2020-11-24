@@ -4,6 +4,7 @@ namespace Admin\Controllers;
 
 use Admin\Helpers\File;
 use Admin\Helpers\SecureDownloader;
+use Admin\Helpers\SheetDownloader;
 use Illuminate\Http\Request;
 
 class DownloadController extends Controller
@@ -65,10 +66,18 @@ class DownloadController extends Controller
     {
         $hash = request('hash');
 
-        if ( !(SecureDownloader::getSessionBasePath($hash)) ){
+        if ( !($path = SecureDownloader::getSessionBasePath($hash)) ){
             return abort(404);
         }
 
-        return response()->download(SecureDownloader::getSessionBasePath($hash));
+        $data = SecureDownloader::getSessionBaseData($hash);
+
+        $response = response()->download($path);
+
+        if ( @$data['delete'] === true ){
+            $response->deleteFileAfterSend();
+        }
+
+        return $response;
     }
 }
