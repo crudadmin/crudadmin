@@ -139,7 +139,9 @@ class LayoutController extends BaseController
         if ( request('download') == 1 ){
             $sheet = new SheetDownloader($model, $data['rows']);
 
-            $path = $sheet->generate();
+            if (!($path = $sheet->generate())){
+                Ajax::error(_('Tabuľku sa nepodarilo stiahnuť.'), null, null, 500);
+            }
 
             return [
                 'download' => (new SecureDownloader($path))->getDownloadPath(true),
