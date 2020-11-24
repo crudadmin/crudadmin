@@ -130,9 +130,9 @@ class DataController extends CRUDController
                 request('subid'),
                 request('language_id'),
                 request('limit'),
-                request('page')
-                 1,
-                 0
+                request('page'),
+                1,
+                0
              );
         }
 
