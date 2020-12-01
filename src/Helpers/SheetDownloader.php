@@ -121,12 +121,12 @@ class SheetDownloader
 
         foreach ($this->rows as $i => $row) {
             foreach ($columns as $columnIndex => $column) {
-                $value = @$row[$column];
-
                 if ( $this->model->hasFieldParam($column, ['belongsTo', 'belongsToMany']) ){
-                    $value = $this->getBelongsToValue($column, $value);
+                    $value = $this->getBelongsToValue($column, @$row[$column]);
                 } else if ( $this->model->isFieldType($column, 'select') ){
-                    $value = $this->model->getSelectOption($column, $value);
+                    $value = $this->model->getSelectOption($column, @$row[$column]);
+                } else {
+                    $value = strip_tags(@$row[$column] ?: '');
                 }
 
                 $column = $this->getColumn($columnIndex);
