@@ -6,6 +6,10 @@ use Admin\Core\Helpers\AdminCore;
 
 class Admin extends AdminCore
 {
+    private $isAdmin = null;
+
+    private $isFrontend = null;
+
     /*
      * We want share loaded models between AdminCore and Admin classes
      */
@@ -19,7 +23,11 @@ class Admin extends AdminCore
      */
     public function isAdmin()
     {
-        return request()->segment(1) == 'admin';
+        if ( $this->isAdmin !== null ){
+            return $this->isAdmin;
+        }
+
+        return $this->isAdmin = request()->segment(1) == 'admin';
     }
 
     /*
@@ -27,7 +35,11 @@ class Admin extends AdminCore
      */
     public function isFrontend()
     {
-        return ! $this->isAdmin() && ! app()->runningInConsole();
+        if ( $this->isFrontend !== null ){
+            return $this->isFrontend;
+        }
+
+        return $this->isFrontend = (! $this->isAdmin() && ! app()->runningInConsole());
     }
 
     /*
