@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
 
 trait ModelUsersRoles
 {
@@ -42,7 +43,7 @@ trait ModelUsersRoles
             if (count($permissions) > 0) {
                 $options[$path] = [
                     'permissions' => $permissions,
-                    'name' => $model->getProperty('name'),
+                    'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
                     'tree' => $this->buildModelTree($model, []),
                 ];
             }

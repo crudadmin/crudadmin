@@ -94,7 +94,7 @@ class AdminResourcesSyncer
 
         foreach ($model->getFields() as $key => $field) {
             foreach (self::$fieldsTranslatableKeys as $k => $value) {
-                $tree[$table.'.fields.'.$key.'.'.$k] = @$field[$k];
+                $tree[$table.'.fields.'.$key.'.'.$k] = @$field[$value];
             }
         }
     }
