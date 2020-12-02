@@ -38,11 +38,16 @@ trait ModelUsersRoles
         foreach ($models as $migration => $path) {
             $model = new $path;
 
-            $permissions = $permissions = $model->getModelPermissions();
+            $permissions = $model->getModelPermissions();
 
             if (count($permissions) > 0) {
                 $options[$path] = [
-                    'permissions' => $permissions,
+                    'permissions' => array_map(function($item){
+                        $item['name'] = AdminResourcesSyncer::translate(@$item['name']);
+                        $item['title'] = AdminResourcesSyncer::translate(@$item['title']);
+
+                        return $item;
+                    }, $permissions),
                     'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
                     'tree' => $this->buildModelTree($model, []),
                 ];
