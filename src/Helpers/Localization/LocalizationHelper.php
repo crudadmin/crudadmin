@@ -309,4 +309,13 @@ class LocalizationHelper
             $this->getLanguages();
         }
     }
+
+    /*
+     * Allow for gettext javascript translations use ASSET_PATH.
+     * Because other domains cannot receive cookies for translations verification
+     */
+    public static function crossDomainSupport()
+    {
+        return true;
+    }
 }

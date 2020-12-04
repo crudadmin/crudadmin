@@ -224,11 +224,19 @@ class Gettext
             $timestamp = filemtime($language->getPoPath()->path);
         }
 
-        return asset(action('\Admin\Controllers\GettextController@'.$localizationClass::gettextJsResourcesMethod(), null, false)
-                    .'?lang='.($language ? $language->slug : '')
-                    .'&t='.$timestamp
-                    .'&a='.(EditorMode::isActiveTranslatable() ? hashAdminVersionName(Admin::getAssetsVersion()) : 0)
+        $path = action(
+            '\Admin\Controllers\GettextController@'.$localizationClass::gettextJsResourcesMethod(), null, false)
+            .'?lang='.($language ? $language->slug : '')
+            .'&t='.$timestamp
+            .'&a='.(EditorMode::isActiveTranslatable() ? hashAdminVersionName(Admin::getAssetsVersion()) : 0
         );
+
+        if ( $localizationClass::crossDomainSupport() === true ) {
+            return asset($path);
+        } else {
+            return url($path);
+        }
+
     }
 
     //Set correct translations headers

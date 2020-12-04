@@ -12,6 +12,15 @@ use Illuminate\Support\Collection;
 
 class AdminLocalization extends LocalizationHelper implements LocalizationInterface
 {
+    /*
+     * Allow for gettext javascript translations use ASSET_PATH.
+     * Because other domains cannot receive cookies for translations verification
+     */
+    public static function crossDomainSupport()
+    {
+        return false;
+    }
+
     /**
      * Table of eloquent
      *

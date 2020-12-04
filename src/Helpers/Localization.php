@@ -12,6 +12,17 @@ use Admin\Helpers\File;
 
 class Localization extends LocalizationHelper implements LocalizationInterface
 {
+    /*
+     * Allow for gettext javascript translations use ASSET_PATH.
+     * Because other domains cannot receive cookies for translations verification
+     */
+    public static function crossDomainSupport()
+    {
+        //We want disable ASSET_PATH for logged administrator
+        //All request must be accross same domain
+        return admin() ? false : true;
+    }
+
     /**
      * Table of eloquent
      *
