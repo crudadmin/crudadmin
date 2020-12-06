@@ -282,6 +282,12 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             'invoice' => [
                 'icon' => 'far fa-file-alt',
             ],
+            'additional' => [
+                'icon' => 'fa-plus-circle',
+            ],
+            'document' => [
+                'icon' => 'far fa-file-alt',
+            ],
             'proform' => [
                 'icon' => 'far fa-file-alt',
             ],
@@ -314,6 +320,9 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
             ],
             'office' => [
                 'icon' => 'fa-building',
+            ],
+            'commision' => [
+                'icon' => 'fa-percentage',
             ],
             'param' => [
                 'icon' => 'fa-gear',
