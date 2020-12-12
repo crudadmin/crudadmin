@@ -88,6 +88,11 @@ class AdminModel extends CoreAdminModel
     protected $sortable = true;
 
     /*
+     * Row can be displayed in preview mode, also when editable is disabled.
+     */
+    protected $displayable = false;
+
+    /*
      * Ordering rows
      */
     protected $orderBy = ['_order', 'DESC'];

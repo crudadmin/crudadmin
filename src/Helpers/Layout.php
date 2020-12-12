@@ -13,7 +13,7 @@ class Layout
      */
     public $available_positions = [
         'top', 'bottom',
-        'form-top', 'form-bottom', 'form-header', 'form-footer',
+        'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
         'table-header', 'table-header-actions', 'table-footer',
     ];
 
@@ -24,8 +24,11 @@ class Layout
      * form-top - start of the form
      * form-bottom - end of the form
      * form-header - header of the form
+     * form-header-left - header of the form in action bar (left)
+     * form-header-right - header of the form in action bar (right)
      * form-footer - footer of the form
      * table-header - header of the table
+     * table-header-actions - action bar
      * table-footer - footer of the table
      */
     public $position = 'top';

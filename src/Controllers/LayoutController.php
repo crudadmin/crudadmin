@@ -358,6 +358,7 @@ class LayoutController extends BaseController
             'maximum' => $model->getProperty('maximum'),
             'insertable' => $model->getProperty('insertable'),
             'editable' => $model->getProperty('editable'),
+            'displayable' => $model->getProperty('displayable'),
             'deletable' => $model->getProperty('deletable'),
             'publishable' => $model->getProperty('publishable'),
             'sortable' => $model->isSortable(),
