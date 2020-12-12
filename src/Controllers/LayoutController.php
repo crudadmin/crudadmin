@@ -354,6 +354,7 @@ class LayoutController extends BaseController
             'reserved' => $model->getProperty('reserved') ?: false,
             'columns' => $model->getBaseFields(),
             'inParent' => $model->getProperty('inParent') ?: false,
+            'single' => $model->getProperty('single') ?: false,
             'minimum' => $model->getProperty('minimum'),
             'maximum' => $model->getProperty('maximum'),
             'insertable' => $model->getProperty('insertable'),
