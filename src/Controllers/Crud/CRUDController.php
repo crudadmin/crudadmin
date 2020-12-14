@@ -283,7 +283,7 @@ class CRUDController extends Controller
         //Because if some fields are filled, they may not be required, etc..
         $row = $update ? ($rows[$table] = $model->findOrFail($request->get('_id'))) : null;
 
-        $rules = $this->getValidationRulesByAdminModel($model, $row, $request, $update);
+        $rules = $this->getValidationRulesByAdminModel($model, $row, $request, null, $update);
 
         return $this->testRequestValidation($rules, $request, $model);
     }
@@ -296,8 +296,9 @@ class CRUDController extends Controller
         $errors = [];
 
         foreach ($model->getModelChilds() as $child) {
-            if ( $child->getProperty('inParent') === false )
+            if ( $child->getProperty('inParent') === false ) {
                 continue;
+            }
 
             $childRequest = $this->getChildRequest($child, $request);
 
@@ -307,7 +308,7 @@ class CRUDController extends Controller
             ) : null;
 
             //Get child relation validation for specific row
-            $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $update);
+            $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $childRequest, $update);
 
             $errors = array_merge($errors, $this->testRequestValidation($childRules, $childRequest, $child));
         }
@@ -333,7 +334,7 @@ class CRUDController extends Controller
     /*
      * Get all validation data for gived model
      */
-    public function getValidationRulesByAdminModel($model, $row, $request, $update)
+    public function getValidationRulesByAdminModel($model, $row, $request, $childRequest = null, $update)
     {
         $rules = $model->getValidationRules($row);
 
@@ -372,7 +373,7 @@ class CRUDController extends Controller
         }
 
         //Check for additional validation mutator
-        $updatedRules = $this->mutateRequestByRules($model, $updatedRules, $update, $request);
+        $updatedRules = $this->mutateRequestByRules($model, $updatedRules, $update, $childRequest, $request);
 
         return $updatedRules;
     }
@@ -380,11 +381,11 @@ class CRUDController extends Controller
     /*
      * Mutate admin validation request
      */
-    public function mutateRequestByRules($model, $rules = [], $update = false, $request = null)
+    public function mutateRequestByRules($model, $rules = [], $update = false, $childRequest = null, $request = null)
     {
-        $model->getAdminRules(function ($rule) use (&$rules, $update, $model, $request) {
+        $model->getAdminRules(function ($rule) use (&$rules, $update, $model, $childRequest, $request) {
             if (method_exists($rule, 'validate')) {
-                $rules = $rule->validate($rules, $update, $model, $request);
+                $rules = $rule->validate($rules, $update, $model, $childRequest, $request);
             }
         });
 
