@@ -47,6 +47,21 @@ trait HasAttributes
         return parent::mutateAttribute($key, $value);
     }
 
+    private function resetMissingDates($fields)
+    {
+        foreach ($fields as $key => $field) {
+            $type = $field['type'] ?? null;
+
+            if ( in_array($type, ['date']) ){
+                $value = $this->attributes[$key] ?? null;
+
+                if ( $value == '0000-00-00' ){
+                    $this->attributes[$key] = null;
+                }
+            }
+        }
+    }
+
     /**
      * Convert the model's attributes to an array.
      *
@@ -58,13 +73,17 @@ trait HasAttributes
         //Turn of mutating of attributes for admin results
         $this->without_mutators = true;
 
+        $fields = $this->getFields();
+
+        $this->resetMissingDates($fields);
+
         //Get attributes without mutated values
         $attributes = parent::attributesToArray();
 
         $this->without_mutators = false;
 
         //Bing belongs to many values
-        foreach ($this->getFields() as $key => $field) {
+        foreach ($fields as $key => $field) {
             /*
              * Update multiple values in many relationship
              */
