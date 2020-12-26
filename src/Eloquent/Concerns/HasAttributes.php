@@ -15,6 +15,16 @@ trait HasAttributes
      */
     private $without_mutators = false;
 
+    /*
+     * Dates will be parsed in admin format
+     */
+    private $adminDatesFormat = false;
+
+    public function setAdminDatesFormat($state)
+    {
+        $this->adminDatesFormat = $state;
+    }
+
     /**
      * Convert the model instance to an array.
      * In admin, do not convert end-point model by developer into array, without his modifications.
@@ -151,7 +161,7 @@ trait HasAttributes
     protected function serializeDate(DateTimeInterface $date)
     {
         //We need seriale dates for administration in old format
-        if ( Admin::isAdmin() ) {
+        if ( Admin::isAdmin() || $this->adminDatesFormat === true ) {
             return $date->format($this->getDateFormat());
         }
 

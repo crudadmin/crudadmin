@@ -4,6 +4,7 @@ namespace Admin\Eloquent\Concerns;
 
 use Admin;
 use Admin\Models\ModelsHistory;
+use Carbon\Carbon;
 
 trait Historiable
 {
@@ -13,6 +14,19 @@ trait Historiable
     public function historySnapshot($request = [], $original = null)
     {
         return Admin::getModel('ModelsHistory')->pushChanges($this, $request, $original);
+    }
+
+    private function mutateHistoryValue($key, $value)
+    {
+        if ($this->hasFieldParam($key, 'locale', true)) {
+            if (is_string($value)) {
+                $value = json_decode($value);
+            }
+
+            return (array) $value;
+        }
+
+        return $value;
     }
 
     /**
@@ -40,15 +54,7 @@ trait Historiable
             $array = (array) json_decode($row['data']);
 
             foreach ($array as $key => $value) {
-                if ($this->hasFieldParam($key, 'locale', true)) {
-                    if (is_string($value)) {
-                        $value = json_decode($value);
-                    }
-
-                    $value = (array) $value;
-                }
-
-                $data[$key] = $value;
+                $data[$key] = $this->mutateHistoryValue($key, $value);
             }
 
             $versions[] = $data;

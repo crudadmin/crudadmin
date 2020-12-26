@@ -73,7 +73,7 @@ class ModelsHistory extends Model
     {
         foreach ($data as $key => $value) {
             if ($value instanceof Carbon) {
-                $data[$key] = $value->format('Y-m-d H:i:00');
+                $data[$key] = $value->format('Y-m-d H:i:s');
             }
         }
 
@@ -125,6 +125,18 @@ class ModelsHistory extends Model
         return $aReturn;
     }
 
+    private function getActualData($model)
+    {
+        //Dates on frontend are parsed with other method than in admin, we need merge this formats
+        $model->setAdminDatesFormat(true);
+
+        $data = $model->attributesToArray();
+
+        $model->setAdminDatesFormat(false);
+
+        return $data;
+    }
+
     /*
      * Compare by last change
      */
@@ -141,8 +153,10 @@ class ModelsHistory extends Model
 
         $changes = [];
 
+        $actualData = $this->getActualData($model);
+
         //Get also modified field by mutators, which are not in request
-        $data = array_merge($this->array_diff_recursive($model->attributesToArray(), $data), $data);
+        $data = array_merge($this->array_diff_recursive($actualData, $data), $data);
 
         //Compare changes
         foreach ($data as $key => $value) {
