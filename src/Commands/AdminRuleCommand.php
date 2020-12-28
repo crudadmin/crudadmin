@@ -74,7 +74,7 @@ class AdminRuleCommand extends GeneratorCommand
         );
 
         $stub = str_replace(
-            'DummyRule', $this->argument('name'), $stub
+            'DummyRule', basename($this->argument('name')), $stub
         );
 
         return $this;
