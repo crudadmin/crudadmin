@@ -18,6 +18,11 @@ class Admin extends AdminCore
         return AdminCore::class;
     }
 
+    public function getAuthModel()
+    {
+        return $this->getModelByTable('users');
+    }
+
     /*
      * Check if is admin interface
      */
