@@ -58,6 +58,7 @@ class UsersRole extends AdminModel
         return [
             'name' => 'name:admin::admin.user-groups-name|placeholder:admin::admin.user-groups-placeholder|type:string|required|max:90',
             'permissions' => 'name:admin::admin.user-groups-modules|type:json|component:UsersRolesRestriction',
+            'default_model' => 'name:Predvolený modul|title:Tento modul bude spústený po prihlásení sa do systému|type:select',
         ];
     }
 
@@ -69,6 +70,13 @@ class UsersRole extends AdminModel
             'title.update' => _('Upravujete skupinu č. :id'),
             'grid.default' => 'small',
             'grid.big.disabled' => true,
+        ];
+    }
+
+    public function options()
+    {
+        return [
+            'default_model' => $this->getDefaultModels(),
         ];
     }
 

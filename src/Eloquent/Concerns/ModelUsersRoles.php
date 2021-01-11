@@ -7,6 +7,20 @@ use Admin\Helpers\Localization\AdminResourcesSyncer;
 
 trait ModelUsersRoles
 {
+    protected function getDefaultModels()
+    {
+        $models = Admin::getAdminModels();
+        $options = [];
+
+        foreach ($models as $model) {
+            if ( count($this->buildModelTree($model, [])) == 0 ) {
+                $options[$model->getTable()] = AdminResourcesSyncer::translate($model->getProperty('name'));
+            }
+        }
+
+        return $options;
+    }
+
     /*
      * Build models tree by relationship parents
      */
