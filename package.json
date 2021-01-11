@@ -22,7 +22,11 @@
     "babel-preset-react": "^6.24.1",
     "js-md5": "^0.7.3"
   },
+  "resolutions": {
+    "graceful-fs": "^4.2.4"
+  },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "precommit": "gulp --production && git add src/Resources/admin/js/main.js"
   }
 }

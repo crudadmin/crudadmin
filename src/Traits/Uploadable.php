@@ -251,6 +251,10 @@ trait Uploadable
             $extension = $response['extension'];
         }
 
+        if ( !$this->rotateImage($path, $filename, $extension) ) {
+            return false;
+        }
+
         //Compress images
         if ( ! ImageCompressor::compressOriginalImage($path.'/'.$filename, null, $extension) ){
             return false;
@@ -260,6 +264,20 @@ trait Uploadable
             return false;
 
         return new AdminFile($filename, $field, $this->getTable());
+    }
+
+    private function rotateImage($path, $filename, $extension)
+    {
+        if ( in_array($extension, ['jpg', 'jpeg', 'png']) === false ){
+            return true;
+        }
+
+        $imagepath = $path.'/'.$filename;
+
+        $image = Image::make($imagepath);
+        $image = $image->orientate();
+
+        return $image->save($imagepath);
     }
 
     /*
