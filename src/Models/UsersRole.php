@@ -99,4 +99,25 @@ class UsersRole extends AdminModel
 
         return $permissions;
     }
+
+    public function setPermissionsAttribute($value)
+    {
+        $models = json_decode($value ?: '[]', true);
+
+        foreach ($models as $namespace => $permissions) {
+            //Remove class which does not exists anymore
+            if ( !class_exists($namespace) ){
+                unset($models[$namespace]);
+            }
+
+            $model = new $namespace;
+
+            //Whitelist only allowed permissions for given user and model
+            $permissions = array_intersect_key($permissions, $model->getModelPermissions());
+
+            $models[$namespace] = $permissions;
+        }
+
+        $this->attributes['permissions'] = json_encode(json_encode($models));
+    }
 }
