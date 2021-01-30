@@ -150,6 +150,8 @@ trait Uploadable
             $filename = $this->filenameModifier($filename.'.'.$extension, $field);
         }
 
+        $filename = $this->createFilenameIncrement($uploadPath, $filename, $extension);
+
         //Copy file from server, or directory into uploads for field
         File::copy($file, $uploadPath.'/'.$filename);
 
@@ -158,12 +160,14 @@ trait Uploadable
             $gussedExtension = $this->guessExtension($uploadPath, $filename);
 
             if ( $gussedExtension != $extension ) {
+                $newFilename = $this->createFilenameIncrement($uploadPath, $origFilename, $gussedExtension);
+
                 //Modified filename
-                $newExtension = $this->filenameModifier($origFilename.'.'.$gussedExtension, $field);
+                $newFilename = $this->filenameModifier($newFilename.'.'.$gussedExtension, $field);
 
-                File::move($uploadPath.'/'.$filename, $uploadPath.'/'.$newExtension);
+                File::move($uploadPath.'/'.$filename, $uploadPath.'/'.$newFilename);
 
-                $filename = $newExtension;
+                $filename = $newFilename;
             }
         }
 
@@ -197,11 +201,21 @@ trait Uploadable
             $extension = $file->getClientOriginalExtension();
         }
 
+        return $this->createFilenameIncrement($path, $filename, $extension);
+    }
+
+    private function mergeExtensionName($filename, $extension)
+    {
+        return $extension ? ($filename.'.'.$extension) : $filename;
+    }
+
+    private function createFilenameIncrement($path, $filename, $extension)
+    {
         //If filename exists, then add number prefix of file
-        if ($extension && File::exists($path.'/'.$filename.'.'.$extension)) {
+        if (File::exists($path.'/'.$this->mergeExtensionName($filename, $extension)) ) {
             $i = 0;
 
-            while (file_exists($path.'/'.$filename.'-'.$i.'.'.$extension)) {
+            while (file_exists($path.'/'.$this->mergeExtensionName($filename.'-'.$i, $extension)) ) {
                 $i++;
             }
 
