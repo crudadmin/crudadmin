@@ -2,8 +2,6 @@
 
 namespace Admin\Tests\Concerns\Dumper;
 
-use Config;
-
 class MySqlDumper
 {
     static $dumped = false;
