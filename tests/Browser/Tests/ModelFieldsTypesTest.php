@@ -98,7 +98,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
                     //Open row and check if has correct values
                     ->openRow(1)
-                    ->waitForElement('.cke_button_label')->pause(200)
+                    ->waitForElement('.cke_button_label')->pause(300)
                     ->assertHasFormValues(FieldsType::class, $create)
 
                     //Update row and check if values has been properly changed
