@@ -4,6 +4,7 @@ namespace Admin\Requests;
 
 use Admin;
 use Admin\Core\Fields\Mutations\FieldToArray;
+use Admin\Core\Helpers\File as AdminFile;
 use Carbon\Carbon;
 use File;
 use Illuminate\Foundation\Http\FormRequest;
@@ -68,7 +69,7 @@ abstract class Request extends FormRequest
     protected function isEmptyFile($key)
     {
         //If is forced deleting of file in admin
-        if ($this->has('$remove_'.$key)) {
+        if ($this->isFileRemoved($key)) {
             return false;
         }
 
@@ -78,6 +79,11 @@ abstract class Request extends FormRequest
         }
 
         return true;
+    }
+
+    public function isFileRemoved($key)
+    {
+        return $this->has('$remove_'.$key);
     }
 
     /*
@@ -94,9 +100,21 @@ abstract class Request extends FormRequest
                 foreach ($languages as $lang_id => $lang_slug) {
                     $key = $has_locale ? $orig_key.'.'.$lang_slug : $orig_key;
 
-                    //If is File field empty, then remove this field for correct updating row in db
+                    //If is File field empty, then replace this field with previous value for correct updating row in db
                     if ($this->isEmptyFile($key)) {
-                        $this->replace($this->except($key));
+                        //In admin, we does not want to update existing files, we can remove this field from request
+                        if ( Admin::isAdmin() === true ) {
+                            $this->replace($this->except($key));
+                        }
+
+                        //In frontend, we want load previous value, and put it into request
+                        else {
+                            $file = $this->isFileRemoved($key) ? null : @$this->model->getAttribute($key);
+
+                            $this->replace($this->except($key) + [
+                                $key => $file
+                            ]);
+                        }
                     } elseif ($this->isFileUpload($key)) {
                         foreach ($this->getFilesInArray($key) as $file) {
                             //Checks for upload errors

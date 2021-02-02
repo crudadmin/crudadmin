@@ -5,6 +5,9 @@ namespace Admin\Controllers\Crud;
 use Admin;
 use Admin\Controllers\Controller;
 use Admin\Requests\DataRequest;
+use Admin\Core\Fields\Validation\FileMutator;
+use Admin\Core\Fields\Validation\ValidationMutator;
+use Admin\Core\Fields\FieldsValidator;
 use Ajax;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -13,10 +16,6 @@ use Validator;
 
 class CRUDController extends Controller
 {
-    protected $requiredFields = [
-        'required_if', 'required_unless', 'required_with', 'required_with_all', 'required_without', 'required_without_all'
-    ];
-
     /*
      * Get model object by model name, and check user permissions for this model
      */
@@ -36,15 +35,17 @@ class CRUDController extends Controller
      * Mutate incoming request
      * From parent model, and also his childs, if are available
      */
-    public function mutateRequests($request, $model)
+    public function mutateRequests($request, $model, $rows = [])
     {
         $requests = [
-            ['model' => $model, 'request' => $request],
+            ['model' => $rows[$model->getTable()], 'request' => $request],
         ];
 
-        $request->applyMutators($model);
+        $request->applyMutators($requests[0]['model']);
 
         foreach ($model->getModelChilds() as $child) {
+            $child = $rows[$child->getTable()];
+
             if ( $child->getProperty('inParent') === false )
                 continue;
 
@@ -53,7 +54,7 @@ class CRUDController extends Controller
             $childRequest->applyMutators($child);
 
             $requests[] = [
-                'model' => $child,
+                'model' => $rows[$child->getTable()],
                 'request' => $childRequest,
             ];
         }
@@ -98,123 +99,6 @@ class CRUDController extends Controller
     {
         return $model->hasFieldParam($key, ['removeFromForm', 'disabled'], true)
                 && $model->hasFieldParam($key, 'required', true);
-    }
-
-    /*
-     * Check if file does not have locales, or if has, then check if is default language
-     */
-    private function canRemoveNullable($model, $originalKey, $key)
-    {
-        return ! $model->hasFieldParam($originalKey, 'locale', true)
-               || last(explode('.', str_replace('.*', '', $key))) == Localization::getDefaultLanguage()->slug;
-    }
-
-    /*
-     * If file has been deleted from server and is required, then add back required rule for this file.
-     */
-    private function addRequiredRuleForDeletedFiles(&$data, $model, $request, $key, $originalKey)
-    {
-        //If field is required and has been removed, then remove nullable rule for a file requirement
-        if ($request->has('$remove_'.$key) && ! $model->hasFieldParam($originalKey, 'multiple', true)) {
-            $request->merge([$key => null]);
-
-            if (
-                $this->canRemoveNullable($model, $originalKey, $key)
-                && $model->hasFieldParam($originalKey, 'required', true)
-                && ($k = array_search('nullable', $data)) !== false
-             ) {
-                unset($data[$k]);
-
-                $data[] = 'required';
-            }
-        }
-
-        //Add required value for empty multi upload fields
-        if (
-            ! $request->has('$uploaded_'.$key)
-            && $model->hasFieldParam($originalKey, 'multiple', true)
-            && $this->canRemoveNullable($model, $originalKey, $key)
-            && $model->hasFieldParam($originalKey, 'required', true)
-            && ($k = array_search('nullable', $data)) !== false
-        ) {
-            unset($data[$k]);
-
-            $data[] = 'required';
-        }
-    }
-
-    /**
-     * Check if given field is required in request
-     *
-     * @param  Admin\Eloquent\AdminModel  $model
-     * @param  string  $key
-     * @param  Request  $request
-     * @return  bool
-     */
-    private function isKeyRequired($model, $key, $request)
-    {
-        if ( $model->hasFieldParam($key, 'required', true) ) {
-            return true;
-        }
-
-        $field = $model->getField($key);
-
-        //We want check, if this field with empty value will pass validation
-        //when some of required rules are applied. If it won't, we can consider this field as required.
-        foreach ($this->requiredFields as $rule) {
-            if ( isset($field[$rule]) ) {
-                $data = [
-                    $key => null,
-                ] + $request->all();
-
-                $validator = Validator::make($data, [
-                    $key => $rule.':'.$field[$rule]
-                ]);
-
-                if ( $validator->fails() ) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /*
-     * If field has required rule, but file is already uploaded in the server, then
-     * remove required rule, because file is not now required
-     */
-    private function removeRequiredFromUploadedFields(&$data, $model, $row, $request, $key, $originalKey)
-    {
-        if (
-            $model->isFieldType($originalKey, 'file')
-            && $this->isKeyRequired($model, $originalKey, $request)
-            && ! empty($row->{$originalKey})
-            && ! $request->has('$remove_'.$key)
-        ) {
-            $isEmptyFiles = ! $model->hasFieldParam($originalKey, 'multiple', true)
-                            || (
-                                $request->has('$uploaded_'.$originalKey)
-                                && count((array) $request->get('$uploaded_'.$originalKey)) > 0
-                            );
-
-            if ($isEmptyFiles) {
-                if ( ($k = array_search('required', $data)) !== false ) {
-                    unset($data[$k]);
-                }
-
-                //We want remove all additional required rules from this multiple field
-                foreach ($this->requiredFields as $rule) {
-                    foreach ($data as $fk => $fieldRule) {
-                        if ( starts_with($fieldRule, $rule.':') ) {
-                            unset($data[$fk]);
-                        }
-                    }
-                }
-            }
-        } else {
-            $this->addRequiredRuleForDeletedFiles($data, $model, $request, $key, $originalKey);
-        }
     }
 
     /*
@@ -361,11 +245,17 @@ class CRUDController extends Controller
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             //also Allow send form without file, when is file uploaded already in server
             if (isset($row)) {
-                $this->removeRequiredFromUploadedFields($data, $model, $row, $request, $key, $originalKey);
+                $validator = new FieldsValidator($model, $request);
+
+                $data = $validator->mutateRules([
+                    $key => $data
+                ], [
+                    FileMutator::class,
+                ])[$key];
             }
 
             //If field is required, then remove nullable rule
-            elseif ($this->canRemoveNullable($model, $originalKey, $key)) {
+            elseif (ValidationMutator::canRemoveNullable($model, $originalKey, $key)) {
                 $this->removeNullable($model, $originalKey, $data);
             }
 

@@ -30,7 +30,7 @@ class UpdateController extends InsertController
         $rows = $this->checkValidation($request, true);
 
         //Upload files with postprocess if are available
-        $requests = $this->mutateRequests($request, $parentModel);
+        $requests = $this->mutateRequests($request, $parentModel, $rows);
 
         foreach ($requests as $data)
         {
