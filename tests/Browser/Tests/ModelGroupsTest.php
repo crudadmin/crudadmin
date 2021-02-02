@@ -16,7 +16,7 @@ class ModelGroupsTest extends BrowserTestCase
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsGroup::class)
-
+                    ->openForm()
                     //Check if base level field is available
                     ->assertPresent('input[name="field1"]')
 
@@ -119,6 +119,7 @@ class ModelGroupsTest extends BrowserTestCase
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsGroup::class)
+                    ->openForm()
                     ->submitForm()
                     ->waitForElement('span.help-block', 2)
                     ->assertHasAttribute('li:contains("my tab 1")', 'has-error')
@@ -133,6 +134,7 @@ class ModelGroupsTest extends BrowserTestCase
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsGroup::class)
+                    ->openform()
                     ->submitForm()
                     ->waitForElement('span.help-block', 2)
 
@@ -171,6 +173,7 @@ class ModelGroupsTest extends BrowserTestCase
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(FieldsGroup::class)
+                    ->openForm()
                     ->clickLink('my tab 4')
                     ->submitForm()
                     ->waitForElement('span.help-block', 2)

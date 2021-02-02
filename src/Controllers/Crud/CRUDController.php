@@ -38,13 +38,13 @@ class CRUDController extends Controller
     public function mutateRequests($request, $model, $rows = [])
     {
         $requests = [
-            ['model' => $rows[$model->getTable()], 'request' => $request],
+            ['model' => $rows[$model->getTable()] ?? $model, 'request' => $request],
         ];
 
         $request->applyMutators($requests[0]['model']);
 
         foreach ($model->getModelChilds() as $child) {
-            $child = $rows[$child->getTable()];
+            $child = $rows[$child->getTable()] ?? $child;
 
             if ( $child->getProperty('inParent') === false )
                 continue;
@@ -54,7 +54,7 @@ class CRUDController extends Controller
             $childRequest->applyMutators($child);
 
             $requests[] = [
-                'model' => $rows[$child->getTable()],
+                'model' => $child,
                 'request' => $childRequest,
             ];
         }

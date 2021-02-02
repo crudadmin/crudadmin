@@ -39,6 +39,36 @@ trait AdminBrowserIntegration
     }
 
     /**
+     * Open model page.
+     * @param  class $model
+     * @return object
+     */
+    public function openForm($model = null, $selector = '')
+    {
+        $model = $model ? $this->getModelClass($model) : null;
+
+        $this->click($selector.' [data-create-new-row'.($model ? ('="'.$model->getTable().'"') : '').']');
+
+        //Wait till page loads and loader will disappear
+        return $this;
+    }
+
+    /**
+     * Open model page.
+     * @param  class $model
+     * @return object
+     */
+    public function closeForm($model = null)
+    {
+        $model = $model ? $this->getModelClass($model) : null;
+
+        $this->click('[data-close-form'.($model ? ('="'.$model->getTable().'"') : '').']');
+
+        //Wait till page loads and loader will disappear
+        return $this;
+    }
+
+    /**
      * Get table rows data in array.
      * @param  class $model
      * @param  string $wrapper
@@ -336,7 +366,7 @@ trait AdminBrowserIntegration
         $this->click($selector = '.buttons-options'.$modelSelector.' button[data-button="edit"][data-id="'.$id.'"]');
 
         //Wait till row will be opened
-        $this->waitFor($selector.'.btn-success', 100);
+        $this->waitFor('[data-close-form'.($model ? ('="'.$this->getModelClass($model)->getTable().'"') : '').']', 1);
 
         //We need wait 100ms
         $this->pause(100);

@@ -12,7 +12,7 @@ class ModelLayoutsTest extends BrowserTestCase
     use DropDatabase;
 
     /** @test */
-    public function test_layouts()
+    public function test_layouts_and_split_mode()
     {
         Model3::create([
             'field1' => 'test item',

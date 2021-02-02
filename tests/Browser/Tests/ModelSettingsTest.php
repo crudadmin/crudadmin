@@ -25,12 +25,15 @@ class ModelSettingsTest extends BrowserTestCase
             $browser->openModelPage(Model1::class)
 
                     //Check text of buttons
+                    ->openForm()
                     ->assertSeeIn('[data-header]', 'Hlavička nového záznamu')
                     ->assertSeeIn('[data-footer]', 'Odoslať nový záznam')
+                    ->closeForm()
                     ->openRow(1)
-                    ->assertSeeIn('[data-header]', 'Vytvoriť nový záznam')
+                    ->assertSeeIn('[data-header]', 'Zavrieť')
                     ->assertSeeIn('[data-header]', 'Upravujete záznam č. 1, test item')
                     ->assertSeeIn('[data-footer]', 'Upraviť starý záznam')
+                    ->closeForm()
 
                     //Test limits, encode an column order settings
                     ->assertTableRowExists(Model1::class, [

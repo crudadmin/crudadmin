@@ -25,6 +25,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
 
                     //Check if validation of every field does work
+                    ->openForm()
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->submitForm()
                     ->assertHasValidationError(FieldsType::class, $fieldKeys)
@@ -45,17 +46,19 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     //Check if form has been successfully saved
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
+                    ->closeAlert()
+                    ->openForm()
 
                     //Check if component values are reseted after new row has been created
                     ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'no value')
                     ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'no value')
 
                     //Check if form values has been successfully reseted after save and validation errors are gone
-                    ->closeAlert()
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsType::class)
 
                     //Check if table after creation contains of correct column values
+                    ->closeForm()
                     ->assertTableRowExists(FieldsType::class, $this->getTableRow($row))
 
                     //Open row, update it, and check if still has same values after update without changing anything
@@ -74,6 +77,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
                     ->assertHasFormValues(FieldsType::class, $row)
+                    ->closeForm()
                     ->assertTableRowExists(FieldsType::class, $this->getTableRow($row));
         });
 
@@ -94,6 +98,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
                     //Open row and check if has correct values
                     ->openRow(1)
+                    ->waitForElement('.cke_button_label')->pause(200)
                     ->assertHasFormValues(FieldsType::class, $create)
 
                     //Update row and check if values has been properly changed

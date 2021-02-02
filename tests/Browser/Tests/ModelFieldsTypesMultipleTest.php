@@ -23,6 +23,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
             $fieldKeys = array_keys((new FieldsTypesMultiple)->getFields());
 
             $browser->openModelPage(FieldsTypesMultiple::class)
+                    ->openForm()
                     //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->submitForm()
@@ -38,8 +39,10 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Check if form values has been successfully reseted after save
                     ->closeAlert()
+                    ->openForm()
                     ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsTypesMultiple::class)
+                    ->closeForm()
 
                     //Check if table after creation contains of correct column values
                     ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($row))
@@ -51,6 +54,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
                     ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+                    ->closeForm()
                     ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($row));
         });
 

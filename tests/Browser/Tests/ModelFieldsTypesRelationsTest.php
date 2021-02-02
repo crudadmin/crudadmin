@@ -24,7 +24,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
             $fieldKeys = array_keys((new FieldsRelation)->getFields());
 
             $browser->openModelPage(FieldsRelation::class)
-
+                    ->openForm()
                     //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsRelation::class, $fieldKeys)
                     ->submitForm()
@@ -40,8 +40,10 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
 
                     //Check if form values has been successfully reseted after save and validation errors are gone
                     ->closeAlert()
+                    ->openForm()
                     ->assertDoesNotHaveValidationError(FieldsRelation::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsRelation::class)
+                    ->closeForm()
 
                     //Check if table after creation contains of correct column values
                     ->assertTableRowExists(FieldsRelation::class, $this->getTableRow($row))
@@ -53,6 +55,7 @@ class ModelFieldsTypesRelationsTest extends BrowserTestCase
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
                     ->assertHasFormValues(FieldsRelation::class, $row)
+                    ->closeForm()
                     ->assertTableRowExists(FieldsRelation::class, $this->getTableRow($row));
         });
 

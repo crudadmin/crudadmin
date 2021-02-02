@@ -2,11 +2,13 @@
 
 namespace Admin\Tests;
 
-use Admin\Tests\App\User;
-use Illuminate\Support\Facades\File;
-use Admin\Providers\AppServiceProvider as AdminServiceProvider;
+use Admin;
 use Admin\Core\Providers\AppServiceProvider as CoreServiceProvider;
+use Admin\Providers\AppServiceProvider as AdminServiceProvider;
 use Admin\Resources\Providers\AppServiceProvider as ResourcesServiceProvider;
+use Admin\Tests\App\User;
+use Admin\Tests\Concerns\Dumper\MySqlDumper;
+use Illuminate\Support\Facades\File;
 
 trait OrchestraSetup
 {
@@ -181,7 +183,23 @@ trait OrchestraSetup
      */
     public function installAdmin()
     {
-        return $this->artisan('admin:install');
+        $dumper = new MySqlDumper();
+
+        $dumper->cacheDatabaseAndRestore(function(){
+            $this->artisan('admin:install');
+        });
+
+        //If missing admin config
+        if ( !file_exists(config_path('admin.php')) ) {
+           $this->artisan('admin:install');
+        }
+
+        //If missing admin resources
+        if ( !file_exists(public_path('vendor/crudadmin/js')) ) {
+           $this->artisan('admin:update');
+        }
+
+        return $this;
     }
 
     /*

@@ -13,7 +13,7 @@ class AdminInstallCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->installAdmin()
+        $this->artisan('admin:install')
              ->expectsOutput('+ Vendor directories has been successfully published')
              ->expectsOutput('+ Demo user created')
              ->expectsOutput('Installation completed!')

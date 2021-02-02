@@ -39,6 +39,7 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertColumnRowData(ArticlesComment::class, 'id', [3, 2, 1])->pause(300)
 
                     //Fill form and save new related row.
+                    ->openForm(ArticlesComment::class)
                     ->fillForm(ArticlesComment::class, ['name' => 'new related comment'])
                     ->submitForm()->closeAlert()
 
@@ -49,6 +50,7 @@ class ModelRelationsTest extends BrowserTestCase
                     //Open created related row, and test recursivity support
                     ->openRow(5, ArticlesComment::class)
                     ->jsClick('[data-tab-model="articles_comments"] [data-tabs][data-model="articles_comments"]:not([default-tab])')
+                    ->openForm(ArticlesComment::class, '[data-depth="2"]')
                     ->fillForm(ArticlesComment::class, ['name' => 'new recursive comment'], null, '[data-depth="2"]')
                     ->submitForm()->closeAlert()
                     ->assertSeeIn('[data-tabs][data-depth="0"][data-model="articles_comments"]', 'Comments (4)')
@@ -57,13 +59,16 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertColumnRowData(ArticlesComment::class, 'id', [6], true, '[data-depth="2"]')
 
                     //Open second row, and check relations data
+                    ->closeForm(Article::class)
                     ->openRow(2, Article::class)
                     ->waitForElement('[data-tabs][data-model="articles_comments"]:contains("Comments (1)"):visible')
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (1)')
                     ->click('[data-tabs][data-model="articles_comments"]')
                     ->assertColumnRowData(ArticlesComment::class, 'id', [4])
+                    ->openForm(ArticlesComment::class)
                     ->fillForm(ArticlesComment::class, ['name' => 'my second new related comment'])
                     ->submitForm()->closeAlert()
+                    ->closeForm(Article::class)
 
                     //Assert if another relation has no related data
                     ->openRow(3, Article::class)
@@ -88,11 +93,14 @@ class ModelRelationsTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($articleRow) {
             $browser->openModelPage(Article::class)
+                    ->openForm()
                     //Click on related model and check given data
                     ->click('[data-tabs][data-model="articles_comments"] a')
 
                     //Add 2 related comments
+                    ->openForm(ArticlesComment::class)
                     ->fillForm(ArticlesComment::class, ['name' => 'new related comment'])->submitForm()->closeAlert()
+                    ->openForm(ArticlesComment::class)
                     ->fillForm(ArticlesComment::class, ['name' => 'new related comment 1'])->submitForm()->closeAlert()
 
                     //Check if new row has been given into table
