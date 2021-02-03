@@ -61,7 +61,9 @@ export default {
 
     computed: {
         permissions(){
-            return JSON.parse(this.field.value||'{}');
+            let permissions = JSON.parse(this.field.value||'{}');
+
+            return _.isArray(permissions) ? {} : permissions;
         },
         getBasePermissions(){
             var tree = this.modelTree,
