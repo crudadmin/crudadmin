@@ -45,7 +45,7 @@ trait AdminBrowserIntegration
 
     public function waitForCkeditor()
     {
-        return $this->pause(800);
+        return $this->pause(1000);
     }
 
     /**
