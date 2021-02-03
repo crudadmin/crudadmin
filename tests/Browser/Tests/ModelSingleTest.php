@@ -22,8 +22,8 @@ class ModelSingleTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($row, $inParentRow) {
             $browser->openModelPage(SingleModel::class)
-                    //We need wait till editor will be loaded
-                    ->waitForElement('.cke_button_label')->pause(200)
+                    //ckeditor pause
+                    ->waitForCkeditor()
 
                     //Test create new single row
                     ->fillForm(SingleModel::class, $row)

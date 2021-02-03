@@ -26,6 +26,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Check if validation of every field does work
                     ->openForm()
+                    ->waitForCkeditor() //ckeditor pause
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->submitForm()
                     ->assertHasValidationError(FieldsType::class, $fieldKeys)
@@ -98,7 +99,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
                     //Open row and check if has correct values
                     ->openRow(1)
-                    ->waitForElement('.cke_button_label')->pause(300)
+                    ->waitForCkeditor()
                     ->assertHasFormValues(FieldsType::class, $create)
 
                     //Update row and check if values has been properly changed

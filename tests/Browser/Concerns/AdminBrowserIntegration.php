@@ -21,11 +21,6 @@ trait AdminBrowserIntegration
         return '@model-builder"][data-model="'.$model->getTable();
     }
 
-    /**
-     * Open model page.
-     * @param  class $model
-     * @return object
-     */
     public function openModelPage($model)
     {
         $model = $this->getModelClass($model);
@@ -38,11 +33,6 @@ trait AdminBrowserIntegration
                     ->waitUntilMissing('.box .overlay');
     }
 
-    /**
-     * Open model page.
-     * @param  class $model
-     * @return object
-     */
     public function openForm($model = null, $selector = '')
     {
         $model = $model ? $this->getModelClass($model) : null;
@@ -51,6 +41,11 @@ trait AdminBrowserIntegration
 
         //Wait till page loads and loader will disappear
         return $this;
+    }
+
+    public function waitForCkeditor()
+    {
+        return $this->pause(800);
     }
 
     /**

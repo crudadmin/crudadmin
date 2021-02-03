@@ -26,6 +26,7 @@ class ModelHistoryTest extends BrowserTestCase
 
                     //Check if form values has been successfully filled
                     ->openForm()
+                    ->waitForCkeditor() //ckeditor pause
                     ->fillForm(History::class, $row, 'sk')
                     ->assertHasFormValues(History::class, $row, 'sk')
 
