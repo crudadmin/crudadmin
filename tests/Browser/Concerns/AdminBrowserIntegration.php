@@ -45,7 +45,16 @@ trait AdminBrowserIntegration
 
     public function waitForCkeditor()
     {
-        return $this->pause(1000);
+        return $this->waitUsing(5, 100, function () {
+            $element = $this->script("
+                let editors = Object.values(CKEDITOR.instances),
+                    notReady = editors.filter(editor => editor.status !== 'ready');
+
+                return editors.length > 0 && notReady.length == 0;
+            ");
+
+            return $element[0] === true;
+        }, 'Ckeditor has not been loaded.');
     }
 
     /**
