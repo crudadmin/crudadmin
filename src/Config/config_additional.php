@@ -7,6 +7,11 @@ return [
     'app_namespace' => 'App',
 
     /*
+     * Default crudadmin storage
+     */
+    'disk' => 'crudadmin',
+
+    /*
      * From which directories CrudAdmin should load Admin Modules
      */
     'models' => [
@@ -103,6 +108,16 @@ return [
      * Allow seo module
      */
     'seo' => false,
+
+    /**
+     * Allow ckfinder in ckeditor, or use filemanager
+     */
+    'ckfinder' => false,
+
+    /*
+     * Filemanager
+     */
+    'filemanager' => true,
 
     /*
      * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel

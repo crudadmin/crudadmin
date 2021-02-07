@@ -82,6 +82,8 @@ class AppServiceProvider extends ServiceProvider
         ], $this->providers));
 
         $this->bootRouteMiddleware();
+
+        $this->addCrudadminStorage();
     }
 
     public function registerFacades()
@@ -141,5 +143,15 @@ class AppServiceProvider extends ServiceProvider
 
             $this->app['config']->set($key.'.'.$property, $attributes);
         }
+    }
+
+    private function addCrudadminStorage()
+    {
+        $this->app['config']->set('filesystems.disks.crudadmin', [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => env('APP_URL').'/uploads',
+            'visibility' => 'public',
+        ]);
     }
 }
