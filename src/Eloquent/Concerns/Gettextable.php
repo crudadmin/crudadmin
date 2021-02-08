@@ -49,20 +49,6 @@ trait Gettextable
     }
 
     /*
-     * Change filename po mo files,
-     * because .mo files need to be unique
-     */
-    public function setPoeditPoFilename($filename)
-    {
-        //Regenerate mo files from po files
-        if ($this->hasGettextSupport()) {
-            $this->attributes['poedit_mo'] = date('d-m-Y-h-i-s').'.mo';
-        }
-
-        return $filename;
-    }
-
-    /*
      * Set slug
      */
     public function setSlugAttribute($value)
