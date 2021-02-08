@@ -37,7 +37,7 @@ class AdminResourcesSyncer
         $translations = Admin::cache('admin.translations.'.$language->getKey(), function() use ($language) {
             $pofile = $language->poedit_po;
 
-            if ( $pofile ) {
+            if ( $pofile && file_exists($pofile->basepath) ) {
                 return Translations::fromPoFile($pofile->basepath);
             }
         });
