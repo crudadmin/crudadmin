@@ -42,6 +42,7 @@ return [
         'resources/views',
         'resources/assets/js',
         'resources/js',
+        public_path('vendor/crudadmin/js/FrontendEditor.js'),
     ],
 
     /*
