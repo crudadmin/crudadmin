@@ -50,7 +50,12 @@ class ImageController extends Controller
         $cache = json_decode(file_get_contents($temporaryPath), true);
 
         //Resize image
-        $file = (new File(public_path($cache['original_path'])))->image($cache['mutators'], null, true, true);
+        $file = (new File(public_path($cache['original_path'])))->image(
+            $cache['mutators'] ?? null,
+            $cache['directory'] ?? null,
+            true,
+            true
+        );
 
         //Remove temporary file with settings
         @unlink($temporaryPath);
