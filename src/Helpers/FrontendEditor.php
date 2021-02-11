@@ -26,7 +26,7 @@ class FrontendEditor
      */
     public function hasAccess()
     {
-        return admin() && admin()->hasAccess(StaticContent::class, 'uploadable');
+        return admin() && admin()->hasAccess(StaticContent::class, 'update');
     }
 
     /**
