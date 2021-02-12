@@ -253,11 +253,16 @@ class Admin extends AdminCore
         $this->addGitignoreFiles();
     }
 
-    public function addGitignoreFiles()
+    public function addGitignoreFiles($directories = null)
     {
         $gitignore = "*\n!.gitignore";
 
-        foreach ([public_path(self::getAdminAssetsPath()), public_path(File::getUploadsDirectory())] as $dir) {
+        $directories = $directories ?: [
+            public_path(self::getAdminAssetsPath()),
+            public_path(File::getUploadsDirectory())
+        ];
+
+        foreach ($directories as $dir) {
             File::makeDirs($dir);
 
             file_put_contents($dir.'/.gitignore', $gitignore);
