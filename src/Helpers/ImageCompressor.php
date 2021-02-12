@@ -5,6 +5,7 @@ namespace Admin\Helpers;
 use Admin\Helpers\CustomImageOptimizerChainFactory;
 use Admin\Helpers\File;
 use Image;
+use Log;
 
 class ImageCompressor
 {
@@ -121,9 +122,10 @@ class ImageCompressor
             $optimizerChain->optimize($sourcePath, $destPath);
 
             $this->addCompressedPath($sourcePath, $destPath, $origSize);
-
             return true;
         } catch (\Exception $e) {
+            Log::error($e);
+
             return false;
         }
     }
