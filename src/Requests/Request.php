@@ -403,6 +403,12 @@ abstract class Request extends FormRequest
         $this->removeEmptyPassword($fields);
         $this->removeMissingFields($fields);
 
+        $this->model->runAdminModules(function($module) use ($fields, $rules) {
+            if ( method_exists($module, 'requestMutator') ) {
+                $response = $module->requestMutator($this, $this->model, $fields, $rules);
+            }
+        });
+
         return count($this->errors) == 0;
     }
 

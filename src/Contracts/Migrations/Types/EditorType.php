@@ -16,7 +16,7 @@ class EditorType extends Type
      */
     public function isEnabled(AdminModel $model, string $key)
     {
-        return $model->isFieldType($key, ['editor', 'longeditor']);
+        return $model->isFieldType($key, ['editor', 'longeditor', 'gutenberg']);
     }
 
     /**
