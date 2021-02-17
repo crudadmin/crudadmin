@@ -6,9 +6,8 @@ use Admin;
 use Admin\Facades as Facades;
 use Admin\Helpers as Helpers;
 use Admin\Middleware as Middleware;
-use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+class AppServiceProvider extends AdminHelperServiceProvider
 {
     protected $providers = [
         FieldsServiceProvider::class,
@@ -73,7 +72,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeAdminConfigs();
+        $this->mergeAdminConfigs(
+            require __DIR__.'/../Config/config_additional.php',
+        );
 
         $this->registerFacades();
 
@@ -84,65 +85,6 @@ class AppServiceProvider extends ServiceProvider
         $this->bootRouteMiddleware();
 
         $this->addCrudadminStorage();
-    }
-
-    public function registerFacades()
-    {
-        $this->app->booting(function () {
-            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-
-            foreach ($this->facades as $alias => $facade) {
-                $loader->alias($alias, $facade);
-            }
-        });
-    }
-
-    public function registerProviders(array $providers)
-    {
-        foreach ($providers as $provider) {
-            app()->register($provider);
-        }
-    }
-
-    public function bootRouteMiddleware()
-    {
-        foreach ($this->routeMiddleware as $name => $middleware) {
-            $router = $this->app['router'];
-
-            /*
-             * Support for laravel 5.3
-             * does not know aliasMiddleware method
-             */
-            if (method_exists($router, 'aliasMiddleware')) {
-                $router->aliasMiddleware($name, $middleware);
-            } else {
-                $router->middleware($name, $middleware);
-            }
-        }
-    }
-
-    /*
-     * Merge crudadmin config with esolutions config
-     */
-    private function mergeAdminConfigs($key = 'admin')
-    {
-        //Additional CrudAdmin Config
-        $crudAdminConfig = require __DIR__.'/../Config/config_additional.php';
-
-        $config = $this->app['config']->get($key, []);
-
-        $this->app['config']->set($key, array_merge($crudAdminConfig, $config));
-
-        //Merge selected properties with one/two dimensional array
-        foreach (['models', 'custom_rules', 'global_rules', 'gettext_source_paths', 'gettext_admin_source_paths'] as $property) {
-            if (! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config)) {
-                continue;
-            }
-
-            $attributes = array_merge($config[$property], $crudAdminConfig[$property]);
-
-            $this->app['config']->set($key.'.'.$property, $attributes);
-        }
     }
 
     private function addCrudadminStorage()
