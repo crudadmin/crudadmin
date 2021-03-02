@@ -28,9 +28,16 @@ trait AdminModelTrait
         if ($this->exists == false) {
             //Add auto order incement into row, when row is not in database yet
             if ($this->isSortable() && ! array_key_exists('_order', $this->attributes)) {
-                $this->attributes['_order'] = $this->when($this->hasSoftDeletes(), function($query){
-                    $query->withTrashed();
-                })->count();
+                //Perform empty query without scopes, or booting new eloquent model without global scopes
+                //This is for huge performance optimatizaiton during inserting high number of rows.
+                $latestIncrement = $this->getConnection()
+                                        ->table($this->getTable())
+                                        ->select($this->getKeyName())
+                                        ->orderBy($this->getKeyName(), 'desc')
+                                        ->limit(1)
+                                        ->first();
+
+                $this->attributes['_order'] = $latestIncrement ? $latestIncrement->{$this->getKeyName()} : 0;
             }
 
             //Add auto publishing rows

@@ -213,6 +213,12 @@ class AdminModel extends CoreAdminModel
     protected $imageLosslessCompression = true;
 
     /*
+     * Publishable feature is turned for each model.
+     * Via this property we can manage global publishable for all models
+     */
+    static $globalPublishable = true;
+
+    /*
      * Admin modules
      */
     protected $modules = [
@@ -220,6 +226,16 @@ class AdminModel extends CoreAdminModel
         AdminCustomizationModule::class,
         GlobalRelationModule::class,
     ];
+
+    /**
+     * We can turn off publishable globally for all models
+     *
+     * @param  bool  $state
+     */
+    public static function setGlobalPublishable($state)
+    {
+        self::$globalPublishable = $state;
+    }
 
     /**
      * Boot the soft deleting trait for a model.
@@ -285,6 +301,24 @@ class AdminModel extends CoreAdminModel
         return true;
     }
 
+    /**
+     * Check if publishable scope is enabled by default
+     *
+     * @return  bool
+     */
+    private function allowPublishableByDefault()
+    {
+        if ( $this->publishable == false ){
+            return false;
+        }
+
+        if ( Admin::isAdmin() === true ) {
+            return false;
+        }
+
+        return self::$globalPublishable;
+    }
+
     public function __construct(array $attributes = [])
     {
         //Boot base model trait
@@ -298,7 +332,7 @@ class AdminModel extends CoreAdminModel
         /*
          * Add global scope for publishing extepts admin interface
          */
-        if (! Admin::isAdmin() && $this->publishable == true) {
+        if ( $this->allowPublishableByDefault() ) {
             static::addGlobalScope('publishable', function (Builder $builder) {
                 $builder->withPublished();
             });
