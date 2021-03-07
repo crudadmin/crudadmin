@@ -21,6 +21,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
         FrontendEditorServiceProvider::class,
+        SitetreeServiceProvider::class,
         SEOServiceProvider::class,
         HashServiceProvider::class,
     ];
@@ -33,6 +34,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         'AdminLocalization' => Facades\AdminLocalization::class,
         'EditorMode' => Facades\EditorMode::class,
         'FrontendEditor' => Facades\FrontendEditor::class,
+        'SiteTree' => Facades\SiteTree::class,
         'SEO' => Facades\SEOFacade::class,
         'ImageCompressor' => Facades\ImageCompressor::class,
         'Image' => \Intervention\Image\Facades\Image::class,

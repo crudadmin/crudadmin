@@ -112,6 +112,14 @@ class Admin extends AdminCore
     }
 
     /*
+     * Check if is frontend editor extension enabled
+     */
+    public function isEnabledSitetree()
+    {
+        return config('admin.sitetree', false);
+    }
+
+    /*
      * Get stub path
      */
     public function stub($stub)

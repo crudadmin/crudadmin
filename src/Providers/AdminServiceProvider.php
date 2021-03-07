@@ -71,6 +71,11 @@ class AdminServiceProvider extends ServiceProvider
         if ( \Admin::isEnabledSitebuilder() ) {
             \Admin::registerModel(\Admin\Models\SiteBuilder::class);
         }
+
+        //Sitetree support
+        if ( \Admin::isEnabledSitetree() ) {
+            \Admin::registerModel(\Admin\Models\SiteTree::class);
+        }
     }
 
     private function loadValidators()
