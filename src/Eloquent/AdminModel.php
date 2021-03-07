@@ -149,11 +149,6 @@ class AdminModel extends CoreAdminModel
      */
     protected $delete_files = true;
 
-    /*
-     * Show sub-childs in tabs
-     */
-    protected $inTab = true;
-
     /**
      * Show model in menu even if is relation
      *

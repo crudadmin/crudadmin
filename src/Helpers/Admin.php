@@ -124,15 +124,15 @@ class Admin extends AdminCore
      */
     public function start()
     {
-        $this->set('microtime.start', microtime(true));
+        return $this->set('microtime.start', microtime(true));
     }
 
     /*
      * Return time in seconds
      */
-    public function end()
+    public function end($timestamp = null)
     {
-        return microtime(true) - $this->get('microtime.start', 0);
+        return microtime(true) - ($timestamp ?: $this->get('microtime.start', 0));
     }
 
     /*

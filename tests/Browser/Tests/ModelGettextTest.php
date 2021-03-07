@@ -40,6 +40,8 @@ class ModelGettextTest extends BrowserTestCase
             'Translate 2' => ['translated text'],
             'Hello world' => [''],
             'title meta' => ['updated meta'],
+            'Režim upravovania' => [''],
+            'Administrácia webu' => [''],
         ];
 
         $this->browse(function (DuskBrowser $browser) use ($excepted) {

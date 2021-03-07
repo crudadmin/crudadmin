@@ -610,7 +610,7 @@ trait AdminBrowserIntegration
      */
     public function changeRowLanguage($lang)
     {
-        return $this->click('[data-form-language-switch] > button')->pause(100)
+        return $this->click('[data-form-language-switch] > button')->pause(200)
                     ->click('[data-form-language-switch] li[data-slug="'.$lang.'"]');
     }
 

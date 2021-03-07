@@ -452,7 +452,7 @@ class AdminRows
                 $paginated_rows_data = $this->getRowsData($subid, $langid, function ($query) use ($limit, $page, $count, $id) {
 
                     //Get specific id
-                    if ($id !== false) {
+                    if ($id != false) {
                         if (is_numeric($id)) {
                             $query->where($this->model->getKeyName(), $id);
                         } elseif (is_array($id)) {
