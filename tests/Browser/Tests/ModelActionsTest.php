@@ -47,8 +47,8 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Article::class)
 
                     //Check which item we want delete
-                    ->click('tr[data-id="10"]')
-                    ->click('tr[data-id="7"]')
+                    ->click('tr[data-id="10"] .select-row-checkbox')
+                    ->click('tr[data-id="7"] .select-row-checkbox')
                     ->click('[data-action-list] button')
                     ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.publish-toggle').'")')
                     ->waitFor('[data-id="10"] [data-button="publishable"][data-published="false"]');
@@ -108,8 +108,8 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Article::class)
 
                     //Check which item we want delete
-                    ->click('tr[data-id="10"]')
-                    ->click('tr[data-id="7"]')
+                    ->click('tr[data-id="10"] .select-row-checkbox')
+                    ->click('tr[data-id="7"] .select-row-checkbox')
                     ->click('[data-action-list] button')
                     ->jsClick('[data-action-list] a:contains("'.trans('admin::admin.delete').'")')
                     ->jsClick('.modal .modal-footer button:contains("'.trans('admin::admin.accept').'")')
@@ -134,8 +134,8 @@ class ModelActionsTest extends BrowserTestCase
             $browser->openModelPage(Model1::class)
 
                     //Click multiple items and then press button action
-                    ->click('tr[data-id="1"] td[data-field="id"]')
-                    ->click('tr[data-id="2"] td[data-field="id"]')
+                    ->click('tr[data-id="1"] .select-row-checkbox')
+                    ->click('tr[data-id="2"] .select-row-checkbox')
                     ->click('[data-action-list] button')
                     ->jsClick('[data-action-list] a:contains("SimpleMultipleButton")')
                     ->whenAvailable('.modal .modal-footer', function() use($browser) {

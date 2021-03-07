@@ -328,7 +328,7 @@ trait AdminBrowserAssertions
         $tableColumns = array_map(function ($item) {
             return 'th-'.$item;
         }, array_values(array_merge($excepted, ['options-buttons'])));
-        $tableColumns = array_merge(['select-row-checkbox'], $tableColumns);
+        $tableColumns = array_merge(['row-draggable', 'select-row-checkbox'], $tableColumns);
 
         PHPUnit::assertEquals(
             $columns[0], $tableColumns,
