@@ -10,14 +10,21 @@ class SiteTreeController extends Controller
     public function store()
     {
         $validator = SiteTree::validator()->only([
-            'name', 'type', 'key', 'group_locked', 'row_id', 'parent_id'
+            'name', 'type', 'model', 'url', 'locked_insert', 'row_id', 'parent_id'
         ])->validate();
+
+        $data = $validator->getData();
+
+        //For groups automatically insert disabled types
+        if ( $data['type'] == 'group' ){
+            $data['disabled_types'] = ['group'];
+        }
 
         if ( $id = request('id') ) {
             $row = SiteTree::find($id);
-            $row->update($validator->getData());
+            $row->update($data);
         } else {
-            $row = SiteTree::create($validator->getData());
+            $row = SiteTree::create($data);
         }
 
         return $row;

@@ -4,12 +4,15 @@ namespace Admin\Models;
 
 use Admin;
 use Admin\Eloquent\AdminModel;
+use Admin\Eloquent\Concerns\HasCurrentUrl;
 use Admin\Fields\Group;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 use SiteTree as SiteTreeHelper;
 
 class SiteTree extends AdminModel
 {
+    use HasCurrentUrl;
+
     /*
      * Model created date, for ordering tables in database and in user interface
      */
@@ -20,10 +23,19 @@ class SiteTree extends AdminModel
     protected $group = 'settings';
 
     protected $layouts = [
-        'top' => 'SiteTreeBuilder'
+        'table-before' => 'SiteTreeBuilder'
     ];
 
     protected $reversed = true;
+
+    protected $insertable = false;
+
+    protected $settings = [
+        'pagination.enabled' => false,
+        'search.enabled' => false,
+        'grid.medium.enabled' => false,
+        'table.enabled' => false,
+    ];
 
     /*
      * Automatic form and database generation
@@ -35,25 +47,56 @@ class SiteTree extends AdminModel
     public function fields()
     {
         return [
-            'parent_id' => 'name:Rodič|belongsTo:site_trees,id',
-            'key' => 'name:Kľúč skupiny|required_if:type,$group',
-            'group_locked' => 'name:Zamknutá skupina|type:checkbox|default:0',
+            'parent_id' => 'name:Rodič|belongsTo:site_trees,id|hideFromForm',
+            'row_id' => 'name:Č. záznamu|type:integer|index|hideFromForm|unsigned',
+            'model' => 'name:Model table|hideFromForm',
             'name' => 'name:Názov|required|'.(Admin::isEnabledLocalization() ? 'locale' : ''),
-            'type' => 'name:Vyberte typ podstránky|required',
-            'row_id' => 'name:Č. záznamu|type:integer|index|min:0',
+            'type' => 'name:Vyberte typ podstránky|type:select|required',
+            'key' => 'name:Identifikátor skupiny [a-Z_0-9]|hideFromFormIfNot:type,group',
+            'url' => 'name:Url adresa príspevku|hideFromFormIfNot:type,url|required_if:type,url',
+            Group::inline([
+                'disabled_types' => 'name:Zakázane typy|type:select|title:Tieto typy záznamov sa nebudú môcť pridať v tejto skupine|multiple',
+                'insertable' => 'name:Pridávanie záznamov|title:Pri deaktivácii nebude možné pridavať nové záznamy do skupiny|type:checkbox|default:1',
+                'sortable' => 'name:Povolené preraďovanie|type:checkbox|default:1',
+            ]),
         ];
     }
 
-    protected $settings = [
-        'pagination.enabled' => false,
-        'form.enabled' => false,
-        'header.enabled' => false,
-        'table.enabled' => false,
-    ];
+    public function options()
+    {
+        return [
+            'type' => $types = [
+                'model' => _('Model'),
+                'group' => _('Skupina'),
+                'url' => _('Url adresa'),
+            ],
+            'disabled_types' => $types,
+        ];
+    }
 
     public function getTree()
     {
-        return SiteTreeHelper::getTree()->where('parent_id', $this->getKey());
+        return SiteTreeHelper::getTree()
+                            ->where('parent_id', $this->getKey())
+                            ->values();
+    }
+
+    public function getGroups()
+    {
+        return SiteTreeHelper::getTree()
+                            ->where('parent_id', $this->getKey())
+                            ->where('type', 'group')
+                            ->values();
+    }
+
+    public function isGroup()
+    {
+        return $this->type == 'group';
+    }
+
+    public function isUrl()
+    {
+        return $this->type == 'url';
     }
 
     /**
@@ -65,15 +108,21 @@ class SiteTree extends AdminModel
     {
         $models = SiteTreeHelper::getModels();
 
-        if ( !($modelRows = ($models[$this->type] ?? null)) ){
-            return;
+        if ( $this->isUrl() ){
+            return $this->url;
         }
 
-        if ( !($row = $modelRows->where('id', $this->row_id)->first()) ){
-            return;
-        }
+        if ( $this->type == 'model' ) {
+            if ( !($modelRows = ($models[$this->model] ?? null)) ){
+                return;
+            }
 
-        return $row->getTreeAction();
+            if ( !($row = $modelRows->where('id', $this->row_id)->first()) ){
+                return;
+            }
+
+            return $row->getTreeAction();
+        }
     }
 
     public function beforeInitialAdminRequest()
@@ -103,5 +152,10 @@ class SiteTree extends AdminModel
         }
 
         return $data;
+    }
+
+    public function setUrlAttribute($value)
+    {
+        $this->attributes['Url'] = $this->getPath($value, true, true, true);
     }
 }

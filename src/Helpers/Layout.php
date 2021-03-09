@@ -13,8 +13,8 @@ class Layout
      */
     public $available_positions = [
         'top', 'bottom',
-        'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
-        'table-header', 'table-header-actions', 'table-footer',
+        'form-before', 'form-after', 'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
+        'table-before', 'table-after', 'table-header', 'table-header-actions', 'table-footer',
     ];
 
     /*
