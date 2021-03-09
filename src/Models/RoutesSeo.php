@@ -17,7 +17,7 @@ class RoutesSeo extends AdminModel
     /*
      * Template name
      */
-    protected $name = 'SEO';
+    protected $name = 'SEO - Statické stránky';
 
     protected $icon = 'fa-globe';
 
