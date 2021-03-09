@@ -55,6 +55,7 @@ class SEOService
         return RoutesSeo::create([
             'url' => $routeUri,
             'group' => @$route->action['seo']['group'],
+            'controller' => @$route->action['controller'],
         ]);
     }
 

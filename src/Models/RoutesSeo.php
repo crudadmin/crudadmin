@@ -31,6 +31,8 @@ class RoutesSeo extends AdminModel
 
     protected $sortable = false;
 
+    protected $sitetree = 'url';
+
     /*
      * Automatic form and database generation
      * @name - field name
@@ -45,6 +47,7 @@ class RoutesSeo extends AdminModel
                 'url' => 'name:admin::admin.seoroutes-url|index|disabled|required',
                 // 'new_url' => 'name:admin::admin.seoroutes-newurl|index',
                 'group' => 'name:admin::admin.seoroutes-group|index|invisible',
+                'controller' => 'name:Controller|index|invisible',
             // ])->inline(),
             'Meta tagy' => Group::fields([
                 'title' => 'name:admin::admin.seoroutes-title'.(Admin::isEnabledLocalization() ? '|locale' : ''),
@@ -53,6 +56,24 @@ class RoutesSeo extends AdminModel
                 'image' => 'name:admin::admin.seoroutes-images|image|multiple',
             ]),
         ];
+    }
+
+    public function siteTreeColumns()
+    {
+        return array_merge(parent::siteTreeColumns(), [
+            'controller'
+        ]);
+    }
+
+    public function getTreeAction()
+    {
+        if ( $this->controller ){
+            try {
+                return action('\\'.$this->controller);
+            } catch (\Exception $e){}
+        }
+
+        return url($this->url);
     }
 
     public function beforeInitialAdminRequest()
