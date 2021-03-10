@@ -50,10 +50,10 @@ class SiteTree extends AdminModel
             'parent_id' => 'name:Rodič|belongsTo:site_trees,id|hideFromForm',
             'row_id' => 'name:Č. záznamu|type:integer|index|hideFromForm|unsigned',
             'model' => 'name:Model table|hideFromForm',
-            'name' => 'name:Názov|required|'.(Admin::isEnabledLocalization() ? 'locale' : ''),
+            'name' => 'name:Názov|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             'type' => 'name:Vyberte typ podstránky|type:select|required',
             'key' => 'name:Identifikátor skupiny [a-Z_0-9]|hideFromFormIfNot:type,group',
-            'url' => 'name:Url adresa príspevku|hideFromFormIfNot:type,url|required_if:type,url',
+            'url' => 'name:Url adresa príspevku|hideFromFormIfNot:type,url|required_if:type,url'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             Group::inline([
                 'disabled_types' => 'name:Zakázane typy|type:select|title:Tieto typy záznamov sa nebudú môcť pridať v tejto skupine|multiple',
                 'insertable' => 'name:Pridávanie záznamov|title:Pri deaktivácii nebude možné pridavať nové záznamy do skupiny|type:checkbox|default:1',
@@ -157,6 +157,16 @@ class SiteTree extends AdminModel
 
     public function setUrlAttribute($value)
     {
-        $this->attributes['Url'] = $this->getPath($value, true, true, true);
+        if ( $this->hasFieldParam('url', 'locale') ) {
+            $value = array_wrap($value);
+
+            foreach ($value as $k => $url) {
+                $value[$k] = $this->getPath($url, true, true, true);
+            }
+
+            $this->attributes['url'] = json_encode($value);
+        } else {
+            $this->attributes['url'] = $this->getPath($value, true, true, true);
+        }
     }
 }
