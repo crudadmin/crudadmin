@@ -47,11 +47,16 @@ class SiteTree extends AdminModel
     public function fields()
     {
         return [
-            'parent_id' => 'name:Rodič|belongsTo:site_trees,id|hideFromForm',
-            'row_id' => 'name:Č. záznamu|type:integer|index|hideFromForm|unsigned',
-            'model' => 'name:Model table|hideFromForm',
+            //Ivinsible fields from form
+            Group::fields([
+                'parent_id' => 'name:Rodič|belongsTo:site_trees,id',
+                'row_id' => 'name:Č. záznamu|type:integer|index|unsigned',
+                'model' => 'name:Model table',
+                'type' => 'name:Vyberte typ podstránky|type:select|required',
+                'group_type' => 'name:Vyberte typ podstránky pre skupinu|type:select|required',
+            ])->add('hideFromForm'),
+
             'name' => 'name:Názov|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
-            'type' => 'name:Vyberte typ podstránky|type:select|required',
             'key' => 'name:Identifikátor skupiny [a-Z_0-9]|hideFromFormIfNot:type,group',
             'url' => 'name:Url adresa príspevku|hideFromFormIfNot:type,url|required_if:type,url'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             Group::inline([
@@ -68,8 +73,11 @@ class SiteTree extends AdminModel
             'type' => $types = [
                 'model' => _('Model'),
                 'group' => _('Skupina'),
+                'group-link' => _('Skupina s odkazom'),
                 'url' => _('Url adresa'),
+                'empty' => _('Bez presmerovania'),
             ],
+            'group_type' => $types,
             'disabled_types' => $types,
         ];
     }
@@ -91,12 +99,12 @@ class SiteTree extends AdminModel
 
     public function isGroup()
     {
-        return $this->type == 'group';
+        return in_array($this->type, ['group', 'group-link']);
     }
 
     public function isUrl()
     {
-        return $this->type == 'url';
+        return $this->type == 'url' || $this->group_type == 'url';
     }
 
     /**
@@ -112,7 +120,7 @@ class SiteTree extends AdminModel
             return $this->url;
         }
 
-        if ( $this->type == 'model' ) {
+        if ( $this->type == 'model' || $this->group_type == 'model' ) {
             if ( !($modelRows = ($models[$this->model] ?? null)) ){
                 return;
             }

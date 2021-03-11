@@ -10,7 +10,7 @@ class SiteTreeController extends Controller
     public function store()
     {
         $validator = SiteTree::validator()->only([
-            'name', 'type', 'model', 'url', 'locked_insert', 'row_id', 'parent_id'
+            'name', 'type', 'group_type', 'model', 'url', 'locked_insert', 'row_id', 'parent_id'
         ])->validate();
 
         $data = $validator->getData();
