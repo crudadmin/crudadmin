@@ -53,7 +53,7 @@ class SiteTree extends AdminModel
                 'row_id' => 'name:Č. záznamu|type:integer|index|unsigned',
                 'model' => 'name:Model table',
                 'type' => 'name:Vyberte typ podstránky|type:select|required',
-                'group_type' => 'name:Vyberte typ podstránky pre skupinu|type:select|required',
+                'group_type' => 'name:Vyberte typ podstránky pre skupinu|type:select|required_if:type,group-link',
             ])->add('hideFromForm'),
 
             'name' => 'name:Názov|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
