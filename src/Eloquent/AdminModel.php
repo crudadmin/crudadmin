@@ -160,7 +160,7 @@ class AdminModel extends CoreAdminModel
 
     /*
      * If child model can be added without parent model
-
+     */
     protected $withoutParent = false;
 
     /*
