@@ -57,7 +57,7 @@ class SiteTree extends AdminModel
             ])->add('hideFromForm'),
 
             'name' => 'name:Názov|required'.(Admin::isEnabledLocalization() ? '|locale' : ''),
-            'key' => 'name:Identifikátor skupiny [a-Z_0-9]|hideFromFormIfNot:type,group',
+            'key' => 'name:Identifikátor skupiny [a-Z_0-9]|hideFromFormIfNotIn:type,group,group-link',
             'url' => 'name:Url adresa príspevku|hideFromFormIfNot:type,url|required_if:type,url'.(Admin::isEnabledLocalization() ? '|locale' : ''),
             Group::inline([
                 'disabled_types' => 'name:Zakázane typy|type:select|title:Tieto typy záznamov sa nebudú môcť pridať v tejto skupine|multiple',
