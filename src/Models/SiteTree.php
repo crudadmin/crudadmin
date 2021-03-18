@@ -152,7 +152,7 @@ class SiteTree extends AdminModel
             $data[$model->getTable()] = [
                 'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
                 'column' => $model->getProperty('sitetree'),
-                'rows' => $model->select($model->siteTreeColumns())->get()->map(function($row){
+                'rows' => $model->select($model->siteTreeColumns())->onSiteTreeLoad()->get()->map(function($row){
                     return $row->toArray() + [
                         '_url' => $row->getTreeAction()
                     ];

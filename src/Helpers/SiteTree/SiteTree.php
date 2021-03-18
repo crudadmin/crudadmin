@@ -38,6 +38,7 @@ class SiteTree
 
                 $loadedRows = $model->whereIn($model->getKeyName(), $ids)
                                     ->select($model->siteTreeColumns())
+                                    ->onSiteTreeLoad()
                                     ->get();
 
                 $this->models[$model->getTable()] = $loadedRows;

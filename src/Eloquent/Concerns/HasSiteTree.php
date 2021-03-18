@@ -28,6 +28,16 @@ trait HasSiteTree
     }
 
     /**
+     * Scope
+     *
+     * @param  Builder  $query
+     */
+    public function scopeOnSiteTreeLoad($query)
+    {
+
+    }
+
+    /**
      * Build sitetree url
      *
      * @return  string
