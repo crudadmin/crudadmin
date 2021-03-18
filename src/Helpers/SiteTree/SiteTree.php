@@ -23,10 +23,12 @@ class SiteTree
     public function getModels()
     {
         if ( $this->models === null ){
+            $tree = $this->getTree();
+
             $this->models = [];
 
             //Filter only existing models
-            $groups = $this->tree->whereNotNull('model')->groupBy('model');
+            $groups = $tree->whereNotNull('model')->groupBy('model');
 
             foreach ($groups as $table => $rows) {
                 //If model is missing
