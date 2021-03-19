@@ -2,10 +2,12 @@
 
 namespace Admin\Fields;
 
+use Admin;
 use Admin\Core\Fields\Group as BaseGroup;
+use Admin\Core\Fields\Mutations\FieldToArray;
 use Admin\Eloquent\AdminModel;
 use Admin\Models\SiteBuilder;
-use Admin;
+use Fields;
 
 /*
  * Check also available parameters from Admin\Core\Fields\Group
@@ -46,6 +48,13 @@ class Group extends BaseGroup
      * @var  Closure
      */
     public $where = null;
+
+    /**
+     * Group attributes
+     *
+     * @var  array
+     */
+    public $attributes = [];
 
     /*
      * Forward methods to support nonstatic/stattic...
@@ -211,6 +220,21 @@ class Group extends BaseGroup
     public static function third(array $fields)
     {
         return (new static($fields))->width(4)->type();
+    }
+
+
+    /**
+     * Set attributes for given group
+     *
+     * @param  string|array  $attributes
+     *
+     * @return  Group
+     */
+    public function attributes($attributes)
+    {
+        $this->attributes = Fields::mutate(FieldToArray::class, $attributes);
+
+        return $this;
     }
 
     /**
