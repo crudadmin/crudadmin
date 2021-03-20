@@ -73,10 +73,6 @@ class AdminRuleCommand extends GeneratorCommand
             'DummyNamespace', $this->getNamespace($name), $stub
         );
 
-        $stub = str_replace(
-            'DummyRule', basename($this->argument('name')), $stub
-        );
-
         return $this;
     }
 

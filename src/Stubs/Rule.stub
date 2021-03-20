@@ -7,7 +7,7 @@ use Admin\Eloquent\AdminRule;
 use Admin;
 use Ajax;
 
-class DummyRule extends AdminRule
+class DummyClass extends AdminRule
 {
     //On all events
     public function fire(AdminModel $row)

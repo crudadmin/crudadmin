@@ -64,9 +64,11 @@ class AdminLayoutCommand extends GeneratorCommand
 
     protected function copyBladeLayout()
     {
-        $directory = resource_path('views/admin/'.($this->template_type == 'vuejs' ? 'components/layouts/' : null));
+        $directory = resource_path(
+            'views/admin/'.($this->template_type == 'vuejs' ? 'components/layouts/' : null).dirname($this->getLayoutName()).'/'
+        );
 
-        $path = $directory.$this->getLayoutName().($this->template_type == 'blade' ? '.blade.php' : '.vue');
+        $path = $directory.basename($this->getLayoutName()).($this->template_type == 'blade' ? '.blade.php' : '.vue');
 
         File::makeDirs($directory);
 
@@ -110,10 +112,6 @@ class AdminLayoutCommand extends GeneratorCommand
     {
         $stub = str_replace(
             'DummyNamespace', $this->getNamespace($name), $stub
-        );
-
-        $stub = str_replace(
-            'DummyLayout', $this->getNameInput(), $stub
         );
 
         $stub = str_replace(

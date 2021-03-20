@@ -6,7 +6,7 @@ use Admin\Helpers\Button;
 use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 
-class DummyButton extends Button
+class DummyClass extends Button
 {
     /*
      * Button type
