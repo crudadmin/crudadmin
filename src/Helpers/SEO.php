@@ -5,7 +5,6 @@ namespace Admin\Helpers;
 use Admin\Core\Helpers\File as AdminFile;
 use Admin\Eloquent\AdminModel;
 use Facades\Admin\Helpers\SEOService;
-use Admin\Models\RoutesSeo;
 use Localization;
 use Gettext;
 use Route;
@@ -98,7 +97,7 @@ class SEO
     public function get($key, $default = null)
     {
         //Load seo rows from database
-        $this->loadSeoRow();
+        $this->getSeoRow();
 
         if (! $this->model && ! $this->modified && count($this->seoRows) === 0 ) {
             return $default;
@@ -142,7 +141,7 @@ class SEO
         return $default;
     }
 
-    public function loadSeoRow()
+    public function getSeoRow()
     {
         //If seo table is not enabled
         if ( Admin::isSeoEnabled() === false ) {
@@ -154,8 +153,7 @@ class SEO
             return $this->seoRow ?: null;
         }
 
-        $this->seoRows = RoutesSeo::select(['url', 'group', 'title', 'keywords', 'description', 'image'])
-                            ->where(function($query){
+        $this->seoRows = Admin::getModel('RoutesSeo')->where(function($query){
                                 $query->where('url', $this->withoutLocalizedSlug($this->getRouteUrl()))
                                       ->orWhere('url', $this->withoutLocalizedSlug($this->getPathInfo()));
                             })
@@ -197,21 +195,19 @@ class SEO
      */
     public function getValueFromSeoTable($key, $onlyFromActulRoute = false)
     {
-        $this->loadSeoRow();
-
-        if ( $this->seoRow ) {
+        if ( $seoRow = $this->getSeoRow() ) {
             //Want meta data values, only if is current route selected
             //So we dont care about route group
             if ( $onlyFromActulRoute === true ) {
                 //Or if is same route url address with seo row
-                if ( $this->seoRow->url === $this->getPathInfo() ) {
-                    return $this->seoRow->getValue($key);
+                if ( $seoRow->url === $this->getPathInfo() ) {
+                    return $seoRow->getValue($key);
                 }
 
                 return;
             }
 
-            return $this->seoRow->getValue($key);
+            return $seoRow->getValue($key);
         }
     }
 
