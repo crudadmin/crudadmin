@@ -16,11 +16,11 @@ class SiteTree extends AdminModel
     /*
      * Model created date, for ordering tables in database and in user interface
      */
-    protected $migration_date = '2021-03-05 14:17:22';
+    protected $migration_date = '2021-01-05 14:17:22';
 
     protected $name = 'Štruktúra webu';
 
-    protected $group = 'settings';
+    protected $group = null;
 
     protected $layouts = [
         'table-before' => 'SiteTreeBuilder'
@@ -29,6 +29,8 @@ class SiteTree extends AdminModel
     protected $reversed = true;
 
     protected $insertable = false;
+
+    protected $icon = 'fa-sitemap';
 
     protected $settings = [
         'pagination.enabled' => false,

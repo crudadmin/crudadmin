@@ -97,7 +97,7 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'settings.buttons.create' => $this->t(_('Nový baner')),
             ],
             'language' => [
-                'icon' => 'fa-globe',
+                'icon' => 'fa-language',
             ],
             'calculator' => [
                 'icon' => 'fa-calculator',
