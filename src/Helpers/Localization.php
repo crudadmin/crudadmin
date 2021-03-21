@@ -9,6 +9,7 @@ use Admin\Models\Language;
 use Gettext;
 use Illuminate\Support\Collection;
 use Admin\Helpers\File;
+use Admin;
 
 class Localization extends LocalizationHelper implements LocalizationInterface
 {
@@ -30,7 +31,7 @@ class Localization extends LocalizationHelper implements LocalizationInterface
      */
     public function getModel()
     {
-        return new Language;
+        return Admin::getModel('Language');
     }
 
     /**
