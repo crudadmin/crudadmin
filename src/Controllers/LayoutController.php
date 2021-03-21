@@ -114,7 +114,7 @@ class LayoutController extends BaseController
         );
 
         //On initial admin request
-        if ( $initialOpeningRequest === true && method_exists($model, 'beforeInitialAdminRequest') ) {
+        if ( $initialOpeningRequest === true ) {
             $data['model'] = $model->beforeInitialAdminRequest();
         }
 
@@ -131,9 +131,13 @@ class LayoutController extends BaseController
         );
 
         //Modify intiial request data
-        if ( $initialOpeningRequest === true && method_exists($model, 'afterInitialAdminRequest') ) {
+        if ( $initialOpeningRequest === true) {
             $data['model'] = $model->afterInitialAdminRequest($data['model']);
+
+            //We can pass additional data into model
+            $data['model']['initial_data'] = $model->getAdminModelInitialData();
         }
+
 
         //Download sheet table
         if ( request('download') == 1 ){

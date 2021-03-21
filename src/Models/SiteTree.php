@@ -135,7 +135,7 @@ class SiteTree extends AdminModel
         }
     }
 
-    public function beforeInitialAdminRequest()
+    public function getAdminModelInitialData()
     {
         return [
             'sitetree_editor' => env('ADMIN_SITETREE_EDITOR', false) ? true : false,

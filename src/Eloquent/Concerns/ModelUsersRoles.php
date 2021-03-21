@@ -71,7 +71,7 @@ trait ModelUsersRoles
         return $options;
     }
 
-    public function beforeInitialAdminRequest()
+    public function getAdminModelInitialData()
     {
         return [
             'admin_tree' => $this->getModelsOptions(),

@@ -81,7 +81,7 @@ export default {
             return permissions;
         },
         modelTree(){
-            var tree = this.model.admin_tree,
+            var tree = this.model.getData('admin_tree'),
                 array = [];
 
             for ( var key in tree ) {

@@ -509,4 +509,31 @@ trait AdminModelTrait
     {
         return $this->timestamps === true || $this->getField($this->getDeletedAtColumn()) ? true : false;
     }
+
+    /**
+     * This is starting array for admin model boot object which will be available in admin frontend
+     *
+     * @return  array
+     */
+    public function beforeInitialAdminRequest()
+    {
+        return [];
+    }
+
+    /**
+     * We can mutate final model object which will be available in admin frontend
+     *
+     * @param  array  $modelObject
+     *
+     * @return  array
+     */
+    public function afterInitialAdminRequest($modelObject)
+    {
+        return $modelObject;
+    }
+
+    public function getAdminModelInitialData()
+    {
+        return [];
+    }
 }

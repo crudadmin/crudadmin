@@ -108,6 +108,8 @@ class UsersRole extends AdminModel
             //Remove class which does not exists anymore
             if ( !class_exists($namespace) ){
                 unset($models[$namespace]);
+
+                continue;
             }
 
             $model = new $namespace;
