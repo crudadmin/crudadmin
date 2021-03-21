@@ -110,6 +110,16 @@ class SiteTree extends AdminModel
     }
 
     /**
+     * You can mutate scope on tree initialization
+     *
+     * @param  Builder  $query
+     */
+    public function scopeInitialize($query)
+    {
+
+    }
+
+    /**
      * Build sitetree url
      *
      * @return  string

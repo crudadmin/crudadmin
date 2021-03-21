@@ -63,6 +63,11 @@ class Button
     public $accept = true;
 
     /*
+     * Should be tooltip encoded?
+     */
+    public $tooltipEncode = true;
+
+    /*
      * Title
      */
     public $message = [

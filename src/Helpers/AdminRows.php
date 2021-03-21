@@ -354,6 +354,7 @@ class AdminRows
                         'icon' => $button->icon,
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
+                        'tooltipEncode' => $button->tooltipEncode,
                         'ask' => method_exists($button, 'ask') || method_exists($button, 'question'),
                     ];
                 }

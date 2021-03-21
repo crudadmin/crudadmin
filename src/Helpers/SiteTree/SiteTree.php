@@ -2,7 +2,6 @@
 
 namespace Admin\Helpers\SiteTree;
 
-use Admin\Models\SiteTree as SiteTreeModel;
 use Admin;
 
 class SiteTree
@@ -14,7 +13,7 @@ class SiteTree
     public function getTree()
     {
         if ( $this->tree === null ){
-            $this->tree = SiteTreeModel::get();
+            $this->tree = Admin::getModel('SiteTree')->initialize()->get();
         }
 
         return $this->tree;
