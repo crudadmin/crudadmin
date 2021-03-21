@@ -145,6 +145,15 @@ class SiteTree extends AdminModel
         }
     }
 
+    public function isCrossAction()
+    {
+        if ( $this->isUrl() ){
+            return parse_url($this->url, PHP_URL_HOST) != request()->getHttpHost();
+        }
+
+        return false;
+    }
+
     public function getAdminModelInitialData()
     {
         return [
