@@ -270,7 +270,7 @@ class LayoutController extends BaseController
 
             //Check if user has allowed model
             if (! admin()->hasAccess($model, 'read') && ! admin()->hasAccess($model, 'insert')) {
-                $model->setProperty('disableModel', true);
+                $model->disableModel = true;
             }
 
             $page = $this->makePage($model, true, $initial_request);
@@ -334,7 +334,7 @@ class LayoutController extends BaseController
 
             // Check if user has allowed model
             if (! admin()->hasAccess($child_model)) {
-                $child_model->setProperty('disableModel', true);
+                $child_model->disableModel = true;
             }
 
             $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
@@ -347,7 +347,7 @@ class LayoutController extends BaseController
             'title' => AdminResourcesSyncer::translate($model->getProperty('title')),
             'icon' => $model->getProperty('icon'),
             'settings' => $model->getModelSettings(),
-            'active' => $model->getProperty('disableModel') ? false : $model->getProperty('active'),
+            'active' => isset($model->disableModel) ? false : $model->getProperty('active'),
             'foreign_column' => $model->getForeignColumn(),
             'without_parent' => $model->getProperty('withoutParent') ?: false,
             'global_relation' => $model->getProperty('globalRelation') ?: false,
