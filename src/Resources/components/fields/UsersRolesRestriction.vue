@@ -82,38 +82,50 @@ export default {
         },
         modelTree(){
             var tree = this.model.getData('admin_tree'),
-                array = [];
+                array = [],
+                assigned = [];
 
-            for ( var key in tree ) {
-                var row = tree[key];
-
-                if ( row.tree.length == 0 ) {
-                    array.push({
-                        name : row.name,
-                        key : key,
-                        depth : 0,
-                        tree : row.tree,
-                        permissions : row.permissions,
-                    });
-                }
-
-                else {
-                    var arrayLength = array.length,
-                        newArray = _.cloneDeep(array);
-
-                    for ( var i = 0; i < arrayLength; i++ ) {
-                        if ( array[i].key == row.tree[row.tree.length - 1] ) {
-                            newArray.splice(i + 1, 0, {
-                                name : row.name,
-                                key : key,
-                                depth : row.tree.length,
-                                tree : row.tree,
-                                permissions : row.permissions,
-                            });
-                        }
+            //We need loop 2 times, because some modules may not assign when migration_date is in wrong order
+            for ( var a = 0; a <= 2; a++ ) {
+                for ( var key in tree ) {
+                    if ( assigned.indexOf(key) > -1 ){
+                        continue;
                     }
 
-                    array = newArray;
+                    var row = tree[key];
+
+                    if ( row.tree.length == 0 ) {
+                        array.push({
+                            name : row.name,
+                            key : key,
+                            depth : 0,
+                            tree : row.tree,
+                            permissions : row.permissions,
+                        });
+
+                        assigned.push(key);
+                    }
+
+                    else {
+                        var arrayLength = array.length,
+                            newArray = _.cloneDeep(array);
+
+                        for ( var i = 0; i < arrayLength; i++ ) {
+                            if ( array[i].key == row.tree[row.tree.length - 1] ) {
+                                newArray.splice(i + 1, 0, {
+                                    name : row.name,
+                                    key : key,
+                                    depth : row.tree.length,
+                                    tree : row.tree,
+                                    permissions : row.permissions,
+                                });
+
+                                assigned.push(key);
+                            }
+                        }
+
+                        array = newArray;
+                    }
                 }
             }
 
