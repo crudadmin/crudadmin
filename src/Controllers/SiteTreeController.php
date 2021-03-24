@@ -17,7 +17,7 @@ class SiteTreeController extends Controller
 
         //For groups automatically insert disabled types
         if ( $data['type'] == 'group' ){
-            $data['disabled_types'] = ['group'];
+            $data['disabled_types'] = ['group', 'group-link'];
         }
 
         if ( $id = request('id') ) {

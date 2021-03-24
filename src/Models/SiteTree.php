@@ -104,9 +104,27 @@ class SiteTree extends AdminModel
         return in_array($this->type, ['group', 'group-link']);
     }
 
+    public function isModel()
+    {
+        return $this->type == 'model' || $this->group_type == 'model';
+    }
+
     public function isUrl()
     {
         return $this->type == 'url' || $this->group_type == 'url';
+    }
+
+    public function getRow()
+    {
+        $models = SiteTreeHelper::getModels();
+
+        $modelRows = $models[$this->model] ?? null;
+
+        if ( !$modelRows || !($row = $modelRows->where('id', $this->row_id)->first()) ){
+            return;
+        }
+
+        return $row;
     }
 
     /**
@@ -126,18 +144,12 @@ class SiteTree extends AdminModel
      */
     public function getTreeAction()
     {
-        $models = SiteTreeHelper::getModels();
-
         if ( $this->isUrl() ){
             return $this->url;
         }
 
-        if ( $this->type == 'model' || $this->group_type == 'model' ) {
-            if ( !($modelRows = ($models[$this->model] ?? null)) ){
-                return;
-            }
-
-            if ( !($row = $modelRows->where('id', $this->row_id)->first()) ){
+        if ( $this->isModel() ) {
+            if ( !($row = $this->getRow()) ){
                 return;
             }
 
