@@ -31,7 +31,7 @@ class Localization extends LocalizationHelper implements LocalizationInterface
      */
     public function getModel()
     {
-        return Admin::getModel('Language');
+        return Admin::getModel('Language') ?: new Language;
     }
 
     /**

@@ -28,7 +28,7 @@ class AdminLocalization extends LocalizationHelper implements LocalizationInterf
      */
     public function getModel()
     {
-        return new AdminLanguage;
+        return Admin::getModel('AdminLanguage') ?: new AdminLanguage;
     }
 
     /**
