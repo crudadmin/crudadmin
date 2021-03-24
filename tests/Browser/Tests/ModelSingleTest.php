@@ -141,7 +141,7 @@ class ModelSingleTest extends BrowserTestCase
                     ->assertSeeIn('[data-tabs][data-model="single_model_relations"]', 'Single model relation (1)')
 
                     //Open single model relation, and check if is loaded
-                    ->click('[data-tabs][data-model="single_model_relations"]')
+                    ->click('[data-tabs][data-model="single_model_relations"]')->pause(300)
                     ->assertHasFormValues(SingleModelRelation::class, $relationRow);
 
         });

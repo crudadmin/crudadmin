@@ -35,8 +35,8 @@ class ModelRelationsTest extends BrowserTestCase
                     ->assertSeeIn('[data-tabs][data-model="articles_comments"]', 'Comments (3)')
 
                     //Click on related model and check given data
-                    ->click('[data-tabs][data-model="articles_comments"]')
-                    ->assertColumnRowData(ArticlesComment::class, 'id', [3, 2, 1])->pause(300)
+                    ->click('[data-tabs][data-model="articles_comments"]')->pause(300)
+                    ->assertColumnRowData(ArticlesComment::class, 'id', [3, 2, 1])
 
                     //Fill form and save new related row.
                     ->openForm(ArticlesComment::class)
