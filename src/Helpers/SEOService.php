@@ -28,18 +28,33 @@ class SEOService
     {
         $routes = $this->loadAllSeoRoutes();
 
-        $existingRoutes = RoutesSeo::select(['id', 'url', 'group'])
-                            ->whereIn('url', array_keys($routes))
-                            ->orWhereNotNull('group')
-                            ->get();
+        $existingRoutes = RoutesSeo::select(['id', 'url', 'group', 'controller'])->get();
 
         foreach ($routes as $routeUri => $route) {
-            //If route does exists
-            if ( $dbRoute = $existingRoutes->filter(function($row) use ($route, $routeUri) {
+            $dbRoute = $existingRoutes->filter(function($row) use ($route, $routeUri) {
                 $group = @$route->action['seo']['group'];
+                $controller = @$route->action['controller'];
 
-                return $row->url == $routeUri || ($group && $row->getValue('group') === $group);
-            })->first() ) {
+                //If url has been found
+                if ( $row->url == $routeUri ){
+                    return true;
+                }
+
+                //If controller has been found
+                if ( $row->controller == $controller ){
+                    return true;
+                }
+
+                //If group is same?
+                if ( ($group && $row->getValue('group') === $group) ) {
+                    return true;
+                }
+
+                return false;
+            })->first();
+
+            //If route does exists
+            if ( $dbRoute ) {
                 $this->updateSeoRoute($route, $routeUri, $dbRoute);
             }
 
