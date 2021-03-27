@@ -167,7 +167,7 @@ class CRUDController extends Controller
         //Because if some fields are filled, they may not be required, etc..
         $row = $update ? ($rows[$table] = $model->findOrFail($request->get('_id'))) : null;
 
-        $rules = $this->getValidationRulesByAdminModel($model, $row, $request, null, $update);
+        $rules = $this->getValidationRulesByAdminModel($model, $row, $request, $update);
 
         return $this->testRequestValidation($rules, $request, $model);
     }
@@ -192,7 +192,7 @@ class CRUDController extends Controller
             ) : null;
 
             //Get child relation validation for specific row
-            $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $childRequest, $update);
+            $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $update, $childRequest);
 
             $errors = array_merge($errors, $this->testRequestValidation($childRules, $childRequest, $child));
         }
@@ -218,7 +218,7 @@ class CRUDController extends Controller
     /*
      * Get all validation data for gived model
      */
-    public function getValidationRulesByAdminModel($model, $row, $request, $childRequest = null, $update)
+    public function getValidationRulesByAdminModel($model, $row, $request, $update, $childRequest = null)
     {
         $rules = $model->getValidationRules($row);
 

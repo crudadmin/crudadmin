@@ -49,7 +49,7 @@ abstract class Request extends FormRequest
         if (is_array($this->get($key))) {
             $files = $this->get($key);
 
-            if (method_exists($files[0], 'isFile') && $files[0]->isFile()) {
+            if ($files[0] && method_exists($files[0], 'isFile') && $files[0]->isFile()) {
                 return true;
             }
         }
@@ -63,7 +63,11 @@ abstract class Request extends FormRequest
             return true;
         }
 
-        return $this->get($key) && method_exists($this->get($key), 'isFile') && $this->get($key)->isFile() || $this->hasFile($key);
+        return (
+            is_object($this->get($key))
+            && method_exists($this->get($key), 'isFile')
+            && $this->get($key)->isFile()
+        ) || $this->hasFile($key);
     }
 
     protected function isEmptyFile($key)
