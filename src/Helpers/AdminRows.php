@@ -141,18 +141,20 @@ class AdminRows
                         foreach ($columns as $key => $column) {
                             //Search in all columns
                             $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to) {
+                                $tableColumn = $this->model->fixAmbiguousColumn($column);
+
                                 //If is imaginarry field, skip whole process
                                 if ( $this->model->isFieldType($column, 'imaginary') || $this->model->hasFieldParam($column, 'imaginary') ) {
                                     return;
                                 } elseif ($search_to) {
                                     $builder->where(function ($builder) use ($column, $search, $search_to) {
                                         if (! isset($search) && isset($search_to)) {
-                                            $builder->where($column, '<=', $search_to);
+                                            $builder->where($tableColumn, '<=', $search_to);
                                         }
 
                                         if (isset($search) && isset($search_to)) {
-                                            $builder->where($column, '>=', $search)
-                                                    ->where($column, '<=', $search_to);
+                                            $builder->where($tableColumn, '>=', $search)
+                                                    ->where($tableColumn, '<=', $search_to);
                                         }
                                     });
                                 }
@@ -160,7 +162,7 @@ class AdminRows
                                 //Find exact id, value
                                 elseif ($this->isPrimaryKey($column, $columns)) {
                                     foreach ($queries as $query) {
-                                        $builder->where($column, $query);
+                                        $builder->where($tableColumn, $query);
                                     }
                                 }
 
@@ -213,7 +215,7 @@ class AdminRows
                                 else {
                                     //Search for all inserted words
                                     foreach ($queries as $key => $query) {
-                                        $builder->where($column, 'like', '%'.$query.'%');
+                                        $builder->where($tableColumn, 'like', '%'.$query.'%');
                                     }
                                 }
                             });
