@@ -354,7 +354,7 @@ class LayoutController extends BaseController
             'in_menu' => $model->getProperty('inMenu', false),
             'hidden_tabs' => $model->getProperty('hidden_tabs') ?: [],
             'hidden_groups' => $model->getProperty('hidden_groups') ?: [],
-            'reserved' => $model->getProperty('reserved') ?: false,
+            'reserved' => $this->getModelReversed($model),
             'columns' => $model->getBaseFields(),
             'inParent' => $model->getProperty('inParent') ?: false,
             'single' => $model->getProperty('single') ?: false,
@@ -389,6 +389,17 @@ class LayoutController extends BaseController
         }
 
         return $data;
+    }
+
+    private function getModelReversed($model)
+    {
+        if ( !($reserved = $model->getProperty('reserved')) ){
+            return false;
+        }
+
+        return array_filter(array_map(function($id) {
+            return (int)$id;
+        }, $reserved));
     }
 
     protected function checkPermissions($model)

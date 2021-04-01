@@ -16,7 +16,7 @@ class StringTypes extends Type
      */
     public function isEnabled(AdminModel $model, string $key)
     {
-        return $model->isFieldType($key, ['password', 'radio', 'file', 'select']);
+        return $model->isFieldType($key, ['password', 'radio', 'file', 'select', 'color']);
     }
 
     /**
