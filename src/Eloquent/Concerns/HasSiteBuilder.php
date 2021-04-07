@@ -35,11 +35,19 @@ trait HasSiteBuilder
                 $blockKeys = array_keys($blockGroups);
                 $lastIndex = $blockKeys[count($blockKeys) - 1];
 
-                $blockGroups[$lastIndex]['views'][] = $view;
+                $blockGroups[$lastIndex]['views'][] = [
+                    'view' => $view,
+                    'row' => $row,
+                ];
             } else {
                 $blockGroups[] = [
                     'type' => $prefix,
-                    'views' => [ $view ],
+                    'views' => [
+                        [
+                            'view' => $view,
+                            'row' => $row,
+                        ],
+                    ],
                 ];
             }
         }
@@ -47,20 +55,32 @@ trait HasSiteBuilder
         return $blockGroups;
     }
 
-    public function renderBuilder()
+    public function getSitebuilderBlocksArray()
     {
         $groups = $this->getBlockGroups();
 
-        $content = '';
+        $blocksArray = [];
 
         $blocksIncrement = 0;
 
         foreach ($groups as $group) {
             $block = SiteBuilderService::getByType($group['type']);
 
+            $groupViews = array_map(function($item){
+                return $item['view'];
+            }, $group['views']);
+
+            $groupRows = array_map(function($item){
+                return $item['row'];
+            }, $group['views']);
+
             //Grouped blocks into one wrapper
             if ( $block->hasGroupedBlocks() ) {
-                $response = $this->wrapBlock(implode("\n", $group['views']), $block, $blocksIncrement);
+                $response = [
+                    'block' => $block,
+                    'view' => $this->wrapBlock(implode("\n", $groupViews), $block, $blocksIncrement),
+                    'rows' => $groupRows,
+                ];
 
                 $blocksIncrement++;
             }
@@ -71,18 +91,37 @@ trait HasSiteBuilder
                     $blocksIncrement++;
 
                     return $this->wrapBlock($view, $block, $blocksIncrement-1);
-                }, $group['views']);
+                }, $groupViews);
 
-                $response = implode("\n", $views);
+                $response = [
+                    'block' => $block,
+                    'view' => implode("\n", $views),
+                    'rows' => $groupRows,
+                ];
             }
 
             //Blocks without wrappers
             else {
-                $response = implode("\n", $group['views']);
+                $response = [
+                    'block' => $block,
+                    'view' => $groupViews,
+                    'rows' => $groupRows,
+                ];
             }
 
-            $content .= $response;
+            $blocksArray[] = $response;
         }
+
+        return $blocksArray;
+    }
+
+    public function renderBuilder()
+    {
+        $blocksArray = $this->getSitebuilderBlocksArray();
+
+        $content = implode('', array_map(function($block){
+            return $block['view'];
+        }, $blocksArray));
 
         return view('admin::sitebuilder/wrapper', compact('content'))->render();
     }
