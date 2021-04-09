@@ -128,4 +128,14 @@ class SBType
             'row' => $row,
         ])->render();
     }
+
+    public function toArray()
+    {
+        return [
+            'type' => $this->getPrefix(),
+            'icon' => $this->getIcon(),
+            'wrapper' => $this->hasWrapper(),
+            'groupBlocks' => $this->hasGroupedBlocks(),
+        ];
+    }
 }

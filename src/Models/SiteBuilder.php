@@ -36,20 +36,6 @@ class SiteBuilder extends AdminModel
 
     protected $reversed = true;
 
-    /*
-     * Automatic form and database generation
-     * @name - field name
-     * @placeholder - field placeholder
-     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox/radio
-     * ... other validation methods from laravel
-     */
-    public function fields()
-    {
-        return [
-            'type' => 'name:Vyberte typ bloku|column_name:Typ bloku|hidden|type:select|component:SiteBuilderBlockSelect|required',
-        ];
-    }
-
     protected $settings = [
         'increments' => false,
         'autoreset' => false,
@@ -67,6 +53,20 @@ class SiteBuilder extends AdminModel
         'columns._block_value.name' => 'Hodnota',
         'columns._block_value.encode' => false,
     ];
+
+    /*
+     * Automatic form and database generation
+     * @name - field name
+     * @placeholder - field placeholder
+     * @type - field type | string/text/editor/select/integer/decimal/file/password/date/datetime/time/checkbox/radio
+     * ... other validation methods from laravel
+     */
+    public function fields()
+    {
+        return [
+            'type' => 'name:Vyberte typ bloku|column_name:Typ bloku|hidden|type:select|component:SiteBuilderBlockSelect|required',
+        ];
+    }
 
     public function options()
     {

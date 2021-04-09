@@ -77,7 +77,7 @@ trait HasSiteBuilder
             //Grouped blocks into one wrapper
             if ( $block->hasGroupedBlocks() ) {
                 $response = [
-                    'block' => $block,
+                    'block' => $block->toArray(),
                     'view' => $this->wrapBlock(implode("\n", $groupViews), $block, $blocksIncrement),
                     'rows' => $groupRows,
                 ];
@@ -94,7 +94,7 @@ trait HasSiteBuilder
                 }, $groupViews);
 
                 $response = [
-                    'block' => $block,
+                    'block' => $block->toArray(),
                     'view' => implode("\n", $views),
                     'rows' => $groupRows,
                 ];
@@ -103,7 +103,7 @@ trait HasSiteBuilder
             //Blocks without wrappers
             else {
                 $response = [
-                    'block' => $block,
+                    'block' => $block->toArray(),
                     'view' => $groupViews,
                     'rows' => $groupRows,
                 ];

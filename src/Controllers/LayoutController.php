@@ -7,11 +7,13 @@ use AdminLocalization;
 use Admin\Controllers\Controller as BaseController;
 use Admin\Fields\Group;
 use Admin\Helpers\AdminRows;
+use Admin\Helpers\Layout;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 use Admin\Helpers\SecureDownloader;
 use Admin\Helpers\SheetDownloader;
 use Ajax;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Localization;
 
 class LayoutController extends BaseController
@@ -311,6 +313,61 @@ class LayoutController extends BaseController
         return $this->addSlugPath($groups);
     }
 
+    private function isInlineTemplateKey($key)
+    {
+        $positions = (new Layout)->available_positions;
+
+        return in_array($key, $positions, true);
+    }
+
+    /*
+     * Return rendered blade layouts
+     */
+    protected function getLayouts($model)
+    {
+        $layouts = [];
+
+        $i = 0;
+        foreach ((array) $model->getProperty('layouts') as $key => $class) {
+            //Load inline template
+            if ($this->isInlineTemplateKey($key)) {
+                $classes = array_wrap($class);
+
+                foreach ($classes as $componentName) {
+                    $layouts[] = [
+                        'name' => strtoupper($componentName[0]).Str::camel(substr($componentName, 1)).'_'.$i.'AnonymousLayout',
+                        'type' => 'vuejs',
+                        'position' => $key,
+                        'view' => (new Layout)->renderVueJs($componentName),
+                        'component_name' => $componentName,
+                    ];
+                }
+            }
+
+            //Load template with layout class
+            elseif (class_exists($class)) {
+                $layout = new $class;
+
+                $view = $layout->build();
+
+                if (is_string($view) || $view instanceof \Illuminate\View\View) {
+                    $is_blade = method_exists($view, 'render');
+
+                    $layouts[] = [
+                        'name' => class_basename($class),
+                        'type' => $is_blade ? 'blade' : 'vuejs',
+                        'position' => $layout->position,
+                        'view' => $is_blade ? $view->render() : $view,
+                    ];
+                }
+            }
+
+            $i++;
+        }
+
+        return $layouts;
+    }
+
     /**
      * Return build model JSON instance.
      * @param  object  $model          model instance
@@ -366,6 +423,7 @@ class LayoutController extends BaseController
             'deletable' => $model->getProperty('deletable'),
             'publishable' => $model->getProperty('publishable'),
             'sortable' => $model->isSortable(),
+            'layouts' => $this->getLayouts($model),
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
             'fields' => $this->getModelFields($model, $withOptions),

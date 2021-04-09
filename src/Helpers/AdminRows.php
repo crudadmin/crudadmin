@@ -384,68 +384,6 @@ class AdminRows
         return $buttons;
     }
 
-    /*
-     *
-     */
-    private function isInlineTemplateKey($key)
-    {
-        $positions = (new Layout)->available_positions;
-
-        return in_array($key, $positions, true);
-    }
-
-    /*
-     * Return rendered blade layouts
-     */
-    protected function getLayouts($count)
-    {
-        $layouts = [];
-
-        if ($count > 0) {
-            return [];
-        }
-
-        $i = 0;
-        foreach ((array) $this->model->getProperty('layouts') as $key => $class) {
-            //Load inline template
-            if ($this->isInlineTemplateKey($key)) {
-                $classes = array_wrap($class);
-
-                foreach ($classes as $componentName) {
-                    $layouts[] = [
-                        'name' => strtoupper($componentName[0]).Str::camel(substr($componentName, 1)).'_'.$i.'AnonymousLayout',
-                        'type' => 'vuejs',
-                        'position' => $key,
-                        'view' => (new Layout)->renderVueJs($componentName),
-                        'component_name' => $componentName,
-                    ];
-                }
-            }
-
-            //Load template with layout class
-            elseif (class_exists($class)) {
-                $layout = new $class;
-
-                $view = $layout->build();
-
-                if (is_string($view) || $view instanceof \Illuminate\View\View) {
-                    $is_blade = method_exists($view, 'render');
-
-                    $layouts[] = [
-                        'name' => class_basename($class),
-                        'type' => $is_blade ? 'blade' : 'vuejs',
-                        'position' => $layout->position,
-                        'view' => $is_blade ? $view->render() : $view,
-                    ];
-                }
-            }
-
-            $i++;
-        }
-
-        return $layouts;
-    }
-
     public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null, $id = false)
     {
         try {
@@ -483,7 +421,6 @@ class AdminRows
                 'count' => $withoutData ? 0 : $this->checkForSearching($all_rows_data)->count(),
                 'page' => $page,
                 'buttons' => $withoutData ? [] : $this->generateButtonsProperties($paginated_rows_data),
-                'layouts' => $this->getLayouts($count),
             ];
         } catch (\Illuminate\Database\QueryException $e) {
             return Ajax::mysqlError($e);
