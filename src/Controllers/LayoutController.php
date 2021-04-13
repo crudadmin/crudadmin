@@ -101,6 +101,10 @@ class LayoutController extends BaseController
             Ajax::permissionsError();
         }
 
+        if ( method_exists('beforeAdminRequest', $model) ){
+            $model->beforeAdminRequest();
+        }
+
         //Set parent row
         $this->setParentModelIntoEloquent($model, $parentTable, $subid);
 
