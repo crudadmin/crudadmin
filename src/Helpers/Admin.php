@@ -140,7 +140,7 @@ class Admin extends AdminCore
      */
     public function end($timestamp = null)
     {
-        return microtime(true) - ($timestamp ?: $this->get('microtime.start', 0));
+        return round(microtime(true) - ($timestamp ?: $this->get('microtime.start', 0)), 2);
     }
 
     /*

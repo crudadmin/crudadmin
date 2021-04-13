@@ -125,6 +125,14 @@ class SheetDownloader
                     $value = $this->getBelongsToValue($column, @$row[$column]);
                 } else if ( $this->model->isFieldType($column, 'select') ){
                     $value = $this->model->getSelectOption($column, @$row[$column]);
+                } else if ( $this->model->hasFieldParam($column, 'locale') || $column == 'slug' && $this->model->hasLocalizedSlug() ){
+                    $model = $this->model->forceFill([ $column => @$row[$column]]);
+
+                    if ( $column == 'slug' ){
+                        $value = $model->getSlug();
+                    } else {
+                        $value = strip_tags($model->{$column});
+                    }
                 } else {
                     $value = strip_tags(@$row[$column] ?: '');
                 }

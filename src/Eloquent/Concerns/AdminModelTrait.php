@@ -28,16 +28,7 @@ trait AdminModelTrait
         if ($this->exists == false) {
             //Add auto order incement into row, when row is not in database yet
             if ($this->isSortable() && ! array_key_exists('_order', $this->attributes)) {
-                //Perform empty query without scopes, or booting new eloquent model without global scopes
-                //This is for huge performance optimatizaiton during inserting high number of rows.
-                $latestIncrement = $this->getConnection()
-                                        ->table($this->getTable())
-                                        ->select($this->getKeyName())
-                                        ->orderBy($this->getKeyName(), 'desc')
-                                        ->limit(1)
-                                        ->first();
-
-                $this->attributes['_order'] = $latestIncrement ? $latestIncrement->{$this->getKeyName()} : 0;
+                $this->attributes['_order'] = $this->getNextOrderIncrement();
             }
 
             //Add auto publishing rows
@@ -62,6 +53,20 @@ trait AdminModelTrait
         }
 
         return $instance;
+    }
+
+    public function getNextOrderIncrement()
+    {
+        //Perform empty query without scopes, or booting new eloquent model without global scopes
+        //This is for huge performance optimatizaiton during inserting high number of rows.
+        $latestIncrement = $this->getConnection()
+                    ->table($this->getTable())
+                    ->select($this->getKeyName())
+                    ->orderBy($this->getKeyName(), 'desc')
+                    ->limit(1)
+                    ->first();
+
+        return $latestIncrement ? $latestIncrement->{$this->getKeyName()} : 0;
     }
 
     //Add fillable and dates fields
@@ -232,6 +237,7 @@ trait AdminModelTrait
             if (
                 $this->hasFieldParam($key, 'hidden', true)
                 && $this->hasFieldParam($key, 'column_visible', true) == false
+                && $this->hasFieldParam($key, 'table_request_present', true) == false
                 && in_array($key, $fields)
             ) {
                 unset($fields[array_search($key, $fields)]);
