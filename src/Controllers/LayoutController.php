@@ -101,7 +101,7 @@ class LayoutController extends BaseController
             Ajax::permissionsError();
         }
 
-        if ( method_exists('beforeAdminRequest', $model) ){
+        if ( method_exists($model, 'beforeAdminRequest') ){
             $model->beforeAdminRequest();
         }
 
