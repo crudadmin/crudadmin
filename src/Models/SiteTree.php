@@ -177,7 +177,7 @@ class SiteTree extends AdminModel
     private function getSiteTreeModels()
     {
         $models = array_filter(Admin::getAdminModels(), function($model){
-            return $model->getProperty('sitetree') !== false;
+            return $model->getProperty('sitetree') !== false && $model->getProperty('active');
         });
 
         $data = [];
@@ -209,5 +209,27 @@ class SiteTree extends AdminModel
         } else {
             $this->attributes['url'] = $this->getPath($value, true, true, true);
         }
+    }
+
+    public function getTreeAttribute()
+    {
+        return $this->getTree();
+    }
+
+    public function getApiTreeAttribute()
+    {
+        return $this->tree->each->setApiResponse();
+    }
+
+    public function getTreeActionAttribute()
+    {
+        return $this->getTreeAction();
+    }
+
+    public function setApiResponse()
+    {
+        $this->setVisible(['name', 'type', 'model', 'key', 'apiTree', 'treeAction'])->append(['apiTree', 'treeAction']);
+
+        return $this;
     }
 }

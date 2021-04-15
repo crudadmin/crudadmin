@@ -58,4 +58,9 @@ class SiteTree
     {
         return $this->getTree()->where('key', $key)->first();
     }
+
+    public function getFirstLevelGroups()
+    {
+        return $this->getTree()->whereNull('parent_id');
+    }
 }
