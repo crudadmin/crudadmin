@@ -62,6 +62,8 @@ class EditorMode
      */
     public function getVisibleRoutes()
     {
-        return $this->visibleRoutes ?: [];
+        return array_map(function($url){
+            return url($url ?: []);
+        }, $this->visibleRoutes);
     }
 }
