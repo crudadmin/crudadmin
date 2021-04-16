@@ -179,14 +179,18 @@ class AdminCleanUploadsCommand extends Command
 
     private function getExistingRows($model, $fileFields)
     {
-        return $model->withoutGlobalScopes()->withoutTrashed()->select(
+        return $model->withoutGlobalScopes()->when($model->hasSoftDeletes(), function($query){
+            $query->withoutTrashed();
+        })->select(
             array_merge(['id'], array_keys($fileFields))
         )->get();
     }
 
     private function getTrashedRows($model, $fileFields)
     {
-        return $model->withoutGlobalScopes()->onlyTrashed()->select(
+        return $model->withoutGlobalScopes()->when($model->hasSoftDeletes(), function($query){
+            $query->onlyTrashed();
+        })->select(
             array_merge(['id'], array_keys($fileFields))
         )->get();
     }
