@@ -50,25 +50,19 @@ class AdminPreResizeImages extends Command
      */
     public function handle()
     {
-        // $models = array_values(array_map(function($model){
-        //     return $model->getTable();
-        // }, Admin::getAdminModels()));
+        $models = array_values(array_map(function($model){
+            return $model->getTable();
+        }, Admin::getAdminModels()));
 
-        // $table = $this->choice('Which model do you want perform operations?', $models);
+        $table = $this->choice('Which model do you want perform operations?', $models);
 
-        // $model = Admin::getModelByTable($table);
-        // $fileFields = $this->getModelFileFields($model);
-
-        // $field = $this->choice('Which field do you want to perform operations?', array_keys($fileFields), 0);
-
-        // $width = $this->ask('Enter width:');
-        // $height = $this->ask('Enter height:');
-
-        $table = 'products';
         $model = Admin::getModelByTable($table);
-        $field = 'image';
-        $width = 200;
-        $height = 200;
+        $fileFields = $this->getModelFileFields($model);
+
+        $field = $this->choice('Which field do you want to perform operations?', array_keys($fileFields), 0);
+
+        $width = $this->ask('Enter width:');
+        $height = $this->ask('Enter height:');
 
         $path = $model->filePath($field);
         $allFiles = $this->files->allFiles($path);
