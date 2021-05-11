@@ -164,6 +164,7 @@ class JSTranslations
 
         $this->addPluralsIntoResponse($array, $translations);
         $this->addMissingIntoResponse($array, $translations);
+        $this->addRawIntoResponse($array, $translations);
 
         return $array;
     }
@@ -223,6 +224,23 @@ class JSTranslations
         foreach ($translations as $translation) {
             if (in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags())) {
                 $array->missing[] = $translation->getOriginal();
+            }
+        }
+    }
+
+    /**
+     * Add raw translations into translations array
+     *
+     * @param  object  $array
+     * @param  Gettext\Translations  $translations
+     */
+    private function addRawIntoResponse($array, Translations $translations)
+    {
+        $array->raw = [];
+
+        foreach ($translations as $translation) {
+            if (in_array(self::GETTEXT_FLAGS['isRaw'], $translation->getFlags())) {
+                $array->raw[] = $translation->getOriginal();
             }
         }
     }
@@ -389,6 +407,10 @@ class JSTranslations
                     $sources = $this->setJSFlag($sources, $file);
                 }
 
+                if (in_array($type, ['VueJs'])) {
+                    $sources = $this->markRawStringsFromVuejs($sources, $file);
+                }
+
                 //Get raw texts
                 if (in_array($type, ['Blade'])) {
                     $sources = $this->markRawStrings($sources, $file);
@@ -426,6 +448,33 @@ class JSTranslations
         preg_match_all('/\{\!\!(.*?)\!\!\}/', $content, $matches);
 
         foreach (@$matches[1] ?: [] as $sentence) {
+            preg_match_all("/(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\\'|[^'])+'))/is", $sentence, $quotas);
+
+            $rawTexts = array_merge($rawTexts, array_map(function($item){
+                return substr($item, 1, -1);
+            }, $quotas[0]));
+        }
+
+        //Check all sources, if are in given raw elements
+        foreach ($sources as $source) {
+            if ( in_array($source->getOriginal(), $rawTexts) ) {
+                $source->addFlag(self::GETTEXT_FLAGS['isRaw']);
+            }
+        }
+
+        return $sources;
+    }
+
+    public function markRawStringsFromVuejs($sources, $file)
+    {
+        $content = $file->getContents();
+
+        $rawTexts = [];
+
+        //Get all raw outputs
+        preg_match_all('/v-html\=\"(.*?)\"/', $content, $matches);
+
+        foreach ($matches[1] ?? [] as $sentence) {
             preg_match_all("/(?:(?:\"(?:\\\\\"|[^\"])+\")|(?:'(?:\\\'|[^'])+'))/is", $sentence, $quotas);
 
             $rawTexts = array_merge($rawTexts, array_map(function($item){
