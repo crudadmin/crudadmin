@@ -245,7 +245,7 @@ class CRUDController extends Controller
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             //also Allow send form without file, when is file uploaded already in server
             if (isset($row)) {
-                $validator = new FieldsValidator($model, $request);
+                $validator = new FieldsValidator($row, $request);
 
                 $data = $validator->mutateRules([
                     $key => $data
