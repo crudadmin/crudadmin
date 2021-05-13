@@ -76,7 +76,7 @@ trait HasSiteBuilder
 
             //Grouped blocks into one wrapper
             if ( $block->hasGroupedBlocks() ) {
-                $response = [
+                $blocksArray[] = [
                     'block' => $block->toArray(),
                     'view' => $this->wrapBlock(implode("\n", $groupViews), $block, $blocksIncrement),
                     'rows' => $groupRows,
@@ -87,29 +87,27 @@ trait HasSiteBuilder
 
             //Block with wrapper
             else if ( $block->hasWrapper() ){
-                $views = array_map(function($view) use ($block, &$blocksIncrement) {
+                foreach ($groupViews as $key => $view) {
                     $blocksIncrement++;
 
-                    return $this->wrapBlock($view, $block, $blocksIncrement-1);
-                }, $groupViews);
-
-                $response = [
-                    'block' => $block->toArray(),
-                    'view' => implode("\n", $views),
-                    'rows' => $groupRows,
-                ];
+                    $blocksArray[] = [
+                        'block' => $block->toArray(),
+                        'view' => $this->wrapBlock($view, $block, $blocksIncrement-1),
+                        'rows' => [
+                            $groupRows[$key],
+                        ],
+                    ];
+                }
             }
 
             //Blocks without wrappers
             else {
-                $response = [
+                $blocksArray[] = [
                     'block' => $block->toArray(),
                     'view' => $groupViews,
                     'rows' => $groupRows,
                 ];
             }
-
-            $blocksArray[] = $response;
         }
 
         return $blocksArray;
