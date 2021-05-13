@@ -80,14 +80,14 @@ class Gettext
         }
 
         foreach ($locales as $code) {
-            $part = explode('_', $code);
+            $part = explode('_', strtolower($code));
 
-            if ($part[0] == $locale) {
+            if ($part[0] == $locale || $part[1] == $locale) {
                 return $code;
             }
         }
 
-        return false;
+        return $locale;
     }
 
     /**
