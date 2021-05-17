@@ -214,6 +214,7 @@ class AdminModel extends CoreAdminModel
      * Via this property we can manage global publishable for all models
      */
     static $globalPublishable = true;
+    static $globalModelPublishable = [];
 
     /*
      * Admin modules
@@ -232,6 +233,22 @@ class AdminModel extends CoreAdminModel
     public static function setGlobalPublishable($state)
     {
         self::$globalPublishable = $state;
+    }
+
+    /**
+     * We can turn off publishable globally for all models
+     *
+     * @param  bool  $state
+     */
+    public static function setGlobalModelPublishable($state)
+    {
+        $table = (new static)->getTable();
+
+        if ( $state === true ) {
+            self::$globalModelPublishable[$table] = true;
+        } else {
+            self::$globalModelPublishable[$table] = false;
+        }
     }
 
     /**
@@ -303,7 +320,7 @@ class AdminModel extends CoreAdminModel
      *
      * @return  bool
      */
-    private function allowPublishableByDefault()
+    private function isPublishableAllowed()
     {
         if ( $this->publishable == false ){
             return false;
@@ -313,7 +330,11 @@ class AdminModel extends CoreAdminModel
             return false;
         }
 
-        return self::$globalPublishable;
+        if ( self::$globalPublishable === false ) {
+            return false;
+        }
+
+        return (self::$globalModelPublishable[$this->getTable()] ?? true) === true;
     }
 
     public function __construct(array $attributes = [])
@@ -329,9 +350,12 @@ class AdminModel extends CoreAdminModel
         /*
          * Add global scope for publishing extepts admin interface
          */
-        if ( $this->allowPublishableByDefault() ) {
+        if ( $this->isPublishableAllowed() ) {
             static::addGlobalScope('publishable', function (Builder $builder) {
-                $builder->withPublished();
+                //We want check publishable again, because state may change
+                if ( $this->isPublishableAllowed() ) {
+                    $builder->withPublished();
+                }
             });
         }
 
