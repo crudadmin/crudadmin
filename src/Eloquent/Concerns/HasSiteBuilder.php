@@ -70,8 +70,8 @@ trait HasSiteBuilder
                 return $item['view'];
             }, $group['views']);
 
-            $groupRows = array_map(function($item){
-                return $item['row'];
+            $groupRows = array_map(function($item) use ($block) {
+                return $block->renderRow($item['row']);
             }, $group['views']);
 
             //Grouped blocks into one wrapper

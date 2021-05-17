@@ -4,6 +4,7 @@ namespace Admin\Contracts\Sitebuilder;
 
 use Admin\Core\Fields\Mutations\FieldToArray;
 use Admin\Eloquent\AdminModel;
+use Admin\Models\SiteBuilder;
 
 class SBType
 {
@@ -137,5 +138,18 @@ class SBType
             'wrapper' => $this->hasWrapper(),
             'groupBlocks' => $this->hasGroupedBlocks(),
         ];
+    }
+
+    public function renderRow(SiteBuilder $row)
+    {
+        return $row;
+    }
+
+    /*
+     * Push field options
+     */
+    public function options()
+    {
+        return [];
     }
 }

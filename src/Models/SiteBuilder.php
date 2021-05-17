@@ -25,6 +25,10 @@ class SiteBuilder extends AdminModel
         return _('Obsahové bloky');
     }
 
+    protected $hidden = [
+        'published_at', 'deleted_at', 'created_at', 'updated_at', '_order',
+    ];
+
     protected $inMenu = false;
 
     protected $withoutParent = true;
@@ -70,9 +74,25 @@ class SiteBuilder extends AdminModel
 
     public function options()
     {
-        return [
-            'type' => $this->getBlockTypes()
-        ];
+        return array_merge(
+            $this->getBlockOptions(),
+            [
+                'type' => $this->getBlockTypes()
+            ]
+        );
+    }
+
+    public function getBlockOptions()
+    {
+        $options = [];
+
+        foreach(SiteBuilderService::getClasses() as $key => $class) {
+            foreach ($class->options() as $key => $options) {
+                $options[$class->getPrefix().'_'.$key] = $options;
+            }
+        }
+
+        return $options;
     }
 
     public function getBlockTypes()
@@ -127,9 +147,15 @@ class SiteBuilder extends AdminModel
             $field = (new FieldToArray)->update($field);
             $fieldType = @$field['type'] ?: 'string';
 
-            if ( in_array($fieldType, ['string', 'text', 'longtext', 'editor', 'longeditor', 'integer', 'decimal', 'select']) ) {
+            if ( isset($field['multiple']) ) {
+                return count($value ?: []).' položiek';
+            }
+
+            else if ( in_array($fieldType, ['string', 'text', 'longtext', 'editor', 'longeditor', 'integer', 'decimal', 'select']) ) {
                 return $this->makeDescription($fieldKey, 100);
-            } elseif ( in_array($fieldType, ['file']) && @$field['image'] === true ) {
+            }
+
+            elseif ( in_array($fieldType, ['file']) && @$field['image'] === true ) {
                 $images = [];
 
                 foreach (array_wrap($value) as $image) {
