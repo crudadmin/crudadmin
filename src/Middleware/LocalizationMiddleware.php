@@ -50,25 +50,27 @@ class LocalizationMiddleware
     {
         $segment = Localization::getLocaleIdentifier();
 
+        $defaultSlug = Localization::getDefaultLanguage()->slug;
+
         $removeDefault = config('admin.localization_remove_default');
 
         //Redirect to default url, or saved from session if is wrong segment
         //Wrong segment can be also if browser has not any slug,
         //but user has saved other language than default. In this case we want redirect user
         //to the saved language from session.
-        if ( Localization::isValidSegment() === false && request()->segment(1) != 'vendor' ) {
+        if ( Localization::isValidSegment() === false && !request()->segment(1) ) {
             $redirect = session()->has('locale') && Localization::isValid(session('locale'))
-                            ? session('locale')
-                            : Localization::getDefaultLanguage()->slug;
+                                ? session('locale')
+                                : $defaultSlug;
 
             //Checks if is set default language
-            if ($redirect != Localization::getDefaultLanguage()->slug || $removeDefault == false) {
+            if ($redirect != $defaultSlug || $removeDefault == false) {
                 return new RedirectResponse(url($redirect), 302, ['Vary' => 'Accept-Language']);
             }
         }
 
         //If user has same segment as default url, we want redirect user to /
-        elseif ($segment == Localization::getDefaultLanguage()->slug && $removeDefault == true) {
+        elseif ($segment == $defaultSlug && $removeDefault == true) {
             Localization::save($segment);
 
             return new RedirectResponse('/', 302, ['Vary' => 'Accept-Language']);
