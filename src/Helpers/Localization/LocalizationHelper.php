@@ -53,6 +53,16 @@ class LocalizationHelper
     }
 
     /**
+     * Fire and initialize localization method
+     *
+     * @return  this
+     */
+    public function fire()
+    {
+        return $this;
+    }
+
+    /**
      * Boot localization class
      *
      * @return
