@@ -18,44 +18,17 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected $namespace = 'App\Http\Controllers';
 
-    protected $admin_namespace = 'Admin\Controllers';
-
-    /**
-     * Multi languages localization support.
-     * @var string/boolean
-     */
-    protected $localization = false;
-
     /**
      * Define your route model bindings, pattern filters, etc.
      *
      * @param  \Illuminate\Routing\Router  $router
      * @return void
      */
-    public function boot()
+    public function register()
     {
-        //Boot web multi languages support
-        if ( Localization::canBootAutomatically() && $segment = Localization::boot() ) {
-            //We need redirect all routes to given segment
-            if ( Localization::isValidSegment() ) {
-                $this->localization = $segment;
-            }
-        }
-
-        parent::boot();
-    }
-
-    /**
-     * Define the routes for the application.
-     *
-     * @param  \Illuminate\Routing\Router  $router
-     * @return void
-     */
-    public function map(Router $router)
-    {
-        $this->mapWebRoutes($router);
-
-        //
+        $this->app->booted(function(){
+            $this->mapWebRoutes($this->app->router);
+        });
     }
 
     /**
@@ -70,12 +43,20 @@ class RouteServiceProvider extends ServiceProvider
     {
         //Admin routes
         $router->group([
-            'namespace' => $this->admin_namespace,
+            'namespace' => 'Admin\Controllers',
             'middleware' => 'web',
         ], function ($router) {
             require __DIR__.'/../routes.php';
         });
 
+        //Depreaced, we can remove in v4, and all webs should be migrated into Localization::prefix()
+        if ( config('admin.localization_fallback', false) === true ) {
+            $this->registerFallbackRouteTranslations($router);
+        }
+    }
+
+    private function registerFallbackRouteTranslations(Router $router)
+    {
         //Boot application routes language within prefix
         foreach (config('admin.routes', []) as $route) {
             if (! file_exists($route_path = base_or_relative_path($route))) {
@@ -84,7 +65,7 @@ class RouteServiceProvider extends ServiceProvider
 
             $router->group([
                 'namespace' => $this->namespace,
-                'prefix' => $this->localization,
+                'prefix' => Localization::prefix(),
                 'middleware' => 'web',
             ], function ($router) use ($route_path) {
                 require $route_path;

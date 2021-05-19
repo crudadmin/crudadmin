@@ -24,6 +24,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         SitetreeServiceProvider::class,
         SEOServiceProvider::class,
         HashServiceProvider::class,
+        RouteServiceProvider::class,
     ];
 
     protected $facades = [
@@ -41,6 +42,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
     ];
 
     protected $routeMiddleware = [
+        'localized' => Middleware\LocalizedRoute::class,
         'admin' => Middleware\Authenticate::class,
         'admin.guest' => Middleware\RedirectIfAuthenticated::class,
         'hasAdminRole' => Middleware\HasAdminRole::class,
@@ -58,13 +60,6 @@ class AppServiceProvider extends AdminHelperServiceProvider
          * Bind variable to admin views path
          */
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'admin');
-
-        /*
-         * Bind route provider after application boot, for correct route actions in localizations
-         */
-        $this->registerProviders([
-            RouteServiceProvider::class,
-        ]);
     }
 
     /**

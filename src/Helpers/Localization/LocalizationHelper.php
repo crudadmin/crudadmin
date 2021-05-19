@@ -318,4 +318,15 @@ class LocalizationHelper
     {
         return true;
     }
+
+    public function prefix()
+    {
+        //Boot web multi languages support
+        if ( $this->canBootAutomatically() && $segment = $this->boot() ) {
+            //We need redirect all routes to given segment
+            if ( $this->isValidSegment() ) {
+                return $segment;
+            }
+        }
+    }
 }

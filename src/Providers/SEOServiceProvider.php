@@ -62,11 +62,7 @@ class SEOServiceProvider extends ServiceProvider
         });
 
         Route::macro('visible', function($param = null){
-            $url = $this->uri;
-            $controller = str_replace($this->action['namespace'], '', $this->action['controller']);
-            $controller = ltrim($controller, '\\');
-
-            EditorMode::addVisibleRoute($controller, $url);
+            EditorMode::addVisibleRoute($this);
 
             return $this;
         });

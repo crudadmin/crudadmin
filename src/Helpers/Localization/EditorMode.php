@@ -3,6 +3,7 @@
 namespace Admin\Helpers\Localization;
 
 use Admin;
+use Illuminate\Routing\Route;
 use Localization;
 
 class EditorMode
@@ -52,9 +53,9 @@ class EditorMode
      * @param  string  $action
      * @param  string  $url
      */
-    public function addVisibleRoute($action, $url)
+    public function addVisibleRoute(Route $route)
     {
-        $this->visibleRoutes[$action] = $url;
+        $this->visibleRoutes[] = $route;
     }
 
     /*
@@ -62,8 +63,15 @@ class EditorMode
      */
     public function getVisibleRoutes()
     {
-        return array_map(function($url){
-            return url($url ?: []);
-        }, $this->visibleRoutes);
+        $list = [];
+
+        foreach ($this->visibleRoutes as $route) {
+            $controller = str_replace($route->action['namespace'], '', $route->action['controller']);
+            $controller = ltrim($controller, '\\');
+
+            $list[$controller] = url($route->uri ?: []);
+        }
+
+        return $list;
     }
 }
