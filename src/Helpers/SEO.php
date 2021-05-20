@@ -155,7 +155,8 @@ class SEO
 
         $this->seoRows = Admin::getModel('RoutesSeo')->where(function($query){
                                 $query->where('url', $this->withoutLocalizedSlug($this->getRouteUrl()))
-                                      ->orWhere('url', $this->withoutLocalizedSlug($this->getPathInfo()));
+                                      ->orWhere('url', $this->withoutLocalizedSlug($this->getPathInfo()))
+                                      ->orWhere('controller', $this->getRouteController());
                             })
                             ->when($this->getSeoGroup(), function($query, $group){
                                 $query->orWhere('group', $group);
@@ -320,6 +321,13 @@ class SEO
         $route = Route::getCurrentRoute();
 
         return $route ? @$route->action['seo']['group'] : null;
+    }
+
+    public function getRouteController()
+    {
+        $route = Route::getCurrentRoute();
+
+        return $route ? @$route->action['controller'] : null;
     }
 
     private function secure($string)
