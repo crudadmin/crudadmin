@@ -335,6 +335,11 @@ class LocalizationHelper
         if ( $this->canBootAutomatically() && $segment = $this->boot() ) {
             //We need redirect all routes to given segment
             if ( $this->isValidSegment() ) {
+                //We cannot return default in any situation
+                if ( config('admin.localization_remove_default') == true && $segment == $this->getDefaultLanguage()->slug ) {
+                    return;
+                }
+
                 return $segment;
             }
         }
