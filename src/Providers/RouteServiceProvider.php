@@ -31,13 +31,6 @@ class RouteServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
-    {
-        //Boot localization. It will automatically check if can be booted,
-        //and will run all features...
-        Localization::fire();
-    }
-
     /**
      * Define the "web" routes for the application.
      *

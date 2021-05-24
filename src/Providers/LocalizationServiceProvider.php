@@ -6,6 +6,8 @@ use Admin\Middleware\LocalizationMiddleware;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Localization;
+use Route;
 
 class LocalizationServiceProvider extends ServiceProvider
 {
@@ -23,7 +25,16 @@ class LocalizationServiceProvider extends ServiceProvider
 
     public function boot(Kernel $kernel, Router $router)
     {
+        //Boot localization. It will automatically check if can be booted,
+        //and will run all features...
+        Localization::fire();
+
         $this->loadMiddlewares($kernel, $router);
+
+        //Added default redirect
+        if ( config('admin.localization_remove_default') && Localization::canBootAutomatically() ) {
+            Route::get(Localization::getDefaultLanguage()->slug, '\Admin\Controllers\LocalizationController@redirect')->middleware('web');
+        }
     }
 
     //Register localization middleware
