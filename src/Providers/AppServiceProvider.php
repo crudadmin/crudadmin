@@ -46,6 +46,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         'admin.guest' => Middleware\RedirectIfAuthenticated::class,
         'hasAdminRole' => Middleware\HasAdminRole::class,
         'hasDevMode' => Middleware\HasDevMode::class,
+        'localized' => Middleware\LocalizationMiddleware::class,
     ];
 
     /**

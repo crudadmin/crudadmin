@@ -10,15 +10,6 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * This namespace is applied to your controller routes.
-     *
-     * In addition, it is set as the URL generator's root namespace.
-     *
-     * @var string
-     */
-    protected $namespace = 'App\Http\Controllers';
-
-    /**
      * Define your route model bindings, pattern filters, etc.
      *
      * @param  \Illuminate\Routing\Router  $router
@@ -29,6 +20,8 @@ class RouteServiceProvider extends ServiceProvider
         $this->app->booted(function(){
             $this->mapWebRoutes($this->app->router);
         });
+
+        $this->registerRouterMacros($this->app->router);
     }
 
     /**
@@ -48,28 +41,26 @@ class RouteServiceProvider extends ServiceProvider
         ], function ($router) {
             require __DIR__.'/../routes.php';
         });
-
-        //Depreaced, we can remove in v4, and all webs should be migrated into Localization::prefix()
-        if ( config('admin.localization_fallback', false) === true ) {
-            $this->registerFallbackRouteTranslations($router);
-        }
     }
 
-    private function registerFallbackRouteTranslations(Router $router)
+    public function registerRouterMacros(Router $router)
     {
-        //Boot application routes language within prefix
-        foreach (config('admin.routes', []) as $route) {
-            if (! file_exists($route_path = base_or_relative_path($route))) {
-                continue;
+        $router->macro('addLocalizationAttributes', function($localizedRouterIndex, $forcedLocale = null){
+            $attributes = [
+                'prefix' => Localization::prefix($forcedLocale),
+                'middleware' => ['localized'],
+                'localized_router_index' => $localizedRouterIndex,
+            ];
+
+            if ($this->hasGroupStack()) {
+                $attributes = $this->mergeWithLastGroup($attributes);
+
+                $this->groupStack[count($this->groupStack) - 1] = $attributes;
+            } else {
+                $this->groupStack[] = $attributes;
             }
 
-            $router->group([
-                'namespace' => $this->namespace,
-                'prefix' => Localization::prefix(),
-                'middleware' => 'web',
-            ], function ($router) use ($route_path) {
-                require $route_path;
-            });
-        }
+            return $this;
+        });
     }
 }

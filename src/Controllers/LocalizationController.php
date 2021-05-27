@@ -11,7 +11,7 @@ class LocalizationController extends Controller
     public function redirect()
     {
         if ( $default = Localization::getDefaultLanguage()->slug ) {
-            Localization::save($default);
+            Localization::saveIntoSession($default);
         }
 
         return new RedirectResponse('/', 302, ['Vary' => 'Accept-Language']);

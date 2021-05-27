@@ -1,5 +1,7 @@
 <?php
 
+use Admin\Models\Language;
+
 if (! function_exists('admin')) {
     function admin()
     {
@@ -83,4 +85,29 @@ if ( !function_exists('localeUrl') ) {
 
         return url($path);
     }
+}
+
+/**
+ * Add supporti nto localized routes
+ *
+ * @param  string  $callback
+ * @param  nullable|string  $forcedLocale
+ * @return  [type]
+ */
+function localizedRoutes($callback, $forcedLocale = null)
+{
+    $path = base_path($callback);
+
+    return function() use ($path, $callback, $forcedLocale) {
+        $index = \Localization::addLocalizedRoutes($callback);
+
+        app()->router->addLocalizationAttributes($index, $forcedLocale);
+
+        require $path;
+    };
+}
+
+function switchLocale(Language $language)
+{
+    return url()->current().'?_locale='.$language->slug;
 }

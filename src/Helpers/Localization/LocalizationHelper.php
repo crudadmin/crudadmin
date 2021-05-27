@@ -64,8 +64,6 @@ class LocalizationHelper
 
     /**
      * Boot localization class
-     *
-     * @return
      */
     public function boot()
     {
@@ -76,8 +74,6 @@ class LocalizationHelper
 
         //Fetch all languages
         $this->getLanguages();
-
-        return $this->get()->slug;
     }
 
     /**
@@ -141,7 +137,11 @@ class LocalizationHelper
      */
     public function isValid($locale = null)
     {
-        $locale === null ? $this->getLocaleIdentifier() : $locale;
+        $locale = $locale === null ? $this->getLocaleIdentifier() : $locale;
+
+        if ( ! $locale ){
+            return false;
+        }
 
         return $this->languages->where('slug', $locale)->count() == 1;
     }
@@ -333,12 +333,14 @@ class LocalizationHelper
         return true;
     }
 
-    public function prefix()
+    public function prefix($forcedLocale = null)
     {
+        $segment = $forcedLocale ?: $this->get()->slug;
+
         //Boot web multi languages support
-        if ( $this->canBootAutomatically() && $segment = $this->boot() ) {
+        if ( $this->canBootAutomatically() ) {
             //We need redirect all routes to given segment
-            if ( $this->isValidSegment() ) {
+            if ( $this->isValid($segment) ) {
                 //We cannot return default in any situation
                 if ( config('admin.localization_remove_default') == true && $segment == $this->getDefaultLanguage()->slug ) {
                     return;

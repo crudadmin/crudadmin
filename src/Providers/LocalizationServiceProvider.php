@@ -2,7 +2,6 @@
 
 namespace Admin\Providers;
 
-use Admin\Middleware\LocalizationMiddleware;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
@@ -29,17 +28,9 @@ class LocalizationServiceProvider extends ServiceProvider
         //and will run all features...
         Localization::fire();
 
-        $this->loadMiddlewares($kernel, $router);
-
         //Added default redirect
         if ( config('admin.localization_remove_default') && Localization::canBootAutomatically() ) {
             Route::get(Localization::getDefaultLanguage()->slug, '\Admin\Controllers\LocalizationController@redirect')->middleware('web');
         }
-    }
-
-    //Register localization middleware
-    private function loadMiddlewares($kernel, $router)
-    {
-        $router->pushMiddlewareToGroup('web', LocalizationMiddleware::class);
     }
 }

@@ -13,6 +13,15 @@ use Admin;
 
 class Localization extends LocalizationHelper implements LocalizationInterface
 {
+    const SESSION_LOCALE_KEY = 'locale';
+
+    /*
+     * Here will be stored all localized routers
+     * They are needed because we need boot them again in different language
+     * when user wants to redirect to same route in other language
+     */
+    public $localizedRouters = [];
+
     /*
      * Allow for gettext javascript translations use ASSET_PATH.
      * Because other domains cannot receive cookies for translations verification
@@ -99,12 +108,20 @@ class Localization extends LocalizationHelper implements LocalizationInterface
      *
      * @param  string  $lang
      */
-    public function save($lang)
+    public function saveIntoSession($lang)
     {
         if ( $this->isValid($lang) ) {
-            session(['locale' => $lang]);
+            session([
+                self::SESSION_LOCALE_KEY => $lang
+            ]);
+
             session()->save();
         }
+    }
+
+    public function getFromSession()
+    {
+        return session(self::SESSION_LOCALE_KEY);
     }
 
     /**
@@ -125,5 +142,17 @@ class Localization extends LocalizationHelper implements LocalizationInterface
     public function isGettextAllowed()
     {
         return config('admin.gettext');
+    }
+
+    public function addLocalizedRoutes($routes)
+    {
+        $this->localizedRouters[] = $routes;
+
+        return count($this->localizedRouters) - 1;
+    }
+
+    public function getLocalizedRouter($index)
+    {
+        return $this->localizedRouters[$index];
     }
 }
