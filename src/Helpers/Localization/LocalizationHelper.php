@@ -134,14 +134,16 @@ class LocalizationHelper
     }
 
     /**
-     * Check if given segment is valid
+     * Check if given locale is valid
      *
-     * @param  string  $segment
+     * @param  string  $locale
      * @return  bool
      */
-    public function isValid($segment)
+    public function isValid($locale = null)
     {
-        return $this->languages->where('slug', $segment)->count() == 1;
+        $locale === null ? $this->getLocaleIdentifier() : $locale;
+
+        return $this->languages->where('slug', $locale)->count() == 1;
     }
 
     /**
@@ -151,7 +153,9 @@ class LocalizationHelper
      */
     public function isValidSegment()
     {
-        return $this->isValid($this->getLocaleIdentifier());
+        return $this->isValid(
+            $this->getLocaleSegmentIdentifier()
+        );
     }
 
     /**
@@ -169,16 +173,16 @@ class LocalizationHelper
             $language = $this->getBySlug($this->localization);
         }
 
-        //Return by default localization
-        else if ($this->isValidSegment() === false) {
+        //If selected language is not valid, we want return default localization
+        else if ($this->isValid() === false) {
             $language = $this->getDefaultLanguage();
         }
 
-        //Return by identifier
+        //Return by locale identifier
         else {
-            $segment = $this->getLocaleIdentifier();
+            $code = $this->getLocaleIdentifier();
 
-            $language = $this->getBySlug($segment);
+            $language = $this->getBySlug($code);
         }
 
         //Update app localization

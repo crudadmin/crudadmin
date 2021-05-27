@@ -48,6 +48,17 @@ class AdminLocalization extends LocalizationHelper implements LocalizationInterf
     }
 
     /**
+     * Segment for administration
+     * (administration does not have prefix locale segments)
+     *
+     * @return  null
+     */
+    public function getLocaleSegmentIdentifier()
+    {
+
+    }
+
+    /**
      * Admin localization is enabled only in admin interface
      *
      * @return  bool
@@ -65,11 +76,6 @@ class AdminLocalization extends LocalizationHelper implements LocalizationInterf
     public function canBootAutomatically()
     {
         return $this->isActive() && Admin::isAdmin() === true;
-    }
-
-    public function isValid($segment)
-    {
-        return $this->languages->where('slug', $segment)->count() == 1;
     }
 
     /**

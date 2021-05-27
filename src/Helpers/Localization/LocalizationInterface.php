@@ -33,6 +33,13 @@ interface LocalizationInterface
     public function getLocaleIdentifier();
 
     /**
+     * Locale loaded from first url slug
+     *
+     * @return  string|nullable
+     */
+    public function getLocaleSegmentIdentifier();
+
+    /**
      * Returns controller parh for
      *
      * @return  string

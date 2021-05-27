@@ -41,11 +41,16 @@ class Localization extends LocalizationHelper implements LocalizationInterface
      */
     public function getLocaleIdentifier()
     {
-        //Rewrite locale by query parameter
-        if ( request('locale') ){
-            return request('locale');
-        }
+        return $this->getLocaleSegmentIdentifier();
+    }
 
+    /**
+     * Return segment language prefix
+     *
+     * @return string|null
+     */
+    public function getLocaleSegmentIdentifier()
+    {
         return request()->segment(1);
     }
 
