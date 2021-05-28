@@ -74,6 +74,9 @@ class LocalizationHelper
 
         //Fetch all languages
         $this->getLanguages();
+
+        //We need assign language first time
+        $this->get();
     }
 
     /**
