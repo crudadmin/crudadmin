@@ -194,9 +194,7 @@ abstract class Request extends FormRequest
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, ['date', 'datetime', 'time'])) {
                 if ($this->model->hasFieldParam($key, 'multiple', true)) {
-                    if (! $this->has($key)) {
-                        $this->merge([$key => []]);
-                    }
+                    $this->merge([$key => array_filter($this->get($key) ?: [])]);
                 } elseif ($this->has($key) && ! empty($this->get($key))) {
                     if ($has_locale = $this->model->hasFieldParam($key, 'locale')) {
                         $date = $this->get($key);
