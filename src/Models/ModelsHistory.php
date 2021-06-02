@@ -69,11 +69,28 @@ class ModelsHistory extends Model
     /*
      * Modify all request data
      */
-    public function convertData($model, $data)
+    public function convertData($model, $data, $initial = false)
     {
         foreach ($data as $key => $value) {
             if ($value instanceof Carbon) {
                 $data[$key] = $value->format('Y-m-d H:i:s');
+            }
+        }
+
+
+        foreach ($model->getFields() as $key => $field) {
+            //If row is beign created first fime from original params, we need add additional relation data into this
+            //original data
+            if ( array_key_exists('belongsToMany', $field) ){
+                if ( !array_key_exists($key, $data) ) {
+                    if ( $initial === true && $relationData = $model->{$key} ) {
+                        $data[$key] = $relationData->pluck('id')->toArray();
+                    }
+                } else if ( is_array($data[$key]) ) {
+                    $data[$key] = array_map(function($id){
+                        return (int)$id;
+                    }, $data[$key]);
+                }
             }
         }
 
@@ -140,17 +157,8 @@ class ModelsHistory extends Model
     /*
      * Compare by last change
      */
-    public function checkChanges($model, $data, $original = null)
+    public function checkChanges($model, $data, $oldData)
     {
-        $old_data = $model->getHistorySnapshot();
-
-        //If row is editted, but does not exists in db history, then create his initial/original value, and changed value
-        if (is_array($original) && count($old_data) == 0) {
-            $this->pushChanges($model, $original, null, true);
-
-            $old_data = $original;
-        }
-
         $changes = [];
 
         $actualData = $this->getActualData($model);
@@ -164,15 +172,15 @@ class ModelsHistory extends Model
                 continue;
             }
 
-            $exists = array_key_exists($key, $old_data);
+            $exists = array_key_exists($key, $oldData);
 
-            if (! $exists && ! is_null($value) || $exists && $old_data[$key] != $value) {
+            if (! $exists && ! is_null($value) || $exists && $oldData[$key] != $value) {
                 $changes[$key] = $value;
             }
         }
 
         //Push empty values into missing keys in actual request
-        foreach (array_diff_key($old_data, $data) as $key => $value) {
+        foreach (array_diff_key($oldData, $data) as $key => $value) {
             if ($this->canSkipFieldInHistory($model, $key)) {
                 unset($changes[$key]);
             } else {
@@ -199,11 +207,21 @@ class ModelsHistory extends Model
         }
 
         //Modify request data
-        $data = $this->convertData($model, $data);
+        $data = $this->convertData($model, $data, $initial);
+
+        $oldData = $model->getHistorySnapshot();
+
+        //If row is editted, but does not exists in db history,
+        //then create his initial/original value, and changed value
+        if (is_array($original) && count($oldData) == 0) {
+            $this->pushChanges($model, $original, null, true);
+
+            $oldData = $this->convertData($model, $original, true);
+        }
 
         //Compare and get new changes
-        if ($initial !== true) {
-            $data = $this->checkChanges($model, $data, $original);
+        if ($initial == false) {
+            $data = $this->checkChanges($model, $data, $oldData);
         }
 
         //If no changes

@@ -188,7 +188,9 @@ trait ModelRules
      */
     public function backupOriginalAttributes()
     {
-        return $this->backup_original = $this->getRawOriginal() ?: [];
+        $this->backup_original = $this->getRawOriginal() ?: [];
+
+        return $this->getOriginal();
     }
 
     /*
