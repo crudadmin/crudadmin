@@ -29,8 +29,17 @@ class Sortable extends Column
      */
     public function registerStaticColumn(Blueprint $table, AdminModel $model, bool $update, $columnExists = null)
     {
+        $indexName = $this->getIndexName($model, $this->column, 'index');
+
         //Check if is enabled sortable support and column does not exists
         if ($columnExists) {
+
+            //We need check index also on existing columns. Because crudadmin < 3.3 does not use index
+            //what is huge performance
+            if ( $this->hasIndex($model, $this->column, 'index') == false ) {
+                return $table->integer($this->column)->unsigned()->index($indexName);
+            }
+
             return;
         }
 
@@ -39,7 +48,7 @@ class Sortable extends Column
             $this->setOrderPosition($model);
         }
 
-        return $table->integer($this->column)->unsigned();
+        return $table->integer($this->column)->unsigned()->index($indexName);
     }
 
     //Resave all rows in model for updating slug if needed
