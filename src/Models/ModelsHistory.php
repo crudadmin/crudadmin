@@ -83,7 +83,7 @@ class ModelsHistory extends Model
             //original data
             if ( array_key_exists('belongsToMany', $field) ){
                 if ( !array_key_exists($key, $data) ) {
-                    if ( $initial === true && $relationData = $model->{$key} ) {
+                    if ( $initial === true && $relationData = $model->{$key}()->get() ) {
                         $data[$key] = $relationData->pluck('id')->toArray();
                     }
                 } else if ( is_array($data[$key]) ) {
@@ -196,6 +196,9 @@ class ModelsHistory extends Model
      */
     public function pushChanges($model, $data, $original = null, $initial = false)
     {
+        //We need clone given model. Because we cant mutate any field...
+        $model = clone $model;
+
         //We need reset all hidden fields for history
         //We want monitor all fields...
         $model = (clone $model)->setHidden([]);
