@@ -48,7 +48,13 @@ class Sortable extends Column
         $this->registerAfterMigration($model, function () use ($model) {
             $i = 0;
 
-            foreach ($model->get() as $row) {
+            $query = $model->withoutGlobalScopes();
+
+            if ( $model->hasSoftDeletes() ) {
+                $query->withoutTrashed();
+            }
+
+            foreach ($query->select(['id'])->get() as $row) {
                 $row->_order = $i++;
                 $row->save();
             }
