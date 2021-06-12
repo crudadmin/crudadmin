@@ -267,7 +267,7 @@ class Admin extends AdminCore
 
         $directories = $directories ?: [
             public_path(self::getAdminAssetsPath()),
-            public_path(File::getUploadsDirectory())
+            public_path(File::UPLOADS_DIRECTORY)
         ];
 
         foreach ($directories as $dir) {

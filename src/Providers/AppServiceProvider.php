@@ -77,17 +77,5 @@ class AppServiceProvider extends AdminHelperServiceProvider
         ], $this->providers));
 
         $this->bootRouteMiddleware();
-
-        $this->addCrudadminStorage();
-    }
-
-    private function addCrudadminStorage()
-    {
-        $this->app['config']->set('filesystems.disks.crudadmin', [
-            'driver' => 'local',
-            'root' => public_path('uploads'),
-            'url' => env('APP_URL').'/uploads',
-            'visibility' => 'public',
-        ]);
     }
 }

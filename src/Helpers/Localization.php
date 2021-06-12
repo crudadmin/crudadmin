@@ -86,7 +86,7 @@ class Localization extends LocalizationHelper implements LocalizationInterface
             $this->isActive() &&
             app()->runningInConsole() === false
             && \Admin::isAdmin() === false
-            && $segment != File::getUploadsDirectory()
+            && $segment != File::UPLOADS_DIRECTORY
         );
     }
 

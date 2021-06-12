@@ -6,6 +6,7 @@ use Admin\Helpers\File;
 use Admin\Helpers\SecureDownloader;
 use Admin\Helpers\SheetDownloader;
 use Illuminate\Http\Request;
+use Admin;
 
 class DownloadController extends Controller
 {
@@ -14,55 +15,55 @@ class DownloadController extends Controller
         $this->middleware('admin', ['except' => 'signedDownload']);
     }
 
-    public function getPath()
+    /**
+     * Build admin file from request query url
+     *
+     * @return  AdminModel
+     */
+    private function getFileFromRequest()
     {
-        $file = request('file');
-        $model = request('model');
-        $field = request('field');
-
-        $file = File::adminModelFile($model, $field, $file);
-
-        $publicPath = public_path(File::getUploadsDirectory());
-        $realPath = dirname(realpath($file->basepath));
-
-        //Alow download only from uploads folder
-        if ( substr($realPath, 0, strlen($publicPath)) != $publicPath ){
+        if ( !($model = Admin::getModelByTable(request('model'))) ){
             abort(404);
+        }
+
+        $fieldKey = basename(request('field'));
+        $filename = basename(request('file'));
+
+        return $model->getAdminFile($fieldKey, $filename);
+    }
+
+    /**
+     * Downloading for authenticated administrators with permissions
+     *
+     * @return  Response
+     */
+    public function adminDownload()
+    {
+        $adminFile = $this->getFileFromRequest();
+
+        $model = Admin::getModelByTable(request('model'));
+
+        //Check if admin has permissions to given model
+        if ( admin()->hasAccess($model) == false ) {
+            abort(401);
         }
 
         //Protection
-        if ( ! file_exists( $file->basepath ) ) {
+        if ( $adminFile->exists === false ) {
             abort(404, '<h1>404 - file not found...</h1>');
         }
 
-        return $file->basepath;
+        return $adminFile->getStorage()->download(
+            $adminFile->path
+        );
     }
 
-    /*
-     * Returns download resposne of file
+    /**
+     * Signed downloading for authenticated administrators with permissions
+     *
+     * @return  Response
      */
-    public function index()
-    {
-        $file = $this->getPath();
-
-        return response()->download($file);
-    }
-
-    /*
-     * Download file with signed hash
-     */
-    public function signedDownload($hash)
-    {
-        $path = implode('/', [request('model'), request('field'), request('file')]);
-
-        if ( $hash != File::getHash($path)){
-            abort(404);
-        }
-
-        return $this->index();
-    }
-
-    public function securedUserDownload()
+    public function securedAdminDownload()
     {
         $hash = request('hash');
 
@@ -79,5 +80,26 @@ class DownloadController extends Controller
         }
 
         return $response;
+    }
+
+    /**
+     * Download file with signed hash for guests
+     *
+     * @param  string  $hash
+     *
+     * @return  Response
+     */
+    public function signedDownload($hash)
+    {
+        $adminFile = $this->getFileFromRequest();
+
+        //Check file model hashes
+        if ( $hash != $adminFile->hash || $adminFile->exists === false ){
+            abort(404);
+        }
+
+        return $adminFile->getStorage()->download(
+            $adminFile->path
+        );
     }
 }

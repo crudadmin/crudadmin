@@ -1,4 +1,7 @@
 <?php
+
+use Admin\Core\Helpers\Storage\AdminFile;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -14,8 +17,8 @@
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
 
 //Image thumbnails
-Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{model}/{field}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
-Route::get('/'.\Admin\Helpers\File::getUploadsDirectory().'/cache/{params1?}/{params2?}/{params3?}/{params4?}/{params5?}', 'ImageController@resizeImage');
+Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/cache/{table}/{fieldKey}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
+Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/cache/{table}/{fieldKey}/{prefix}/{filename}', 'ImageController@resizeImage');
 
 //Gettext js translates
 Route::get('/vendor/js/ca-translates.js', 'GettextController@index');
@@ -52,8 +55,8 @@ Route::group(['middleware' => ['admin', 'hasDevMode']], function () {
     Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');
 
     //Downloading files from uploads in administration
-    Route::get('/admin/download/file', 'DownloadController@index');
-    Route::get('/admin/user/download/{hash}', 'DownloadController@securedUserDownload');
+    Route::get('/admin/download/file', 'DownloadController@adminDownload');
+    Route::get('/admin/user/download/{hash}', 'DownloadController@securedAdminDownload');
 
     //Sitetree
     Route::post('/admin/sitetree/store', 'SiteTreeController@store');

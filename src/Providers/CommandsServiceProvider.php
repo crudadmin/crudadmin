@@ -31,8 +31,6 @@ class CommandsServiceProvider extends ServiceProvider
 
         $this->app->bind('gogol::admin.component', \Admin\Commands\AdminComponentCommand::class);
 
-        $this->app->bind('gogol::admin.compress', \Admin\Commands\AdminCompressUploadsCommand::class);
-
         $this->app->bind('gogol::admin.preresize', \Admin\Commands\AdminPreResizeImages::class);
 
         $this->app->bind('gogol::admin.queue', \Admin\Commands\EnsureQueueListenerIsRunning::class);
@@ -49,7 +47,6 @@ class CommandsServiceProvider extends ServiceProvider
             'gogol::admin.layout',
             'gogol::admin.sitebuilderblock',
             'gogol::admin.component',
-            'gogol::admin.compress',
             'gogol::admin.preresize',
             'gogol::admin.queue',
             'gogol::admin.dev',

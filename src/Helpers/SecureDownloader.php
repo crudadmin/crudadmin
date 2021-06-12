@@ -30,7 +30,7 @@ class SecureDownloader
 
         session()->save();
 
-        return action('\Admin\Controllers\DownloadController@securedUserDownload', $this->getHash());
+        return action('\Admin\Controllers\DownloadController@securedAdminDownload', $this->getHash());
     }
 
     public static function getSessionBaseData(string $hash)

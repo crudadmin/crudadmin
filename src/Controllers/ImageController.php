@@ -2,9 +2,9 @@
 
 namespace Admin\Controllers;
 
+use Admin\Core\Helpers\Storage\AdminFile;
 use Admin;
 use Image;
-use Admin\Helpers\File;
 
 class ImageController extends Controller
 {
@@ -31,36 +31,30 @@ class ImageController extends Controller
     /*
      * Resize image which has not been resized yet
      */
-    public function resizeImage($a = null, $b = null, $c = null, $d = null, $e = null)
+    public function resizeImage($table, $fieldKey, $prefix, $filename)
     {
-        $cacheFilePath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
-
-        $temporaryPath = File::getTemporaryFilename($cacheFilePath);
-
-        //If does not exists cache path, but also does not exists cached image already
-        //But alsot if cached image exists, and temorary path does not exists
-        if (
-            ! file_exists($cacheFilePath) && ! file_exists($temporaryPath)
-            || ! file_exists($temporaryPath)
-        ) {
+        if ( !($model = Admin::getModelByTable($table)) ){
             abort(404);
         }
 
-        //Get resizing information from cache
-        $cache = json_decode(file_get_contents($temporaryPath), true);
+        $adminFile = $model->getAdminFile($fieldKey, $filename);
+
+        //If does not exists cache path, but also does not exists cached image already
+        //But alsot if cached image exists, and temorary path does not exists
+        if ( ! $resizeData = $adminFile->getCachedResizeData($prefix) ) {
+            abort(404);
+        }
 
         //Resize image
-        $file = (new File(public_path($cache['original_path'])))->image(
-            $cache['mutators'] ?? null,
-            $cache['directory'] ?? null,
-            true,
-            true
-        );
+        $resizedImage = $adminFile->image($resizeData['mutators'] ?? [], true);
 
         //Remove temporary file with settings
-        @unlink($temporaryPath);
+        $adminFile->removeCachedResizeData($prefix);
+
+        //Retrieve resized and compressed image
+        $compressedImage = $resizedImage->getStorage()->get($resizedImage->path);
 
         //Return resized image response
-        return $file->response();
+        return Image::make($compressedImage)->response();
     }
 }
