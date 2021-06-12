@@ -18,7 +18,6 @@ class AppServiceProvider extends AdminHelperServiceProvider
         ValidatorServiceProvider::class,
         CommandsServiceProvider::class,
         PasswordResetServiceProvider::class,
-        ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
         FrontendEditorServiceProvider::class,
         SitetreeServiceProvider::class,
@@ -37,8 +36,6 @@ class AppServiceProvider extends AdminHelperServiceProvider
         'FrontendEditor' => Facades\FrontendEditor::class,
         'SiteTree' => Facades\SiteTree::class,
         'SEO' => Facades\SEOFacade::class,
-        'ImageCompressor' => Facades\ImageCompressor::class,
-        'Image' => \Intervention\Image\Facades\Image::class,
     ];
 
     protected $routeMiddleware = [
