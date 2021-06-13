@@ -16,16 +16,30 @@ class ImageController extends Controller
     /*
      * Returns image response of file
      */
-    public function getThumbnail($model, $field, $file)
+    public function getThumbnail($table, $fieldKey, $filename)
     {
-        $file = File::adminModelFile($model, $field, $file);
-
-        //Check if model and field exists
-        if (($model = Admin::getModelByTable($model)) && $model->getField($field) && $file->exists()) {
-            return response()->download($file->resize(40, 40, 'admin-thumbnails', true, false)->path);
+        if ( !($model = Admin::getModelByTable($table)) ){
+            abort(404);
         }
 
-        return abort(404);
+        $adminFile = $model->getAdminFile($fieldKey, $filename);
+
+        //Check if model and field exists
+        if ( $adminFile->exists == false ) {
+            return abort(404);
+        }
+
+        $storage = $adminFile->getStorage();
+
+        //Retrieve resized and compressed image
+        $response = $storage->response(
+            $adminFile->resize(50, 50, true)->path
+        )
+            ->setMaxAge(3600 * 24 * 365)
+            ->setPublic();
+
+        //Send response manually, because we does not want to throw cookies etc..
+        $response->send();
     }
 
     /*
