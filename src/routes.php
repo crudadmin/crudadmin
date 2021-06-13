@@ -18,6 +18,7 @@ Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload')
 
 //Image thumbnails
 Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/cache/{table}/{fieldKey}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
+Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/{table}/{fieldKey}/{filename}', 'ImageController@getFile');
 Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/cache/{table}/{fieldKey}/{prefix}/{filename}', 'ImageController@resizeImage')->name('crudadminResizer');
 
 //Gettext js translates

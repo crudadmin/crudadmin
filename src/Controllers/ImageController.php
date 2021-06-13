@@ -58,4 +58,26 @@ class ImageController extends Controller
         //Send response manually, because we does not want to throw cookies etc..
         $response->send();
     }
+
+    /*
+     * Get files from cloud storage
+     */
+    public function getFile($table, $fieldKey, $filename)
+    {
+        if ( !($model = Admin::getModelByTable($table)) ){
+            abort(404);
+        }
+
+        $adminFile = $model->getAdminFile($fieldKey, $filename);
+
+        $storage = $adminFile->getStorage();
+
+        //Retrieve resized and compressed image
+        $response = $storage->response($adminFile->path)
+            ->setMaxAge(3600 * 24 * 365)
+            ->setPublic();
+
+        //Send response manually, because we does not want to throw cookies etc..
+        $response->send();
+    }
 }
