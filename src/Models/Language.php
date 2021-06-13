@@ -81,9 +81,4 @@ class Language extends Model
     {
         return true;
     }
-
-    public function getPoPath()
-    {
-        return $this->poedit_po;
-    }
 }

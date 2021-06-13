@@ -217,6 +217,8 @@ class LocalizationHelper
      */
     public function setLocale($locale, $updateLaravelLocale = true)
     {
+        $storage = Gettext::getStorage();
+
         //We does not want to set same locale 2 times
         if ($locale == $this->localization) {
             return true;
@@ -227,7 +229,7 @@ class LocalizationHelper
             $language = $this->getBySlug($locale);
 
             //Try backup default language if no translates are present in given language
-            if (!$language || !$language->getPoPath()) {
+            if (!$language || $storage->exists($language->getLocalPoPath()) == false ) {
                 $language = $this->getDefaultLanguage();
             }
 
@@ -238,11 +240,11 @@ class LocalizationHelper
 
             //If language and translations data are present
             if ($language) {
-                if ( $language->getPoPath() && $language->getPoPath()->exists() ) {
+                if ( $language->getLocalPoPath() && $storage->exists($language->getLocalPoPath()) ) {
                     Gettext::setGettextPropertiesModel($language);
                 }
 
-                Gettext::setLocale($language->slug, $language->getPoPath());
+                Gettext::setLocale($language->slug, $language->getLocalPoPath());
             }
         }
 

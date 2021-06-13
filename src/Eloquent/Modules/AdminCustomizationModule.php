@@ -7,6 +7,7 @@ use AdminLocalization;
 use Admin\Core\Eloquent\Concerns\AdminModelModule;
 use Admin\Core\Eloquent\Concerns\AdminModelModuleSupport;
 use Gettext\Translations;
+use Gettext;
 
 class AdminCustomizationModule extends AdminModelModule implements AdminModelModuleSupport
 {
@@ -444,12 +445,17 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                     return false;
                 }
 
+                $locale = Gettext::getLocale($adminLang->slug);
+                $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+
                 //If language PO file does not exists
-                if ( ($poPath = $adminLang->getPoPath())->exists() == false ){
+                if ( Gettext::getStorage()->exists($localePoPath) == false ){
                     return false;
                 }
 
-                return Translations::fromPoFile($poPath->basepath);
+                return Translations::fromPoFile(
+                    Gettext::getStorage()->path($localePoPath)
+                );
             });
 
             //We can allow this value if translations are not available

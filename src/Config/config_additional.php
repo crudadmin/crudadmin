@@ -53,7 +53,7 @@ return [
         'app/Model',
         'app/Models',
         __DIR__.'/../',
-        storage_path('app/lang/cache'),
+        storage_path('crudadmin/lang/cache'),
         base_path('vendor/crudadmin/resources/src/Resources/js'),
         base_path('vendor/crudadmin/resources/src/Resources/lang/sk'),
         base_path('vendor/crudadmin/resources/src/Resources/views'),

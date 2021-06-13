@@ -44,7 +44,7 @@ class LayoutController extends BaseController
                 'removeFromHistory' => action('\Admin\Controllers\HistoryController@removeFromHistory'),
                 'updateOrder' => action('\Admin\Controllers\Crud\DataController@updateOrder'),
                 'buttonAction' => action('\Admin\Controllers\Crud\DataController@buttonAction'),
-                'download' => action('\Admin\Controllers\DownloadController@index'),
+                'download' => action('\Admin\Controllers\DownloadController@adminDownload'),
                 'rows' => action('\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
                 'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id', ':table']),
                 'switch_locale' => action('\Admin\Controllers\GettextController@switchAdminLanguage', [':id']),

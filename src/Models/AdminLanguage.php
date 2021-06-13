@@ -4,7 +4,7 @@ namespace Admin\Models;
 
 use Admin\Admin\Rules\CanDeleteDefaultAdminLanguage;
 use Admin\Eloquent\Concerns\Gettextable;
-use Admin\Helpers\File;
+use Admin\Core\Helpers\Storage\AdminFile;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 use Admin\Helpers\Localization\ResourcesGettext;
 
@@ -89,14 +89,19 @@ class AdminLanguage extends Model
         return false;
     }
 
-    public function getPoPath()
-    {
-        if ( ! $this->poedit_po ) {
-            return new File((new ResourcesGettext)->getPoPath($this->slug));
-        }
+    //Todo: refactor when admin locale is missing
+    // public function getLocalePoPath()
+    // {
+        // if ( ! $this->poedit_po ) {
+        //     $path = (new ResourcesGettext)->getPoPath($this->slug);
+        //     // $file = (new AdminFile($this, 'poedit_po', $path))->setDisk('crudadmin')->basepath;
 
-        return $this->poedit_po;
-    }
+        //     // dd($file);
+        //     return $file;
+        // }
+
+    //     return $this->poedit_po;
+    // }
 
     public function beforeGettextFilesSync()
     {

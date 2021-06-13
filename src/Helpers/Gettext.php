@@ -4,7 +4,7 @@ namespace Admin\Helpers;
 
 use Admin;
 use AdminLocalization;
-use Admin\Helpers\File;
+use Admin\Core\Helpers\Storage\AdminFile;
 use Facades\Admin\Helpers\Localization\JSTranslations;
 use Admin\Helpers\Localization\LocalizationHelper;
 use App\Core\Models\Language;
@@ -13,11 +13,10 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use EditorMode;
 use Localization;
+use Storage;
 
 class Gettext
 {
-    protected $basepath = 'storage/app/lang';
-
     protected $gettextDir = 'gettext';
 
     protected $sourcePaths = [];
@@ -39,14 +38,14 @@ class Gettext
         return $this;
     }
 
-    public function getBasePath($path = null)
+    public function getStorage()
     {
-        return base_path($this->basepath.'/'.$path);
+        return Storage::disk('crudadmin.lang');
     }
 
     public function getGettextPath($path = null)
     {
-        return $this->getBasePath($this->gettextDir.'/'.$path);
+        return $this->gettextDir.'/'.$path;
     }
 
     public function getLocalePath($locale, $file = null)
@@ -115,8 +114,8 @@ class Gettext
         setlocale(LC_COLLATE, $locale.'.UTF-8');
 
         //Bind domains if are available
-        if ( $poPath && ($poTimestamp = $this->generateMoFile($locale, $poPath)) !== false) {
-            bindtextdomain($poTimestamp, $this->getGettextPath());
+        if ( $poPath && ($poTimestamp = $this->generateMoFile($locale)) !== false) {
+            bindtextdomain($poTimestamp, $this->getStorage()->path($this->getGettextPath()));
             textdomain($poTimestamp);
         }
     }
@@ -142,7 +141,7 @@ class Gettext
 
         //Create new directory if not exists
         if (! $this->filesystem->isDirectory($locale_path) || ! file_exists($poPath)) {
-            File::makeDirs($locale_path);
+            AdminFile::makeDirs($locale_path);
 
             //Create gitignore
             if (! file_exists($this->getGettextPath('.gitignore'))) {
@@ -162,23 +161,27 @@ class Gettext
      * Generate mo files from given poFile
      *
      * @param  string  $locale
-     * @param  Admin\Helpers\File  $poFile
+     * @param  Admin\Helpers\File  $poFilePath
      */
-    public function generateMoFile($locale, $poFile)
+    public function generateMoFile($locale, $poFilePath = null)
     {
+        $poFilePath = $poFilePath ?: $this->getLocalePath($locale, $locale.'.po');
+
         //If locale or pofile is not present
-        if (! ($locale = $this->getLocale($locale)) || ! $poFile) {
+        if (! ($locale = $this->getLocale($locale))) {
             return false;
         }
 
-        //Path to uploaded file by administrator
-        if ( ! file_exists($poBasePath = $poFile->basepath) ) {
+        $storage = $this->getStorage();
+
+        //Locale po path does not exists
+        if ( ! $poFilePath || $storage->exists($poFilePath) == false ) {
             return false;
         }
 
         //Get mo filename by timestamp
-        $poFileTimestamp = filemtime($poBasePath);
-        $moFilename = $poFileTimestamp.'.mo';
+        $lastPoChangeTime = $storage->lastModified($poFilePath);
+        $moFilename = $lastPoChangeTime.'.mo';
 
         //Path to moved file from uploads to storage
         $storageMoPath = $this->getLocalePath($locale, $moFilename);
@@ -186,20 +189,17 @@ class Gettext
         $storagePoPath = $this->getLocalePath($locale, $locale.'.po');
 
         //If poFile has been changed, then generate new mo file and remove previous one
-        if ( !file_exists($storagePoPath) || !file_exists($storageMoPath) ) {
-            File::makeDirs(dirname($storagePoPath));
-
-            //Copy given po file to strage folder
-            copy($poBasePath, $storagePoPath);
+        if ( $storage->exists($storagePoPath) == false || $storage->exists($storageMoPath) == false ) {
+            $poBasePath = $storage->path($storagePoPath);
 
             $translations = Translations::fromPoFile($poBasePath);
 
-            $translations->toMoFile($storageMoPath);
+            $translations->toMoFile($storage->path($storageMoPath));
 
             $this->removeOldMoFiles($locale, $moFilename);
         }
 
-        return $poFileTimestamp;
+        return $lastPoChangeTime;
     }
 
     /**
@@ -219,9 +219,12 @@ class Gettext
 
         $timestamp = 0;
 
+        $localPoPath = $language->getLocalPoPath();
+        $storage = $this->getStorage();
+
         //We want get timestamp of localization
-        if ($language && $language->getPoPath() && file_exists($language->getPoPath()->path)) {
-            $timestamp = filemtime($language->getPoPath()->path);
+        if ($language && $localPoPath && $storage->exists($localPoPath)) {
+            $timestamp = $storage->lastModified($localPoPath);
         }
 
         $path = action(
@@ -254,11 +257,15 @@ class Gettext
      */
     public function removeOldMoFiles($locale, $except = null)
     {
-        $files = scandir($this->getLocalePath($locale));
+        $files = $this->getStorage()->files(
+            $this->getLocalePath($locale)
+        );
 
-        foreach ($files as $file) {
-            if (last(explode('.', $file)) == 'mo' && $file != $except) {
-                unlink($this->getLocalePath($locale, $file));
+        foreach ($files as $path) {
+            $filename = basename($path);
+
+            if (last(explode('.', $filename)) == 'mo' && $filename != $except) {
+                $this->getStorage()->delete($path);
             }
         }
     }

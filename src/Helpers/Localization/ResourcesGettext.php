@@ -9,7 +9,7 @@ use Gettext\Translations;
 
 class ResourcesGettext
 {
-    public function getPoPath($slug)
+    public function getVendorPoPath($slug)
     {
         $locale = Gettext::getLocale($slug);
 
@@ -29,10 +29,16 @@ class ResourcesGettext
      */
     public function syncResourceLocales($language)
     {
+        Gettext::setGettextPropertiesModel($language);
+
         $locale = Gettext::getLocale($language->slug);
 
+        $poPath = $this->getVendorPoPath($language->slug);
+
+        $storage = Gettext::getStorage();
+
         //If resource translates for this language does not exists
-        if ( !file_exists($resourcesPoPath = $this->getPoPath($language->slug)) ) {
+        if ( !file_exists($resourcesPoPath = $poPath) ) {
             return;
         }
 
@@ -46,14 +52,14 @@ class ResourcesGettext
         //Cache
         Cache::set($this->getCacheKey($locale), $resourcesLanguageTimestamp);
 
-        //If source file does not exists
-        if ( !$language->poedit_po || $language->poedit_po->exists() === false ) {
-            $translations = new Translations;
-        }
+        $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
 
-        //Else load from existing po file
-        else {
-            $translations = Translations::fromPoFile($language->poedit_po->basepath);
+        if ( $storage->exists($localePoPath) ) {
+            $translations = Translations::fromPoFile(
+                $storage->path($localePoPath)
+            );
+        } else {
+            $translations = new Translations;
         }
 
         $resourceTranslations = Translations::fromPoFile($resourcesPoPath);

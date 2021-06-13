@@ -127,7 +127,9 @@ class GettextController extends Controller
 
         JSTranslations::checkIfIsUpToDate($language);
 
-        return response()->download($language->poedit_po->basepath);
+        return $language->poedit_po->getStorage()->response(
+            $language->poedit_po->path
+        );
     }
 
     /**

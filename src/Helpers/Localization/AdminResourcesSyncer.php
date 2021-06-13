@@ -8,6 +8,7 @@ use Admin\Core\Fields\Group;
 use Admin\Core\Helpers\File;
 use Fields;
 use Gettext\Translations;
+use Gettext;
 
 class AdminResourcesSyncer
 {
@@ -21,11 +22,6 @@ class AdminResourcesSyncer
         'column_name',
     ];
 
-    public function getCachePath()
-    {
-        return storage_path('app/lang/cache');
-    }
-
     public static function translate($string)
     {
         if ( !$string || self::$disableTranslations === true ){
@@ -35,10 +31,14 @@ class AdminResourcesSyncer
         $language = AdminLocalization::get();
 
         $translations = Admin::cache('admin.translations.'.$language->getKey(), function() use ($language) {
-            $pofile = $language->poedit_po;
+            $locale = Gettext::getLocale($language->slug);
+            $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+            $storage = Gettext::getStorage();
 
-            if ( $pofile && file_exists($pofile->basepath) ) {
-                return Translations::fromPoFile($pofile->basepath);
+            if ( $storage->exists($localePoPath) ) {
+                return Translations::fromPoFile(
+                    $storage->path($localePoPath)
+                );
             }
         });
 
@@ -147,6 +147,9 @@ class AdminResourcesSyncer
 
     private function saveModelData($tree)
     {
+        $storage = Gettext::getStorage();
+        $path = 'cache/static.php';
+
         $tree = array_filter($tree);
         $data = [];
 
@@ -154,11 +157,12 @@ class AdminResourcesSyncer
             $data[] = $key.':'.$this->wrapGettextString($value);
         }
 
-        $path = $this->getCachePath();
+        $data = implode("\n", $data);
 
-        File::makeDirs($path);
-
-        file_put_contents($path.'/static.php', implode("\n", $data));
+        //Update static file when neccessary
+        if ( !$storage->exists($path) || md5($storage->get($path)) != md5($data) ) {
+            $storage->put('cache/static.php', $data);
+        }
     }
 
     /**

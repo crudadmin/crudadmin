@@ -44,7 +44,18 @@ trait Gettextable
         //Update gettext files...
         if ($this->hasGettextSupport()) {
             Gettext::setGettextPropertiesModel($this);
-            Gettext::generateMoFile($row->slug, $row->getPoPath());
+
+            $locale = Gettext::getLocale($row->slug);
+            $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+
+            //On update we need downloads file from cloud storage and save it into local storage
+            Gettext::getStorage()->put(
+                $localePoPath,
+                $row->poedit_po->getStorage()->get($row->poedit_po->path)
+            );
+
+            //We can regenerate mo files on update
+            Gettext::generateMoFile($row->slug, $localePoPath);
         }
     }
 
@@ -116,5 +127,16 @@ trait Gettextable
         $permissions['update']['title'] = _('Administrátor bude môcť na webe taktiež spravovať všetky texty pomocou upravovateľského módu.');
 
         return $permissions;
+    }
+
+    public function getLocalPoPath()
+    {
+        Gettext::setGettextPropertiesModel($this);
+
+        $locale = Gettext::getLocale($this->slug);
+
+        $path = Gettext::getLocalePath($locale, $locale.'.po');
+
+        return $path;
     }
 }
