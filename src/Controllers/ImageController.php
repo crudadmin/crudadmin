@@ -4,7 +4,7 @@ namespace Admin\Controllers;
 
 use Admin\Core\Helpers\Storage\AdminFile;
 use Admin;
-use Image;
+use Cache;
 
 class ImageController extends Controller
 {
@@ -48,13 +48,14 @@ class ImageController extends Controller
         //Resize image
         $resizedImage = $adminFile->image($resizeData['mutators'] ?? [], true);
 
-        //Remove temporary file with settings
-        $adminFile->removeCachedResizeData($prefix);
+        $storage = $resizedImage->getStorage();
 
         //Retrieve resized and compressed image
-        $compressedImage = $resizedImage->getStorage()->get($resizedImage->path);
+        $response = $storage->response($resizedImage->path)
+            ->setMaxAge(3600 * 24 * 365)
+            ->setPublic();
 
-        //Return resized image response
-        return Image::make($compressedImage)->response();
+        //Send response manually, because we does not want to throw cookies etc..
+        $response->send();
     }
 }
