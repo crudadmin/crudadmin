@@ -9,7 +9,7 @@ return [
     /*
      * Default crudadmin storage
      */
-    'disk' => 'crudadmin',
+    'disk' => 'crudadmin.uploads',
 
     /*
      * From which directories CrudAdmin should load Admin Modules

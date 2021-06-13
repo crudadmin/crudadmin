@@ -3,6 +3,7 @@
 namespace Admin\Helpers;
 
 use Admin\Core\Helpers\AdminCore;
+use Admin\Core\Helpers\Storage\AdminFile;
 
 class Admin extends AdminCore
 {
@@ -248,7 +249,7 @@ class Admin extends AdminCore
         $directory = self::getAssetsVersionPath();
 
         //Create directory if not exists
-        File::makeDirs($directory);
+        AdminFile::makeDirs($directory);
 
         $this->files->put($directory.'version.txt', self::getResourcesVersion());
 
@@ -267,11 +268,10 @@ class Admin extends AdminCore
 
         $directories = $directories ?: [
             public_path(self::getAdminAssetsPath()),
-            public_path(File::UPLOADS_DIRECTORY)
         ];
 
         foreach ($directories as $dir) {
-            File::makeDirs($dir);
+            AdminFile::makeDirs($dir);
 
             file_put_contents($dir.'/.gitignore', $gitignore);
         }
