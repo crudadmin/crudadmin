@@ -46,7 +46,7 @@ class AdminLanguage extends Model
     /*
      * Where will be located po/mo files in storage lang directory
      */
-    public $gettextDirectory = 'gettext_admin';
+    public $gettextDirectory = 'admin';
 
     protected $rules = [
         CanDeleteDefaultAdminLanguage::class,

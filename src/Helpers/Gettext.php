@@ -16,7 +16,7 @@ use Storage;
 
 class Gettext
 {
-    protected $gettextDir = 'gettext';
+    protected $gettextDir = 'app';
 
     protected $sourcePaths = [];
 

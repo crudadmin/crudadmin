@@ -48,7 +48,7 @@ class Language extends Model
     /*
      * Where will be located po/mo files in storage lang directory
      */
-    public $gettextDirectory = 'gettext';
+    public $gettextDirectory = 'app';
 
     /*
      * Automatic form and database generation
