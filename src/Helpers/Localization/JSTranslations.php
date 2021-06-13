@@ -360,10 +360,6 @@ class JSTranslations
 
         $poPath = Gettext::getLocalePath($locale, $locale.'.po');
 
-        if ( Gettext::getStorage()->exists($poPath) === false ) {
-            Gettext::createLocale($language->slug);
-        }
-
         //Run trigger before files sync build
         if ( method_exists($language, 'beforeGettextFilesSync') ){
             $language->beforeGettextFilesSync();
