@@ -81,7 +81,7 @@ return [
      * Image lossy compression in %.
      * Eg. 90|true|false
      */
-    'image_lossy_compression_quality' => 90,
+    'image_lossy_compression_quality' => 80,
 
     /*
      * Image lossless compression
