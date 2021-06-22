@@ -2,8 +2,6 @@
 
 namespace Admin\Middleware;
 
-use Admin;
-use AdminLocalization;
 use Admin\Helpers\Localization\LocalizationRedirecter;
 use Closure;
 use Localization;
