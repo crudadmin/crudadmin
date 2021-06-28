@@ -33,8 +33,10 @@ class ImageController extends Controller
 
         //Retrieve resized and compressed image
         $response = $storage->response(
-            $adminFile->resize(50, 50, true)->path
-        )
+                $adminFile->resize(50, 50, true)->path,
+                200,
+                ['CrudAdmin' => 'Image-Resizer']
+            )
             ->setMaxAge(3600 * 24 * 365)
             ->setPublic();
 
@@ -65,7 +67,11 @@ class ImageController extends Controller
         $storage = $resizedImage->getStorage();
 
         //Retrieve resized and compressed image
-        $response = $storage->response($resizedImage->path)
+        $response = $storage->response(
+                $resizedImage->path,
+                200,
+                ['CrudAdmin' => 'Image-Resizer']
+            )
             ->setMaxAge(3600 * 24 * 365)
             ->setPublic();
 
