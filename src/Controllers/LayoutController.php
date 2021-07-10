@@ -58,13 +58,22 @@ class LayoutController extends BaseController
      */
     private function getDashBoard()
     {
-        $path = config('admin.dashboard', resource_path('views/admin/dashboard.blade.php'));
+        $dashboard = config('admin.dashboard');
 
-        if (! file_exists($path)) {
-            return '';
+        //Try load blade component
+        $path = $dashboard ?: resource_path('views/admin/dashboard.blade.php');
+        if (file_exists($path)) {
+            return [
+                'html' => view()->file($path)->render(),
+            ];
         }
 
-        return view()->file($path)->render();
+        //If vue template is available
+        if ( $dashboard ) {
+            return [
+                'vue' => $dashboard
+            ];
+        }
     }
 
     /**
