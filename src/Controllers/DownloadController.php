@@ -4,7 +4,6 @@ namespace Admin\Controllers;
 
 use Admin\Helpers\File;
 use Admin\Helpers\SecureDownloader;
-use Admin\Helpers\SheetDownloader;
 use Illuminate\Http\Request;
 
 class DownloadController extends Controller

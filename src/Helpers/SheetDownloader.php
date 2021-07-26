@@ -3,6 +3,8 @@
 namespace Admin\Helpers;
 
 use Admin\Helpers\File;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -45,19 +47,20 @@ class SheetDownloader
     private function getBelongsToValue($column, $value)
     {
         $field = $this->model->getField($column);
-        $options = @$field['options'];
+        $options = $field['options'] ?? null;
 
-        $belongsTo = @$field['belongsTo']?:$field['belongsToMany'];
+        $belongsTo = $field['belongsTo'] ?? $field['belongsToMany'] ?? null;
         $belongsTo = str_replace(',', '.', $belongsTo);
         $belongsTo = explode('.', $belongsTo);
         $belongsTo = array_slice($belongsTo, 1);
         $belongsTo = implode('.', $belongsTo);
 
         $ids = array_wrap($value);
+
         $array = [];
 
         foreach ($ids as $id) {
-            $option = @$options[$id];
+            $option = $options[$id] ?? null;
 
             //If select option does not exists
             if ( !$option ){
@@ -121,21 +124,7 @@ class SheetDownloader
 
         foreach ($this->rows as $i => $row) {
             foreach ($columns as $columnIndex => $column) {
-                if ( $this->model->hasFieldParam($column, ['belongsTo', 'belongsToMany']) ){
-                    $value = $this->getBelongsToValue($column, @$row[$column]);
-                } else if ( $this->model->isFieldType($column, 'select') ){
-                    $value = $this->model->getSelectOption($column, @$row[$column]);
-                } else if ( $this->model->hasFieldParam($column, 'locale') || $column == 'slug' && $this->model->hasLocalizedSlug() ){
-                    $model = $this->model->forceFill([ $column => @$row[$column]]);
-
-                    if ( $column == 'slug' ){
-                        $value = $model->getSlug();
-                    } else {
-                        $value = strip_tags($model->{$column});
-                    }
-                } else {
-                    $value = strip_tags(@$row[$column] ?: '');
-                }
+                $value = $this->getFieldValue($column, $row);
 
                 $column = $this->getColumn($columnIndex);
 
@@ -149,5 +138,36 @@ class SheetDownloader
         $writer->save($path);
 
         return $path;
+    }
+
+    private function getFieldValue($column, $row)
+    {
+        $rawValue = $row[$column] ?? null;
+
+        if ( $rawValue instanceof Collection ){
+            $rawValue = $rawValue->toArray();
+        }
+
+        if ( $this->model->hasFieldParam($column, ['belongsTo']) ){
+            $value = $this->getBelongsToValue($column, $rawValue);
+        } else if ( $this->model->hasFieldParam($column, ['belongsToMany']) ){
+            $value = $this->getBelongsToValue($column, $rawValue);
+        } else if ( $this->model->isFieldType($column, 'select') ){
+            $value = $this->model->getSelectOption($column, $rawValue);
+        } else if ( $this->model->hasFieldParam($column, 'locale') || $column == 'slug' && $this->model->hasLocalizedSlug() ){
+            $model = $this->model->forceFill([ $column => $rawValue]);
+
+            if ( $column == 'slug' ){
+                $value = $model->getSlug();
+            } else {
+                $value = strip_tags($model->{$column});
+            }
+        } else if ( in_array($column, ['created_at', 'updated_at', 'deleted_at']) ) {
+            $value = $rawValue ? (new Carbon($rawValue))->format('d.m.Y H:i:s') : null;
+        } else {
+            $value = strip_tags($rawValue ?: '');
+        }
+
+        return $value;
     }
 }
