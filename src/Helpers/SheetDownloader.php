@@ -119,7 +119,7 @@ class SheetDownloader
 
             $column = $this->getColumn($i);
 
-            $sheet->setCellValue($column.'1', $name);
+            $sheet->setCellValue($column.'1', $name)->getStyle($column.'1')->applyFromArray([ 'font' => [ 'bold' => true ] ]);;
         }
 
         foreach ($this->rows as $i => $row) {
@@ -133,6 +133,10 @@ class SheetDownloader
         }
 
         $path = self::getFilePath().'/'.$this->getFileName();
+
+        if ( method_exists($this->model, 'setExcelSheet') ){
+            $this->model->setExcelSheet($spreadsheet, $this->rows);
+        }
 
         $writer = new Xlsx($spreadsheet);
         $writer->save($path);
