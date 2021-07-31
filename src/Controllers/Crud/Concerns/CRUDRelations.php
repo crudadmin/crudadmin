@@ -23,7 +23,7 @@ trait CRUDRelations
 
                 DB::table($properties[3])->where($properties[6], $row->getKey())->delete();
 
-                if (! $request->has($key)) {
+                if (! $request->has($key) || !is_array($request->get($key))) {
                     continue;
                 }
 
