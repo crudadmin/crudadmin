@@ -2,9 +2,11 @@
 
 namespace Admin\Controllers;
 
-use Admin\Core\Helpers\Storage\AdminFile;
 use Admin;
+use Admin\Core\Helpers\Storage\AdminFile;
 use Cache;
+use Exception;
+use League\Flysystem\FileNotFoundException;
 
 class ImageController extends Controller
 {
@@ -64,19 +66,32 @@ class ImageController extends Controller
         //Resize image
         $resizedImage = $adminFile->image($resizeData['mutators'] ?? [], true);
 
-        $storage = $resizedImage->getStorage();
+        //If is not local storage, and storage url is different than actual crudadmin renderer path
+        //we can resize on final destination after resize.
+        if ( $resizedImage->isLocalStorage() === false && $resizedImage->url !== url()->current() ) {
+            return redirect($resizedImage->url, 301);
+        }
 
-        //Retrieve resized and compressed image
-        $response = $storage->response(
-                $resizedImage->path,
-                200,
-                ['CrudAdmin' => 'Image-Resizer']
-            )
-            ->setMaxAge(3600 * 24 * 365)
-            ->setPublic();
+        //Image should be returned as response
+        try {
+            $storage = $resizedImage->getStorage();
 
-        //Send response manually, because we does not want to throw cookies etc..
-        $response->send();
+            //Retrieve resized and compressed image
+            $response = $storage->response(
+                    $resizedImage->path,
+                    200,
+                    ['CrudAdmin' => 'Image-Resizer']
+                )
+                ->setMaxAge(3600 * 24 * 365)
+                ->setPublic();
+
+            //Send response manually, because we does not want to throw cookies etc..
+            $response->send();
+        } catch (FileNotFoundException $e){
+            abort(404);
+        } catch (Exception $e){
+            abort(500);
+        }
     }
 
     /*
