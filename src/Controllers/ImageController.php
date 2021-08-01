@@ -68,7 +68,7 @@ class ImageController extends Controller
 
         //If is not local storage, and storage url is different than actual crudadmin renderer path
         //we can resize on final destination after resize.
-        if ( $resizedImage->isLocalStorage() === false && $resizedImage->url !== url()->current() ) {
+        if ( config('admin.file.redirect_after_resize', true) == true && $resizedImage->isLocalStorage() === false && $resizedImage->url !== url()->current() ) {
             return redirect($resizedImage->url, 301);
         }
 
