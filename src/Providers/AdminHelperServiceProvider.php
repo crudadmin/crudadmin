@@ -69,7 +69,14 @@ class AdminHelperServiceProvider extends ServiceProvider
                 continue;
             }
 
-            if ( in_array($property, $reversedKeys) ) {
+            if (
+                in_array($property, $reversedKeys)
+
+                //If array are associative, we want save original values, and merged keys which exists should be replaced with existing value
+                || (
+                    $this->isAssocArray($config[$property]) && $this->isAssocArray($mergeWithConfig[$property])
+                )
+            ) {
                 $attributes = array_merge($mergeWithConfig[$property], $config[$property]);
             } else {
                 $attributes = array_merge($config[$property], $mergeWithConfig[$property]);
@@ -77,5 +84,14 @@ class AdminHelperServiceProvider extends ServiceProvider
 
             $this->app['config']->set($key.'.'.$property, $attributes);
         }
+    }
+
+    private function isAssocArray(array $arr)
+    {
+        if ([] === $arr)  {
+            return false;
+        }
+
+        return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }
