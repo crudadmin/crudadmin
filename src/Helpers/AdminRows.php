@@ -91,7 +91,7 @@ class AdminRows
             $itemQueryTo = @$item['query_to'];
             $column = @$item['column'];
 
-            if (!($itemQuery || $itemQueryTo)) {
+            if (!($itemQuery == '' || $itemQueryTo == '')) {
                 continue;
             }
 
