@@ -105,6 +105,10 @@ class LayoutController extends BaseController
 
         $initialOpeningRequest = $count == 0;
 
+        $sheetDownload = request('download') == 1;
+
+        $limit = $sheetDownload ? 0 : $limit;
+
         //Check if user has allowed model
         if (! $model || ! admin()->hasAccess($model)) {
             Ajax::permissionsError();
@@ -155,7 +159,7 @@ class LayoutController extends BaseController
 
 
         //Download sheet table
-        if ( request('download') == 1 ){
+        if ( $sheetDownload ){
             $sheet = new SheetDownloader($model, $data['rows']);
 
             if (!($path = $sheet->generate())){
