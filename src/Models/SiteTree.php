@@ -30,6 +30,8 @@ class SiteTree extends AdminModel
 
     protected $insertable = false;
 
+    protected $publishableState = true;
+
     protected $icon = 'fa-sitemap';
 
     protected $settings = [
