@@ -439,6 +439,7 @@ class LayoutController extends BaseController
             'displayable' => $model->getProperty('displayable'),
             'deletable' => $model->getProperty('deletable'),
             'publishable' => $model->getProperty('publishable'),
+            'publishableState' => $model->getProperty('publishableState'),
             'sortable' => $model->isSortable(),
             'layouts' => $this->getLayouts($model),
             'orderBy' => $model->getProperty('orderBy'),

@@ -153,10 +153,15 @@ class DataController extends CRUDController
             Ajax::error(trans('admin::admin.cannot-publish'));
         }
 
-        $rows = $model->withUnpublished()
-                      ->select(['id', 'published_at'])
-                      ->whereIn($model->getKeyName(), $request->get('id', []))
-                      ->get();
+        $rows = $model
+                    ->withUnpublished()
+                    ->select(array_filter([
+                        'id',
+                        'published_at',
+                        $model->getProperty('publishableState') ? 'published_state' : null
+                    ]))
+                    ->whereIn($model->getKeyName(), $request->get('id', []))
+                    ->get();
 
         $data = [];
 
@@ -167,13 +172,36 @@ class DataController extends CRUDController
             //are loaded only needed columns for publishing fields.
             //and rules could break, because in rule may be needed more columns than this two.
             $row->disableAllAdminRules(true);
-            $row->published_at = $row->published_at == null ? Carbon::now() : null;
+
+
+            if ( $model->getProperty('publishableState') == true ) {
+                $actualState = $row->published_state['av'] ?? 0;
+                $newState = $row->published_state ?: [];
+
+                if ( $row->published_at ) {
+                    $row->published_at = null;
+                    unset($newState['av']);
+                } else if ( $actualState == 0 ) {
+                    $newState['av'] = 1;
+                } else if ( $actualState == 1 ) {
+                    unset($newState['av']);
+                    $row->published_at = Carbon::now();
+                }
+
+                $row->published_state = $newState;
+            } else {
+                $row->published_at = $row->published_at ? null : Carbon::now();
+            }
+
             $row->save();
             $row->disableAllAdminRules(false);
 
             $row->checkForModelRules([$row->published_at ? 'published' : 'unpublished'], true);
 
-            $data[$row->getKey()] = $row->published_at ? $row->published_at->toDateTimeString() : null;
+            $data[$row->getKey()] = [
+                'published_at' => $row->published_at ? $row->published_at->toDateTimeString() : null,
+                'published_state' => $row->published_state,
+            ];
         }
 
         return $data;
