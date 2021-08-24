@@ -103,7 +103,7 @@ class LocalizationRedirecter
         $defaultLocale = $this->getDefaultLocale();
 
         if ( $originalLanguage->slug != $defaultLocale ) {
-            abort(404);
+            return redirect($defaultLocale);
         }
     }
 }
