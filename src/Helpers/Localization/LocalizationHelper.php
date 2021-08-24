@@ -36,6 +36,13 @@ class LocalizationHelper
     protected $defaultLocalization = null;
 
     /**
+     *
+     *
+     * @var  bool
+     */
+    protected $sessionEnabled = false;
+
+    /**
      * Boot localization
      */
     public function __construct()
@@ -77,6 +84,13 @@ class LocalizationHelper
 
         //We need assign language first time
         $this->get();
+    }
+
+    public function refreshOnSession()
+    {
+        $this->languages = $this->languages->filter(function($language){
+            return $language->isAdminPublished() == true;
+        });
     }
 
     /**
@@ -129,7 +143,7 @@ class LocalizationHelper
     {
         $this->bootInConsole();
 
-        return $this->languages->first();
+        return $this->all()->first();
     }
 
     /**
@@ -146,7 +160,7 @@ class LocalizationHelper
             return false;
         }
 
-        return $this->languages->where('slug', $locale)->count() == 1;
+        return $this->all()->where('slug', $locale)->count() == 1;
     }
 
     /**
@@ -156,9 +170,7 @@ class LocalizationHelper
      */
     public function isValidSegment()
     {
-        return $this->isValid(
-            $this->getLocaleSegmentIdentifier()
-        );
+        return $this->isValid($this->getLocaleSegmentIdentifier());
     }
 
     /**
@@ -206,7 +218,7 @@ class LocalizationHelper
             return;
         }
 
-        return $this->languages->where('slug', $slug)->first();
+        return $this->all()->where('slug', $slug)->first();
     }
 
     /**
@@ -294,7 +306,7 @@ class LocalizationHelper
     {
         //Return existing languages
         if ( $this->booted === true ) {
-            return $this->languages;
+            return $this->all();
         }
 
         $this->booted = true;
@@ -302,6 +314,8 @@ class LocalizationHelper
         if (! ($model = \Admin::getModelByTable($this->getModel()->getTable()))) {
             return $this->defaultCollection();
         }
+
+        $model->withTemporaryPublished();
 
         //We want publish models also in administration. Because publishable scope
         //is skipped in admin, we want add it manually.
@@ -312,7 +326,19 @@ class LocalizationHelper
             $model = $model->withPublished();
         }
 
-        return $this->languages = $model->get();
+        $this->languages = $model->get();
+
+        return $this->all();
+    }
+
+    /**
+     * Return all languages
+     *
+     * @return  collection
+     */
+    public function all()
+    {
+        return $this->languages;
     }
 
     /**

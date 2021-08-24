@@ -87,4 +87,23 @@ class LocalizationRedirecter
 
         return redirect($localizedRoute);
     }
+
+    /**
+     * Check if language is also available after session boot. If not, reload page to default language.
+     *
+     * @param  Language  $originalLanguage
+     * @return  bool
+     */
+    public function isLocalizationUnpublished($originalLanguage)
+    {
+        if ( !($originalLanguage && Localization::isValidSegment() === false && request()->segment(1)) ) {
+            return;
+        }
+
+        $defaultLocale = $this->getDefaultLocale();
+
+        if ( $originalLanguage->slug != $defaultLocale ) {
+            abort(404);
+        }
+    }
 }
