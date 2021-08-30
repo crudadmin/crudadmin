@@ -315,7 +315,9 @@ class LocalizationHelper
             return $this->defaultCollection();
         }
 
-        $model->withTemporaryPublished();
+        $model->withTemporaryPublished(
+            $model->getTable()
+        );
 
         //We want publish models also in administration. Because publishable scope
         //is skipped in admin, we want add it manually.
