@@ -2,7 +2,7 @@
 
 namespace Admin\Helpers;
 
-use Admin\Core\Helpers\File as AdminFile;
+use Admin\Core\Helpers\Storage\AdminFile;
 use Admin\Eloquent\AdminModel;
 use Facades\Admin\Helpers\SEOService;
 use Localization;
