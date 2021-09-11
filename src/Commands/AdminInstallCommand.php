@@ -57,6 +57,10 @@ class AdminInstallCommand extends Command
 
         Admin::publishAssetsVersion();
 
+        Admin::addGitignoreFiles([
+            storage_path('/crudadmin')
+        ]);
+
         $this->line('<comment>+ Vendor directories has been successfully published</comment>');
     }
 
