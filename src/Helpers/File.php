@@ -246,6 +246,11 @@ class File
         if ( $webp === true && config('admin.upload_webp', false) === true )
             $this->createWebp($filepath);
 
+        //Compress image with lossless compression
+        if ( class_exists('ImageCompressor') ) {
+            \ImageCompressor::tryShellCompression($filepath);
+        }
+
         //Return image object
         if ( $return_object ){
             return $image;
