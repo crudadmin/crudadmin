@@ -10,10 +10,11 @@ use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Auth\MustVerifyEmail;
 
 class Authenticatable extends AdminModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
-    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable;
+    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable, MustVerifyEmail;
 
     /*
      * Skipping dropping columns
