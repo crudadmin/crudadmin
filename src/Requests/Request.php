@@ -9,6 +9,8 @@ use Carbon\Carbon;
 use File;
 use Illuminate\Foundation\Http\FormRequest;
 use Localization;
+use Exception;
+use DateTime;
 
 abstract class Request extends FormRequest
 {
@@ -199,10 +201,9 @@ abstract class Request extends FormRequest
                     if ($has_locale = $this->model->hasFieldParam($key, 'locale')) {
                         $date = $this->get($key);
                     } else {
-                        $date = Carbon::createFromFormat($field['date_format'], $this->get($key));
+                        [$date, $date_format] = $this->getUniversalDateFormat($this->get($key), $field);
 
-                        $date_format = strtolower($field['date_format']);
-
+                        $date_format = strtolower($date_format);
                         foreach ($reset as $identifier => $arr) {
                             //Reset hours if are not in date format
                             if (strpos($date_format, $identifier) === false) {
@@ -220,6 +221,30 @@ abstract class Request extends FormRequest
                 }
             }
         }
+    }
+
+    private function getUniversalDateFormat($value, $field)
+    {
+        $formats = array_values(array_filter(array_merge(
+            [ $field['date_format'] ?? null ],
+            explode(',', $field['date_format_multiple'] ?? '')
+        )));
+
+        foreach ($formats as $format) {
+            try {
+                if ( strpos($value, 'Z') ) {
+                    $date = Carbon::createFromFormat($format, $value, 'UTC')->setTimezone(config('app.timezone'));
+                } else {
+                    $date = Carbon::createFromFormat($format, $value);
+                }
+
+                return [$date, $format];
+            } catch (Exception $e){
+
+            }
+        }
+
+        throw $e;
     }
 
     /*

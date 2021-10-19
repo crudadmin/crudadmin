@@ -144,12 +144,7 @@ class ModelsHistory extends Model
 
     private function getActualData($model)
     {
-        //Dates on frontend are parsed with other method than in admin, we need merge this formats
-        $model->setAdminDatesFormat(true);
-
         $data = $model->attributesToArray();
-
-        $model->setAdminDatesFormat(false);
 
         return $data;
     }

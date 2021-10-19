@@ -13,17 +13,7 @@ trait HasAttributes
     /*
      * Return attributes without mutates values
      */
-    private $without_mutators = false;
-
-    /*
-     * Dates will be parsed in admin format
-     */
-    private $adminDatesFormat = false;
-
-    public function setAdminDatesFormat($state)
-    {
-        $this->adminDatesFormat = $state;
-    }
+    private $withoutMutators = false;
 
     /**
      * Convert the model instance to an array.
@@ -50,7 +40,7 @@ trait HasAttributes
      */
     protected function mutateAttribute($key, $value)
     {
-        if ($this->without_mutators === true) {
+        if ($this->withoutMutators === true) {
             return $value;
         }
 
@@ -81,7 +71,7 @@ trait HasAttributes
     public function getAdminAttributes()
     {
         //Turn of mutating of attributes for admin results
-        $this->without_mutators = true;
+        $this->withoutMutators = true;
 
         $fields = $this->getFields();
 
@@ -90,7 +80,7 @@ trait HasAttributes
         //Get attributes without mutated values
         $attributes = parent::attributesToArray();
 
-        $this->without_mutators = false;
+        $this->withoutMutators = false;
 
         //Bing belongs to many values
         foreach ($fields as $key => $field) {
@@ -134,13 +124,6 @@ trait HasAttributes
                         $attributes[$key] = number_format($attributes[$key], $decimalLength[1], '.', '');
                     }
                 }
-
-                /*
-                 * Casts date/datetime/time values
-                 */
-                if (! $this->hasFieldParam($key, 'multiple', true)) {
-                    $this->castsAdminDatetimes($field, $key, $attributes);
-                }
             }
         }
 
@@ -150,52 +133,6 @@ trait HasAttributes
         }
 
         return $attributes;
-    }
-
-    /**
-     * Prepare a date for array / JSON serialization.
-     *
-     * @param  \DateTimeInterface  $date
-     * @return string
-     */
-    protected function serializeDate(DateTimeInterface $date)
-    {
-        //We need seriale dates for administration in old format
-        if ( Admin::isAdmin() || $this->adminDatesFormat === true ) {
-            return $date->format($this->getDateFormat());
-        }
-
-        return parent::serializeDate($date);
-    }
-
-    /*
-     * Casts datetime/date/time values
-     */
-    private function castsAdminDatetimes($field, $key, &$attributes)
-    {
-        //Skip locales values
-        if ($this->hasFieldParam($key, 'locale', true)) {
-            return;
-        }
-
-        /*
-         * Update to correct datetime format
-         */
-        if (in_array($field['type'], ['date', 'datetime'])) {
-            $attributes[$key] = $attributes[$key]
-                                ? (new Carbon($attributes[$key]))->format($field['date_format'])
-                                : null;
-
-        }
-
-        /*
-         * Update to correct time format
-         */
-        if ($field['type'] == 'time') {
-            $attributes[$key] = $attributes[$key]
-                                ? (Carbon::createFromFormat('H:i:s', $attributes[$key]))->format($field['date_format'])
-                                : null;
-        }
     }
 
     /*
