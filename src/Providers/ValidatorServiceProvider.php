@@ -44,7 +44,6 @@ class ValidatorServiceProvider extends ServiceProvider
     {
         Validator::extend('date_format_multiple', function($attribute, $value, $parameters, $validator){
             foreach ($parameters as $format) {
-                // dump($value, $format, $validator->validateDateFormat($attribute, $value, [$format], $validator));
                 if ( $validator->validateDateFormat($attribute, $value, [$format], $validator) === true ){
                     return true;
                 }
