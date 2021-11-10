@@ -238,6 +238,11 @@ abstract class Request extends FormRequest
                     $date = Carbon::createFromFormat($format, $value);
                 }
 
+                //If time has been received for date field, we need reset time.
+                if ( $field['type'] == 'date' ){
+                    $date->startOfDay();
+                }
+
                 return [$date, $format];
             } catch (Exception $e){
 
