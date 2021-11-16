@@ -6,6 +6,7 @@ use Admin;
 use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\Concerns\HasCurrentUrl;
 use Admin\Fields\Group;
+use Admin\Admin\Rules\DeleteSitetreeSubtree;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 use SiteTree as SiteTreeHelper;
 
@@ -40,6 +41,13 @@ class SiteTree extends AdminModel
         'grid.medium.enabled' => false,
         'table.enabled' => false,
     ];
+
+    public function rules()
+    {
+        return [
+            DeleteSitetreeSubtree::class,
+        ];
+    }
 
     /*
      * Automatic form and database generation

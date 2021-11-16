@@ -36,8 +36,10 @@ trait ModelRules
      */
     public function getAdminRules($callback)
     {
-        if ($this->rules && is_array($this->rules)) {
-            foreach ($this->rules as $class) {
+        $rules = $this->getProperty('rules');
+
+        if ($rules && is_array($rules)) {
+            foreach ($rules as $class) {
                 $rule = $this->getCachedAdminRuleClass($class);
 
                 $callback($rule);
