@@ -2,8 +2,6 @@
 
 namespace Admin\Middleware;
 
-use Admin;
-use AdminLocalization;
 use Admin\Helpers\Localization\LocalizationRedirecter;
 use Closure;
 use Localization;
@@ -25,6 +23,12 @@ class LocalizationMiddleware
      */
     public function webLocalizationSupport($request, Closure $next)
     {
+        //We need fetch original language before languages will be removed from array
+        //if admin is not logged in.
+        $languageBeforeSession = Localization::get();
+
+        Localization::refreshOnSession();
+
         $redirecter = (new LocalizationRedirecter);
 
         if ( $redirect = $redirecter->redirectToSessionLanguage() ) {
@@ -32,6 +36,10 @@ class LocalizationMiddleware
         }
 
         else if ( $redirect = $redirecter->redirectToOtherLanguage() ) {
+            return $redirect;
+        }
+
+        else if ( $redirect = $redirecter->isLocalizationUnpublished($languageBeforeSession) ) {
             return $redirect;
         }
 

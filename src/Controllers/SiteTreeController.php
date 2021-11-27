@@ -2,14 +2,16 @@
 
 namespace Admin\Controllers;
 
-use Admin\Models\SiteTree;
+use Admin;
 use Illuminate\Http\Request;
 
 class SiteTreeController extends Controller
 {
     public function store()
     {
-        $validator = SiteTree::validator()->only([
+        $model = Admin::getModel('SiteTree');
+
+        $validator = $model->validator()->only([
             'name', 'type', 'group_type', 'model', 'url', 'locked_insert', 'row_id', 'parent_id'
         ])->validate();
 
@@ -21,10 +23,10 @@ class SiteTreeController extends Controller
         }
 
         if ( $id = request('id') ) {
-            $row = SiteTree::find($id);
+            $row = $model->find($id);
             $row->update($data);
         } else {
-            $row = SiteTree::create($data);
+            $row = $model->create($data);
         }
 
         return $row;

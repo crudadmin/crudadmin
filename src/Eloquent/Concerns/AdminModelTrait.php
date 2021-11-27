@@ -274,7 +274,7 @@ trait AdminModelTrait
         if ($subid > 0) {
             $column = $this->getForeignColumn($parent_table);
 
-            if ($parent_table === null && count($column) == 1) {
+            if ($parent_table === null && $column && count($column) == 1) {
                 $column = array_values($column)[0];
             }
 

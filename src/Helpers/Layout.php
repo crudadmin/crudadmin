@@ -15,6 +15,7 @@ class Layout
         'top', 'bottom',
         'form-before', 'form-after', 'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
         'table-before', 'table-after', 'table-header', 'table-header-actions', 'table-footer',
+        'actions-grid',
     ];
 
     /*
@@ -30,6 +31,7 @@ class Layout
      * table-header - header of the table
      * table-header-actions - action bar
      * table-footer - footer of the table
+     * actions-grid - Next to grid switcher
      */
     public $position = 'top';
 

@@ -111,7 +111,7 @@ export default {
                             newArray = _.cloneDeep(array);
 
                         for ( var i = 0; i < arrayLength; i++ ) {
-                            if ( array[i].key == row.tree[row.tree.length - 1] ) {
+                            if ( array[i].key.split('\\').slice(-1).join('') === row.tree[row.tree.length - 1].split('\\').slice(-1).join('') ) {
                                 newArray.splice(i + 1, 0, {
                                     name : row.name,
                                     key : key,

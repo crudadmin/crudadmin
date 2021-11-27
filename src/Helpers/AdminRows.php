@@ -87,13 +87,9 @@ class AdminRows
         }
 
         foreach ($search as $item) {
-            $itemQuery = @$item['query'];
-            $itemQueryTo = @$item['query_to'];
-            $column = @$item['column'];
-
-            if (!($itemQuery || $itemQueryTo)) {
-                continue;
-            }
+            $itemQuery = $item['query'] ?? null;
+            $itemQueryTo = $item['query_to'] ?? null;
+            $column = $item['column'] ?? null;
 
             $query->where(function($query) use ($itemQuery, $itemQueryTo, $column) {
                 $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', $itemQuery)));

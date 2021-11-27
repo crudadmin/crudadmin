@@ -44,6 +44,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         'hasAdminRole' => Middleware\HasAdminRole::class,
         'hasDevMode' => Middleware\HasDevMode::class,
         'localized' => Middleware\LocalizationMiddleware::class,
+        'adminLocalized' => Middleware\AdminLocalizationMiddleware::class,
     ];
 
     /**

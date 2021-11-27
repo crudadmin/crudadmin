@@ -58,13 +58,22 @@ class LayoutController extends BaseController
      */
     private function getDashBoard()
     {
-        $path = config('admin.dashboard', resource_path('views/admin/dashboard.blade.php'));
+        $dashboard = config('admin.dashboard');
 
-        if (! file_exists($path)) {
-            return '';
+        //Try load blade component
+        $path = $dashboard ?: resource_path('views/admin/dashboard.blade.php');
+        if (file_exists($path)) {
+            return [
+                'html' => view()->file($path)->render(),
+            ];
         }
 
-        return view()->file($path)->render();
+        //If vue template is available
+        if ( $dashboard ) {
+            return [
+                'vue' => $dashboard
+            ];
+        }
     }
 
     /**
@@ -95,6 +104,10 @@ class LayoutController extends BaseController
         $model = Admin::getModelByTable($table);
 
         $initialOpeningRequest = $count == 0;
+
+        $sheetDownload = request('download') == 1;
+
+        $limit = $sheetDownload ? 0 : $limit;
 
         //Check if user has allowed model
         if (! $model || ! admin()->hasAccess($model)) {
@@ -146,7 +159,7 @@ class LayoutController extends BaseController
 
 
         //Download sheet table
-        if ( request('download') == 1 ){
+        if ( $sheetDownload ){
             $sheet = new SheetDownloader($model, $data['rows']);
 
             if (!($path = $sheet->generate())){
@@ -426,6 +439,7 @@ class LayoutController extends BaseController
             'displayable' => $model->getProperty('displayable'),
             'deletable' => $model->getProperty('deletable'),
             'publishable' => $model->getProperty('publishable'),
+            'publishableState' => $model->getProperty('publishableState'),
             'sortable' => $model->isSortable(),
             'layouts' => $this->getLayouts($model),
             'orderBy' => $model->getProperty('orderBy'),
