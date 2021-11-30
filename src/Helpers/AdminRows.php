@@ -391,9 +391,9 @@ class AdminRows
                     //Get specific id
                     if ($id != false) {
                         if (is_numeric($id)) {
-                            $query->where($this->model->getKeyName(), $id);
+                            $query->where($this->model->fixAmbiguousColumn($this->model->getKeyName()), $id);
                         } elseif (is_array($id)) {
-                            $query->whereIn($this->model->getKeyName(), $id);
+                            $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $id);
                         }
                     }
 
