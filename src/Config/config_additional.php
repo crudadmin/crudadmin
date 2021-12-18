@@ -154,6 +154,7 @@ return [
         'multiple' => 'array',
         'multirows' => 'array',
         'inaccessible' => 'invisible|inaccessible',
+        'inaccessible_column' => 'hidden|inaccessible_column',
         'invisible' => 'hidden|removeFromForm|invisible',
         'unsigned' => 'min:0',
     ],
