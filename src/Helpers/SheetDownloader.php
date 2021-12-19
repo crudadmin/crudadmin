@@ -24,7 +24,9 @@ class SheetDownloader
     private function getColumn($i)
     {
         $columns = [
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ',
+            'BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BK', 'BL', 'BM', 'BN', 'BO', 'BP', 'BQ', 'BR', 'BS', 'BT', 'BU', 'BV', 'BW', 'BX', 'BY', 'BZ',
         ];
 
         return $columns[$i];
@@ -93,7 +95,7 @@ class SheetDownloader
             return _('Upravené dňa');
         }
 
-        return @$field['name'] ?: @$settings['columns'][$key]['name'] ?: $key;
+        return @$field['column_name'] ?: @$field['name'] ?: @$settings['columns'][$key]['name'] ?: $key;
     }
 
     public function generate()
@@ -168,8 +170,14 @@ class SheetDownloader
             }
         } else if ( in_array($column, ['created_at', 'updated_at', 'deleted_at']) ) {
             $value = $rawValue ? (new Carbon($rawValue))->format('d.m.Y H:i:s') : null;
+        } else if ( is_bool($rawValue) ) {
+            $value = $rawValue === true ? _('Áno') : _('Nie');
         } else {
             $value = strip_tags($rawValue ?: '');
+        }
+
+        if ( method_exists($this->model, $methodMutatorName = 'setSheet'.$column.'Attribute') ){
+            return $this->model->{$methodMutatorName}($value, $row);
         }
 
         return $value;
