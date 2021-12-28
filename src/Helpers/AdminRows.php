@@ -143,7 +143,7 @@ class AdminRows
                                 if ( $this->model->isFieldType($column, 'imaginary') || $this->model->hasFieldParam($column, 'imaginary') ) {
                                     return;
                                 } elseif ($search_to) {
-                                    $builder->where(function ($builder) use ($column, $search, $search_to) {
+                                    $builder->where(function ($builder) use ($column, $search, $search_to, $tableColumn) {
                                         if (! isset($search) && isset($search_to)) {
                                             $builder->where($tableColumn, '<=', $search_to);
                                         }

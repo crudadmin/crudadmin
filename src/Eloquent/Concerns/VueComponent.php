@@ -19,21 +19,28 @@ trait VueComponent
         $components = [];
 
         foreach ($fields as $key => $field) {
-            $this->importComponentFromAttribute($initialRequest, 'component', $key, $field, $components);
-            $this->importComponentFromAttribute($initialRequest, 'sub_component', $key, $field, $components);
-            $this->importComponentFromAttribute($initialRequest, 'column_component', $key, $field, $components);
+            foreach (['component', 'sub_component', 'column_component'] as $attribute) {
+                if (! array_key_exists($attribute, $field)) {
+                    continue;
+                }
+
+                $this->importComponentFromAttribute($initialRequest, $field[$attribute], $components);
+            }
+        }
+
+        $columns = array_get($this->getModelSettings() ?: [], 'columns', []);
+        foreach ($columns as $key => $column) {
+            if ( $column['component'] ?? null ){
+                $this->importComponentFromAttribute($initialRequest, $column['component'], $components);
+            }
         }
 
         return $components;
     }
 
-    private function importComponentFromAttribute($initialRequest, $attribute, $key, $field, &$components)
+    private function importComponentFromAttribute($initialRequest, $componentNames, &$components)
     {
-        if (! array_key_exists($attribute, $field)) {
-            return;
-        }
-
-        $componentsNames = explode(',', $field[$attribute]);
+        $componentsNames = explode(',', $componentNames);
 
         foreach ($componentsNames as $name) {
             if (! ($path = $this->getComponentRealPath($name))) {
