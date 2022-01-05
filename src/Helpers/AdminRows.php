@@ -2,11 +2,12 @@
 
 namespace Admin\Helpers;
 
+use Admin;
+use Admin\Eloquent\AdminModel;
 use Ajax;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Admin\Eloquent\AdminModel;
-use Admin;
 
 class AdminRows
 {
@@ -208,7 +209,12 @@ class AdminRows
                                 }
 
                                 //Find by fulltext in query string
-                                else {
+                                elseif ($this->model->hasFieldParam($column, 'locale')) {
+                                    //Search for all inserted words
+                                    foreach ($queries as $key => $query) {
+                                        $builder->where(DB::raw('CONVERT(LOWER('.$tableColumn.') USING utf8)'), 'like', '%'.mb_strtolower($query).'%');
+                                    }
+                                } else {
                                     //Search for all inserted words
                                     foreach ($queries as $key => $query) {
                                         $builder->where($tableColumn, 'like', '%'.$query.'%');
