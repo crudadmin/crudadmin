@@ -138,7 +138,7 @@ trait HasAttributes
     /*
      * Overide admin attributes
      */
-    public function getMutatedAdminAttributes($columns = false)
+    public function getMutatedAdminAttributes($isColumns = false, $isRow = false)
     {
         $attributes = $this->getAdminAttributes();
 
@@ -148,8 +148,13 @@ trait HasAttributes
         }
 
         //Mutate attributes
-        if ($columns === true && method_exists($this, 'setAdminRowsAttributes')) {
+        if ($isColumns === true && method_exists($this, 'setAdminRowsAttributes')) {
             $attributes = $this->setAdminRowsAttributes($attributes);
+        }
+
+        //Mutate attributes
+        if ($isRow === true && method_exists($this, 'setAdminRowAttributes')) {
+            $attributes = $this->setAdminRowAttributes($attributes);
         }
 
         return $attributes;
