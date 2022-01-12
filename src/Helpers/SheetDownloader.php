@@ -5,6 +5,7 @@ namespace Admin\Helpers;
 use Admin\Helpers\File;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -48,6 +49,11 @@ class SheetDownloader
 
     private function getBelongsToValue($column, $value)
     {
+        //If custom value has been returned
+        if ( is_string($value) ){
+            return $value;
+        }
+
         $field = $this->model->getField($column);
         $options = $field['options'] ?? null;
 
@@ -116,6 +122,10 @@ class SheetDownloader
 
         //Create header
         foreach ($columns as $i => $key) {
+            if ( substr($key, 0, 1) == '$' ){
+                continue;
+            }
+
             $field = $this->model->getField($key);
             $name = $this->getColumnName($key, $field, $settings);
 
@@ -126,6 +136,10 @@ class SheetDownloader
 
         foreach ($this->rows as $i => $row) {
             foreach ($columns as $columnIndex => $column) {
+                if ( substr($column, 0, 1) == '$' ){
+                    continue;
+                }
+
                 $value = $this->getFieldValue($column, $row);
 
                 $column = $this->getColumn($columnIndex);
@@ -150,6 +164,8 @@ class SheetDownloader
     {
         $rawValue = $row[$column] ?? null;
 
+        $value = null;
+
         if ( $rawValue instanceof Collection ){
             $rawValue = $rawValue->toArray();
         }
@@ -173,13 +189,15 @@ class SheetDownloader
         } else if ( is_bool($rawValue) ) {
             $value = $rawValue === true ? _('Áno') : _('Nie');
         } else {
-            $value = strip_tags($rawValue ?: '');
+            $value = $rawValue;
         }
 
-        if ( method_exists($this->model, $methodMutatorName = 'setSheet'.$column.'Attribute') ){
+        if ( method_exists($this->model, $methodMutatorName = 'setSheet'.Str::studly($column).'Attribute') ){
             return $this->model->{$methodMutatorName}($value, $row);
         }
 
-        return $value;
+        if ( is_string($value) || is_numeric($value) ) {
+            return trim(strip_tags($value ?: ''));
+        }
     }
 }
