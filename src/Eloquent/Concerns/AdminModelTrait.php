@@ -19,6 +19,8 @@ trait AdminModelTrait
      */
     public function save(array $options = [])
     {
+        $isPerformingRuleMethods = $this->isRuleMethodPerforming(['creating', 'created', 'updating', 'updated']);
+
         //If model has needs sluggable field
         if ($this->sluggable != null) {
             $this->sluggable();
@@ -38,7 +40,9 @@ trait AdminModelTrait
         }
 
         //Check for model rules
-        $this->checkForModelRules(['creating', 'updating']);
+        if ( $isPerformingRuleMethods === false ) {
+            $this->checkForModelRules(['creating', 'updating']);
+        }
 
         //Save model state before save action
         $this->backupExistsProperty();
@@ -48,7 +52,7 @@ trait AdminModelTrait
 
         //Check for model rules after row is already saved/created for frontend/console situations
         //for admin state events will be initialized in DataController after binding all relationships
-        if (! Admin::isAdmin()) {
+        if (! Admin::isAdmin() && $isPerformingRuleMethods === false ) {
             $this->checkForModelRules(['created', 'updated'], true);
         }
 
