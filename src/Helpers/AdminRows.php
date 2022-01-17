@@ -235,13 +235,13 @@ class AdminRows
 
             $relationColumns = $this->model->getRelationshipNameBuilder($relation[1]);
 
-            return array_filter($relationColumns, function($column) use ($model) {
+            return array_values(array_filter($relationColumns, function($column) use ($model) {
                 if ( in_array($column, ['id', $model->getKeyName()]) ) {
                     return true;
                 }
 
                 return $model->getField($column) ? true : false;
-            });
+            }));
         } else {
             return ['id'];
         }
