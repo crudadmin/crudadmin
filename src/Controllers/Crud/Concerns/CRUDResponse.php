@@ -38,6 +38,10 @@ trait CRUDResponse
     protected function responseType()
     {
         if ( count($this->getRequestMessages('error')) ){
+            return 'warning';
+        }
+
+        if ( count($this->getRequestMessages('notice')) ){
             return 'info';
         }
 
