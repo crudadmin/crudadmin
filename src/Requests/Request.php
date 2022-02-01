@@ -125,7 +125,9 @@ abstract class Request extends FormRequest
                             if ($fileObject = $this->model->upload($orig_key, $file)) {
                                 $this->uploadedFiles[$orig_key][$lang_slug][] = $fileObject->filename;
                             } else {
-                                Admin::push('errors.request', $this->errors[$key] = $this->model->getUploadError());
+                                Admin::warning(
+                                    $this->errors[$key] = $this->model->getUploadError()
+                                );
                             }
 
                             //If is not multiple upload
