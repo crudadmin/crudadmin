@@ -45,14 +45,36 @@ class Ajax
         throw new AjaxException(response()->json($array, $code), $code);
     }
 
+    /**
+     * Push warning message into admin request error
+     *
+     * @param  string  $message
+     * @param  string  $type (notice|error)
+     */
+    public static function pushMessage($message, $type = 'notice')
+    {
+        Admin::push('request.'.$type, $message);
+    }
+
     /*
-     * Push warning message into admin request errors
+     * Push warning message into admin request error
      */
     public static function warning($message)
     {
-        Admin::push('errors', $message);
+        self::pushMessage($message, 'error');
     }
 
+    /*
+     * Push notice
+     */
+    public static function notice($message)
+    {
+        self::pushMessage($message);
+    }
+
+    /*
+     * Permission dannied helper
+     */
     public static function permissionsError()
     {
         return self::error(trans('admin::admin.no-permissions'), null, null, 401);

@@ -72,7 +72,7 @@ trait Gettextable
         if (! $this->exists) {
             $this->attributes['slug'] = $slug;
         } elseif ($this->original['slug'] != $value && request()->expectsJson()) {
-            Admin::push('errors', _('Skratku jazyka nie je možné po jej vytvorení premenovať.'));
+            Admin::warning(_('Skratku jazyka nie je možné po jej vytvorení premenovať.'));
         }
     }
 
