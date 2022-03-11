@@ -24,7 +24,7 @@ Route::get('/vendor/js/ca-translates-json.js', 'GettextController@getJson');
 /*
  * Admin routes
  */
-Route::group(['middleware' => ['admin', 'hasDevMode', 'adminLocalized']], function () {
+Route::group(['middleware' => ['admin.autologout', 'admin', 'hasDevMode', 'adminLocalized']], function () {
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
     Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');

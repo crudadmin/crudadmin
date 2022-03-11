@@ -2,6 +2,7 @@
 
 namespace Admin\Models;
 
+use Admin\Admin\Buttons\LogoutUser;
 use Admin\Eloquent\Authenticatable;
 use Admin\Fields\Group;
 use Illuminate\Notifications\Notifiable;
@@ -36,6 +37,15 @@ class User extends Authenticatable
      * Default = 0
      */
     protected $minimum = 1;
+
+    /**
+     * Buttons
+     *
+     * @var  array
+     */
+    protected $buttons = [
+        LogoutUser::class,
+    ];
 
     /*
      * Automatic form and database generation
