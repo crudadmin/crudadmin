@@ -368,6 +368,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             'danger' => true,
         ];
 
+        $permissions['logout'] = [
+            'name' => _('Odhlásenie používateľov'),
+            'danger' => false,
+        ];
+
         //Update title for all
         $permissions['all']['title'] = $permissions['update']['title'];
 

@@ -21,6 +21,13 @@ class LogoutUser extends Button
 
         //Button Icon
         $this->icon = 'fa-sign-out';
+
+        $this->active = $this->hasAccess();
+    }
+
+    private function hasAccess()
+    {
+        return admin()->hasAccess(admin(), 'logout');
     }
 
     public function question()
@@ -33,6 +40,10 @@ class LogoutUser extends Button
      */
     public function fire(AdminModel $row)
     {
+        if ( $this->hasAccess() === false ){
+            return $this->error(_('Nemáte prístup k tejto akcii.'));
+        }
+
         $date = Carbon::now();
 
         if ( $row->getKey() == admin()->getKey() ) {
