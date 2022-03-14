@@ -81,6 +81,8 @@ class SheetDownloader
                 $string = $belongsTo;
 
                 foreach ($option as $key => $v) {
+                    $v = array_values(array_wrap($v))[0] ?? '';
+
                     $string = str_replace(':'.$key, $v, $string);
                 }
 
