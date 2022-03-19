@@ -191,7 +191,7 @@ class JSTranslations
         $poPath = Gettext::getLocalePath($locale, $locale.'.po');
 
         //Check if actual language has been modified sync last source changes
-        $canSync = $this->compareCacheKey('lang_modification.'.$locale) || true;
+        $canSync = $this->compareCacheKey('lang_modification.'.$locale);
 
         if ((
             !$poPath || ! file_exists($poPath) //If poPath does not exists
