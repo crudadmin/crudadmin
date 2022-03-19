@@ -126,13 +126,21 @@ class JSTranslations
         foreach ($translations as $key => $translation) {
             //If translation does not exists in new loaded string,
             if ( ! array_key_exists($key, (array)$loadedTranslations) ) {
-                //if is not marked as missing already
-                if ( ! in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags()) ) {
-                    $translation->addFlag(self::GETTEXT_FLAGS['missing']);
+                //Remove missing translations
+                if ( config('admin.gettext_remove_missing') === true ) {
+                    unset($translations[$key]);
+                }
+
+                //flag missing translations
+                else {
+                    //if is not marked as missing already
+                    if ( ! in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags()) ) {
+                        $translation->addFlag(self::GETTEXT_FLAGS['missing']);
+                    }
                 }
             }
 
-            //If text does exists, but is marked as does not exists
+            //If text does exists now, but has been marked as inexisting before..
             elseif ( in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags()) ) {
                 $flags = array_diff($translation->getFlags(), ['missing-in-source']);
                 $translation->deleteFlags();

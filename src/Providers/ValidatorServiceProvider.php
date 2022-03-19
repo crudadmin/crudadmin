@@ -2,8 +2,8 @@
 
 namespace Admin\Providers;
 
-use DateTime;
 use Illuminate\Support\ServiceProvider;
+use Symfony\Component\Mime\MimeTypes;
 use Validator;
 
 class ValidatorServiceProvider extends ServiceProvider
@@ -26,12 +26,25 @@ class ValidatorServiceProvider extends ServiceProvider
          * Extensions rules for request
          * extensions:jpg,jpeg...
          */
-        Validator::extend('extensions', function ($attribute, $value, $parameters) {
+        Validator::extend('extensions', function ($attribute, $value, $supportedExtensions) {
             if ( ! $value || !is_object($value)){
                 return false;
             }
 
-            return in_array($value->getClientOriginalExtension(), $parameters);
+            $mimeTypes = new MimeTypes();
+            $extension = $value->getClientOriginalExtension();
+            $isValidExtension = in_array($extension, $supportedExtensions);
+
+            foreach ($supportedExtensions as $neededExt) {
+                $types = $mimeTypes->getMimeTypes($neededExt);
+                $guessedMimeType = $mimeTypes->guessMimeType($value->getPathName());
+
+                if ( in_array($guessedMimeType, $types) && $isValidExtension ){
+                    return true;
+                }
+            }
+
+            return false;
         });
 
 

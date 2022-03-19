@@ -3,18 +3,20 @@
 namespace Admin\Eloquent;
 
 use Admin;
-use Illuminate\Notifications\Notifiable;
 use Admin\Eloquent\Concerns\CanResetPassword;
-use Illuminate\Foundation\Auth\Access\Authorizable;
+use Admin\Eloquent\Concerns\HasAutoLogoutTrait;
+use Admin\Models\User;
 use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Notifications\Notifiable;
 
 class Authenticatable extends AdminModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
-    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable, MustVerifyEmail;
+    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable, MustVerifyEmail, HasAutoLogoutTrait;
 
     /*
      * Skipping dropping columns
@@ -57,6 +59,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         }
 
         parent::__construct($attributes);
+    }
+
+    public function getGuard()
+    {
+        return auth()->guard($this->guard);
     }
 
     /*
@@ -222,7 +229,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function setEnabledAttribute($value)
     {
-        if (Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard($this->guard)->user()->getKey() && $this->enabled != $value) {
+        if (Admin::isAdmin() && $this->exists == true && $this->getKey() === $this->getGuard()->user()->getKey() && $this->enabled != $value) {
             return Admin::push('errors.request', 'Nie je možné deaktivovať vlastný účet.');
         }
 
@@ -234,7 +241,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function setPermissionsAttribute($value)
     {
-        if (Admin::isAdmin() && $this->exists == true && $this->getKey() === auth()->guard($this->guard)->user()->getKey() && $this->permissions != $value) {
+        if (Admin::isAdmin() && $this->exists == true && $this->getKey() === $this->getGuard()->user()->getKey() && $this->permissions != $value) {
             return Admin::push('errors.request', 'Nie je možné upravovať vlastne administrátorske práva.');
         }
 
@@ -299,6 +306,13 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      */
     public function mutateFields($fields)
     {
+        //If has logout user feature
+        if ( $this->hasAutoLogoutSupport() ) {
+            $fields->push([
+                'logout_date' => 'name:Odhlásiť od dátumu|type:datetime|inaccessible',
+            ]);
+        }
+
         /*
          * If is enabled admin groups
          */
@@ -353,6 +367,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             'name' => _('Priradenie skupín'),
             'title' => _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť priradenie rol pre konkrétnych užívateľov.'),
             'danger' => true,
+        ];
+
+        $permissions['logout'] = [
+            'name' => _('Odhlásenie používateľov'),
+            'danger' => false,
         ];
 
         //Update title for all

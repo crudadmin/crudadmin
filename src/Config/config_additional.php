@@ -66,6 +66,11 @@ return [
     'gettext_supported_codes' => [],
 
     /*
+     * Remove missing translates
+     */
+    'gettext_remove_missing' => true,
+
+    /*
      * Permanently delete files after deleted row in db or after overridden uploaded files
      */
     'reduce_space' => true,

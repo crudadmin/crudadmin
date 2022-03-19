@@ -41,6 +41,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
     protected $routeMiddleware = [
         'admin' => Middleware\Authenticate::class,
         'admin.guest' => Middleware\RedirectIfAuthenticated::class,
+        'admin.autologout' => Middleware\LogoutAdminMiddleware::class,
         'hasAdminRole' => Middleware\HasAdminRole::class,
         'hasDevMode' => Middleware\HasDevMode::class,
         'localized' => Middleware\LocalizationMiddleware::class,
