@@ -279,9 +279,22 @@ class DataController extends CRUDController
         }
 
         //Update rows and theirs orders
-        foreach (request('rows') as $id => $order) {
+        foreach (request('rows') as $id => $item) {
+            $update = [
+                '_order' => is_numeric($item) ? $item : $item['_order']
+            ];
+
+            //Support to recursive drag & drop
+            if ( is_array($item) ) {
+                $recursiveKey = $model->getForeignColumn($model->getTable());
+
+                if ( array_key_exists($recursiveKey, $item) ){
+                    $update[$recursiveKey] = $item[$recursiveKey];
+                }
+            }
+
             //Update first row
-            $model->newInstance()->where('id', $id)->update(['_order' => $order]);
+            $model->newInstance()->where('id', $id)->update($update);
         }
 
         //Fire on update order event

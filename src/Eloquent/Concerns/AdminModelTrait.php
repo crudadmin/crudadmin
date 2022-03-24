@@ -296,7 +296,10 @@ trait AdminModelTrait
 
         //If is not parent table, but rows can be related into recursive relation
         if (! $parent_table && (int) $subid == 0) {
-            if (in_array(class_basename(get_class($this)), $this->getBelongsToRelation(true))) {
+            if (
+                in_array(class_basename(get_class($this)), $this->getBelongsToRelation(true))
+                && $this->getProperty('withRecursiveRows') !== true
+            ) {
                 $query->whereNull($this->getForeignColumn($this->getTable()));
             }
         }
