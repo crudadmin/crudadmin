@@ -12,14 +12,14 @@
         "php": ">=7.1",
         "crudadmin/framework": "^3.0.51|dev-3.0-dev",
         "crudadmin/resources" : "^3.0.6|dev-3.0-dev",
-        "laravel/framework": "^5.4|^6|^7|^8",
+        "laravel/framework": "^5.4|^6|^7|^8|^9",
         "laravel/ui": "^1.0|^2.0|^3.0",
         "gettext/gettext": "^4.6"
     },
     "require-dev": {
-        "phpunit/phpunit": "~5.7|~7.0|^8.0",
-        "orchestra/testbench": "^3.8|^5.0|^6.0",
-        "orchestra/testbench-dusk": "^3.8|^5.0|^6.0",
+        "phpunit/phpunit": "~5.7|~7.0|^8.0|^9.0",
+        "orchestra/testbench": "^3.8|^5.0|^6.0|^7.0",
+        "orchestra/testbench-dusk": "^3.8|^5.0|^6.0|^7.0",
         "laravel/legacy-factories": "^1.0.4"
     },
     "autoload": {
