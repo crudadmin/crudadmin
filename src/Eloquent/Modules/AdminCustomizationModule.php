@@ -508,7 +508,7 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 if ( !$actualValue || is_array($actualValue) ) {
                     //Merge defined values with default values
                     if ( is_array($actualValue) ){
-                        $value = array_merge($value, $actualValue);
+                        $value = is_array($value) ? array_merge($value, $actualValue) : $actualValue;
                     }
 
                     array_set($response, $key, $value);

@@ -290,6 +290,11 @@ class DataController extends CRUDController
 
                 if ( array_key_exists($recursiveKey, $item) ){
                     $update[$recursiveKey] = $item[$recursiveKey];
+
+                    //We need fire event on update
+                    if ( method_exists($model, 'onRecursiveDragAndDrop') ){
+                        $model->onRecursiveDragAndDrop($id, $recursiveKey, $item[$recursiveKey]);
+                    }
                 }
             }
 
