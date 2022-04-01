@@ -18,7 +18,10 @@ class PublishServiceProvider extends ServiceProvider
          */
         $this->publishes([__DIR__.'/../Models/User.php' => AdminInstall::getInstallAuthModelPath()], 'admin.user');
         $this->publishes([__DIR__.'/../Config/config.php' => config_path('admin.php')], 'admin.config');
-        $this->publishes([__DIR__.'/../Resources/lang' => resource_path('lang')], 'admin.languages');
+
+        //Laravel 8 and lower support with resources/lang
+        $this->publishes([__DIR__.'/../Resources/lang' => file_exists(base_path('lang')) ? base_path('lang') : resource_path('lang')], 'admin.languages');
+
         $this->publishes([__DIR__.'/../Resources/views/sitebuilder' => resource_path('views/vendor/admin/sitebuilder')], 'admin.sitebuilder');
     }
 }
