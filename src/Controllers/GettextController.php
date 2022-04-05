@@ -56,11 +56,7 @@ class GettextController extends Controller
             abort(404);
         }
 
-        $lang = $lang ?: Localization::get()->slug;
-
-        $translations = JSTranslations::getJSTranslations($lang, Localization::getModel());
-
-        return $translations;
+        return Localization::getJson($lang);
     }
 
     /**

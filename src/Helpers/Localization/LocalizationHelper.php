@@ -4,6 +4,7 @@ namespace Admin\Helpers\Localization;
 
 use Admin;
 use Admin\Eloquent\AdminModel;
+use Facades\Admin\Helpers\Localization\JSTranslations;
 use Event;
 use Gettext;
 use Illuminate\Foundation\Events\LocaleUpdated;
@@ -382,5 +383,13 @@ class LocalizationHelper
                 return $segment;
             }
         }
+    }
+
+    public function getJson($locale = null)
+    {
+        return JSTranslations::getJSTranslations(
+            $locale ?: $this->get()->slug,
+            $this->getModel()
+        );
     }
 }
