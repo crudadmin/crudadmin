@@ -12,7 +12,7 @@ class Layout
      * List of all available positions
      */
     public $available_positions = [
-        'top', 'bottom',
+        'top', 'bottom', 'mutators',
         'form-before', 'form-after', 'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
         'table-before', 'table-after', 'table-header', 'table-header-actions', 'table-footer',
         'actions-grid',

@@ -32,7 +32,7 @@ class LogoutUser extends Button
 
     public function question()
     {
-        return $this->warning(_('Naozaj chcete ohdlásiť používateľa zo všetkých zariadení?'));
+        return $this->warning(_('Naozaj chcete odhlásiť používateľa zo všetkých zariadení?'));
     }
 
     /*
