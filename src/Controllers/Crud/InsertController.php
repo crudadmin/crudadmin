@@ -41,7 +41,7 @@ class InsertController extends CRUDController
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-created'));
 
-        return autoAjax()->success($message)->type($this->responseType())->data($data);
+        return autoAjax()->toast(true)->success($message)->type($this->responseType())->data($data);
     }
 
     //Set rows into admin response format

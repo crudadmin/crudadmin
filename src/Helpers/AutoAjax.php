@@ -9,6 +9,8 @@ use Log;
 
 class AutoAjax extends BaseAutoAjax
 {
+    protected $toast = false;
+
     /**
      * Set default types
      */
@@ -19,8 +21,16 @@ class AutoAjax extends BaseAutoAjax
         $this->setMessage('success', _('Zmeny boli úspešne uložené.'));
 
         //Mutate responses
+        $this->setEvent('onResponse', function($response){
+            $response['toast'] = $this->toast;
+
+            return $response;
+        });
+
         $this->setEvent('onMessage', function($autoAjax){
-            $autoAjax->title = $autoAjax->title ?: trans('admin::admin.info');
+            if ( $this->message && $autoAjax->toast === false ) {
+                $autoAjax->title = $autoAjax->title ?: trans('admin::admin.info');
+            }
         });
 
         $this->setEvent('onSuccess', function($autoAjax){
@@ -29,8 +39,18 @@ class AutoAjax extends BaseAutoAjax
 
         $this->setEvent('onError', function($autoAjax){
             $autoAjax->type = $autoAjax->type ?: 'error';
-            $autoAjax->title = $autoAjax->title ?: trans('admin::admin.warning');
+
+            if ( $autoAjax->toast === false ) {
+                $autoAjax->title = $autoAjax->title ?: trans('admin::admin.warning');
+            }
         });
+    }
+
+    public function toast($state)
+    {
+        $this->toast = $state;
+
+        return $this;
     }
 
     /*

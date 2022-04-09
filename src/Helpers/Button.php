@@ -124,8 +124,11 @@ class Button
             $this->message['title'] = $title;
         }
 
+        if ( $type ) {
+            $this->message['type'] = $type;
+        }
+
         $this->message['message'] = $message;
-        $this->message['type'] = $type;
         $this->message['toast'] = $toast;
 
         return $this;
@@ -137,6 +140,11 @@ class Button
     public function toast($message, $type = null)
     {
         return $this->message($message, null, $type, true);
+    }
+
+    public function errorToast($message)
+    {
+        return $this->toast($message, 'error');
     }
 
     public function download($basepath)

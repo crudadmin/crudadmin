@@ -89,7 +89,6 @@ trait HasButtonsSupport
             'redirect' => $this->redirect,
             'action' => $this->getAction(),
             'shouldAccept' => $this->accept,
-            'toast' => $this->message['toast'] ?? false,
         ];
 
         //Rows should not be returned in all responses, for example in question we does not want rows.
@@ -99,6 +98,7 @@ trait HasButtonsSupport
         }
 
         return autoAjax()
+                ->toast($this->message['toast'] ?? false)
                 ->type($message['type'])
                 ->title($message['title'])
                 ->message($message['message'])
