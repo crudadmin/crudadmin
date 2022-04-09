@@ -19,6 +19,14 @@ trait CRUDResponse
         );
     }
 
+    public function hasAdditionalMessages()
+    {
+        return count(array_merge(
+            $this->getRequestMessages('error'),
+            $this->getRequestMessages('notice')
+        )) > 0;
+    }
+
     /*
      * Return simple message, or when is errors avaliable then shows them
      */

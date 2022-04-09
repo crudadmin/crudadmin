@@ -87,9 +87,13 @@ class UpdateController extends InsertController
             return $row->getMutatedAdminAttributes();
         }, $rows));
 
-        return autoAjax()->toast(true)->success($message)->type($this->responseType())->data([
-            'rows' => $mutatedAdminRows,
-        ]);
+        return autoAjax()
+            ->toast($this->hasAdditionalMessages() ? false : true)
+            ->success($message)
+            ->type($this->responseType())
+            ->data([
+                'rows' => $mutatedAdminRows,
+            ]);
     }
 
     /*
