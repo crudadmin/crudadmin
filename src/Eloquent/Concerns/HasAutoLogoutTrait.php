@@ -13,7 +13,7 @@ trait HasAutoLogoutTrait
 
     public function hasAutoLogoutSupport()
     {
-        return count(array_filter($this->getProperty('buttons') ?: [], function($buttonClass){
+        return count(array_filter($this->getAdminButtons(), function($buttonClass){
             return $buttonClass == LogoutUser::class;
         })) > 0;
     }

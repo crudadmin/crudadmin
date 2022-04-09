@@ -39,178 +39,10 @@ class DataController extends CRUDController
         ];
     }
 
-    /*
-     * Permanently removes files from deleted rows
-     */
-    protected function removeFilesOnDelete($model)
+    private function getButtonResponse($button, $rows, $multiple, $hasQuestionFirst)
     {
-        foreach ($model->getFields() as $key => $field) {
-            if ($model->isFieldType($key, 'file')) {
-                $model->deleteFiles($key);
-            }
-        }
-    }
-
-    /*
-     * Check if row can be deleted
-     */
-    private function canDeleteRow($model, $row, $request)
-    {
-        if ($row->canDelete() !== true) {
-            return false;
-        }
-
-        if ($model->getProperty('minimum') >= $model->localization($request->get('language_id'))->count()) {
-            return false;
-        }
-
-        if ($model->getProperty('deletable') == false) {
-            return false;
-        }
-
-        $reserved = $model->getProperty('reserved');
-
-        if (is_array($reserved) && in_array($row->getKey(), $reserved)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /*
-     * Deleting row from db
-     */
-    public function delete(Request $request)
-    {
-        $model = $this->getModel($request->get('model'));
-
-        $rows = $model->whereIn($model->getKeyName(), $request->get('id', []))->get();
-
-        foreach ($rows as $row) {
-            if (! $this->canDeleteRow($model, $row, $request)) {
-                Ajax::error(trans('admin::admin.cannot-delete'));
-            }
-
-            $row->deleted_at = Carbon::now();
-
-            $row->checkForModelRules(['deleting']);
-
-            //Remove row from db (softDeletes)
-            if ( $model->hasSoftDeletes() ) {
-                $row->delete();
-            } else {
-                $row->forceDelete();
-            }
-
-            //Remove uploaded files
-            $this->removeFilesOnDelete($row);
-
-            //Fire on delete events
-            $row->checkForModelRules(['deleted'], true);
-
-            //Fire on delete events
-            if (method_exists($model, 'onDelete')) {
-                $row->onDelete($row);
-            }
-        }
-
-        $rows = (new AdminRows($model))->returnModelData(
-            request('parent'),
-            request('subid'),
-            request('language_id'),
-            request('limit'),
-            request('page'),
-            0
-        );
-
-        //We need load data from previous page, if given page is empty
-        if (count($rows['rows']) == 0 && request('page') > 1) {
-            $rows = (new AdminRows($model))->returnModelData(
-                request('parent'),
-                request('subid'),
-                request('language_id'),
-                request('limit'),
-                request('page') - 1,
-                1,
-                0
-             );
-        }
-
-        Ajax::message(null, null, null, [
-            'rows' => $rows,
-        ]);
-    }
-
-    /*
-     * Publishing/Unpublishing row in db from administration
-     */
-    public function togglePublishedAt(Request $request)
-    {
-        $model = $this->getModel($request->get('model'));
-
-        //Checks for disabled publishing
-        if ($model->getProperty('publishable') == false) {
-            Ajax::error(trans('admin::admin.cannot-publish'));
-        }
-
-        $rows = $model
-                    ->withUnpublished()
-                    ->select(array_filter([
-                        'id',
-                        'published_at',
-                        $model->getProperty('publishableState') ? 'published_state' : null
-                    ]))
-                    ->whereIn($model->getKeyName(), $request->get('id', []))
-                    ->get();
-
-        $data = [];
-
-        foreach ($rows as $row) {
-            $row->checkForModelRules([$row->published_at ? 'unpublishing' : 'publishing']);
-
-            //We want disable all rules, because in this state
-            //are loaded only needed columns for publishing fields.
-            //and rules could break, because in rule may be needed more columns than this two.
-            $row->disableAllAdminRules(true);
-
-
-            if ( $model->getProperty('publishableState') == true ) {
-                $actualState = $row->published_state['av'] ?? 0;
-                $newState = $row->published_state ?: [];
-
-                if ( $row->published_at ) {
-                    $row->published_at = null;
-                    unset($newState['av']);
-                } else if ( $actualState == 0 ) {
-                    $newState['av'] = 1;
-                } else if ( $actualState == 1 ) {
-                    unset($newState['av']);
-                    $row->published_at = Carbon::now();
-                }
-
-                $row->published_state = $newState;
-            } else {
-                $row->published_at = $row->published_at ? null : Carbon::now();
-            }
-
-            $row->save();
-            $row->disableAllAdminRules(false);
-
-            $row->checkForModelRules([$row->published_at ? 'published' : 'unpublished'], true);
-
-            $data[$row->getKey()] = [
-                'published_at' => $row->published_at ? $row->published_at->toDateTimeString() : null,
-                'published_state' => $row->published_state,
-            ];
-        }
-
-        return $data;
-    }
-
-    private function getButtonResponse($button, $rows, $multiple, $ask)
-    {
-        if ($ask) {
-            return $button->{ method_exists($button, 'ask') ? 'ask' : 'question' }($multiple === true ? $rows : $rows[0]);
+        if ($hasQuestionFirst) {
+            return $button->{'question'}($multiple === true ? $rows : $rows[0]);
         }
         if ($multiple) {
             return $button->fireMultiple($rows);
@@ -235,37 +67,35 @@ class DataController extends CRUDController
 
         $rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get();
 
-        $buttons = array_values(array_filter((array) $model->getProperty('buttons')));
+        if ( $rows->count() === 0 ){
+            return Ajax::error(_('Záznam neexistuje, pravdepodobne už bol vymazaný.'));
+        }
 
-        $button = new $buttons[$request['button_id']]($multiple ? null : $rows[0]);
+        $button = array_values(array_filter($model->getAdminButtons(), function($button) use ($request) {
+            return AdminRows::getButtonKey($button) == $request['button_key'];
+        }))[0] ?? null;
 
-        $ask = $request['ask'] === true
-               && (method_exists($button, 'ask') || method_exists($button, 'question'));
+        if ( !$button ){
+            return Ajax::error();
+        }
 
-        $response = $this->getButtonResponse($button, $rows, $multiple, $ask);
+        $button = new $button($multiple ? null : $rows[0]);
+
+        $hasQuestionFirst = $request['hasQuestion'] === true && method_exists($button, 'question');
+
+        $response = $this->getButtonResponse($button, $rows, $multiple, $hasQuestionFirst);
 
         //On redirect response
         if ($response instanceof \Illuminate\Http\RedirectResponse) {
             $button->redirect = $response->getTargetUrl();
         }
 
-        //If is ask mode requesion, then does not return updated rows data
-        $rows = $ask ? [] : (new AdminRows($model))->returnModelData(
-            $request['parent'],
-            $request['subid'],
-            $request['language_id'],
-            $request['limit'],
-            $request['page'],
-            0,
-            $button->reloadAll ? false : $rows->pluck($model->getKeyName())->toArray()
-        );
-
         return Ajax::message($button->message['message'], $button->message['title'], $button->message['type'], [
             'component' => isset($button->message['component']) ? $button->message['component'] : null,
             'component_data' => isset($button->message['component_data']) ? $button->message['component_data'] : null,
-            'rows' => $rows,
+            'rows' => $hasQuestionFirst ? [] : $button->getRows($model, $rows, $request),
             'redirect' => $button->redirect,
-            'ask' => $ask && $button->accept,
+            'hasQuestion' => $hasQuestionFirst && $button->accept,
         ]);
     }
 

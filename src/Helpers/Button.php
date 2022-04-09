@@ -4,6 +4,7 @@ namespace Admin\Helpers;
 
 use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Helpers\AdminRows;
 use Admin\Helpers\SecureDownloader;
 use Illuminate\Support\Collection;
 
@@ -226,5 +227,51 @@ class Button
     protected function getComponentPaths()
     {
         return resource_path('views/admin/components/buttons');
+    }
+
+    /*
+     * Determine which rows may be returned into request
+     */
+    protected function loadOnlyRows($rows, $request)
+    {
+        if (
+            //If reloadall is turned on, but we are listing in non-existing parent, we need return only accessed button
+            ($request['parentTable'] && !$request['parentId'])
+
+            //If reload is turned off, we need return only accessed buttons
+            || $this->reloadAll === false
+        ){
+            return $rows->pluck($rows[0]->getKeyName())->toArray();
+        }
+
+        //Return all rows
+        return [];
+    }
+
+    /**
+     * Returns rows which we want reload/display
+     *
+     * @param  AdminModel  $model
+     * @param  Collection  $rows
+     *
+     * @return  array
+     */
+    public function getRows(AdminModel $model, $rows, $request)
+    {
+        //Load all rows, or only selected rows
+        $onlyIds = $this->loadOnlyRows($rows, $request);
+
+        $adminRows = (new AdminRows($model, $request));
+
+        $rows = $adminRows->returnModelData($onlyIds, true);
+
+        //If no more rows are on this page. We need return lower page.
+        //This may happen when buttons removes pressed row, but no more-rows are on given page.
+        if ( count($rows['rows']) == 0 && $request['page'] >= 2 ){
+            $rows = $adminRows->setPage($request['page'] - 1)->returnModelData($onlyIds, true);
+        }
+
+        //If is ask mode requesion, then does not return updated rows data
+        return $rows;
     }
 }

@@ -269,33 +269,33 @@ trait AdminModelTrait
         return array_values($fields);
     }
 
-    public function scopeFilterByParentOrLanguage($query, $subid, $langid, $parent_table = null)
+    public function scopeFilterByParentOrLanguage($query, $parentId, $languageId, $parentTable = null)
     {
-        if ($langid > 0) {
-            $query->localization($langid);
+        if ($languageId > 0) {
+            $query->localization($languageId);
         }
 
-        if ($subid > 0) {
-            $column = $this->getForeignColumn($parent_table);
+        if ($parentId > 0) {
+            $column = $this->getForeignColumn($parentTable);
 
-            if ($parent_table === null && $column && count($column) == 1) {
+            if ($parentTable === null && $column && count($column) == 1) {
                 $column = array_values($column)[0];
             }
 
             //Find by relationship
             if ($column) {
-                $query->where($column, $subid);
+                $query->where($column, $parentId);
             }
 
             //Find by global relationship
             else if ( $this->getProperty('globalRelation') === true ) {
-                $query->where('_table', $parent_table)
-                      ->where('_row_id', $subid);
+                $query->where('_table', $parentTable)
+                      ->where('_row_id', $parentId);
             }
         }
 
         //If is not parent table, but rows can be related into recursive relation
-        if (! $parent_table && (int) $subid == 0) {
+        if (! $parentTable && (int) $parentId == 0) {
             if (
                 in_array(class_basename(get_class($this)), $this->getBelongsToRelation(true))
                 && $this->getProperty('withRecursiveRows') !== true

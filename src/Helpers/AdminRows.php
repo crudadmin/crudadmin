@@ -12,15 +12,40 @@ use Illuminate\Support\Str;
 class AdminRows
 {
     protected $model = null;
+    protected $parentTable;
+    protected $parentId;
+    protected $limit;
+    protected $page;
+    protected $languageId;
 
     /**
      * Class constructor
      *
      * @param  Admin\Eloquent\AdminModel  $model
      */
-    public function __construct(AdminModel $model)
+    public function __construct(AdminModel $model, $request = null)
     {
         $this->model = $model;
+
+        if ( $request ){
+            $this->loadRequestParams($request);
+        }
+    }
+
+    public function loadRequestParams($request)
+    {
+        $this->parentTable = $request['parentTable'] ?? null;
+        $this->parentId = $request['parentId'] ?? null;
+        $this->limit = (int)$request['limit'];
+        $this->page = (int)$request['page'];
+        $this->languageId = (int)$request['language_id'];
+    }
+
+    public function setPage($page)
+    {
+        $this->page = $page;
+
+        return $this;
     }
 
     private function isPrimaryKey($column, $columns)
@@ -256,32 +281,33 @@ class AdminRows
     /*
      * Apply pagination for given eloqment builder
      */
-    protected function paginateRecords($query, $limit, $page, $count = null)
+    protected function paginateRecords($query, $initialRequest)
     {
-        if ($limit == 0) {
+        //If limit is not enabled
+        if ($this->limit <= 0) {
             return;
         }
 
         //If is first loading of first page and model is in reversed mode, then return last x rows.
-        if ($page == 1 && $count !== null && $count == 0 && $this->model->isReversed() === true) {
+        if ($this->page == 1 && $initialRequest && $this->model->isReversed() === true) {
             $count = $query->count();
-            $take = $limit - ((ceil($count / $limit) * $limit) - $count);
+            $take = $this->limit - ((ceil($count / $this->limit) * $this->limit) - $count);
 
             $query->offset($count - $take)->take($take);
 
             return;
         }
 
-        $start = $limit * $page;
-        $offset = $start - $limit;
+        $start = $this->limit * $this->page;
+        $offset = $start - $this->limit;
 
-        $query->offset($offset)->take($limit);
+        $query->offset($offset)->take($this->limit);
     }
 
     /*
      * Returns which model dependencies have to be loaded
      */
-    protected function loadWithDependecies()
+    private function getDependeciesIntoQuery()
     {
         $with = [];
 
@@ -302,16 +328,16 @@ class AdminRows
     /*
      * Returns filtered and paginated rows from administration
      */
-    protected function getRowsData($subid, $langid, $callback = null, $parent_table = null)
+    private function getRowsData($callback = nulll)
     {
         //Get model dependencies
-        $with = $this->loadWithDependecies();
+        $with = $this->getDependeciesIntoQuery();
 
         //Get base columns from database with relationships
         $query = $this->model->adminRows()->with($with);
 
         //Filter rows by language id and parent id
-        $query->filterByParentOrLanguage($subid, $langid, $parent_table);
+        $query->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable);
 
         $query->filterByParentGroup();
 
@@ -344,22 +370,22 @@ class AdminRows
      */
     protected function generateButton($row)
     {
-        if ($buttons = array_values(array_filter((array) $this->model->getProperty('buttons')))) {
+        if ($buttons = $this->model->getAdminButtons()) {
             $data = [];
 
-            foreach ($buttons as $key => $button_class) {
-                $button = new $button_class($row);
+            foreach ($buttons as $key => $buttonClass) {
+                $button = new $buttonClass($row);
 
                 if ($button->active === true) {
                     $data[$key] = [
-                        'key' => class_basename($button),
+                        'key' => self::getButtonKey($buttonClass),
                         'name' => $button->name,
                         'class' => $button->class,
                         'icon' => $button->icon,
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
                         'tooltipEncode' => $button->tooltipEncode,
-                        'ask' => method_exists($button, 'ask') || method_exists($button, 'question'),
+                        'hasQuestion' => method_exists($button, 'question'),
                     ];
                 }
             }
@@ -368,6 +394,11 @@ class AdminRows
         }
 
         return false;
+    }
+
+    public static function getButtonKey($buttonClass)
+    {
+        return class_basename($buttonClass);
     }
 
     /*
@@ -386,48 +417,59 @@ class AdminRows
         return $buttons;
     }
 
-    public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null, $id = false)
+    public function returnModelData($onlyIds = [], $initialRequest)
     {
         try {
-            $withoutData = $parent_table && (int) $subid == 0 || !admin()->hasAccess($this->model, 'read');
+            $withoutRows = $this->returnNoData($onlyIds);
 
-            if (! $withoutData) {
-                $paginated_rows_data = $this->getRowsData($subid, $langid, function ($query) use ($limit, $page, $count, $id) {
-
+            if (! $withoutRows) {
+                $paginatedRowsData = $this->getRowsData(function ($query) use ($onlyIds, $initialRequest) {
                     //Get specific id
-                    if ($id != false) {
-                        if (is_numeric($id)) {
-                            $query->where($this->model->fixAmbiguousColumn($this->model->getKeyName()), $id);
-                        } elseif (is_array($id)) {
-                            $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $id);
-                        }
+                    if ($onlyIds && count($onlyIds) > 0) {
+                        $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $onlyIds);
+                    } else {
+                        $this->paginateRecords($query, $initialRequest);
                     }
 
                     //Search in rows
                     $this->checkForSearching($query);
+                });
 
-                    //Paginate rows
-                    if ($id == false) {
-                        $this->paginateRecords($query, $limit, $page, $count);
-                    }
-                }, $parent_table);
-
-                $all_rows_data = $this->model->adminRows()
-                                             ->filterByParentOrLanguage($subid, $langid, $parent_table)
-                                             ->filterByParentGroup();
-
+                $totalResultsCount = $this->model->adminRows()
+                                    ->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable)
+                                    ->filterByParentGroup();
             }
 
             $data = [
-                'rows' => $withoutData ? [] : $this->getBaseRows($paginated_rows_data),
-                'count' => $withoutData ? 0 : $this->checkForSearching($all_rows_data)->count(),
-                'page' => $page,
-                'buttons' => $withoutData ? [] : $this->generateButtonsProperties($paginated_rows_data),
+                'rows' => $withoutRows ? [] : $this->getBaseRows($paginatedRowsData),
+                'count' => $withoutRows ? 0 : $this->checkForSearching($totalResultsCount)->count(),
+                'limit' => $this->limit,
+                'page' => $this->page,
+                'buttons' => $withoutRows ? [] : $this->generateButtonsProperties($paginatedRowsData),
             ];
         } catch (\Illuminate\Database\QueryException $e) {
             return Ajax::mysqlError($e);
         }
 
         return $data;
+    }
+
+    private function returnNoData(array $onlyIds)
+    {
+        if ( admin()->hasAccess($this->model, 'read') === false ){
+            return true;
+        }
+
+        //We want retrieve only specific rows, we can allow get this rows.
+        if ( count($onlyIds) > 0 ){
+            return false;
+        }
+
+        //We cant return data when listing in non existing parent
+        if ( $this->parentTable && !$this->parentId ){
+            return true;
+        }
+
+        return false;
     }
 }

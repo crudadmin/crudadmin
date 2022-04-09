@@ -39,13 +39,12 @@ class LayoutController extends BaseController
                 'store' => action('\Admin\Controllers\Crud\InsertController@store'),
                 'update' => action('\Admin\Controllers\Crud\UpdateController@update'),
                 'delete' => action('\Admin\Controllers\Crud\DataController@delete'),
-                'togglePublishedAt' => action('\Admin\Controllers\Crud\DataController@togglePublishedAt'),
                 'getHistory' => action('\Admin\Controllers\HistoryController@getHistory', [':model', ':id']),
                 'removeFromHistory' => action('\Admin\Controllers\HistoryController@removeFromHistory'),
                 'updateOrder' => action('\Admin\Controllers\Crud\DataController@updateOrder'),
                 'buttonAction' => action('\Admin\Controllers\Crud\DataController@buttonAction'),
                 'download' => action('\Admin\Controllers\DownloadController@adminDownload'),
-                'rows' => action('\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
+                'rows' => action('\Admin\Controllers\LayoutController@getRows', [':table']),
                 'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id', ':table']),
                 'switch_locale' => action('\Admin\Controllers\GettextController@switchAdminLanguage', [':id']),
                 'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id', ':table']),
@@ -76,38 +75,13 @@ class LayoutController extends BaseController
         }
     }
 
-    /**
-     * Set parent table into actual selected child model in admin
-     *
-     * @param  string  &$parentTable
-     * @param  int  $subid
-     */
-    private function setParentModelIntoEloquent($model, &$parentTable, $subid)
-    {
-        if ($parentTable == '0') {
-            $parentTable = null;
-        } else {
-            //Set parent row into model
-            $parentRow = Admin::getModelByTable($parentTable)
-                                ->withoutGlobalScopes()
-                                ->find($subid);
-
-            $model->setParentRow($parentRow);
-        }
-    }
-
     /*
      * Returns paginated rows and all required model informations
      */
-    public function getRows($table, $parentTable, $subid, $langid, $limit, $page, $count)
+    public function getRows($table)
     {
         $model = Admin::getModelByTable($table);
-
-        $initialOpeningRequest = $count == 0;
-
-        $sheetDownload = request('download') == 1;
-
-        $limit = $sheetDownload ? 0 : $limit;
+        $isInitialRequest = (int)request('count') == 0;
 
         //Check if user has allowed model
         if (! $model || ! admin()->hasAccess($model)) {
@@ -118,8 +92,16 @@ class LayoutController extends BaseController
             $model->beforeAdminRequest();
         }
 
-        //Set parent row
-        $this->setParentModelIntoEloquent($model, $parentTable, $subid);
+        //Set parent row into model
+        if ( $parentTable = request('parentTable') ){
+            $parentRow = Admin::getModelByTable($parentTable)
+                                ->withoutGlobalScopes()
+                                ->find(request('parentId'));
+
+            if ( $parentRow ) {
+                $model->setParentRow($parentRow);
+            }
+        }
 
         $data = [];
 
@@ -129,11 +111,11 @@ class LayoutController extends BaseController
             $model,
             false,
             false,
-            $initialOpeningRequest
+            $isInitialRequest
         );
 
         //On initial admin request
-        if ( $initialOpeningRequest === true ) {
+        if ( $isInitialRequest === true ) {
             $data['model'] = $model->beforeInitialAdminRequest();
         }
 
@@ -146,11 +128,11 @@ class LayoutController extends BaseController
         //Add rows data
         $data = array_merge(
             $data,
-            (new AdminRows($model))->returnModelData($parentTable, $subid, $langid, $limit, $page, $count)
+            (new AdminRows($model, request()))->returnModelData([], $isInitialRequest)
         );
 
         //Modify intiial request data
-        if ( $initialOpeningRequest === true) {
+        if ( $isInitialRequest === true) {
             $data['model'] = $model->afterInitialAdminRequest($data['model']);
 
             //We can pass additional data into model
@@ -159,7 +141,7 @@ class LayoutController extends BaseController
 
 
         //Download sheet table
-        if ( $sheetDownload ){
+        if ( request('download') === true ){
             $sheet = new SheetDownloader($model, $data['rows']);
 
             if (!($path = $sheet->generate())){

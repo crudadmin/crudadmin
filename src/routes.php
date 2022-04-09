@@ -31,14 +31,13 @@ Route::get('/vendor/js/ca-translates-json.js', 'GettextController@getJson');
 Route::group(['middleware' => ['admin.autologout', 'admin', 'hasDevMode', 'adminLocalized']], function () {
     //Api
     Route::get('/admin/api/layout', 'LayoutController@index');
-    Route::get('/admin/api/layout/paginate/{model}/{parent}/{subid}/{langid}/{limit}/{page}/{count}', 'LayoutController@getRows');
+    Route::post('/admin/api/rows/{table}', 'LayoutController@getRows');
 
     //Requests
     Route::get('/admin/api/show/{model}/{id}/{subid?}', 'Crud\DataController@show');
     Route::post('/admin/api/store', 'Crud\InsertController@store')->middleware('hasAdminRole:insert');
     Route::put('/admin/api/update', 'Crud\UpdateController@update')->middleware('hasAdminRole:update');
     Route::post('/admin/api/buttonAction', 'Crud\DataController@buttonAction');
-    Route::post('/admin/api/togglePublishedAt', 'Crud\DataController@togglePublishedAt')->middleware('hasAdminRole:publishable');
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
     Route::get('/admin/api/history/get/{model}/{id}', 'HistoryController@getHistory');
     Route::post('/admin/api/history/remove', 'HistoryController@removeFromHistory');
