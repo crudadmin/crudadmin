@@ -4,7 +4,6 @@ namespace Admin\Helpers;
 
 use Admin;
 use Admin\Eloquent\AdminModel;
-use Ajax;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -448,7 +447,7 @@ class AdminRows
                 'buttons' => $withoutRows ? [] : $this->generateButtonsProperties($paginatedRowsData),
             ];
         } catch (\Illuminate\Database\QueryException $e) {
-            return Ajax::mysqlError($e);
+            autoAjax()->mysqlError($e)->throw();
         }
 
         return $data;

@@ -4,7 +4,6 @@ namespace Admin\Controllers;
 
 use Admin;
 use Admin\Models\StaticContent;
-use Ajax;
 use FrontendEditor;
 
 class FrontendEditorController extends Controller
@@ -29,7 +28,7 @@ class FrontendEditorController extends Controller
             || ! admin()->hasAccess($model, 'update')
             || ! $model->isFieldType($fieldKey, 'file')
         ) {
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
 
@@ -94,7 +93,7 @@ class FrontendEditorController extends Controller
             || ! admin()->hasAccess($model, 'update')
             || ! $model->isFieldType($fieldKey, ['editor', 'longeditor'])
         ) {
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
         //Get content value
@@ -133,7 +132,7 @@ class FrontendEditorController extends Controller
     {
         //Check permission access and hashes of given properties:
         if ( FrontendEditor::hasAccess() == false ) {
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
         //We does not want save host url. If is same, we want trim this host...

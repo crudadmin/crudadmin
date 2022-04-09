@@ -3,7 +3,6 @@
 namespace Admin\Controllers\Crud;
 
 use Admin\Controllers\Crud\CRUDController;
-use Ajax;
 use Illuminate\Http\Request;
 
 class DataController extends CRUDController
@@ -42,8 +41,8 @@ class DataController extends CRUDController
         $model = $this->getModel(request('model'));
 
         //Checks for disabled sorting rows
-        if ($model->getProperty('sortable') == false) {
-            Ajax::error(trans('admin::admin.cannot-sort'));
+        if ($model->getProperty('sortable') == false ) {
+            return autoAjax()->error(trans('admin::admin.cannot-sort'));
         }
 
         //Update rows and theirs orders

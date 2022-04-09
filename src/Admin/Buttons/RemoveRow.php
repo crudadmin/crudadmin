@@ -108,7 +108,7 @@ class RemoveRow extends Button
         }
 
         return $this
-            ->message(_('Záznam bol úspešne zmazaný.'))
+            ->toast(_('Záznam bol úspešne zmazaný.'))
             ->component('OnRemoveButton', [
                 'removedIds' => $rows->pluck($model->getKeyName())
             ]);

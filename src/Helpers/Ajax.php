@@ -4,45 +4,26 @@ namespace Admin\Helpers;
 
 use Log;
 use Admin;
-use Admin\Exceptions\AjaxException;
 
+/**
+ * THIS IS ONLY LEGACY CLASS
+ * for crudadmin 3 and lower.
+ */
 class Ajax
 {
     public static function success($message = null, $title = null, $data = null, $code = 200)
     {
-        return self::message(
-            $message ? $message : trans('admin::admin.success-save'),
-            $title,
-            'success',
-            $data,
-            $code
-        );
+        autoAjax()->title($title)->message($message ?: trans('admin::admin.success-save'))->type('success')->data($data)->code($code)->throw();
     }
 
     public static function error($message = null, $title = null, $data = null, $code = 200)
     {
-        return self::message(
-            $message ? $message : trans('admin::admin.unknown-error'),
-            $title ? $title : trans('admin::admin.warning'),
-            'error',
-            $data,
-            $code
-        );
+        autoAjax()->title($title)->message($message)->type('error')->data($data)->code($code)->throw();
     }
 
     public static function message($message = null, $title = null, $type = 'info', $data = null, $code = 200)
     {
-        $array = [
-            'type' => $type,
-            'title' => $title ? $title : trans('admin::admin.info'),
-            'message' => $message,
-        ];
-
-        if (isset($data)) {
-            $array['data'] = $data;
-        }
-
-        throw new AjaxException(response()->json($array, $code), $code);
+        autoAjax()->title($title)->type($type)->message($message)->data($data)->code($code)->throw();
     }
 
     /**
@@ -53,7 +34,7 @@ class Ajax
      */
     public static function pushMessage($message, $type = 'notice')
     {
-        Admin::push('request.'.$type, $message);
+        autoAjax()->pushMessage($message, $type);
     }
 
     /*
@@ -77,7 +58,7 @@ class Ajax
      */
     public static function permissionsError()
     {
-        return self::error(trans('admin::admin.no-permissions'), null, null, 401);
+        return autoAjax()->permissionsError()->throw();
     }
 
     /*
@@ -85,13 +66,6 @@ class Ajax
      */
     public static function mysqlError(\Exception $e)
     {
-        //Log error
-        Log::error($e);
-
-        if (env('APP_DEBUG') == true) {
-            self::error(trans('admin::admin.migrate-error').'<br><strong>php artisan admin:migrate</strong><br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
-        }
-
-        return self::error(trans('admin::admin.db-error').'<br><br><small>'.e($e->getMessage()).'</small>', null, null, 500);
+        return autoAjax()->mysqlError($e)->throw();
     }
 }

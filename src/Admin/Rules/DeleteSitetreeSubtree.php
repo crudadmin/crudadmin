@@ -5,7 +5,6 @@ namespace Admin\Admin\Rules;
 use Admin;
 use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\AdminRule;
-use Ajax;
 
 class DeleteSitetreeSubtree extends AdminRule
 {

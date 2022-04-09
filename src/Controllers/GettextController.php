@@ -10,7 +10,6 @@ use Gettext;
 use Symfony\Component\HttpFoundation\Response;
 use EditorMode;
 use Localization;
-use Ajax;
 
 class GettextController extends Controller
 {
@@ -80,7 +79,7 @@ class GettextController extends Controller
 
         //If user does not have permissions
         if ( !admin() || !admin()->hasAccess($model, $permission ?: 'read') ) {
-            Ajax::permissionsError();
+            autoAjax()->permissionsError()->throw();
         }
 
         if ( is_numeric($idOrSlug) ) {

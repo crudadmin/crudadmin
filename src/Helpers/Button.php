@@ -118,7 +118,7 @@ class Button
     /*
      * Set response message
      */
-    public function message($message, $title = null, $type = 'success')
+    public function message($message, $title = null, $type = 'success', $toast = false)
     {
         if ($title) {
             $this->message['title'] = $title;
@@ -126,8 +126,17 @@ class Button
 
         $this->message['message'] = $message;
         $this->message['type'] = $type;
+        $this->message['toast'] = $toast;
 
         return $this;
+    }
+
+    /*
+     * Display toast message
+     */
+    public function toast($message, $type = null)
+    {
+        return $this->message($message, null, $type, true);
     }
 
     public function download($basepath)

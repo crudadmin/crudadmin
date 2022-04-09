@@ -5,7 +5,6 @@ namespace Admin\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Admin;
-use Ajax;
 
 class HasAdminRole
 {
@@ -29,7 +28,7 @@ class HasAdminRole
         $model = Admin::getModelByTable($modelTable);
 
         if ( !$model || !admin() || !admin()->hasAccess($model, $roleKey) ) {
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
         return $next($request);

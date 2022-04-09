@@ -4,7 +4,6 @@ namespace Admin\Controllers;
 
 use Admin\Controllers\Crud\CRUDController;
 use Admin\Helpers\AdminRows;
-use Ajax;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -22,13 +21,13 @@ class ButtonController extends CRUDController
         $model->getFields(null, true);
 
         //If no buttom has been found for this model
-        if ( !$button = $this->getModelButton($model, $request['button_key']) ){
-            return Ajax::error();
+        if ( !($button = $this->getModelButton($model, $request['button_key'])) ){
+            return autoAjax()->error();
         }
 
         //If no rows does exists
         if ( ($rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get())->count() === 0 ){
-            return Ajax::error(_('Záznam neexistuje, pravdepodobne už bol vymazaný.'));
+            return autoAjax()->error(_('Záznam neexistuje, pravdepodobne už bol vymazaný.'));
         }
 
         $button = new $button(
@@ -66,7 +65,7 @@ class ButtonController extends CRUDController
 
             //Throw unknown error
             else {
-                Ajax::error(sprintf(_('Metóda %s pre spustenie akcie nie je dostupná.'), $action));
+                autoAjax()->error(sprintf(_('Metóda %s pre spustenie akcie nie je dostupná.'), $action))->throw();
             }
 
             //If no following action has been returned in custom method.

@@ -7,6 +7,7 @@ use Admin\Controllers\Crud\Concerns\CRUDResponse;
 use Admin\Controllers\Crud\InsertController;
 use Admin\Helpers\Ajax;
 use Admin\Requests\DataRequest;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class UpdateController extends InsertController
@@ -23,7 +24,7 @@ class UpdateController extends InsertController
 
         //Checks for disabled publishing
         if ($parentModel->getProperty('editable') == false) {
-            Ajax::error(trans('admin::admin.cannot-edit'));
+            return autoAjax()->error(trans('admin::admin.cannot-edit'));
         }
 
         //Validate parent model, and his childs relations if are available
@@ -51,8 +52,8 @@ class UpdateController extends InsertController
 
                 try {
                     $row->update($changes);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    return Ajax::mysqlError($e);
+                } catch (QueryException $e) {
+                    return autoAjax()->mysqlError($e);
                 }
 
                 /*
@@ -86,7 +87,7 @@ class UpdateController extends InsertController
             return $row->getMutatedAdminAttributes();
         }, $rows));
 
-        Ajax::message($message, null, $this->responseType(), [
+        return autoAjax()->success($message)->type($this->responseType())->data([
             'rows' => $mutatedAdminRows,
         ]);
     }

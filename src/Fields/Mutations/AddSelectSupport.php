@@ -6,7 +6,6 @@ use Admin;
 use Admin\Contracts\Migrations\Types\ImaginaryType;
 use Admin\Core\Contracts\DataStore;
 use Admin\Core\Fields\Mutations\MutationRule;
-use Ajax;
 use DB;
 use Fields;
 use Illuminate\Support\Arr;
@@ -186,7 +185,10 @@ class AddSelectSupport extends MutationRule
         }
 
         if (count($loadColumns) == 2 && strpos($column, ':') === false && ! array_key_exists($column, $option)) {
-            Ajax::error('Nie je možné načítať tabuľku, keďže stĺpec <strong>'.$properties[1].'</strong> v tabuľke <strong>'.$properties[0].'</strong> neexistuje.', null, null, 500);
+            autoAjax()->error(
+                sprintf(_('Nie je možné načítať tabuľku, keďže stĺpec <strong>%s</strong> v tabuľke <strong>%s</strong> neexistuje.'), $properties[1], $properties[0]),
+                500
+            )->throw();
         }
     }
 

@@ -6,7 +6,6 @@ use Admin\Eloquent\AdminModel;
 use Admin\Helpers\Button;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
-use Ajax;
 
 class TogglePublishRow extends Button
 {
@@ -79,7 +78,7 @@ class TogglePublishRow extends Button
 
         foreach ($rows as $row) {
             if ( $this->canTogglePublish($row) === false ){
-                return Ajax::error(trans('admin::admin.cannot-publish'));
+                return $this->error(trans('admin::admin.cannot-publish'));
             }
 
             $row->checkForModelRules([$row->published_at ? 'unpublishing' : 'publishing']);

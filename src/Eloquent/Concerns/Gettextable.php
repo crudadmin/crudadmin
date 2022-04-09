@@ -2,7 +2,6 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Ajax;
 use Admin;
 use Gettext;
 
@@ -66,13 +65,13 @@ trait Gettextable
         $slug = str_slug($value);
 
         if (request()->expectsJson() && strlen(str_replace('-', '', $slug)) != 2) {
-            Ajax::error(_('Zadali skratku jazyka v nesprávnom formáte.'));
+            autoAjax()->error(_('Zadali skratku jazyka v nesprávnom formáte.'))->throw();
         }
 
         if (! $this->exists) {
             $this->attributes['slug'] = $slug;
         } elseif ($this->original['slug'] != $value && request()->expectsJson()) {
-            Admin::warning(_('Skratku jazyka nie je možné po jej vytvorení premenovať.'));
+            autoAjax()->pushMessage(_('Skratku jazyka nie je možné po jej vytvorení premenovať.'));
         }
     }
 

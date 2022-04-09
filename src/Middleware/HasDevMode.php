@@ -4,7 +4,6 @@ namespace Admin\Middleware;
 
 use Admin;
 use Admin\Commands\AdminDevelopmentCommand;
-use Ajax;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,7 +23,7 @@ class HasDevMode
             (new AdminDevelopmentCommand)->hasDevMode() === true
             && (!admin() || !admin()->hasAdminAccess()) //if user does not have full permissions
         ) {
-            Ajax::message('Práve prebieha údržba systému, skúste prosím znova v najbližších minutách.', null, 'warning', null, 500);
+            return autoAjax()->error(_('Práve prebieha údržba systému, skúste prosím znova v najbližších minutách.'), 500);
         }
 
         return $next($request);

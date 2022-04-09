@@ -9,7 +9,6 @@ use Admin\Helpers\AdminRows;
 use Admin\Requests\DataRequest;
 use Illuminate\Http\Request;
 use Admin;
-use Ajax;
 
 class InsertController extends CRUDController
 {
@@ -24,8 +23,8 @@ class InsertController extends CRUDController
         $model = $this->getModel(request()->get('_model'));
 
         //Checks for disabled publishing
-        if ($model->getProperty('insertable') == false) {
-            Ajax::error(trans('admin::admin.cannot-create'));
+        if ($model->getProperty('insertable') == false ) {
+            return autoAjax()->error(trans('admin::admin.cannot-create'));
         }
 
         $this->checkValidation($request);
@@ -42,7 +41,7 @@ class InsertController extends CRUDController
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-created'));
 
-        Ajax::message($message, null, $this->responseType(), $data);
+        return autoAjax()->success($message)->type($this->responseType())->data($data);
     }
 
     //Set rows into admin response format
@@ -89,7 +88,7 @@ class InsertController extends CRUDController
                         $parentId = $row->getKey();
 
                 } catch (\Illuminate\Database\QueryException $e) {
-                    return Ajax::mysqlError($e);
+                    return autoAjax()->mysqlError($e);
                 }
 
                 $this->updateBelongsToMany($model, $row, $request);
@@ -140,7 +139,7 @@ class InsertController extends CRUDController
 
             foreach ((array)json_decode($request->_save_children) as $item) {
                 if ( !($relationModel = Admin::getModelByTable($item->table)) ) {
-                    Ajax::error(sprintf(_('Relácie pre model %s neexistuje.'), $item->table));
+                    autoAjax()->error(sprintf(_('Relácie pre model %s neexistuje.'), $item->table))->throw();
                 }
 
                 $isGlobalRelation = $relationModel->getProperty('globalRelation');
@@ -157,7 +156,7 @@ class InsertController extends CRUDController
                 if ( !($relationKey = $model->getForeignColumn($row->getTable())) ) {
                     //If given relation table model has not turned global relation support
                     if ( !$isGlobalRelation ) {
-                        Ajax::error();
+                        autoAjax()->error()->throw();
                     }
 
                     $relationKey = '_row_id';

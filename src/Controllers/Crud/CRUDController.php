@@ -8,7 +8,6 @@ use Admin\Requests\DataRequest;
 use Admin\Core\Fields\Validation\FileMutator;
 use Admin\Core\Fields\Validation\ValidationMutator;
 use Admin\Core\Fields\FieldsValidator;
-use Ajax;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Localization;
@@ -25,7 +24,7 @@ class CRUDController extends Controller
 
         //Check if user has allowed model
         if (! admin()->hasAccess($model)) {
-            Ajax::permissionsError();
+            autoAjax()->permissionsError()->throw();
         }
 
         return $model;

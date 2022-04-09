@@ -2,7 +2,6 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Ajax;
 use Admin;
 use Admin\Helpers\Button;
 use Admin\Helpers\Layout;

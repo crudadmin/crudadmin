@@ -2,6 +2,7 @@
 
 namespace Admin\Providers;
 
+use Admin\Helpers\AutoAjax;
 use Admin\Requests\Validators\UniqueJsonValidator;
 use Illuminate\Support\ServiceProvider;
 use Validator;
@@ -20,6 +21,7 @@ class AdminServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $this->setAutoAjax();
         $this->loadGlobalModules();
         $this->loadValidators();
     }
@@ -81,5 +83,10 @@ class AdminServiceProvider extends ServiceProvider
     private function loadValidators()
     {
         Validator::extend('unique_json', UniqueJsonValidator::class.'@validate', trans('validation.unique'));
+    }
+
+    private function setAutoAjax()
+    {
+        config()->set('autoajax.provider', AutoAjax::class);
     }
 }

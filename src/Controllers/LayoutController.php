@@ -11,7 +11,6 @@ use Admin\Helpers\Layout;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 use Admin\Helpers\SecureDownloader;
 use Admin\Helpers\SheetDownloader;
-use Ajax;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Localization;
@@ -85,7 +84,7 @@ class LayoutController extends BaseController
 
         //Check if user has allowed model
         if (! $model || ! admin()->hasAccess($model)) {
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
         if ( method_exists($model, 'beforeAdminRequest') ){
@@ -139,13 +138,12 @@ class LayoutController extends BaseController
             $data['model']['initial_data'] = $model->getAdminModelInitialData();
         }
 
-
         //Download sheet table
         if ( request('download') === true ){
             $sheet = new SheetDownloader($model, $data['rows']);
 
             if (!($path = $sheet->generate())){
-                Ajax::error(_('Tabuľku sa nepodarilo stiahnuť.'), null, null, 500);
+                return autoAjax()->error(_('Tabuľku sa nepodarilo stiahnuť.'), 500);
             }
 
             return [

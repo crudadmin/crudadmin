@@ -3,7 +3,6 @@
 namespace Admin\Controllers;
 
 use Admin\Models\ModelsHistory;
-use Ajax;
 use Illuminate\Http\Request;
 use Admin;
 
@@ -21,7 +20,7 @@ class HistoryController extends Controller
             admin()->hasAccess(ModelsHistory::class, 'read') == false
             || admin()->hasAccess($model, 'read') == false
         ){
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
         $rows = ModelsHistory::where('table', $model->getTable())
@@ -50,7 +49,7 @@ class HistoryController extends Controller
             || admin()->hasAccess($model, 'read') == false
             || !$row
         ){
-            Ajax::permissionsError();
+            return autoAjax()->permissionsError();
         }
 
         $row->delete();
