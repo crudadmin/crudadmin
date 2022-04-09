@@ -137,7 +137,7 @@ class Button
     /*
      * Display toast message
      */
-    public function toast($message, $type = null)
+    public function toast($message, $type = 'success')
     {
         return $this->message($message, null, $type, true);
     }
