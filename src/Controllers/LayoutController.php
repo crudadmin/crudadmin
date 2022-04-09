@@ -42,7 +42,7 @@ class LayoutController extends BaseController
                 'getHistory' => action('\Admin\Controllers\HistoryController@getHistory', [':model', ':id']),
                 'removeFromHistory' => action('\Admin\Controllers\HistoryController@removeFromHistory'),
                 'updateOrder' => action('\Admin\Controllers\Crud\DataController@updateOrder'),
-                'buttonAction' => action('\Admin\Controllers\Crud\DataController@buttonAction'),
+                'buttonAction' => action('\Admin\Controllers\ButtonController@action'),
                 'download' => action('\Admin\Controllers\DownloadController@adminDownload'),
                 'rows' => action('\Admin\Controllers\LayoutController@getRows', [':table']),
                 'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id', ':table']),

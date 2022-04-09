@@ -385,7 +385,7 @@ class AdminRows
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
                         'tooltipEncode' => $button->tooltipEncode,
-                        'hasQuestion' => method_exists($button, 'question'),
+                        'action' => $button->getAction(),
                     ];
                 }
             }

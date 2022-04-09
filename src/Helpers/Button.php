@@ -2,15 +2,16 @@
 
 namespace Admin\Helpers;
 
+use Admin\Contracts\Buttons\HasButtonsSupport;
 use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\Concerns\VueComponent;
-use Admin\Helpers\AdminRows;
 use Admin\Helpers\SecureDownloader;
 use Illuminate\Support\Collection;
 
 class Button
 {
-    use VueComponent;
+    use VueComponent,
+        HasButtonsSupport;
 
     /*
      * Button row
@@ -59,14 +60,26 @@ class Button
     public $reloadAll = false;
 
     /*
-     * Allow accept in ask/question alert
+     * Should button response be acceptable with yes/no buttons?
      */
-    public $accept = true;
+    public $accept = false;
 
     /*
      * Should be tooltip encoded?
      */
     public $tooltipEncode = true;
+
+    /*
+     * Should button response return rows? Modifiable wia ->withRows(true)
+     * fire() and fireMultiple() returns rows by default
+     */
+    public $withRows = false;
+
+    /*
+     * Which action has been fired after response
+     * mutate with action() method
+     */
+    public $action;
 
     /*
      * Title
@@ -203,11 +216,31 @@ class Button
     }
 
     /*
+     * We can modify which action will be fired after response
+     */
+    public function action($action)
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    /*
      * Allow/denny accept button in question alert
      */
     public function accept($accept)
     {
         $this->accept = $accept;
+
+        return $this;
+    }
+
+    /*
+     * We want update rows in this response
+     */
+    public function withRows($state)
+    {
+        $this->withRows = $state;
 
         return $this;
     }
@@ -220,58 +253,4 @@ class Button
     //     return $this->title('Your title...')
     //                 ->component('YoutComponent.vue');
     // }
-
-    /*
-     * Where are stored VueJS components
-     */
-    protected function getComponentPaths()
-    {
-        return resource_path('views/admin/components/buttons');
-    }
-
-    /*
-     * Determine which rows may be returned into request
-     */
-    protected function loadOnlyRows($rows, $request)
-    {
-        if (
-            //If reloadall is turned on, but we are listing in non-existing parent, we need return only accessed button
-            ($request['parentTable'] && !$request['parentId'])
-
-            //If reload is turned off, we need return only accessed buttons
-            || $this->reloadAll === false
-        ){
-            return $rows->pluck($rows[0]->getKeyName())->toArray();
-        }
-
-        //Return all rows
-        return [];
-    }
-
-    /**
-     * Returns rows which we want reload/display
-     *
-     * @param  AdminModel  $model
-     * @param  Collection  $rows
-     *
-     * @return  array
-     */
-    public function getRows(AdminModel $model, $rows, $request)
-    {
-        //Load all rows, or only selected rows
-        $onlyIds = $this->loadOnlyRows($rows, $request);
-
-        $adminRows = (new AdminRows($model, $request));
-
-        $rows = $adminRows->returnModelData($onlyIds, true);
-
-        //If no more rows are on this page. We need return lower page.
-        //This may happen when buttons removes pressed row, but no more-rows are on given page.
-        if ( count($rows['rows']) == 0 && $request['page'] >= 2 ){
-            $rows = $adminRows->setPage($request['page'] - 1)->returnModelData($onlyIds, true);
-        }
-
-        //If is ask mode requesion, then does not return updated rows data
-        return $rows;
-    }
 }
