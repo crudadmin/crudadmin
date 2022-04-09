@@ -94,6 +94,6 @@ trait HasDeleteSupport {
             }
         }
 
-        dd($usedModels);
+        return $usedModels;
     }
 }

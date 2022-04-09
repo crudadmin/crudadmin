@@ -40,8 +40,30 @@ class RemoveRow extends Button
         $this->active = $this->canDeleteRow($row, request(), false, false);
     }
 
-    public function question()
+    public function question($rows)
     {
+        $rows = $rows instanceof Collection ? $rows : collect([$rows]);
+        $relationMatches = [];
+        foreach ($rows as $row) {
+            $rowMatches = $this->getAllRowRelations($row);
+
+            foreach ($rowMatches as $table => $modelFieldMatches) {
+                foreach ($modelFieldMatches as $match) {
+                    $relationMatches[] = '<p class="mb-1">
+                        <strong>'.$match['name'].'</strong><br>
+                        <small>'.$match['field']['name'].'</small></p>
+                        <textarea class="form-control" readonly>'.$match['rows']->join(', ').'</textarea>';
+                }
+            }
+        }
+
+        if ( count($relationMatches) > 0 ){
+            return $this->warning(
+                _('Tento záznam sme našli priradený v rozšíraniach pri nasledujúcich záznamoch. Pred zmazanim by ste mali odpriradiť dané prepojenia. Prajete si aj napriek tomu pokračovať?').'<br><br>'.
+                implode('<br>', $relationMatches)
+            )->accept(true);
+        }
+
         return $this->warning(_('Naozaj chcete vymazať daný záznam?'));
     }
 
