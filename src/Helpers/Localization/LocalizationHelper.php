@@ -387,8 +387,12 @@ class LocalizationHelper
 
     public function getJson($locale = null)
     {
+        if ( !($locale = $locale ?: $this->get()?->slug) ){
+            return '{}';
+        }
+
         return JSTranslations::getJSTranslations(
-            $locale ?: $this->get()->slug,
+            $locale,
             $this->getModel()
         );
     }
