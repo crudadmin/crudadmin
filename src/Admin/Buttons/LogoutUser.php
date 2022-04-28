@@ -14,7 +14,7 @@ class LogoutUser extends Button
     public function __construct(AdminModel $row)
     {
         //Name of button on hover
-        $this->name = 'Odhlásiť používateľa';
+        $this->name = _('Odhlásiť používateľa');
 
         //Button classes
         $this->class = 'btn-default';

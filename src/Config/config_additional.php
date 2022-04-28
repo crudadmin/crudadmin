@@ -44,6 +44,7 @@ return [
         'resources/js',
         public_path('vendor/crudadmin/js/FrontendEditor.js'),
         __DIR__.'/../Helpers',
+        __DIR__.'/../Admin',
     ],
 
     /*
