@@ -30,9 +30,11 @@ return [
     /*
      * Administration groups names
      */
-    'groups' => [
-        'settings' => ['Nastavenia', 'fa-gear'],
-    ],
+    'groups' => function(){
+        return [
+            'settings' => [_('Nastavenia'), 'fa-gear'],
+        ]
+    },
 
     /*
      * Add multi language mutations support

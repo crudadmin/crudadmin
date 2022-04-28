@@ -69,7 +69,7 @@ trait OrchestraSetup
         $app['config']->set('admin.app_namespace', 'Admin\Tests\App');
 
         //Add submenu tree settings
-        $app['config']->set('admin.groups', config('admin.groups', []) + [
+        $app['config']->set('admin.groups', array_wrap(config('admin.groups', [])) + [
             'fields' => 'Fields',
             'localization' => 'Localization',
             'level1' => 'My tree level 1',
