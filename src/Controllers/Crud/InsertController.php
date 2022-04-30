@@ -92,7 +92,7 @@ class InsertController extends CRUDController
                         $parentId = $row->getKey();
 
                 } catch (\Illuminate\Database\QueryException $e) {
-                    return autoAjax()->mysqlError($e);
+                    return autoAjax()->mysqlError($e)->throw();
                 }
 
                 $this->updateBelongsToMany($model, $row, $request);
