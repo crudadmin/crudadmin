@@ -18,6 +18,11 @@ return [
     'name' => 'My Admin',
 
     /*
+     * Admin disk storage
+     */
+    'disk' => env('FILESYSTEM_DRIVER_CRUDADMIN', 'crudadmin.uploads'),
+
+    /*
      * Admin locale (en|sk|cs)
      */
     'locale' => 'sk',
