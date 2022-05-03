@@ -80,7 +80,7 @@ class LayoutController extends BaseController
     public function getRows($table)
     {
         $model = Admin::getModelByTable($table);
-        $isInitialRequest = (int)request('count') == 0;
+        $isInitialRequest = request('initial') ? true : false;
 
         //Check if user has allowed model
         if (! $model || ! admin()->hasAccess($model)) {
