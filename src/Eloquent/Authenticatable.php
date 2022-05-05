@@ -83,7 +83,8 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
 
             if ($admin_groups = $this->roles) {
                 foreach ($admin_groups as $group) {
-                    $permissions = (array) json_decode($group->permissions ?: '{}', true);
+                    //JSON decode is backward support for old crudadmin versions (4.1/3)
+                    $permissions = is_string($group->permissions) ? (array) json_decode($group->permissions ?: '{}', true) : $group->permissions;
 
                     //Remove all disabled permissions
                     foreach ($permissions as $modelKey => $model) {

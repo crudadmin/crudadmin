@@ -1,6 +1,6 @@
 <template>
     <div class="form-group userRolesFormGroup">
-        <input type="hidden" :name="field_key" :value="field.value" class="form-control">
+        <input type="hidden" :name="field_key" :value="jsonValue" class="form-control">
         <table class="table">
             <thead>
                 <th>{{ trans('roles-module') }}</th>
@@ -61,7 +61,7 @@ export default {
 
     computed: {
         permissions(){
-            let permissions = JSON.parse(this.field.value||'{}');
+            let permissions = _.isObject(this.field.value) ? this.field.value : JSON.parse(this.field.value||'{}');
 
             return _.isArray(permissions) ? {} : permissions;
         },
@@ -131,6 +131,9 @@ export default {
 
             return array;
         },
+        jsonValue(){
+            return _.isObject(this.field.value) ? JSON.stringify(this.field.value) : this.field.value;
+        }
     },
 
     methods: {
@@ -179,7 +182,7 @@ export default {
             return permission_key in row.permissions;
         },
         setPermissions(permissions){
-            this.field.value = JSON.stringify(permissions);
+            this.field.value = { ...this.field.value, ...permissions };
         },
         togglePermissionValue(row, permission_key){
             var permissions = this.permissions;

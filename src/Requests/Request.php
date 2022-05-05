@@ -284,6 +284,19 @@ abstract class Request extends FormRequest
         }
     }
 
+    public function jsonFields(array $fields = null)
+    {
+        foreach ($fields as $key => $field) {
+            if ($this->model->isFieldType($key, 'json') && is_string($value = $this->get($key)) ) {
+                $json = json_decode($value, true);
+
+                $this->merge([
+                    $key => $json
+                ]);
+            }
+        }
+    }
+
     //If is no value for checkbox, then automaticaly add zero value
     public function removeEmptyForeign(array $fields = null)
     {
@@ -430,6 +443,7 @@ abstract class Request extends FormRequest
         $this->uploadFiles($fields);
         $this->checkboxes($fields);
         $this->datetimes($fields);
+        $this->jsonFields($fields);
         $this->removeEmptyForeign($fields);
         $this->emptyStringsToNull($fields);
         $this->emptyLocalesToNull($fields);
