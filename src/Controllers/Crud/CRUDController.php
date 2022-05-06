@@ -45,8 +45,9 @@ class CRUDController extends Controller
         foreach ($model->getModelChilds() as $child) {
             $child = $rows[$child->getTable()] ?? $child;
 
-            if ( $child->getProperty('inParent') === false )
+            if ( $this->hasInParentRequest($child, $request) === false ){
                 continue;
+            }
 
             $childRequest = $this->getChildRequest($child, $request);
 
@@ -179,7 +180,7 @@ class CRUDController extends Controller
         $errors = [];
 
         foreach ($model->getModelChilds() as $child) {
-            if ( $child->getProperty('inParent') === false ) {
+            if ( $this->hasInParentRequest($child, $request) === false ) {
                 continue;
             }
 
@@ -274,10 +275,25 @@ class CRUDController extends Controller
     {
         $model->getAdminRules(function ($rule) use (&$rules, $update, $model, $childRequest, $request) {
             if (method_exists($rule, 'validate')) {
-                $rules = $rule->validate($rules, $update, $model, $childRequest, $request);
+                $rules = $rule->validate($rules, $update, $model, $childRequest ?: $request, $request);
             }
         });
 
         return $rules;
+    }
+
+    private function hasInParentRequest($model, $request)
+    {
+        if (
+            //Check if model has enabled inParent feature
+            $model->getProperty('inParent') === true &&
+
+            //Check if frontend has inParent enabled as well, because we may turn off this feature
+            $request->has($model->getModelFormPrefix('_in_parent'))
+        ){
+            return true;
+        }
+
+        return false;
     }
 }

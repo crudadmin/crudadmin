@@ -4,7 +4,6 @@ namespace Admin\Contracts\Buttons;
 
 use Admin\Eloquent\AdminModel;
 use Admin\Helpers\AdminRows;
-use Admin\Helpers\Ajax;
 
 trait HasButtonsSupport
 {

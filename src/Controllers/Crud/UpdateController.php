@@ -5,7 +5,6 @@ namespace Admin\Controllers\Crud;
 use Admin\Controllers\Crud\Concerns\CRUDRelations;
 use Admin\Controllers\Crud\Concerns\CRUDResponse;
 use Admin\Controllers\Crud\InsertController;
-use Admin\Helpers\Ajax;
 use Admin\Requests\DataRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
