@@ -68,7 +68,7 @@ trait HasAttributes
      * @see Illuminate\Database\Eloquent\Model
      * @return array
      */
-    public function getAdminAttributes()
+    private function getAdminAttributes()
     {
         //Turn of mutating of attributes for admin results
         $this->withoutMutators = true;
@@ -129,7 +129,7 @@ trait HasAttributes
 
         //Return just base fields
         if ($this->maximum == 0 && $this->justBaseFields() === true) {
-            return array_intersect_key($attributes, array_flip($this->getBaseFields()));
+            $attributes = array_intersect_key($attributes, array_flip($this->getBaseFields()));
         }
 
         return $attributes;
@@ -147,14 +147,36 @@ trait HasAttributes
             $attributes = $this->setAdminAttributes($attributes);
         }
 
+        $this->runAdminModules(function($module) use (&$attributes) {
+            if ( method_exists($module, 'setAdminAttributes') ) {
+                $attributes = $module->setAdminAttributes($attributes);
+            }
+        });
+
         //Mutate attributes
-        if ($isColumns === true && method_exists($this, 'setAdminRowsAttributes')) {
-            $attributes = $this->setAdminRowsAttributes($attributes);
+        if ($isColumns === true) {
+            if ( method_exists($this, 'setAdminRowsAttributes') ) {
+                $attributes = $this->setAdminRowsAttributes($attributes);
+            }
+
+            $this->runAdminModules(function($module) use (&$attributes) {
+                if ( method_exists($module, 'setAdminRowsAttributes') ) {
+                    $attributes = $module->setAdminRowsAttributes($attributes);
+                }
+            });
         }
 
         //Mutate attributes
-        if ($isRow === true && method_exists($this, 'setAdminRowAttributes')) {
-            $attributes = $this->setAdminRowAttributes($attributes);
+        if ($isRow === true) {
+            if ( method_exists($this, 'setAdminRowAttributes') ) {
+                $attributes = $this->setAdminRowAttributes($attributes);
+            }
+
+            $this->runAdminModules(function($module) use (&$attributes) {
+                if ( method_exists($module, 'setAdminRowAttributes') ) {
+                    $attributes = $module->setAdminRowAttributes($attributes);
+                }
+            });
         }
 
         return $attributes;

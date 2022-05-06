@@ -307,11 +307,17 @@ trait AdminModelTrait
         //Use custom scopes for admin rows
         if ( is_array($scopes = request('scopes')) && count($scopes) ) {
             foreach ($scopes as $scope => $attributes) {
-                if ( method_exists($this, 'scope'.$scope) ){
-                    $params = explode(';', $attributes);
+                $params = explode(';', $attributes);
 
+                if ( method_exists($this, 'scope'.$scope) ){
                     $query->{$scope}(...$params);
                 }
+
+                $this->runAdminModules(function($module) use ($query, $scope, $params) {
+                    if ( method_exists($module, 'scope'.$scope) ) {
+                        $module->{'scope'.$scope}($query, ...$params);
+                    }
+                });
             }
         }
     }

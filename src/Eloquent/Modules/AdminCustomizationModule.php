@@ -16,6 +16,36 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
         return Admin::isAdmin();
     }
 
+    public function adminModelRender(&$response = [])
+    {
+        $data = $this->getModelData();
+
+        $name = $this->getLastTableName($this);
+
+        if (array_key_exists($name, $data)) {
+            foreach ($data[$name] as $key => $value) {
+                //We want skip untranslated value
+                if ( $value === '$$SKIP:continue' ) {
+                    continue;
+                }
+
+                $actualValue = array_get($response, $key);
+
+                if ( !$actualValue || is_array($actualValue) ) {
+                    //Merge defined values with default values
+                    if ( is_array($actualValue) ){
+                        $value = is_array($value) ? array_merge($value, $actualValue) : $actualValue;
+                    }
+
+                    array_set($response, $key, $value);
+                }
+            }
+        }
+
+
+        return $response;
+    }
+
     private function getModelData()
     {
         return [
@@ -420,7 +450,7 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
         ];
     }
 
-    public function getLastTableName()
+    private function getLastTableName()
     {
         return str_singular(last(explode('_', $this->getModel()->getTable())));
     }
@@ -428,7 +458,7 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
     /*
      * Check if given text is translated in given language mutation
      */
-    public function hasTranslatedValue($value)
+    private function hasTranslatedValue($value)
     {
         //If is not string type, we can allow this value
         if ( ! is_string($value) ) {
@@ -480,7 +510,7 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
      * @param  string  $value
      * @return  string
      */
-    public function t($value)
+    private function t($value)
     {
         if ( $this->hasTranslatedValue($value) ) {
             return $value;
@@ -488,35 +518,5 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
 
         //This key will be skipped
         return '$$SKIP:continue';
-    }
-
-    public function adminModelRender(&$response = [])
-    {
-        $data = $this->getModelData();
-
-        $name = $this->getLastTableName($this);
-
-        if (array_key_exists($name, $data)) {
-            foreach ($data[$name] as $key => $value) {
-                //We want skip untranslated value
-                if ( $value === '$$SKIP:continue' ) {
-                    continue;
-                }
-
-                $actualValue = array_get($response, $key);
-
-                if ( !$actualValue || is_array($actualValue) ) {
-                    //Merge defined values with default values
-                    if ( is_array($actualValue) ){
-                        $value = is_array($value) ? array_merge($value, $actualValue) : $actualValue;
-                    }
-
-                    array_set($response, $key, $value);
-                }
-            }
-        }
-
-
-        return $response;
     }
 }
