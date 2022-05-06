@@ -172,6 +172,7 @@ return [
     'global_rules' => [
         'string' => 'max:255',
         'color' => 'max:7',
+        'phone' => 'max:20',
         'integer' => 'integer|max:4294967295',
         'decimal' => 'numeric',
         'file' => 'max:10240|file|nullable',
