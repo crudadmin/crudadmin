@@ -51,7 +51,7 @@ trait Historiable
 
         $data = [];
         foreach ($changes as $row) {
-            $array = (array) json_decode($row['data']);
+            $array = (array) json_decode($row['data'], true);
 
             foreach ($array as $key => $value) {
                 $data[$key] = $this->mutateHistoryValue($key, $value);
