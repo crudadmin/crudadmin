@@ -459,6 +459,10 @@ class AdminRows
             return true;
         }
 
+        if ( $this->limit === 0 ){
+            return true;
+        }
+
         //We want retrieve only specific rows, we can allow get this rows.
         if ( count($onlyIds) > 0 ){
             return false;
