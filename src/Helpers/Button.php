@@ -82,6 +82,11 @@ class Button
     public $action;
 
     /*
+     * Model response
+     */
+    public $model;
+
+    /*
      * Title
      */
     public $message = [
@@ -226,8 +231,26 @@ class Button
      */
     public function component($template, $component_data = [])
     {
-        $this->message['component'] = $this->renderVuejs($template);
-        $this->message['component_data'] = $component_data;
+        $this->message['component'] = [
+            'template' => $this->renderVuejs($template),
+            'data' => $component_data,
+        ];
+
+        return $this;
+    }
+
+    /*
+     * Render VueJs template
+     */
+    public function model($classname, $action = 'create')
+    {
+        $this->message['component'] = [
+            'template' => 'ModalAddNewRow',
+            'data' => [
+                'table' => (new $classname)->getTable(),
+                'action' => $action,
+            ],
+        ];
 
         return $this;
     }

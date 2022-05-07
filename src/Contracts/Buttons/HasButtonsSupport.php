@@ -84,7 +84,6 @@ trait HasButtonsSupport
 
         $data = [
             'component' => isset($message['component']) ? $message['component'] : null,
-            'component_data' => isset($message['component_data']) ? $message['component_data'] : null,
             'redirect' => $this->redirect,
             'action' => $this->getAction(),
             'shouldAccept' => $this->accept,
