@@ -471,29 +471,22 @@ abstract class Request extends FormRequest
     /*
      * Modify final value by admin rule modifier
      */
-    private function mutateRowDataRule($data)
+    private function mutateRowDataRule(array $rows)
     {
-        return array_map(function ($item) {
-            $this->model->getAdminRules(function ($rule) use (&$item) {
+        return array_map(function ($row) {
+            //Reset file values
+            foreach ($this->resetValuesInFields as $field) {
+                $row[$field] = null;
+            }
+
+            $this->model->getAdminRules(function ($rule) use (&$row) {
                 if (method_exists($rule, 'fill')) {
-                    $item = $rule->fill($item);
+                    $row = $rule->fill($row);
                 }
             });
 
-            return $item;
-        }, $data);
-    }
-
-    /*
-     * Bind files into array by locale type
-     */
-    private function bindFilesIntoArray(&$array, $key, $langSlug, $hasLocale, $files)
-    {
-        if ($hasLocale) {
-            $array[$langSlug] = $files;
-        } else {
-            $array = $files;
-        }
+            return $row;
+        }, $rows);
     }
 
     /*
@@ -501,57 +494,84 @@ abstract class Request extends FormRequest
      */
     public function allWithMutators()
     {
-        $data = $this->all();
+        $request = $this->all();
 
-        $array = [];
+        $requestRows = [
+            $request,
+        ];
 
-        //Bing multiple files values as multiple rows
-        foreach ((array) $this->uploadedFiles as $key => $files) {
-            $hasLocale = $this->model->hasFieldParam($key, 'locale', true);
+        $requestRows = $this->manageUploadedFiles($requestRows);
+        $requestRows = $this->addMultiRelationSupport($requestRows);
 
-            $languages = $hasLocale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
+        return $this->mutateRowDataRule(
+            array_values($requestRows)
+        );
+    }
 
-            foreach ($languages as $lang_key => $langSlug) {
-                //If file has not been uploaded in locale field
-                if ($hasLocale && ! array_key_exists($langSlug, $files)) {
-                    continue;
-                }
+    private function manageUploadedFiles($requestRows)
+    {
+        foreach ($requestRows as $requestRowKey => $request) {
+            //Bing multiple files values as multiple rows
+            foreach ((array) $this->uploadedFiles as $key => $files) {
+                $hasLocale = $this->model->hasFieldParam($key, 'locale', true);
+                $languages = $hasLocale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
 
-                //Check if is multiple or signle upload
-                $count = count($files[$langSlug]);
+                foreach ($languages as $langKey => $langSlug) {
+                    //If file has not been uploaded in locale field
+                    if ($hasLocale && ! array_key_exists($langSlug, $files)) {
+                        continue;
+                    }
 
-                if ($count == 1) {
-                    $this->bindFilesIntoArray($data[$key], $key, $langSlug, $hasLocale, $files[$langSlug][0]);
-                } elseif ($count > 1) {
-
-                    //Returns one file as one db row
+                    //We need clone request rows and add multiple rows to add. Because each image represents one row in db.
                     if ($this->model->hasFieldParam($key, 'multirows', true)) {
                         if ($this->model->exists === false) {
-                            foreach ($files[$langSlug] as $file) {
-                                $data[$key] = $file;
+                            unset($requestRows[$requestRowKey]);
 
-                                $array[] = $data;
+                            foreach ($files[$langSlug] as $file) {
+                                $request[$key] = $file;
+
+                                $requestRows[] = $request;
                             }
 
-                            return $this->mutateRowDataRule($array);
-                        } else {
-                            $data[$key] = end($files[$langSlug]);
+                            //We need end this when requests are completed
+                            break 2;
                         }
                     }
 
-                    //Bind files into file value
-                    elseif ($this->model->hasFieldParam($key, 'multiple', true)) {
-                        $this->bindFilesIntoArray($data[$key], $key, $langSlug, $hasLocale, $files[$langSlug]);
+                    $preparedFiles = $this->model->hasFieldParam($key, 'multiple', true)
+                            ? $files[$langSlug]
+                            : $files[$langSlug][0];
+
+                    if ($hasLocale) {
+                        $requestRows[$requestRowKey][$key][$langSlug] = $preparedFiles;
+                    } else {
+                        $requestRows[$requestRowKey][$key] = $preparedFiles;
                     }
                 }
             }
         }
 
-        //Reset file values
-        foreach ($this->resetValuesInFields as $field) {
-            $data[$field] = null;
+        return $requestRows;
+    }
+
+    private function addMultiRelationSupport($requestRows)
+    {
+        foreach ($requestRows as $requestRowKey => $request) {
+            foreach ($this->model->getForeignColumn() as $foreignTable => $relationKeyName) {
+                $relationIds = $request[$relationKeyName] ?? null;
+
+                if ( is_array($relationIds) ) {
+                    unset($requestRows[$requestRowKey]);
+
+                    foreach ($relationIds as $relationId) {
+                        $request[$relationKeyName] = $relationId;
+
+                        $requestRows[] = $request;
+                    }
+                }
+            }
         }
 
-        return $this->mutateRowDataRule([$data]);
+        return $requestRows;
     }
 }
