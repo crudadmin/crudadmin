@@ -18,7 +18,7 @@ class DataController extends CRUDController
 
         $model = $this->getModel($model);
 
-        return $model->adminRows()->findOrFail($id)->getMutatedAdminAttributes(false, true);
+        return $model->findOrFail($id)->getMutatedAdminAttributes(false, true);
     }
 
     /*

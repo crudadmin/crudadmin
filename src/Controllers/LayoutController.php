@@ -4,7 +4,7 @@ namespace Admin\Controllers;
 
 use Admin;
 use AdminLocalization;
-use Admin\Controllers\Controller as BaseController;
+use Admin\Controllers\Crud\CRUDController;
 use Admin\Fields\Group;
 use Admin\Helpers\AdminRows;
 use Admin\Helpers\Layout;
@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Localization;
 
-class LayoutController extends BaseController
+class LayoutController extends CRUDController
 {
     public function index()
     {
@@ -79,7 +79,7 @@ class LayoutController extends BaseController
      */
     public function getRows($table)
     {
-        $model = Admin::getModelByTable($table);
+        $model = $this->getModel($table);
         $isInitialRequest = request('initial') ? true : false;
 
         //Check if user has allowed model
@@ -93,9 +93,9 @@ class LayoutController extends BaseController
 
         //Set parent row into model
         if ( $parentTable = request('parentTable') ){
-            $parentRow = Admin::getModelByTable($parentTable)
-                                ->withoutGlobalScopes()
-                                ->find(request('parentId'));
+            $parentRow = $this->getModel($parentTable)
+                              ->withoutGlobalScopes()
+                              ->find(request('parentId'));
 
             if ( $parentRow ) {
                 $model->setParentRow($parentRow);

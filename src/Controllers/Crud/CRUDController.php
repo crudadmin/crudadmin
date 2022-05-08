@@ -18,9 +18,9 @@ class CRUDController extends Controller
     /*
      * Get model object by model name, and check user permissions for this model
      */
-    protected function getModel($model)
+    protected function getModel($table)
     {
-        $model = Admin::getModelByTable($model)->getAdminRows();
+        $model = Admin::getModelByTable($table)->getAdminRows();
 
         //Check if user has allowed model
         if (! admin()->hasAccess($model)) {
@@ -136,7 +136,7 @@ class CRUDController extends Controller
 
         $table = $request->get('_model');
 
-        $model = Admin::getModelByTable($table);
+        $model = $this->getModel($table);
 
         //Get parent validation rules
         $parentValidationErrors = $this->getParentValidationErrors($model, $rows, $request, $update, $table);

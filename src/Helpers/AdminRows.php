@@ -24,7 +24,7 @@ class AdminRows
      */
     public function __construct(AdminModel $model, $request = null)
     {
-        $this->model = $model;
+        $this->model = $model->getAdminRows();
 
         if ( $request ){
             $this->loadRequestParams($request);
@@ -333,7 +333,7 @@ class AdminRows
         $with = $this->getDependeciesIntoQuery();
 
         //Get base columns from database with relationships
-        $query = $this->model->adminRows()->with($with);
+        $query = $this->model->with($with);
 
         //Filter rows by language id and parent id
         $query->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable);
@@ -434,9 +434,9 @@ class AdminRows
                     $this->checkForSearching($query);
                 });
 
-                $totalResultsCount = $this->model->adminRows()
-                                    ->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable)
-                                    ->filterByParentGroup();
+                $totalResultsCount = $this->model
+                                        ->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable)
+                                        ->filterByParentGroup();
             }
 
             $data = [

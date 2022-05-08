@@ -427,7 +427,16 @@ trait AdminModelTrait
      */
     public function getAdminRows()
     {
-        $this->adminRows();
+        $this->addGlobalScope('adminRows', function(Builder $builder){
+            $builder->adminRows();
+
+            //Run modules
+            $this->runAdminModules(function($module) use ($builder) {
+                if ( method_exists($module, 'scopeAdminRows') ) {
+                    $module->scopeAdminRows($builder);
+                }
+            });
+        });
 
         return $this;
     }
