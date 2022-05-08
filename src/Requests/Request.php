@@ -97,14 +97,14 @@ abstract class Request extends FormRequest
      */
     public function uploadFiles(array $fields = null)
     {
-        foreach ($fields as $orig_key => $field) {
+        foreach ($fields as $origKey => $field) {
             if ($field['type'] == 'file') {
-                $has_locale = $this->model->hasFieldParam($orig_key, 'locale', true);
+                $hasLocale = $this->model->hasFieldParam($origKey, 'locale', true);
 
-                $languages = $has_locale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
+                $languages = $hasLocale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
 
-                foreach ($languages as $lang_id => $lang_slug) {
-                    $key = $has_locale ? $orig_key.'.'.$lang_slug : $orig_key;
+                foreach ($languages as $langId => $langSlug) {
+                    $key = $hasLocale ? $origKey.'.'.$langSlug : $origKey;
 
                     //If is File field empty, then replace this field with previous value for correct updating row in db
                     if ($this->isEmptyFile($key)) {
@@ -124,8 +124,8 @@ abstract class Request extends FormRequest
                     } elseif ($this->isFileUpload($key)) {
                         foreach ($this->getFilesInArray($key) as $file) {
                             //Checks for upload errors
-                            if ($fileObject = $this->model->upload($orig_key, $file)) {
-                                $this->uploadedFiles[$orig_key][$lang_slug][] = $fileObject->filename;
+                            if ($fileObject = $this->model->upload($origKey, $file)) {
+                                $this->uploadedFiles[$origKey][$langSlug][] = $fileObject->filename;
                             } else {
                                 Admin::warning(
                                     $this->errors[$key] = $this->model->getUploadError()
@@ -133,7 +133,7 @@ abstract class Request extends FormRequest
                             }
 
                             //If is not multiple upload
-                            if (! $this->model->hasFieldParam($orig_key, 'array', true)) {
+                            if (! $this->model->hasFieldParam($origKey, 'array', true)) {
                                 break;
                             }
                         }
@@ -142,38 +142,38 @@ abstract class Request extends FormRequest
                     /*
                      * Get already uploaded files
                      */
-                    if (Admin::isAdmin() && (($is_multiple = $this->model->hasFieldParam($orig_key, 'multiple', true)) || $has_locale)) {
-                        if ($this->has('$uploaded_'.$orig_key)) {
-                            $uploadedFiles = $this->get('$uploaded_'.$orig_key);
+                    if (Admin::isAdmin() && (($isMultiple = $this->model->hasFieldParam($origKey, 'multiple', true)) || $hasLocale)) {
+                        if ($this->has('$uploaded_'.$origKey)) {
+                            $uploadedFiles = $this->get('$uploaded_'.$origKey);
 
-                            $is_uploaded = array_key_exists($lang_slug, $uploadedFiles);
+                            $isUploaded = array_key_exists($langSlug, $uploadedFiles);
 
-                            $now_uploaded = (array_key_exists($orig_key, $this->uploadedFiles))
-                                            && ($has_locale ? array_key_exists($lang_slug, $this->uploadedFiles[$orig_key]) : true);
+                            $now_uploaded = (array_key_exists($origKey, $this->uploadedFiles))
+                                            && ($hasLocale ? array_key_exists($langSlug, $this->uploadedFiles[$origKey]) : true);
 
                             //Dont merge old uploaded files if is locale field with new uploaded file
                             //Or if is field locale with no previous uploaded files
                             //Or if is multiple locale upload, but with no previous uploads
                             if (
-                                $has_locale && ($now_uploaded || ! $is_uploaded)
-                                && (! $is_multiple || ! $is_uploaded)
+                                $hasLocale && ($now_uploaded || ! $isUploaded)
+                                && (! $isMultiple || ! $isUploaded)
                             ) {
                                 continue;
                             }
 
                             //Get files from actual language
-                            if ($has_locale) {
-                                $uploadedFiles = $uploadedFiles[$lang_slug];
+                            if ($hasLocale) {
+                                $uploadedFiles = $uploadedFiles[$langSlug];
                             }
 
-                            $fromBuffer = $now_uploaded ? $this->uploadedFiles[$orig_key][$lang_slug] : [];
+                            $fromBuffer = $now_uploaded ? $this->uploadedFiles[$origKey][$langSlug] : [];
 
-                            $this->uploadedFiles[$orig_key][$lang_slug] = array_merge($uploadedFiles, $fromBuffer);
+                            $this->uploadedFiles[$origKey][$langSlug] = array_merge($uploadedFiles, $fromBuffer);
                         }
 
                         //If is multiple file, and 0 files has been send into this field
-                        elseif (! array_key_exists($orig_key, $this->uploadedFiles)) {
-                            $this->resetValuesInFields[$lang_slug] = $orig_key;
+                        elseif (! array_key_exists($origKey, $this->uploadedFiles)) {
+                            $this->resetValuesInFields[$langSlug] = $origKey;
                         }
                     }
                 }
@@ -200,15 +200,15 @@ abstract class Request extends FormRequest
                 if ($this->model->hasFieldParam($key, 'multiple', true)) {
                     $this->merge([$key => array_filter($this->get($key) ?: [])]);
                 } elseif ($this->has($key) && ! empty($this->get($key))) {
-                    if ($has_locale = $this->model->hasFieldParam($key, 'locale')) {
+                    if ($hasLocale = $this->model->hasFieldParam($key, 'locale')) {
                         $date = $this->get($key);
                     } else {
-                        [$date, $date_format] = $this->getUniversalDateFormat($this->get($key), $field);
+                        [$date, $dateFormat] = $this->getUniversalDateFormat($this->get($key), $field);
 
-                        $date_format = strtolower($date_format);
+                        $dateFormat = strtolower($dateFormat);
                         foreach ($reset as $identifier => $arr) {
                             //Reset hours if are not in date format
-                            if (strpos($date_format, $identifier) === false) {
+                            if (strpos($dateFormat, $identifier) === false) {
                                 $date->{$arr[0]}($arr[1]);
                             }
                         }
@@ -487,10 +487,10 @@ abstract class Request extends FormRequest
     /*
      * Bind files into array by locale type
      */
-    private function bindFilesIntoArray(&$array, $key, $lang_slug, $has_locale, $files)
+    private function bindFilesIntoArray(&$array, $key, $langSlug, $hasLocale, $files)
     {
-        if ($has_locale) {
-            $array[$lang_slug] = $files;
+        if ($hasLocale) {
+            $array[$langSlug] = $files;
         } else {
             $array = $files;
         }
@@ -507,27 +507,27 @@ abstract class Request extends FormRequest
 
         //Bing multiple files values as multiple rows
         foreach ((array) $this->uploadedFiles as $key => $files) {
-            $has_locale = $this->model->hasFieldParam($key, 'locale', true);
+            $hasLocale = $this->model->hasFieldParam($key, 'locale', true);
 
-            $languages = $has_locale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
+            $languages = $hasLocale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
 
-            foreach ($languages as $lang_key => $lang_slug) {
+            foreach ($languages as $lang_key => $langSlug) {
                 //If file has not been uploaded in locale field
-                if ($has_locale && ! array_key_exists($lang_slug, $files)) {
+                if ($hasLocale && ! array_key_exists($langSlug, $files)) {
                     continue;
                 }
 
                 //Check if is multiple or signle upload
-                $count = count($files[$lang_slug]);
+                $count = count($files[$langSlug]);
 
                 if ($count == 1) {
-                    $this->bindFilesIntoArray($data[$key], $key, $lang_slug, $has_locale, $files[$lang_slug][0]);
+                    $this->bindFilesIntoArray($data[$key], $key, $langSlug, $hasLocale, $files[$langSlug][0]);
                 } elseif ($count > 1) {
 
                     //Returns one file as one db row
                     if ($this->model->hasFieldParam($key, 'multirows', true)) {
                         if ($this->model->exists === false) {
-                            foreach ($files[$lang_slug] as $file) {
+                            foreach ($files[$langSlug] as $file) {
                                 $data[$key] = $file;
 
                                 $array[] = $data;
@@ -535,13 +535,13 @@ abstract class Request extends FormRequest
 
                             return $this->mutateRowDataRule($array);
                         } else {
-                            $data[$key] = end($files[$lang_slug]);
+                            $data[$key] = end($files[$langSlug]);
                         }
                     }
 
                     //Bind files into file value
                     elseif ($this->model->hasFieldParam($key, 'multiple', true)) {
-                        $this->bindFilesIntoArray($data[$key], $key, $lang_slug, $has_locale, $files[$lang_slug]);
+                        $this->bindFilesIntoArray($data[$key], $key, $langSlug, $hasLocale, $files[$langSlug]);
                     }
                 }
             }

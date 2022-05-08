@@ -75,16 +75,16 @@ class InsertController extends CRUDController
             $rows = [];
             $models = [];
 
-            foreach ($request->allWithMutators() as $request_row) {
+            foreach ($request->allWithMutators() as $requestRow) {
                 try {
                     //Add into subchilds foreign key to parent row
                     //For $inParent support
                     if ( $model->getTable() != $parentModel->getTable() ){
-                        $request_row[$model->getForeignColumn($parentModel->getTable())] = $parentId;
+                        $requestRow[$model->getForeignColumn($parentModel->getTable())] = $parentId;
                     }
 
                     //Create row into db
-                    $row = (new $model)->create($request_row)->fresh();
+                    $row = (new $model)->create($requestRow)->fresh();
 
                     //Save parent id for $inParent support, because when we will be insering parent childs
                     //we need assign relation key between this rows
@@ -103,7 +103,7 @@ class InsertController extends CRUDController
                  * Save into history
                  */
                 if ($model->getProperty('history') === true) {
-                    $row->historySnapshot($request_row);
+                    $row->historySnapshot($requestRow);
                 }
 
                 //Fire on create event
