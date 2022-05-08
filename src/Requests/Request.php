@@ -557,7 +557,7 @@ abstract class Request extends FormRequest
     private function addMultiRelationSupport($requestRows)
     {
         foreach ($requestRows as $requestRowKey => $request) {
-            foreach ($this->model->getForeignColumn() as $foreignTable => $relationKeyName) {
+            foreach ($this->model->getForeignColumn() ?: [] as $foreignTable => $relationKeyName) {
                 $relationIds = $request[$relationKeyName] ?? null;
 
                 if ( is_array($relationIds) ) {
