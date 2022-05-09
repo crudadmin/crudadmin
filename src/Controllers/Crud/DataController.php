@@ -16,9 +16,11 @@ class DataController extends CRUDController
             return $this->showDataFromHistory($model, $id, $history_id);
         }
 
-        $model = $this->getModel($model);
+        $row = $this->getModel($model)->findOrFail($id);
 
-        return $model->findOrFail($id)->getMutatedAdminAttributes(false, true);
+        $row->logHistoryAction('view');
+
+        return $row->getMutatedAdminAttributes(false, true);
     }
 
     /*
@@ -29,6 +31,13 @@ class DataController extends CRUDController
         $model = $this->getModel($model);
 
         $changesTree = $model->getHistorySnapshot($history_id, $id, true);
+
+        $model->logHistoryAction('history-view', [
+            'row_id' => $id,
+            'data' => [
+                'history_id' => $history_id,
+            ],
+        ]);
 
         return [
             'row' => $model->forceFill($changesTree[count($changesTree) - 1])->setProperty('skipBelongsToMany', true)->getMutatedAdminAttributes(),

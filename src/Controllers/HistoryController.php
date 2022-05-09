@@ -2,18 +2,19 @@
 
 namespace Admin\Controllers;
 
+use Admin;
+use Admin\Controllers\Crud\CRUDController;
 use Admin\Models\ModelsHistory;
 use Illuminate\Http\Request;
-use Admin;
 
-class HistoryController extends Controller
+class HistoryController extends CRUDController
 {
     /*
      * Return history rows
      */
     public function getHistory($table, $id)
     {
-        $model = Admin::getModelByTable($table);
+        $model = $this->getModel($table);
 
         //If admin does not have permissions for given model
         if (
@@ -23,13 +24,18 @@ class HistoryController extends Controller
             return autoAjax()->permissionsError();
         }
 
+        $model->logHistoryAction('history-list', [
+            'row_id' => $id,
+        ]);
+
         $rows = ModelsHistory::where('table', $model->getTable())
                             ->where('row_id', $id)
                             ->with(['user' => function ($query) {
                                 $query->select(['id', 'username']);
                             }])
-                            ->get(['id', 'data', 'user_id', 'created_at'])->map(function ($item) {
-                                return $item->getMutatedAdminAttributes();
+                            ->select(['id', 'data', 'user_id', 'action', 'created_at'])
+                            ->get()->map(function ($item) {
+                                return $item->getMutatedAdminAttributes(true);
                             });
 
         return $rows;
@@ -37,7 +43,7 @@ class HistoryController extends Controller
 
     public function removeFromHistory()
     {
-        $model = Admin::getModelByTable(request('model'));
+        $model = $this->getModel(request('model'));
 
         $row = ModelsHistory::where('table', $model->getTable())
                             ->where('id', request('id'))

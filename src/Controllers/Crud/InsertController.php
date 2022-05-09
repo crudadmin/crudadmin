@@ -100,13 +100,7 @@ class InsertController extends CRUDController
 
                 $this->insertUnsavedChilds($row, $request);
                 $this->moveTemporaryUploads($row, $request);
-
-                /*
-                 * Save into history
-                 */
-                if ($model->getProperty('history') === true) {
-                    $row->historySnapshot($requestRow);
-                }
+                $row->makeHistorySnapshot($requestRow, null, 'insert');
 
                 //Fire on create event
                 if (method_exists($model, 'onCreate')) {

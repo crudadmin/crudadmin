@@ -55,12 +55,8 @@ class UpdateController extends InsertController
                     return autoAjax()->mysqlError($e);
                 }
 
-                /*
-                 * Save into history
-                 */
-                if ($model->getProperty('history') === true) {
-                    $row->historySnapshot($changes, $original);
-                }
+                //Save into history
+                $row->makeHistorySnapshot($changes, $original, 'update');
 
                 $this->updateBelongsToMany($model, $row, $request);
 
