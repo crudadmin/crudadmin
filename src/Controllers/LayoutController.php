@@ -24,7 +24,7 @@ class LayoutController extends CRUDController
             'version_resources' => Admin::getResourcesVersion(),
             'version_assets' => Admin::getAssetsVersion(),
             'license_key' => config('admin.license_key'),
-            'user' => admin()->getAdminUser(),
+            'user' => admin()->setAdminResponse(),
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
             'admin_languages' => $this->getAdminLanguages(),

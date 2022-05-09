@@ -249,17 +249,22 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         $this->attributes['permissions'] = $value;
     }
 
-    public function getAdminUser()
+    public function getAvatarThumbnailAttribute()
     {
-        if ($this->avatar) {
-            $this->avatar = $this->avatar->resize(100, 100)->url;
-        }
+        return $this->avatar ? $this->avatar->resize(100, 100)->url : null;
+    }
+
+    public function setAdminResponse()
+    {
+        $this->append([
+            'avatarThumbnail',
+        ]);
 
         if ($this->canApplyUserRoles()) {
             $this->load('roles');
         }
 
-        return $this->getAttributes() + $this->relationsToArray();
+        return $this;
     }
 
     /*
