@@ -104,6 +104,8 @@ class RemoveRow extends Button
                 return $this->error(sprintf(_('Záznam č. %s nie je možné vymazať.'), $row->getKey()));
             }
 
+            $row->logHistoryAction('delete');
+
             $row->deleted_at = Carbon::now();
 
             $row->checkForModelRules(['deleting']);

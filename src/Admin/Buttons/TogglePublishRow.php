@@ -111,6 +111,7 @@ class TogglePublishRow extends Button
             $row->disableAllAdminRules(false);
 
             $row->checkForModelRules([$row->published_at ? 'published' : 'unpublished'], true);
+            $row->logHistoryAction($row->published_at ? 'publish' : 'unpublish');
         }
     }
 }

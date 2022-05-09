@@ -36,6 +36,8 @@ class ModelsHistory extends Model
 
     protected $displayable = true;
 
+    protected $reversed = true;
+
     public $timestamps = false;
 
     /*
@@ -74,6 +76,10 @@ class ModelsHistory extends Model
                 'history-list' => 'Zobrazená história zmien',
                 'insert' => 'Vytvorený záznam',
                 'update' => 'Upravený záznam',
+                'sortable' => 'Zmenené poradie',
+                'publish' => 'Záznam publikovaný',
+                'unpublish' => 'Záznam skrytý',
+                'delete' => 'Záznam zmazaný',
             ],
         ];
     }
@@ -100,6 +106,7 @@ class ModelsHistory extends Model
     {
         $attributes['actionName'] = $this->getSelectOption('action');
         $attributes['changedFields'] = array_keys($this->data ?: []);
+        $attributes['user'] = $this->user;
 
         return $attributes;
     }

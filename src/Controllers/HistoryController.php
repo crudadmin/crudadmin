@@ -24,10 +24,6 @@ class HistoryController extends CRUDController
             return autoAjax()->permissionsError();
         }
 
-        $model->logHistoryAction('history-list', [
-            'row_id' => $id,
-        ]);
-
         $rows = ModelsHistory::where('table', $model->getTable())
                             ->where('row_id', $id)
                             ->with(['user' => function ($query) {
@@ -37,6 +33,11 @@ class HistoryController extends CRUDController
                             ->get()->map(function ($item) {
                                 return $item->getMutatedAdminAttributes(true);
                             });
+
+        //We wang log action after history fetch
+        $model->logHistoryAction('history-list', [
+            'row_id' => $id,
+        ]);
 
         return $rows;
     }

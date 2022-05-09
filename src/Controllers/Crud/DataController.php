@@ -54,6 +54,8 @@ class DataController extends CRUDController
             return autoAjax()->error(trans('admin::admin.cannot-sort'));
         }
 
+        $model->logHistoryAction('sortable');
+
         //Update rows and theirs orders
         foreach (request('rows') as $id => $item) {
             $update = [
