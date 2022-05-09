@@ -9,6 +9,7 @@ use Admin\Helpers\AdminRows;
 use Admin\Requests\DataRequest;
 use Illuminate\Http\Request;
 use Admin;
+use Str;
 
 class InsertController extends CRUDController
 {
@@ -98,6 +99,7 @@ class InsertController extends CRUDController
                 $this->updateBelongsToMany($model, $row, $request);
 
                 $this->insertUnsavedChilds($row, $request);
+                $this->moveTemporaryUploads($row, $request);
 
                 /*
                  * Save into history
@@ -174,6 +176,30 @@ class InsertController extends CRUDController
                         '_table' => $row->getTable()
                     ] : [])
                 );
+            }
+        }
+    }
+
+    private function moveTemporaryUploads($row, $request)
+    {
+        foreach ($row->getFields() as $key => $field) {
+            if ( $row->isFieldType($key, 'uploader') === false ){
+                continue;
+            }
+
+            //Allow only valid uuids
+            if ( !($uuid = $request->get($key)) || !Str::isUuid($uuid) ){
+                continue;
+            }
+
+            $storage = $row->getFieldStorage($key);
+
+            $tempDirectory = $row->getStorageFilePath($key, 'temp/'.$uuid);
+            $finalDirectory = $row->getStorageFilePath($key, $row->getKey());
+
+            //If temp directory for this row does exists.
+            if ( $storage->exists($tempDirectory) === true ){
+                $storage->move($tempDirectory, $finalDirectory);
             }
         }
     }

@@ -176,6 +176,7 @@ return [
         'integer' => 'integer|max:4294967295',
         'decimal' => 'numeric',
         'file' => 'max:10240|file|nullable',
+        'uploader' => 'imaginary',
         'editor' => 'hidden',
         'longeditor' => 'hidden',
         'password' => 'hidden',
