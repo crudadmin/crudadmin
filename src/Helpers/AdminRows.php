@@ -2,11 +2,7 @@
 
 namespace Admin\Helpers;
 
-use Admin;
 use Admin\Eloquent\AdminModel;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class AdminRows
 {
@@ -17,6 +13,7 @@ class AdminRows
     protected $page;
     protected $languageId;
     protected $scopes;
+    protected $search;
 
     /**
      * Class constructor
@@ -40,6 +37,7 @@ class AdminRows
         $this->page = (int)$request['page'];
         $this->languageId = (int)$request['language_id'];
         $this->scopes = $request['scopes'];
+        $this->search = $request['search'];
     }
 
     public function setPage($page)
@@ -47,236 +45,6 @@ class AdminRows
         $this->page = $page;
 
         return $this;
-    }
-
-    private function isPrimaryKey($column, $columns)
-    {
-        if (in_array($column, ['id'])) {
-            return true;
-        }
-
-        //If is correct relationship id
-        if (count($columns) == 1) {
-            if ($this->model->hasFieldParam($column, 'belongsToMany')) {
-                return false;
-            }
-
-            if ($this->model->hasFieldParam($column, 'belongsTo')) {
-                return true;
-            }
-
-            //If is select, but not multiple
-            if ($this->isSelectColumn($column)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function isSelectColumn($column)
-    {
-        return $column && $this->model->isFieldType($column, ['select', 'radio']) && ! $this->model->hasFieldParam($column, 'multiple');
-    }
-
-    private function isDateColumn($column)
-    {
-        if (in_array($column, ['created_at'])) {
-            return true;
-        }
-
-        return $column && $this->model->isFieldType($column, ['date', 'datetime', 'time']);
-    }
-
-    private function getDateFormat($column, $value)
-    {
-        try {
-            $field = $this->model->getField($column);
-
-            $fromFormat = (isset($field['date_format']) ? $field['date_format'] : '') ?: 'd.m.Y';
-            $fromFormat = @explode(' ', $fromFormat)[0];
-
-            return Carbon::createFromFormat($fromFormat, $value);
-        } catch (\Exception $e) {
-            return;
-        }
-    }
-
-    /*
-     * Apply multi-text search scope for given query
-     */
-    protected function checkForSearching($query)
-    {
-        $search = request('search');
-
-        if ( !is_array($search) || count($search) == 0 ){
-            return $query;
-        }
-
-        foreach ($search as $item) {
-            $itemQuery = $item['query'] ?? null;
-            $itemQueryTo = $item['query_to'] ?? null;
-            $column = $item['column'] ?? null;
-
-            $query->where(function($query) use ($itemQuery, $itemQueryTo, $column) {
-                $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', $itemQuery)));
-                $search_to = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', $itemQueryTo)));
-
-                if ($this->isDateColumn($column)) {
-                    if ($itemQuery) {
-                        $date = $this->getDateFormat($column, $search);
-                    }
-
-                    if ($itemQueryTo) {
-                        $date_to = $this->getDateFormat($column, $search_to);
-                    }
-
-                    if (isset($date) && ! isset($date_to)) {
-                        $query->whereDate($column, $date->format('Y-m-d'));
-                    }
-
-                    if (! isset($date) && isset($date_to)) {
-                        $query->whereDate($column, '<=', $date_to->format('Y-m-d'));
-                    }
-
-                    if (isset($date) && isset($date_to)) {
-                        $query->whereDate($column, '>=', $date->format('Y-m-d'))
-                              ->whereDate($column, '<=', $date_to->format('Y-m-d'));
-                    }
-
-                    if (! isset($date) && ! isset($date_to)) {
-                        $query->whereRaw('0');
-                    }
-                }
-
-                //If is more than 3 chars for searching
-                elseif (strlen($search) >= 3 || ($this->isSelectColumn($column) || is_numeric($search)) || $search_to) {
-                    $columns = array_merge(array_keys($this->model->getFields()), ['id']);
-                    $queries = explode(' ', $search);
-
-                    //If is valid column
-                    if (in_array($column, $columns)) {
-                        $columns = [$column];
-                    }
-
-                    //Search scope
-                    $query->where(function ($builder) use ($columns, $queries, $search, $search_to) {
-                        foreach ($columns as $key => $column) {
-                            //Search in all columns
-                            $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to) {
-                                $tableColumn = $this->model->fixAmbiguousColumn($column);
-
-                                //If is imaginarry field, skip whole process
-                                if ( $this->model->isFieldType($column, 'imaginary') || $this->model->hasFieldParam($column, 'imaginary') ) {
-                                    return;
-                                } elseif ($search_to) {
-                                    $builder->where(function ($builder) use ($column, $search, $search_to, $tableColumn) {
-                                        if (! isset($search) && isset($search_to)) {
-                                            $builder->where($tableColumn, '<=', $search_to);
-                                        }
-
-                                        if (isset($search) && isset($search_to)) {
-                                            $builder->where($tableColumn, '>=', $search)
-                                                    ->where($tableColumn, '<=', $search_to);
-                                        }
-                                    });
-                                }
-
-                                //Find exact id, value
-                                elseif ($this->isPrimaryKey($column, $columns)) {
-                                    foreach ($queries as $query) {
-                                        $builder->where($tableColumn, $query);
-                                    }
-                                }
-
-                                //Find by data in relation
-                                elseif ($this->model->hasFieldParam($column, 'belongsTo')) {
-                                    $relation = explode(',', $this->model->getField($column)['belongsTo']);
-
-                                    $byColumns = $this->getNamesBuilder($relation, $columns);
-
-                                    //We does not have columns for filter
-                                    if ( count($byColumns) == 0 ){
-                                        return;
-                                    }
-
-                                    $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
-                                        foreach ($queries as $query) {
-                                            foreach ($byColumns as $key => $selector) {
-                                                if ($selector == 'id') {
-                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                                                } else {
-                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                                                }
-                                            }
-                                        }
-                                    });
-                                } elseif ($this->model->hasFieldParam($column, 'belongsToMany')) {
-                                    $relation = explode(',', $this->model->getField($column)['belongsToMany']);
-
-                                    $byColumns = $this->getNamesBuilder($relation, $columns);
-
-                                    //We does not have columns for filter
-                                    if ( count($byColumns) == 0 ){
-                                        return;
-                                    }
-
-                                    $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
-                                        foreach ($queries as $query) {
-                                            foreach ($byColumns as $key => $selector) {
-                                                if ($selector == 'id') {
-                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                                                } else {
-                                                    $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-
-                                //Find by fulltext in query string
-                                elseif ($this->model->hasFieldParam($column, 'locale')) {
-                                    //Search for all inserted words
-                                    foreach ($queries as $key => $query) {
-                                        $builder->where(DB::raw('CONVERT(LOWER('.$tableColumn.') USING utf8)'), 'like', '%'.mb_strtolower($query).'%');
-                                    }
-                                } else {
-                                    //Search for all inserted words
-                                    foreach ($queries as $key => $query) {
-                                        $builder->where($tableColumn, 'like', '%'.$query.'%');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-
-        return $query;
-    }
-
-    /*
-     * Get all columns from foreign relationships
-     */
-    private function getNamesBuilder($relation, $columns = [])
-    {
-        if (array_key_exists(1, $relation) && count($columns) > 1) {
-            $model = Admin::getModelByTable($relation[0]);
-
-            $relationColumns = $this->model->getRelationshipNameBuilder($relation[1]);
-
-            return array_values(array_filter($relationColumns, function($column) use ($model) {
-                if ( in_array($column, ['id', $model->getKeyName()]) ) {
-                    return true;
-                }
-
-                return $model->getField($column) ? true : false;
-            }));
-        } else {
-            return ['id'];
-        }
     }
 
     /*
@@ -354,6 +122,9 @@ class AdminRows
 
         //Filter by fields Group::where clausule
         $query->filterByParentGroup();
+
+        //Search in rows
+        (new AdminRowsSearch($this->model, $query, $this->search))->filter();
 
         if (is_callable($callback)) {
             call_user_func_array($callback, [$query]);
@@ -444,9 +215,6 @@ class AdminRows
                     } else {
                         $this->paginateRecords($query, $initialRequest);
                     }
-
-                    //Search in rows
-                    $this->checkForSearching($query);
                 }, true)->get();
 
                 $totalResultsCount = $this->getRowsDataQuery();
@@ -454,7 +222,7 @@ class AdminRows
 
             $data = [
                 'rows' => $withoutRows ? [] : $this->getBaseRows($paginatedRowsData),
-                'count' => $withoutRows ? 0 : $this->checkForSearching($totalResultsCount)->count(),
+                'count' => $withoutRows ? 0 : $totalResultsCount->count(),
                 'limit' => $this->limit,
                 'page' => $this->page,
                 'buttons' => $withoutRows ? [] : $this->generateButtonsProperties($paginatedRowsData),
