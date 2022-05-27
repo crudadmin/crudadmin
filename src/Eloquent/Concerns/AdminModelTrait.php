@@ -269,12 +269,8 @@ trait AdminModelTrait
         return array_values($fields);
     }
 
-    public function scopeFilterByParentOrLanguage($query, $parentId, $languageId, $parentTable = null)
+    public function scopeFilterByParent($query, $parentId, $parentTable = null)
     {
-        if ($languageId > 0) {
-            $query->localization($languageId);
-        }
-
         if ($parentId > 0) {
             $column = $this->getForeignColumn($parentTable);
 
@@ -303,22 +299,27 @@ trait AdminModelTrait
                 $query->whereNull($this->getForeignColumn($this->getTable()));
             }
         }
+    }
 
+    public function scopeFilterByScopes($query, $scopes)
+    {
         //Use custom scopes for admin rows
-        if ( is_array($scopes = request('scopes')) && count($scopes) ) {
-            foreach ($scopes as $scope => $attributes) {
-                $params = explode(';', $attributes);
+        if ( !is_array($scopes) || count($scopes) === 0 ) {
+            return;
+        }
 
-                if ( method_exists($this, 'scope'.$scope) ){
-                    $query->{$scope}(...$params);
-                }
+        foreach ($scopes as $scope => $attributes) {
+            $params = explode(';', $attributes);
 
-                $this->runAdminModules(function($module) use ($query, $scope, $params) {
-                    if ( method_exists($module, 'scope'.$scope) ) {
-                        $module->{'scope'.$scope}($query, ...$params);
-                    }
-                });
+            if ( method_exists($this, 'scope'.$scope) ){
+                $query->{$scope}(...$params);
             }
+
+            $this->runAdminModules(function($module) use ($query, $scope, $params) {
+                if ( method_exists($module, 'scope'.$scope) ) {
+                    $module->{'scope'.$scope}($query, ...$params);
+                }
+            });
         }
     }
 
@@ -344,8 +345,9 @@ trait AdminModelTrait
     public function scopeFilterByParentGroup($query)
     {
         //If is no admin parent model
-        if ( !$parent = $this->getParentRow() )
+        if ( !$parent = $this->getParentRow() ) {
             return;
+        }
 
         $groups = $parent->getFieldsGroups();
 

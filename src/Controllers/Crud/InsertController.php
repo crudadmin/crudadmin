@@ -98,7 +98,7 @@ class InsertController extends CRUDController
 
                 $this->updateBelongsToMany($model, $row, $request);
 
-                $this->insertUnsavedChilds($row, $request);
+                $this->assignUnsavedChilds($row, $request, $rows);
                 $this->moveTemporaryUploads($row, $request);
                 $row->makeHistorySnapshot($requestRow, null, 'insert');
 
@@ -130,45 +130,62 @@ class InsertController extends CRUDController
     /*
      * Connect all unsaved items with parent row what has been added
      */
-    private function insertUnsavedChilds($row, $request)
+    private function assignUnsavedChilds($row, $request, $rows)
     {
-        if ($request->has('_save_children')) {
-            $allowedChilds = array_map(function($model){
-                return $model->getTable();
-            }, (array)$row->getModelChilds());
+        $unsavedChilds = $unsavedChilds = (array)json_decode($request->_save_children, true);
+        if ( count($unsavedChilds) == 0 ){
+            return;
+        }
 
-            foreach ((array)json_decode($request->_save_children) as $item) {
-                if ( !($relationModel = Admin::getModelByTable($item->table)) ) {
-                    autoAjax()->error(sprintf(_('Relácie pre model %s neexistuje.'), $item->table))->throw();
+        $allowedChilds = array_map(function($model){
+            return $model->getTable();
+        }, (array)$row->getModelChilds());
+
+        foreach ($unsavedChilds as $item) {
+            $table = $item['table'] ?? null;
+
+            if ( !($relationModel = Admin::getModelByTable($table)) ) {
+                autoAjax()->error(sprintf(_('Relácie pre model %s neexistuje.'), $table))->throw();
+            }
+
+            $isGlobalRelation = $relationModel->getProperty('globalRelation');
+
+            //If unknown model has been which is not child of parent model.
+            //But this given model has not globalRelation support
+            if ( !in_array($table, $allowedChilds) && $isGlobalRelation === false ) {
+                continue;
+            }
+
+            //Get model, and check if user has access to given model
+            $model = $this->getModel($table);
+
+            if ( !($relationKey = $model->getForeignColumn($row->getTable())) ) {
+                //If given relation table model has not turned global relation support
+                if ( !$isGlobalRelation ) {
+                    autoAjax()->error()->throw();
                 }
 
-                $isGlobalRelation = $relationModel->getProperty('globalRelation');
+                $relationKey = '_row_id';
+            }
 
-                //If unknown model has been which is not child of parent model.
-                //But this given model has not globalRelation support
-                if ( !in_array($item->table, $allowedChilds) && $isGlobalRelation === false ) {
-                    continue;
-                }
+            $data = array_merge([
+                $relationKey => $row->getKey()
+            ], $isGlobalRelation ? [
+                '_table' => $row->getTable()
+            ] : []);
 
-                //Get model, and check if user has access to given model
-                $model = $this->getModel($item->table);
+            $connection = $model->getConnection()->table($model->getTable());
+            $query = $connection->where('id', $item['id']);
 
-                if ( !($relationKey = $model->getForeignColumn($row->getTable())) ) {
-                    //If given relation table model has not turned global relation support
-                    if ( !$isGlobalRelation ) {
-                        autoAjax()->error()->throw();
-                    }
-
-                    $relationKey = '_row_id';
-                }
-
+            if ( count($rows) === 0 ) {
                 //Update unrelated rows to actually created model
-                $model->getConnection()->table($model->getTable())->where('id', $item->id)->update(
-                    array_merge([
-                        $relationKey => $row->getKey()
-                    ], $isGlobalRelation ? [
-                        '_table' => $row->getTable()
-                    ] : [])
+                $query->update($data);
+            } else {
+                $existingRow = (array)$query->first();
+                unset($existingRow['id']);
+
+                $connection->insert(
+                    array_merge($existingRow, $data)
                 );
             }
         }

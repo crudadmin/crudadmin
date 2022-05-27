@@ -16,6 +16,7 @@ class AdminRows
     protected $limit;
     protected $page;
     protected $languageId;
+    protected $scopes;
 
     /**
      * Class constructor
@@ -38,6 +39,7 @@ class AdminRows
         $this->limit = (int)$request['limit'];
         $this->page = (int)$request['page'];
         $this->languageId = (int)$request['language_id'];
+        $this->scopes = $request['scopes'];
     }
 
     public function setPage($page)
@@ -327,24 +329,37 @@ class AdminRows
     /*
      * Returns filtered and paginated rows from administration
      */
-    private function getRowsData($callback = nulll)
+    private function getRowsDataQuery($callback = null, $withDependencies = false)
     {
-        //Get model dependencies
-        $with = $this->getDependeciesIntoQuery();
+        $query = $this->model->newQuery();
 
-        //Get base columns from database with relationships
-        $query = $this->model->with($with);
+        if ( $withDependencies === true ) {
+            //Get model dependencies
+            $with = $this->getDependeciesIntoQuery();
+
+            //Get base columns from database with relationships
+            $query = $query->with($with);
+        }
+
+        //Filter by localization
+        if ($this->languageId > 0) {
+            $query->localization($this->languageId);
+        }
 
         //Filter rows by language id and parent id
-        $query->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable);
+        $query->filterByParent($this->parentId, $this->parentTable);
 
+        //Filter by scopes
+        $query->filterByScopes($this->parentId, $this->scopes);
+
+        //Filter by fields Group::where clausule
         $query->filterByParentGroup();
 
         if (is_callable($callback)) {
             call_user_func_array($callback, [$query]);
         }
 
-        return $query->get();
+        return $query;
     }
 
     /*
@@ -422,7 +437,7 @@ class AdminRows
             $withoutRows = $this->returnNoData($onlyIds);
 
             if (! $withoutRows) {
-                $paginatedRowsData = $this->getRowsData(function ($query) use ($onlyIds, $initialRequest) {
+                $paginatedRowsData = $this->getRowsDataQuery(function ($query) use ($onlyIds, $initialRequest) {
                     //Get specific id
                     if ($onlyIds && count($onlyIds) > 0) {
                         $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $onlyIds);
@@ -432,11 +447,9 @@ class AdminRows
 
                     //Search in rows
                     $this->checkForSearching($query);
-                });
+                }, true)->get();
 
-                $totalResultsCount = $this->model
-                                        ->filterByParentOrLanguage($this->parentId, $this->languageId, $this->parentTable)
-                                        ->filterByParentGroup();
+                $totalResultsCount = $this->getRowsDataQuery();
             }
 
             $data = [
