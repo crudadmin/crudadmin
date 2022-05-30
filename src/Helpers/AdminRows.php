@@ -36,8 +36,8 @@ class AdminRows
         $this->limit = (int)$request['limit'];
         $this->page = (int)$request['page'];
         $this->languageId = (int)$request['language_id'];
-        $this->scopes = $request['scopes'];
-        $this->search = $request['search'];
+        $this->scopes = $request['scopes'] ?? null;
+        $this->search = $request['search'] ?? null;
     }
 
     public function setPage($page)
@@ -118,7 +118,7 @@ class AdminRows
         $query->filterByParent($this->parentId, $this->parentTable);
 
         //Filter by scopes
-        $query->filterByScopes($this->parentId, $this->scopes);
+        $query->filterByScopes($this->scopes);
 
         //Filter by fields Group::where clausule
         $query->filterByParentGroup();
