@@ -26,7 +26,7 @@ class ButtonController extends CRUDController
         }
 
         //If no rows does exists
-        if ( ($rows = $model->whereIn($model->getKeyName(), $request['id'] ?: [])->get())->count() === 0 ){
+        if ( ($rows = $model->whereIn($model->getTable().'.'.$model->getKeyName(), $request['id'] ?: [])->get())->count() === 0 ){
             return autoAjax()->error(_('Záznam neexistuje, pravdepodobne už bol vymazaný.'));
         }
 
