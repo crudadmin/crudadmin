@@ -272,7 +272,7 @@ class AddSelectSupport extends MutationRule
 
             //Get data from table, and bind them info buffer for better performance
             $options = $this->cache('selects.options.'.$properties[0], function () use ($relationModel, $properties, $loadColumns, $customColumns) {
-                $loadColumns[] = 'id';
+                $loadColumns[] = $relationModel->fixAmbiguousColumn('id');
 
                 if ($relationModel) {
                     //Add all custom columns into list of loading actual columns
