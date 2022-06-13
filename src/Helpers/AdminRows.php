@@ -134,10 +134,10 @@ class AdminRows
                     }
 
                     //Search scope
-                    $query->where(function ($builder) use ($columns, $queries, $search, $search_to) {
+                    $query->where(function ($builder) use ($columns, $queries, $search, $search_to, $itemQuery) {
                         foreach ($columns as $key => $column) {
                             //Search in all columns
-                            $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to) {
+                            $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to, $itemQuery) {
                                 $tableColumn = $this->model->fixAmbiguousColumn($column);
 
                                 //If is imaginarry field, skip whole process
@@ -159,7 +159,7 @@ class AdminRows
                                 //Find exact id, value
                                 elseif ($this->isPrimaryKey($column, $columns)) {
                                     foreach ($queries as $query) {
-                                        $builder->where($tableColumn, $query);
+                                        $builder->where($tableColumn, $itemQuery);
                                     }
                                 }
 
