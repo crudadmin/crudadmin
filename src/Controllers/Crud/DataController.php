@@ -77,7 +77,7 @@ class DataController extends CRUDController
             }
 
             //Update first row
-            $model->newInstance()->where('id', $id)->update($update);
+            $model->newInstance()->where($model->fixAmbiguousColumn('id'), $id)->update($update);
         }
 
         //Fire on update order event
