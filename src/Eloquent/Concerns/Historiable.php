@@ -149,7 +149,7 @@ trait Historiable
         }
 
         //Add missing values from second array
-        foreach ($array2 as $key => $value) {
+        foreach ($array2 ?: [] as $key => $value) {
             if (! array_key_exists($key, $array1)) {
                 $aReturn[$key] = $value;
             }
