@@ -391,7 +391,7 @@ class LocalizationHelper
             return '{}';
         }
 
-        return JSTranslations::getJSTranslations(
+        return JSTranslations::getJsonTranslations(
             $locale,
             $this->getModel()
         );

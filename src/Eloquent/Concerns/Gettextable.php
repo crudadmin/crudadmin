@@ -3,10 +3,17 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
+use Admin\Admin\Buttons\SetSourceLanguage;
 use Gettext;
 
 trait Gettextable
 {
+    public function setRulesProperty($rules)
+    {
+        $rules[] = SetSourceLanguage::class;
+
+        return $rules;
+    }
     public function settings()
     {
         return [
@@ -86,6 +93,7 @@ trait Gettextable
         if ( $this->hasGettextSupport() ) {
             $fields->push([
                 'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|hasNotAccess:languages.update,invisible|extensions:po|hidden',
+                'is_source' => 'name:Zdrojovy jazyk|type:checkbox|default:0',
             ]);
         }
 

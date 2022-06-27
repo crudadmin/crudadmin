@@ -44,7 +44,7 @@ class LayoutController extends CRUDController
                 'buttonAction' => action('\Admin\Controllers\ButtonController@action'),
                 'download' => action('\Admin\Controllers\DownloadController@adminDownload'),
                 'rows' => action('\Admin\Controllers\LayoutController@getRows', [':table']),
-                'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id', ':table']),
+                'translations' => action('\Admin\Controllers\GettextController@getEditorResponse', [':id', ':table']),
                 'switch_locale' => action('\Admin\Controllers\GettextController@switchAdminLanguage', [':id']),
                 'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id', ':table']),
             ],

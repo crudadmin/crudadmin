@@ -2,17 +2,18 @@
 
 namespace Admin\Helpers\Localization;
 
+use Admin\Core\Helpers\Storage\AdminFile;
 use Cache;
 use Carbon\Carbon;
-use Gettext;
-use Admin\Core\Helpers\Storage\AdminFile;
 use File;
+use Gettext;
 use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
 use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
-use \SplFileInfo;
 use \Illuminate\Support\Facades\Blade;
+use \SplFileInfo;
+use EditorMode;
 
 class JSTranslations
 {
@@ -33,6 +34,25 @@ class JSTranslations
         $this->filesystem = new Filesystem;
     }
 
+    public function getGettextFlags()
+    {
+        return self::GETTEXT_FLAGS;
+    }
+
+    public function getJavascript($localizationClass = 'Localization', $lang = null)
+    {
+        $model = $localizationClass::getModel();
+
+        $translations = $this->getJsonTranslations($lang, $model);
+
+        //Return original translations for editor purposes
+        $rawTranslations = EditorMode::isActiveTranslatable()
+            ? json_encode($this->getRawTranslations($lang, $model))
+            : '[]';
+
+        return view('admin::translates', compact('translations', 'rawTranslations'))->render();
+    }
+
     /**
      * Return all js translations
      *
@@ -40,7 +60,7 @@ class JSTranslations
      * @param  string  $localizationClass
      * @return  string
      */
-    public function getJSTranslations($lang, $model)
+    public function getJsonTranslations($lang, $model)
     {
         return $this->getCachableTranslates($lang, $model, 'jsBundle', function ($poPath) {
             $translations = Translations::fromPoFile(
@@ -58,7 +78,7 @@ class JSTranslations
      * @param  string  $localizationClass
      * @return  string
      */
-    public function getRawJSTranslations($lang, $model)
+    private function getRawTranslations($lang, $model)
     {
         return $this->getCachableTranslates($lang, $model, 'jsBundleRaw', function ($poPath) {
             $rawTranslations = [];
@@ -73,7 +93,7 @@ class JSTranslations
                 }
             }
 
-            return json_encode($rawTranslations);
+            return $rawTranslations;
         });
     }
 
@@ -153,37 +173,6 @@ class JSTranslations
     }
 
     /**
-     * Return translations array
-     *
-     * @param  Admin\Eloquent\AdminModel  $language
-     * @return  array
-     */
-    public function getTranslations($language)
-    {
-        Gettext::setGettextPropertiesModel($language);
-
-        $this->checkIfIsUpToDate($language);
-
-        $locale = Gettext::getLocale($language->slug);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
-
-        $translations = Translations::fromPoFile(
-            Gettext::getStorage()->path($poPath)
-        );
-
-        //Get all plural forms
-        $string = JSON::toString($translations);
-        $array = json_decode($string);
-
-        $this->addPluralsIntoResponse($array, $translations);
-        $this->addMissingIntoResponse($array, $translations);
-        $this->addRawIntoResponse($array, $translations);
-
-        return $array;
-    }
-
-    /**
      * Check if given locale is up to date
      *
      * @param  Admin\Eloquent\AdminModel  $language
@@ -210,57 +199,6 @@ class JSTranslations
 
         if ($poFilesMissing || $cacheKeyChanged ) {
             $this->syncTranslates($language, $cacheKey);
-        }
-    }
-
-    /**
-     * Add plurals into translations array
-     *
-     * @param  object  $array
-     * @param  Gettext\Translations  $translations
-     */
-    private function addPluralsIntoResponse($array, Translations $translations)
-    {
-        $array->plurals = [];
-
-        foreach ($translations as $translation) {
-            if ($translation->hasPlural()) {
-                $array->plurals[] = $translation->getOriginal();
-            }
-        }
-    }
-
-    /**
-     * Add missing translations into translations array
-     *
-     * @param  object  $array
-     * @param  Gettext\Translations  $translations
-     */
-    private function addMissingIntoResponse($array, Translations $translations)
-    {
-        $array->missing = [];
-
-        foreach ($translations as $translation) {
-            if (in_array(self::GETTEXT_FLAGS['missing'], $translation->getFlags())) {
-                $array->missing[] = $translation->getOriginal();
-            }
-        }
-    }
-
-    /**
-     * Add raw translations into translations array
-     *
-     * @param  object  $array
-     * @param  Gettext\Translations  $translations
-     */
-    private function addRawIntoResponse($array, Translations $translations)
-    {
-        $array->raw = [];
-
-        foreach ($translations as $translation) {
-            if (in_array(self::GETTEXT_FLAGS['isRaw'], $translation->getFlags())) {
-                $array->raw[] = $translation->getOriginal();
-            }
         }
     }
 

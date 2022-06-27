@@ -6,6 +6,7 @@ use Admin;
 use AdminLocalization;
 use Admin\Helpers\Localization\LocalizationHelper;
 use Facades\Admin\Helpers\Localization\JSTranslations;
+use Facades\Admin\Helpers\Localization\GettextEditor;
 use Gettext;
 use Symfony\Component\HttpFoundation\Response;
 use EditorMode;
@@ -22,31 +23,23 @@ class GettextController extends Controller
     {
         $lang = request('lang', $lang);
 
-        $js = $this->getJavascript($localizationClass, $lang);
-
-        $response = new Response($js, 200, [
-            'Content-Type' => 'application/javascript; charset=utf-8',
-            'Cache-Control' => 'max-age=2592000,public',
-        ]);
+        $script = JSTranslations::getJavascript($localizationClass, $lang);
 
         //We does not want cookies send by this request
         //Because some CDN may not cache request with cookies
-        $response->send();
+        (new Response($script, 200, [
+            'Content-Type' => 'application/javascript; charset=utf-8',
+            'Cache-Control' => 'max-age=2592000,public',
+        ]))->send();
         die;
     }
 
-    public function getJavascript($localizationClass = 'Localization', $lang = null)
+    /**
+     * Returns admin translates
+     */
+    public function adminIndex()
     {
-        $translations = JSTranslations::getJSTranslations($lang, $localizationClass::getModel());
-
-        //Return original translations for editor purposes
-        if ( EditorMode::isActiveTranslatable() ) {
-            $rawTranslations = JSTranslations::getRawJSTranslations($lang, $localizationClass::getModel());
-        } else {
-            $rawTranslations = '[]';
-        }
-
-        return view('admin::translates', compact('translations', 'rawTranslations'))->render();
+        return $this->index(AdminLocalization::class);
     }
 
     public function getJson($lang = null)
@@ -58,47 +51,14 @@ class GettextController extends Controller
         return Localization::getJson($lang);
     }
 
-    /**
-     * Returns admin translates
-     */
-    public function adminIndex()
-    {
-        return $this->index(AdminLocalization::class);
-    }
-
-    /**
-     * Returns translation row by given table
-     *
-     * @param  string/number  $idOrSlug
-     * @param  string  $table
-     * @return  AdminModel|null
-     */
-    public function getTranslationRow($idOrSlug, $table, $permission = null)
-    {
-        $model = Admin::getModelByTable($table ?: 'languages');
-
-        //If user does not have permissions
-        if ( !admin() || !admin()->hasAccess($model, $permission ?: 'read') ) {
-            autoAjax()->permissionsError()->throw();
-        }
-
-        if ( is_numeric($idOrSlug) ) {
-            return $model->findOrFail($idOrSlug);
-        }
-
-        return $model->where('slug', $idOrSlug)->firstOrFail();
-    }
-
     /*
      * Return all translations for specifics language
      */
-    public function getTranslations($id, $table)
+    public function getEditorResponse($id, $table)
     {
-        $language = $this->getTranslationRow($id, $table, 'read');
+        $language = GettextEditor::getTranslationRow($id, $table, 'read');
 
-        $translations = JSTranslations::getTranslations($language);
-
-        return response()->json($translations);
+        return GettextEditor::getEditorResponse($language);
     }
 
     /*
@@ -106,7 +66,7 @@ class GettextController extends Controller
      */
     public function updateTranslations($id, $table = null)
     {
-        $language = $this->getTranslationRow($id, $table, 'update');
+        $language = GettextEditor::getTranslationRow($id, $table, 'update');
 
         $changes = request('changes', []);
 
@@ -118,7 +78,7 @@ class GettextController extends Controller
      */
     public function downloadTranslations($id, $table)
     {
-        $language = $this->getTranslationRow($id, $table, 'read');
+        $language = GettextEditor::getTranslationRow($id, $table, 'read');
 
         JSTranslations::checkIfIsUpToDate($language);
 

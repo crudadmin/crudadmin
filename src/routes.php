@@ -42,7 +42,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin', 'hasDevMode', 'admin
     Route::get('/admin/api/history/get/{model}/{id}', 'HistoryController@getHistory');
     Route::post('/admin/api/history/remove', 'HistoryController@removeFromHistory');
     Route::get('/admin/api/translation/switch/{id}', 'GettextController@switchAdminLanguage');
-    Route::get('/admin/api/getTranslations/{id}/{table?}', 'GettextController@getTranslations');
+    Route::get('/admin/api/translation/editor/{id}/{table?}', 'GettextController@getEditorResponse');
     Route::get('/admin/api/download-translations/{id}/{table}', 'GettextController@downloadTranslations');
     Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
