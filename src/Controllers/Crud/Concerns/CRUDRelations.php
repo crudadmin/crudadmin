@@ -21,6 +21,8 @@ trait CRUDRelations
 
                 $properties = $model->getRelationProperty($key, 'belongsToMany');
 
+                $previousData = DB::table($properties[3])->where($properties[6], $row->getKey())->get();
+
                 DB::table($properties[3])->where($properties[6], $row->getKey())->delete();
 
                 if (! $request->has($key) || !is_array($request->get($key))) {
@@ -33,7 +35,13 @@ trait CRUDRelations
                         continue;
                     }
 
-                    $array = [];
+                    //We want keep 3rd column previous data
+                    $array = (array)(collect($previousData)->firstWhere($properties[7], $id) ?: []);
+
+                    if ( isset($array['id']) ) {
+                        unset($array['id']);
+                    }
+
                     $array[$properties[6]] = $row->getKey();
                     $array[$properties[7]] = $id;
 
