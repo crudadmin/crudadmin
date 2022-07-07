@@ -53,6 +53,7 @@ class RoutesSeo extends AdminModel
                 'title' => 'name:admin::admin.seoroutes-title'.(Admin::isEnabledLocalization() ? '|locale' : ''),
                 'keywords' => 'name:admin::admin.seoroutes-keywords'.(Admin::isEnabledLocalization() ? '|locale' : ''),
                 'description' => 'name:admin::admin.seoroutes-description|type:text|max:400'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+                'canonical_url' => 'name:Kanonická url|url',
                 'image' => 'name:admin::admin.seoroutes-images|image|multiple',
             ]),
         ];
