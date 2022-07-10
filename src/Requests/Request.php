@@ -196,7 +196,7 @@ abstract class Request extends FormRequest
         ];
 
         foreach ($fields as $key => $field) {
-            if ($this->model->isFieldType($key, ['date', 'datetime', 'time'])) {
+            if ($this->model->isFieldType($key, ['date', 'datetime', 'time', 'timestamp'])) {
                 if ($this->model->hasFieldParam($key, 'multiple', true)) {
                     $this->merge([$key => array_filter($this->get($key) ?: [])]);
                 } elseif ($this->has($key) && ! empty($this->get($key))) {
