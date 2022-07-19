@@ -34,10 +34,15 @@ class AdminRowsSearch
 
             //If specific column search is not defined, we can search in subchild models
             if ( !($item['column'] ?? null) ) {
-                foreach ($deepSearchModels as $classname) {
+                foreach ($deepSearchModels as $deepItem) {
+                    $classname = is_array($deepItem) ? $deepItem['model'] : $deepItem;
+
+                    $relation = class_basename($classname);
+                    $relation = is_array($deepItem) ? ($deepItem['relation'] ?? $relation) : $relation;
+
                     $model = new $classname;
 
-                    $this->query->orWhereHas(class_basename($classname), function($query) use ($item) {
+                    $this->query->orWhereHas($relation, function($query) use ($item) {
                         $this->applyModelFilter($query, $item);
                     });
                 }
