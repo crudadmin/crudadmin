@@ -31,7 +31,9 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
         $states = $this->getModel()->getFilterStates();
 
         foreach ($states as $state) {
-            if ( $state['active']() === true ){
+            $active = $state['active'] ?? null;
+
+            if ( is_callable($active) && $active() === true ){
                 $attributes['$indicator'] = $state;
 
                 break;
