@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Fields;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Arr;
 
 trait AdminModelTrait
 {
@@ -560,5 +561,16 @@ trait AdminModelTrait
     public function getAdminModelInitialData()
     {
         return [];
+    }
+
+    public function getModelSettings()
+    {
+        $settings = parent::getModelSettings();
+
+        if ( Arr::has($settings, 'form.autocomplete') === false ){
+            Arr::set($settings, 'form.autocomplete', config('admin.model.settings.form.autocomplete', 'off'));
+        }
+
+        return $settings;
     }
 }
