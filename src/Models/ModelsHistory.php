@@ -70,6 +70,7 @@ class ModelsHistory extends Model
             'table' => $this->getTableModels(),
             'action' => [
                 'login' => 'Prihlásenie',
+                'login-verificator' => 'Prihlásenie autentifikátorom',
                 'logout' => 'Odhlásenie',
                 'view' => 'Zobrazený záznam',
                 'history-view' => 'Zobrazený záznam z histórie',

@@ -5,6 +5,8 @@ namespace Admin\Eloquent;
 use Admin;
 use Admin\Eloquent\Concerns\CanResetPassword;
 use Admin\Eloquent\Concerns\HasAutoLogoutTrait;
+use Admin\Eloquent\Concerns\HasLoginVerificator;
+use Admin\Eloquent\Modules\VerificationModule;
 use Admin\Models\User;
 use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
 use Illuminate\Auth\MustVerifyEmail;
@@ -16,7 +18,7 @@ use Illuminate\Notifications\Notifiable;
 
 class Authenticatable extends AdminModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
-    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable, MustVerifyEmail, HasAutoLogoutTrait;
+    use BaseAuthenticatable, Authorizable, CanResetPassword, Notifiable, MustVerifyEmail, HasAutoLogoutTrait, HasLoginVerificator;
 
     /*
      * Skipping dropping columns
@@ -56,6 +58,10 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     {
         if (Admin::isFrontend()) {
             $this->publishable = false;
+        }
+
+        if ( $this->isUserClass() ) {
+            $this->addModule(VerificationModule::class);
         }
 
         parent::__construct($attributes);

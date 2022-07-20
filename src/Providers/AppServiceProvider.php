@@ -42,6 +42,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         'admin' => Middleware\Authenticate::class,
         'admin.guest' => Middleware\RedirectIfAuthenticated::class,
         'admin.autologout' => Middleware\LogoutAdminMiddleware::class,
+        'admin.verification' => Middleware\AdminVerificationMiddleware::class,
         'hasAdminRole' => Middleware\HasAdminRole::class,
         'hasDevMode' => Middleware\HasDevMode::class,
         'localized' => Middleware\LocalizationMiddleware::class,
