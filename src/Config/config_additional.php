@@ -217,4 +217,11 @@ return [
         Admin\Contracts\Sitebuilder\Types\Image::class,
         Admin\Contracts\Sitebuilder\Types\Iframe::class,
     ],
+
+    'resizer' => [
+        'storage' => false, //Should we save resized images into external storage?
+        'storage_cache' => true, //If in_storage is set to true. We can cache whatever image has been resized or no.
+        'storage_cache_days' => 31,
+        'redirect_after_resize' => true, //When we displaying storage url, we can control whatever we want 301 redirect after resize
+    ],
 ];
