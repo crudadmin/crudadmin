@@ -7,9 +7,9 @@ use Admin\Controllers\Crud\CRUDController;
 
 class ExportController extends CRUDController
 {
-    public function rows($model)
+    public function rows($table)
     {
-        $model = $this->getModel($model, false);
+        $model = $this->getModel($table, false);
 
         $rows = $model
             ->withExportResponse()
@@ -23,5 +23,12 @@ class ExportController extends CRUDController
         return [
             'pagination' => $rows,
         ];
+    }
+
+    public function scheme($table)
+    {
+        $model = $this->getModel($table, false);
+
+        return view('admin::openapi.pagination_scheme', compact('model'));
     }
 }
