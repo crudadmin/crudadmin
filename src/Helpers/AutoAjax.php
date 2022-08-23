@@ -68,9 +68,9 @@ class AutoAjax extends BaseAutoAjax
         return $this->error(trans('admin::admin.db-error').'<br><br><small>'.e($e->getMessage()).'</small>', 500);
     }
 
-    public function permissionsError()
+    public function permissionsError($section = null)
     {
-        return $this->error(_('Nemáte právomoc k pristúpeniu do tejto sekcie.'), 401);
+        return $this->error(_('Nemáte právomoc k pristúpeniu do tejto sekcie.').($section ? ' ('.$section.')' : ''), 401);
     }
 
     /**

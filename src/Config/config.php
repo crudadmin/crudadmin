@@ -38,7 +38,7 @@ return [
     'groups' => function(){
         return [
             'settings' => [_('Nastavenia'), 'fa-gear'],
-        ]
+        ];
     },
 
     /*

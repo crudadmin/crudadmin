@@ -6,10 +6,11 @@ use Admin\Admin\Buttons\LogoutUser;
 use Admin\Eloquent\Authenticatable;
 use Admin\Fields\Group;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, HasApiTokens;
 
     /*
      * Model created date, for ordering tables in database and in user interface

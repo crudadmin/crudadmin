@@ -41,6 +41,14 @@ class RouteServiceProvider extends ServiceProvider
         ], function ($router) {
             require __DIR__.'/../routes.php';
         });
+
+        //Admin routes
+        $router->group([
+            'namespace' => 'Admin\Controllers',
+            'prefix' => 'admin/api',
+        ], function ($router) {
+            require __DIR__.'/../Routes/api.php';
+        });
     }
 
     public function registerRouterMacros(Router $router)

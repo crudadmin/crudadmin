@@ -5,14 +5,18 @@ use Admin\Models\Language;
 if (! function_exists('admin')) {
     function admin()
     {
-        $guard = auth()->guard('web');
-
-        //Check if is student logged
-        if (! $guard->check()) {
-            return false;
+        if (($guard = auth()->guard('web'))->check()) {
+            return $guard->user();
         }
 
-        return $guard->user();
+        //Fallback to admin api guard
+        try {
+            if (($guard = auth()->guard('admin'))->check()) {
+                return $guard->user();
+            }
+        } catch (\Exception $e){}
+
+        return false;
     }
 }
 

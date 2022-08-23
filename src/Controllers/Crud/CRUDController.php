@@ -18,13 +18,17 @@ class CRUDController extends Controller
     /*
      * Get model object by model name, and check user permissions for this model
      */
-    protected function getModel($table)
+    protected function getModel($table, $withAdminRows = true)
     {
-        $model = Admin::getModelByTable($table)->getAdminRows();
+        $model = Admin::getModelByTable($table);
+
+        if ( $withAdminRows === true ){
+            $model = $model->getAdminRows();
+        }
 
         //Check if user has allowed model
         if (! admin()->hasAccess($model)) {
-            autoAjax()->permissionsError()->throw();
+            autoAjax()->permissionsError($model->getTable())->throw();
         }
 
         return $model;

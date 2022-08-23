@@ -11,6 +11,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
 {
     protected $providers = [
         FieldsServiceProvider::class,
+        AuthServiceProvider::class,
         AdminServiceProvider::class,
         EventsServiceProvider::class,
         LocalizationServiceProvider::class,

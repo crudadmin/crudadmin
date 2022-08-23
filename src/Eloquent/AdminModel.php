@@ -7,6 +7,7 @@ use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
 use Admin\Eloquent\Concerns\AdminModelTrait;
 use Admin\Eloquent\Concerns\HasAttributes;
 use Admin\Eloquent\Concerns\HasButtons;
+use Admin\Eloquent\Concerns\HasExporter;
 use Admin\Eloquent\Concerns\HasPermissions;
 use Admin\Eloquent\Concerns\HasSiteBuilder;
 use Admin\Eloquent\Concerns\HasSiteTree;
@@ -28,6 +29,7 @@ class AdminModel extends CoreAdminModel
 {
     use AdminModelTrait,
         ModelLayoutBuilder,
+        HasExporter,
         HasAttributes,
         HasPermissions,
         ModelRules,
