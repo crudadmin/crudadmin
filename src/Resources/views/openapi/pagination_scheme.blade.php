@@ -1,15 +1,53 @@
 openapi: 3.0.0
 servers:
-  - url: {{ action('\Admin\Controllers\Export\ExportController@rows', $model->getTable()) }}
+  - url: {{ env('APP_URL') }}/admin/api
 info:
   title: {{ $model->getProperty('name') }}
   version: 1.0.0
   contact:
-    email: {{ env('MAIL_FROM_ADDRESS') ?: 'info@marekgogol.sk' }}
+    email: {{ $email = (env('MAIL_FROM_ADDRESS') ?: 'info@marekgogol.sk') }}
 paths:
-  /:
+  /auth/login:
+    get:
+      summary: Receive authorization token
+      parameters:
+        - in: query
+          name: email
+          description: Administrator email
+          required: false
+          schema:
+            type: string
+            example: {{ $email }}
+        - in: query
+          name: password
+          description: Password from administration
+          schema:
+            type: string
+            example: heslo123
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    data:
+                      type: object
+                      properties:
+                        user:
+                          $ref: '#/components/schemas/{{ class_basename(get_class(Admin::getModel('User'))) }}'
+                        token:
+                          type: object
+                          properties:
+                            token:
+                              type: string
+                              example: 6|QthWyWYy5IMwE8eLxdkTJNqdav4D91um060hAvm8
+  /model/{{ $model->getTable() }}:
     get:
       summary: Fetch paginated rows from {{ $model->getProperty('name') }}
+      security:
+        - bearerAuth: []
       parameters:
         - in: query
           name: columns
@@ -52,8 +90,13 @@ paths:
                           items:
                             $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
   schemas:
      {{ view('admin::openapi.model_scheme', compact('model') + ['deep' => true]) }}
+     {{ view('admin::openapi.model_scheme', ['model' => Admin::getModel('User'), 'deep' => false]) }}
 @foreach( collect($model->getExportRelations())->unique('table') as $relationKey => $relation )
      {{ view('admin::openapi.model_scheme', [
       'model' => $relation['relation'],
