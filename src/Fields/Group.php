@@ -2,8 +2,12 @@
 
 namespace Admin\Fields;
 
-use Admin\Eloquent\AdminModel;
+use Admin;
 use Admin\Core\Fields\Group as BaseGroup;
+use Admin\Core\Fields\Mutations\FieldToArray;
+use Admin\Eloquent\AdminModel;
+use Admin\Models\SiteBuilder;
+use Fields;
 
 /*
  * Check also available parameters from Admin\Core\Fields\Group
@@ -44,6 +48,21 @@ class Group extends BaseGroup
      * @var  Closure
      */
     public $where = null;
+
+    /**
+     * Group attributes
+     *
+     * @var  array
+     */
+    public $attributes = [];
+
+    /*
+     * Forward methods to support nonstatic/stattic...
+     * origMethodName => alias
+     */
+    protected $forwardCalls = [
+        'inline' => 'inlineFields',
+    ];
 
     /**
      * Returns icon of group
@@ -92,6 +111,11 @@ class Group extends BaseGroup
      */
     public function width($width = 'full')
     {
+        //Add inline property into existing inline group
+        if ( strpos($this->width, '-inline') ) {
+            $width .= '-inline';
+        }
+
         $this->width = $width;
 
         return $this;
@@ -155,6 +179,20 @@ class Group extends BaseGroup
     }
 
     /**
+     * Create sitebuilder tab
+     *
+     * @return  Group
+     */
+    public static function builder()
+    {
+        if ( Admin::isEnabledSitebuilder() ) {
+            return self::tab(SiteBuilder::class)->icon('fa-th')->id('sitebuilder');
+        }
+
+        return [];
+    }
+
+    /**
      * Make full width group.
      * @param  array  $fields
      * @return Group
@@ -184,15 +222,17 @@ class Group extends BaseGroup
         return (new static($fields))->width(4)->type();
     }
 
+
     /**
-     * Group which will inline all fields in group
-     * Fields will be in one row, and not in new row.
-     * @param  array  $fields
-     * @return Group
+     * Set attributes for given group
+     *
+     * @param  string|array  $attributes
+     *
+     * @return  Group
      */
-    public function inline()
+    public function attributes($attributes)
     {
-        $this->width = $this->width.'-inline';
+        $this->attributes = Fields::mutate(FieldToArray::class, $attributes);
 
         return $this;
     }
@@ -228,4 +268,20 @@ class Group extends BaseGroup
 
         return $this;
     }
+
+    /**
+     * Group which will inline all fields in group
+     * Fields will be in one row, and not in new row.
+     * @param  array  $fields
+     * @return Group
+     */
+    public function inlineFields(array $fields = null)
+    {
+        if ( is_array($fields) && count($fields) ){
+            $this->fields = $fields;
+        }
+
+        return $this->width($this->width.'-inline');
+    }
+
 }

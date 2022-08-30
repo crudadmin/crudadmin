@@ -2,7 +2,6 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Ajax;
 use Admin;
 use Admin\Helpers\Button;
 use Admin\Helpers\Layout;
@@ -12,34 +11,50 @@ trait VueComponent
     /*
      * Return parsed field component, or multiple components
      */
-    public function getFieldsComponents($initial_request = false)
+    public function getFieldsComponents($initialRequest = false)
     {
         $fields = $this->getFields();
 
         $components = [];
 
         foreach ($fields as $key => $field) {
-            if (! array_key_exists('component', $field)) {
-                continue;
-            }
-
-            $componentsNames = explode(',', $field['component']);
-
-            foreach ($componentsNames as $name) {
-                if (! ($path = $this->getComponentRealPath($name))) {
-                    //Disable throw error on initial admin boot request
-                    if ($initial_request === true) {
-                        continue;
-                    }
-
-                    Ajax::error(sprintf(trans('admin::admin.component-missing'), $name, $key), null, null, 500);
+            foreach (['component', 'sub_component', 'column_component'] as $attribute) {
+                if (! array_key_exists($attribute, $field)) {
+                    continue;
                 }
 
-                $components[strtolower($name)] = $this->renderVuejsComponent($path);
+                $this->importComponentFromAttribute($initialRequest, $field[$attribute], $components);
+            }
+        }
+
+        $columns = array_get($this->getModelSettings() ?: [], 'columns', []);
+        foreach ($columns as $key => $column) {
+            if ( $column['component'] ?? null ){
+                $this->importComponentFromAttribute($initialRequest, $column['component'], $components);
             }
         }
 
         return $components;
+    }
+
+    private function importComponentFromAttribute($initialRequest, $componentNames, &$components)
+    {
+        $componentsNames = explode(',', $componentNames);
+
+        foreach ($componentsNames as $name) {
+            if (! ($path = $this->getComponentRealPath($name))) {
+                //Disable throw error on initial admin boot request
+                if ($initialRequest === true) {
+                    return;
+                }
+
+                return;
+            }
+
+            if ( $data = $this->renderVuejsComponent($path) ) {
+                $components[strtolower($name)] = $data;
+            }
+        }
     }
 
     /*
@@ -72,7 +87,7 @@ trait VueComponent
 
         preg_match("/\<$tagname.*?\>(.*?)\<\/$tagname\>/s", $string, $matches);
 
-        return trim($matches[1]);
+        return trim(@$matches[1]);
     }
 
     /*
@@ -126,8 +141,8 @@ trait VueComponent
         $path = $this->getComponentRealPath($filename);
 
         //Throw ajax error for button or layout component render
-        if ($path === null && ($this instanceof Button || $this instanceof Layout)) {
-            Ajax::error(sprintf(trans('admin::admin.component-missing'), $filename, ''), null, null, 500);
+        if ($path === null) {
+            return $filename;
         }
 
         return $this->renderVuejsComponent($path);

@@ -2,27 +2,35 @@
 
 namespace Admin\Controllers;
 
-use Ajax;
 use Admin;
-use Localization;
+use AdminLocalization;
+use Admin\Controllers\Crud\CRUDController;
 use Admin\Fields\Group;
 use Admin\Helpers\AdminRows;
+use Admin\Helpers\Layout;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
+use Admin\Helpers\SecureDownloader;
+use Admin\Helpers\SheetDownloader;
 use Illuminate\Http\Request;
-use Admin\Controllers\Controller as BaseController;
+use Illuminate\Support\Str;
+use Localization;
 
-class LayoutController extends BaseController
+class LayoutController extends CRUDController
 {
     public function index()
     {
         return [
             'version' => Admin::getVersion(),
+            'version_resources' => Admin::getResourcesVersion(),
             'version_assets' => Admin::getAssetsVersion(),
             'license_key' => config('admin.license_key'),
-            'user' => auth()->guard('web')->user()->getAdminUser(),
+            'user' => admin()->setAdminResponse(),
             'models' => $this->getAppTree(true),
             'languages' => $this->getLanguages(),
+            'admin_languages' => $this->getAdminLanguages(),
+            'admin_language' => admin()->language ? admin()->language : AdminLocalization::get(),
             'gettext' => config('admin.gettext', false),
-            'locale' => config('admin.locale', app()->getLocale()),
+            'locale' => app()->getLocale(),
             'localization' => trans('admin::admin'),
             'dashboard' => $this->getDashBoard(),
             'requests' => [
@@ -30,14 +38,15 @@ class LayoutController extends BaseController
                 'store' => action('\Admin\Controllers\Crud\InsertController@store'),
                 'update' => action('\Admin\Controllers\Crud\UpdateController@update'),
                 'delete' => action('\Admin\Controllers\Crud\DataController@delete'),
-                'togglePublishedAt' => action('\Admin\Controllers\Crud\DataController@togglePublishedAt'),
-                'getHistory' => action('\Admin\Controllers\Crud\DataController@getHistory', [':model', ':id']),
+                'getHistory' => action('\Admin\Controllers\HistoryController@getHistory', [':model', ':id']),
+                'removeFromHistory' => action('\Admin\Controllers\HistoryController@removeFromHistory'),
                 'updateOrder' => action('\Admin\Controllers\Crud\DataController@updateOrder'),
-                'buttonAction' => action('\Admin\Controllers\Crud\DataController@buttonAction'),
-                'download' => action('\Admin\Controllers\DownloadController@index'),
-                'rows' => action('\Admin\Controllers\LayoutController@getRows', [':model', ':parent', ':subid', ':langid', ':limit', ':page', ':count']),
-                'translations' => action('\Admin\Controllers\GettextController@getTranslations', [':id']),
-                'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id']),
+                'buttonAction' => action('\Admin\Controllers\ButtonController@action'),
+                'download' => action('\Admin\Controllers\DownloadController@adminDownload'),
+                'rows' => action('\Admin\Controllers\LayoutController@getRows', [':table']),
+                'translations' => action('\Admin\Controllers\GettextController@getEditorResponse', [':id', ':table']),
+                'switch_locale' => action('\Admin\Controllers\GettextController@switchAdminLanguage', [':id']),
+                'update_translations' => action('\Admin\Controllers\GettextController@updateTranslations', [':id', ':table']),
             ],
         ];
     }
@@ -47,48 +56,102 @@ class LayoutController extends BaseController
      */
     private function getDashBoard()
     {
-        $path = config('admin.dashboard', resource_path('views/admin/dashboard.blade.php'));
+        $dashboard = config('admin.dashboard');
 
-        if (! file_exists($path)) {
-            return '';
+        //Try load blade component
+        $path = $dashboard ?: resource_path('views/admin/dashboard.blade.php');
+        if (file_exists($path)) {
+            return [
+                'html' => view()->file($path)->render(),
+            ];
         }
 
-        return view()->file($path)->render();
+        //If vue template is available
+        if ( $dashboard ) {
+            return [
+                'vue' => $dashboard
+            ];
+        }
     }
 
     /*
      * Returns paginated rows and all required model informations
      */
-    public function getRows($table, $parent_table, $subid, $langid, $limit, $page, $count)
+    public function getRows($table)
     {
-        $model = Admin::getModelByTable($table);
+        $model = $this->getModel($table);
+        $isInitialRequest = request('initial') ? true : false;
 
         //Check if user has allowed model
-        if (! $model || ! auth()->guard('web')->user()->hasAccess($model)) {
-            Ajax::permissionsError();
+        if (! $model || ! admin()->hasAccess($model)) {
+            return autoAjax()->permissionsError();
         }
 
-        if ($parent_table == '0') {
-            $parent_table = null;
-        } else {
-            //Set parent row into model
-            $parent_row = Admin::getModelByTable($parent_table)->withoutGlobalScopes()->find($subid);
-
-            $model->setParentRow($parent_row);
+        if ( method_exists($model, 'beforeAdminRequest') ){
+            $model->beforeAdminRequest();
         }
 
-        $data = (new AdminRows($model))->returnModelData($parent_table, $subid, $langid, $limit, $page, $count);
+        //Set parent row into model
+        if ( $parentTable = request('parentTable') ){
+            $parentRow = $this->getModel($parentTable)
+                              ->withoutGlobalScopes()
+                              ->find(request('parentId'));
+
+            if ( $parentRow ) {
+                $model->setParentRow($parentRow);
+            }
+        }
+
+        $data = [];
+
+        //Model tree need to be generated at first order
+        //Because we want refresh all fields property by booted session.
+        $modelTree = $this->makePage(
+            $model,
+            false,
+            false,
+            $isInitialRequest
+        );
+
+        //On initial admin request
+        if ( $isInitialRequest === true ) {
+            $data['model'] = $model->beforeInitialAdminRequest();
+        }
 
         //Add token
         $data['token'] = csrf_token();
 
-        return $this->makePage(
-            $model,
+        //Add model data
+        $data['model'] = array_merge(@$data['model'] ?: [], $modelTree);
+
+        //Add rows data
+        $data = array_merge(
             $data,
-            false,
-            false,
-            $count == 0
+            (new AdminRows($model, request()))->returnModelData([], $isInitialRequest)
         );
+
+        //Modify intiial request data
+        if ( $isInitialRequest === true) {
+            $data['model'] = $model->afterInitialAdminRequest($data['model']);
+
+            //We can pass additional data into model
+            $data['model']['initial_data'] = $model->getAdminModelInitialData();
+        }
+
+        //Download sheet table
+        if ( request('download') === true ){
+            $sheet = new SheetDownloader($model, $data['rows']);
+
+            if (!($path = $sheet->generate())){
+                return autoAjax()->error(_('Tabuľku sa nepodarilo stiahnuť.'), 500);
+            }
+
+            return [
+                'download' => (new SecureDownloader($path))->getDownloadPath(true),
+            ];
+        }
+
+        return $data;
     }
 
     /*
@@ -139,10 +202,17 @@ class LayoutController extends BaseController
 
         $fields = $model->getFields();
 
+        //Translate model fields
         foreach ($fields as $key => $field) {
             $this->updateOptionsForm($key, $field, $fields);
 
             $this->findEqualOptions($key, $field, $fields);
+
+            foreach ($field as $k => $value) {
+                if ( in_array($k, AdminResourcesSyncer::$fieldsTranslatableKeys) ){
+                    $fields[$key][$k] = AdminResourcesSyncer::translate($value);
+                }
+            }
         }
 
         return $fields;
@@ -158,7 +228,7 @@ class LayoutController extends BaseController
         //If is model related recursive to itself
         if (
             ($count == 1 && in_array(class_basename(get_class($model)), $belongsToModel))
-            || $model->getProperty('inMenu', false) === true
+            || $model->getProperty('inMenu') === true
         ) {
             return false;
         }
@@ -190,16 +260,19 @@ class LayoutController extends BaseController
 
         //Bind pages into groups
         foreach ($models as $model) {
+            //We need refresh new instance of given model, because on logged user state there may be updated some properties
+            $model = $model->newInstance();
+
             if ($this->skipModelInTree($model)) {
                 continue;
             }
 
             //Check if user has allowed model
-            if (! auth()->guard('web')->user()->hasAccess($model)) {
-                $model->setProperty('active', false);
+            if (! admin()->hasAccess($model, 'read') && ! admin()->hasAccess($model, 'insert')) {
+                $model->disableModel = true;
             }
 
-            $page = $this->makePage($model, null, true, $initial_request);
+            $page = $this->makePage($model, true, $initial_request);
 
             if ($model->hasModelGroup()) {
                 $tree = $model->getModelGroupsTree();
@@ -237,18 +310,75 @@ class LayoutController extends BaseController
         return $this->addSlugPath($groups);
     }
 
+    private function isInlineTemplateKey($key)
+    {
+        $positions = (new Layout)->available_positions;
+
+        return in_array($key, $positions, true);
+    }
+
+    /*
+     * Return rendered blade layouts
+     */
+    protected function getLayouts($model)
+    {
+        $layouts = [];
+
+        $i = 0;
+        foreach ((array) $model->getProperty('layouts') as $key => $class) {
+            //Load inline template
+            if ($this->isInlineTemplateKey($key)) {
+                $classes = array_wrap($class);
+
+                foreach ($classes as $componentName) {
+                    $layouts[] = [
+                        'name' => strtoupper($componentName[0]).Str::camel(substr($componentName, 1)).'_'.$i.'AnonymousLayout',
+                        'type' => 'vuejs',
+                        'position' => $key,
+                        'view' => (new Layout)->renderVueJs($componentName),
+                        'component_name' => $componentName,
+                    ];
+                }
+            }
+
+            //Load template with layout class
+            elseif (class_exists($class)) {
+                $layout = new $class;
+
+                $view = $layout->build();
+
+                if (is_string($view) || $view instanceof \Illuminate\View\View) {
+                    $is_blade = method_exists($view, 'render');
+
+                    $layouts[] = [
+                        'name' => class_basename($class),
+                        'type' => $is_blade ? 'blade' : 'vuejs',
+                        'position' => $layout->position,
+                        'view' => $is_blade ? $view->render() : $view,
+                    ];
+                }
+            }
+
+            $i++;
+        }
+
+        return $layouts;
+    }
+
     /**
      * Return build model JSON instance.
      * @param  object  $model          model instance
-     * @param  object  $data           additional data for request
      * @param  bool $withChilds     return all model childs
      * @param  bool $layout_request if is first request for admin boot
      * @return json
      */
-    protected function makePage($model, $data = null, $withChilds = true, $initial_request = false, $withOptions = false)
+    protected function makePage($model, $withChilds = true, $initial_request = false, $withOptions = false)
     {
-        $childs_models = $model->getModelChilds();
+        //We need refresh fields for actual fields rules. Modified eg. by session.
+        //(some admin rules may not have available all fields. Or some properties may be changed)
+        $model->getFields(null, true);
 
+        $childs_models = $model->getModelChilds();
         $childs = [];
 
         foreach ($childs_models as $child_model) {
@@ -257,8 +387,8 @@ class LayoutController extends BaseController
             }
 
             // Check if user has allowed model
-            if (! auth()->guard('web')->user()->hasAccess($child_model)) {
-                $child_model->setProperty('active', false);
+            if (! admin()->hasAccess($child_model)) {
+                $child_model->disableModel = true;
             }
 
             $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
@@ -266,26 +396,32 @@ class LayoutController extends BaseController
             $childs[$child_model->getTable()] = $child;
         }
 
-        return array_merge((array) $data, [
-            'name' => $model->getProperty('name'),
-            'icon' => $model->getModelIcon(),
+        $data = [
+            'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
+            'title' => AdminResourcesSyncer::translate($model->getProperty('title')),
+            'icon' => $model->getProperty('icon'),
             'settings' => $model->getModelSettings(),
-            'active' => $model->getProperty('active'),
+            'active' => isset($model->disableModel) ? false : $model->getProperty('active'),
             'foreign_column' => $model->getForeignColumn(),
             'without_parent' => $model->getProperty('withoutParent') ?: false,
-            'in_tab' => $model->getProperty('inTab') ?: false,
+            'global_relation' => $model->getProperty('globalRelation') ?: false,
+            'in_menu' => $model->getProperty('inMenu', false),
             'hidden_tabs' => $model->getProperty('hidden_tabs') ?: [],
-            'reserved' => $model->getProperty('reserved') ?: false,
-            'title' => $model->getProperty('title'),
+            'hidden_groups' => $model->getProperty('hidden_groups') ?: [],
+            'reserved' => $this->getModelReversed($model),
             'columns' => $model->getBaseFields(),
             'inParent' => $model->getProperty('inParent') ?: false,
+            'single' => $model->getProperty('single') ?: false,
             'minimum' => $model->getProperty('minimum'),
             'maximum' => $model->getProperty('maximum'),
             'insertable' => $model->getProperty('insertable'),
             'editable' => $model->getProperty('editable'),
+            'displayable' => $model->getProperty('displayable'),
             'deletable' => $model->getProperty('deletable'),
             'publishable' => $model->getProperty('publishable'),
+            'publishableState' => $model->getProperty('publishableState'),
             'sortable' => $model->isSortable(),
+            'layouts' => $this->getLayouts($model),
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
             'fields' => $this->getModelFields($model, $withOptions),
@@ -293,8 +429,44 @@ class LayoutController extends BaseController
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
             'components' => $model->getFieldsComponents($initial_request),
+            'permissions' => $this->checkPermissions($model),
             'submenu' => [],
-        ]);
+        ];
+
+        $model->runAdminModules(function($module) use (&$data) {
+            if ( method_exists($module, 'adminModelRender') ) {
+                $module->adminModelRender($data);
+            }
+        });
+
+        //Mutate all parameters
+        if ( method_exists($model, 'adminModelRender') ) {
+            $data = $model->adminModelRender($data);
+        }
+
+        return $data;
+    }
+
+    private function getModelReversed($model)
+    {
+        if ( !($reserved = $model->getProperty('reserved')) ){
+            return false;
+        }
+
+        return array_filter(array_map(function($id) {
+            return (int)$id;
+        }, $reserved));
+    }
+
+    protected function checkPermissions($model)
+    {
+        $permissions = [];
+
+        foreach ($model->getModelPermissions() as $permissionKey => $name) {
+            $permissions[$permissionKey] = admin()->hasAccess($model, $permissionKey);
+        }
+
+        return $permissions;
     }
 
     /*
@@ -334,5 +506,17 @@ class LayoutController extends BaseController
         }
 
         return Localization::getLanguages();
+    }
+
+   /*
+     * Returns all admin languages
+     */
+    protected function getAdminLanguages()
+    {
+        if (! Admin::isEnabledAdminLocalization()) {
+            return [];
+        }
+
+        return AdminLocalization::getLanguages();
     }
 }

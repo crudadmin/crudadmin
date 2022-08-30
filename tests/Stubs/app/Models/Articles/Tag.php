@@ -29,7 +29,18 @@ class Tag extends AdminModel
     {
         return [
             'type' => 'name:Tag type|type:select|options:moovie,blog,article',
-            'article' => 'name:Head article|belongsTo:articles,name',
+            'article' => 'name:Head article|belongsTo:articles,:name :imaginary_column',
+        ];
+    }
+
+    public function options()
+    {
+        return [
+            'article_id' => Article::all()->map(function($item){
+                return $item->toArray() + [
+                    'imaginary_column' => 1,
+                ];
+            }),
         ];
     }
 }

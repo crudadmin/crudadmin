@@ -3,8 +3,10 @@
 namespace Admin\Providers;
 
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
-use Admin\Middleware\LocalizationMiddleware;
+use Localization;
+use Route;
 
 class LocalizationServiceProvider extends ServiceProvider
 {
@@ -16,20 +18,19 @@ class LocalizationServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('localization', \Admin\Helpers\Localization::class);
+        $this->app->bind('localization.admin', \Admin\Helpers\AdminLocalization::class);
+        $this->app->bind('localization.editormode', \Admin\Helpers\Localization\EditorMode::class);
     }
 
-    public function boot(Kernel $kernel)
+    public function boot(Kernel $kernel, Router $router)
     {
-        $this->loadMiddlewares($kernel);
-    }
+        //Boot localization. It will automatically check if can be booted,
+        //and will run all features...
+        Localization::fire();
 
-    //Register localization middleware
-    private function loadMiddlewares($kernel)
-    {
-        if ($kernel->hasMiddleware(LocalizationMiddleware::class)) {
-            return;
+        //Added default redirect
+        if ( config('admin.localization_remove_default') && Localization::canBootAutomatically() ) {
+            Route::get(Localization::getDefaultLanguage()->slug, '\Admin\Controllers\LocalizationController@redirect')->middleware('web');
         }
-
-        $kernel->prependMiddleware(LocalizationMiddleware::class);
     }
 }

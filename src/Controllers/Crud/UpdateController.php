@@ -5,8 +5,8 @@ namespace Admin\Controllers\Crud;
 use Admin\Controllers\Crud\Concerns\CRUDRelations;
 use Admin\Controllers\Crud\Concerns\CRUDResponse;
 use Admin\Controllers\Crud\InsertController;
-use Admin\Helpers\Ajax;
 use Admin\Requests\DataRequest;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class UpdateController extends InsertController
@@ -23,14 +23,14 @@ class UpdateController extends InsertController
 
         //Checks for disabled publishing
         if ($parentModel->getProperty('editable') == false) {
-            Ajax::error(trans('admin::admin.cannot-edit'));
+            return autoAjax()->error(trans('admin::admin.cannot-edit'));
         }
 
         //Validate parent model, and his childs relations if are available
         $rows = $this->checkValidation($request, true);
 
         //Upload files with postprocess if are available
-        $requests = $this->mutateRequests($request, $parentModel);
+        $requests = $this->mutateRequests($request, $parentModel, $rows);
 
         foreach ($requests as $data)
         {
@@ -51,16 +51,12 @@ class UpdateController extends InsertController
 
                 try {
                     $row->update($changes);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    return Ajax::mysqlError($e);
+                } catch (QueryException $e) {
+                    return autoAjax()->mysqlError($e);
                 }
 
-                /*
-                 * Save into history
-                 */
-                if ($model->getProperty('history') === true) {
-                    $row->historySnapshot($changes, $original);
-                }
+                //Save into history
+                $row->makeHistorySnapshot($changes, $original, 'update');
 
                 $this->updateBelongsToMany($model, $row, $request);
 
@@ -83,12 +79,16 @@ class UpdateController extends InsertController
         $message = $this->responseMessage(trans('admin::admin.success-save'));
 
         $mutatedAdminRows = array_combine(array_keys($rows), array_map(function($row){
-            return $row->getMutatedAdminAttributes();
+            return $row->getMutatedAdminAttributes(false, true);
         }, $rows));
 
-        Ajax::message($message, null, $this->responseType(), [
-            'rows' => $mutatedAdminRows,
-        ]);
+        return autoAjax()
+            ->toast($this->hasAdditionalMessages() ? false : true)
+            ->success($message)
+            ->type($this->responseType())
+            ->data([
+                'rows' => $mutatedAdminRows,
+            ]);
     }
 
     /*

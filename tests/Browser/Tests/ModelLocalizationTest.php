@@ -19,20 +19,22 @@ class ModelLocalizationTest extends BrowserTestCase
     {
         $this->browse(function (DuskBrowser $browser) {
             $browser->openModelPage(ModelLocalization::class)
-
+                    ->openForm()
                     //Check if row has been successfully added
                     ->fillForm(ModelLocalization::class, [
                         'name' => 'sk name',
                     ])->submitForm()->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['sk name'])
-
                     //Change into english language and check if table is empty
-                    ->valueWithEvent('[data-global-language-switch]', 2, 'change')
+                    ->jsClick('[data-global-language-switch]')
+                    ->jsClick('[data-global-language-switch] li:nth-child(2)')
+
                     ->waitUntilMissing('[data-id="1"]');
             $this->assertEquals([], $browser->getRows(ModelLocalization::class));
 
             //Add two rows into english language and check correct values
-            $browser->fillForm(ModelLocalization::class, [
+            $browser->openForm()
+                    ->fillForm(ModelLocalization::class, [
                         'name' => 'en name',
                     ])->submitForm()->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['en name'])
@@ -42,7 +44,8 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['en name second', 'en name']);
 
             //Change back to slovak language, and check correct rows
-            $browser->valueWithEvent('[data-global-language-switch]', 1, 'change')
+            $browser->jsClick('[data-global-language-switch]')
+                    ->jsClick('[data-global-language-switch] li:nth-child(1)')
                     ->waitFor('[data-id="1"]')
                     ->assertColumnRowData(ModelLocalization::class, 'name', ['sk name']);
         });
@@ -56,7 +59,7 @@ class ModelLocalizationTest extends BrowserTestCase
 
         $this->browse(function (DuskBrowser $browser) use ($row_sk, $row_en) {
             $browser->openModelPage(ModelLocale::class)
-
+                    ->openForm()
                     //Check if form values has been successfully filled
                     ->fillForm(ModelLocale::class, $row_sk, 'sk')
                     ->assertHasFormValues(ModelLocale::class, $row_sk, 'sk')
@@ -65,9 +68,10 @@ class ModelLocalizationTest extends BrowserTestCase
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
                     ->closeAlert()
+                    ->openForm()
 
                     //Check if form values has been successfully reseted after save
-                    ->assertFormIsEmpty(ModelLocale::class, 'sk')
+                    ->assertFormIsEmpty(ModelLocale::class, 'sk')->closeForm()
 
                     //Check if table after creation contains of correct column values
                     ->assertTableRowExists(ModelLocale::class, $this->getTableRow($row_sk))
@@ -86,6 +90,7 @@ class ModelLocalizationTest extends BrowserTestCase
                     //Check correct valeus
                     ->assertHasFormValues(ModelLocale::class, $row_sk, 'sk')
                     ->assertHasFormValues(ModelLocale::class, $row_en, 'en')
+                    ->closeForm()
                     ->assertTableRowExists(ModelLocale::class, $this->getTableRow($row_sk));
         });
 
@@ -99,6 +104,7 @@ class ModelLocalizationTest extends BrowserTestCase
             $browser->openModelPage(ModelLocale::class)
 
                     //Submit form and check if language switched is not colorized
+                    ->openForm()
                     ->submitForm()
                     ->assertHasNotClass('[data-form-language-switch] > button', 'has-error')
 

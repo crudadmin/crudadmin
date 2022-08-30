@@ -10,6 +10,15 @@ use Illuminate\Support\ServiceProvider;
 
 class FieldsServiceProvider extends ServiceProvider
 {
+    protected $allFields = [
+        'title', 'placeholder', 'hidden', 'orderBy', 'limit', 'multirows', 'defaultByOption', 'tooltip', 'editor_height',
+        'column_visible', 'component', 'sub_component', 'column_component', 'component_data', 'table_request_present',
+        'column_name', 'phone_link', 'ifExists', 'ifDoesntExists', 'hideOnUpdate', 'hideOnCreate', 'keepInRequest',
+        'inaccessible' => true, 'inaccessible_column' => true, 'invisible' => true, 'disabled' => true, 'readonly' => true,
+        'removeFromForm' => true, 'hideFromForm' => true,
+        'removeField' => true, 'hideField' => true, 'visibleField' => true,
+    ];
+
     /**
      * Register the service provider.
      *
@@ -18,11 +27,7 @@ class FieldsServiceProvider extends ServiceProvider
     public function boot()
     {
         //Register global crudadmin fields attributes
-        Fields::addAttribute([
-            'title', 'placeholder', 'hidden', 'disabled', 'orderBy', 'limit', 'multirows',
-            'invisible', 'component', 'column_name', 'removeFromForm', 'hideFromForm', 'phone_link',
-            'ifDoesntExists', 'hideOnUpdate', 'ifExists', 'hideOnCreate',
-        ]);
+        $this->registerAllFields();
 
         //Add CrudAdmin additional column type
         Fields::addColumnTypeBefore([
@@ -43,10 +48,31 @@ class FieldsServiceProvider extends ServiceProvider
         //We need register fields mutators into crudadmin core
         Fields::addMutation([
             Mutations\InterfaceRules::class,
+            Mutations\PermissionsSupport::class,
             Mutations\AddSelectSupport::class,
             Mutations\AddLocalizationSupport::class,
             Mutations\UpdateDateFormat::class,
             Mutations\AddEmptyValue::class,
         ]);
+    }
+
+    /**
+     * Register all fields with attribute types
+     *
+     * @return  void
+     */
+    public function registerAllFields()
+    {
+        foreach ($this->allFields as $key => $field) {
+            if ( $field === true ) {
+                Fields::addAttribute($key);
+
+                foreach (['If', 'IfNot', 'IfIn', 'IfNotIn'] as $postfix) {
+                    Fields::addAttribute($key.$postfix);
+                }
+            } else {
+                Fields::addAttribute($field);
+            }
+        }
     }
 }

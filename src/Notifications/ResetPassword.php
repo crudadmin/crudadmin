@@ -2,6 +2,7 @@
 
 namespace Admin\Notifications;
 
+use Admin;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 
@@ -57,9 +58,13 @@ class ResetPassword extends Notification
      */
     public function toMail($notifiable)
     {
-        if (method_exists($this->user, 'getResetLink')) {
-            $action = $this->user->getResetLink($this->token);
-        } elseif ($this->user instanceof \App\User) {
+        $user = $this->user;
+
+        $authModel = Admin::getAuthModel();
+
+        if (method_exists($user, 'getResetLink')) {
+            $action = $user->getResetLink($this->token);
+        } elseif ( $user instanceof $authModel ) {
             $action = admin_action('Auth\ResetPasswordController@showResetForm', $this->token);
         } else {
             $action = route('password.reset', $this->token);

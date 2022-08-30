@@ -6,22 +6,25 @@ use Admin;
 use Admin\Facades as Facades;
 use Admin\Helpers as Helpers;
 use Admin\Middleware as Middleware;
-use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+class AppServiceProvider extends AdminHelperServiceProvider
 {
     protected $providers = [
         FieldsServiceProvider::class,
+        AuthServiceProvider::class,
         AdminServiceProvider::class,
+        EventsServiceProvider::class,
         LocalizationServiceProvider::class,
         GettextServiceProvider::class,
         ValidatorServiceProvider::class,
         CommandsServiceProvider::class,
         PasswordResetServiceProvider::class,
-        ImageCompressorServiceProvider::class,
         PublishServiceProvider::class,
+        FrontendEditorServiceProvider::class,
+        SitetreeServiceProvider::class,
         SEOServiceProvider::class,
         HashServiceProvider::class,
+        RouteServiceProvider::class,
     ];
 
     protected $facades = [
@@ -29,14 +32,22 @@ class AppServiceProvider extends ServiceProvider
         'Ajax' => Helpers\Ajax::class,
         'Gettext' => Facades\Gettext::class,
         'Localization' => Facades\Localization::class,
+        'AdminLocalization' => Facades\AdminLocalization::class,
+        'EditorMode' => Facades\EditorMode::class,
+        'FrontendEditor' => Facades\FrontendEditor::class,
+        'SiteTree' => Facades\SiteTree::class,
         'SEO' => Facades\SEOFacade::class,
-        'ImageCompressor' => Facades\ImageCompressor::class,
-        'Image' => \Intervention\Image\Facades\Image::class,
     ];
 
     protected $routeMiddleware = [
         'admin' => Middleware\Authenticate::class,
         'admin.guest' => Middleware\RedirectIfAuthenticated::class,
+        'admin.autologout' => Middleware\LogoutAdminMiddleware::class,
+        'admin.verification' => Middleware\AdminVerificationMiddleware::class,
+        'hasAdminRole' => Middleware\HasAdminRole::class,
+        'hasDevMode' => Middleware\HasDevMode::class,
+        'localized' => Middleware\LocalizationMiddleware::class,
+        'adminLocalized' => Middleware\AdminLocalizationMiddleware::class,
     ];
 
     /**
@@ -47,16 +58,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         /*
-         * Bind route provider after application boot, for correct route actions in localizations
+         * Bind variable to admin views path
          */
-        $this->registerProviders([
-            RouteServiceProvider::class,
-        ]);
-
-        //Set admin locale
-        if (\Admin::isAdmin() === true) {
-            app()->setLocale(config('admin.locale', 'sk'));
-        }
+        $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'admin');
     }
 
     /**
@@ -66,7 +70,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeAdminConfigs();
+        $this->mergeAdminConfigs(
+            require __DIR__.'/../Config/config_additional.php',
+        );
 
         $this->registerFacades();
 
@@ -75,64 +81,5 @@ class AppServiceProvider extends ServiceProvider
         ], $this->providers));
 
         $this->bootRouteMiddleware();
-    }
-
-    public function registerFacades()
-    {
-        $this->app->booting(function () {
-            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-
-            foreach ($this->facades as $alias => $facade) {
-                $loader->alias($alias, $facade);
-            }
-        });
-    }
-
-    public function registerProviders(array $providers)
-    {
-        foreach ($providers as $provider) {
-            app()->register($provider);
-        }
-    }
-
-    public function bootRouteMiddleware()
-    {
-        foreach ($this->routeMiddleware as $name => $middleware) {
-            $router = $this->app['router'];
-
-            /*
-             * Support for laravel 5.3
-             * does not know aliasMiddleware method
-             */
-            if (method_exists($router, 'aliasMiddleware')) {
-                $router->aliasMiddleware($name, $middleware);
-            } else {
-                $router->middleware($name, $middleware);
-            }
-        }
-    }
-
-    /*
-     * Merge crudadmin config with esolutions config
-     */
-    private function mergeAdminConfigs($key = 'admin')
-    {
-        //Additional CrudAdmin Config
-        $crudAdminConfig = require __DIR__.'/../Config/config_additional.php';
-
-        $config = $this->app['config']->get($key, []);
-
-        $this->app['config']->set($key, array_merge($crudAdminConfig, $config));
-
-        //Merge selected properties with two dimensional array
-        foreach (['models', 'custom_rules', 'global_rules'] as $property) {
-            if (! array_key_exists($property, $crudAdminConfig) || ! array_key_exists($property, $config)) {
-                continue;
-            }
-
-            $attributes = array_merge($config[$property], $crudAdminConfig[$property]);
-
-            $this->app['config']->set($key.'.'.$property, $attributes);
-        }
     }
 }

@@ -30,11 +30,6 @@ class Language extends Model
     protected $group = 'settings';
 
     /*
-     * Acivate/deactivate model in administration
-     */
-    protected $active = true;
-
-    /*
      * Minimum page rows
      * Default = 0
      */
@@ -50,13 +45,10 @@ class Language extends Model
      */
     protected $delete_files = false;
 
-    public function settings()
-    {
-        return [
-            'title.insert' => trans('admin::admin.languages-add-new'),
-            'title.update' => trans('admin::admin.languages-update'),
-        ];
-    }
+    /*
+     * Where will be located po/mo files in storage lang directory
+     */
+    public $gettextDirectory = 'app';
 
     /*
      * Automatic form and database generation
@@ -67,5 +59,26 @@ class Language extends Model
             'name' => 'name:admin::admin.languages-name|placeholder:admin::admin.languages-title|required|max:25',
             'slug' => 'name:admin::admin.languages-prefix|placeholder:admin::admin.languages-prefix-title|required|size:2|unique:languages,slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
         ];
+    }
+
+    /*
+     * Returns if model has gettext support
+     */
+    public function hasGettextSupport()
+    {
+        return config('admin.gettext') === true;
+    }
+
+    /*
+     * From this files will be loaded all translates
+     */
+    public function sourcePaths()
+    {
+        return config('admin.gettext_source_paths', []);
+    }
+
+    public function loadGettextFilesWithReferences()
+    {
+        return true;
     }
 }

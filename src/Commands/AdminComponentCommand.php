@@ -53,7 +53,7 @@ class AdminComponentCommand extends GeneratorCommand
      */
     public function handle()
     {
-        $this->template_type = $this->choice('What type of component would you like?', ['form field', 'layout', 'button'], 0);
+        $this->template_type = $this->choice('What type of component would you like?', ['form field', 'layout', 'button', 'column'], 0);
 
         //Laravel 5.4 support
         if (method_exists($this, 'fire')) {
@@ -76,6 +76,8 @@ class AdminComponentCommand extends GeneratorCommand
             $stub = 'LayoutVueJs';
         } elseif ($this->template_type == 'button') {
             $stub = 'ButtonVuejsLayout';
+        } elseif ($this->template_type == 'column') {
+            $stub = 'ColumnComponent';
         }
 
         return __DIR__.'/../Stubs/'.$stub.'.stub';
@@ -92,6 +94,8 @@ class AdminComponentCommand extends GeneratorCommand
             return 'layouts';
         } elseif ($this->template_type == 'button') {
             return 'buttons';
+        } elseif ($this->template_type == 'column') {
+            return 'columns';
         }
 
         return '';

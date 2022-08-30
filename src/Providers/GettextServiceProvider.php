@@ -2,12 +2,16 @@
 
 namespace Admin\Providers;
 
+use Gettext\Extractors\VueJs;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class GettextServiceProvider extends ServiceProvider
 {
-    private $GettextBladeDirective = '<script src="<?php echo Gettext::getJSPlugin() ?>"></script>';
+    public function getBladeDirective()
+    {
+        return file_get_contents(view('admin::directives.gettext-setup')->getPath());
+    }
 
     /**
      * Register the service provider.
@@ -30,11 +34,22 @@ class GettextServiceProvider extends ServiceProvider
     private function registerBladeDirectives()
     {
         Blade::directive('translates', function ($model) {
-            return $this->GettextBladeDirective;
+            return $this->getBladeDirective();
         });
 
         Blade::directive('gettext', function ($model) {
-            return $this->GettextBladeDirective;
+            return $this->getBladeDirective();
         });
+
+        //Fix vuejs v-html extractor
+        VueJs::$options = VueJs::$options + [
+            'attributePrefixes' => [
+                ':',
+                'v-bind:',
+                'v-on:',
+                'v-text',
+                'v-html',
+            ],
+        ];
     }
 }

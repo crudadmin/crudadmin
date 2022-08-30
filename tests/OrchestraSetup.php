@@ -2,11 +2,13 @@
 
 namespace Admin\Tests;
 
-use Admin\Tests\App\User;
-use Illuminate\Support\Facades\File;
-use Admin\Providers\AppServiceProvider as AdminServiceProvider;
+use Admin;
 use Admin\Core\Providers\AppServiceProvider as CoreServiceProvider;
+use Admin\Providers\AppServiceProvider as AdminServiceProvider;
 use Admin\Resources\Providers\AppServiceProvider as ResourcesServiceProvider;
+use Admin\Tests\App\User;
+use Admin\Tests\Concerns\Dumper\MySqlDumper;
+use Illuminate\Support\Facades\File;
 
 trait OrchestraSetup
 {
@@ -51,8 +53,9 @@ trait OrchestraSetup
      */
     protected function setAdminEnvironmentSetUp($app)
     {
-        //Bind app path
-        $app['path'] = $this->getStubPath('app');
+        //Bind app path, BECAUSE we does not want use
+        //app directory in orchestra vendor location... We want use Stub folder
+        $app->useAppPath($this->getStubPath('app'));
 
         $app['config']->set('app.debug', true);
 
@@ -63,11 +66,10 @@ trait OrchestraSetup
         // Rewrite default user model
         $app['config']->set('auth.providers.users.model', User::class);
 
-        // Setup default database to use sqlite :memory:
         $app['config']->set('admin.app_namespace', 'Admin\Tests\App');
 
         //Add submenu tree settings
-        $app['config']->set('admin.groups', config('admin.groups', []) + [
+        $app['config']->set('admin.groups', array_wrap(config('admin.groups', [])) + [
             'fields' => 'Fields',
             'localization' => 'Localization',
             'level1' => 'My tree level 1',
@@ -181,7 +183,23 @@ trait OrchestraSetup
      */
     public function installAdmin()
     {
-        return $this->artisan('admin:install');
+        $dumper = new MySqlDumper();
+
+        $dumper->cacheDatabaseAndRestore(function(){
+            $this->artisan('admin:install');
+        });
+
+        //If missing admin config
+        if ( !file_exists(config_path('admin.php')) ) {
+           $this->artisan('admin:install');
+        }
+
+        //If missing admin resources
+        if ( !file_exists(public_path('vendor/crudadmin/js')) ) {
+           $this->artisan('admin:update');
+        }
+
+        return $this;
     }
 
     /*

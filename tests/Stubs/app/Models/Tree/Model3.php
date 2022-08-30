@@ -36,6 +36,10 @@ class Model3 extends AdminModel
         ];
     }
 
+    protected $settings = [
+        'grid.splitmode' => true,
+    ];
+
     protected $layouts = [
         'top' => 'TopLayout.vue',
         'bottom' => 'BottomLayout.vue',

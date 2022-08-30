@@ -324,10 +324,14 @@ trait AdminBrowserAssertions
             return $(this).attr('class')
         })");
 
+
+        $tableColumns = array_map(function ($item) {
+            return 'th-'.$item;
+        }, array_values(array_merge($excepted, ['options-buttons'])));
+        $tableColumns = array_merge(['row-draggable', 'select-row-checkbox'], $tableColumns);
+
         PHPUnit::assertEquals(
-            $columns[0], array_map(function ($item) {
-                return 'th-'.$item;
-            }, array_values(array_merge($excepted, ['options-buttons']))),
+            $columns[0], $tableColumns,
             'Table ['.$model->getTable().'] does not match excepted columns list'
         );
 
@@ -480,6 +484,15 @@ trait AdminBrowserAssertions
         $element = $this->script('return $("'.str_replace('"', '\"', $query).'").length;');
 
         PHPUnit::assertFalse($element[0] > 0, 'Element ['.$query.'] does not exists');
+
+        return $this;
+    }
+
+    public function assertSeeInFragment($element, $text)
+    {
+        $elements = $this->script('return $(\''.$element.':contains(\\\''.$text.'\\\')\').length');
+
+        PHPUnit::assertTrue($elements[0] > 0, 'Element ['.$element.'] is not visible.');
 
         return $this;
     }

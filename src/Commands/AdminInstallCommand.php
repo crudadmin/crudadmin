@@ -3,36 +3,15 @@
 namespace Admin\Commands;
 
 use Admin;
+use Admin\Helpers\AdminInstall;
+use Admin\Models\User;
 use Artisan;
-use App\User;
 use Illuminate\Console\Command;
-use Admin\Models\User as BaseUser;
 use Illuminate\Console\ConfirmableTrait;
 
 class AdminInstallCommand extends Command
 {
     use ConfirmableTrait;
-
-    public function getCredentials($user = null)
-    {
-        //Default crudadmin credentials
-        $credentials = [
-            'username' => 'Administrator',
-            'email' => 'admin@admin.com',
-        ];
-
-        //Use credentials from admin model
-        if ($user) {
-            $credentials = ($user->getProperty('demo') ?: []) + $credentials;
-        }
-
-        //Set testing password
-        if (app()->environment('testing')) {
-            $credentials['password'] = 'password';
-        }
-
-        return $credentials;
-    }
 
     /**
      * The name and signature of the console command.
@@ -47,16 +26,6 @@ class AdminInstallCommand extends Command
      * @var string
      */
     protected $description = 'Install Admin packpage';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * Execute the console command.
@@ -76,8 +45,6 @@ class AdminInstallCommand extends Command
         $this->createSuperUser();
 
         $this->line('Installation completed!');
-
-        parent::__construct();
     }
 
     public function publishVendor()
@@ -89,6 +56,10 @@ class AdminInstallCommand extends Command
         Artisan::call('vendor:publish', ['--tag' => 'admin.languages']);
 
         Admin::publishAssetsVersion();
+
+        Admin::addGitignoreFiles([
+            storage_path('/crudadmin')
+        ]);
 
         $this->line('<comment>+ Vendor directories has been successfully published</comment>');
     }
@@ -106,20 +77,15 @@ class AdminInstallCommand extends Command
 
     public function rewriteUserModel()
     {
-        // Checks if model has been copied
-        if (! file_exists(app_path('User.php')) || ! class_exists('App\User') || ! Admin::isAdminModel(new User)) {
+        // Checks if model has been replaced. If no AdminUserModel has been found
+        // We need rewrite actual UserModel
+        if ( Admin::getAuthModel() instanceof User ) {
             Artisan::call('vendor:publish', [
                 '--tag' => 'admin.user',
                 '--force' => true,
             ]);
 
-            //Replace namespace in new user model
-            $user_model = app_path('User.php');
-
-            if (
-                ! ($content = @file_get_contents($user_model))
-                || ! @file_put_contents($user_model, str_replace('Admin\Models;', config('admin.app_namespace').';', $content))
-            ) {
+            if ( !AdminInstall::setAuthModelNamespace() ) {
                 $this->error('Some error with replacing namespace in User model...');
                 die;
             }
@@ -143,18 +109,30 @@ class AdminInstallCommand extends Command
         ]);
     }
 
-    protected function getUserModel()
+    public function getCredentials($user = null)
     {
-        if (! class_exists('App\User') || ! Admin::isAdminModel(new User)) {
-            return new BaseUser;
-        } else {
-            return new User;
+        //Default crudadmin credentials
+        $credentials = [
+            'username' => 'Administrator',
+            'email' => 'admin@admin.com',
+        ];
+
+        //Use credentials from admin model
+        if ($user) {
+            $credentials = ($user->getProperty('demo') ?: []) + $credentials;
         }
+
+        //Set testing password
+        if (app()->environment('testing')) {
+            $credentials['password'] = 'password';
+        }
+
+        return $credentials;
     }
 
     public function createSuperUser()
     {
-        $user = $this->getUserModel();
+        $user = Admin::getAuthModel();
 
         $credentials = $this->getCredentials($user);
 

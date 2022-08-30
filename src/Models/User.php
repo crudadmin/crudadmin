@@ -2,12 +2,15 @@
 
 namespace Admin\Models;
 
+use Admin\Admin\Buttons\LogoutUser;
 use Admin\Eloquent\Authenticatable;
+use Admin\Fields\Group;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, HasApiTokens;
 
     /*
      * Model created date, for ordering tables in database and in user interface
@@ -36,6 +39,15 @@ class User extends Authenticatable
      */
     protected $minimum = 1;
 
+    /**
+     * Buttons
+     *
+     * @var  array
+     */
+    protected $buttons = [
+        LogoutUser::class,
+    ];
+
     /*
      * Automatic form and database generation
      * @name - field name
@@ -50,7 +62,9 @@ class User extends Authenticatable
             'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:60|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
             'password' => 'name:Heslo|type:password|confirmed|min:4|max:40|'.(isset($row) ? '' : '|required'),
             'avatar' => 'name:Profilová fotografia|type:file|image',
-            'enabled' => 'name:Aktívny|type:checkbox|default:1',
+            Group::fields([
+                'enabled' => 'name:Aktívny|type:checkbox|default:1',
+            ])->inline(),
         ];
     }
 }

@@ -14,32 +14,49 @@ trait ModelLayoutBuilder
         return is_string($this->group) && ! empty($this->group);
     }
 
+    private function getAdminModelGroups()
+    {
+        return Admin::cache('admin.tree.groups', function(){
+            $groups = array_wrap(config('admin.groups', []));
+
+            foreach ($groups as $key => $value) {
+                if ( is_callable($value) ){
+                    unset($groups[$key]);
+
+                    $groups = array_merge($groups, $value());
+                }
+            }
+
+            return $groups;
+        });
+    }
+
     /*
      * Returns group for submenu
      */
     public function getModelGroupsTree()
     {
-        $config = config('admin.groups', []);
+        $groups = $this->getAdminModelGroups();
 
         //If model has no group
-        if (! ($group_key = $this->group)) {
+        if (! ($groupKey = $this->group)) {
             return;
         }
 
-        $group_tree = explode('.', $group_key);
+        $groupTree = explode('.', $groupKey);
 
         $tree = [];
 
-        foreach ($group_tree as $i => $key) {
-            $group_key = implode('.', array_slice($group_tree, 0, $i + 1));
+        foreach ($groupTree as $i => $key) {
+            $groupKey = implode('.', array_slice($groupTree, 0, $i + 1));
 
             //Get group from config
-            $group_name = array_key_exists($group_key, $config) ? $config[$group_key] : $group_key;
+            $groupName = array_key_exists($groupKey, $groups) ? $groups[$groupKey] : $groupKey;
 
             $tree[] = [
-                'name' => is_array($group_name) ? $group_name[0] : $group_name,
-                'icon' => is_array($group_name) && isset($group_name[1]) ? $group_name[1] : null,
-                'key' => $group_key,
+                'name' => is_array($groupName) ? $groupName[0] : $groupName,
+                'icon' => is_array($groupName) && isset($groupName[1]) ? $groupName[1] : null,
+                'key' => $groupKey,
             ];
         }
 
@@ -58,7 +75,7 @@ trait ModelLayoutBuilder
         $models = Admin::getAdminModels();
 
         foreach ($models as $model) {
-            if (! $model->belongsToModel) {
+            if (! $model->getProperty('belongsToModel')) {
                 continue;
             }
 

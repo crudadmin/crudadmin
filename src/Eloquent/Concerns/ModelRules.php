@@ -17,6 +17,16 @@ trait ModelRules
     private $backup_original = null;
 
     /*
+     * Disable all admin rules
+     */
+    private $disableAllAdminRules = false;
+
+    /*
+     * Which rules are being performed
+     */
+    private $performingRuleMethods = [];
+
+    /*
      * Returns cached admin rule class
      */
     protected function getCachedAdminRuleClass($class)
@@ -31,8 +41,10 @@ trait ModelRules
      */
     public function getAdminRules($callback)
     {
-        if ($this->rules && is_array($this->rules)) {
-            foreach ($this->rules as $class) {
+        $rules = $this->getProperty('rules');
+
+        if ($rules && is_array($rules)) {
+            foreach ($rules as $class) {
                 $rule = $this->getCachedAdminRuleClass($class);
 
                 $callback($rule);
@@ -40,22 +52,40 @@ trait ModelRules
         }
     }
 
+    /**
+     * Disable all admin rules
+     *
+     * @param  bool  $state
+     * @return this
+     */
+    public function disableAllAdminRules($state = true)
+    {
+        $this->disableAllAdminRules = $state;
+
+        return $this;
+    }
+
     /*
      * Check if rule can be initialized in interface types
      */
-    private function canRunRule($rule, $saved = false)
+    private function canRunRule($rule)
     {
-        //If is not admin interface allowed, skip rules
-        if (Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === false) {
+        //If rules are disabled
+        if ( $this->disableAllAdminRules === true ) {
             return false;
+        }
+
+        //If is not admin interface allowed, skip rules
+        if (Admin::isAdmin() && property_exists($rule, 'admin') && $rule->admin === true) {
+            return true;
         }
 
         //If is not frontend interface allowed, skip rules
-        if (Admin::isFrontend() && (! property_exists($rule, 'frontend') || $rule->frontend === false)) {
-            return false;
+        if (Admin::isFrontend() && property_exists($rule, 'frontend') && $rule->frontend === true) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     private function isDeletingRow()
@@ -70,14 +100,14 @@ trait ModelRules
      */
     private function beforeSaveMethods($rule, $rules)
     {
-        if (method_exists($rule, 'fire')) {
-            $rule->fire($this);
+        if (method_exists($rule, $method = 'fire')) {
+            $this->runRuleMethod($rule, $method);
         }
 
         if (in_array('creating', $rules)) {
             foreach (['create', 'creating'] as $method) {
                 if (method_exists($rule, $method) && ! $this->exists) {
-                    $rule->{$method}($this);
+                    $this->runRuleMethod($rule, $method);
                 }
             }
         }
@@ -85,7 +115,7 @@ trait ModelRules
         if (in_array('updating', $rules)) {
             foreach (['update', 'updating'] as $method) {
                 if (method_exists($rule, $method) && $this->exists) {
-                    $rule->{$method}($this);
+                    $this->runRuleMethod($rule, $method);
                 }
             }
         }
@@ -93,8 +123,20 @@ trait ModelRules
         if (in_array('deleting', $rules)) {
             foreach (['delete', 'deleting'] as $method) {
                 if (method_exists($rule, $method) && $this->isDeletingRow()) {
-                    $rule->{$method}($this);
+                    $this->runRuleMethod($rule, $method);
                 }
+            }
+        }
+
+        if (in_array($method = 'unpublishing', $rules)) {
+            if (method_exists($rule, $method)) {
+                $this->runRuleMethod($rule, $method);
+            }
+        }
+
+        if (in_array($method = 'publishing', $rules)) {
+            if (method_exists($rule, $method)) {
+                $this->runRuleMethod($rule, $method);
             }
         }
     }
@@ -105,27 +147,53 @@ trait ModelRules
      */
     private function afterSaveMethods($rule, $rules, $exists)
     {
-        if (method_exists($rule, 'fired')) {
-            $rule->fired($this);
+        if (method_exists($rule, $method = 'fired')) {
+            $this->runRuleMethod($rule, $method);
         }
 
-        if (in_array('created', $rules)) {
-            if (method_exists($rule, 'created') && ! $exists) {
-                $rule->created($this);
+        if (in_array($method = 'created', $rules)) {
+            if (method_exists($rule, $method) && ! $exists) {
+                $this->runRuleMethod($rule, $method);
             }
         }
 
-        if (in_array('updated', $rules)) {
-            if (method_exists($rule, 'updated') && $exists) {
-                $rule->updated($this);
+        if (in_array($method = 'updated', $rules)) {
+            if (method_exists($rule, $method) && $exists) {
+                $this->runRuleMethod($rule, $method);
             }
         }
 
-        if (in_array('deleted', $rules)) {
-            if (method_exists($rule, 'deleted')) {
-                $rule->deleted($this);
+        if (in_array($method = 'deleted', $rules)) {
+            if (method_exists($rule, $method)) {
+                $this->runRuleMethod($rule, $method);
             }
         }
+
+        if (in_array($method = 'unpublished', $rules)) {
+            if (method_exists($rule, $method)) {
+                $this->runRuleMethod($rule, $method);
+            }
+        }
+
+        if (in_array($method = 'published', $rules)) {
+            if (method_exists($rule, $method)) {
+                $this->runRuleMethod($rule, $method);
+            }
+        }
+    }
+
+    private function runRuleMethod($rule, $method)
+    {
+        $this->performingRuleMethods[] = $method;
+
+        $rule->{$method}($this);
+
+        $this->performingRuleMethods = array_diff($this->performingRuleMethods, [$method]);
+    }
+
+    public function isRuleMethodPerforming($methods)
+    {
+        return count(array_intersect($this->performingRuleMethods, $methods)) > 0;
     }
 
     /*
@@ -141,7 +209,9 @@ trait ModelRules
      */
     public function backupOriginalAttributes()
     {
-        return $this->backup_original = $this->getOriginal() ?: [];
+        $this->backup_original = $this->getRawOriginal() ?: [];
+
+        return $this->getOriginal();
     }
 
     /*

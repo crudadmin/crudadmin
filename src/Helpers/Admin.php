@@ -3,9 +3,14 @@
 namespace Admin\Helpers;
 
 use Admin\Core\Helpers\AdminCore;
+use Admin\Core\Helpers\Storage\AdminFile;
 
 class Admin extends AdminCore
 {
+    private $isAdmin = null;
+
+    private $isFrontend = null;
+
     /*
      * We want share loaded models between AdminCore and Admin classes
      */
@@ -14,12 +19,21 @@ class Admin extends AdminCore
         return AdminCore::class;
     }
 
+    public function getAuthModel()
+    {
+        return $this->getModelByTable('users');
+    }
+
     /*
      * Check if is admin interface
      */
     public function isAdmin()
     {
-        return request()->segment(1) == 'admin';
+        if ( $this->isAdmin !== null ){
+            return $this->isAdmin;
+        }
+
+        return $this->isAdmin = request()->segment(1) == 'admin';
     }
 
     /*
@@ -27,7 +41,11 @@ class Admin extends AdminCore
      */
     public function isFrontend()
     {
-        return ! $this->isAdmin() && ! app()->runningInConsole();
+        if ( $this->isFrontend !== null ){
+            return $this->isFrontend;
+        }
+
+        return $this->isFrontend = (! $this->isAdmin() && ! app()->runningInConsole());
     }
 
     /*
@@ -39,11 +57,19 @@ class Admin extends AdminCore
     }
 
     /*
+     * Returns if is in config allowed multi languages support
+     */
+    public function isEnabledAdminLocalization()
+    {
+        return config('admin.admin_localization', false);
+    }
+
+    /*
      * Check if admin roles are enabled
      */
     public function isRolesEnabled()
     {
-        return config('admin.admin_groups', false);
+        return config('admin.admin_groups', false) || config('admin.admin_roles', false);
     }
 
     /*
@@ -63,6 +89,38 @@ class Admin extends AdminCore
     }
 
     /*
+     * Check if is seo enabled
+     */
+    public function isSeoEnabled()
+    {
+        return config('admin.seo', false);
+    }
+
+    /*
+     * Check if is frontend editor extension enabled
+     */
+    public function isEnabledFrontendEditor()
+    {
+        return config('admin.frontend_editor', false);
+    }
+
+    /*
+     * Check if is frontend editor extension enabled
+     */
+    public function isEnabledSitebuilder()
+    {
+        return config('admin.sitebuilder', false);
+    }
+
+    /*
+     * Check if is frontend editor extension enabled
+     */
+    public function isEnabledSitetree()
+    {
+        return config('admin.sitetree', false);
+    }
+
+    /*
      * Get stub path
      */
     public function stub($stub)
@@ -75,25 +133,25 @@ class Admin extends AdminCore
      */
     public function start()
     {
-        $this->set('microtime.start', microtime(true));
+        return $this->set('microtime.start', microtime(true));
     }
 
     /*
      * Return time in seconds
      */
-    public function end()
+    public function end($timestamp = null)
     {
-        return microtime(true) - $this->get('microtime.start', 0);
+        return round(microtime(true) - ($timestamp ?: $this->get('microtime.start', 0)), 4);
     }
 
     /*
      * Returns version of package from packagelist
      */
-    protected function getPackageVersion()
+    protected function getPackageVersion($packageName)
     {
-        $composer_file = base_path('composer.lock');
+        $composerFile = base_path('composer.lock');
 
-        if (file_exists($composer_file)) {
+        if (file_exists($composerFile)) {
             if (! ($data = file_get_contents(base_path('composer.lock')))) {
                 return false;
             }
@@ -102,7 +160,7 @@ class Admin extends AdminCore
 
             foreach ([$json->packages, $json->{'packages-dev'}] as $list) {
                 foreach ($list as $package) {
-                    if ($package->name == 'crudadmin/crudadmin') {
+                    if ($package->name == $packageName) {
                         return $package->version;
                     }
                 }
@@ -122,7 +180,19 @@ class Admin extends AdminCore
             return 'dev-test';
         }
 
-        return $this->getPackageVersion() ?: 'dev-master';
+        return $this->getPackageVersion('crudadmin/crudadmin') ?: 'dev-master';
+    }
+
+    /*
+     * Returns version of package
+     */
+    public function getResourcesVersion()
+    {
+        if ($this->isTesting()) {
+            return 'dev-test';
+        }
+
+        return $this->getPackageVersion('crudadmin/resources') ?: 'dev-master';
     }
 
     /*
@@ -179,9 +249,9 @@ class Admin extends AdminCore
         $directory = self::getAssetsVersionPath();
 
         //Create directory if not exists
-        File::makeDirs($directory);
+        AdminFile::makeDirs($directory);
 
-        $this->files->put($directory.'version.txt', self::getVersion());
+        $this->files->put($directory.'version.txt', self::getResourcesVersion());
 
         $htaccess = $directory.'.htaccess';
 
@@ -192,12 +262,16 @@ class Admin extends AdminCore
         $this->addGitignoreFiles();
     }
 
-    public function addGitignoreFiles()
+    public function addGitignoreFiles($directories = null)
     {
         $gitignore = "*\n!.gitignore";
 
-        foreach ([public_path(self::getAdminAssetsPath()), public_path('uploads')] as $dir) {
-            File::makeDirs($dir);
+        $directories = $directories ?: [
+            public_path(self::getAdminAssetsPath()),
+        ];
+
+        foreach ($directories as $dir) {
+            AdminFile::makeDirs($dir);
 
             file_put_contents($dir.'/.gitignore', $gitignore);
         }

@@ -11,7 +11,7 @@
 
 <script type="text/javascript">
 export default {
-    props : ['model', 'row', 'rows', 'request'],
+    props : ['model', 'row', 'rows', 'request', 'data'],
 
     data(){
         return {

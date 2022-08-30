@@ -25,12 +25,14 @@ class ModelFieldsTypesTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
 
                     //Check if validation of every field does work
+                    ->openForm()
+                    ->waitForCkeditor() //ckeditor pause
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->submitForm()
                     ->assertHasValidationError(FieldsType::class, $fieldKeys)
 
                     //Check if custom component renders properly
-                    ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with empty value.')
+                    ->assertSeeInFragment('[data-field="custom"] p', 'This is my first custom component for field my custom field, with empty value.')
 
                     //Check if form values has been successfully filled
                     ->fillForm(FieldsType::class, $row)
@@ -38,24 +40,26 @@ class ModelFieldsTypesTest extends BrowserTestCase
 
                     //Check if custom component is modified properly
                     //Also check if row events has been triggered properly
-                    ->assertSeeIn('[data-field="custom"] p', 'This is my first custom component for field my custom field, with my custom value value.')
-                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'my custom value')
-                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'true')
+                    ->assertSeeInFragment('[data-field="custom"] p', 'This is my first custom component for field my custom field, with my custom value value.')
+                    ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'my custom value')
+                    ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'true')
 
                     //Check if form has been successfully saved
                     ->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))
+                    ->closeAlert()
+                    ->openForm()
 
                     //Check if component values are reseted after new row has been created
-                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'no value')
-                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'no value')
+                    ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'no value')
+                    ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'no value')
 
                     //Check if form values has been successfully reseted after save and validation errors are gone
-                    ->closeAlert()
                     ->assertDoesNotHaveValidationError(FieldsType::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsType::class)
 
                     //Check if table after creation contains of correct column values
+                    ->closeForm()
                     ->assertTableRowExists(FieldsType::class, $this->getTableRow($row))
 
                     //Open row, update it, and check if still has same values after update without changing anything
@@ -63,8 +67,8 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsType::class, $row)
 
                     //Check if row events has been triggered on new row open
-                    ->assertSeeIn('[data-field="custom"] .custom-field-row-event', 'my custom value')
-                    ->assertSeeIn('[data-field="custom"] .checkbox-field-row-event', 'true')
+                    ->assertSeeInFragment('[data-field="custom"] .custom-field-row-event', 'my custom value')
+                    ->assertSeeInFragment('[data-field="custom"] .checkbox-field-row-event', 'true')
 
                     //Update row and check if has same values
                     ->fillForm(FieldsType::class, [
@@ -74,6 +78,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
                     ->assertHasFormValues(FieldsType::class, $row)
+                    ->closeForm()
                     ->assertTableRowExists(FieldsType::class, $this->getTableRow($row));
         });
 
@@ -94,6 +99,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
             $browser->openModelPage(FieldsType::class)
                     //Open row and check if has correct values
                     ->openRow(1)
+                    ->waitForCkeditor()
                     ->assertHasFormValues(FieldsType::class, $create)
 
                     //Update row and check if values has been properly changed
@@ -107,7 +113,7 @@ class ModelFieldsTypesTest extends BrowserTestCase
                     ->assertHasFormValues(FieldsType::class, $rowUpdated)
 
                     //Reset form after update and check for empty values
-                    ->press(trans('admin::admin.new-row'))
+                    ->press(_('Nový typ'))
                     ->assertFormIsEmpty(FieldsType::class)
 
                     //Check if table contains of correct column values
@@ -125,8 +131,8 @@ class ModelFieldsTypesTest extends BrowserTestCase
             'text' => 'This is my text example value',
             'editor' => '<p>This is my editor <strong>example</strong> value</p>',
             'select' => 'option a',
-            'integer' => '10',
-            'decimal' => '11.50',
+            'integer' => 10,
+            'decimal' => 11.51,
             'file' => 'image1.jpg',
             'password' => 'password_test',
             'date' => date('d.m.Y'),

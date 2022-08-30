@@ -2,241 +2,81 @@
 
 namespace Admin\Helpers;
 
-use Ajax;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Admin\Eloquent\AdminModel;
 
 class AdminRows
 {
     protected $model = null;
+    protected $parentTable;
+    protected $parentId;
+    protected $limit;
+    protected $page;
+    protected $languageId;
+    protected $scopes;
+    protected $search;
 
     /**
      * Class constructor
      *
      * @param  Admin\Eloquent\AdminModel  $model
      */
-    public function __construct(AdminModel $model)
+    public function __construct(AdminModel $model, $request = null)
     {
-        $this->model = $model;
-    }
+        $this->model = $model->getAdminRows();
 
-    private function isPrimaryKey($column, $columns)
-    {
-        if (in_array($column, ['id'])) {
-            return true;
-        }
-
-        //If is correct relationship id
-        if (count($columns) == 1) {
-            if ($this->model->hasFieldParam($column, 'belongsToMany')) {
-                return false;
-            }
-
-            if ($this->model->hasFieldParam($column, 'belongsTo')) {
-                return true;
-            }
-
-            //If is select, but not multiple
-            if ($this->isSelectColumn($column)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function isSelectColumn($column)
-    {
-        return $column && $this->model->isFieldType($column, ['select', 'radio']) && ! $this->model->hasFieldParam($column, 'multiple');
-    }
-
-    private function isDateColumn($column)
-    {
-        if (in_array($column, ['created_at'])) {
-            return true;
-        }
-
-        return $column && $this->model->isFieldType($column, ['date', 'datetime', 'time']);
-    }
-
-    private function getDateFormat($column, $value)
-    {
-        try {
-            return Carbon::createFromFormat($this->model->getField($column)['date_format'] ?: 'd.m.Y', $value);
-        } catch (\Exception $e) {
-            return;
+        if ( $request ){
+            $this->loadRequestParams($request);
         }
     }
 
-    /*
-     * Apply multi-text search scope for given query
-     */
-    protected function checkForSearching($query)
+    public function loadRequestParams($request)
     {
-        if (request()->has('query') || request()->has('query_to')) {
-            $search = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query'))));
-            $search_to = trim(preg_replace("/(\s+)/", ' ', str_replace('%', '', request('query_to'))));
-            $column = request('column');
-
-            if ($this->isDateColumn($column)) {
-                if (request('query')) {
-                    $date = $this->getDateFormat($column, $search);
-                }
-
-                if (request('query_to')) {
-                    $date_to = $this->getDateFormat($column, $search_to);
-                }
-
-                if (isset($date) && ! isset($date_to)) {
-                    $query->whereDate($column, $date->format('Y-m-d'));
-                }
-
-                if (! isset($date) && isset($date_to)) {
-                    $query->whereDate($column, '<=', $date_to->format('Y-m-d'));
-                }
-
-                if (isset($date) && isset($date_to)) {
-                    $query->whereDate($column, '>=', $date->format('Y-m-d'))
-                          ->whereDate($column, '<=', $date_to->format('Y-m-d'));
-                }
-
-                if (! isset($date) && ! isset($date_to)) {
-                    $query->whereRaw('0');
-                }
-            }
-
-            //If is more than 3 chars for searching
-            elseif (strlen($search) >= 3 || ($this->isSelectColumn($column) || is_numeric($search)) || $search_to) {
-                $columns = array_merge(array_keys($this->model->getFields()), ['id']);
-                $queries = explode(' ', $search);
-
-                //If is valid column
-                if (in_array($column, $columns)) {
-                    $columns = [$column];
-                }
-
-                //Search scope
-                $query->where(function ($builder) use ($columns, $queries, $search, $search_to) {
-                    foreach ($columns as $key => $column) {
-                        //Search in all columns
-                        $builder->{ $key == 0 ? 'where' : 'orWhere' }(function ($builder) use ($columns, $column, $queries, $search, $search_to) {
-                            //If is imaginarry field, skip whole process
-                            if ( $this->model->isFieldType($column, 'imaginary') || $this->model->hasFieldParam($column, 'imaginary') ) {
-                                return;
-                            } elseif ($search_to) {
-                                $builder->where(function ($builder) use ($column, $search, $search_to) {
-                                    if (! isset($search) && isset($search_to)) {
-                                        $builder->where($column, '<=', $search_to);
-                                    }
-
-                                    if (isset($search) && isset($search_to)) {
-                                        $builder->where($column, '>=', $search)
-                                                ->where($column, '<=', $search_to);
-                                    }
-                                });
-                            }
-
-                            //Find exact id, value
-                            elseif ($this->isPrimaryKey($column, $columns)) {
-                                foreach ($queries as $query) {
-                                    $builder->where($column, $query);
-                                }
-                            }
-
-                            //Find by data in relation
-                            elseif ($this->model->hasFieldParam($column, 'belongsTo')) {
-                                $relation = explode(',', $this->model->getField($column)['belongsTo']);
-
-                                //If is build relation from multiple columns
-                                if ( isset($relation[1]) && strpos($relation[1], ':') !== false ){
-                                    return;
-                                }
-
-                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($columns, $relation, $queries) {
-                                    foreach ($queries as $query) {
-                                        foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
-                                            if ($selector == 'id') {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                                            } else {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                                            }
-                                        }
-                                    }
-                                });
-                            } elseif ($this->model->hasFieldParam($column, 'belongsToMany')) {
-                                $relation = explode(',', $this->model->getField($column)['belongsToMany']);
-
-                                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($columns, $relation, $queries) {
-                                    foreach ($queries as $query) {
-                                        foreach ($this->getNamesBuilder($relation, $columns) as $key => $selector) {
-                                            if ($selector == 'id') {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                                            } else {
-                                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-
-                            //Find by fulltext in query string
-                            else {
-                                //Search for all inserted words
-                                foreach ($queries as $query) {
-                                    $builder->where($column, 'like', '%'.$query.'%');
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-        }
-
-        return $query;
+        $this->parentTable = $request['parentTable'] ?? null;
+        $this->parentId = $request['parentId'] ?? null;
+        $this->limit = (int)$request['limit'];
+        $this->page = (int)$request['page'];
+        $this->languageId = (int)$request['language_id'];
+        $this->scopes = $request['scopes'] ?? null;
+        $this->search = $request['search'] ?? null;
     }
 
-    /*
-     * Get all columns from foreign relationships
-     */
-    private function getNamesBuilder($relation, $columns = [])
+    public function setPage($page)
     {
-        if (array_key_exists(1, $relation) && count($columns) > 1) {
-            return $this->model->getRelationshipNameBuilder($relation[1]);
-        } else {
-            return ['id'];
-        }
+        $this->page = $page;
+
+        return $this;
     }
 
     /*
      * Apply pagination for given eloqment builder
      */
-    protected function paginateRecords($query, $limit, $page, $count = null)
+    protected function paginateRecords($query, $initialRequest)
     {
-        if ($limit == 0) {
+        //If limit is not enabled
+        if ($this->limit <= 0) {
             return;
         }
 
         //If is first loading of first page and model is in reversed mode, then return last x rows.
-        if ($page == 1 && $count !== null && $count == 0 && $this->model->isReversed() === true) {
+        if ($this->page == 1 && $initialRequest && $this->model->isReversed() === true) {
             $count = $query->count();
-            $take = $limit - ((ceil($count / $limit) * $limit) - $count);
+            $take = $this->limit - ((ceil($count / $this->limit) * $this->limit) - $count);
 
             $query->offset($count - $take)->take($take);
 
             return;
         }
 
-        $start = $limit * $page;
-        $offset = $start - $limit;
+        $start = $this->limit * $this->page;
+        $offset = $start - $this->limit;
 
-        $query->offset($offset)->take($limit);
+        $query->offset($offset)->take($this->limit);
     }
 
     /*
      * Returns which model dependencies have to be loaded
      */
-    protected function loadWithDependecies()
+    private function getDependeciesIntoQuery()
     {
         $with = [];
 
@@ -257,24 +97,40 @@ class AdminRows
     /*
      * Returns filtered and paginated rows from administration
      */
-    protected function getRowsData($subid, $langid, $callback = null, $parent_table = null)
+    private function getRowsDataQuery($callback = null, $withDependencies = false)
     {
-        //Get model dependencies
-        $with = $this->loadWithDependecies();
+        $query = $this->model->newQuery();
 
-        //Get base columns from database with relationships
-        $query = $this->model->adminRows()->with($with);
+        if ( $withDependencies === true ) {
+            //Get model dependencies
+            $with = $this->getDependeciesIntoQuery();
+
+            //Get base columns from database with relationships
+            $query = $query->with($with);
+        }
+
+        //Filter by localization
+        if ($this->languageId > 0) {
+            $query->localization($this->languageId);
+        }
 
         //Filter rows by language id and parent id
-        $query->filterByParentOrLanguage($subid, $langid, $parent_table);
+        $query->filterByParent($this->parentId, $this->parentTable);
 
+        //Filter by scopes
+        $query->filterByScopes($this->scopes);
+
+        //Filter by fields Group::where clausule
         $query->filterByParentGroup();
+
+        //Search in rows
+        (new AdminRowsSearch($this->model, $query, $this->search))->filter();
 
         if (is_callable($callback)) {
             call_user_func_array($callback, [$query]);
         }
 
-        return $query->get();
+        return $query;
     }
 
     /*
@@ -288,7 +144,7 @@ class AdminRows
             //Return just base fields
             $row->justBaseFields(true);
 
-            $rows[] = $row->getMutatedAdminAttributes();
+            $rows[] = $row->getMutatedAdminAttributes(true);
         }
 
         return $rows;
@@ -299,21 +155,22 @@ class AdminRows
      */
     protected function generateButton($row)
     {
-        if ($buttons = array_values(array_filter((array) $this->model->getProperty('buttons')))) {
+        if ($buttons = $this->model->getAdminButtons()) {
             $data = [];
 
-            foreach ($buttons as $key => $button_class) {
-                $button = new $button_class($row);
+            foreach ($buttons as $key => $buttonClass) {
+                $button = new $buttonClass($row);
 
                 if ($button->active === true) {
                     $data[$key] = [
-                        'key' => class_basename($button),
+                        'key' => self::getButtonKey($buttonClass),
                         'name' => $button->name,
                         'class' => $button->class,
                         'icon' => $button->icon,
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
-                        'ask' => method_exists($button, 'ask') || method_exists($button, 'question'),
+                        'tooltipEncode' => $button->tooltipEncode,
+                        'action' => $button->getAction(),
                     ];
                 }
             }
@@ -322,6 +179,11 @@ class AdminRows
         }
 
         return false;
+    }
+
+    public static function getButtonKey($buttonClass)
+    {
+        return class_basename($buttonClass);
     }
 
     /*
@@ -340,110 +202,58 @@ class AdminRows
         return $buttons;
     }
 
-    /*
-     *
-     */
-    private function isInlineTemplateKey($key)
-    {
-        $positions = (new Layout)->available_positions;
-
-        return in_array($key, $positions, true);
-    }
-
-    /*
-     * Return rendered blade layouts
-     */
-    protected function getLayouts($count)
-    {
-        $layouts = [];
-
-        if ($count > 0) {
-            return [];
-        }
-
-        $i = 0;
-        foreach ((array) $this->model->getProperty('layouts') as $key => $class) {
-            //Load inline template
-            if ($this->isInlineTemplateKey($key)) {
-                $classes = array_wrap($class);
-
-                foreach ($classes as $componentName) {
-                    $layouts[] = [
-                        'name' => strtoupper($componentName[0]).Str::camel(substr($componentName, 1)).'_'.$i.'AnonymousLayout',
-                        'type' => 'vuejs',
-                        'position' => $key,
-                        'view' => (new Layout)->renderVueJs($componentName),
-                    ];
-                }
-            }
-
-            //Load template with layout class
-            elseif (class_exists($class)) {
-                $layout = new $class;
-
-                $view = $layout->build();
-
-                if (is_string($view) || $view instanceof \Illuminate\View\View) {
-                    $is_blade = method_exists($view, 'render');
-
-                    $layouts[] = [
-                        'name' => class_basename($class),
-                        'type' => $is_blade ? 'blade' : 'vuejs',
-                        'position' => $layout->position,
-                        'view' => $is_blade ? $view->render() : $view,
-                    ];
-                }
-            }
-
-            $i++;
-        }
-
-        return $layouts;
-    }
-
-    public function returnModelData($parent_table, $subid, $langid, $limit, $page, $count = null, $id = false)
+    public function returnModelData($onlyIds = [], $initialRequest)
     {
         try {
-            $without_parent = $parent_table && (int) $subid == 0;
+            $withoutRows = $this->returnNoData($onlyIds);
 
-            if (! $without_parent) {
-                $paginated_rows_data = $this->getRowsData($subid, $langid, function ($query) use ($limit, $page, $count, $id) {
-
+            if (! $withoutRows) {
+                $paginatedRowsData = $this->getRowsDataQuery(function ($query) use ($onlyIds, $initialRequest) {
                     //Get specific id
-                    if ($id !== false) {
-                        if (is_numeric($id)) {
-                            $query->where($this->model->getKeyName(), $id);
-                        } elseif (is_array($id)) {
-                            $query->whereIn($this->model->getKeyName(), $id);
-                        }
+                    if ($onlyIds && count($onlyIds) > 0) {
+                        $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $onlyIds);
+                    } else {
+                        $this->paginateRecords($query, $initialRequest);
                     }
+                }, true)->get();
 
-                    //Search in rows
-                    $this->checkForSearching($query, $this->model);
-
-                    //Paginate rows
-                    if ($id == false) {
-                        $this->paginateRecords($query, $limit, $page, $count);
-                    }
-                }, $parent_table);
-
-                $all_rows_data = $this->model->adminRows()
-                                             ->filterByParentOrLanguage($subid, $langid, $parent_table)
-                                             ->filterByParentGroup();
-
+                $totalResultsCount = $this->getRowsDataQuery();
             }
 
             $data = [
-                'rows' => $without_parent ? [] : $this->getBaseRows($paginated_rows_data),
-                'count' => $without_parent ? 0 : $this->checkForSearching($all_rows_data)->count(),
-                'page' => $page,
-                'buttons' => $without_parent ? [] : $this->generateButtonsProperties($paginated_rows_data),
-                'layouts' => $this->getLayouts($count),
+                'rows' => $withoutRows ? [] : $this->getBaseRows($paginatedRowsData),
+                'count' => $withoutRows ? 0 : $totalResultsCount->count(),
+                'limit' => $this->limit,
+                'page' => $this->page,
+                'buttons' => $withoutRows ? [] : $this->generateButtonsProperties($paginatedRowsData),
             ];
         } catch (\Illuminate\Database\QueryException $e) {
-            return Ajax::mysqlError($e);
+            autoAjax()->mysqlError($e)->throw();
         }
 
         return $data;
+    }
+
+    private function returnNoData(array $onlyIds)
+    {
+        if ( admin()->hasAccess($this->model, 'read') === false ){
+            return true;
+        }
+
+        if ( $this->limit === 0 ){
+            return true;
+        }
+
+        //We want retrieve only specific rows, we can allow get this rows.
+        if ( count($onlyIds) > 0 ){
+            return false;
+        }
+
+        //We cant return data when listing in non existing parent
+        if ( $this->parentTable && !$this->parentId ){
+            return true;
+        }
+
+        return false;
     }
 }

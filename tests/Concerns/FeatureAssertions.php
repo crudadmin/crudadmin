@@ -30,10 +30,10 @@ trait FeatureAssertions
             if ($model->isFieldType($key, 'checkbox')) {
                 if ($model->hasFieldParam($key, ['locale'], true)) {
                     foreach (array_wrap($data[$key]) as $k => $v) {
-                        $data[$key][$k] = $v === true ? 1 : 0;
+                        $data[$key][$k] = $v === true ? true : false;
                     }
                 } else {
-                    $data[$key] = $value == true ? 1 : 0;
+                    $data[$key] = $value == true ? true : false;
                 }
             }
 
@@ -42,19 +42,19 @@ trait FeatureAssertions
                 //Update multiple date field
                 if ($model->hasFieldParam($key, 'multiple')) {
                     foreach ($value as $k => $date) {
-                        $data[$key][$k] = Carbon::createFromFormat('d.m.Y', $date)->format($model->getFieldParam($key, 'date_format'));
+                        $data[$key][$k] = Carbon::createFromFormat('d.m.Y', $date)->format('Y-m-d');
                     }
                 }
 
                 //Update single date
                 else {
-                    $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('Y-m-d 00:00:00') : null;
+                    $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->setTime(0,0,0)->toISOString() : null;
                 }
             }
 
             //Update filled datetime format into date format from db
             if ($model->isFieldType($key, 'datetime') && ! $model->hasFieldParam($key, ['locale'], true)) {
-                $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->format('Y-m-d H:i:s') : null;
+                $data[$key] = $value ? Carbon::createFromFormat($model->getFieldParam($key, 'date_format'), $value)->toISOString() : null;
             }
 
             //Update filled time format into date format from db

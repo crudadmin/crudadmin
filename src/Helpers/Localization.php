@@ -2,172 +2,100 @@
 
 namespace Admin\Helpers;
 
-use Gettext;
+use Admin\Eloquent\AdminModel;
+use Admin\Helpers\Localization\LocalizationHelper;
+use Admin\Helpers\Localization\LocalizationInterface;
 use Admin\Models\Language;
+use Gettext;
 use Illuminate\Support\Collection;
+use Admin\Helpers\File;
+use Admin;
 
-class Localization
+class Localization extends LocalizationHelper implements LocalizationInterface
 {
-    protected $languages;
-
-    protected $localization = null;
-
-    protected $default_localization = null;
-
-    protected $booted = false;
-
-    public function __construct()
-    {
-        $this->languages = new Collection;
-
-        //Checks if is enabled multi language support
-        if (! \Admin::isEnabledLocalization() || app()->runningInConsole() == true) {
-            return false;
-        }
-
-        $this->bootLanguages();
-    }
-
-    public function bootLanguages()
-    {
-        $this->booted = true;
-
-        if (! ($model = \Admin::getModelByTable('languages'))) {
-            return new Collection;
-        }
-
-        return $this->languages = $model->all();
-    }
-
-    public function boot()
-    {
-        //Checks if is enabled multi language support
-        if (! $this->isEnabled()) {
-            return false;
-        }
-
-        if (! $this->isValidSegment()) {
-            //Update app localization for default language
-            $this->setLocale($this->getDefaultLanguage()->slug);
-
-            return false;
-        }
-
-        return $this->get()->slug;
-    }
-
-    public function setLocale($locale)
-    {
-        if ($locale == $this->localization) {
-            return true;
-        }
-
-        app()->setLocale($locale);
-
-        //Switch gettext localization
-        if (config('admin.gettext') === true) {
-            Gettext::setLocale($locale);
-        }
-
-        $this->setDateLocale($locale);
-
-        $this->localization = $locale;
-    }
+    const SESSION_LOCALE_KEY = 'locale';
 
     /*
-     * Automatically set locale for date package if is available in package list
-     * https://github.com/jenssegers/date
-     * \Jenssegers\Date\Date
+     * Here will be stored all localized routers
+     * They are needed because we need boot them again in different language
+     * when user wants to redirect to same route in other language
      */
-    public function setDateLocale($locale)
+    public $localizedRouters = [];
+
+    /*
+     * Allow for gettext javascript translations use ASSET_PATH.
+     * Because other domains cannot receive cookies for translations verification
+     */
+    public static function crossDomainSupport()
     {
-        if (class_exists(\Jenssegers\Date\Date::class)) {
-            \Jenssegers\Date\Date::setLocale($locale);
-        }
+        //We want disable ASSET_PATH for logged administrator
+        //All request must be accross same domain
+        return admin() ? false : true;
     }
 
-    public function isEnabled()
+    /**
+     * Table of eloquent
+     *
+     * @return  string
+     */
+    public function getModel()
     {
-        $segment = request()->segment(1);
-
-        return \Admin::isEnabledLocalization()
-            && app()->runningInConsole() == false
-            && $segment != 'admin'
-            && $segment != 'uploads';
+        return Admin::getModel('Language') ?: new Language;
     }
 
-    public function getLanguages($console = false)
+    /**
+     * Returns locale identifier
+     *
+     * @return string
+     */
+    public function getLocaleIdentifier()
     {
-        if ($console === true && count($this->languages) == 0) {
-            return $this->bootLanguages();
-        }
-
-        return $this->languages;
+        return $this->getLocaleSegmentIdentifier();
     }
 
-    public function getDefaultLanguage()
+    /**
+     * Return segment language prefix
+     *
+     * @return string|null
+     */
+    public function getLocaleSegmentIdentifier()
     {
-        $this->checkForConsoleBoot();
-
-        if ($this->default_localization && $language = $this->languages->where('slug', $this->default_localization)->first()) {
-            return $language;
-        }
-
-        return $this->getFirstLanguage();
+        return request()->segment(1);
     }
 
-    public function setDefaultLocale($prefix)
+    /**
+     * Localization is disabled in console
+     *
+     * @return  bool
+     */
+    public function isActive()
     {
-        $this->default_localization = $prefix;
+        return \Admin::isEnabledLocalization();
     }
 
-    public function getFirstLanguage()
+    /**
+     * We can boot languages automatically if is not in console mode
+     *
+     * @return  bool
+     */
+    public function canBootAutomatically()
     {
-        $this->checkForConsoleBoot();
+        $segment = $this->getLocaleIdentifier();
 
-        return $this->languages->first();
+        return (
+            $this->isActive() &&
+            app()->runningInConsole() === false
+            && \Admin::isAdmin() === false
+            && $segment != File::UPLOADS_DIRECTORY
+        );
     }
 
-    public function isValid($segment)
-    {
-        return $this->languages->where('slug', $segment)->count() == 1;
-    }
-
-    public function isValidSegment()
-    {
-        return $this->isValid(request()->segment(1));
-    }
-
-    private function checkForConsoleBoot()
-    {
-        if (
-            $this->booted === false
-            && \Admin::isEnabledLocalization() === true
-            && app()->runningInConsole() === true
-        ) {
-            $this->bootLanguages();
-        }
-    }
-
-    public function get()
-    {
-        //Fix for requesting data from console
-        $this->checkForConsoleBoot();
-
-        $segment = request()->segment(1);
-
-        if ($this->isValidSegment() === false) {
-            $language = $this->getDefaultLanguage();
-        } else {
-            $language = $this->languages->where('slug', $segment)->first();
-        }
-
-        //Update app localization
-        $this->setLocale($language->slug);
-
-        return $language;
-    }
-
+    /**
+     * Returns url segment according to prefix language in url
+     *
+     * @param  int  $id
+     * @return  string
+     */
     public function segment($id)
     {
         $id = $this->isValidSegment() ? $id + 1 : $id;
@@ -175,18 +103,56 @@ class Localization
         return request()->segment($id);
     }
 
-    public function save($lang)
+    /**
+     * Save localization
+     *
+     * @param  string  $lang
+     */
+    public function saveIntoSession($lang)
     {
-        session(['locale' => $lang]);
-        session()->save();
+        if ( $this->isValid($lang) ) {
+            session([
+                self::SESSION_LOCALE_KEY => $lang
+            ]);
+
+            session()->save();
+        }
     }
 
-    public function createLangSlug($slug)
+    public function getFromSession()
     {
-        if ($slug == 'en') {
-            return 'en_US';
-        }
+        return session(self::SESSION_LOCALE_KEY);
+    }
 
-        return $slug.'_'.strtoupper($slug);
+    /**
+     * Returns controller parh for
+     *
+     * @return  string
+     */
+    public function gettextJsResourcesMethod()
+    {
+        return 'index';
+    }
+
+    /**
+     * Check if gettext module is allowed for this localizaiton
+     *
+     * @return  bool
+     */
+    public function isGettextAllowed()
+    {
+        return config('admin.gettext');
+    }
+
+    public function addLocalizedRoutes($routes)
+    {
+        $this->localizedRouters[] = $routes;
+
+        return count($this->localizedRouters) - 1;
+    }
+
+    public function getLocalizedRouter($index)
+    {
+        return $this->localizedRouters[$index];
     }
 }

@@ -73,10 +73,6 @@ class AdminButtonCommand extends GeneratorCommand
             'DummyNamespace', $this->getNamespace($name), $stub
         );
 
-        $stub = str_replace(
-            'DummyButton', $this->argument('name'), $stub
-        );
-
         return $this;
     }
 

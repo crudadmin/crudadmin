@@ -29,12 +29,9 @@ class Authenticate
             if ($request->ajax() || $request->wantsJson()) {
                 return response('Unauthorized.', 401);
             } else {
-                //Custom login path
-                if (! ($path = config('admin.authentication.login.path'))) {
-                    $path = admin_action('Auth\LoginController@showLoginForm');
-                }
-
-                return redirect()->guest($path)->withErrors($errors);
+                return redirect()->guest(
+                    config('admin.authentication.login.path', admin_action('Auth\LoginController@showLoginForm'))
+                )->withErrors($errors);
             }
         }
 

@@ -10,47 +10,18 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * This namespace is applied to your controller routes.
-     *
-     * In addition, it is set as the URL generator's root namespace.
-     *
-     * @var string
-     */
-    protected $namespace = 'App\Http\Controllers';
-
-    protected $admin_namespace = 'Admin\Controllers';
-
-    /**
-     * Multi languages localization support.
-     * @var string/boolean
-     */
-    protected $localization = false;
-
-    /**
      * Define your route model bindings, pattern filters, etc.
      *
      * @param  \Illuminate\Routing\Router  $router
      * @return void
      */
-    public function boot()
+    public function register()
     {
-        //Boot multi languages support
-        $this->localization = Localization::boot();
+        $this->app->booted(function(){
+            $this->mapWebRoutes($this->app->router);
+        });
 
-        parent::boot();
-    }
-
-    /**
-     * Define the routes for the application.
-     *
-     * @param  \Illuminate\Routing\Router  $router
-     * @return void
-     */
-    public function map(Router $router)
-    {
-        $this->mapWebRoutes($router);
-
-        //
+        $this->registerRouterMacros($this->app->router);
     }
 
     /**
@@ -65,25 +36,39 @@ class RouteServiceProvider extends ServiceProvider
     {
         //Admin routes
         $router->group([
-            'namespace' => $this->admin_namespace,
+            'namespace' => 'Admin\Controllers',
             'middleware' => 'web',
         ], function ($router) {
             require __DIR__.'/../routes.php';
         });
 
-        //Boot application routes language within prefix
-        foreach (config('admin.routes', []) as $route) {
-            if (! file_exists($route_path = base_or_relative_path($route))) {
-                continue;
+        //Admin routes
+        $router->group([
+            'namespace' => 'Admin\Controllers',
+            'prefix' => 'admin/api',
+        ], function ($router) {
+            require __DIR__.'/../Routes/api.php';
+        });
+    }
+
+    public function registerRouterMacros(Router $router)
+    {
+        $router->macro('addLocalizationAttributes', function($localizedRouterIndex, $forcedLocale = null){
+            $attributes = [
+                'prefix' => Localization::prefix($forcedLocale),
+                'middleware' => ['localized'],
+                'localized_router_index' => $localizedRouterIndex,
+            ];
+
+            if ($this->hasGroupStack()) {
+                $attributes = $this->mergeWithLastGroup($attributes);
+
+                $this->groupStack[count($this->groupStack) - 1] = $attributes;
+            } else {
+                $this->groupStack[] = $attributes;
             }
 
-            $router->group([
-                'namespace' => $this->namespace,
-                'prefix' => $this->localization,
-                'middleware' => 'web',
-            ], function ($router) use ($route_path) {
-                require $route_path;
-            });
-        }
+            return $this;
+        });
     }
 }

@@ -2,9 +2,13 @@
 
 namespace Admin\Helpers;
 
-use Gettext;
+use Admin\Core\Helpers\Storage\AdminFile;
 use Admin\Eloquent\AdminModel;
-use Admin\Core\Helpers\File as AdminFile;
+use Facades\Admin\Helpers\SEOService;
+use Localization;
+use Gettext;
+use Route;
+use Admin;
 
 class SEO
 {
@@ -13,6 +17,12 @@ class SEO
     private $default = [];
 
     private $modified = [];
+
+    private $defaultSeoRow = null;
+
+    private $seoRow = null;
+
+    private $seoRows = [];
 
     /*
      * Set model for retreiving data for SEO
@@ -48,20 +58,16 @@ class SEO
     private function tryModelFields($key)
     {
         $aliases = [
-            'title' => ['name', 'username'],
-            'description' => ['content'],
-            'image' => ['image', 'avatar'],
+            'title' => ['meta_title', 'name', 'title', 'username'],
+            'description' => ['meta_description', 'description', 'content'],
+            'image' => ['meta_image', 'image', 'images', 'avatar'],
+            'keywords' => ['meta_keywords', 'keywords'],
         ];
 
         $is_object = $this->model instanceof AdminModel;
 
-        //Check for values into model
-        if ($is_object && $value = $this->model->getValue($key)) {
-            return $value;
-        }
-
         //Check for values into array
-        else if ( $this->model && array_key_exists($key, $this->model->getAttributes()) && $value = $this->model[$key] ) {
+        if (is_array($this->model) && array_key_exists($key, $this->model) && $value = $this->model[$key]) {
             return $value;
         }
 
@@ -70,8 +76,7 @@ class SEO
             foreach ($aliases[$key] as $alias) {
                 if (
                     ($is_object && $value = $this->model->getValue($alias)) ||
-                    (!$is_object && array_key_exists($alias, $this->model->getAttributes()) && $value = $this->model[$alias])
-                ) {
+                    (! $is_object && array_key_exists($alias, $this->model) && $value = $this->model[$alias])) {
                     return $value;
                 }
             }
@@ -91,7 +96,10 @@ class SEO
      */
     public function get($key, $default = null)
     {
-        if (! $this->model && ! $this->modified) {
+        //Load seo rows from database
+        $this->getSeoRow();
+
+        if (! $this->model && ! $this->modified && count($this->seoRows) === 0 ) {
             return $default;
         }
 
@@ -105,12 +113,103 @@ class SEO
             return $value;
         }
 
+        //Get value from seo row for current route
+        if ( $value = $this->getValueFromSeoTable($key, true) ) {
+            return $value;
+        }
+
         //Get modified changes
         if (array_key_exists($key, $this->modified)) {
             return $this->modified[$key];
         }
 
-        return $this->tryModelFields($key) ?: $default;
+        //Try data from inserted model
+        if ( $modelValue = $this->tryModelFields($key) ) {
+            return $modelValue;
+        }
+
+        //Get value from seo row for given seo group
+        if ( $value = $this->getValueFromSeoTable($key, false) ) {
+            return $value;
+        }
+
+        //Get value from default root seo row
+        if ( $this->defaultSeoRow && ($value = $this->defaultSeoRow->getValue($key)) ) {
+            return $value;
+        }
+
+        return $default;
+    }
+
+    public function getSeoRow()
+    {
+        //If seo table is not enabled
+        if ( Admin::isSeoEnabled() === false ) {
+            return;
+        }
+
+        //If seo row has been loaded
+        if ( $this->seoRow || $this->seoRow === false ) {
+            return $this->seoRow ?: null;
+        }
+
+        $this->seoRows = Admin::getModel('RoutesSeo')->where(function($query){
+                                $query->where('url', $this->withoutLocalizedSlug($this->getRouteUrl()))
+                                      ->orWhere('url', $this->withoutLocalizedSlug($this->getPathInfo()))
+                                      ->orWhere('controller', $this->getRouteController());
+                            })
+                            ->when($this->getSeoGroup(), function($query, $group){
+                                $query->orWhere('group', $group);
+                            })
+                            ->orWhere('url', '/')
+                            ->get();
+
+        $this->defaultSeoRow = $this->seoRows->where('url', '/')->first() ?: false;
+
+        $this->seoRow = $this->seoRows->where('url', '!=', '/')->first() ?: false;
+
+        return $this->seoRow;
+    }
+
+    private function withoutLocalizedSlug($url)
+    {
+        $parts = explode('/', trim($url, '/'));
+
+        if ( Localization::isValidSegment() ){
+            $parts = array_slice($parts, 1);
+        }
+
+        return '/'.implode('/', $parts);
+    }
+
+    public function getPathInfo()
+    {
+        return SEOService::toPathInfoFormat(url()->getRequest()->getPathInfo());
+    }
+
+    /**
+     * Get value from seos table
+     *
+     * @param  string  $key
+     * @param  bool  $onlyFromActulRoute
+     * @return mixed
+     */
+    public function getValueFromSeoTable($key, $onlyFromActulRoute = false)
+    {
+        if ( $seoRow = $this->getSeoRow() ) {
+            //Want meta data values, only if is current route selected
+            //So we dont care about route group
+            if ( $onlyFromActulRoute === true ) {
+                //Or if is same route url address with seo row
+                if ( $seoRow->url === $this->getPathInfo() ) {
+                    return $seoRow->getValue($key);
+                }
+
+                return;
+            }
+
+            return $seoRow->getValue($key);
+        }
     }
 
     /*
@@ -134,7 +233,9 @@ class SEO
 
         $before = $this->get('title');
 
-        return ($before ? $before.' - ' : '').$title;
+        $separator = $before.' '.config('admin.seo_separator', '-').' ';
+
+        return ($before ? $separator : '').$title;
     }
 
     /*
@@ -176,9 +277,9 @@ class SEO
      */
     public function getImages()
     {
-        $image = $this->getDefault('image');
+        $defaultImage = $this->getDefault('image');
 
-        $image = $this->get('image', $image);
+        $image = $this->get('image', $defaultImage);
 
         $items = [];
 
@@ -201,6 +302,32 @@ class SEO
         }
 
         return $items;
+    }
+
+    public function getSeoGroup()
+    {
+        return @$this->modified['seogroup'];
+    }
+
+    public function getRouteUrl()
+    {
+        $route = Route::getCurrentRoute();
+
+        return $route ? SEOService::toPathInfoFormat($route->uri) : null;
+    }
+
+    public function getRouteGroup()
+    {
+        $route = Route::getCurrentRoute();
+
+        return $route ? @$route->action['seo']['group'] : null;
+    }
+
+    public function getRouteController()
+    {
+        $route = Route::getCurrentRoute();
+
+        return $route ? @$route->action['controller'] : null;
     }
 
     private function secure($string)

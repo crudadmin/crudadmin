@@ -21,11 +21,6 @@ trait AdminBrowserIntegration
         return '@model-builder"][data-model="'.$model->getTable();
     }
 
-    /**
-     * Open model page.
-     * @param  class $model
-     * @return object
-     */
     public function openModelPage($model)
     {
         $model = $this->getModelClass($model);
@@ -34,8 +29,47 @@ trait AdminBrowserIntegration
              ->visit(admin_action('DashboardController@index').'#/page/'.$model->getTable());
 
         //Wait till page loads and loader will disappear
-        return $this->waitFor('h1')
+        return $this->waitFor('.content-wrapper .content-header .breadcrumb .active')
                     ->waitUntilMissing('.box .overlay');
+    }
+
+    public function openForm($model = null, $selector = '')
+    {
+        $model = $model ? $this->getModelClass($model) : null;
+
+        $this->click($selector.' [data-create-new-row'.($model ? ('="'.$model->getTable().'"') : '').']');
+
+        //Wait till page loads and loader will disappear
+        return $this;
+    }
+
+    public function waitForCkeditor()
+    {
+        return $this->waitUsing(5, 100, function () {
+            $element = $this->script("
+                let editors = Object.values(CKEDITOR.instances),
+                    notReady = editors.filter(editor => editor.status !== 'ready');
+
+                return editors.length > 0 && notReady.length == 0;
+            ");
+
+            return $element[0] === true;
+        }, 'Ckeditor has not been loaded.');
+    }
+
+    /**
+     * Open model page.
+     * @param  class $model
+     * @return object
+     */
+    public function closeForm($model = null)
+    {
+        $model = $model ? $this->getModelClass($model) : null;
+
+        $this->click('[data-close-form'.($model ? ('="'.$model->getTable().'"') : '').']');
+
+        //Wait till page loads and loader will disappear
+        return $this;
     }
 
     /**
@@ -140,7 +174,9 @@ trait AdminBrowserIntegration
 
                 $inputWrapper = $hasComponent ? '' : '[data-model="'.$model->getTable().'"][data-field="'.$key.'"] ';
 
-                $this->type($wrapper.$inputWrapper.'[name="'.$formKey.'"]', $value);
+                $f = $wrapper.$inputWrapper.'[name="'.$formKey.'"]';
+
+                $this->script('return $(\''.$f.'\').val("'.$value.'")[0].dispatchEvent(new Event("keyup"));');
             }
 
             //Set editor value
@@ -205,12 +241,36 @@ trait AdminBrowserIntegration
 
             //Set checkbox value
             elseif ($model->isFieldType($key, ['checkbox'])) {
-                $this->{$value === true || $value === 1 ? 'check' : 'uncheck'}($formKey);
+                $hasComponent = $model->hasFieldParam($key, 'component');
+
+                $inputWrapper = $hasComponent ? '' : '[data-model="'.$model->getTable().'"][data-field="'.$key.'"] ';
+
+                if ( $value === true || $value === 1 ) {
+                    $this->script('
+                        var element = $(\''.$inputWrapper.' input[type="checkbox"][name="'.$formKey.'"]\')[0];
+
+                        if ( !element.checked ){
+                            element.click();
+                        }
+                    ');
+                } else {
+                    $this->script('
+                        var element = $(\''.$inputWrapper.' input[type="checkbox"][name="'.$formKey.'"]\')[0];
+
+                        if ( element.checked ){
+                            element.click();
+                        }
+                    ');
+                }
             }
 
             //Set radio value
             elseif ($model->isFieldType($key, ['radio'])) {
-                $this->radio($formKey, $value);
+                $hasComponent = $model->hasFieldParam($key, 'component');
+
+                $inputWrapper = $hasComponent ? '' : '[data-model="'.$model->getTable().'"][data-field="'.$key.'"] ';
+
+                $this->script('$(\''.$inputWrapper.' input[type="radio"][name="'.$formKey.'"][value="'.$value.'"]\').click();');
             }
 
             //Set multiple date value
@@ -226,7 +286,7 @@ trait AdminBrowserIntegration
                 else {
                     //We need reset cursor before opening date and wait half of second till calendar opens
                     $this->resetFocus()
-                         ->click($wrapper.'input[name="'.$formKey.'"]')
+                         ->openDatepicker($wrapper, $formKey)
                          ->pause(500)
                          ->clickDatePicker($value);
                 }
@@ -238,7 +298,7 @@ trait AdminBrowserIntegration
 
                 //We need reset cursor before opening date and wait half of second till calendar opens
                 $this->resetFocus()
-                     ->click($wrapper.'input[name="'.$formKey.'"]')
+                     ->openDatepicker($wrapper, $formKey)
                      ->pause(500)
                      ->clickDatePicker($date[0])
                      ->clickTimePicker($date[1]);
@@ -257,7 +317,7 @@ trait AdminBrowserIntegration
                 else {
                     //We need reset cursor before opening date and wait half of second till calendar opens
                     $this->resetFocus()
-                         ->click($wrapper.'input[name="'.$formKey.'"]')
+                         ->openDatepicker($wrapper, $formKey)
                          ->pause(500)
                          ->clickTimePicker($value);
                 }
@@ -265,6 +325,15 @@ trait AdminBrowserIntegration
         }
 
         return $this->resetFocus()->pause(400);
+    }
+
+    private function openDatepicker($wrapper, $formKey)
+    {
+        $selector = $wrapper.'input[name="'.$formKey.'"]';
+
+        $this->script('$(\''.$selector.'\')[0].dispatchEvent(new Event(\'mousedown\'))');
+
+        return $this;
     }
 
     /**
@@ -301,7 +370,10 @@ trait AdminBrowserIntegration
         $this->click($selector = '.buttons-options'.$modelSelector.' button[data-button="edit"][data-id="'.$id.'"]');
 
         //Wait till row will be opened
-        $this->waitFor($selector.'.btn-success', 100);
+        $this->waitFor('[data-close-form'.($model ? ('="'.$this->getModelClass($model)->getTable().'"') : '').']', 1);
+
+        //We need wait 100ms
+        $this->pause(100);
 
         $this->resetFocus();
 
@@ -384,7 +456,7 @@ trait AdminBrowserIntegration
         }
 
         if ($model->isFieldType($origKey, ['file'])) {
-            $selectorClass = "$('input[name=\"{$key}\"]').parent().parent()";
+            $selectorClass = "$('input[name=\"{$key}\"]').parent().parent().parent()";
         }
 
         //Checkbox can not be required field
@@ -417,7 +489,7 @@ trait AdminBrowserIntegration
         }
 
         return $this->waitFor($prefix.'button[data-action-type="create"]')
-                    ->press(trans('admin::admin.send'))
+                    ->jsClick($prefix.'button[data-action-type="create"]')
                     ->waitUntilMissing('button[data-action-type="updating"]')->pause(200);
     }
 
@@ -427,7 +499,7 @@ trait AdminBrowserIntegration
     public function saveForm()
     {
         return $this->waitFor('button[data-action-type="update"]')
-                    ->press(trans('admin::admin.save'))
+                    ->jsClick('button[data-action-type="update"]')
                     ->waitUntilMissing('button[data-action-type="updating"]');
     }
 
@@ -437,7 +509,7 @@ trait AdminBrowserIntegration
      */
     public function closeAlert()
     {
-        $this->whenAvailable('.modal', function($modal){
+        $this->whenAvailable('.message-modal > .modal', function($modal){
             $this->press(trans('admin::admin.close'));
         });
 
@@ -538,7 +610,7 @@ trait AdminBrowserIntegration
      */
     public function changeRowLanguage($lang)
     {
-        return $this->click('[data-form-language-switch] > button')->pause(100)
+        return $this->click('[data-form-language-switch] > button')->pause(200)
                     ->click('[data-form-language-switch] li[data-slug="'.$lang.'"]');
     }
 

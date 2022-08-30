@@ -2,36 +2,51 @@
 
 namespace Admin\Middleware;
 
+use Admin\Helpers\Localization\LocalizationRedirecter;
 use Closure;
 use Localization;
-use Illuminate\Http\RedirectResponse;
 
 class LocalizationMiddleware
 {
     public function handle($request, Closure $next, $guard = null)
     {
-        $segment = $request->segment(1);
-
-        $remove_default = config('admin.localization_remove_default');
-
-        //Checks if is enabled multulanguages
-        if (! Localization::isEnabled()) {
-            return $next($request);
+        //If web localization is enabled
+        if ( Localization::canBootAutomatically() ) {
+            return $this->webLocalizationSupport($request, $next);
         }
 
-        if (! Localization::isValidSegment()) {
-            $redirect = session()->has('locale') && Localization::isValid(session()->get('locale')) ? session()->get('locale') : Localization::getDefaultLanguage()->slug;
+        return $next($request);
+    }
 
-            //Checks if is set default language
-            if ($redirect != Localization::getDefaultLanguage()->slug || $remove_default == false) {
-                return new RedirectResponse(url($redirect), 301, ['Vary' => 'Accept-Language']);
-            }
-        } elseif ($segment == Localization::getDefaultLanguage()->slug && $remove_default == true) {
-            Localization::save($segment);
+    /*
+     * Returns web localization
+     */
+    public function webLocalizationSupport($request, Closure $next)
+    {
+        //We need fetch original language before languages will be removed from array
+        //if admin is not logged in.
+        $languageBeforeSession = Localization::get();
 
-            return new RedirectResponse('/', 301, ['Vary' => 'Accept-Language']);
-        } elseif (! session()->has('locale') || session()->get('locale') != $segment) {
-            Localization::save($segment);
+        Localization::refreshOnSession();
+
+        $redirecter = (new LocalizationRedirecter);
+
+        if ( $redirect = $redirecter->redirectToSessionLanguage() ) {
+            return $redirect;
+        }
+
+        else if ( $redirect = $redirecter->redirectToOtherLanguage() ) {
+            return $redirect;
+        }
+
+        else if ( $redirect = $redirecter->isLocalizationUnpublished($languageBeforeSession) ) {
+            return $redirect;
+        }
+
+        elseif ( $redirecter->hasLocalizationChanged() ) {
+            Localization::saveIntoSession(
+                Localization::getLocaleIdentifier()
+            );
         }
 
         return $next($request);

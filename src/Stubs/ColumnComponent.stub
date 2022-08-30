@@ -1,0 +1,15 @@
+<template>
+    <div>
+        <strong>custom column:</strong> {{ mutatedValue }}
+    </div>
+</template>
+
+<script type="text/javascript">
+export default {
+    props : ['mutatedValue', 'value', 'field', 'row', 'model'],
+
+    created(){
+        console.log(this.mutatedValue, this.value, this.field, this.row, this.model);
+    },
+}
+</script>

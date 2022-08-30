@@ -51,6 +51,13 @@ class InterfaceRules extends MutationRule
      */
     private function registerAttributes($rules, $field)
     {
-        return $field + Fields::mutate(FieldToArray::class, $rules);
+        $rules = array_wrap($rules);
+
+        //Support multiple rules in one field
+        foreach ($rules as $rule) {
+            $field = $field + Fields::mutate(FieldToArray::class, $rule);
+        }
+
+        return $field;
     }
 }

@@ -3,8 +3,10 @@
 namespace Admin\Controllers;
 
 use Admin;
-use Image;
-use Admin\Helpers\File;
+use Admin\Core\Helpers\Storage\AdminFile;
+use Cache;
+use Exception;
+use League\Flysystem\FileNotFoundException;
 
 class ImageController extends Controller
 {
@@ -16,42 +18,106 @@ class ImageController extends Controller
     /*
      * Returns image response of file
      */
-    public function getThumbnail($model, $field, $file)
+    public function getThumbnail($table, $fieldKey, $filename)
     {
-        $file = File::adminModelFile($model, $field, $file);
-
-        //Check if model and field exists
-        if (($model = Admin::getModelByTable($model)) && $model->getField($field) && $file->exists()) {
-            return response()->download($file->resize(40, 40, 'admin-thumbnails', true, false)->path);
+        if ( !($model = Admin::getModelByTable($table)) ){
+            abort(404);
         }
 
-        return abort(404);
+        $adminFile = $model->getAdminFile($fieldKey, $filename);
+
+        //Check if model and field exists
+        if ( $adminFile->exists == false ) {
+            return abort(404);
+        }
+
+        $storage = $adminFile->getStorage();
+
+        //Retrieve resized and compressed image
+        $response = $storage->response(
+                $adminFile->resize(50, 50, true)->path,
+                200,
+                ['CrudAdmin' => 'Image-Resizer']
+            )
+            ->setMaxAge(3600 * 24 * 365)
+            ->setPublic();
+
+        //Send response manually, because we does not want to throw cookies etc..
+        $response->send();
     }
 
     /*
      * Resize image which has not been resized yet
      */
-    public function resizeImage($a = null, $b = null, $c = null, $d = null, $e = null)
+    public function resizeImage($table, $fieldKey, $prefix, $filename)
     {
-        $filepath = File::adminModelCachePath(implode('/', array_filter(func_get_args())));
-
-        $temporary_path = $filepath.'.temp';
-
-        //If not exists any form of file
-        if (! file_exists($filepath) && ! file_exists($temporary_path)) {
+        if ( !($model = Admin::getModelByTable($table)) ){
             abort(404);
         }
 
-        //Get resizing information from cache
-        $cache = json_decode(file_get_contents($temporary_path), true);
+        $adminFile = $model->getAdminFile($fieldKey, $filename);
+
+        //If does not exists cache path, but also does not exists cached image already
+        //But alsot if cached image exists, and temorary path does not exists
+        if ( ! $resizeData = $adminFile->getCachedResizeData($prefix) ) {
+            abort(404);
+        }
 
         //Resize image
-        $file = (new File($cache['original_path']))->image($cache['mutators'], null, true, true);
+        $resizedImage = $adminFile->image($resizeData['mutators'] ?? [], true);
 
-        //Remove temporary file with settings
-        @unlink($temporary_path);
+        //If is not local storage, and storage url is different than actual crudadmin renderer path
+        //we can resize on final destination after resize.
+        if (
+            $adminFile->externalStorageResizer()
+            && config('admin.resizer.redirect_after_resize', true) == true
+            && $resizedImage->isLocalStorage() === false
+            && $resizedImage->url !== url()->current()
+        ) {
+            return redirect($resizedImage->url, 301);
+        }
 
-        //Return resized image response
-        return $file->response();
+        //Image should be returned as response
+        try {
+            $storage = $resizedImage->getCacheStorage();
+
+            //Retrieve resized and compressed image
+            $response = $storage->response(
+                    $resizedImage->path,
+                    200,
+                    ['CrudAdmin' => 'Image-Resizer']
+                )
+                ->setMaxAge(3600 * 24 * 365)
+                ->setPublic();
+
+            //Send response manually, because we does not want to throw cookies etc..
+            $response->send();
+        } catch (FileNotFoundException $e){
+            abort(404);
+        } catch (Exception $e){
+            abort(500);
+        }
+    }
+
+    /*
+     * Get files from cloud storage
+     */
+    public function getFile($table, $fieldKey, $filename)
+    {
+        if ( !($model = Admin::getModelByTable($table)) ){
+            abort(404);
+        }
+
+        $adminFile = $model->getAdminFile($fieldKey, $filename);
+
+        $storage = $adminFile->getStorage();
+
+        //Retrieve resized and compressed image
+        $response = $storage->response($adminFile->path)
+            ->setMaxAge(3600 * 24 * 365)
+            ->setPublic();
+
+        //Send response manually, because we does not want to throw cookies etc..
+        $response->send();
     }
 }

@@ -5,7 +5,10 @@ namespace Admin\Controllers\Crud;
 use Admin;
 use Admin\Controllers\Controller;
 use Admin\Requests\DataRequest;
-use Ajax;
+use Admin\Core\Fields\Validation\FileMutator;
+use Admin\Core\Fields\Validation\ValidationMutator;
+use Admin\Core\Fields\FieldsValidator;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Localization;
 use Validator;
@@ -15,13 +18,17 @@ class CRUDController extends Controller
     /*
      * Get model object by model name, and check user permissions for this model
      */
-    protected function getModel($model)
+    protected function getModel($table, $withAdminRows = true)
     {
-        $model = Admin::getModelByTable($model)->getAdminRows();
+        $model = Admin::getModelByTable($table);
+
+        if ( $withAdminRows === true ){
+            $model = $model->getAdminRows();
+        }
 
         //Check if user has allowed model
-        if (! auth()->guard('web')->user()->hasAccess($model)) {
-            Ajax::permissionsError();
+        if (! admin()->hasAccess($model)) {
+            autoAjax()->permissionsError($model->getTable())->throw();
         }
 
         return $model;
@@ -31,17 +38,20 @@ class CRUDController extends Controller
      * Mutate incoming request
      * From parent model, and also his childs, if are available
      */
-    public function mutateRequests($request, $model)
+    public function mutateRequests($request, $model, $rows = [])
     {
         $requests = [
-            ['model' => $model, 'request' => $request],
+            ['model' => $rows[$model->getTable()] ?? $model, 'request' => $request],
         ];
 
-        $request->applyMutators($model);
+        $request->applyMutators($requests[0]['model']);
 
         foreach ($model->getModelChilds() as $child) {
-            if ( $child->getProperty('inParent') === false )
+            $child = $rows[$child->getTable()] ?? $child;
+
+            if ( $this->hasInParentRequest($child, $request) === false ){
                 continue;
+            }
 
             $childRequest = $this->getChildRequest($child, $request);
 
@@ -96,75 +106,6 @@ class CRUDController extends Controller
     }
 
     /*
-     * Check if file does not have locales, or if has, then check if is default language
-     */
-    private function canRemoveNullable($model, $originalKey, $key)
-    {
-        return ! $model->hasFieldParam($originalKey, 'locale', true)
-               || last(explode('.', str_replace('.*', '', $key))) == Localization::getDefaultLanguage()->slug;
-    }
-
-    /*
-     * If file has been deleted from server and is required, then add back required rule for this file.
-     */
-    private function addRequiredRuleForDeletedFiles(&$data, $model, $request, $key, $originalKey)
-    {
-        //If field is required and has been removed, then remove nullable rule for a file requirement
-        if ($request->has('$remove_'.$key) && ! $model->hasFieldParam($originalKey, 'multiple', true)) {
-            $request->merge([$key => null]);
-
-            if (
-                $this->canRemoveNullable($model, $originalKey, $key)
-                && $model->hasFieldParam($originalKey, 'required', true)
-                && ($k = array_search('nullable', $data)) !== false
-             ) {
-                unset($data[$k]);
-
-                $data[] = 'required';
-            }
-        }
-
-        //Add required value for empty multi upload fields
-        if (
-            ! $request->has('$uploaded_'.$key)
-            && $model->hasFieldParam($originalKey, 'multiple', true)
-            && $this->canRemoveNullable($model, $originalKey, $key)
-            && $model->hasFieldParam($originalKey, 'required', true)
-            && ($k = array_search('nullable', $data)) !== false
-        ) {
-            unset($data[$k]);
-
-            $data[] = 'required';
-        }
-    }
-
-    /*
-     * If field has required rule, but file is already uploaded in the server, then
-     * remove required rule, because file is not now required
-     */
-    private function removeRequiredFromUploadedFields(&$data, $model, $row, $request, $key, $originalKey)
-    {
-        if (
-            $model->isFieldType($originalKey, 'file')
-            && $model->hasFieldParam($originalKey, 'required', true)
-            && ! empty($row->{$originalKey})
-            && ! $request->has('$remove_'.$key)
-        ) {
-            $isEmptyFiles = ! $model->hasFieldParam($originalKey, 'multiple', true)
-                            || (
-                                $request->has('$uploaded_'.$originalKey)
-                                && count((array) $request->get('$uploaded_'.$originalKey)) > 0
-                            );
-
-            if ($isEmptyFiles && ($k = array_search('required', $data)) !== false) {
-                unset($data[$k]);
-            }
-        } else {
-            $this->addRequiredRuleForDeletedFiles($data, $model, $request, $key, $originalKey);
-        }
-    }
-
-    /*
      * Remove nullable parameter from required fields
      */
     private function removeNullable($model, $originalKey, &$data)
@@ -199,7 +140,7 @@ class CRUDController extends Controller
 
         $table = $request->get('_model');
 
-        $model = Admin::getModelByTable($table);
+        $model = $this->getModel($table);
 
         //Get parent validation rules
         $parentValidationErrors = $this->getParentValidationErrors($model, $rows, $request, $update, $table);
@@ -243,8 +184,9 @@ class CRUDController extends Controller
         $errors = [];
 
         foreach ($model->getModelChilds() as $child) {
-            if ( $child->getProperty('inParent') === false )
+            if ( $this->hasInParentRequest($child, $request) === false ) {
                 continue;
+            }
 
             $childRequest = $this->getChildRequest($child, $request);
 
@@ -254,7 +196,7 @@ class CRUDController extends Controller
             ) : null;
 
             //Get child relation validation for specific row
-            $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $update);
+            $childRules = $this->getValidationRulesByAdminModel($child, $row, $request, $update, $childRequest);
 
             $errors = array_merge($errors, $this->testRequestValidation($childRules, $childRequest, $child));
         }
@@ -280,7 +222,7 @@ class CRUDController extends Controller
     /*
      * Get all validation data for gived model
      */
-    public function getValidationRulesByAdminModel($model, $row, $request, $update)
+    public function getValidationRulesByAdminModel($model, $row, $request, $update, $childRequest = null)
     {
         $rules = $model->getValidationRules($row);
 
@@ -307,11 +249,17 @@ class CRUDController extends Controller
             //Removes required validation parameter from input when is row avaiable and when is not field value empty
             //also Allow send form without file, when is file uploaded already in server
             if (isset($row)) {
-                $this->removeRequiredFromUploadedFields($data, $model, $row, $request, $key, $originalKey);
+                $validator = new FieldsValidator($row, $request);
+
+                $data = $validator->mutateRules([
+                    $key => $data
+                ], [
+                    FileMutator::class,
+                ])[$key];
             }
 
             //If field is required, then remove nullable rule
-            elseif ($this->canRemoveNullable($model, $originalKey, $key)) {
+            elseif (ValidationMutator::canRemoveNullable($model, $originalKey, $key)) {
                 $this->removeNullable($model, $originalKey, $data);
             }
 
@@ -319,7 +267,7 @@ class CRUDController extends Controller
         }
 
         //Check for additional validation mutator
-        $updatedRules = $this->mutateRequestByRules($model, $updatedRules, $update, $request);
+        $updatedRules = $this->mutateRequestByRules($model, $updatedRules, $update, $childRequest, $request);
 
         return $updatedRules;
     }
@@ -327,14 +275,29 @@ class CRUDController extends Controller
     /*
      * Mutate admin validation request
      */
-    public function mutateRequestByRules($model, $rules = [], $update = false, $request = null)
+    public function mutateRequestByRules($model, $rules = [], $update = false, $childRequest = null, $request = null)
     {
-        $model->getAdminRules(function ($rule) use (&$rules, $update, $model, $request) {
+        $model->getAdminRules(function ($rule) use (&$rules, $update, $model, $childRequest, $request) {
             if (method_exists($rule, 'validate')) {
-                $rules = $rule->validate($rules, $update, $model, $request);
+                $rules = $rule->validate($rules, $update, $model, $childRequest ?: $request, $request);
             }
         });
 
         return $rules;
+    }
+
+    private function hasInParentRequest($model, $request)
+    {
+        if (
+            //Check if model has enabled inParent feature
+            $model->getProperty('inParent') === true &&
+
+            //Check if frontend has inParent enabled as well, because we may turn off this feature
+            $request->has($model->getModelFormPrefix('_in_parent'))
+        ){
+            return true;
+        }
+
+        return false;
     }
 }

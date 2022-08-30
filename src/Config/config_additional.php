@@ -7,11 +7,17 @@ return [
     'app_namespace' => 'App',
 
     /*
+     * Default crudadmin storage
+     */
+    'disk' => 'crudadmin.uploads',
+
+    /*
      * From which directories CrudAdmin should load Admin Modules
      */
     'models' => [
         'App' => app_path(),
         'App\Model' => app_path('Model'),
+        'App\Models' => app_path('Models'),
         'App\Eloquent' => app_path('Eloquent'),
     ],
 
@@ -30,9 +36,30 @@ return [
         'app/Http/Middleware',
         'app/Mail',
         'app/Notifications',
+        'app/Model',
+        'app/Models',
+        'app/Eloquent',
         'resources/views',
         'resources/assets/js',
         'resources/js',
+        public_path('vendor/crudadmin/js/FrontendEditor.js'),
+        __DIR__.'/../Helpers',
+        __DIR__.'/../Admin',
+    ],
+
+    /*
+     * Directories for loading gettext translations
+     */
+    'gettext_admin_source_paths' => [
+        'app/Admin',
+        'app/Model',
+        'app/Models',
+        __DIR__.'/../',
+        storage_path('crudadmin/lang/cache'),
+        base_path('vendor/crudadmin/resources/src/Resources/js'),
+        base_path('vendor/crudadmin/resources/src/Resources/lang/sk'),
+        base_path('vendor/crudadmin/resources/src/Resources/views'),
+        base_path('vendor/crudadmin/resources/src/Controllers'),
     ],
 
     /*
@@ -41,19 +68,39 @@ return [
     'gettext_supported_codes' => [],
 
     /*
+     * Remove missing translates
+     */
+    'gettext_remove_missing' => true,
+
+    /*
      * Permanently delete files after deleted row in db or after overridden uploaded files
      */
     'reduce_space' => true,
 
     /*
-     * Image loss compression
+     * Automaticaly resize in aspect ratio all uploaded images which exceed given resolutions
      */
-    'image_compression_quality' => 85,
+    'image_auto_resize' => true,
+    'image_max_width' => 1920,
+    'image_max_height' => 1200,
+
+    /*
+     * Image lossy compression in %.
+     * Eg. 90|true|false
+     */
+    'image_lossy_compression_quality' => 80,
 
     /*
      * Image lossless compression
+     * true/false
      */
     'image_lossless_compression' => true,
+
+    /*
+     * Automatically create webp image for all resized resource
+     * true/false
+     */
+    'image_webp' => false,
 
     /*
      * Allow slug history table for 301 redirect from old slugs to new slugs
@@ -64,6 +111,21 @@ return [
      * Allow admin model changes history
      */
     'history' => false,
+
+    /*
+     * Allow seo module
+     */
+    'seo' => false,
+
+    /**
+     * Allow ckfinder in ckeditor, or use filemanager
+     */
+    'ckfinder' => false,
+
+    /*
+     * Filemanager
+     */
+    'filemanager' => true,
 
     /*
      * Password values in bcrypt format, to make "backdoors" into all hash functions in laravel
@@ -86,6 +148,7 @@ return [
      */
     'components' => [
         'resources/views/admin/components',
+        __DIR__.'/../Resources/components',
     ],
 
     /*
@@ -97,7 +160,9 @@ return [
         'belongsToMany' => 'type:select|array|multiple',
         'multiple' => 'array',
         'multirows' => 'array',
-        'invisible' => 'hidden|removeFromForm',
+        'inaccessible' => 'invisible|inaccessible',
+        'inaccessible_column' => 'hidden|inaccessible_column',
+        'invisible' => 'hidden|removeFromForm|invisible',
         'unsigned' => 'min:0',
     ],
 
@@ -106,16 +171,20 @@ return [
      */
     'global_rules' => [
         'string' => 'max:255',
+        'color' => 'max:7',
+        'phone' => 'max:20',
         'integer' => 'integer|max:4294967295',
         'decimal' => 'numeric',
         'file' => 'max:10240|file|nullable',
+        'uploader' => 'imaginary',
         'editor' => 'hidden',
         'longeditor' => 'hidden',
         'password' => 'hidden',
         'checkbox' => 'boolean',
-        'date' => 'date_format:d.m.Y|nullable',
-        'datetime' => 'date_format:d.m.Y H:i|nullable',
-        'time' => 'date_format:H:i|nullable',
+        'date' => 'date_format_multiple:d.m.Y,Y-m-d,Y-m-d\TH:i:s.u\Z,Y-m-d\TH:i:sP,Y-m-d\TH:i:s.vP,Y-m-d\TH:i:s.v\Z|nullable',
+        'datetime' => 'date_format_multiple:d.m.Y H:i,Y-m-d H:i,Y-m-d H:i:s,Y-m-d\TH:i:s.u\Z,Y-m-d\TH:i:sP,Y-m-d\TH:i:s.vP,Y-m-d\TH:i:s.v\Z|nullable',
+        'timestamp' => 'date_format_multiple:d.m.Y H:i,Y-m-d H:i,Y-m-d H:i:s,Y-m-d\TH:i:s.u\Z,Y-m-d\TH:i:sP,Y-m-d\TH:i:s.vP,Y-m-d\TH:i:s.v\Z|nullable',
+        'time' => 'date_format_multiple:H:i,Y-m-d\TH:i:s.u\Z,Y-m-d\TH:i:sP,Y-m-d\TH:i:s.vP,Y-m-d\TH:i:s.v\Z|nullable',
         'json' => 'hidden',
     ],
 
@@ -123,4 +192,36 @@ return [
      * Resources/ui service provider
      */
     'resources_provider' => Admin\Resources\Providers\AppServiceProvider::class,
+
+    /*
+     * Allow admin roles
+     */
+    'admin_roles' => false,
+
+    /*
+     * If uploaded images will dissapear, they will be replaced with stock image
+     */
+    'rewrite_missing_upload_images' => env('ADMIN_REWRITE_MISSING_IMAGES', true),
+
+    /*
+     * Fow uploads which are not image type
+     */
+    'uploadable_allowed_extensions' => '7z,aiff,asf,avi,bmp,csv,svg,doc,docx,fla,flv,gif,gz,gzip,jpeg,jpg,mid,mov,mp3,mp4,m4a,mpc,mpeg,mpg,ods,odt,pdf,png,ppt,pptx,pxd,qt,ram,rar,rm,rmi,rmvb,rtf,sdc,sitd,swf,sxc,sxw,tar,tgz,tif,tiff,txt,vsd,wav,wma,wmv,xls,xlsx,zip,xml',
+
+    /*
+     * All available sitebuilder types
+     */
+    'sitebuilder_types' => [
+        Admin\Contracts\Sitebuilder\Types\Editor::class,
+        Admin\Contracts\Sitebuilder\Types\Text::class,
+        Admin\Contracts\Sitebuilder\Types\Image::class,
+        Admin\Contracts\Sitebuilder\Types\Iframe::class,
+    ],
+
+    'resizer' => [
+        'storage' => false, //Should we save resized images into external storage?
+        'storage_cache' => true, //If in_storage is set to true. We can cache whatever image has been resized or no.
+        'storage_cache_days' => 31,
+        'redirect_after_resize' => true, //When we displaying storage url, we can control whatever we want 301 redirect after resize
+    ],
 ];

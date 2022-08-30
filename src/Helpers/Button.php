@@ -2,13 +2,16 @@
 
 namespace Admin\Helpers;
 
+use Admin\Contracts\Buttons\HasButtonsSupport;
 use Admin\Eloquent\AdminModel;
-use Illuminate\Support\Collection;
 use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Helpers\SecureDownloader;
+use Illuminate\Support\Collection;
 
 class Button
 {
-    use VueComponent;
+    use VueComponent,
+        HasButtonsSupport;
 
     /*
      * Button row
@@ -57,9 +60,31 @@ class Button
     public $reloadAll = false;
 
     /*
-     * Allow accept in ask/question alert
+     * Should button response be acceptable with yes/no buttons?
      */
-    public $accept = true;
+    public $accept = false;
+
+    /*
+     * Should be tooltip encoded?
+     */
+    public $tooltipEncode = true;
+
+    /*
+     * Should button response return rows? Modifiable wia ->withRows(true)
+     * fire() and fireMultiple() returns rows by default
+     */
+    public $withRows = false;
+
+    /*
+     * Which action has been fired after response
+     * mutate with action() method
+     */
+    public $action;
+
+    /*
+     * Model response
+     */
+    public $model;
 
     /*
      * Title
@@ -98,14 +123,38 @@ class Button
     /*
      * Set response message
      */
-    public function message($message, $title = null, $type = 'success')
+    public function message($message, $title = null, $type = 'success', $toast = false)
     {
         if ($title) {
             $this->message['title'] = $title;
         }
 
+        if ( $type ) {
+            $this->message['type'] = $type;
+        }
+
         $this->message['message'] = $message;
-        $this->message['type'] = $type;
+        $this->message['toast'] = $toast;
+
+        return $this;
+    }
+
+    /*
+     * Display toast message
+     */
+    public function toast($message, $type = 'success')
+    {
+        return $this->message($message, null, $type, true);
+    }
+
+    public function errorToast($message)
+    {
+        return $this->toast($message, 'error');
+    }
+
+    public function download($basepath)
+    {
+        $this->redirect = (new SecureDownloader($basepath))->getDownloadPath();
 
         return $this;
     }
@@ -182,8 +231,36 @@ class Button
      */
     public function component($template, $component_data = [])
     {
-        $this->message['component'] = $this->renderVuejs($template);
-        $this->message['component_data'] = $component_data;
+        $this->message['component'] = [
+            'template' => $this->renderVuejs($template),
+            'data' => $component_data,
+        ];
+
+        return $this;
+    }
+
+    /*
+     * Render VueJs template
+     */
+    public function model($classname, $action = 'create')
+    {
+        $this->message['component'] = [
+            'template' => 'ModalAddNewRow',
+            'data' => [
+                'table' => (new $classname)->getTable(),
+                'action' => $action,
+            ],
+        ];
+
+        return $this;
+    }
+
+    /*
+     * We can modify which action will be fired after response
+     */
+    public function action($action)
+    {
+        $this->action = $action;
 
         return $this;
     }
@@ -199,6 +276,16 @@ class Button
     }
 
     /*
+     * We want update rows in this response
+     */
+    public function withRows($state)
+    {
+        $this->withRows = $state;
+
+        return $this;
+    }
+
+    /*
      * Ask question with form before action
      */
     // public function question()
@@ -206,12 +293,4 @@ class Button
     //     return $this->title('Your title...')
     //                 ->component('YoutComponent.vue');
     // }
-
-    /*
-     * Where are stored VueJS components
-     */
-    protected function getComponentPaths()
-    {
-        return resource_path('views/admin/components/buttons');
-    }
 }

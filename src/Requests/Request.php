@@ -2,11 +2,15 @@
 
 namespace Admin\Requests;
 
-use File;
 use Admin;
-use Localization;
+use Admin\Core\Fields\Mutations\FieldToArray;
+use Admin\Core\Helpers\File as AdminFile;
 use Carbon\Carbon;
+use File;
 use Illuminate\Foundation\Http\FormRequest;
+use Localization;
+use Exception;
+use DateTime;
 
 abstract class Request extends FormRequest
 {
@@ -17,6 +21,8 @@ abstract class Request extends FormRequest
     private $errors = [];
 
     private $model = false;
+
+    private $rewritedRules = null;
 
     //Checks if is multiple or one file
     protected function getFilesInArray($key)
@@ -45,7 +51,7 @@ abstract class Request extends FormRequest
         if (is_array($this->get($key))) {
             $files = $this->get($key);
 
-            if (method_exists($files[0], 'isFile') && $files[0]->isFile()) {
+            if ($files[0] && method_exists($files[0], 'isFile') && $files[0]->isFile()) {
                 return true;
             }
         }
@@ -59,13 +65,17 @@ abstract class Request extends FormRequest
             return true;
         }
 
-        return $this->get($key) && method_exists($this->get($key), 'isFile') && $this->get($key)->isFile() || $this->hasFile($key);
+        return (
+            is_object($this->get($key))
+            && method_exists($this->get($key), 'isFile')
+            && $this->get($key)->isFile()
+        ) || $this->hasFile($key);
     }
 
     protected function isEmptyFile($key)
     {
         //If is forced deleting of file in admin
-        if ($this->has('$remove_'.$key)) {
+        if ($this->isFileRemoved($key)) {
             return false;
         }
 
@@ -77,34 +87,53 @@ abstract class Request extends FormRequest
         return true;
     }
 
+    public function isFileRemoved($key)
+    {
+        return $this->has('$remove_'.$key);
+    }
+
     /*
      * Uploads all files from request by model inputs
      */
     public function uploadFiles(array $fields = null)
     {
-        foreach ($fields as $orig_key => $field) {
+        foreach ($fields as $origKey => $field) {
             if ($field['type'] == 'file') {
-                $has_locale = $this->model->hasFieldParam($orig_key, 'locale', true);
+                $hasLocale = $this->model->hasFieldParam($origKey, 'locale', true);
 
-                $languages = $has_locale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
+                $languages = $hasLocale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
 
-                foreach ($languages as $lang_id => $lang_slug) {
-                    $key = $has_locale ? $orig_key.'.'.$lang_slug : $orig_key;
+                foreach ($languages as $langId => $langSlug) {
+                    $key = $hasLocale ? $origKey.'.'.$langSlug : $origKey;
 
-                    //If is File field empty, then remove this field for correct updating row in db
+                    //If is File field empty, then replace this field with previous value for correct updating row in db
                     if ($this->isEmptyFile($key)) {
-                        $this->replace($this->except($key));
+                        //In admin, we does not want to update existing files, we can remove this field from request
+                        if ( Admin::isAdmin() === true ) {
+                            $this->replace($this->except($key));
+                        }
+
+                        //In frontend, we want load previous value, and put it into request
+                        else {
+                            $file = $this->isFileRemoved($key) ? null : @$this->model->getAttribute($key);
+
+                            $this->replace($this->except($key) + [
+                                $key => $file
+                            ]);
+                        }
                     } elseif ($this->isFileUpload($key)) {
                         foreach ($this->getFilesInArray($key) as $file) {
                             //Checks for upload errors
-                            if ($fileObject = $this->model->upload($orig_key, $file)) {
-                                $this->uploadedFiles[$orig_key][$lang_slug][] = $fileObject->filename;
+                            if ($fileObject = $this->model->upload($origKey, $file)) {
+                                $this->uploadedFiles[$origKey][$langSlug][] = $fileObject->filename;
                             } else {
-                                Admin::push('errors.request', $this->errors[$key] = $this->model->getUploadError());
+                                Admin::warning(
+                                    $this->errors[$key] = $this->model->getUploadError()
+                                );
                             }
 
                             //If is not multiple upload
-                            if (! $this->model->hasFieldParam($orig_key, 'array', true)) {
+                            if (! $this->model->hasFieldParam($origKey, 'array', true)) {
                                 break;
                             }
                         }
@@ -113,38 +142,38 @@ abstract class Request extends FormRequest
                     /*
                      * Get already uploaded files
                      */
-                    if (Admin::isAdmin() && (($is_multiple = $this->model->hasFieldParam($orig_key, 'multiple', true)) || $has_locale)) {
-                        if ($this->has('$uploaded_'.$orig_key)) {
-                            $uploadedFiles = $this->get('$uploaded_'.$orig_key);
+                    if (Admin::isAdmin() && (($isMultiple = $this->model->hasFieldParam($origKey, 'multiple', true)) || $hasLocale)) {
+                        if ($this->has('$uploaded_'.$origKey)) {
+                            $uploadedFiles = $this->get('$uploaded_'.$origKey);
 
-                            $is_uploaded = array_key_exists($lang_slug, $uploadedFiles);
+                            $isUploaded = array_key_exists($langSlug, $uploadedFiles);
 
-                            $now_uploaded = (array_key_exists($orig_key, $this->uploadedFiles))
-                                            && ($has_locale ? array_key_exists($lang_slug, $this->uploadedFiles[$orig_key]) : true);
+                            $now_uploaded = (array_key_exists($origKey, $this->uploadedFiles))
+                                            && ($hasLocale ? array_key_exists($langSlug, $this->uploadedFiles[$origKey]) : true);
 
                             //Dont merge old uploaded files if is locale field with new uploaded file
                             //Or if is field locale with no previous uploaded files
                             //Or if is multiple locale upload, but with no previous uploads
                             if (
-                                $has_locale && ($now_uploaded || ! $is_uploaded)
-                                && (! $is_multiple || ! $is_uploaded)
+                                $hasLocale && ($now_uploaded || ! $isUploaded)
+                                && (! $isMultiple || ! $isUploaded)
                             ) {
                                 continue;
                             }
 
                             //Get files from actual language
-                            if ($has_locale) {
-                                $uploadedFiles = $uploadedFiles[$lang_slug];
+                            if ($hasLocale) {
+                                $uploadedFiles = $uploadedFiles[$langSlug];
                             }
 
-                            $fromBuffer = $now_uploaded ? $this->uploadedFiles[$orig_key][$lang_slug] : [];
+                            $fromBuffer = $now_uploaded ? $this->uploadedFiles[$origKey][$langSlug] : [];
 
-                            $this->uploadedFiles[$orig_key][$lang_slug] = array_merge($uploadedFiles, $fromBuffer);
+                            $this->uploadedFiles[$origKey][$langSlug] = array_merge($uploadedFiles, $fromBuffer);
                         }
 
                         //If is multiple file, and 0 files has been send into this field
-                        elseif (! array_key_exists($orig_key, $this->uploadedFiles)) {
-                            $this->resetValuesInFields[$lang_slug] = $orig_key;
+                        elseif (! array_key_exists($origKey, $this->uploadedFiles)) {
+                            $this->resetValuesInFields[$langSlug] = $origKey;
                         }
                     }
                 }
@@ -167,22 +196,19 @@ abstract class Request extends FormRequest
         ];
 
         foreach ($fields as $key => $field) {
-            if ($this->model->isFieldType($key, ['date', 'datetime', 'time'])) {
+            if ($this->model->isFieldType($key, ['date', 'datetime', 'time', 'timestamp'])) {
                 if ($this->model->hasFieldParam($key, 'multiple', true)) {
-                    if (! $this->has($key)) {
-                        $this->merge([$key => []]);
-                    }
+                    $this->merge([$key => array_filter($this->get($key) ?: [])]);
                 } elseif ($this->has($key) && ! empty($this->get($key))) {
-                    if ($has_locale = $this->model->hasFieldParam($key, 'locale')) {
+                    if ($hasLocale = $this->model->hasFieldParam($key, 'locale')) {
                         $date = $this->get($key);
                     } else {
-                        $date = Carbon::createFromFormat($field['date_format'], $this->get($key));
+                        [$date, $dateFormat] = $this->getUniversalDateFormat($this->get($key), $field);
 
-                        $date_format = strtolower($field['date_format']);
-
+                        $dateFormat = strtolower($dateFormat);
                         foreach ($reset as $identifier => $arr) {
                             //Reset hours if are not in date format
-                            if (strpos($date_format, $identifier) === false) {
+                            if (strpos($dateFormat, $identifier) === false) {
                                 $date->{$arr[0]}($arr[1]);
                             }
                         }
@@ -197,6 +223,35 @@ abstract class Request extends FormRequest
                 }
             }
         }
+    }
+
+    private function getUniversalDateFormat($value, $field)
+    {
+        $formats = array_values(array_filter(array_merge(
+            [ $field['date_format'] ?? null ],
+            explode(',', $field['date_format_multiple'] ?? '')
+        )));
+
+        foreach ($formats as $format) {
+            try {
+                if ( strpos($value, 'Z') ) {
+                    $date = Carbon::createFromFormat($format, $value, 'UTC')->setTimezone(config('app.timezone'));
+                } else {
+                    $date = Carbon::createFromFormat($format, $value);
+                }
+
+                //If time has been received for date field, we need reset time.
+                if ( $field['type'] == 'date' ){
+                    $date->startOfDay();
+                }
+
+                return [$date, $format];
+            } catch (Exception $e){
+
+            }
+        }
+
+        throw $e;
     }
 
     /*
@@ -216,7 +271,7 @@ abstract class Request extends FormRequest
             return $data;
         }
 
-        return $this->has($key) && $this->get($key) == 1 ? 1 : 0;
+        return $this->has($key) && in_array($this->get($key), [1, 'on']) ? 1 : 0;
     }
 
     //If is no value for checkbox, then automaticaly add zero value
@@ -225,6 +280,19 @@ abstract class Request extends FormRequest
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, 'checkbox')) {
                 $this->merge([$key => $this->getCheckboxValue($key)]);
+            }
+        }
+    }
+
+    public function jsonFields(array $fields = null)
+    {
+        foreach ($fields as $key => $field) {
+            if ($this->model->isFieldType($key, 'json') && is_string($value = $this->get($key)) ) {
+                $json = json_decode($value, true);
+
+                $this->merge([
+                    $key => $json
+                ]);
             }
         }
     }
@@ -246,11 +314,30 @@ abstract class Request extends FormRequest
 
     private function getFieldsByRequest($fields = null)
     {
+        //We need load refreshed fields. Because after session boot
+        //fields may be changed.
+        $modelFields = $this->model->getFields(null, true);
+
+        //Rewrite original model properties,
+        //with properties given by original and additional/rewrited request rules
+        if ( is_array($this->rewritedRules) ) {
+            foreach ($this->rewritedRules as $field => $rules) {
+                $rules = (new FieldToArray)->update($rules);
+
+                //Rewrite each rule key which is not missing in model
+                foreach ($rules as $rKey => $value) {
+                    if ( array_key_exists($field, $modelFields) && array_key_exists($rKey, $modelFields[$field]) ) {
+                        $modelFields[$field][$rKey] = $value;
+                    }
+                }
+            }
+        }
+
         //Get fields by request
         if ($fields) {
-            return array_intersect_key($this->model->getFields(), array_flip($fields));
+            return array_intersect_key($modelFields, array_flip($fields));
         } else {
-            return $this->model->getFields();
+            return $modelFields;
         }
     }
 
@@ -297,6 +384,39 @@ abstract class Request extends FormRequest
         }
     }
 
+    /**
+     * Check if given field is removed from request
+     *
+     * @return  bool
+     */
+    public function isRemovedFieldFromRequest($key)
+    {
+        return (
+            $this->model->hasFieldParam($key, ['removeFromForm', 'invisible', 'disabled'], true) === true
+            && $this->model->hasFieldParam($key, ['keepInRequest'], true) === false
+        );
+    }
+
+    /*
+     * Remove fields which are turned off in administration
+     * For example has removeFromForm, etc...
+     * This fields must not been edited! Also because of security purposes.
+     */
+    protected function removeMissingFields($fields = null)
+    {
+        //Allow this feature only in administration
+        if ( Admin::isAdmin() === false ) {
+            return;
+        }
+
+        foreach ($fields as $key => $field) {
+            //Allow remove only "removed" fields from dom.
+            if ($this->isRemovedFieldFromRequest($key)) {
+                $this->replace($this->except($key));
+            }
+        }
+    }
+
     protected function resetMultipleSelects($fields = null)
     {
         foreach ($fields as $key => $field) {
@@ -310,21 +430,32 @@ abstract class Request extends FormRequest
         }
     }
 
-    public function applyMutators($model, array $fields = null)
+    public function applyMutators($model, array $fields = null, $rules = null)
     {
         //Set model object
         $this->model = $model;
+
+        //Set rewrited rules
+        $this->rewritedRules = $rules;
 
         $fields = $this->getFieldsByRequest($fields);
 
         $this->uploadFiles($fields);
         $this->checkboxes($fields);
         $this->datetimes($fields);
+        $this->jsonFields($fields);
         $this->removeEmptyForeign($fields);
         $this->emptyStringsToNull($fields);
         $this->emptyLocalesToNull($fields);
         $this->resetMultipleSelects($fields);
         $this->removeEmptyPassword($fields);
+        $this->removeMissingFields($fields);
+
+        $this->model->runAdminModules(function($module) use ($fields, $rules) {
+            if ( method_exists($module, 'requestMutator') ) {
+                $response = $module->requestMutator($this, $this->model, $fields, $rules);
+            }
+        });
 
         return count($this->errors) == 0;
     }
@@ -340,29 +471,22 @@ abstract class Request extends FormRequest
     /*
      * Modify final value by admin rule modifier
      */
-    private function mutateRowDataRule($data)
+    private function mutateRowDataRule(array $rows)
     {
-        return array_map(function ($item) {
-            $this->model->getAdminRules(function ($rule) use (&$item) {
+        return array_map(function ($row) {
+            //Reset file values
+            foreach ($this->resetValuesInFields as $field) {
+                $row[$field] = null;
+            }
+
+            $this->model->getAdminRules(function ($rule) use (&$row) {
                 if (method_exists($rule, 'fill')) {
-                    $item = $rule->fill($item);
+                    $row = $rule->fill($row);
                 }
             });
 
-            return $item;
-        }, $data);
-    }
-
-    /*
-     * Bind files into array by locale type
-     */
-    private function bindFilesIntoArray(&$array, $key, $lang_slug, $has_locale, $files)
-    {
-        if ($has_locale) {
-            $array[$lang_slug] = $files;
-        } else {
-            $array = $files;
-        }
+            return $row;
+        }, $rows);
     }
 
     /*
@@ -370,57 +494,84 @@ abstract class Request extends FormRequest
      */
     public function allWithMutators()
     {
-        $data = $this->all();
+        $request = $this->all();
 
-        $array = [];
+        $requestRows = [
+            $request,
+        ];
 
-        //Bing multiple files values as multiple rows
-        foreach ((array) $this->uploadedFiles as $key => $files) {
-            $has_locale = $this->model->hasFieldParam($key, 'locale', true);
+        $requestRows = $this->manageUploadedFiles($requestRows);
+        $requestRows = $this->addMultiRelationSupport($requestRows);
 
-            $languages = $has_locale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
+        return $this->mutateRowDataRule(
+            array_values($requestRows)
+        );
+    }
 
-            foreach ($languages as $lang_key => $lang_slug) {
-                //If file has not been uploaded in locale field
-                if ($has_locale && ! array_key_exists($lang_slug, $files)) {
-                    continue;
-                }
+    private function manageUploadedFiles($requestRows)
+    {
+        foreach ($requestRows as $requestRowKey => $request) {
+            //Bing multiple files values as multiple rows
+            foreach ((array) $this->uploadedFiles as $key => $files) {
+                $hasLocale = $this->model->hasFieldParam($key, 'locale', true);
+                $languages = $hasLocale ? Localization::getLanguages()->pluck('slug', 'id') : [0];
 
-                //Check if is multiple or signle upload
-                $count = count($files[$lang_slug]);
+                foreach ($languages as $langKey => $langSlug) {
+                    //If file has not been uploaded in locale field
+                    if ($hasLocale && ! array_key_exists($langSlug, $files)) {
+                        continue;
+                    }
 
-                if ($count == 1) {
-                    $this->bindFilesIntoArray($data[$key], $key, $lang_slug, $has_locale, $files[$lang_slug][0]);
-                } elseif ($count > 1) {
-
-                    //Returns one file as one db row
+                    //We need clone request rows and add multiple rows to add. Because each image represents one row in db.
                     if ($this->model->hasFieldParam($key, 'multirows', true)) {
                         if ($this->model->exists === false) {
-                            foreach ($files[$lang_slug] as $file) {
-                                $data[$key] = $file;
+                            unset($requestRows[$requestRowKey]);
 
-                                $array[] = $data;
+                            foreach ($files[$langSlug] as $file) {
+                                $request[$key] = $file;
+
+                                $requestRows[] = $request;
                             }
 
-                            return $this->mutateRowDataRule($array);
-                        } else {
-                            $data[$key] = end($files[$lang_slug]);
+                            //We need end this when requests are completed
+                            break 2;
                         }
                     }
 
-                    //Bind files into file value
-                    elseif ($this->model->hasFieldParam($key, 'multiple', true)) {
-                        $this->bindFilesIntoArray($data[$key], $key, $lang_slug, $has_locale, $files[$lang_slug]);
+                    $preparedFiles = $this->model->hasFieldParam($key, 'multiple', true)
+                            ? $files[$langSlug]
+                            : $files[$langSlug][0];
+
+                    if ($hasLocale) {
+                        $requestRows[$requestRowKey][$key][$langSlug] = $preparedFiles;
+                    } else {
+                        $requestRows[$requestRowKey][$key] = $preparedFiles;
                     }
                 }
             }
         }
 
-        //Reset file values
-        foreach ($this->resetValuesInFields as $field) {
-            $data[$field] = null;
+        return $requestRows;
+    }
+
+    private function addMultiRelationSupport($requestRows)
+    {
+        foreach ($requestRows as $requestRowKey => $request) {
+            foreach ($this->model->getForeignColumn() ?: [] as $foreignTable => $relationKeyName) {
+                $relationIds = $request[$relationKeyName] ?? null;
+
+                if ( is_array($relationIds) ) {
+                    unset($requestRows[$requestRowKey]);
+
+                    foreach ($relationIds as $relationId) {
+                        $request[$relationKeyName] = $relationId;
+
+                        $requestRows[] = $request;
+                    }
+                }
+            }
         }
 
-        return $this->mutateRowDataRule([$data]);
+        return $requestRows;
     }
 }

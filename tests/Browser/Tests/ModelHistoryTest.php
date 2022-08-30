@@ -25,6 +25,8 @@ class ModelHistoryTest extends BrowserTestCase
             $browser->openModelPage(History::class)
 
                     //Check if form values has been successfully filled
+                    ->openForm()
+                    ->waitForCkeditor() //ckeditor pause
                     ->fillForm(History::class, $row, 'sk')
                     ->assertHasFormValues(History::class, $row, 'sk')
 
@@ -43,7 +45,8 @@ class ModelHistoryTest extends BrowserTestCase
                     ->saveForm()
 
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
-                    ->closeAlert();
+                    ->closeAlert()
+                    ->closeForm();
 
             //Check if updated row snapshot correctly exists
             $rowSnapshot = $this->getHistoryRow(2, $this->createLangArray($updatedRow, $row, ['en', 'sk']));
@@ -68,7 +71,8 @@ class ModelHistoryTest extends BrowserTestCase
                     ->assertHasClass('[data-id="1"] [data-button="history"]', 'enabled-history');
 
             //Open actual history row and check values
-            $browser->click('[data-id="1"] [data-button="history"]')
+            $browser->closeForm()
+                    ->click('[data-id="1"] [data-button="history"]')
                     ->whenAvailable('.modal', function($modal) use($row, $updatedRow) {
                         $modal->click('[data-history-id="2"] button');
                     })
@@ -95,6 +99,10 @@ class ModelHistoryTest extends BrowserTestCase
         $row = $this->buildDbData(History::class, $row, $lang);
 
         ksort($row);
+
+        if ( isset($row['checkbox']) ) {
+            $row['checkbox'] = $row['checkbox'] ? 1 : 0;
+        }
 
         return [
             'id' => $id,

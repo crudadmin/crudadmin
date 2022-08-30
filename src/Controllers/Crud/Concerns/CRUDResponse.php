@@ -6,12 +6,25 @@ use Admin;
 
 trait CRUDResponse
 {
-    /*
+    /**
      * Returns errors from admin buffer and admin request buffer
+     *
+     * @param  string  $type error|notice
+     * @return  [type]
      */
-    protected function getRequestErrors()
+    protected function getRequestMessages($type = 'error')
     {
-        return array_merge((array) Admin::get('errors'), (array) Admin::get('errors.request'));
+        return array_merge(
+            (array) Admin::get('request.'.$type)
+        );
+    }
+
+    public function hasAdditionalMessages()
+    {
+        return count(array_merge(
+            $this->getRequestMessages('error'),
+            $this->getRequestMessages('notice')
+        )) > 0;
     }
 
     /*
@@ -19,8 +32,12 @@ trait CRUDResponse
      */
     protected function responseMessage($sentense)
     {
-        if (count($this->getRequestErrors())) {
-            return $sentense.' '.trans('admin::admin.with-errors').':<br>'.implode($this->getRequestErrors(), '<br>');
+        if (count($errors = $this->getRequestMessages('error'))) {
+            return $sentense.' '.trans('admin::admin.with-errors').':<br>'.implode('<br>', $errors);
+        }
+
+       if (count($notices = $this->getRequestMessages('notice'))) {
+            return $sentense.' '._('s nasledujúcimi hláseniami').':<br>'.implode('<br>', $notices);
         }
 
         return $sentense.'.';
@@ -28,7 +45,15 @@ trait CRUDResponse
 
     protected function responseType()
     {
-        return count($this->getRequestErrors()) ? 'info' : 'success';
+        if ( count($this->getRequestMessages('error')) ){
+            return 'warning';
+        }
+
+        if ( count($this->getRequestMessages('notice')) ){
+            return 'info';
+        }
+
+        return 'success';
     }
 }
 

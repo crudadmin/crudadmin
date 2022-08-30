@@ -4,7 +4,7 @@ namespace DummyNamespace;
 
 use \Admin\Helpers\Layout;
 
-class DummyLayout extends Layout
+class DummyClass extends Layout
 {
     /*
      * Layout position

@@ -2,7 +2,10 @@
 
 namespace Admin\Providers;
 
+use Admin\Helpers\AutoAjax;
+use Admin\Requests\Validators\UniqueJsonValidator;
 use Illuminate\Support\ServiceProvider;
+use Validator;
 
 class AdminServiceProvider extends ServiceProvider
 {
@@ -18,7 +21,9 @@ class AdminServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $this->setAutoAjax();
         $this->loadGlobalModules();
+        $this->loadValidators();
     }
 
     //Register admin language model
@@ -34,9 +39,14 @@ class AdminServiceProvider extends ServiceProvider
             \Admin::registerModel(\Admin\Models\Language::class);
         }
 
+        //Admin translations
+        if (\Admin::isEnabledAdminLocalization()) {
+            \Admin::registerModel(\Admin\Models\AdminLanguage::class);
+        }
+
         //Admin groups
         if (\Admin::isRolesEnabled()) {
-            \Admin::registerModel(\Admin\Models\AdminsGroup::class);
+            \Admin::registerModel(\Admin\Models\UsersRole::class);
         }
 
         //Models history
@@ -48,5 +58,35 @@ class AdminServiceProvider extends ServiceProvider
         if (\Admin::isSluggableHistoryEnabled()) {
             \Admin::registerModel(\Admin\Models\SluggableHistory::class);
         }
+
+        //Seo
+        if (\Admin::isSeoEnabled()) {
+            \Admin::registerModel(\Admin\Models\RoutesSeo::class);
+        }
+
+        //Frontend editor
+        if ( \Admin::isEnabledFrontendEditor() ) {
+            \Admin::registerModel(\Admin\Models\StaticContent::class);
+        }
+
+        //Sitebuilder support
+        if ( \Admin::isEnabledSitebuilder() ) {
+            \Admin::registerModel(\Admin\Models\SiteBuilder::class);
+        }
+
+        //Sitetree support
+        if ( \Admin::isEnabledSitetree() ) {
+            \Admin::registerModel(\Admin\Models\SiteTree::class);
+        }
+    }
+
+    private function loadValidators()
+    {
+        Validator::extend('unique_json', UniqueJsonValidator::class.'@validate', trans('validation.unique'));
+    }
+
+    private function setAutoAjax()
+    {
+        config()->set('autoajax.provider', AutoAjax::class);
     }
 }

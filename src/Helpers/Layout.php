@@ -12,9 +12,10 @@ class Layout
      * List of all available positions
      */
     public $available_positions = [
-        'top', 'bottom',
-        'form-top', 'form-bottom', 'form-header', 'form-footer',
-        'table-header', 'table-footer',
+        'top', 'bottom', 'mutators',
+        'form-before', 'form-after', 'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
+        'table-before', 'table-after', 'table-header', 'table-header-actions', 'table-footer',
+        'actions-grid',
     ];
 
     /*
@@ -24,9 +25,13 @@ class Layout
      * form-top - start of the form
      * form-bottom - end of the form
      * form-header - header of the form
+     * form-header-left - header of the form in action bar (left)
+     * form-header-right - header of the form in action bar (right)
      * form-footer - footer of the form
      * table-header - header of the table
+     * table-header-actions - action bar
      * table-footer - footer of the table
+     * actions-grid - Next to grid switcher
      */
     public $position = 'top';
 

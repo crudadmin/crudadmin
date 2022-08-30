@@ -23,6 +23,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
             $fieldKeys = array_keys((new FieldsTypesMultiple)->getFields());
 
             $browser->openModelPage(FieldsTypesMultiple::class)
+                    ->openForm()
                     //Check if validation of every field does work
                     ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->submitForm()
@@ -38,8 +39,10 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Check if form values has been successfully reseted after save
                     ->closeAlert()
+                    ->openForm()
                     ->assertDoesNotHaveValidationError(FieldsTypesMultiple::class, $fieldKeys)
                     ->assertFormIsEmpty(FieldsTypesMultiple::class)
+                    ->closeForm()
 
                     //Check if table after creation contains of correct column values
                     ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($row))
@@ -51,6 +54,7 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
                     ->assertSeeSuccess(trans('admin::admin.success-save'))
                     ->closeAlert()
                     ->assertHasFormValues(FieldsTypesMultiple::class, $row)
+                    ->closeForm()
                     ->assertTableRowExists(FieldsTypesMultiple::class, $this->getTableRow($row));
         });
 
@@ -92,8 +96,8 @@ class ModelFieldsTypesMultipleTest extends BrowserTestCase
 
                     //Remove one item from file upload, and save form 2 times, because if something happens
                     //with missing file, it will be obvious after 2 form saves.
-                    ->jsClick('[data-field="file_multiple"] .chosen-choices li:contains(image3.jpg) a')->pause(300)
-                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()->pause(300)
+                    ->jsClick('[data-field="file_multiple"] .chosen-choices li:contains(image3.jpg) a')->pause(400)
+                    ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()->pause(400)
                     ->saveForm()->assertSeeSuccess(trans('admin::admin.success-save'))->closeAlert()
                     ->assertHasFormValues(FieldsTypesMultiple::class, $rowWithoutFile, null, true)
 

@@ -5,9 +5,8 @@ namespace DummyNamespace;
 use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\AdminRule;
 use Admin;
-use Ajax;
 
-class DummyRule extends AdminRule
+class DummyClass extends AdminRule
 {
     //On all events
     public function fire(AdminModel $row)
@@ -20,7 +19,7 @@ class DummyRule extends AdminRule
      */
     public function creating(AdminModel $row)
     {
-        //return Ajax::error('You cannot create row!');
+        //return autoAjax()->error('You cannot create row!')->throw();
     }
 
     /*

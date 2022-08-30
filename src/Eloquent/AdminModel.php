@@ -3,30 +3,42 @@
 namespace Admin\Eloquent;
 
 use Admin;
-use Localization;
-use Admin\Eloquent\Concerns\ModelIcons;
-use Admin\Eloquent\Concerns\ModelRules;
-use Admin\Eloquent\Concerns\Uploadable;
-use Admin\Eloquent\Concerns\Historiable;
-use Admin\Eloquent\Concerns\VueComponent;
-use Illuminate\Database\Eloquent\Builder;
-use Admin\Eloquent\Concerns\HasAttributes;
-use Admin\Eloquent\Concerns\AdminModelTrait;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Admin\Eloquent\Concerns\ModelLayoutBuilder;
 use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Admin\Eloquent\Concerns\AdminModelTrait;
+use Admin\Eloquent\Concerns\HasAttributes;
+use Admin\Eloquent\Concerns\HasButtons;
+use Admin\Eloquent\Concerns\HasExporter;
+use Admin\Eloquent\Concerns\HasPermissions;
+use Admin\Eloquent\Concerns\HasSiteBuilder;
+use Admin\Eloquent\Concerns\HasSiteTree;
+use Admin\Eloquent\Concerns\Historiable;
+use Admin\Eloquent\Concerns\ModelIcons;
+use Admin\Eloquent\Concerns\ModelLayoutBuilder;
+use Admin\Eloquent\Concerns\ModelRules;
+use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Eloquent\Modules\AdminCustomizationModule;
+use Admin\Eloquent\Modules\FilterStateModule;
+use Admin\Eloquent\Modules\GlobalRelationModule;
+use Admin\Eloquent\Modules\SeoModule;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Localization;
 
 class AdminModel extends CoreAdminModel
 {
     use AdminModelTrait,
         ModelLayoutBuilder,
+        HasExporter,
         HasAttributes,
+        HasPermissions,
         ModelRules,
         VueComponent,
         Historiable,
-        Uploadable,
-        ModelIcons,
-        SoftDeletes;
+        SoftDeletes,
+        HasSiteBuilder,
+        HasSiteTree,
+        HasButtons;
 
     /*
      * Template name
@@ -79,6 +91,11 @@ class AdminModel extends CoreAdminModel
      * Enable sorting rows
      */
     protected $sortable = true;
+
+    /*
+     * Row can be displayed in preview mode, also when editable is disabled.
+     */
+    protected $displayable = false;
 
     /*
      * Ordering rows
@@ -137,15 +154,12 @@ class AdminModel extends CoreAdminModel
      */
     protected $delete_files = true;
 
-    /*
-     * Show sub-childs in tabs
-     */
-    protected $inTab = true;
-
-    /*
+    /**
      * Show model in menu even if is relation
+     *
+     * @var  null/true/false
      */
-    protected $inMenu = false;
+    protected $inMenu = null;
 
     /*
      * If child model can be added without parent model
@@ -166,6 +180,105 @@ class AdminModel extends CoreAdminModel
      * Model icon
      */
     protected $icon = null;
+
+    /*
+     * Has available seo module
+     */
+    protected $seo = false;
+
+    /*
+     * Visible seo attributes in toArray()
+     */
+    protected $seoVisible = false;
+
+    /*
+     * This model can be assigned to any other model without specific relation key
+     */
+    protected $globalRelation = false;
+
+    /*
+     * Compress all uploaded images with lossy compression
+     */
+    protected $imageLossyCompression = true;
+
+    /*
+     * Compress all uploaded images with lossy compression.
+     * Is automatically disabled when lossyCompression is off
+     */
+    protected $imageMaximumProportions = true;
+
+    /*
+     * Compress all uploaded images with lossless compression
+     */
+    protected $imageLosslessCompression = true;
+
+    /*
+     * Publishable feature is turned for each model.
+     * Via this property we can manage global publishable for all models
+     */
+    static $globalPublishable = true;
+    static $globalModelPublishable = [];
+
+    /*
+     * Admin modules
+     */
+    protected $modules = [
+        SeoModule::class,
+        AdminCustomizationModule::class,
+        GlobalRelationModule::class,
+        FilterStateModule::class,
+    ];
+
+    /**
+     * We can turn off publishable globally for all models
+     *
+     * @param  bool  $state
+     */
+    public static function setGlobalPublishable($state)
+    {
+        self::$globalPublishable = $state;
+    }
+
+    /**
+     * We can turn off publishable globally for all models
+     *
+     * @param  bool  $state
+     */
+    public static function setGlobalModelPublishable($state)
+    {
+        $table = (new static)->getTable();
+
+        if ( $state === true ) {
+            self::$globalModelPublishable[$table] = true;
+        } else {
+            self::$globalModelPublishable[$table] = false;
+        }
+    }
+
+    /**
+     * Boot the soft deleting trait for a model.
+     *
+     * @return void
+     */
+    public static function bootSoftDeletes()
+    {
+        $model = (new static);
+
+        //Enable soft deletes when timestamps are turned on or column deleted_at is available
+        if ( $model->hasSoftDeletes() ) {
+            static::addGlobalScope(new SoftDeletingScope);
+        }
+    }
+
+    /**
+     * You can modify model default permissions in this method
+     *
+     * @param  array  $permissions
+     */
+    public function setModelPermissions($permissions)
+    {
+        return $permissions;
+    }
 
     /*
      * Filter rows by selected language
@@ -198,25 +311,34 @@ class AdminModel extends CoreAdminModel
     {
     }
 
-    /**
-     * Query for rows displayed rows of parent relationship belongsToModel
-     *
-     * @param  Builder  $query
-     * @param  string  $column
-     * @param  int  $id
-     * @return void
-     */
-    public function scopeParentRelationship($query, $column, $id)
-    {
-        $query->where($column, $id);
-    }
-
     /*
      * Check if user can delete row
      */
-    public function canDelete($row)
+    public function canDelete()
     {
         return true;
+    }
+
+    /**
+     * Check if publishable scope is enabled by default
+     *
+     * @return  bool
+     */
+    private function isPublishableAllowed()
+    {
+        if ( $this->publishable == false ){
+            return false;
+        }
+
+        if ( Admin::isAdmin() === true ) {
+            return false;
+        }
+
+        if ( self::$globalPublishable === false ) {
+            return false;
+        }
+
+        return (self::$globalModelPublishable[$this->getTable()] ?? true) === true;
     }
 
     public function __construct(array $attributes = [])
@@ -232,9 +354,12 @@ class AdminModel extends CoreAdminModel
         /*
          * Add global scope for publishing extepts admin interface
          */
-        if (! Admin::isAdmin() && $this->publishable == true) {
+        if ( $this->isPublishableAllowed() ) {
             static::addGlobalScope('publishable', function (Builder $builder) {
-                $builder->withPublished();
+                //We want check publishable again, because state may change
+                if ( $this->isPublishableAllowed() ) {
+                    $builder->withPublished();
+                }
             });
         }
 

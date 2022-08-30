@@ -23,6 +23,7 @@ class FieldSelectTest extends BrowserTestCase
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
+                    ->openForm(SelectType::class)
                     ->assertSelectValues(SelectType::class, 'langs_id', ['sk option'])
                     ->changeRowLanguage('en')
                     ->assertSelectValues(SelectType::class, 'langs_id', ['en option']);
@@ -53,6 +54,7 @@ class FieldSelectTest extends BrowserTestCase
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
+                    ->openForm()
 
                     //Test default values in filter select
                     ->assertSelectValues(SelectType::class, 'select_filter_by_id', ['hellboy 8'])
@@ -79,21 +81,21 @@ class FieldSelectTest extends BrowserTestCase
 
         $this->browse(function (Browser $browser) {
             $browser->openModelPage(SelectType::class)
+                    ->openForm()
 
                     //Check if exists add relation row button
                     ->assertElementExists('[data-field="langs_id"] [data-add-relation-row]')
 
                     //Open relation model and create new row
-                    ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
+                    ->jsClick('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
                     ->fillForm(ModelLocalization::class, ['name' => 'new sk option value'], 'sk')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
 
                     //Update existing row
                     ->openRow(1, ModelLocalization::class)
                     ->fillForm(ModelLocalization::class, ['name' => 'updated existing sk row'], 'sk')
-                    ->saveForm()->closeAlert()->click('button[data-create-new-row]')
-
-                    ->click('.modal-header button.close')->pause(400) //need be duration, because of bug when changing language
+                    ->saveForm()->closeAlert()->openForm(ModelLocalization::class)
+                    ->jsClick('.modal-header button.close')->pause(400) //need be duration, because of bug when changing language
 
                     //Check if new created row is selected in select
                     ->assertSelectValues(SelectType::class, 'langs_id', ['new sk option value', 'updated existing sk row'])
@@ -102,11 +104,10 @@ class FieldSelectTest extends BrowserTestCase
                     //On english language change check select options, then add english row and check new item in options
                     ->changeRowLanguage('en')
                     ->assertSelectValues(SelectType::class, 'langs_id', ['en option'])
-                    ->click('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
+                    ->jsClick('[data-field="langs_id"] [data-add-relation-row]')->pause(500)
                     ->fillForm(ModelLocalization::class, ['name' => 'new en option value'], 'en')->submitForm()
                     ->assertSeeSuccess(trans('admin::admin.success-created'))->closeAlert()
                     ->click('.modal-header button.close')->pause(400) //need be duration, because of bug when changing language
-
                     ->assertSelectValues(SelectType::class, 'langs_id', ['new en option value', 'en option'])
 
                     //On changing language to slovak, check options
