@@ -9,9 +9,9 @@
         { "name": "Marek Gogoľ", "email": "info@marekgogol.sk" }
     ],
     "require": {
-        "php": ">=7.1",
-        "crudadmin/framework": "^3.0.51|^4.0|dev-3.0-dev|dev-4.0-dev",
-        "crudadmin/resources" : "^3.0.6|^4.0|dev-3.0-dev|dev-4.0-dev",
+        "php": ">=8.0",
+        "crudadmin/framework": "^4.0|dev-master|dev-4.0-dev",
+        "crudadmin/resources" : "^4.0|dev-master|dev-4.0-dev",
         "crudadmin/autoajax" : "^2.0|dev-master",
         "laravel/framework": "^5.4|^6|^7|^8|^9",
         "laravel/sanctum": "^2.14.1",
