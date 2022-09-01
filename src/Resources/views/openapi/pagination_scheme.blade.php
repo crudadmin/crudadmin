@@ -89,6 +89,107 @@ paths:
                           type: array
                           items:
                             $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+  /model/{{ $model->getTable() }}/{identifier}:
+    get:
+      summary: Receive row from {{ $model->getProperty('name') }}
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: identifier
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the model to get. Or any other value defined by selector query param.
+        - in: query
+          name: selector
+          description: Defines identifier column. Default value is "id". With this property we can search eg. with order number etc...
+          required: false
+          schema:
+            type: string
+            example: id
+        - in: query
+          name: columns
+          description: Which columns should be returned from given scheme. Empty values is for all columns.
+          required: false
+          schema:
+            type: string
+            example: {{ implode(',', $model->getExportColumns()) }}
+        - in: query
+          name: with[]
+          description: Fetch additional order relationships
+          schema:
+            type: string
+          example: Same as in listing model.
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    data:
+                      type: object
+                      properties:
+                        row:
+                          $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+    post:
+      summary: Update row in {{ $model->getProperty('name') }}
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: identifier
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the model to get. Or any other value defined by selector query param.
+        - in: query
+          name: _selector
+          description: Defines identifier column. Default value is "id". With this property we can search eg. with order number etc...
+          required: false
+          schema:
+            type: string
+            example: id
+        - in: query
+          name: _columns
+          description: Which columns should be returned from given scheme. Empty values is for all columns.
+          required: false
+          schema:
+            type: string
+            example: {{ implode(',', $model->getExportColumns()) }}
+        - in: query
+          name: _with[]
+          description: Fetch additional order relationships
+          schema:
+            type: string
+          example: Same as in listing model.
+@foreach(array_intersect($model->getFillable(), $model->getExportColumns()) as $key)
+@php
+$field = $model->getField($key) ?? [];
+@endphp
+        - in: query
+          name: {{ $key }}
+@if ( $name = $model->getExportFieldName($key) )
+          description: {{ $name }}
+@endif
+          schema:
+            type: {{ $model->getExportFieldType($key) }}
+@endforeach
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    data:
+                      type: object
+                      properties:
+                        row:
+                          $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
 components:
   securitySchemes:
     bearerAuth:

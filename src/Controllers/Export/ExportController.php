@@ -30,10 +30,7 @@ class ExportController extends CRUDController
 
     public function show($table, $id)
     {
-        $row = $this->getBootedModel($table)->where(
-            request('selector', 'id'),
-            $id
-        )->firstOrFail();
+        $row = $this->getBootedModel($table)->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
 
         return autoAjax()->data([
             'row' => $row->setExportResponse()
@@ -44,7 +41,7 @@ class ExportController extends CRUDController
     {
         $query = $this->getBootedModel($table);
 
-        $row = $query->findOrFail($id);
+        $row = $query->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
 
         $data = $row->validator()->only(
             array_intersect($query->getModel()->getFillable(), request()->keys())

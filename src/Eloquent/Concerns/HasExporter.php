@@ -152,7 +152,7 @@ trait HasExporter
         $type = $this->getFieldType($key);
         $field = $this->getField($key);
 
-        if ( in_array($key, ['id', '_order']) ){
+        if ( in_array($key, ['id', '_order']) || in_array($type, ['checkbox']) ){
             return 'integer';
         }
 
