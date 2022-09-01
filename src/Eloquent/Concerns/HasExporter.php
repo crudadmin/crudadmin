@@ -134,7 +134,10 @@ trait HasExporter
                             $columns[] = $parentRelationKey;
                         }
 
-                        $query->select($columns);
+                        //We need add ID column in any case
+                        $columns[] = $query->getModel()->getKeyName();
+
+                        $query->select(array_unique($columns));
                     }
                 },
             ]);
