@@ -135,9 +135,12 @@ trait HasExporter
                         }
 
                         //We need add ID column in any case
-                        $columns[] = $query->getModel()->getKeyName();
+                        $columns = array_unique(array_merge(
+                            [$query->getModel()->getKeyName()],
+                            $columns
+                        ));
 
-                        $query->select(array_unique($columns));
+                        $query->select($columns);
                     }
                 },
             ]);
