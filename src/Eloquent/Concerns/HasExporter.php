@@ -72,36 +72,59 @@ trait HasExporter
     public function scopeBootExportResponse($query, $props = [])
     {
         //Add columns support
-        $columns = array_filter(explode(',', $props['columns'] ?? ''));
+        $columns = array_filter(explode(',', $props['_columns'] ?? $props['columns'] ?? ''));
+        $withs = $props['_with'] ?? $props['with'] ?? null;
+
         if ( count($columns) ){
+            //We need add child relation foreign keys into this select.
+            foreach ($this->processExportWiths($withs) as $with) {
+                $relation = $query->getModel()->{$with['relation']}();
+
+                //If this relations contains parent foreign key name, we need push this columns int oparent select
+                if ( property_exists($relation, 'foreignKey') ){
+                    $columns[] = $relation->getForeignKeyName();
+                }
+            }
+
             $query->select($columns);
         }
 
-        $query->exportWithSupport($props['with'] ?? null);
+        $query->exportWithSupport($withs);
     }
 
-    public function scopeExportWithSupport($query, $with = [])
+    private function processExportWiths($with)
     {
-        $parentModel = $query->getModel();
-
         $with = array_filter(
             is_array($with) ? $with : explode(';', $with ?: '')
         );
+
+        $items = [];
 
         foreach ($with as $item) {
             $parts = explode(':', $item);
             $relation = $parts[0];
             $columns = $parts[1] ?? null;
 
+            $items[] = compact('parts', 'relation', 'columns');
+        }
+
+        return $items;
+    }
+
+    public function scopeExportWithSupport($query, $with = [])
+    {
+        $parentModel = $query->getModel();
+
+        foreach ($this->processExportWiths($with) as $item) {
             $query->with([
-                $relation => function($query) use ($columns, $parentModel, $relation) {
+                $item['relation'] => function($query) use ($item, $parentModel, &$foreignKeys) {
                     //Check if we have access to given relation
                     if (! admin()->hasAccess($query->getModel())) {
-                        autoAjax()->permissionsError($relation)->throw();
+                        autoAjax()->permissionsError($item['relation'])->throw();
                     }
 
                     //Add relation columns change support
-                    if ( $columns ){
+                    if ( $columns = $item['columns'] ){
                         if ( is_string($columns) ){
                             $columns = explode(',', $columns);
                         }
@@ -162,6 +185,6 @@ trait HasExporter
 
     public function setExportResponse()
     {
-
+        return $this;
     }
 }

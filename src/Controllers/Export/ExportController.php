@@ -7,22 +7,54 @@ use Admin\Controllers\Crud\CRUDController;
 
 class ExportController extends CRUDController
 {
-    public function rows($table)
+    private function getBootedModel($table)
     {
         $model = $this->getModel($table, false);
 
-        $rows = $model
+        return $model
             ->withExportResponse()
             ->bootExportResponse(
-                request()->only(['columns', 'with'])
-            )
-            ->paginate(request('limit'));
+                request()->only(['columns', '_columns', 'with', '_with'])
+            );
+    }
+    public function rows($table)
+    {
+        $rows = $this->getBootedModel($table)->paginate(request('limit'));
 
         $rows->getCollection()->each->setExportResponse();
 
-        return [
+        return autoAjax()->data([
             'pagination' => $rows,
-        ];
+        ]);
+    }
+
+    public function show($table, $id)
+    {
+        $row = $this->getBootedModel($table)->where(
+            request('selector', 'id'),
+            $id
+        )->firstOrFail();
+
+        return autoAjax()->data([
+            'row' => $row->setExportResponse()
+        ]);
+    }
+
+    public function update($table, $id)
+    {
+        $query = $this->getBootedModel($table);
+
+        $row = $query->findOrFail($id);
+
+        $data = $row->validator()->only(
+            array_intersect($query->getModel()->getFillable(), request()->keys())
+        )->validate()->getData();
+
+        $row->update($data);
+
+        return autoAjax()->success(_('Zmeny boli úspešne uložené.'))->data([
+            'row' => $row->setExportResponse()
+        ]);
     }
 
     public function scheme($table)

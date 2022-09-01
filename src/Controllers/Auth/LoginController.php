@@ -103,7 +103,7 @@ class LoginController extends Controller
 
         $token = $admin->createToken('login');
 
-        return api([
+        return autoAjax()->success(_('Boli ste úspešne prihlásený.'))->data([
             'user' => $admin->setAdminResponse(),
             'token' => [
                 'token' => $token->plainTextToken,

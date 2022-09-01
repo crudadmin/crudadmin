@@ -22,7 +22,9 @@ class AutoAjax extends BaseAutoAjax
 
         //Mutate responses
         $this->setEvent('onResponse', function($response){
-            $response['toast'] = $this->toast;
+            if ( $this->toast === true ) {
+                $response['toast'] = $this->toast;
+            }
 
             return $response;
         });
