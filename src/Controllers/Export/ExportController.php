@@ -21,7 +21,7 @@ class ExportController extends CRUDController
     {
         $rows = $this->getBootedModel($table)->paginate(request('limit'));
 
-        $rows->getCollection()->each->setExportResponse();
+        $rows->getCollection()->each->setFullExportResponse();
 
         return autoAjax()->data([
             'pagination' => $rows,
@@ -33,7 +33,7 @@ class ExportController extends CRUDController
         $row = $this->getBootedModel($table)->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
 
         return autoAjax()->data([
-            'row' => $row->setExportResponse()
+            'row' => $row->setFullExportResponse()
         ]);
     }
 
@@ -50,7 +50,7 @@ class ExportController extends CRUDController
         $row->update($data);
 
         return autoAjax()->success(_('Zmeny boli úspešne uložené.'))->data([
-            'row' => $row->setExportResponse()
+            'row' => $row->setFullExportResponse()
         ]);
     }
 

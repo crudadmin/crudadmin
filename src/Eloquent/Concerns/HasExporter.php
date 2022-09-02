@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
+use Illuminate\Support\Collection;
 use Str;
 
 trait HasExporter
@@ -122,8 +123,10 @@ trait HasExporter
         foreach ($this->processExportWiths($with) as $item) {
             $query->with([
                 $item['relation'] => function($query) use ($item, $parentModel, &$foreignKeys) {
+                    $model = $query->getModel();
+
                     //Check if we have access to given relation
-                    if (! admin()->hasAccess($query->getModel())) {
+                    if (! admin()->hasAccess($model)) {
                         autoAjax()->permissionsError($item['relation'])->throw();
                     }
 
@@ -134,18 +137,20 @@ trait HasExporter
                         }
 
                         //If relation has column of parent row, we need automatically add relation key
-                        if ( $parentRelationKey = $query->getModel()->getForeignColumn($parentModel->getTable()) ){
+                        if ( $parentRelationKey = $model->getForeignColumn($parentModel->getTable()) ){
                             $columns[] = $parentRelationKey;
                         }
 
                         //We need add ID column in any case
-                        $columns = array_unique(array_merge(
-                            [$query->getModel()->getKeyName()],
+                        $columns = $model->fixAmbiguousColumn(array_unique(array_merge(
+                            [$model->getKeyName()],
                             $columns
-                        ));
-
-                        $query->select($columns);
+                        )));
                     }
+
+                    $query
+                        ->select($columns ?: [$model->getTable().'.*'])
+                        ->withExportResponse();
                 },
             ]);
         }
@@ -196,5 +201,18 @@ trait HasExporter
     public function setExportResponse()
     {
         return $this;
+    }
+
+    public function setFullExportResponse()
+    {
+        foreach ($this->getRelations() as $key => $relation) {
+            if ( $relation instanceof Collection ) {
+                $relation->each->setFullExportResponse();
+            } else {
+                $relation->setFullExportResponse();
+            }
+        }
+
+        return $this->setExportResponse();
     }
 }
