@@ -82,7 +82,11 @@ trait HasExporter
 
                 //If this relations contains parent foreign key name, we need push this columns int oparent select
                 if ( property_exists($relation, 'foreignKey') ){
-                    $columns[] = $relation->getForeignKeyName();
+                    $parts = explode('.', $relation->getQualifiedForeignKeyName());
+
+                    if ( $parts[0] == $query->getModel()->getTable() ){
+                        $columns[] = $relation->getForeignKeyName();
+                    }
                 }
             }
 
