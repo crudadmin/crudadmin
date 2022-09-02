@@ -62,7 +62,7 @@ class LoginController extends Controller
 
         $user = $model->where($this->username(), $request->{$this->username()})->first();
 
-        if ( Hash::check($request->password, $user->password) ){
+        if ( $user && Hash::check($request->password, $user->password) ){
             $this->guard()->setUser($user);
 
             return true;
