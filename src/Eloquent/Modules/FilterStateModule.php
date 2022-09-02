@@ -33,7 +33,7 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
         foreach ($states as $state) {
             $active = $state['active'] ?? null;
 
-            if ( is_callable($active) && $active() === true ){
+            if ( is_callable($active) && $active() == true ){
                 $attributes['$indicator'] = $state;
 
                 break;
