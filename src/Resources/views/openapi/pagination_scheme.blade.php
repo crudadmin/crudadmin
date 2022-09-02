@@ -165,17 +165,24 @@ paths:
           schema:
             type: string
           example: Same as in listing model.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
 @foreach(array_intersect($model->getFillable(), $model->getExportColumns()) as $key)
 @php
 $field = $model->getField($key) ?? [];
 @endphp
-        - in: query
-          name: {{ $key }}
+                {{ $key }}:
+                  type: {{ $model->getExportFieldType($key) }}
 @if ( $name = $model->getExportFieldName($key) )
-          description: {{ $name }}
+                  description: {{ $name }}
+@if ( $model->isFieldType($key, 'file') )
+                  format: binary
 @endif
-          schema:
-            type: {{ $model->getExportFieldType($key) }}
+@endif
 @endforeach
       responses:
         '200':
