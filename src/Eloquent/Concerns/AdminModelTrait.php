@@ -14,6 +14,11 @@ use Arr;
 trait AdminModelTrait
 {
     /*
+     * We want disable adminRows infinity loop
+     */
+    private static $adminRowsInUse = false;
+
+    /*
      * Update model data before saving
      *
      * @see Illuminate\Database\Eloquent\Model
@@ -430,7 +435,16 @@ trait AdminModelTrait
      */
     public function getAdminRows()
     {
-        $this->addGlobalScope('adminRows', function(Builder $builder){
+        self::addGlobalScope('adminRows', function(Builder $builder){
+            //We want disable inherance of adminRows in this function. Because adminRows are global scope
+            //It can be applied also on models inside this feature. And this will couase buggy behaoviour in
+            //relations auto-finding.
+            if ( static::$adminRowsInUse ){
+                return;
+            }
+
+            static::$adminRowsInUse = true;
+
             $builder->adminRows();
 
             //Run modules
@@ -439,6 +453,8 @@ trait AdminModelTrait
                     $module->scopeAdminRows($builder);
                 }
             });
+
+            static::$adminRowsInUse = false;
         });
 
         return $this;
