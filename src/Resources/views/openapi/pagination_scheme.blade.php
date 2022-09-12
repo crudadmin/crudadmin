@@ -74,7 +74,7 @@ paths:
               value: {{ $relationKey.':'.implode(',', $relation['relation']->getExportColumns()) }}
 @endforeach
         - in: query
-          name: where
+          name: where[]
           description: Filter by column value.
           schema:
             type: object
