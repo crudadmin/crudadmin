@@ -75,26 +75,49 @@ trait HasExporter
         //Add columns support
         $columns = array_filter(explode(',', $props['_columns'] ?? $props['columns'] ?? ''));
         $withs = $props['_with'] ?? $props['with'] ?? null;
+        $where = $props['_where'] ?? $props['where'] ?? [];
 
-        if ( count($columns) ){
-            //We need add child relation foreign keys into this select.
-            foreach ($this->processExportWiths($withs) as $with) {
-                $relation = $query->getModel()->{$with['relation']}();
+        $query->exportColumnsSupport($columns, $withs);
+        $query->exportWhereSupport($where);
+        $query->exportWithSupport($withs);
+    }
 
-                //If this relations contains parent foreign key name, we need push this columns int oparent select
-                if ( property_exists($relation, 'foreignKey') ){
-                    $parts = explode('.', $relation->getQualifiedForeignKeyName());
-
-                    if ( $parts[0] == $query->getModel()->getTable() ){
-                        $columns[] = $relation->getForeignKeyName();
-                    }
-                }
-            }
-
-            $query->select($columns);
+    public function scopeExportWhereSupport($query, $where)
+    {
+        if ( !count($where) ){
+            return;
         }
 
-        $query->exportWithSupport($withs);
+        foreach ($where as $key => $value) {
+            $parts = explode(',', $key);
+            $column = $parts[0];
+            $operator = $parts[1] ?? '=';
+
+            $query->where($column, $operator, $value);
+        }
+    }
+
+    public function scopeExportColumnsSupport($query, $columns, $withs)
+    {
+        if ( !count($columns) ){
+            return;
+        }
+
+        //We need add child relation foreign keys into this select.
+        foreach ($this->processExportWiths($withs) as $with) {
+            $relation = $query->getModel()->{$with['relation']}();
+
+            //If this relations contains parent foreign key name, we need push this columns int oparent select
+            if ( property_exists($relation, 'foreignKey') ){
+                $parts = explode('.', $relation->getQualifiedForeignKeyName());
+
+                if ( $parts[0] == $query->getModel()->getTable() ){
+                    $columns[] = $relation->getForeignKeyName();
+                }
+            }
+        }
+
+        $query->select($columns);
     }
 
     private function processExportWiths($with)

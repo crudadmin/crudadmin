@@ -14,7 +14,11 @@ class ExportController extends CRUDController
         return $model
             ->withExportResponse()
             ->bootExportResponse(
-                request()->only(['columns', '_columns', 'with', '_with'])
+                request()->only([
+                    'columns', '_columns',
+                    'with', '_with',
+                    'where', '_where',
+                ])
             );
     }
     public function rows($table)

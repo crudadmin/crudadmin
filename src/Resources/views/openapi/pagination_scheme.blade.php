@@ -73,6 +73,20 @@ paths:
             {{ $relationKey }} ({{ $relation['name'] }}):
               value: {{ $relationKey.':'.implode(',', $relation['relation']->getExportColumns()) }}
 @endforeach
+        - in: query
+          name: where
+          description: Filter by column value.
+          schema:
+            type: object
+            properties:
+              column_name:
+                type: "string"
+          example:
+            where[column_name]: 5
+            where[id,>]: 10
+            where[id,<]: 10
+            where[id,<=]: 12
+            where[id,>=]: 12
       responses:
         '200':
           description: search results matching criteria
