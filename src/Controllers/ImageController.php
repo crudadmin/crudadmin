@@ -31,7 +31,7 @@ class ImageController extends Controller
             return abort(404);
         }
 
-        $storage = $adminFile->getStorage();
+        $storage = $adminFile->getCacheStorage();
 
         //Retrieve resized and compressed image
         $response = $storage->response(
