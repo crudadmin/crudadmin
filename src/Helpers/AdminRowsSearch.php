@@ -202,7 +202,7 @@ class AdminRowsSearch
             $tableColumn = $model->fixAmbiguousColumn($column);
 
             //If is imaginarry field, skip whole process
-            if ( $model->isFieldType($column, 'imaginary') || $model->hasFieldParam($column, 'imaginary') ) {
+            if ( $model->isFieldType($column, 'imaginary') || $model->hasFieldParam($column, ['imaginary', 'encrypted']) ) {
                 return;
             } elseif ($searchTo) {
                 $builder->where(function ($builder) use ($column, $search, $searchTo, $tableColumn) {
