@@ -56,7 +56,6 @@ class EncryptExistingDataCommand extends Command
             foreach ($model->getFields() as $key => $field) {
                 if ( $model->hasFieldParam($key, 'encrypted') ){
                     $encryptedFields[] = $key;
-                    break;
                 }
             }
 
@@ -85,7 +84,15 @@ class EncryptExistingDataCommand extends Command
         foreach ($unecryptedRows as $key => $row) {
             $entry = $model
                         ->newInstance([], true)
-                        ->forceFill($row);
+                        ->setRawAttributes($row);
+
+            //We need fix casted values as json
+            foreach ($entry->getAttributes() as $key => $value) {
+                $entry->setAttribute(
+                    $key,
+                    $entry->getAttribute($key)
+                );
+            }
 
             $entry->save();
         }

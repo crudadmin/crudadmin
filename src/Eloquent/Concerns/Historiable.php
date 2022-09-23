@@ -3,7 +3,6 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
-use Admin\Models\ModelsHistory;
 use Carbon\Carbon;
 
 trait Historiable
@@ -43,7 +42,7 @@ trait Historiable
      */
     public function getHistorySnapshot($max_id = null, $id = null, $returnChangresTree = false)
     {
-        $changes = ModelsHistory::where('table', $this->getTable())
+        $changes = Admin::getModel('ModelsHistory')->where('table', $this->getTable())
                     ->where('row_id', $id ?: $this->getKey())
                     ->when($max_id, function ($query, $max_id) {
                         $query->where('id', '<=', $max_id);
@@ -81,7 +80,7 @@ trait Historiable
      */
     public function castHistoryData($data, $isMissingHistoryRow = false)
     {
-        foreach (['_id', '_order', '_method', '_model', '_table', '_row_id', 'language_id'] as $key) {
+        foreach (['_id', '_order', '_method', '_model', '_table', '_row_id', '_encrypted_hashes', 'language_id'] as $key) {
             if (array_key_exists($key, $data)) {
                 unset($data[$key]);
             }
@@ -256,6 +255,6 @@ trait Historiable
         $data['row_id'] = $data['row_id'] ?? $this->getKey();
         $data['ip'] = request()->ip();
 
-        return ModelsHistory::create($data);
+        return Admin::getModel('ModelsHistory')->create($data);
     }
 }

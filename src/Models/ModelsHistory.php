@@ -38,6 +38,8 @@ class ModelsHistory extends Model
 
     protected $reversed = true;
 
+    protected $encrypted = false;
+
     public $timestamps = false;
 
     /*
@@ -57,7 +59,7 @@ class ModelsHistory extends Model
                     'action' => 'name:Akcia|type:select|limit:50|required',
                     'row_id' => 'name:Č. záznamu|type:integer|index|unsigned',
                 ]),
-                'data' => 'name:Data|type:json',
+                'data' => 'name:Data|type:json'.($this->encrypted ? '|encrypted:array' : ''),
                 'ip' => 'name:IP Adresa|max:20',
                 'created_at' => 'name:Dátum vytvorenia|type:datetime|default:CURRENT_TIMETAMP|column_visible|required',
             ])->add('readonly')
