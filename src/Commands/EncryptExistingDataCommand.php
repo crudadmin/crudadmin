@@ -51,13 +51,7 @@ class EncryptExistingDataCommand extends Command
         $models = Admin::getAdminModels();
 
         foreach ($models as $model) {
-            $encryptedFields = [];
-
-            foreach ($model->getFields() as $key => $field) {
-                if ( $model->hasFieldParam($key, 'encrypted') ){
-                    $encryptedFields[] = $key;
-                }
-            }
+            $encryptedFields = array_keys($model->getEncryptedFields());
 
             if ( count($encryptedFields) > 0 ){
                 $this->processModel($model, $encryptedFields);

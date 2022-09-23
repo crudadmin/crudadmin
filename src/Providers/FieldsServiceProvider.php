@@ -43,6 +43,7 @@ class FieldsServiceProvider extends ServiceProvider
         Fields::addStaticColumn([
             Columns\LanguageId::class,
             Columns\Sortable::class,
+            Columns\EncryptedSearch::class,
         ]);
 
         //We need register fields mutators into crudadmin core

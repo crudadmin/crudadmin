@@ -45,6 +45,8 @@ trait AdminModelTrait
             }
         }
 
+        $this->setEncryptedHashes();
+
         //Check for model rules
         if ( $isPerformingRuleMethods === false ) {
             $this->checkForModelRules(['creating', 'updating']);
