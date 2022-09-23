@@ -52,7 +52,7 @@ class DownloadController extends Controller
             abort(404, '<h1>404 - file not found...</h1>');
         }
 
-        return $adminFile->download();
+        return $adminFile->downloadResponse();
     }
 
     /**
@@ -95,6 +95,6 @@ class DownloadController extends Controller
             abort(404);
         }
 
-        return $adminFile->download();
+        return $adminFile->downloadResponse();
     }
 }

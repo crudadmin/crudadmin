@@ -69,4 +69,21 @@ trait HasPermissions
 
         return $this->setModelPermissions($permissions);
     }
+
+    public function hasFileAccess($fieldKey)
+    {
+        if ( $this->isPrivateFile($fieldKey) === false ){
+            return true;
+        }
+
+        if ( !admin() ){
+            return false;
+        }
+
+        if ( admin()->hasAccess($this, 'read') === false ){
+            return false;
+        }
+
+        return true;
+    }
 }

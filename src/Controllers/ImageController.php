@@ -25,6 +25,11 @@ class ImageController extends Controller
             abort(404);
         }
 
+        //Private files access
+        if ( $model->hasFileAccess($fieldKey) === false ){
+            abort(401);
+        }
+
         $adminFile = $model->getAdminFile($fieldKey, $filename);
 
         //Check if model and field exists
@@ -114,8 +119,14 @@ class ImageController extends Controller
      */
     public function getFile($table, $fieldKey, $filename)
     {
+        //Unknown model
         if ( !($model = Admin::getModelByTable($table)) ){
             abort(404);
+        }
+
+        //Private files access
+        if ( $model->hasFileAccess($fieldKey) === false ){
+            abort(401);
         }
 
         $adminFile = $model->getAdminFile($fieldKey, $filename);
