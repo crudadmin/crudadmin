@@ -7,6 +7,7 @@ use Admin\Core\Helpers\Storage\AdminFile;
 use Cache;
 use Exception;
 use League\Flysystem\FileNotFoundException;
+use League\Flysystem\UnableToRetrieveMetadata;
 
 class ImageController extends Controller
 {
@@ -33,9 +34,11 @@ class ImageController extends Controller
 
         $storage = $adminFile->getCacheStorage();
 
+        $resizedImage = $adminFile->resize(50, 50, true);
+
         //Retrieve resized and compressed image
         $response = $storage->response(
-                $adminFile->resize(50, 50, true)->path,
+                $resizedImage->path,
                 200,
                 ['CrudAdmin' => 'Image-Resizer']
             )
@@ -44,6 +47,11 @@ class ImageController extends Controller
 
         //Send response manually, because we does not want to throw cookies etc..
         $response->send();
+
+        //Encrypted images should be removed on completed response
+        if ( $resizedImage && $adminFile->isEncrypted() ){
+            $resizedImage->remove();
+        }
     }
 
     /*
@@ -94,6 +102,8 @@ class ImageController extends Controller
             $response->send();
         } catch (FileNotFoundException $e){
             abort(404);
+        } catch (UnableToRetrieveMetadata $e){
+            abort(404);
         } catch (Exception $e){
             abort(500);
         }
@@ -112,12 +122,20 @@ class ImageController extends Controller
 
         $storage = $adminFile->getStorage();
 
-        //Retrieve resized and compressed image
-        $response = $storage->response($adminFile->path)
-            ->setMaxAge(3600 * 24 * 365)
-            ->setPublic();
+        try {
+            //Retrieve resized and compressed image
+            $response = $storage->response($adminFile->path)
+                ->setMaxAge(3600 * 24 * 365)
+                ->setPublic();
 
-        //Send response manually, because we does not want to throw cookies etc..
-        $response->send();
+            //Send response manually, because we does not want to throw cookies etc..
+            $response->send();
+        } catch (FileNotFoundException $e){
+            abort(404);
+        } catch (UnableToRetrieveMetadata $e){
+            abort(404);
+        } catch (Exception $e){
+            abort(500);
+        }
     }
 }
