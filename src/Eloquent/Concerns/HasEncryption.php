@@ -66,6 +66,9 @@ trait HasEncryption
             return;
         }
 
+        $value = trim($value);
+        $value = str_slug($value);
+
         return md5(hash_hmac('sha256', env('APP_KEY').$value, md5(env('APP_KEY'))));
     }
 
