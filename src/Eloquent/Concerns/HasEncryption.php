@@ -51,13 +51,25 @@ trait HasEncryption
     public function setEncryptedAttribute($key, $value)
     {
         //Encrypt support
-        if (! is_null($value) && $this->isEncryptedCastable($key)) {
+        if (! is_null($value) && $this->isEncryptedCastable($key) ) {
             $value = $this->castAttributeAsEncryptedString($key, $value);
         }
 
         $this->attributes[$key] = $value;
 
         return $this;
+    }
+
+    public function getEncryptedAttribute($key,)
+    {
+        $value = $this->attributes[$key] ?? null;
+
+        //Encrypt support
+        if (! is_null($value) && $this->isEncryptedCastable($key) ) {
+            $value = $this->fromEncryptedString($value);
+        }
+
+        return $value;
     }
 
     public function generateEncryptedHash($value)

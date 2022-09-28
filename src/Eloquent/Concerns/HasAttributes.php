@@ -32,6 +32,50 @@ trait HasAttributes
     }
 
     /**
+     * Determine if a get mutator exists for an attribute.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function hasGetMutator($key)
+    {
+        if ($this->withoutMutators === true) {
+            return false;
+        }
+
+        return parent::hasGetMutator($key);
+    }
+
+    /**
+     * Determine if a "Attribute" return type marked get mutator exists for an attribute.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    public function hasAttributeGetMutator($key)
+    {
+        if ($this->withoutMutators === true) {
+            return false;
+        }
+
+        return parent::hasAttributeGetMutator($key);
+    }
+
+    /**
+     * Get the mutated attributes for a given instance.
+     *
+     * @return array
+     */
+    public function getMutatedAttributes()
+    {
+        if ($this->withoutMutators === true) {
+            return [];
+        }
+
+        return parent::getMutatedAttributes();
+    }
+
+    /**
      * Get the value of an attribute using its mutator.
      *
      * @param  string  $key
