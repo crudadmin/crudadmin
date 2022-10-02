@@ -74,7 +74,7 @@ trait HasEncryption
 
     public function generateEncryptedHash($value)
     {
-        if ( is_null($value) ){
+        if ( is_null($value) || (is_string($value) || is_numeric($value)) == false ){
             return;
         }
 
@@ -102,7 +102,7 @@ trait HasEncryption
         }
 
         if ( count($hashes) ){
-            $this->attributes['_encrypted_hashes'] = $hashes;
+            $this->attributes['_encrypted_hashes'] = json_encode($hashes);
         }
     }
 }
