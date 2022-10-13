@@ -25,29 +25,29 @@ class AdminRowsSearch
             return;
         }
 
-        foreach ($search as $item) {
-            $this->query->where(function($query) use ($item) {
-                $this->applyModelFilter($this->query, $item);
-            });
+        $this->query->where(function($query) use ($search) {
+            foreach ($search as $item) {
+                $this->applyModelFilter($query, $item);
 
-            $deepSearchModels = ($this->model->getProperty('search') ?: [])['deep'] ?? [];
+                $deepSearchModels = ($this->model->getProperty('search') ?: [])['deep'] ?? [];
 
-            //If specific column search is not defined, we can search in subchild models
-            if ( !($item['column'] ?? null) ) {
-                foreach ($deepSearchModels as $deepItem) {
-                    $classname = is_array($deepItem) ? $deepItem['model'] : $deepItem;
+                //If specific column search is not defined, we can search in subchild models
+                if ( !($item['column'] ?? null) ) {
+                    foreach ($deepSearchModels as $deepItem) {
+                        $classname = is_array($deepItem) ? $deepItem['model'] : $deepItem;
 
-                    $relation = class_basename($classname);
-                    $relation = is_array($deepItem) ? ($deepItem['relation'] ?? $relation) : $relation;
+                        $relation = class_basename($classname);
+                        $relation = is_array($deepItem) ? ($deepItem['relation'] ?? $relation) : $relation;
 
-                    $model = new $classname;
+                        $model = new $classname;
 
-                    $this->query->orWhereHas($relation, function($query) use ($item) {
-                        $this->applyModelFilter($query, $item);
-                    });
+                        $query->orWhereHas($relation, function($query) use ($item) {
+                            $this->applyModelFilter($query, $item);
+                        });
+                    }
                 }
             }
-        }
+        });
     }
 
     private function applyModelFilter($query, $item)
