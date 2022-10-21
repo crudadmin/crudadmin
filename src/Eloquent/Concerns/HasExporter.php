@@ -93,7 +93,14 @@ trait HasExporter
             $column = $parts[0];
             $operator = $parts[1] ?? '=';
 
-            $query->where($column, $operator, $value);
+            if ( $operator == 'in' ) {
+                $separator = $parts[2] ?? ',';
+                $values = explode($separator, $value);
+
+                $query->whereIn($column, $values);
+            } else {
+                $query->where($column, $operator, $value);
+            }
         }
     }
 

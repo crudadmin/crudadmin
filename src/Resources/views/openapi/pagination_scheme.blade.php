@@ -87,6 +87,8 @@ paths:
             where[id,<]: 10
             where[id,<=]: 12
             where[id,>=]: 12
+            where[id,in]: 1,2,3,4,5
+            where[id,in,;]: 1;2;3;4;5
       responses:
         '200':
           description: search results matching criteria
