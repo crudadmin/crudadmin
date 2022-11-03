@@ -371,4 +371,20 @@ class AdminModel extends CoreAdminModel
         //and also a crudadmin framework
         parent::__construct($attributes);
     }
+
+
+    /**
+     * Get the fully qualified "deleted at" column.
+     *
+     * @return string
+     */
+    public function getQualifiedDeletedAtColumn()
+    {
+        //Fix for non-deletable columns
+        if ( !$this->hasSoftDeletes() ){
+            return;
+        }
+
+        return $this->qualifyColumn($this->getDeletedAtColumn());
+    }
 }
