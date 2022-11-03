@@ -293,7 +293,7 @@ class AddSelectSupport extends MutationRule
             }
 
             if ($options !== false) {
-                $this->buildOptionsRow($rows, $options, $properties, $relationModel, $loadColumns, $customColumns);
+                $this->buildOptionsRow($rows, $options, $properties, $relationModel, $loadColumns, $customColumns, $field);
             }
         }
 
@@ -302,11 +302,13 @@ class AddSelectSupport extends MutationRule
         return $field;
     }
 
-    private function buildOptionsRow(&$rows, $options, $properties, $relationModel, $loadColumns, $customColumns)
+    private function buildOptionsRow(&$rows, $options, $properties, $relationModel, $loadColumns, $customColumns, $field)
     {
-        $key = isset($properties[2]) ? $properties[2] : 'id';
+        $key = $this->getModel()->getRelationPropertyData($field, $this->getKey())[2];
 
-        $definedColumnProps = $relationModel && method_exists($relationModel, 'belongsToColumns') ? $relationModel->belongsToColumns() : null;
+        $definedColumnProps = $relationModel && method_exists($relationModel, 'belongsToColumns')
+            ? $relationModel->belongsToColumns()
+            : null;
 
         foreach ($options as $option) {
             $option = (array) $option;
@@ -315,7 +317,7 @@ class AddSelectSupport extends MutationRule
              * Build option row from given columns
              */
             foreach ($loadColumns as $column) {
-                $rows[$option[$key]][$column] = @$option[$column];
+                $rows[$option[$key]][$column] = $option[$column] ?? null;
             }
 
             /*
