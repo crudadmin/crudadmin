@@ -76,10 +76,25 @@ trait HasExporter
         $columns = array_filter(explode(',', $props['_columns'] ?? $props['columns'] ?? ''));
         $withs = $props['_with'] ?? $props['with'] ?? null;
         $where = $props['_where'] ?? $props['where'] ?? [];
+        $scopes = $props['_scope'] ?? $props['scope'] ?? [];
 
         $query->exportColumnsSupport($columns, $withs);
         $query->exportWhereSupport($where);
         $query->exportWithSupport($withs);
+        $query->exportScopesSupport($scopes);
+    }
+
+    public function scopeExportScopesSupport($query, $scopes)
+    {
+        foreach ($scopes as $key => $scope) {
+            $hasParams = is_numeric($key) == false;
+            $params = $hasParams ? $scope : null;
+            $scope = $hasParams ? $key : $scope;
+
+            if ( method_exists($query->getModel(), 'scope'.$scope) ){
+                $query->{$scope}($params);
+            }
+        }
     }
 
     public function scopeExportWhereSupport($query, $where)

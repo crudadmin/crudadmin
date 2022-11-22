@@ -89,6 +89,19 @@ paths:
             where[id,>=]: 12
             where[id,in]: 1,2,3,4,5
             where[id,in,;]: 1;2;3;4;5
+        - in: query
+          name: scope[]
+          description: Filter rows by scope/preddefined filters with parameters.
+          schema:
+            type: object
+            properties:
+              scope_name:
+                type: "string"
+          example:
+            scope[myScopeName]: 'parameterValue'
+            scope[withInvoice]: 1
+            scope[onlyGreen]: 0
+            scope[]: 'myScopeName'
       responses:
         '200':
           description: search results matching criteria

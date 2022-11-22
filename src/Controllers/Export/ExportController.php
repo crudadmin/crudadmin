@@ -18,6 +18,7 @@ class ExportController extends CRUDController
                     'columns', '_columns',
                     'with', '_with',
                     'where', '_where',
+                    'scope', '_scope',
                 ])
             );
     }
