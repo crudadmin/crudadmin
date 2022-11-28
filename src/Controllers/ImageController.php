@@ -6,6 +6,8 @@ use Admin;
 use Admin\Core\Helpers\Storage\AdminFile;
 use Cache;
 use Exception;
+use Illuminate\Http\Response;
+use Image;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\UnableToRetrieveMetadata;
 
@@ -134,10 +136,14 @@ class ImageController extends Controller
         $storage = $adminFile->getStorage();
 
         try {
+            if ( $adminFile->isEncrypted() ) {
+                $response = Image::make($adminFile->get())->response();
+            } else {
+                $response = $storage->response($adminFile->path);
+            }
+
             //Retrieve resized and compressed image
-            $response = $storage->response($adminFile->path)
-                ->setMaxAge(3600 * 24 * 365)
-                ->setPublic();
+            $response->setMaxAge(3600 * 24 * 365)->setPublic();
 
             //Send response manually, because we does not want to throw cookies etc..
             $response->send();
