@@ -3,6 +3,7 @@
 namespace Admin\Contracts\Controllers;
 
 use Admin;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
 
 trait HasDeleteSupport {
     /*
@@ -83,9 +84,9 @@ trait HasDeleteSupport {
 
                 if ( count($usedIds) ) {
                     $usedModels[$model->getTable()][] = [
-                        'name' => $model->getProperty('name'),
+                        'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
                         'field' => [
-                            'name' => $model->getFieldParam($fieldKey, 'name'),
+                            'name' => AdminResourcesSyncer::translate($model->getFieldParam($fieldKey, 'name')),
                             'key' => $fieldKey,
                         ],
                         'rows' => $usedIds,
