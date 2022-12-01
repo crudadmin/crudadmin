@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
+use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 use Str;
 
@@ -250,10 +251,12 @@ trait HasExporter
 
     public function setFullExportResponse()
     {
-        foreach ($this->getRelations() as $key => $relation) {
+        foreach ($this->getRelations() as $key => $data) {
+            $relation = $this->{$key};
+
             if ( $relation instanceof Collection ) {
                 $relation->each->setFullExportResponse();
-            } else {
+            } else if ( $relation instanceof AdminModel ) {
                 $relation->setFullExportResponse();
             }
         }
