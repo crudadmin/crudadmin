@@ -36,6 +36,15 @@ class AdminInstall
 
         $content = str_replace('class Admin extends', 'class '.config('admin.auth_eloquent').' extends', $content);
         $content = str_replace('Admin\Models;', self::getAuthModelNamespace().';', $content);
+        $content = str_replace("\n\n".'    /**
+     * Use table name by eloquent
+     *
+     * @return  string
+     */
+    public function getTable()
+    {
+        return Str::snake(Str::pluralStudly(class_basename(config(\'admin.auth_eloquent\'))));
+    }', '', $content);
 
         return @file_put_contents($userModel, $content);
     }
