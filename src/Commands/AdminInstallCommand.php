@@ -4,7 +4,6 @@ namespace Admin\Commands;
 
 use Admin;
 use Admin\Helpers\AdminInstall;
-use Admin\Models\User;
 use Artisan;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
@@ -79,7 +78,7 @@ class AdminInstallCommand extends Command
     {
         // Checks if model has been replaced. If no AdminUserModel has been found
         // We need rewrite actual UserModel
-        if ( Admin::getAuthModel() instanceof User ) {
+        if ( !Admin::getAuthModel() ) {
             Artisan::call('vendor:publish', [
                 '--tag' => 'admin.user',
                 '--force' => true,
@@ -90,7 +89,7 @@ class AdminInstallCommand extends Command
                 die;
             }
 
-            $this->line('<comment>+ User model has been successfully '.(class_exists('App\User') ? 'replaced' : 'created').'</comment>');
+            $this->line('<comment>+ User model has been successfully published</comment>');
         }
     }
 
@@ -109,7 +108,7 @@ class AdminInstallCommand extends Command
         ]);
     }
 
-    public function getCredentials($user = null)
+    public function getCredentials($model)
     {
         //Default crudadmin credentials
         $credentials = [
@@ -118,8 +117,8 @@ class AdminInstallCommand extends Command
         ];
 
         //Use credentials from admin model
-        if ($user) {
-            $credentials = ($user->getProperty('demo') ?: []) + $credentials;
+        if ($model) {
+            $credentials = ($model->getProperty('demo') ?: []) + $credentials;
         }
 
         //Set testing password
@@ -132,20 +131,22 @@ class AdminInstallCommand extends Command
 
     public function createSuperUser()
     {
-        $user = Admin::getAuthModel();
+        $model = Admin::getAuthModel() ?: new \Admin\Models\Admin;
 
-        $credentials = $this->getCredentials($user);
+        $credentials = $this->getCredentials($model);
 
         //If user has been already created
-        if ($user->where('email', $credentials['email'])->count() > 0) {
+        if ($model->where('email', $credentials['email'])->count() > 0) {
             return;
         }
 
-        //Demo user
-        $user->create($data = $credentials + [
+        $data = $data = $credentials + [
             'permissions' => 1,
             'password' => str_random(6),
-        ]);
+        ];
+
+        //Demo user
+        $model->create($data);
 
         $this->line('<comment>+ Demo user created</comment>');
         $this->line('<info>- Admin path:</info> <comment>'.admin_action('Auth\LoginController@showLoginForm').'</comment>');
@@ -153,7 +154,7 @@ class AdminInstallCommand extends Command
         $this->line('<info>- Password:</info> <comment>'.$data['password'].'</comment>');
 
         //Show additional columns in demo user
-        foreach ($user->getProperty('demo') ?: [] as $key => $value) {
+        foreach ($model->getProperty('demo') ?: [] as $key => $value) {
             if (! in_array($key, ['email', 'password'])) {
                 $this->line('<info>- '.ucfirst($key).':</info> <comment>'.$value.'</comment>');
             }

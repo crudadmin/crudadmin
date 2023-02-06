@@ -16,7 +16,7 @@ class PublishServiceProvider extends ServiceProvider
         /*
          * Publishes
          */
-        $this->publishes([__DIR__.'/../Models/User.php' => AdminInstall::getInstallAuthModelPath()], 'admin.user');
+        $this->publishes([__DIR__.'/../Models/Admin.php' => AdminInstall::getInstallAuthModelPath()], 'admin.user');
         $this->publishes([__DIR__.'/../Config/config.php' => config_path('admin.php')], 'admin.config');
 
         //Laravel 8 and lower support with resources/lang

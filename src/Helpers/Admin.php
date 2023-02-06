@@ -21,7 +21,7 @@ class Admin extends AdminCore
 
     public function getAuthModel()
     {
-        return $this->getModelByTable('users');
+        return $this->getModel(config('admin.auth_eloquent'));
     }
 
     /*

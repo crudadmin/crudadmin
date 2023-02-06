@@ -6,9 +6,10 @@ use Admin\Admin\Buttons\LogoutUser;
 use Admin\Eloquent\Authenticatable;
 use Admin\Fields\Group;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
     use Notifiable, HasApiTokens;
 
@@ -48,6 +49,16 @@ class User extends Authenticatable
         LogoutUser::class,
     ];
 
+    /**
+     * Use table name by eloquent
+     *
+     * @return  string
+     */
+    public function getTable()
+    {
+        return Str::snake(Str::pluralStudly(class_basename(config('admin.auth_eloquent'))));
+    }
+
     /*
      * Automatic form and database generation
      * @name - field name
@@ -59,7 +70,7 @@ class User extends Authenticatable
     {
         return [
             'username' => 'name:Meno a priezvisko|placeholder:Zadajte meno a priezvisko administrátora|type:string|required|max:30',
-            'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:60|unique:users,email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
+            'email' => 'name:Email|placeholder:Zadajte email administrátora|type:string|email|required|max:60|unique:'.$this->getTable().',email,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
             'password' => 'name:Heslo|type:password|confirmed|min:4|max:40|'.(isset($row) ? '' : '|required'),
             'avatar' => 'name:Profilová fotografia|type:file|image',
             Group::fields([

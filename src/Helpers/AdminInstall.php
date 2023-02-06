@@ -6,8 +6,10 @@ class AdminInstall
 {
     public static function getInstallAuthModelPath()
     {
-        $laravelV7UserModelPath = app_path('User.php');
-        $laravelV8UserModelPath = app_path('Models/User.php');
+        $modelName = config('admin.auth_eloquent');
+
+        $laravelV7UserModelPath = app_path($modelName.'.php');
+        $laravelV8UserModelPath = app_path('Models/'.$modelName.'.php');
 
         return file_exists($laravelV8UserModelPath) ? $laravelV8UserModelPath : $laravelV7UserModelPath;
     }
@@ -32,6 +34,7 @@ class AdminInstall
             return false;
         }
 
+        $content = str_replace('class Admin extends', 'class '.config('admin.auth_eloquent').' extends', $content);
         $content = str_replace('Admin\Models;', self::getAuthModelNamespace().';', $content);
 
         return @file_put_contents($userModel, $content);

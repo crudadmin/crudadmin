@@ -53,7 +53,7 @@ class ModelsHistory extends Model
     {
         return [
             Group::fields([
-                'user' => 'name:Administrator|belongsTo:users,username',
+                'user' => 'name:Administrator|belongsTo:'.Admin::getAuthModel()->getTable().',username',
                 Group::inline([
                     'table' => 'name:Rozšírenie|type:select|index',
                     'action' => 'name:Akcia|type:select|limit:50|required',

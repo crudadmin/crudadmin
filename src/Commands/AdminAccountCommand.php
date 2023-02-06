@@ -32,12 +32,7 @@ class AdminAccountCommand extends Command
         $this->createUser();
     }
 
-    public function getModel()
-    {
-        return Admin::getModelByTable('users');
-    }
-
-    public function getCredentials($user = null)
+    public function getCredentials()
     {
         //Default crudadmin credentials
         $username = $this->ask('Type username', 'Administrátor');
@@ -53,7 +48,7 @@ class AdminAccountCommand extends Command
     {
         $email = $this->ask('Type email', 'admin@admin.com');
 
-        if ( $this->getModel()->where('email', $email)->count() > 0 && 0 ){
+        if ( Admin::getAuthModel()->where('email', $email)->count() > 0 && 0 ){
             $this->error('This email address does exists');
 
             return $this->getEmailInput();
@@ -64,12 +59,12 @@ class AdminAccountCommand extends Command
 
     public function createUser()
     {
-        $user = $this->getModel();
+        $model = Admin::getAuthModel();
 
-        $credentials = $this->getCredentials($user);
+        $credentials = $this->getCredentials($model);
 
         //Demo user
-        $user->create($data = $credentials + [
+        $model->create($data = $credentials + [
             'permissions' => 1,
         ]);
 

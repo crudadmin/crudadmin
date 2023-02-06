@@ -12,7 +12,7 @@ class DefaultTest extends TestCase
     {
         $this->assertEquals(Admin::boot(), [
             '2016-06-05 00:00:00' => 'Admin\Models\Language',
-            '2016-07-09 17:27:57' => 'Admin\Models\User',
+            '2016-07-09 17:27:57' => 'Admin\Models\Admin',
             '2017-07-15 00:00:00' => 'Admin\Models\ModelsHistory',
         ]);
     }

@@ -7,7 +7,6 @@ use Admin\Eloquent\Concerns\CanResetPassword;
 use Admin\Eloquent\Concerns\HasAutoLogoutTrait;
 use Admin\Eloquent\Concerns\HasLoginVerificator;
 use Admin\Eloquent\Modules\VerificationModule;
-use Admin\Models\User;
 use Illuminate\Auth\Authenticatable as BaseAuthenticatable;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
@@ -60,7 +59,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             $this->publishable = false;
         }
 
-        if ( $this->isUserClass() ) {
+        if ( $this->isAdminUserClass() ) {
             $this->addModule(VerificationModule::class);
         }
 
@@ -296,9 +295,9 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
      *
      * @return  bool
      */
-    public function isUserClass()
+    public function isAdminUserClass()
     {
-        return $this->getTable() === 'users';
+        return class_basename($this) == config('admin.auth_eloquent');
     }
 
     /*
@@ -310,7 +309,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
             return false;
         }
 
-        return $this->isUserClass() || $this->withUserRoles == true;
+        return $this->isAdminUserClass() || $this->withUserRoles == true;
     }
 
     /*
@@ -359,7 +358,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     public function setModelPermissions($permissions)
     {
         //We does not want mutate titles in other than user model
-        if ( $this->isUserClass() == false ){
+        if ( $this->isAdminUserClass() == false ){
             return $permissions;
         }
 

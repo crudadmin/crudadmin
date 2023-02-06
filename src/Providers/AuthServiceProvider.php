@@ -15,9 +15,11 @@ class AuthServiceProvider extends ServiceProvider
             'hash' => false,
         ]);
 
-        config()->set('auth.providers.admins', [
-            'driver' => 'eloquent',
-            'model' => get_class(Admin::getModel('User')),
-        ]);
+        if ( $authModel = Admin::getAuthModel() ) {
+            config()->set('auth.providers.admins', [
+                'driver' => 'eloquent',
+                'model' => get_class($authModel),
+            ]);
+        }
     }
 }

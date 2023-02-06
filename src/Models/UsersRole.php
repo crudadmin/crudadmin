@@ -83,7 +83,7 @@ class UsersRole extends AdminModel
     public function onTableCreate()
     {
         //When roles table is created, set all users as super admins.
-        DB::table('users')->update(['permissions' => 1]);
+        DB::table(Admin::getAuthModel()->getTable())->update(['permissions' => 1]);
     }
 
     /*

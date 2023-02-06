@@ -7,6 +7,11 @@ return [
     'app_namespace' => 'App',
 
     /*
+     * Auth eloquent model name
+     */
+    'auth_eloquent' => 'User',
+
+    /*
      * Default crudadmin storage
      */
     'disk' => 'crudadmin.uploads',

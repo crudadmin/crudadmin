@@ -36,7 +36,7 @@ paths:
                       type: object
                       properties:
                         user:
-                          $ref: '#/components/schemas/{{ class_basename(get_class(Admin::getModel('User'))) }}'
+                          $ref: '#/components/schemas/{{ class_basename(get_class(Admin::getAuthModel())) }}'
                         token:
                           type: object
                           properties:
@@ -233,7 +233,7 @@ components:
       scheme: bearer
   schemas:
      {{ view('admin::openapi.model_scheme', compact('model') + ['deep' => true]) }}
-     {{ view('admin::openapi.model_scheme', ['model' => Admin::getModel('User'), 'deep' => false]) }}
+     {{ view('admin::openapi.model_scheme', ['model' => Admin::getAuthModel(), 'deep' => false]) }}
 @foreach( collect($model->getExportRelations())->unique('table') as $relationKey => $relation )
      {{ view('admin::openapi.model_scheme', [
       'model' => $relation['relation'],
