@@ -3,6 +3,7 @@
 namespace Admin\Middleware;
 
 use Closure;
+use Admin;
 
 class RedirectIfAuthenticated
 {
