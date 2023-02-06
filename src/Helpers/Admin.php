@@ -24,6 +24,11 @@ class Admin extends AdminCore
         return $this->getModel(config('admin.auth_eloquent'));
     }
 
+    public function getAdminGuard()
+    {
+        return auth()->guard('adminSession');
+    }
+
     /*
      * Check if is admin interface
      */

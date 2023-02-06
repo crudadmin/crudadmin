@@ -78,7 +78,7 @@ class AdminInstallCommand extends Command
     {
         // Checks if model has been replaced. If no AdminUserModel has been found
         // We need rewrite actual UserModel
-        if ( !Admin::getAuthModel() ) {
+        if ( !Admin::getAuthModel() || Admin::getAuthModel() instanceof \Admin\Models\Admin ) {
             Artisan::call('vendor:publish', [
                 '--tag' => 'admin.user',
                 '--force' => true,

@@ -3,7 +3,6 @@
 namespace Admin\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Auth;
 
 class RedirectIfAuthenticated
 {
@@ -15,9 +14,11 @@ class RedirectIfAuthenticated
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = 'web')
+    public function handle($request, Closure $next, $guard = null)
     {
-        if (Auth::guard($guard)->check()) {
+        $guard = $guard ? auth()->guard($guard) : Admin::getAdminGuard();
+
+        if ($guard->check()) {
             return redirect('/admin');
         }
 

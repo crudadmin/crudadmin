@@ -11,7 +11,7 @@ class AdminInstall
         $laravelV7UserModelPath = app_path($modelName.'.php');
         $laravelV8UserModelPath = app_path('Models/'.$modelName.'.php');
 
-        return file_exists($laravelV8UserModelPath) ? $laravelV8UserModelPath : $laravelV7UserModelPath;
+        return file_exists($laravelV7UserModelPath) ? $laravelV7UserModelPath : $laravelV8UserModelPath;
     }
 
     public static function getAuthModelNamespace()

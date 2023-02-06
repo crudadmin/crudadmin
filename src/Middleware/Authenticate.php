@@ -4,6 +4,7 @@ namespace Admin\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Admin;
 
 class Authenticate
 {
@@ -15,13 +16,15 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = 'web', $errors = [])
+    public function handle($request, Closure $next, $guard = null, $errors = [])
     {
-        if (auth()->guard($guard)->guest() || ! auth()->guard($guard)->user()->isEnabled()) {
+        $guard = $guard ? auth()->guard($guard) : Admin::getAdminGuard();
+
+        if ($guard->guest() || ! $guard->user()->isEnabled()) {
 
             //If is user logged but has not privilegies
-            if (auth()->guard($guard)->user() && ! auth()->guard($guard)->user()->isEnabled()) {
-                auth()->guard($guard)->logout();
+            if ($guard->user() && ! $guard->user()->isEnabled()) {
+                $guard->logout();
 
                 $errors = ['email' => trans('admin::admin.auth-disabled')];
             }

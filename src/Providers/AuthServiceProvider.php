@@ -15,6 +15,11 @@ class AuthServiceProvider extends ServiceProvider
             'hash' => false,
         ]);
 
+        config()->set('auth.guards.adminSession', [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ]);
+
         if ( $authModel = Admin::getAuthModel() ) {
             config()->set('auth.providers.admins', [
                 'driver' => 'eloquent',

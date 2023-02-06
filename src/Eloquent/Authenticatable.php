@@ -46,7 +46,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
     /*
      * Guard for authentification model
      */
-    protected $guard = 'web';
+    protected $guard = null;
 
     /*
      * Add Admin rules permissions
@@ -68,7 +68,11 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
 
     public function getGuard()
     {
-        return auth()->guard($this->guard);
+        if ( $this->guard ){
+            return auth()->guard($this->guard);
+        }
+
+        return Admin::getAdminGuard();
     }
 
     /*
