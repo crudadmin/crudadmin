@@ -19,9 +19,9 @@ class Admin extends AdminCore
         return AdminCore::class;
     }
 
-    public function getAuthModel()
+    public function getAuthModel($namespace = false)
     {
-        return $this->getModel(config('admin.auth_eloquent'));
+        return $this->getModel(config('admin.auth_eloquent'), $namespace);
     }
 
     public function getAdminGuard()

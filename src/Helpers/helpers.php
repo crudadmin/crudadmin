@@ -14,7 +14,7 @@ if (! function_exists('admin')) {
             if (($guard = auth()->guard('admin'))->check()) {
                 return $guard->user();
             }
-        } catch (\Exception $e){}
+        } catch (\Throwable $e){}
 
         return false;
     }

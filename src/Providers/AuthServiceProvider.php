@@ -22,7 +22,7 @@ class AuthServiceProvider extends ServiceProvider
 
         config()->set('auth.providers.admins', [
             'driver' => 'eloquent',
-            'model' => ($guard = Admin::getAuthModel()) ? get_class($guard) : \Admin\Models\Admin::class,
+            'model' => ($authModel = Admin::getAuthModel(true)) ? $authModel : \Admin\Models\Admin::class,
         ]);
     }
 }
