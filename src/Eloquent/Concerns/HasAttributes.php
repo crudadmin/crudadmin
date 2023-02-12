@@ -6,7 +6,6 @@ use Admin;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 trait HasAttributes
 {
@@ -91,21 +90,6 @@ trait HasAttributes
         return parent::mutateAttribute($key, $value);
     }
 
-    private function resetMissingDates($fields)
-    {
-        foreach ($fields as $key => $field) {
-            $type = $field['type'] ?? null;
-
-            if ( in_array($type, ['date']) ){
-                $value = $this->attributes[$key] ?? null;
-
-                if ( $value == '0000-00-00' ){
-                    $this->attributes[$key] = null;
-                }
-            }
-        }
-    }
-
     /**
      * Convert the model's attributes to an array.
      *
@@ -119,61 +103,102 @@ trait HasAttributes
 
         $fields = $this->getFields();
 
-        $this->resetMissingDates($fields);
+        $this->setVisibleAdminAttributes();
+
+        $this->castAdminAttributes();
 
         //Get attributes without mutated values
         $attributes = parent::attributesToArray();
 
         $this->withoutMutators = false;
 
-        //Bing belongs to many values
+        return $attributes;
+    }
+
+    private function getAdminCasts()
+    {
+        $casts = [];
+
+        $fields = $this->getFields();
+
+        //Bind belongs to many values
         foreach ($fields as $key => $field) {
             /*
              * Update multiple values in many relationship
              */
             if (array_key_exists('belongsToMany', $field) && $this->skipBelongsToMany === false) {
-                $properties = $this->getRelationProperty($key, 'belongsToMany');
-
-                //Get all admin modules
-                $models = Admin::getAdminModelNamespaces();
-
-                foreach ($models as $path) {
-                    //Find match
-                    if (strtolower(Str::snake(class_basename($path))) == strtolower($properties[5])) {
-                        $attributes[$key] = $this->getValue($key)->pluck('id');
-                    }
-                }
+                $casts[$key] = \Admin\Eloquent\Casts\BelongsToManyCast::class;
             }
 
-            if (array_key_exists($key, $attributes)) {
-                /*
-                 * Casts decimal format
-                 */
-                if ($field['type'] == 'decimal' && ! is_null($attributes[$key])) {
-                    $decimalLength = $this->getDecimalLength($key);
+            /*
+             * Casts decimal format
+             */
+            if ($field['type'] == 'decimal') {
+                $casts[$key] = \Admin\Eloquent\Casts\DecimalCast::class;
+            }
 
-                    //Parse locale values
-                    if ($this->hasFieldParam($key, 'locale', true)) {
-                        foreach (array_wrap($attributes[$key]) as $k => $v) {
-                            if (is_null($v)) {
-                                unset($attributes[$key][$k]);
-                            } else {
-                                $attributes[$key][$k] = number_format($v, $decimalLength[1], '.', '');
-                            }
-                        }
-                    }
-
-                    //Parse simple values
-                    else {
-                        $attributes[$key] = number_format($attributes[$key], $decimalLength[1], '.', '');
-                    }
-                }
+            if ($field['type'] == 'date') {
+                $casts[$key] = \Admin\Eloquent\Casts\DateCast::class;
             }
         }
 
+        return $casts;
+    }
+
+    public function callWithoutCasts($callback)
+    {
+        $casts = $this->casts;
+
+        $this->casts = [];
+
+        $value = $callback();
+
+        $this->casts = $casts;
+
+        return $value;
+    }
+
+    private function castAdminAttributes()
+    {
+        $casts = $this->getAdminCasts();
+
+        foreach ($casts as $key => $cast) {
+            $this->casts[$key] = $cast;
+        }
+    }
+
+    private function setVisibleAdminAttributes()
+    {
         //Return just base fields
         if ($this->maximum == 0 && $this->justBaseFields() === true) {
-            $attributes = array_intersect_key($attributes, array_flip($this->getBaseFields()));
+            $visibleFields = $this->getBaseFields();
+
+            $this->setVisible($visibleFields);
+
+            foreach ($visibleFields as $key) {
+                if ( $this->hasFieldParam($key, 'belongsToMany') ){
+                    $this->append($key);
+                }
+            }
+        }
+    }
+
+    private function runAdminAttributesMutators($events, $attributes = [])
+    {
+        foreach ($events as $eventName => $enabled) {
+            if ( $enabled == false ){
+                continue;
+            }
+
+            if (method_exists($this, $eventName)) {
+                $attributes = $this->{$eventName}($attributes);
+            }
+
+            $this->runAdminModules(function($module) use ($eventName, &$attributes) {
+                if ( method_exists($module, $eventName) ) {
+                    $attributes = $module->{$eventName}($attributes);
+                }
+            });
         }
 
         return $attributes;
@@ -184,44 +209,22 @@ trait HasAttributes
      */
     public function getMutatedAdminAttributes($isColumns = false, $isRow = false)
     {
+        $this->runAdminAttributesMutators([
+            'setAdminResponse' => true,
+            'setAdminRowsResponse' => $isColumns,
+            'setAdminRowResponse' => $isRow,
+        ]);
+
+        /**
+         * Render attributes
+         */
         $attributes = $this->getAdminAttributes();
 
-        //Mutate attributes
-        if (method_exists($this, 'setAdminAttributes')) {
-            $attributes = $this->setAdminAttributes($attributes);
-        }
-
-        $this->runAdminModules(function($module) use (&$attributes) {
-            if ( method_exists($module, 'setAdminAttributes') ) {
-                $attributes = $module->setAdminAttributes($attributes);
-            }
-        });
-
-        //Mutate attributes
-        if ($isColumns === true) {
-            if ( method_exists($this, 'setAdminRowsAttributes') ) {
-                $attributes = $this->setAdminRowsAttributes($attributes);
-            }
-
-            $this->runAdminModules(function($module) use (&$attributes) {
-                if ( method_exists($module, 'setAdminRowsAttributes') ) {
-                    $attributes = $module->setAdminRowsAttributes($attributes);
-                }
-            });
-        }
-
-        //Mutate attributes
-        if ($isRow === true) {
-            if ( method_exists($this, 'setAdminRowAttributes') ) {
-                $attributes = $this->setAdminRowAttributes($attributes);
-            }
-
-            $this->runAdminModules(function($module) use (&$attributes) {
-                if ( method_exists($module, 'setAdminRowAttributes') ) {
-                    $attributes = $module->setAdminRowAttributes($attributes);
-                }
-            });
-        }
+        $attributes = $this->runAdminAttributesMutators([
+            'setAdminAttributes' => true,
+            'setAdminRowsAttributes' => $isColumns,
+            'setAdminRowAttributes' => $isRow,
+        ], $attributes);
 
         return $attributes;
     }
