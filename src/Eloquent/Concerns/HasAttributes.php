@@ -170,15 +170,17 @@ trait HasAttributes
     private function setVisibleAdminAttributes()
     {
         //Return just base fields
-        if ($this->maximum == 0 && $this->justBaseFields() === true) {
-            $visibleFields = $this->getBaseFields();
+        if ($this->justBaseFields() === true) {
+            $this->makeVisible(
+                $this->getBaseFields()
+            );
 
-            $this->setVisible($visibleFields);
+        }
 
-            foreach ($visibleFields as $key) {
-                if ( $this->hasFieldParam($key, 'belongsToMany') ){
-                    $this->append($key);
-                }
+        //Add belongsToMany if is visible
+        foreach ($this->getArrayableItems($this->getFields()) as $key => $field) {
+            if ( $field['belongsToMany'] ?? null ){
+                $this->append($key);
             }
         }
     }
