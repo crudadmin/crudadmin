@@ -272,6 +272,9 @@ class AddSelectSupport extends MutationRule
 
             //Get data from table, and bind them info buffer for better performance
             $options = $this->cache('selects.options.'.$properties[0], function () use ($relationModel, $properties, $loadColumns, $customColumns) {
+                //Check for super heave tables
+                $limit = 10000;
+
                 $loadColumns[] = $relationModel->fixAmbiguousColumn('id');
 
                 if ($relationModel) {
@@ -281,10 +284,20 @@ class AddSelectSupport extends MutationRule
                     //All columns, or required
                     $modelColumns = in_array('*', $modelColumns) ? ['*'] : $modelColumns;
 
-                    return $relationModel->select($modelColumns)->get()->toArray();
+                    $query = $relationModel->select($modelColumns);
+
+                    if ( $query->count() <= $limit ) {
+                        return $query->get()->toArray();
+                    }
+
+                    return [];
                 }
 
-                return DB::table($properties[0])->select($loadColumns)->whereNull('deleted_at')->get();
+                if ( $query->count() <= $limit ){
+                    return $query->get();
+                }
+
+                return [];
             });
 
             //If is unknown belongs to column
