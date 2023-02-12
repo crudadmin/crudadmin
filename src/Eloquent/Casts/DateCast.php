@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Casts;
 
 use Admin;
+use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class DateCast implements CastsAttributes
@@ -24,7 +25,7 @@ class DateCast implements CastsAttributes
             return;
         }
 
-        return $value;
+        return $value ? new Carbon($value) : null;
     }
 
     /**
