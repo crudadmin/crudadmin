@@ -34,11 +34,6 @@ class ImageController extends Controller
 
         $adminFile = $model->getAdminFile($fieldKey, $filename);
 
-        //Check if model and field exists
-        if ( $adminFile->exists == false ) {
-            return abort(404);
-        }
-
         $storage = $adminFile->getCacheStorage();
 
         $resizedImage = $adminFile->resize(50, 50, true);
