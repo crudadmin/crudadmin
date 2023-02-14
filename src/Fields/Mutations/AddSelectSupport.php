@@ -282,7 +282,7 @@ class AddSelectSupport extends MutationRule
                     $modelColumns = array_merge(Arr::flatten(array_values($customColumns)), $loadColumns);
 
                     //All columns, or required
-                    $modelColumns = in_array('*', $modelColumns) ? ['*'] : $modelColumns;
+                    $modelColumns = in_array('*', $modelColumns) ? ['*'] : $relationModel->fixAmbiguousColumn($modelColumns);
 
                     $query = $relationModel->select($modelColumns);
 

@@ -31,6 +31,24 @@ trait HasAttributes
     }
 
     /**
+     * Check if mutator is whitelisted
+     *
+     * @param  string  $key
+     *
+     * @return  bool
+     */
+    private function isMutatorWhitelisted($key)
+    {
+        $whitelisted = $this->withoutMutators;
+
+        if ( is_array($whitelisted) ){
+            return in_array($key, $whitelisted);
+        }
+
+        return true;
+    }
+
+    /**
      * Determine if a get mutator exists for an attribute.
      *
      * @param  string  $key
@@ -38,7 +56,7 @@ trait HasAttributes
      */
     public function hasGetMutator($key)
     {
-        if ($this->withoutMutators === true) {
+        if ($this->isMutatorWhitelisted($key) === false) {
             return false;
         }
 
@@ -53,7 +71,7 @@ trait HasAttributes
      */
     public function hasAttributeGetMutator($key)
     {
-        if ($this->withoutMutators === true) {
+        if ($this->isMutatorWhitelisted($key) === false) {
             return false;
         }
 
@@ -67,11 +85,14 @@ trait HasAttributes
      */
     public function getMutatedAttributes()
     {
-        if ($this->withoutMutators === true) {
-            return [];
+        $mutatedAttributes = parent::getMutatedAttributes();
+
+        $whitelisted = $this->withoutMutators;
+        if ( is_array($whitelisted) ){
+            return array_intersect($whitelisted, $mutatedAttributes);
         }
 
-        return parent::getMutatedAttributes();
+        return $mutatedAttributes;
     }
 
     /**
@@ -83,7 +104,7 @@ trait HasAttributes
      */
     protected function mutateAttribute($key, $value)
     {
-        if ($this->withoutMutators === true) {
+        if ($this->isMutatorWhitelisted($key) === false) {
             return $value;
         }
 
@@ -99,7 +120,8 @@ trait HasAttributes
     private function getAdminAttributes()
     {
         //Turn of mutating of attributes for admin results
-        $this->withoutMutators = true;
+        //Enable only appended attributes
+        $this->withoutMutators = $this->getAppends();
 
         $fields = $this->getFields();
 
