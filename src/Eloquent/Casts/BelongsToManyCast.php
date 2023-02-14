@@ -29,7 +29,7 @@ class BelongsToManyCast implements CastsAttributes
             if (strtolower(Str::snake(class_basename($path))) == strtolower($properties[5])) {
                 $relations = $model->callWithoutCasts(function() use ($model, $key) {
                     return $model->getValue($key);
-                });
+                }, $key);
 
                 return $relations->pluck('id')->toArray();
             }

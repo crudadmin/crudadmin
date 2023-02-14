@@ -145,11 +145,11 @@ trait HasAttributes
         return $casts;
     }
 
-    public function callWithoutCasts($callback)
+    public function callWithoutCasts($callback, $except = null)
     {
         $casts = $this->casts;
 
-        $this->casts = [];
+        $this->casts = $except ? array_diff_key($casts, array_flip(array_wrap($except))) : [];
 
         $value = $callback();
 
