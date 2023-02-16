@@ -253,6 +253,7 @@ trait HasExporter
 
     public function setFullExportResponse()
     {
+        //Set response for all relations
         foreach ($this->getRelations() as $key => $data) {
             $relation = $this->{$key};
 
@@ -260,6 +261,13 @@ trait HasExporter
                 $relation->each->setFullExportResponse();
             } else if ( $relation instanceof AdminModel ) {
                 $relation->setFullExportResponse();
+            }
+        }
+
+        //Replace files with images
+        foreach ($this->getArrayableItems($this->getFields()) as $key => $field) {
+            if ( $field['type'] == 'file' && isset($this->attributes[$key]) ){
+                $this->attributes[$key] = $this->{$key}?->url;
             }
         }
 

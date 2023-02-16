@@ -11,13 +11,13 @@
               schema:
                 type: object
                 properties:
-                    data:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                          table:
+                    model_name:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        relations:
+                          type: array
+                          items:
                             type: string
 

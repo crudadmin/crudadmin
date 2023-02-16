@@ -1,15 +1,16 @@
-  /admin/api/model_scheme/{table}:
+  /admin/api/models_scheme:
     get:
       tags:
         - Base
-      summary: GET OPENAPI scheme for given model
+      summary: GET OPENAPI scheme for given model. Only for generating swagger scheme.
       parameters:
-        - in: path
-          name: table
+        - in: query
+          name: models
           schema:
             type: string
-          required: true
-          description: Table name from models list to view all model scheme
+          required: false
+          description: List of models which you want display
+          example: products,orders,...
       responses:
         '200':
           description: Success response

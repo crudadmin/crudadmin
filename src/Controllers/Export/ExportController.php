@@ -8,12 +8,12 @@ use Admin;
 
 class ExportController extends CRUDController
 {
-    private function getBootedModel($table, $access = null)
+    private function getBootedModel($table, $access = true)
     {
         $model = $this->getModel($table, false);
 
         if ( admin()->hasAccess($model, $access) === false ){
-            return autoAjax()->error('Unauthorized.', 401)->throw();
+            return autoAjax()->error('Unauthorized - '.$model->getProperty('name').($access ? ' - '.$access : '').'.', 401)->throw();
         }
 
         return $model
@@ -67,22 +67,31 @@ class ExportController extends CRUDController
 
     public function models()
     {
-        return collect(Admin::getAdminModels())
+        $models = collect(Admin::getAdminModels())
                 ->filter(function($model){
                     return admin()->hasAccess($model);
-                })->map(function($model){
+                });
+
+        return $models->keyBy(function($model){
+            return $model->getTable();
+        })->map(function($model){
                     return [
                         'name' => $model->getProperty('name'),
-                        'table' => $model->getTable(),
+                        'relations' => collect($model->getExportRelations())->pluck('table'),
                     ];
-                })
-                ->values();
+                });
     }
 
-    public function scheme($table)
+    public function scheme($table = null)
     {
-        $model = $this->getModel($table, false);
+        $tables = collect(array_filter(array_merge(array_wrap($table), explode(',', request('models', '')))));
 
-        return view('admin::openapi.pagination_scheme', compact('model'));
+        $models = $tables->map(function($table){
+            return $this->getBootedModel($table)->getModel();
+        })->keyBy(function($model){
+            return $model->getTable();
+        });
+
+        return view('admin::openapi.pagination_scheme', compact('models'));
     }
 }

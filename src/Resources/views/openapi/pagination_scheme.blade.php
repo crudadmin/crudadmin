@@ -2,7 +2,7 @@ openapi: 3.0.0
 servers:
   - url: {{ env('APP_URL') }}/admin/api
 info:
-  title: {{ $model->getProperty('name') }}
+  title: {{ env('APP_NAME') }}
   version: 1.0.0
   contact:
     email: {{ $email = (env('MAIL_FROM_ADDRESS') ?: 'info@marekgogol.sk') }}
@@ -12,6 +12,7 @@ paths:
   @include('admin::openapi.models_list_scheme')
 
   @include('admin::openapi.scheme')
+@foreach($models as $model)
   /model/{{ $model->getTable() }}:
     get:
       tags:
@@ -203,16 +204,25 @@ $field = $model->getField($key) ?? [];
                       properties:
                         row:
                           $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+@endforeach
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
   schemas:
-     {{ view('admin::openapi.model_scheme', compact('model') + ['deep' => true]) }}
+@php
+$schemes = [];
+@endphp
      {{ view('admin::openapi.model_scheme', ['model' => Admin::getAuthModel(), 'deep' => false]) }}
+@foreach($models as $model)
+@php $schemes[] = $model->getTable() @endphp
+     {{ view('admin::openapi.model_scheme', compact('model') + ['deep' => true]) }}
 @foreach( collect($model->getExportRelations())->unique('table') as $relationKey => $relation )
+@continue(in_array($relation['table'], $schemes) || $models->has($relation['table']))
+@php $schemes[] = $relation['table']; @endphp
      {{ view('admin::openapi.model_scheme', [
       'model' => $relation['relation'],
       'deep' => false,
 ]) }}@endforeach
+@endforeach
