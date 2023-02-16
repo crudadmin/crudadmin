@@ -121,7 +121,7 @@ trait HasAttributes
     {
         //Turn of mutating of attributes for admin results
         //Enable only appended attributes
-        $this->withoutMutators = $this->getAppends();
+        $this->withoutMutators = $this->appends;
 
         $fields = $this->getFields();
 
