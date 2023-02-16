@@ -200,7 +200,7 @@ paths:
             schema:
               type: object
               properties:
-@foreach(array_intersect($model->getFillable(), $model->getExportColumns()) as $key)
+@foreach(array_unique(array_intersect($model->getFillable(), $model->getExportColumns())) as $key)
 @php
 $field = $model->getField($key) ?? [];
 @endphp

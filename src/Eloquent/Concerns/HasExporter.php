@@ -19,7 +19,9 @@ trait HasExporter
             return true;
         });
 
-        return array_merge(['id'], $this->getForeignColumn() ?: [], array_keys($fields));
+        $columns = array_values(array_unique(array_merge(['id'], $this->getForeignColumn() ?: [], array_keys($fields))));
+
+        return $columns;
     }
 
     public function getExportRelations()
