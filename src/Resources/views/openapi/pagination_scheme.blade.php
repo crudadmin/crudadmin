@@ -9,6 +9,8 @@ info:
 paths:
   /auth/login:
     get:
+      tags:
+        - Authorization
       summary: Receive authorization token
       parameters:
         - in: query
@@ -45,6 +47,8 @@ paths:
                               example: 6|QthWyWYy5IMwE8eLxdkTJNqdav4D91um060hAvm8
   /model/{{ $model->getTable() }}:
     get:
+      tags:
+        - {{ $model->getProperty('name') }}
       summary: Fetch paginated rows from {{ $model->getProperty('name') }}
       security:
         - bearerAuth: []
@@ -120,6 +124,8 @@ paths:
                             $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
   /model/{{ $model->getTable() }}/{identifier}:
     get:
+      tags:
+        - {{ $model->getProperty('name') }}
       summary: Receive row from {{ $model->getProperty('name') }}
       security:
         - bearerAuth: []
@@ -164,6 +170,8 @@ paths:
                         row:
                           $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
     post:
+      tags:
+        - {{ $model->getProperty('name') }}
       summary: Update row in {{ $model->getProperty('name') }}
       security:
         - bearerAuth: []
