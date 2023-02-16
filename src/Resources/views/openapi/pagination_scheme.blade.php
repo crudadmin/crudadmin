@@ -7,44 +7,11 @@ info:
   contact:
     email: {{ $email = (env('MAIL_FROM_ADDRESS') ?: 'info@marekgogol.sk') }}
 paths:
-  /auth/login:
-    get:
-      tags:
-        - Authorization
-      summary: Receive authorization token
-      parameters:
-        - in: query
-          name: email
-          description: Administrator email
-          required: false
-          schema:
-            type: string
-            example: {{ $email }}
-        - in: query
-          name: password
-          description: Password from administration
-          schema:
-            type: string
-            example: heslo123
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                    data:
-                      type: object
-                      properties:
-                        user:
-                          $ref: '#/components/schemas/{{ class_basename(get_class(Admin::getAuthModel())) }}'
-                        token:
-                          type: object
-                          properties:
-                            token:
-                              type: string
-                              example: 6|QthWyWYy5IMwE8eLxdkTJNqdav4D91um060hAvm8
+  @include('admin::openapi.auth_scheme')
+
+  @include('admin::openapi.models_list_scheme')
+
+  @include('admin::openapi.scheme')
   /model/{{ $model->getTable() }}:
     get:
       tags:
@@ -72,11 +39,13 @@ paths:
           description: Fetch additional order relationships
           schema:
             type: string
+@if ( count($model->getExportRelations()) )
           examples:
 @foreach( $model->getExportRelations() as $relationKey => $relation )
             {{ $relationKey }} ({{ $relation['name'] }}):
               value: {{ $relationKey.':'.implode(',', $relation['relation']->getExportColumns()) }}
 @endforeach
+@endif
         - in: query
           name: where[]
           description: Filter by column value.

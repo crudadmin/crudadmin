@@ -103,7 +103,7 @@ class UsersRole extends AdminModel
     public function setPermissionsAttribute($value)
     {
         //Support for old formats from crudadmin v3
-        $models = is_string($value) ? json_decode($value ?: '[]', true) : $value;
+        $models = (is_string($value) ? json_decode($value ?: '[]', true) : $value) ?: [];
 
         foreach ($models as $namespace => $permissions) {
             //Remove class which does not exists anymore
