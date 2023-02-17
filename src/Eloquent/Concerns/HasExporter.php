@@ -131,8 +131,15 @@ trait HasExporter
             return;
         }
 
+        //Add primary id
+        if ( $withs && count($withs) ){
+            $columns = array_merge([$query->getModel()->getKeyName()], $columns);
+        }
+
         //We need add child relation foreign keys into this select.
-        foreach ($this->processExportWiths($withs) as $with) {
+        $relations = $this->processExportWiths($withs);
+
+        foreach ($relations as $relationName => $with) {
             $relation = $query->getModel()->{$with['relation']}();
 
             //If this relations contains parent foreign key name, we need push this columns int oparent select
@@ -145,7 +152,7 @@ trait HasExporter
             }
         }
 
-        $query->select($columns);
+        $query->select(array_unique($columns));
     }
 
     private function processExportWiths($with)
@@ -157,11 +164,18 @@ trait HasExporter
         $items = [];
 
         foreach ($with as $item) {
-            $parts = explode(':', $item);
+            $subRelations = explode('.', $item);
+            $parts = explode(':', $subRelations[0]);
             $relation = $parts[0];
             $columns = $parts[1] ?? null;
 
-            $items[] = compact('parts', 'relation', 'columns');
+            $sub = $this->processExportWiths(array_slice($subRelations, 1));
+
+            if ( isset($items[$relation]) === false ){
+                $items[$relation] = compact('relation', 'parts', 'columns', 'sub');
+            } else {
+                $items[$relation]['sub'] = array_merge($items[$subRelations[0]]['sub'], $sub);
+            }
         }
 
         return $items;
@@ -202,6 +216,10 @@ trait HasExporter
                     $query
                         ->select($columns ?: [$model->getTable().'.*'])
                         ->withExportResponse();
+
+                    foreach ($item['sub'] as $sub) {
+                        $query->exportWithSupport(implode(':', $sub['parts']));
+                    }
                 },
             ]);
         }
