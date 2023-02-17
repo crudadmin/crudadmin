@@ -76,10 +76,10 @@ class AdminRowsSearch
             }
 
             //Search scope
-            $query->where(function ($builder) use ($columns, $queries, $search, $searchTo, $isInterval) {
+            $query->where(function ($builder) use ($columns, $queries, $search, $searchTo, $isInterval, $itemQuery) {
                 foreach ($columns as $key => $column) {
                     //Search in all columns
-                    $this->filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval);
+                    $this->filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval, $itemQuery);
                 }
             });
         }
@@ -194,11 +194,11 @@ class AdminRowsSearch
         }
     }
 
-    private function filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval, $orWhere = false)
+    private function filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval, $itemQuery)
     {
         $model = $builder->getModel();
 
-        $builder->orWhere(function ($builder) use ($model, $columns, $column, $queries, $search, $searchTo) {
+        $builder->orWhere(function ($builder) use ($model, $columns, $column, $queries, $search, $searchTo, $itemQuery) {
             $tableColumn = $model->fixAmbiguousColumn($column);
 
             //If is imaginarry field, skip whole process
@@ -226,9 +226,7 @@ class AdminRowsSearch
 
             //Find exact id, value
             elseif ($this->isPrimaryKey($model, $column, $columns)) {
-                foreach ($queries as $query) {
-                    $builder->where($tableColumn, $query);
-                }
+                $builder->where($tableColumn, $itemQuery);
             }
 
             //Find by data in relation

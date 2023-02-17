@@ -62,6 +62,7 @@ class SEO
             'description' => ['meta_description', 'description', 'content'],
             'image' => ['meta_image', 'image', 'images', 'avatar'],
             'keywords' => ['meta_keywords', 'keywords'],
+            'canonical_url' => ['meta_canonical_url', 'canonical_url'],
         ];
 
         $is_object = $this->model instanceof AdminModel;
@@ -273,6 +274,17 @@ class SEO
     }
 
     /*
+     * Return canonical url
+     */
+    public function getCanonicalUrl()
+    {
+        $url = $this->getDefault('canonical_url');
+        $url = $this->get('canonical_url', $url);
+
+        return $url;
+    }
+
+    /*
      * Return page keywords
      */
     public function getImages()
@@ -372,6 +384,10 @@ class SEO
 
         foreach ($this->getImages() as $image) {
             $lines[] = '<meta name="twitter:image" content="'.$this->secure($image).'">';
+        }
+
+        if ( $url = $this->getCanonicalUrl() ){
+            $lines[] = '<link rel="canonical" href="'.$this->secure($url).'">';
         }
 
         return $lines;
