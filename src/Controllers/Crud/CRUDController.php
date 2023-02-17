@@ -20,7 +20,9 @@ class CRUDController extends Controller
      */
     protected function getModel($table, $withAdminRows = true)
     {
-        $model = Admin::getModelByTable($table);
+        if ( !($model = Admin::getModelByTable($table)) ){
+            autoAjax()->error('Model does not exists: '.$table)->throw();
+        }
 
         if ( $withAdminRows === true ){
             $model = $model->getAdminRows();

@@ -2,10 +2,11 @@
 
 namespace Admin\Providers;
 
-use Localization;
+use Admin\Middleware\SetAppLocale;
 use App\Core\Helpers\Language;
-use Illuminate\Routing\Router;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Routing\Router;
+use Localization;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,9 @@ class RouteServiceProvider extends ServiceProvider
         $router->group([
             'namespace' => 'Admin\Controllers',
             'prefix' => 'admin/api',
+            'middleware' => [
+                SetAppLocale::class
+            ],
         ], function ($router) {
             require __DIR__.'/../Routes/api.php';
         });

@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
+use Admin\Core\Casts\LocalizedJsonCast;
 use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 use Str;
@@ -109,9 +110,11 @@ trait HasExporter
         foreach ($where as $key => $value) {
             $parts = explode(',', $key);
             $column = $parts[0];
-            $operator = $parts[1] ?? '=';
+            $operator = mb_strtolower($parts[1] ?? '=');
 
-            if ( $operator == 'in' ) {
+            if ( $operator == 'notnull' ) {
+                $query->whereNotNull($column);
+            } else if ( $operator == 'in' ) {
                 $separator = $parts[2] ?? ',';
                 $values = explode($separator, $value);
 
@@ -267,7 +270,22 @@ trait HasExporter
         //Replace files with images
         foreach ($this->getArrayableItems($this->getFields()) as $key => $field) {
             if ( $field['type'] == 'file' && isset($this->attributes[$key]) ){
-                $this->attributes[$key] = $this->{$key}?->url;
+                if ( $this->hasFieldParam($key, 'locale') ) {
+                    //Remove cast for locale files.
+                    if ( isset($this->casts[$key]) ){
+                        unset($this->casts[$key]);
+                    }
+
+                    $files = (new LocalizedJsonCast)->get($this, $key, $this->attributes[$key], $this->attributes);
+                    $files = array_wrap($files);
+                    $files = array_map(function($filename) use ($key) {
+                        return $this->getAdminFile($key, $filename)->url;
+                    }, $files);
+
+                    $this->attributes[$key] = count($files) == 1 && isset($files[0]) ? $files[0] : $files;
+                } else {
+                    $this->attributes[$key] = $this->{$key}?->url;
+                }
             }
         }
 

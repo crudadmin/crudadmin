@@ -63,6 +63,7 @@ paths:
             where[id,>=]: 12
             where[id,in]: 1,2,3,4,5
             where[id,in,;]: 1;2;3;4;5
+            where[file,notNull]:
         - in: query
           name: scope[]
           description: Filter rows by scope/preddefined filters with parameters.
@@ -76,6 +77,15 @@ paths:
             scope[withInvoice]: 1
             scope[onlyGreen]: 0
             scope[]: 'myScopeName'
+@if ( Admin::isEnabledLocalization() )
+        - in: header
+          name: App-Locale
+          description: Optional localization header for defining response only in given language. If header is not present, all language versions will be returned under localized field.
+          schema:
+            type: string
+          required: false
+          example: {{ Localization::get()->pluck('slug')->join(' / ') }}
+@endif
       responses:
         '200':
           description: search results matching criteria
@@ -139,6 +149,7 @@ paths:
                       properties:
                         row:
                           $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+@if ( admin()->hasAccess($model, 'update') )
     post:
       tags:
         - {{ $model->getProperty('name') }}
@@ -204,6 +215,7 @@ $field = $model->getField($key) ?? [];
                       properties:
                         row:
                           $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+@endif
 @endforeach
 components:
   securitySchemes:
