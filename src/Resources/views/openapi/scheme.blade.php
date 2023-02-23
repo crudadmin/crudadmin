@@ -1,8 +1,10 @@
-  /admin/api/models_scheme:
+  /models_scheme:
     get:
       tags:
         - Base
       summary: GET OPENAPI scheme for given model. Only for generating swagger scheme.
+      security:
+        - bearerAuth: []
       parameters:
         - in: query
           name: models

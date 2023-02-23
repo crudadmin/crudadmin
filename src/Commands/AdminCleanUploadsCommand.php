@@ -3,7 +3,8 @@
 namespace Admin\Commands;
 
 use Admin;
-use Admin\Core\Helpers\File as AdminFile;
+use Admin\Core\Helpers\Storage\AdminFile;
+use Exception;
 use File;
 use Illuminate\Console\Command;
 
@@ -34,15 +35,17 @@ class AdminCleanUploadsCommand extends Command
     {
         $this->performStats();
 
-        $this->showDeepStats();
+        $this->askForDeepStats();
     }
 
     private function performStats()
     {
-        $this->error('******** Calculating... ********');
+        $this->info('<comment>******** Calculating... ********</comment>');
 
-        foreach (Admin::getAdminModels() as $model) {
-            $this->buildModelStats($model);
+        $models = Admin::getAdminModels();
+
+        foreach ($models as $model) {
+            $this->fetchModelStats($model);
         }
 
         $this->sortStatsBySize();
@@ -50,6 +53,18 @@ class AdminCleanUploadsCommand extends Command
         foreach ($this->stats as $table => $data) {
             $this->showModelStats($table);
         }
+
+        $this->line("\n".'<comment>+ Total stats:</comment>');
+        $this->line('  Total: <comment>'.AdminFile::formatFilesizeNumber($this->getTotalStatNumber('totalBytes')).'</comment>');
+        $this->line('  Missing in DB: <comment>'.AdminFile::formatFilesizeNumber($this->getTotalStatNumber('uneccessaryBytes')).'</comment>');
+        $this->line('  Trashed rows: <comment>'.AdminFile::formatFilesizeNumber($this->getTotalStatNumber('removedBytes')).'</comment>');
+    }
+
+    private function getTotalStatNumber($key)
+    {
+        return collect($this->stats)->map(function($row) use ($key) {
+            return array_sum($row[$key]);
+        })->sum();
     }
 
     private function askForDeleting($table)
@@ -63,16 +78,14 @@ class AdminCleanUploadsCommand extends Command
             'nothing' => 'Nothing',
             'missing' => 'Files which are not present in database anymore',
             'trashed' => 'Files which are saved in trashed rows',
-            'both' => 'Missing and trashed',
+            'all' => 'Missing and trashed',
         ], 'nothing');
 
         if ( $operation == 'nothing' ){
             return;
         }
 
-        $this->line('Removing...');
-
-        $removed = 0;
+        $toRemove = [];
 
         foreach ($fileFields as $key => $option) {
             //Skip all uneccessary fields
@@ -81,24 +94,36 @@ class AdminCleanUploadsCommand extends Command
             }
 
             //Remove missing files. (Does not exists in db)
-            if ( in_array($operation, ['missing', 'both']) ){
+            if ( in_array($operation, ['missing', 'all']) ){
                 foreach (@$this->stats[$table]['uneccessaryFiles'][$key] ?: [] as $path) {
-                    @unlink($path);
-                    $removed++;
+                    $toRemove[] = [$key, $path];
                 }
             }
 
             //Remove files with trashed rows in db
-            if ( in_array($operation, ['trashed', 'both']) ){
+            if ( in_array($operation, ['trashed', 'all']) ){
                 foreach (@$this->stats[$table]['removedFiles'][$key] ?: [] as $path) {
-                    @unlink($path);
-                    $removed++;
+                    $toRemove[] = [$key, $path];
                 }
             }
-
         }
 
-        $this->line($removed.' files has been removed');
+        $this->line('Removing '.count($toRemove).' files...');
+
+        $removed = 0;
+        foreach ($toRemove as $data) {
+            try {
+                $storage = $model->getFieldStorage($data[0]);
+
+                $storage->delete($data[1]);
+
+                $removed++;
+            } catch (Exception $e){
+                //..
+            }
+        }
+
+        $this->line($removed.'/'.count($toRemove).' files has been removed');
     }
 
     private function showModelStats($table, $full = false)
@@ -139,7 +164,7 @@ class AdminCleanUploadsCommand extends Command
         $this->line('');
     }
 
-    private function showDeepStats()
+    private function askForDeepStats()
     {
         $table = $this->choice('Which model do you want perform operations?', array_keys($this->stats));
 
@@ -179,11 +204,20 @@ class AdminCleanUploadsCommand extends Command
 
     private function getExistingRows($model, $fileFields)
     {
-        return $model->withoutGlobalScopes()->when($model->hasSoftDeletes(), function($query){
+        $scope = $model->withoutGlobalScopes()->when($model->hasSoftDeletes(), function($query){
             $query->withoutTrashed();
         })->select(
             array_merge(['id'], array_keys($fileFields))
-        )->get();
+        );
+
+        $count = $scope->count();
+        $limit = env('STORAGE_CLEAN_ITEMS_LIMIT', 100000);
+        if ( $count >= $limit ){
+            $this->error('Could not load rows for '.$model->getTable().' table. Rows '.$count.'/'.$limit);
+            return;
+        }
+
+        return $scope->get();
     }
 
     private function getTrashedRows($model, $fileFields)
@@ -195,48 +229,61 @@ class AdminCleanUploadsCommand extends Command
         )->get();
     }
 
-    public function buildModelStats($model)
+    public function fetchModelStats($model)
     {
         $table = $model->getTable();
 
+        $this->line('Fetching stats for: '.$table);
+
         $fileFields = $this->getModelFileFields($model);
+
+        // if ( count($fileFields) == 0 ){
+        //     return;
+        // }
 
         $this->buildStatsTree($table, $fileFields);
 
         $existingRows = $this->getExistingRows($model, $fileFields);
 
+        if ( !$existingRows ){
+            return;
+        }
+
         $trashedRows = $this->getTrashedRows($model, $fileFields);
 
         //Calculate all data
         foreach ($fileFields as $key => $options) {
-            $path = $model->filePath($key);
+            $storage = $model->getFieldStorage($key);
+            $path = $model->getStorageFilePath($key);
 
             $existingFiles = $existingRows->pluck($key)->filter()->toArray();
             $removedFiles = $trashedRows->pluck($key)->filter()->toArray();
 
-            //If directory does not exists
-            if ( !file_exists($path) ){
+            if ( $storage->exists($path) == false ){
                 continue;
             }
 
-            foreach (File::allFiles($path) as $file) {
-                $this->stats[$table]['totalBytes'][$key] += $file->getSize();
+            foreach ($storage->allFiles($path) as $path) {
+                $filename = basename($path);
+                $size = $storage->size($path);
+
+                $this->stats[$table]['totalBytes'][$key] += $size;
                 $this->stats[$table]['totalFilesCount'][$key]++;
 
                 //Files which are in deleted rows
                 //but are not also in existing rows
                 if (
-                    in_array($file->getFileName(), $removedFiles) === true
-                    && in_array($file->getFileName(), $existingFiles) === false
+                    in_array($filename, $removedFiles) === true
+                    && in_array($filename, $existingFiles) === false
                 ) {
-                    $this->stats[$table]['removedBytes'][$key] += $file->getSize();
-                    $this->stats[$table]['removedFiles'][$key][] = $file->getPathname();
+                    $this->stats[$table]['removedBytes'][$key] += $size;
+                    $this->stats[$table]['removedFiles'][$key][] = $path;
                 }
 
                 //Files which does not exists in existing database rows
-                else if ( in_array($file->getFileName(), $existingFiles) === false ) {
-                    $this->stats[$table]['uneccessaryBytes'][$key] += $file->getSize();
-                    $this->stats[$table]['uneccessaryFiles'][$key][] = $file->getPathname();
+                else if ( in_array($filename, $existingFiles) === false ) {
+                    $this->stats[$table]['uneccessaryBytes'][$key] += $size;
+                    $this->stats[$table]['uneccessaryFiles'][$key][] = $path;
                 }
             }
         }

@@ -1,8 +1,10 @@
-  /admin/api/models:
+  /models:
     get:
       tags:
         - Base
       summary: Receive all available models to interact with via REST API
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Success response
