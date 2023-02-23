@@ -211,7 +211,7 @@ class AdminCleanUploadsCommand extends Command
         );
 
         $count = $scope->count();
-        $limit = env('STORAGE_CLEAN_ITEMS_LIMIT', 100000);
+        $limit = env('STORAGE_CLEAN_ITEMS_LIMIT', 10000);
         if ( $count >= $limit ){
             $this->error('Could not load rows for '.$model->getTable().' table. Rows '.$count.'/'.$limit);
             return;
@@ -237,9 +237,9 @@ class AdminCleanUploadsCommand extends Command
 
         $fileFields = $this->getModelFileFields($model);
 
-        // if ( count($fileFields) == 0 ){
-        //     return;
-        // }
+        if ( count($fileFields) == 0 ){
+            return;
+        }
 
         $this->buildStatsTree($table, $fileFields);
 
