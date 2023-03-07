@@ -5,9 +5,11 @@ use Admin\Models\Language;
 if (! function_exists('admin')) {
     function admin()
     {
-        if (($guard = Admin::getAdminGuard())->check()) {
-            return $guard->user();
-        }
+        try {
+            if (($guard = Admin::getAdminGuard())->check()) {
+                return $guard->user();
+            }
+        } catch (\Throwable $e){}
 
         //Fallback to admin api guard
         try {
