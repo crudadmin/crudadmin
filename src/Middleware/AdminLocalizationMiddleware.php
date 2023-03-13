@@ -4,6 +4,7 @@ namespace Admin\Middleware;
 
 use Admin;
 use AdminLocalization;
+use Localization;
 use Closure;
 
 class AdminLocalizationMiddleware
@@ -27,6 +28,13 @@ class AdminLocalizationMiddleware
         //We need boot localization without admin eloquent
         else {
             AdminLocalization::setLocale(
+                AdminLocalization::getLocaleIdentifier()
+            );
+        }
+
+        //Set website default localization to same as admin language
+        if ( Localization::isActive() ) {
+            Localization::setDefaultLocale(
                 AdminLocalization::getLocaleIdentifier()
             );
         }
