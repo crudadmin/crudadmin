@@ -1,5 +1,5 @@
   /auth/login:
-    get:
+    post:
       tags:
         - Authorization
       summary: Receive authorization token
