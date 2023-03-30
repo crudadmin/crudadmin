@@ -133,11 +133,11 @@ class ModelsHistory extends Model
 
     public function getFieldRowAttribute()
     {
-        $model = Admin::getModelByTable($this->table);
+        $model = Admin::getModelByTable($this->getValue('table'));
 
         $row = $model->forceFill($this->data)
                       ->setProperty('skipBelongsToMany', true)
-                      ->getMutatedAdminAttributes();
+                      ->getMutatedAdminAttributes(false, true);
 
         return $row;
     }

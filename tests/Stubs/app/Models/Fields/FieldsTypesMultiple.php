@@ -28,10 +28,10 @@ class FieldsTypesMultiple extends AdminModel
     public function fields()
     {
         return [
-            'select_multiple' => 'name:my multiple select field|type:select|multiple|options:option a,option b,option c|required',
-            'file_multiple' => 'name:my multiple file field|type:file|multiple|required',
-            'date_multiple' => 'name:my multiple date field|type:date|multiple|required',
-            'time_multiple' => 'name:my time field|type:time|multiple|required',
+            'select_multiple' => 'name:my multiple select field|type:select|multiple|options:option a,option b,option c|title:test|required',
+            'file_multiple' => 'name:my multiple file field|type:file|title:test|multiple|required',
+            'date_multiple' => 'name:my multiple date field|type:date|title:test|multiple|required',
+            'time_multiple' => 'name:my time field|type:time|multiple|title:test|required',
         ];
     }
 }

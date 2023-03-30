@@ -66,7 +66,7 @@ class HistoryController extends CRUDController
                             ->with(['user' => function ($query) {
                                 $query->select(['id', 'username']);
                             }])
-                            ->select(['id', 'data', 'user_id', 'action', 'created_at'])
+                            ->select(['id', 'table', 'data', 'user_id', 'action', 'created_at'])
                             ->get()
                             ->filter(function($item) use ($field) {
                                 return in_array($field, $item->changedFields);
