@@ -37,10 +37,10 @@ trait Historiable
      *
      * @param  int|null  $max_id
      * @param  int|null  $id
-     * @param  bool  $returnChangresTree
+     * @param  bool  $returnChangesTree
      * @return  array
      */
-    public function getHistorySnapshot($max_id = null, $id = null, $returnChangresTree = false)
+    public function getHistorySnapshot($max_id = null, $id = null, $returnChangesTree = false)
     {
         $changes = Admin::getModel('ModelsHistory')->where('table', $this->getTable())
                     ->where('row_id', $id ?: $this->getKey())
@@ -68,7 +68,7 @@ trait Historiable
         }
 
         //Return all versions tree
-        if ( $returnChangresTree === true ){
+        if ( $returnChangesTree === true ){
             return $versions;
         }
 

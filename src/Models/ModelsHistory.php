@@ -76,6 +76,7 @@ class ModelsHistory extends Model
                 'logout' => 'Odhlásenie',
                 'view' => 'Zobrazený záznam',
                 'history-view' => 'Zobrazený záznam z histórie',
+                'history-field' => 'Zobrazený záznam poľa z histórie',
                 'history-list' => 'Zobrazená história zmien',
                 'insert' => 'Vytvorený záznam',
                 'update' => 'Upravený záznam',
@@ -108,7 +109,7 @@ class ModelsHistory extends Model
     public function setAdminRowsAttributes($attributes)
     {
         $attributes['actionName'] = $this->getSelectOption('action');
-        $attributes['changedFields'] = array_keys($this->data ?: []);
+        $attributes['changedFields'] = $this->changedFields;
         $attributes['user'] = $this->user;
 
         return $attributes;
@@ -123,5 +124,21 @@ class ModelsHistory extends Model
         }
 
         return $tables;
+    }
+
+    public function getChangedFieldsAttribute()
+    {
+        return array_keys($this->data ?: []);
+    }
+
+    public function getFieldRowAttribute()
+    {
+        $model = Admin::getModelByTable($this->table);
+
+        $row = $model->forceFill($this->data)
+                      ->setProperty('skipBelongsToMany', true)
+                      ->getMutatedAdminAttributes();
+
+        return $row;
     }
 }

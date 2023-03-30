@@ -40,6 +40,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
     Route::post('/admin/api/buttonAction', 'ButtonController@action');
     Route::get('/admin/api/history/get/{model}/{id}', 'HistoryController@getHistory');
+    Route::get('/admin/api/history/get/{model}/{id}/{field}', 'HistoryController@getFieldHistory');
     Route::post('/admin/api/history/remove', 'HistoryController@removeFromHistory');
     Route::get('/admin/api/translation/switch/{id}', 'GettextController@switchAdminLanguage');
     Route::get('/admin/api/translation/editor/{id}/{table?}', 'GettextController@getEditorResponse');

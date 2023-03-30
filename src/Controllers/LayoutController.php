@@ -39,6 +39,7 @@ class LayoutController extends CRUDController
                 'update' => action('\Admin\Controllers\Crud\UpdateController@update'),
                 'delete' => action('\Admin\Controllers\Crud\DataController@delete'),
                 'getHistory' => action('\Admin\Controllers\HistoryController@getHistory', [':model', ':id']),
+                'getFieldHistory' => action('\Admin\Controllers\HistoryController@getFieldHistory', [':model', ':id', ':field']),
                 'removeFromHistory' => action('\Admin\Controllers\HistoryController@removeFromHistory'),
                 'updateOrder' => action('\Admin\Controllers\Crud\DataController@updateOrder'),
                 'buttonAction' => action('\Admin\Controllers\ButtonController@action'),
