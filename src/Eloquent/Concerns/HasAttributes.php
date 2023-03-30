@@ -159,7 +159,7 @@ trait HasAttributes
                 $casts[$key] = \Admin\Eloquent\Casts\DecimalCast::class;
             }
 
-            if ($field['type'] == 'date') {
+            if ($field['type'] == 'date' && $this->hasFieldParam($key, ['multiple', 'locale'], true) == false ) {
                 $casts[$key] = \Admin\Eloquent\Casts\DateCast::class;
             }
         }
