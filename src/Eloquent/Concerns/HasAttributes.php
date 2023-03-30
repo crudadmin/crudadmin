@@ -117,7 +117,7 @@ trait HasAttributes
      * @see Illuminate\Database\Eloquent\Model
      * @return array
      */
-    private function getAdminAttributes()
+    private function getAdminAttributes($isColumns = false, $isRow = false)
     {
         //Turn of mutating of attributes for admin results
         //Enable only appended attributes
@@ -125,7 +125,7 @@ trait HasAttributes
 
         $fields = $this->getFields();
 
-        $this->setVisibleAdminAttributes();
+        $this->setVisibleAdminAttributes($isColumns, $isRow);
 
         $this->castAdminAttributes();
 
@@ -189,19 +189,20 @@ trait HasAttributes
         }
     }
 
-    private function setVisibleAdminAttributes()
+    private function setVisibleAdminAttributes($isColumns = false, $isRow = false)
     {
-        //Return just base fields
-        if ($this->justBaseFields() === true) {
-            $this->makeVisible(
-                $this->getBaseFields()
-            );
+        $visibleColumns = array_keys($this->getFields());
 
+        //Return just base fields for columns response
+        if ( $isColumns ) {
+            $visibleColumns = $this->getBaseFields();
+
+            $this->makeVisible($visibleColumns);
         }
 
         //Add belongsToMany if is visible
-        foreach ($this->getArrayableItems($this->getFields()) as $key => $field) {
-            if ( ($field['belongsToMany'] ?? null) && $this->skipBelongsToMany === false ){
+        foreach ($this->getArrayableItems($visibleColumns) as $key) {
+            if ( $this->hasFieldParam($key, 'belongsToMany') && $this->skipBelongsToMany === false ){
                 $this->append($key);
             }
         }
@@ -242,7 +243,7 @@ trait HasAttributes
         /**
          * Render attributes
          */
-        $attributes = $this->getAdminAttributes();
+        $attributes = $this->getAdminAttributes($isColumns, $isRow);
 
         $attributes = $this->runAdminAttributesMutators([
             'setAdminAttributes' => true,

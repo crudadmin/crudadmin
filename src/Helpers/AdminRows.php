@@ -47,6 +47,11 @@ class AdminRows
         return $this;
     }
 
+    private function isSingle()
+    {
+        return $this->model->getProperty('inParent') || $this->model->getProperty('single');
+    }
+
     /*
      * Apply pagination for given eloqment builder
      */
@@ -136,15 +141,18 @@ class AdminRows
     /*
      * Returns all rows with base fields
      */
-    protected function getBaseRows($rows_data)
+    protected function getRows($rowsData)
     {
         $rows = [];
 
-        foreach ($rows_data as $row) {
-            //Return just base fields
-            $row->justBaseFields(true);
+        foreach ($rowsData as $row) {
+            if ( $this->isSingle() ) {
+                $data = $row->getMutatedAdminAttributes(false, true);
+            } else {
+                $data = $row->getMutatedAdminAttributes(true);
+            }
 
-            $rows[] = $row->getMutatedAdminAttributes(true);
+            $rows[] = $data;
         }
 
         return $rows;
@@ -221,7 +229,7 @@ class AdminRows
             }
 
             $data = [
-                'rows' => $withoutRows ? [] : $this->getBaseRows($paginatedRowsData),
+                'rows' => $withoutRows ? [] : $this->getRows($paginatedRowsData),
                 'count' => $withoutRows ? 0 : $totalResultsCount->count(),
                 'limit' => $this->limit,
                 'page' => $this->page,

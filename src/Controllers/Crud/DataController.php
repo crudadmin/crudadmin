@@ -20,7 +20,9 @@ class DataController extends CRUDController
 
         $row->logHistoryAction('view');
 
-        return $row->getMutatedAdminAttributes(false, true);
+        return [
+            'row' => $row->getMutatedAdminAttributes(false, true),
+        ];
     }
 
     /*

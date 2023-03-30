@@ -32,6 +32,13 @@ trait Historiable
         return $value;
     }
 
+    public function getHistoryRows($id = null)
+    {
+        return Admin::getModel('ModelsHistory')
+                ->where('table', $this->getTable())
+                ->where('row_id', $id ?: $this->getKey());
+    }
+
     /**
      * Foreach all rows in history, and get acutal data status
      *
@@ -42,13 +49,13 @@ trait Historiable
      */
     public function getHistorySnapshot($max_id = null, $id = null, $returnChangesTree = false)
     {
-        $changes = Admin::getModel('ModelsHistory')->where('table', $this->getTable())
-                    ->where('row_id', $id ?: $this->getKey())
-                    ->when($max_id, function ($query, $max_id) {
-                        $query->where('id', '<=', $max_id);
-                    })
-                    ->orderBy('id', 'ASC')
-                    ->get();
+        $changes = $this->getHistoryRows($id)
+                        ->whereIn('action', ['insert', 'update'])
+                        ->when($max_id, function ($query, $max_id) {
+                            $query->where('id', '<=', $max_id);
+                        })
+                        ->orderBy('id', 'ASC')
+                        ->get();
 
         if ( $changes->count() == 0 ) {
             return [];
@@ -256,5 +263,32 @@ trait Historiable
         $data['ip'] = request()->ip();
 
         return Admin::getModel('ModelsHistory')->create($data);
+    }
+
+    public function getEditedHistoryFields()
+    {
+        if ( $this->history == false ){
+            return [];
+        }
+
+        $rows = $this->getHistoryRows()->whereIn('action', ['insert', 'update'])->select(['data'])->get();
+
+        $columns = [];
+
+        foreach ($rows as $row) {
+            $keys = array_keys($row->data ?: []);
+
+            foreach ($keys as $key) {
+                if ( !isset($columns[$key]) ){
+                    $columns[$key] = 0;
+                }
+
+                $columns[$key] += 1;
+            }
+        }
+
+        return array_filter($columns, function($count){
+            return $count >= 2;
+        });
     }
 }

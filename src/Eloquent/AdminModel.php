@@ -20,6 +20,7 @@ use Admin\Eloquent\Concerns\VueComponent;
 use Admin\Eloquent\Modules\AdminCustomizationModule;
 use Admin\Eloquent\Modules\FilterStateModule;
 use Admin\Eloquent\Modules\GlobalRelationModule;
+use Admin\Eloquent\Modules\HistoryModule;
 use Admin\Eloquent\Modules\SeoModule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -229,6 +230,7 @@ class AdminModel extends CoreAdminModel
         AdminCustomizationModule::class,
         GlobalRelationModule::class,
         FilterStateModule::class,
+        HistoryModule::class,
     ];
 
     /**
