@@ -201,7 +201,7 @@ trait HasAttributes
 
         //Add belongsToMany if is visible
         foreach ($this->getArrayableItems($this->getFields()) as $key => $field) {
-            if ( $field['belongsToMany'] ?? null ){
+            if ( ($field['belongsToMany'] ?? null) && $this->skipBelongsToMany === false ){
                 $this->append($key);
             }
         }
