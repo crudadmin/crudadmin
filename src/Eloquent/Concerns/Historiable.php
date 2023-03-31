@@ -126,7 +126,19 @@ trait Historiable
      */
     private function canSkipFieldInHistory($model, $key)
     {
-        return ! $model->getField($key) || $model->hasFieldParam($key, ['disabled', 'imaginary'], true) || $model->isFieldType($key, 'imaginary');
+        if ( ! $model->getField($key) ){
+            return true;
+        }
+
+        if ( $model->hasFieldParam($key, ['disabled', 'imaginary'], true) ){
+            return true;
+        }
+
+        if ( $model->isFieldType($key, 'imaginary') ){
+            return true;
+        }
+
+        return false;
     }
 
     /*
