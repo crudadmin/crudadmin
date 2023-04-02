@@ -61,4 +61,8 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
 
     //Sitetree
     Route::post('/admin/sitetree/store', 'SiteTreeController@store');
+
+    //Swagger mdodels scheme
+    Route::get('/admin/swagger', 'Export\ExportController@swagger');
+    Route::get('/admin/swagger/scheme/{type}', 'Export\ExportController@openApiScheme');
 });

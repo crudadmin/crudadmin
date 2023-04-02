@@ -7,11 +7,10 @@ info:
   contact:
     email: {{ $email = (env('MAIL_FROM_ADDRESS') ?: 'info@marekgogol.sk') }}
 paths:
-  @include('admin::openapi.auth_scheme')
+  @include('admin::openapi.auth_scheme', [ 'email' => admin() ? admin()->email : $email ])
 
   @include('admin::openapi.models_list_scheme')
 
-  @include('admin::openapi.scheme')
 @foreach($models as $model)
   /model/{{ $model->getTable() }}:
     get:
@@ -226,8 +225,9 @@ components:
 @php
 $schemes = [];
 @endphp
-     {{ view('admin::openapi.model_scheme', ['model' => Admin::getAuthModel(), 'deep' => false]) }}
+     {{ view('admin::openapi.model_scheme', ['model' => $authModel = Admin::getAuthModel(), 'deep' => false]) }}
 @foreach($models as $model)
+@continue($model instanceof $authModel)
 @php $schemes[] = $model->getTable() @endphp
      {{ view('admin::openapi.model_scheme', compact('model') + ['deep' => true]) }}
 @foreach( collect($model->getExportRelations())->unique('table') as $relationKey => $relation )

@@ -16,7 +16,7 @@
           description: Password from administration
           schema:
             type: string
-            example: heslo123
+            example:
       responses:
         '200':
           description: Success response

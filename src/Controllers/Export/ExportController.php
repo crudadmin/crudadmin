@@ -2,9 +2,10 @@
 
 namespace Admin\Controllers\Export;
 
+use Admin;
 use Admin\Controllers\Controller;
 use Admin\Controllers\Crud\CRUDController;
-use Admin;
+use Symfony\Component\Yaml\Yaml;
 
 class ExportController extends CRUDController
 {
@@ -27,6 +28,7 @@ class ExportController extends CRUDController
                 ])
             );
     }
+
     public function rows($table)
     {
         $rows = $this->getBootedModel($table, 'read')->paginate(request('limit'));
@@ -82,9 +84,37 @@ class ExportController extends CRUDController
                 });
     }
 
+    public function swagger()
+    {
+        return view('admin::openapi.swagger');
+    }
+
+    public function openApiScheme($type, $table = null)
+    {
+        $yamlString = $this->scheme($table)->render();
+
+        if ( $type == 'json' ) {
+            $yaml = Yaml::parse($yamlString);
+
+            return $yaml;
+        } else {
+            return $yamlString;
+        }
+    }
+
     public function scheme($table = null)
     {
         $tables = collect(array_filter(array_merge(array_wrap($table), explode(',', request('models', '')))));
+
+        if ( count($tables) == 0 ){
+            $models = Admin::getAdminModels();
+
+            $tables = collect($models)->filter(function($model){
+                return admin()->hasAccess($model, true);
+            })->map(function($model){
+                return $model->getTable();
+            });
+        }
 
         $models = $tables->map(function($table){
             return $this->getBootedModel($table)->getModel();
