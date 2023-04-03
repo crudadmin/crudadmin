@@ -81,5 +81,16 @@ class AppServiceProvider extends AdminHelperServiceProvider
         ], $this->providers));
 
         $this->bootRouteMiddleware();
+
+        $this->addCrudadminLogChannel();
+    }
+
+    private function addCrudadminLogChannel()
+    {
+        $this->app['config']->set('logging.channels.crudadmin', [
+            'driver' => 'single',
+            'path' => storage_path('logs/crudadmin.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ]);
     }
 }

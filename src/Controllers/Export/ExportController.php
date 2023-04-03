@@ -29,8 +29,27 @@ class ExportController extends CRUDController
             );
     }
 
+    private function logRequest()
+    {
+        if ( config('admin.api.logging', true) == false ){
+            return false;
+        }
+
+        $data = json_encode([
+            'method' => request()->getMethod(),
+            'user_id' => admin()->getKey(),
+            'path' => request()->getPathInfo(),
+            'get' => request()->input(),
+            'post' => request()->post(),
+        ]);
+
+        Admin::log()->info($data);
+    }
+
     public function rows($table)
     {
+        $this->logRequest();
+
         $rows = $this->getBootedModel($table, 'read')->paginate(request('limit'));
 
         $rows->getCollection()->each->setFullExportResponse();
@@ -42,6 +61,8 @@ class ExportController extends CRUDController
 
     public function show($table, $id)
     {
+        $this->logRequest();
+
         $row = $this->getBootedModel($table, 'read')
                     ->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
 
@@ -52,13 +73,18 @@ class ExportController extends CRUDController
 
     public function update($table, $id)
     {
+        $this->logRequest();
+
         $query = $this->getBootedModel($table, 'update');
 
         $row = $query->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
 
-        $data = $row->validator()->only(
-            array_intersect($query->getModel()->getFillable(), request()->keys())
-        )->validate()->getData();
+        $data = $row->validator()
+                    ->only(
+                        array_intersect($query->getModel()->getFillable(), request()->keys())
+                    )
+                    ->validate()
+                    ->getData();
 
         $row->update($data);
 

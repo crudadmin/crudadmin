@@ -54,13 +54,15 @@ trait Gettextable
             $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
 
             //On update we need downloads file from cloud storage and save it into local storage
-            Gettext::getStorage()->put(
-                $localePoPath,
-                $row->poedit_po->getStorage()->get($row->poedit_po->path)
-            );
+            if ( $row->poedit_po->exists ) {
+                Gettext::getStorage()->put(
+                    $localePoPath,
+                    $row->poedit_po->get()
+                );
 
-            //We can regenerate mo files on update
-            Gettext::generateMoFile($row->slug, $localePoPath);
+                //We can regenerate mo files on update
+                Gettext::generateMoFile($row->slug, $localePoPath);
+            }
         }
     }
 

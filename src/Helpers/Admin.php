@@ -4,6 +4,7 @@ namespace Admin\Helpers;
 
 use Admin\Core\Helpers\AdminCore;
 use Admin\Core\Helpers\Storage\AdminFile;
+use Log;
 
 class Admin extends AdminCore
 {
@@ -320,5 +321,10 @@ class Admin extends AdminCore
 
             return $components;
         });
+    }
+
+    public function log()
+    {
+        return Log::channel('crudadmin');
     }
 }

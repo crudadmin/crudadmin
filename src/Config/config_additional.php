@@ -229,4 +229,8 @@ return [
         'storage_cache_days' => 31,
         'redirect_after_resize' => true, //When we displaying storage url, we can control whatever we want 301 redirect after resize
     ],
+
+    'api' => [
+        'logging' => true,
+    ],
 ];

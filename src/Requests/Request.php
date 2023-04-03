@@ -24,6 +24,24 @@ abstract class Request extends FormRequest
 
     private $rewritedRules = null;
 
+    private $isAdminRewrited;
+
+    public function setIsAdmin($state)
+    {
+        $this->isAdminRewrited = $state;
+
+        return $this;
+    }
+
+    public function isAdmin()
+    {
+        if ( is_bool($this->isAdminRewrited) ){
+            return $this->isAdminRewrited;
+        }
+
+        return Admin::isAdmin();
+    }
+
     //Checks if is multiple or one file
     protected function getFilesInArray($key)
     {
@@ -109,7 +127,8 @@ abstract class Request extends FormRequest
                     //If is File field empty, then replace this field with previous value for correct updating row in db
                     if ($this->isEmptyFile($key)) {
                         //In admin, we does not want to update existing files, we can remove this field from request
-                        if ( Admin::isAdmin() === true ) {
+                        //in case file is empty
+                        if ( $this->isAdmin() === true ) {
                             $this->replace($this->except($key));
                         }
 
@@ -142,7 +161,7 @@ abstract class Request extends FormRequest
                     /*
                      * Get already uploaded files
                      */
-                    if (Admin::isAdmin() && (($isMultiple = $this->model->hasFieldParam($origKey, 'multiple', true)) || $hasLocale)) {
+                    if ($this->isAdmin() && (($isMultiple = $this->model->hasFieldParam($origKey, 'multiple', true)) || $hasLocale)) {
                         if ($this->has('$uploaded_'.$origKey)) {
                             $uploadedFiles = $this->get('$uploaded_'.$origKey);
 
@@ -405,7 +424,7 @@ abstract class Request extends FormRequest
     protected function removeMissingFields($fields = null)
     {
         //Allow this feature only in administration
-        if ( Admin::isAdmin() === false ) {
+        if ( $this->isAdmin() === false ) {
             return;
         }
 
