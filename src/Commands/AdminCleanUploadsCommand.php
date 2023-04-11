@@ -211,7 +211,7 @@ class AdminCleanUploadsCommand extends Command
         );
 
         $count = $scope->count();
-        $limit = env('STORAGE_CLEAN_ITEMS_LIMIT', 10000);
+        $limit = env('STORAGE_CLEAN_ITEMS_LIMIT', 20000);
         if ( $count >= $limit ){
             $this->error('Could not load rows for '.$model->getTable().' table. Rows '.$count.'/'.$limit);
             return;
@@ -256,8 +256,9 @@ class AdminCleanUploadsCommand extends Command
             $storage = $model->getFieldStorage($key);
             $path = $model->getStorageFilePath($key);
 
-            $existingFiles = $existingRows->pluck($key)->filter()->toArray();
-            $removedFiles = $trashedRows->pluck($key)->filter()->toArray();
+            $existingFiles = $this->getDatabaseFiles($existingRows, $key);
+
+            $removedFiles = $this->getDatabaseFiles($trashedRows, $key);
 
             if ( $storage->exists($path) == false ){
                 continue;
@@ -287,5 +288,15 @@ class AdminCleanUploadsCommand extends Command
                 }
             }
         }
+    }
+
+    private function getDatabaseFiles($rows, $key)
+    {
+        return $rows
+                ->pluck($key)
+                ->filter()
+                ->flatten()
+                ->values()
+                ->toArray();
     }
 }
