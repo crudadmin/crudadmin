@@ -79,7 +79,8 @@ class UpdateController extends InsertController
         $message = $this->responseMessage(trans('admin::admin.success-save'));
 
         $mutatedAdminRows = array_combine(array_keys($rows), array_map(function($row){
-            return $row->getMutatedAdminAttributes(false, true);
+            //We want update rows data on updated entry. Because generated data in table may change.
+            return $row->getMutatedAdminAttributes(true, true);
         }, $rows));
 
         return autoAjax()

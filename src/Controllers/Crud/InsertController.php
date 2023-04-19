@@ -54,7 +54,8 @@ class InsertController extends CRUDController
     {
         return array_map(function($item){
             $item['rows'] = array_map(function($row){
-                return $row->getMutatedAdminAttributes(false, true);
+                //We want return also rows data on new entry
+                return $row->getMutatedAdminAttributes(true, true);
             }, $item['rows']);
 
             return $item;
