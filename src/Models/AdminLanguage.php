@@ -106,6 +106,6 @@ class AdminLanguage extends Model
     public function beforeGettextFilesSync()
     {
         //Switch gettext localization
-        (new AdminResourcesSyncer)->syncModelTranslations();
+        (new AdminResourcesSyncer)->syncModelTranslations($this);
     }
 }

@@ -60,7 +60,7 @@ class AdminResourcesSyncer
         return '<?php _(\''.$string.'\') ?>';
     }
 
-    public function syncModelTranslations()
+    public function syncModelTranslations($localeModel = null)
     {
         //We want disable all translations
         self::$disableTranslations = true;
@@ -70,6 +70,11 @@ class AdminResourcesSyncer
         $tree = [];
 
         foreach ($models as $model) {
+            //Fix if language changed by unexpected
+            if ( $localeModel ){
+                Gettext::setGettextPropertiesModel($localeModel);
+            }
+
             $table = $model->getTable();
 
             //Add global properties
