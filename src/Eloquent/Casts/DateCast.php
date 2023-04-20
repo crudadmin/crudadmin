@@ -25,7 +25,7 @@ class DateCast implements CastsAttributes
             return;
         }
 
-        return $value ? new Carbon($value) : null;
+        return $value ? (new Carbon($value))->setTimezone(config('app.timezone')) : null;
     }
 
     /**
