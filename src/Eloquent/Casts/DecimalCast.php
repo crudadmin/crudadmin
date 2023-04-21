@@ -42,6 +42,10 @@ class DecimalCast implements CastsAttributes
 
     private function castNumber($value, $decimalLength)
     {
+        if ( is_null($value) ){
+            return $value;
+        }
+
         return number_format($value, $decimalLength[1], '.', '');
     }
 
