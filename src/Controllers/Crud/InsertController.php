@@ -36,9 +36,6 @@ class InsertController extends CRUDController
         //Insert received data into db
         $data = $this->insertRows($model, $requests);
 
-        //run getMutatedAdminAttributes throught all inserted rows
-        $data = $this->mutateDataResponse($data);
-
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-created'));
 
@@ -47,19 +44,6 @@ class InsertController extends CRUDController
             ->success($message)
             ->type($this->responseType())
             ->data($data);
-    }
-
-    //Set rows into admin response format
-    public function mutateDataResponse($data)
-    {
-        return array_map(function($item){
-            $item['rows'] = array_map(function($row){
-                //We want return also rows data on new entry
-                return $row->getMutatedAdminAttributes(true, true);
-            }, $item['rows']);
-
-            return $item;
-        }, $data);
     }
 
     /*
@@ -74,8 +58,8 @@ class InsertController extends CRUDController
             $model = $item['model'];
             $request = $item['request'];
 
-            $rows = [];
-            $models = [];
+            $rows = collect();
+            $models = collect();
 
             foreach ($request->allWithMutators() as $requestRow) {
                 try {
@@ -120,7 +104,9 @@ class InsertController extends CRUDController
 
             $data[] = [
                 'model' => $model->getTable(),
-                'rows' => $rows,
+                'rows' => $rows->map(function($row){
+                    return $row->getMutatedAdminAttributes(true, true);
+                }),
                 'buttons' => (new AdminRows($model))->generateButtonsProperties($models),
             ];
         }

@@ -78,17 +78,17 @@ class UpdateController extends InsertController
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-save'));
 
-        $mutatedAdminRows = array_combine(array_keys($rows), array_map(function($row){
-            //We want update rows data on updated entry. Because generated data in table may change.
-            return $row->getMutatedAdminAttributes(true, true);
-        }, $rows));
+        //We want update rows data on updated entry. Because generated data in table may change.
+        $rows = $rows->keys()->combine($rows);
 
         return autoAjax()
             ->toast($this->hasAdditionalMessages() ? false : true)
             ->success($message)
             ->type($this->responseType())
             ->data([
-                'rows' => $mutatedAdminRows,
+                'rows' => $rows->keys()->combine($rows)->map(function($row){
+                    return $row->getMutatedAdminAttributes(true, true);
+                }),
             ]);
     }
 

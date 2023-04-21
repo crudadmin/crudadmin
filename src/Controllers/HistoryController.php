@@ -30,11 +30,12 @@ class HistoryController extends CRUDController
                                 $query->select(['id', 'username']);
                             }])
                             ->select(['id', 'data', 'user_id', 'action', 'created_at'])
-                            ->get()->map(function ($item) {
-                                $item->makeHidden(['data']);
-
-                                return $item->getMutatedAdminAttributes(true);
-                            });
+                            ->get()
+                            ->each
+                            ->makeHidden(['data'])
+                            ->append([
+                                'actionName', 'changedFields',
+                            ]);
 
         //We wang log action after history fetch
         if ( $log == true ) {
@@ -71,12 +72,10 @@ class HistoryController extends CRUDController
                             ->filter(function($item) use ($field) {
                                 return in_array($field, $item->changedFields);
                             })
-                            ->map(function ($item) {
-                                $item->makeHidden(['data'])->append(['fieldRow']);
-
-                                return $item->getMutatedAdminAttributes(true);
-                            })
-                            ->values();
+                            ->each
+                                ->makeHidden(['data'])
+                                ->append(['fieldRow'])
+                                ->values();
 
         //We wang log action after history fetch
         if ( $log == true ) {

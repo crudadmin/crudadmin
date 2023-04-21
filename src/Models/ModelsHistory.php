@@ -106,15 +106,6 @@ class ModelsHistory extends Model
         ];
     }
 
-    public function setAdminRowsAttributes($attributes)
-    {
-        $attributes['actionName'] = $this->getSelectOption('action');
-        $attributes['changedFields'] = $this->changedFields;
-        $attributes['user'] = $this->user;
-
-        return $attributes;
-    }
-
     private function getTableModels()
     {
         $tables = [];
@@ -124,6 +115,11 @@ class ModelsHistory extends Model
         }
 
         return $tables;
+    }
+
+    public function getActionNameAttribute()
+    {
+        return $this->getSelectOption('action');
     }
 
     public function getChangedFieldsAttribute()

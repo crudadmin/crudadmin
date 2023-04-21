@@ -34,6 +34,12 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
             $active = $state['active'] ?? null;
 
             if ( is_callable($active) && $active() == true ){
+                foreach (['active', 'query'] as $key) {
+                    if ( array_key_exists($key, $state) ){
+                        unset($state[$key]);
+                    }
+                }
+
                 $attributes['$indicator'] = $state;
 
                 break;

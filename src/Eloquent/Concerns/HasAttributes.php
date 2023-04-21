@@ -194,14 +194,14 @@ trait HasAttributes
         $visibleColumns = array_keys($this->getFields());
 
         //Return just base fields for columns response
-        if ( $isColumns ) {
+        if ( $isColumns && $isRow == false ) {
             $visibleColumns = $this->getBaseFields();
 
-            $this->makeVisible($visibleColumns);
+            $this->{ empty($this->visible) ? 'setVisible' : 'makeVisible'}($visibleColumns);
         }
 
         //Add belongsToMany if is visible
-        foreach ($this->getArrayableItems($visibleColumns) as $key) {
+        foreach (($this->getVisible() ?: $visibleColumns) as $key) {
             if ( $this->hasFieldParam($key, 'belongsToMany') && $this->skipBelongsToMany === false ){
                 $this->append($key);
             }
@@ -236,8 +236,8 @@ trait HasAttributes
     {
         $this->runAdminAttributesMutators([
             'setAdminResponse' => true,
-            'setAdminRowsResponse' => $isColumns,
             'setAdminRowResponse' => $isRow,
+            'setAdminRowsResponse' => $isColumns,
         ]);
 
         /**
@@ -247,11 +247,32 @@ trait HasAttributes
 
         $attributes = $this->runAdminAttributesMutators([
             'setAdminAttributes' => true,
-            'setAdminRowsAttributes' => $isColumns,
             'setAdminRowAttributes' => $isRow,
+            'setAdminRowsAttributes' => $isColumns,
         ], $attributes);
 
+        if ( $isColumns == true ){
+            $attributesWithoutColumns = $this->getMutatedAdminAttributes(false, $isRow);
+
+            $attributesWithoutColumns['$table'] = $this->diffRowArray($attributes, $attributesWithoutColumns);
+
+            return $attributesWithoutColumns;
+        }
+
         return $attributes;
+    }
+
+    private function diffRowArray($a, $b)
+    {
+        foreach ($a as $key => $aValue) {
+            $bValue = $b[$key] ?? null;
+
+            if ( $aValue == $bValue ){
+                unset($a[$key]);
+            }
+        }
+
+        return $a;
     }
 
     /**

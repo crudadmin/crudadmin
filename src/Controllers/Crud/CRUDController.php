@@ -138,7 +138,7 @@ class CRUDController extends Controller
      */
     public function checkValidation($request, $update = false)
     {
-        $rows = [];
+        $rows = collect();
 
         $table = $request->get('_model');
 
