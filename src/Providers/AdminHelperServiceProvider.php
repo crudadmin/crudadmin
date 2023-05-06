@@ -17,7 +17,16 @@ class AdminHelperServiceProvider extends ServiceProvider
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
 
             foreach ($facades ?: $this->facades as $alias => $facade) {
-                $loader->alias($alias, $facade);
+                $isArray = is_array($facade);
+
+                $loader->alias(
+                    $alias,
+                    $isArray ? $facade['facade'] : $facade
+                );
+
+                if ( $isArray ){
+                    $this->app->bind($facade['class'][0], $facade['class'][1]);
+                }
             }
         });
     }

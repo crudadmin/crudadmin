@@ -253,7 +253,7 @@ trait Historiable
 
         return $this->logHistoryAction($action, [
             //If is missing history row, and we are creating new one. We does not want to copy user id
-            'user_id' => $isMissingHistoryRow === true ? null : admin()?->getKey(),
+            'user_id' => $isMissingHistoryRow === true ? null : (admin() ? admin()->getKey() : null),
             //If is missing history row, and we want copy created_at from actual row
             'created_at' => $isMissingHistoryRow === true ? $this->created_at : Carbon::now(),
             'data' => $updatedRow,
@@ -268,7 +268,7 @@ trait Historiable
         }
 
         $data['action'] = $action;
-        $data['user_id'] = $data['user_id'] ?? admin()?->getKey();
+        $data['user_id'] = $data['user_id'] ?? (admin() ? admin()->getKey() : null);
         $data['created_at'] = ($data['created_at'] ?? null) ?: Carbon::now();
         $data['table'] = $this->getTable();
         $data['row_id'] = $data['row_id'] ?? $this->getKey();
