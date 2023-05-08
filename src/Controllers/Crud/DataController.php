@@ -42,7 +42,7 @@ class DataController extends CRUDController
         ]);
 
         $row = $model
-                ->forceFill($changesTree[count($changesTree) - 1])
+                ->forceFill([ 'id' => $id ] + $changesTree[count($changesTree) - 1])
                 ->setProperty('skipBelongsToMany', true)
                 ->getMutatedAdminAttributes();
 

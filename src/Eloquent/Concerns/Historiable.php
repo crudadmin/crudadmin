@@ -178,7 +178,9 @@ trait Historiable
 
     private function getActualData($model)
     {
-        $data = $model->attributesToArray();
+        $data = $model->getOriginal();
+
+        $data = $this->castHistoryData($data, true);
 
         return $data;
     }
@@ -264,6 +266,11 @@ trait Historiable
     {
         //History is disabled
         if ( config('admin.history', false) === false ){
+            return;
+        }
+
+        //If actions are disabled, skip adding. Except insert/update history
+        if ( !config('admin.history_actions') && in_array($action, ['insert', 'update']) == false ){
             return;
         }
 

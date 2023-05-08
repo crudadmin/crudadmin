@@ -116,6 +116,7 @@ return [
      * Allow admin model changes history
      */
     'history' => false,
+    'history_actions' => true,
 
     /*
      * Allow seo module

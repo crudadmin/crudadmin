@@ -42,6 +42,11 @@ class ModelsHistory extends Model
 
     public $timestamps = false;
 
+    public function active()
+    {
+        return config('admin.history_actions', true);
+    }
+
     /*
      * Automatic form and database generation
      * @name - field name
