@@ -39,7 +39,6 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::put('/admin/api/update', 'Crud\UpdateController@update')->middleware('hasAdminRole:update');
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');
     Route::post('/admin/api/buttonAction', 'ButtonController@action');
-    Route::get('/admin/api/history/get/{model}/{id}', 'HistoryController@getHistory');
     Route::get('/admin/api/history/get/{model}/{id}/{field}', 'HistoryController@getFieldHistory');
     Route::post('/admin/api/history/remove', 'HistoryController@removeFromHistory');
     Route::get('/admin/api/translation/switch/{id}', 'GettextController@switchAdminLanguage');

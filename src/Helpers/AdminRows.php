@@ -128,6 +128,9 @@ class AdminRows
         //Filter by fields Group::where clausule
         $query->filterByParentGroup();
 
+        //With history count
+        $query->withHistoryChangesCount();
+
         //Search in rows
         (new AdminRowsSearch($this->model, $query, $this->search))->filter();
 

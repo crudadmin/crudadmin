@@ -4,6 +4,7 @@ namespace Admin\Eloquent\Concerns;
 
 use Admin\Admin\Buttons\RemoveRow;
 use Admin\Admin\Buttons\TogglePublishRow;
+use Admin\Admin\Buttons\HistoryButton;
 
 trait HasButtons
 {
@@ -14,6 +15,7 @@ trait HasButtons
         );
 
         return array_merge($buttons, [
+            HistoryButton::class,
             TogglePublishRow::class,
             RemoveRow::class,
         ]);

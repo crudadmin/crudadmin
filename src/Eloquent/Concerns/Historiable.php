@@ -7,12 +7,41 @@ use Carbon\Carbon;
 
 trait Historiable
 {
+    public function hasHistory()
+    {
+        if ( $this->exists && $this->hasRowHistory() === false ) {
+            return false;
+        }
+
+        return $this->history === true;
+    }
+
+    /**
+     * We can limit history support for individual rows
+     *
+     * @return  bool
+     */
+    public function hasRowHistory()
+    {
+        return true;
+    }
+
+    public function historyRows()
+    {
+        return $this->hasMany(
+                Admin::getModel('ModelsHistory')::class,
+                'row_id',
+                'id',
+            )
+            ->where('models_histories.table', $this->getTable());
+    }
+
     /*
      * Save actual model row into history
      */
     public function makeHistorySnapshot($request = [], $original = null, $action = 'update')
     {
-        if ( $this->getProperty('history') === true ) {
+        if ( $this->hasHistory() === true ) {
             return $this->pushHistoryChange($request, $original, false, $action);
         } else {
             $this->logHistoryAction($action);
@@ -270,7 +299,7 @@ trait Historiable
         }
 
         //If actions are disabled, skip adding. Except insert/update history
-        if ( !config('admin.history_actions') && in_array($action, ['insert', 'update']) == false ){
+        if ( !config('admin.history_actions') && (in_array($action, ['insert', 'update']) == false || !$data) ){
             return;
         }
 
@@ -286,7 +315,7 @@ trait Historiable
 
     public function getEditedHistoryFields()
     {
-        if ( $this->history == false ){
+        if ( !$this->hasHistory() ){
             return [];
         }
 
@@ -309,5 +338,16 @@ trait Historiable
         return array_filter($columns, function($count){
             return $count >= 2;
         });
+    }
+
+    public function scopeWithHistoryChangesCount($query)
+    {
+        if ( $this->history == false ){
+            return;
+        }
+
+        $query->withCount([
+            'historyRows'
+        ]);
     }
 }
