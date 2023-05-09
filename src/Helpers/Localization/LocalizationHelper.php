@@ -44,6 +44,13 @@ class LocalizationHelper
     protected $sessionEnabled = false;
 
     /**
+     * Skip locale change event
+     *
+     * @var  bool
+     */
+    static $skipChangeEvent = false;
+
+    /**
      * Boot localization
      */
     public function __construct()
@@ -55,7 +62,11 @@ class LocalizationHelper
 
             //Listen on app()->setLocale event from laravel
             Event::listen(LocaleUpdated::class, function($event){
-                $this->onLaravelLocaleChange($event);
+                if ( self::$skipChangeEvent == true ){
+                    self::$skipChangeEvent = false;
+                } else {
+                    $this->onLaravelLocaleChange($event);
+                }
             });
         }
     }
@@ -76,15 +87,15 @@ class LocalizationHelper
     public function boot()
     {
         //Checks if is enabled multi language support for given localization
-        if ( $this->isActive() === false ) {
-            return false;
+        if ( $this->isActive() ) {
+            //Fetch all languages
+            $this->getLanguages();
+
+            //We need assign language first time
+            $this->get();
         }
 
-        //Fetch all languages
-        $this->getLanguages();
-
-        //We need assign language first time
-        $this->get();
+        return $this;
     }
 
     public function refreshOnSession()
@@ -230,12 +241,12 @@ class LocalizationHelper
      */
     public function setLocale($locale, $updateLaravelLocale = true)
     {
-        $storage = Gettext::getStorage();
-
         //We does not want to set same locale 2 times
         if ($locale == $this->localization) {
             return true;
         }
+
+        $storage = Gettext::getStorage();
 
         //Switch gettext localization
         if ( $this->isGettextAllowed() ) {
@@ -265,6 +276,8 @@ class LocalizationHelper
         $this->localization = $locale;
 
         $this->setDateLocale($locale);
+
+        self::$skipChangeEvent = true;
 
         //If laravel locale is set to other than given one
         if ( $updateLaravelLocale === true && app()->getLocale() != $locale ) {

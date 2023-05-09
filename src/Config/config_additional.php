@@ -47,6 +47,7 @@ return [
         'resources/views',
         'resources/assets/js',
         'resources/js',
+        app_path('Admin'),
         public_path('vendor/crudadmin/js/FrontendEditor.js'),
         __DIR__.'/../Helpers',
         __DIR__.'/../Admin',

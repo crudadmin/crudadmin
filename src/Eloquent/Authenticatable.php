@@ -344,7 +344,7 @@ class Authenticatable extends AdminModel implements AuthenticatableContract, Aut
         /*
          * Added user language preference
          */
-        if ( Admin::isEnabledAdminLocalization() ){
+        if ( $this->isAdminUserClass() && Admin::isEnabledAdminLocalization() ){
             $fields->push([
                 'language' => 'name:Predvolený jazyk|belongsTo:admin_languages,name|invisible'
             ]);
