@@ -119,6 +119,8 @@ trait HasAttributes
      */
     private function getAdminAttributes($isColumns = false, $isRow = false)
     {
+        $this->setLocalizedResponse(true);
+
         //Turn of mutating of attributes for admin results
         //Enable only appended attributes
         $this->withoutMutators = $this->appends;
@@ -133,6 +135,8 @@ trait HasAttributes
         $attributes = parent::attributesToArray();
 
         $this->withoutMutators = false;
+
+        $this->setLocalizedResponse(false);
 
         return $attributes;
     }
