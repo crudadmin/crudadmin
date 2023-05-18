@@ -230,12 +230,12 @@ abstract class Request extends FormRequest
 
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, ['date', 'datetime', 'time', 'timestamp'])) {
-                if ($this->model->hasFieldParam($key, 'multiple', true)) {
-                    $this->merge([$key => array_filter($this->get($key) ?: [])]);
-                } elseif ($this->has($key) && ! empty($this->get($key))) {
+                $isMultiple = $this->model->hasFieldParam($key, 'multiple', true);
+
+                if ($this->has($key) && ! empty($this->get($key))) {
                     $date = $this->get($key);
 
-                    if ($hasLocale = $this->model->hasFieldParam($key, 'locale')) {
+                    if ($hasLocale = $this->model->hasFieldParam($key, 'locale') || $isMultiple) {
                         $date = array_filter($date);
                         $date = array_map(function($date) use ($parse, $field) {
                             return $parse($date, $field);
@@ -244,7 +244,9 @@ abstract class Request extends FormRequest
                         $date = $parse($date, $field);
                     }
 
-                    $this->merge([$key => $date]);
+                    $this->merge([ $key => $date ]);
+                } else if ( $isMultiple ) {
+                    $this->merge([ $key => [] ]);
                 }
             }
         }
