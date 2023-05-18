@@ -205,37 +205,43 @@ abstract class Request extends FormRequest
      */
     public function datetimes(array $fields = null)
     {
-        $reset = [
-            'd' => ['day', 1],
-            'm' => ['month', 1],
-            'y' => ['year', 1970],
-            'h' => ['hour', 0],
-            'i' => ['minute', 0],
-            's' => ['second', 0],
-        ];
+        $parse = function($date, $field){
+            $reset = [
+                'd' => ['day', 1],
+                'm' => ['month', 1],
+                'y' => ['year', 1970],
+                'h' => ['hour', 0],
+                'i' => ['minute', 0],
+                's' => ['second', 0],
+            ];
+
+            [$date, $dateFormat] = $this->getUniversalDateFormat($date, $field);
+
+            $dateFormat = strtolower($dateFormat);
+            foreach ($reset as $identifier => $arr) {
+                //Reset hours if are not in date format
+                if (strpos($dateFormat, $identifier) === false) {
+                    $date->{$arr[0]}($arr[1]);
+                }
+            }
+
+            return $date;
+        };
 
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, ['date', 'datetime', 'time', 'timestamp'])) {
                 if ($this->model->hasFieldParam($key, 'multiple', true)) {
                     $this->merge([$key => array_filter($this->get($key) ?: [])]);
                 } elseif ($this->has($key) && ! empty($this->get($key))) {
+                    $date = $this->get($key);
+
                     if ($hasLocale = $this->model->hasFieldParam($key, 'locale')) {
-                        $date = $this->get($key);
+                        $date = array_filter($date);
+                        $date = array_map(function($date) use ($parse, $field) {
+                            return $parse($date, $field);
+                        }, $date);
                     } else {
-                        [$date, $dateFormat] = $this->getUniversalDateFormat($this->get($key), $field);
-
-                        $dateFormat = strtolower($dateFormat);
-                        foreach ($reset as $identifier => $arr) {
-                            //Reset hours if are not in date format
-                            if (strpos($dateFormat, $identifier) === false) {
-                                $date->{$arr[0]}($arr[1]);
-                            }
-                        }
-
-                        //Set time as string
-                        if ($this->model->isFieldType($key, 'time')) {
-                            $date = $date->format('H:i:s');
-                        }
+                        $date = $parse($date, $field);
                     }
 
                     $this->merge([$key => $date]);

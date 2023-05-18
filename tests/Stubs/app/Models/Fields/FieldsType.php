@@ -38,6 +38,7 @@ class FieldsType extends AdminModel
             'password' => 'name:my password field|type:password|required',
             'date' => 'name:my date field|type:date|required',
             'datetime' => 'name:my datetime field|type:datetime|required',
+            'timestamp' => 'name:my timestamp field|type:timestamp|required',
             'time' => 'name:my time field|type:time|required',
             'checkbox' => 'name:my checkbox field|type:checkbox',
             'radio' => 'name:my radio field|type:radio|options:c,d,b|required',
