@@ -39,26 +39,13 @@ trait Historiable
     /*
      * Save actual model row into history
      */
-    public function makeHistorySnapshot($request = [], $original = null, $action = 'update')
+    public function makeHistorySnapshot($original = null, $action = 'update')
     {
         if ( $this->hasHistory() === true ) {
-            return $this->pushHistoryChange($request, $original, false, $action);
+            return $this->pushHistoryChange($original, false, $action);
         } else {
             $this->logHistoryAction($action);
         }
-    }
-
-    private function mutateHistoryValue($key, $value)
-    {
-        if ($this->hasFieldParam($key, 'locale', true)) {
-            if (is_string($value)) {
-                $value = json_decode($value, true);
-            }
-
-            return (array) $value;
-        }
-
-        return $value;
     }
 
     public function getHistoryRows($id = null)
@@ -94,10 +81,10 @@ trait Historiable
 
         $data = [];
         foreach ($changes as $row) {
-            $array = (array) $row['data'];
+            $array = $this->castHistoryData((array) $row['data']);
 
             foreach ($array as $key => $value) {
-                $data[$key] = $this->mutateHistoryValue($key, $value);
+                $data[$key] = $value;
             }
 
             $versions[] = $data;
@@ -122,13 +109,6 @@ trait Historiable
             }
         }
 
-        foreach ($data as $key => $value) {
-            if ($value instanceof Carbon) {
-                $data[$key] = $value->format('Y-m-d H:i:s');
-            }
-        }
-
-
         foreach ($this->getFields() as $key => $field) {
             //If row is beign created first fime from original params, we need add additional relation data into this
             //original data
@@ -145,6 +125,18 @@ trait Historiable
             }
         }
 
+        //Fix json mysql version differences, because PHP has slightly different json format.
+        //MySQL has empty values after :
+        foreach ($data as $key => $value) {
+            if ( ($jsonData = json_decode($value, true)) && (is_array($jsonData)) ){
+                //We want sort localized keys to same order
+                ksort($jsonData);
+
+                $data[$key] = json_encode($jsonData);
+            }
+        }
+
+        //Sort all data
         ksort($data);
 
         return $data;
@@ -207,7 +199,7 @@ trait Historiable
 
     private function getActualData($model)
     {
-        $data = $model->getOriginal();
+        $data = $model->getRawOriginal();
 
         $data = $this->castHistoryData($data, true);
 
@@ -254,11 +246,13 @@ trait Historiable
     /*
      * Save changes into history
      */
-    private function pushHistoryChange($updatedRow, $original = null, $isMissingHistoryRow = false, $action = 'update')
+    private function pushHistoryChange($original = null, $isMissingHistoryRow = false, $action = 'update')
     {
         //We need reset all hidden fields for history
         //We want monitor all fields...
         $model = (clone $this)->setHidden([]);
+
+        $updatedRow = $this->getRawOriginal();
 
         //Modify request data
         $updatedRow = $this->castHistoryData($updatedRow, $isMissingHistoryRow);
@@ -268,7 +262,7 @@ trait Historiable
         //If row is editted, but does not exists in db history,
         //then create his initial/original value, and changed value
         if (is_array($original) && count($oldData) == 0) {
-            $this->pushHistoryChange($original, null, true, $action);
+            $this->pushHistoryChange(null, true, $action);
 
             $oldData = $this->castHistoryData($original, true);
         }

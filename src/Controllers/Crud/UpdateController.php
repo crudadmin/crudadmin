@@ -56,7 +56,7 @@ class UpdateController extends InsertController
                 }
 
                 //Save into history
-                $row->makeHistorySnapshot($changes, $original, 'update');
+                $row->makeHistorySnapshot($original, 'update');
 
                 $this->updateBelongsToMany($model, $row, $request);
 

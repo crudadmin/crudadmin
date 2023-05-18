@@ -136,7 +136,7 @@ class ModelsHistory extends Model
     {
         $model = Admin::getModelByTable($this->getValue('table'));
 
-        $row = $model->forceFill($this->data)
+        $row = $model->setRawAttributes($this->data)
                       ->setProperty('skipBelongsToMany', true)
                       ->getMutatedAdminAttributes(false, true);
 

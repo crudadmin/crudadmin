@@ -48,7 +48,7 @@ class DecimalCast implements CastsAttributes
             return $value;
         }
 
-        return number_format($value, $decimalLength[1], '.', '');
+        return number_format((float)$value, $decimalLength[1], '.', '');
     }
 
     /**
