@@ -163,7 +163,7 @@ abstract class Request extends FormRequest
                      */
                     if ($this->isAdmin() && (($isMultiple = $this->model->hasFieldParam($origKey, 'multiple', true)) || $hasLocale)) {
                         if ($this->has('$uploaded_'.$origKey)) {
-                            $uploadedFiles = $this->get('$uploaded_'.$origKey);
+                            $uploadedFiles = array_filter($this->get('$uploaded_'.$origKey));
 
                             $isUploaded = array_key_exists($langSlug, $uploadedFiles);
 
@@ -205,29 +205,6 @@ abstract class Request extends FormRequest
      */
     public function datetimes(array $fields = null)
     {
-        $parse = function($date, $field){
-            $reset = [
-                'd' => ['day', 1],
-                'm' => ['month', 1],
-                'y' => ['year', 1970],
-                'h' => ['hour', 0],
-                'i' => ['minute', 0],
-                's' => ['second', 0],
-            ];
-
-            [$date, $dateFormat] = $this->getUniversalDateFormat($date, $field);
-
-            $dateFormat = strtolower($dateFormat);
-            foreach ($reset as $identifier => $arr) {
-                //Reset hours if are not in date format
-                if (strpos($dateFormat, $identifier) === false) {
-                    $date->{$arr[0]}($arr[1]);
-                }
-            }
-
-            return $date;
-        };
-
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, ['date', 'datetime', 'time', 'timestamp'])) {
                 $isMultiple = $this->model->hasFieldParam($key, 'multiple', true);
@@ -235,50 +212,12 @@ abstract class Request extends FormRequest
                 if ($this->has($key) && ! empty($this->get($key))) {
                     $date = $this->get($key);
 
-                    if ($hasLocale = $this->model->hasFieldParam($key, 'locale') || $isMultiple) {
-                        $date = array_filter($date);
-                        $date = array_map(function($date) use ($parse, $field) {
-                            return $parse($date, $field);
-                        }, $date);
-                    } else {
-                        $date = $parse($date, $field);
-                    }
-
                     $this->merge([ $key => $date ]);
                 } else if ( $isMultiple ) {
                     $this->merge([ $key => [] ]);
                 }
             }
         }
-    }
-
-    private function getUniversalDateFormat($value, $field)
-    {
-        $formats = array_values(array_filter(array_merge(
-            [ $field['date_format'] ?? null ],
-            explode(',', $field['date_format_multiple'] ?? '')
-        )));
-
-        foreach ($formats as $format) {
-            try {
-                if ( strpos($value, 'Z') ) {
-                    $date = Carbon::createFromFormat($format, $value, 'UTC')->setTimezone(config('app.timezone'));
-                } else {
-                    $date = Carbon::createFromFormat($format, $value);
-                }
-
-                //If time has been received for date field, we need reset time.
-                if ( $field['type'] == 'date' ){
-                    $date->startOfDay();
-                }
-
-                return [$date, $format];
-            } catch (Exception $e){
-
-            }
-        }
-
-        throw $e;
     }
 
     /*

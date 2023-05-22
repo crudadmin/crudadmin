@@ -21,23 +21,6 @@ class DecimalCast implements CastsAttributes
     {
         $decimalLength = $model->getDecimalLength($key);
 
-        //Parse locale values
-        if ($model->hasFieldParam($key, 'locale', true)) {
-            $value = (new LocalizedJsonCast)->get($model, $key, $value, $attributes);
-
-            if ( is_array($value ) ) {
-                foreach ($value as $k => $v) {
-                    if (is_null($v)) {
-                        unset($value[$k]);
-                    } else {
-                        $value[$k] = $this->castNumber($v, $decimalLength);
-                    }
-                }
-
-                return $value;
-            }
-        }
-
         //Parse simple values
         return $this->castNumber($value, $decimalLength);
     }
@@ -45,7 +28,7 @@ class DecimalCast implements CastsAttributes
     private function castNumber($value, $decimalLength)
     {
         if ( is_null($value) ){
-            return $value;
+            return;
         }
 
         return number_format((float)$value, $decimalLength[1], '.', '');

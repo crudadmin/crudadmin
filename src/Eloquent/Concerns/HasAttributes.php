@@ -141,30 +141,24 @@ trait HasAttributes
         return $attributes;
     }
 
-    private function getAdminCasts()
+    private function castAdminAttributes()
     {
-        $casts = [];
-
-        $fields = $this->getFields();
-
         //Bind belongs to many values
-        foreach ($fields as $key => $field) {
+        foreach ($this->getFields() as $key => $field) {
             /*
              * Update multiple values in many relationship
              */
             if (array_key_exists('belongsToMany', $field) && $this->skipBelongsToMany === false) {
-                $casts[$key] = \Admin\Eloquent\Casts\BelongsToManyCast::class;
+                $this->casts[$key] = \Admin\Eloquent\Casts\BelongsToManyCast::class;
             }
 
             /*
              * Casts decimal format
              */
             if ($field['type'] == 'decimal') {
-                $casts[$key] = \Admin\Eloquent\Casts\DecimalCast::class;
+                $this->addMultiCast($key, \Admin\Eloquent\Casts\DecimalCast::class);
             }
         }
-
-        return $casts;
     }
 
     public function callWithoutCasts($callback, $except = null)
@@ -178,15 +172,6 @@ trait HasAttributes
         $this->casts = $casts;
 
         return $value;
-    }
-
-    private function castAdminAttributes()
-    {
-        $casts = $this->getAdminCasts();
-
-        foreach ($casts as $key => $cast) {
-            $this->casts[$key] = $cast;
-        }
     }
 
     private function setVisibleAdminAttributes($isColumns = false, $isRow = false)
