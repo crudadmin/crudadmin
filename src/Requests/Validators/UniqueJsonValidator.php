@@ -25,22 +25,25 @@ class UniqueJsonValidator
         $parameters = array_map(function ($u) {
             return strtolower($u) == 'null' || empty($u) ? null : $u;
         }, $parameters);
-        list($table, $combined_fields, $except_value, $id_field) = array_pad($parameters, 4, null);
+        list($table, $combinedFields, $exceptValue, $exceptIdField) = array_pad($parameters, 4, null);
         list($field, $json) = array_pad(
-            array_filter(explode('->', $combined_fields), 'strlen'),
+            array_filter(explode('->', $combinedFields), 'strlen'),
             2,
             null
         );
         $field = $field ?: $name;
         $json = $json ?? $json_field;
 
+        $additionalRules = array_chunk(array_slice($parameters, 4), 2);
+
         return $this->findJsonValue(
             $value,
             $json,
             $table,
             $field,
-            $except_value,
-            $id_field
+            $exceptValue,
+            $exceptIdField,
+            $additionalRules
         );
     }
 
@@ -61,19 +64,24 @@ class UniqueJsonValidator
         $json,
         $table,
         $field,
-        $except_value,
-        $id_field
+        $exceptValue,
+        $exceptIdField,
+        $additionalRules = []
     ) {
-        $except_value = $except_value ?? null;
-        $id_field = $id_field ?? 'id';
+        $exceptValue = $exceptValue ?? null;
+        $exceptIdField = $exceptIdField ?? 'id';
 
         //Get correct connection
         $model = Admin::getModelByTable($table);
         $table = $model ? $model->getConnection()->table($table) : DB::table($table);
 
         $query = $table->where("{$field}->{$json}", $value);
-        if ($except_value) {
-            $query = $query->where($id_field, '!=', $except_value);
+        if ($exceptValue) {
+            $query = $query->where($exceptIdField, '!=', $exceptValue);
+        }
+
+        foreach ($additionalRules as $rules) {
+            $query->where($rules[0], $rules[1]);
         }
 
         return $query->count() === 0;
