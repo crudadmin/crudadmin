@@ -173,7 +173,7 @@ class Gettext
 
         $timestamp = 0;
 
-        $localPoPath = $language->getLocalPoPath();
+        $localPoPath = $language->localPoPath;
         $storage = $this->getStorage();
 
         //We want get timestamp of localization
@@ -209,16 +209,25 @@ class Gettext
      * @param  string  $locale
      * @param  string  $except
      */
-    public function removeOldMoFiles($locale, $except = null)
+    public function removeOldMoFiles($language, $except = null)
     {
-        $files = $this->getStorage()->files(
-            $this->getLocalePath($locale)
-        );
+        $locale = $language->locale;
+        $path = $this->getLocalePath($locale);
+        $files = $this->getStorage()->files($path);
 
         foreach ($files as $path) {
             $filename = basename($path);
 
-            if (last(explode('.', $filename)) == 'mo' && $filename != $except) {
+            if (
+                //Only Mo file
+                last(explode('.', $filename)) == 'mo'
+
+                //Except given
+                && $filename != $except
+
+                //Only with given filenameprefix
+                && (!$language->localePrefixWithSlash || str_starts_with($filename, $language->localePrefixWithSlash) )
+            ) {
                 $this->getStorage()->delete($path);
             }
         }

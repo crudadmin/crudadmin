@@ -46,13 +46,7 @@ class GettextEditor
 
         JSTranslations::checkIfIsUpToDate($language);
 
-        $locale = $language->locale;
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
-
-        return Translations::fromPoFile(
-            Gettext::getStorage()->path($poPath)
-        );
+        return Translations::fromPoFile($language->localPoBasepath);
     }
 
     public function getEditorResponse($language)

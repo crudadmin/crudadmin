@@ -108,11 +108,11 @@ class JSTranslations
      */
     public function getCachableTranslates($lang, $model, $cacheKey, $callback)
     {
+        $language = $model->where('slug', $lang)->firstOrFail();
+
         Gettext::setGettextPropertiesModel($model);
 
-        $locale = Gettext::getLocale($lang);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $poPath = $language->localPoPath;
 
         if (Gettext::getStorage()->exists($poPath) == false) {
             return '[]';
@@ -181,9 +181,9 @@ class JSTranslations
     {
         Gettext::setGettextPropertiesModel($language);
 
-        $locale = Gettext::getLocale($language->slug);
+        $locale = $language->locale;
 
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $poPath = $language->localPoPath;
 
         $cacheKey = self::CACHE_RESOURCES_KEY.'.'.$locale;
 
@@ -209,13 +209,7 @@ class JSTranslations
     {
         Gettext::setGettextPropertiesModel($language);
 
-        $locale = Gettext::getLocale($language->slug);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
-
-        $translations = Translations::fromPoFile(
-            Gettext::getStorage()->path($poPath)
-        );
+        $translations = Translations::fromPoFile($language->localPoBasepath);
 
         foreach ($changes as $key => $value) {
             //Update existing translation
@@ -304,7 +298,7 @@ class JSTranslations
     {
         $locale = Gettext::getLocale($language->slug);
 
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $poPath = $language->localPoPath;
 
         //Run trigger before files sync build
         if ( method_exists($language, 'beforeGettextFilesSync') ){
@@ -319,7 +313,7 @@ class JSTranslations
         //If cached resource exists
         if ( Gettext::getStorage()->exists($poPath) ) {
             $translations = Translations::fromPoFile(
-                Gettext::getStorage()->path($poPath)
+                $language->localPoBasepath
             );
         }
 
@@ -512,16 +506,16 @@ class JSTranslations
     {
         Gettext::setGettextPropertiesModel($language);
 
-        $locale = Gettext::getLocale($language->slug);
+        $locale = $language->locale;
 
         Gettext::setTranslationsHeaders($translations, $locale);
 
         //Create uploads po file
-        $poFilename = $locale.'-'.time().'.po';
+        $poFilename = $language->localePrefixWithSlash.$locale.'-'.time().'.po';
 
         //Get storage po file path
-        $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
-        $localePoBasepath = Gettext::getStorage()->path($localePoPath);
+        $localePoPath = $language->localPoPath;
+        $localePoBasepath = $language->localPoBasepath;
 
         //Make missing directories
         AdminFile::makeDirs(dirname($localePoBasepath));
@@ -553,6 +547,6 @@ class JSTranslations
         }
 
         //Regenerate new mo file
-        Gettext::generateMoFile($language->slug, $localePoPath);
+        Gettext::generateMoFile($language);
     }
 }

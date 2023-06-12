@@ -31,8 +31,8 @@ class AdminResourcesSyncer
         $language = AdminLocalization::get();
 
         $translations = Admin::cache('admin.translations.'.$language->getKey(), function() use ($language) {
-            $locale = Gettext::getLocale($language->slug);
-            $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+            $locale = $language->locale;
+            $localePoPath = $language->localPoPath;
             $storage = Gettext::getStorage();
 
             if ( $storage->exists($localePoPath) ) {

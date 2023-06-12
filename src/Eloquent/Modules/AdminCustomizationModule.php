@@ -475,8 +475,7 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                     return false;
                 }
 
-                $locale = Gettext::getLocale($adminLang->slug);
-                $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+                $localePoPath = $adminLang->localPoPath;
 
                 //If language PO file does not exists
                 if ( Gettext::getStorage()->exists($localePoPath) == false ){

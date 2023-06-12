@@ -13,7 +13,7 @@ class ResourcesGettext
     {
         $locale = Gettext::getLocale($slug);
 
-        return crudadmin_resources_path('/../Resources/lang/gettext/'.$locale.'.po');
+        return crudadmin_resources_path('lang/gettext/'.$locale.'.po');
     }
 
     public function getCacheKey($locale)
@@ -31,14 +31,14 @@ class ResourcesGettext
     {
         Gettext::setGettextPropertiesModel($language);
 
-        $locale = Gettext::getLocale($language->slug);
-
-        $poPath = $this->getVendorPoPath($language->slug);
+        $locale = $language->locale;
 
         $storage = Gettext::getStorage();
 
+        $resourcesPoPath = $this->getVendorPoPath($language->slug);
+
         //If resource translates for this language does not exists
-        if ( !file_exists($resourcesPoPath = $poPath) ) {
+        if ( !file_exists($resourcesPoPath) ) {
             return;
         }
 
@@ -52,12 +52,10 @@ class ResourcesGettext
         //Cache
         Cache::set($this->getCacheKey($locale), $resourcesLanguageTimestamp);
 
-        $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $localPoPath = $language->localPoPath;
 
-        if ( $storage->exists($localePoPath) ) {
-            $translations = Translations::fromPoFile(
-                $storage->path($localePoPath)
-            );
+        if ( $storage->exists($localPoPath) ) {
+            $translations = Translations::fromPoFile($language->localPoBasepath);
         } else {
             $translations = new Translations;
         }

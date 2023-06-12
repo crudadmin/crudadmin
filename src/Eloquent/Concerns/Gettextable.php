@@ -149,12 +149,22 @@ trait Gettextable
     {
         Gettext::setGettextPropertiesModel($this);
 
-        $locale = Gettext::getLocale($this->slug);
+        if ( $locale = $this->locale ) {
+            $filename = $this->localePrefixWithSlash.$locale.'.po';
 
-        $filename = $this->localePrefixWithSlash.$locale.'.po';
-
-        $path = Gettext::getLocalePath($locale, $filename);
+            $path = Gettext::getLocalePath($locale, $filename);
+        }
 
         return $path;
+    }
+
+    public function getLocalPoBasePathAttribute()
+    {
+        return Gettext::getStorage()->path($this->localPoPath);
+    }
+
+    public function getLocaleAttribute()
+    {
+        return Gettext::getLocale($this->slug);
     }
 }
