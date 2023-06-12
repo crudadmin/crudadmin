@@ -51,7 +51,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::post('/admin/frontend-editor/static-link', 'FrontendEditorController@updateLink');
     Route::post('/admin/frontend-editor/static-image', 'FrontendEditorController@updateImage');
     Route::post('/admin/frontend-editor/update-content', 'FrontendEditorController@updateContent');
-    Route::post('/admin/translates/editable/{lang}', 'GettextController@updateEditorState');
+    Route::post('/admin/translates/editable/{id}', 'GettextController@updateEditorState');
     Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');
 
     //Downloading files from uploads in administration

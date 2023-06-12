@@ -92,14 +92,16 @@ class GettextController extends Controller
      *
      * @return
      */
-    public function updateEditorState($lang)
+    public function updateEditorState($languageId)
     {
         $state = request('state');
 
         EditorMode::setState($state);
 
+        $language = GettextEditor::getTranslationRow($languageId, null, 'read');
+
         if ( request('response') && EditorMode::isActiveTranslatable() ) {
-            return $this->index('Localization', $lang);
+            return $this->index('Localization', $language->slug);
         }
 
         return EditorMode::isActive() ? 1 : 0;
