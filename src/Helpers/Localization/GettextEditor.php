@@ -42,8 +42,6 @@ class GettextEditor
      */
     public function getTranslations($language)
     {
-        Gettext::setGettextPropertiesModel($language);
-
         JSTranslations::checkIfIsUpToDate($language);
 
         return Translations::fromPoFile($language->localPoBasepath);

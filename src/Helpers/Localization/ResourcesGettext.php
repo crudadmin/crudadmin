@@ -29,8 +29,6 @@ class ResourcesGettext
      */
     public function syncResourceLocales($language)
     {
-        Gettext::setGettextPropertiesModel($language);
-
         $locale = $language->locale;
 
         $storage = Gettext::getStorage();

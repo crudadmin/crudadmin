@@ -70,11 +70,6 @@ class AdminResourcesSyncer
         $tree = [];
 
         foreach ($models as $model) {
-            //Fix if language changed by unexpected
-            if ( $localeModel ){
-                Gettext::setGettextPropertiesModel($localeModel);
-            }
-
             $table = $model->getTable();
 
             //Add global properties

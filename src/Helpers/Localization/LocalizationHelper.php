@@ -264,10 +264,6 @@ class LocalizationHelper
 
             //If language and translations data are present
             if ($language) {
-                if ( $language->localPoPath && $storage->exists($language->localPoPath) ) {
-                    Gettext::setGettextPropertiesModel($language);
-                }
-
                 Gettext::setLocale($language);
             }
         }

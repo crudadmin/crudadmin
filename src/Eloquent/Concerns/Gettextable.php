@@ -8,6 +8,21 @@ use Gettext;
 
 trait Gettextable
 {
+    public function getSourcePaths()
+    {
+        return $this->sourcePaths();
+    }
+
+    public function getGettextPath($path = null)
+    {
+        return ($this->gettextDirectory ?: 'app').'/'.$path;
+    }
+
+    public function getLocalePath($locale, $file = null)
+    {
+        return $this->getGettextPath($locale.'/LC_MESSAGES/'.$file);
+    }
+
     public function getLocalePrefixAttribute()
     {
         return '';
@@ -47,20 +62,10 @@ trait Gettextable
         return true;
     }
 
-    public function onCreate($row)
-    {
-        //Update gettext files...
-        if ($this->hasGettextSupport()) {
-            Gettext::setGettextPropertiesModel($this);
-        }
-    }
-
     public function onUpdate($row)
     {
         //Update gettext files...
         if ($this->hasGettextSupport()) {
-            Gettext::setGettextPropertiesModel($this);
-
             //On update we need downloads file from cloud storage and save it into local storage
             if ( $row->poedit_po->exists ) {
                 Gettext::getStorage()->put(
@@ -147,12 +152,10 @@ trait Gettextable
 
     public function getLocalPoPathAttribute()
     {
-        Gettext::setGettextPropertiesModel($this);
-
         if ( $locale = $this->locale ) {
             $filename = $this->localePrefixWithSlash.$locale.'.po';
 
-            $path = Gettext::getLocalePath($locale, $filename);
+            $path = $this->getLocalePath($locale, $filename);
         }
 
         return $path;
