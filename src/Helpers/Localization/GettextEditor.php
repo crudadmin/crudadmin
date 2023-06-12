@@ -122,7 +122,11 @@ class GettextEditor
             return [];
         }
 
-        $sourceLanguage = $language->newQuery()->where('is_source', true)->first();
+        $sourceLanguage = $language->newQuery()->where('slug', '!=', $language->slug)->where('is_source', true)->first();
+
+        if ( !($sourceLanguage) ){
+            return [];
+        }
 
         return json_decode(JSON::toString(
             $this->getTranslations($sourceLanguage)
