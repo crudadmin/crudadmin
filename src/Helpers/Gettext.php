@@ -5,12 +5,13 @@ namespace Admin\Helpers;
 use Admin;
 use AdminLocalization;
 use Admin\Core\Helpers\Storage\AdminFile;
-use Facades\Admin\Helpers\Localization\JSTranslations;
+use Admin\Eloquent\AdminModel;
 use Admin\Helpers\Localization\LocalizationHelper;
 use App\Core\Models\Language;
+use EditorMode;
+use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext\Translations;
 use Illuminate\Support\Collection;
-use EditorMode;
 use Localization;
 use Storage;
 
@@ -84,13 +85,12 @@ class Gettext
     /**
      * Set gettext locale
      *
-     * @param  string  $locale
-     * @param  string  $poPath
+     * @param  AdminModel Language
      */
-    public function setLocale($locale = null, $poPath = null)
+    public function setLocale(AdminModel $language)
     {
         //Regenerate mo files if pofile has been changed
-        if ( ! ($locale = $this->getLocale($locale)) ) {
+        if ( !($locale = $language->locale) ) {
             return false;
         }
 
@@ -106,55 +106,54 @@ class Gettext
         setlocale(LC_COLLATE, $locale.'.UTF-8');
 
         //Bind domains if are available
-        if ( $poPath && ($poTimestamp = $this->generateMoFile($locale)) !== false) {
-            bindtextdomain($poTimestamp, $this->getStorage()->path($this->getGettextPath()));
-            textdomain($poTimestamp);
+        if ( ($moFilenameTimestamp = $this->generateMoFile($language)) !== false ) {
+            bindtextdomain($moFilenameTimestamp, $this->getStorage()->path($this->getGettextPath()));
+
+            textdomain($moFilenameTimestamp);
         }
     }
 
     /**
      * Generate mo files from given poFile
      *
-     * @param  string  $locale
-     * @param  Admin\Helpers\File  $poFilePath
+     * @param  AdminModel  $language
      */
-    public function generateMoFile($locale, $poFilePath = null)
+    public function generateMoFile($language)
     {
-        $poFilePath = $poFilePath ?: $this->getLocalePath($locale, $locale.'.po');
-
         //If locale or pofile is not present
-        if (! ($locale = $this->getLocale($locale))) {
+        if (!($locale = $language->locale)) {
             return false;
         }
+
+        $localPoFilePath = $language->localPoPath;
 
         $storage = $this->getStorage();
 
         //Locale po path does not exists
-        if ( ! $poFilePath || $storage->exists($poFilePath) == false ) {
+        if ( ! $localPoFilePath || $storage->exists($localPoFilePath) == false ) {
             return false;
         }
 
         //Get mo filename by timestamp
-        $lastPoChangeTime = $storage->lastModified($poFilePath);
-        $moFilename = $lastPoChangeTime.'.mo';
+        $lastPoChangeTimestampFilename = $language->localePrefixWithSlash.$storage->lastModified($localPoFilePath);
+
+        $moFilename = $lastPoChangeTimestampFilename.'.mo';
 
         //Path to moved file from uploads to storage
         $storageMoPath = $this->getLocalePath($locale, $moFilename);
 
-        $storagePoPath = $this->getLocalePath($locale, $locale.'.po');
-
         //If poFile has been changed, then generate new mo file and remove previous one
-        if ( $storage->exists($storagePoPath) == false || $storage->exists($storageMoPath) == false ) {
-            $poBasePath = $storage->path($storagePoPath);
+        if ( $storage->exists($storageMoPath) == false ) {
+            $poBasePath = $storage->path($localPoFilePath);
 
             $translations = Translations::fromPoFile($poBasePath);
 
             $translations->toMoFile($storage->path($storageMoPath));
 
-            $this->removeOldMoFiles($locale, $moFilename);
+            $this->removeOldMoFiles($language, $moFilename);
         }
 
-        return $lastPoChangeTime;
+        return $lastPoChangeTimestampFilename;
     }
 
     /**

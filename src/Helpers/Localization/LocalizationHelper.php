@@ -230,7 +230,7 @@ class LocalizationHelper
             return;
         }
 
-        return $this->all()->where('slug', $slug)->first();
+        return $this->all()->firstWhere('slug', $slug);
     }
 
     /**
@@ -253,7 +253,7 @@ class LocalizationHelper
             $language = $this->getBySlug($locale);
 
             //Try backup default language if no translates are present in given language
-            if (!$language || $storage->exists($language->getLocalPoPath()) == false ) {
+            if (!$language || $storage->exists($language->localPoPath) == false ) {
                 $language = $this->getDefaultLanguage();
             }
 
@@ -264,11 +264,11 @@ class LocalizationHelper
 
             //If language and translations data are present
             if ($language) {
-                if ( $language->getLocalPoPath() && $storage->exists($language->getLocalPoPath()) ) {
+                if ( $language->localPoPath && $storage->exists($language->localPoPath) ) {
                     Gettext::setGettextPropertiesModel($language);
                 }
 
-                Gettext::setLocale($language->slug, $language->getLocalPoPath());
+                Gettext::setLocale($language);
             }
         }
 

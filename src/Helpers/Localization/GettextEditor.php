@@ -46,7 +46,7 @@ class GettextEditor
 
         JSTranslations::checkIfIsUpToDate($language);
 
-        $locale = Gettext::getLocale($language->slug);
+        $locale = $language->locale;
 
         $poPath = Gettext::getLocalePath($locale, $locale.'.po');
 
