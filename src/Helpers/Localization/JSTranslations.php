@@ -14,6 +14,7 @@ use Illuminate\Filesystem\Filesystem;
 use \Illuminate\Support\Facades\Blade;
 use \SplFileInfo;
 use EditorMode;
+use Admin;
 
 class JSTranslations
 {
@@ -108,6 +109,11 @@ class JSTranslations
      */
     public function getCachableTranslates($lang, $model, $cacheKey, $callback)
     {
+        //Check if model is activated
+        if ( !($model = Admin::getModelByTable($model->getTable())) ){
+            return '[]';
+        }
+
         $language = $model->where('slug', $lang)->firstOrFail();
 
         $poPath = $language->localPoPath;
