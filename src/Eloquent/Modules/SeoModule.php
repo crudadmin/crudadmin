@@ -70,7 +70,7 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
      */
     public function mutateBootedFields(&$fields, $row, $model)
     {
-        if ( $model->hasSluggable() && $model->getProperty('slugUnique') !== false ){
+        if ( $model->hasSluggable() ){
             $isLocalized = @$fields[$model->getProperty('sluggable')]['locale'] ?: false;
 
             //If sluggable column has locale attribute, we need add this attribute also into slug column
@@ -79,7 +79,9 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
             }
 
             //Use json unique, or basic column unique method
-            $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
+            if ( $model->getProperty('slugUnique') !== false ){
+                $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
+            }
         }
 
         return $fields;
