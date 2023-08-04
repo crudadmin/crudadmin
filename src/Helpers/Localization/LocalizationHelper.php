@@ -20,7 +20,7 @@ class LocalizationHelper
     /*
      * Actual localization
      */
-    public $localization = null;
+    protected $localization = null;
 
     /**
      * Has been booted?
