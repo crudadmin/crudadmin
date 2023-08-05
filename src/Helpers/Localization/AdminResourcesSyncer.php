@@ -31,8 +31,8 @@ class AdminResourcesSyncer
         $language = AdminLocalization::get();
 
         $translations = Admin::cache('admin.translations.'.$language->getKey(), function() use ($language) {
-            $locale = Gettext::getLocale($language->slug);
-            $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
+            $locale = $language->locale;
+            $localePoPath = $language->localPoPath;
             $storage = Gettext::getStorage();
 
             if ( $storage->exists($localePoPath) ) {
@@ -70,11 +70,6 @@ class AdminResourcesSyncer
         $tree = [];
 
         foreach ($models as $model) {
-            //Fix if language changed by unexpected
-            if ( $localeModel ){
-                Gettext::setGettextPropertiesModel($localeModel);
-            }
-
             $table = $model->getTable();
 
             //Add global properties

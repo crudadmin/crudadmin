@@ -14,6 +14,7 @@ use Illuminate\Filesystem\Filesystem;
 use \Illuminate\Support\Facades\Blade;
 use \SplFileInfo;
 use EditorMode;
+use Admin;
 
 class JSTranslations
 {
@@ -108,11 +109,14 @@ class JSTranslations
      */
     public function getCachableTranslates($lang, $model, $cacheKey, $callback)
     {
-        Gettext::setGettextPropertiesModel($model);
+        //Check if model is activated
+        if ( !($model = Admin::getModelByTable($model->getTable())) ){
+            return '[]';
+        }
 
-        $locale = Gettext::getLocale($lang);
+        $language = $model->where('slug', $lang)->firstOrFail();
 
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $poPath = $language->localPoPath;
 
         if (Gettext::getStorage()->exists($poPath) == false) {
             return '[]';
@@ -124,7 +128,7 @@ class JSTranslations
         $cacheKey .= '.'.$lang;
 
         //If we need restore cached translations data
-        if ($this->hasCachedFilesBeenChanged($cacheKey, $timestamp)) {
+        if ($this->hasCachedFilesBeenChanged($language, $cacheKey, $timestamp)) {
             Cache::forget($cacheKey);
         }
 
@@ -179,16 +183,14 @@ class JSTranslations
      */
     public function checkIfIsUpToDate($language)
     {
-        Gettext::setGettextPropertiesModel($language);
+        $locale = $language->locale;
 
-        $locale = Gettext::getLocale($language->slug);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $poPath = $language->localPoPath;
 
         $cacheKey = self::CACHE_RESOURCES_KEY.'.'.$locale;
 
         //Check if actual language has been modified sync last source changes
-        $cacheKeyChanged = $this->hasCachedFilesBeenChanged($cacheKey);
+        $cacheKeyChanged = $this->hasCachedFilesBeenChanged($language, $cacheKey);
 
         $poFilesMissing = (
             //If poPath does not exists
@@ -207,15 +209,7 @@ class JSTranslations
      */
     public function updateTranslations($language, $changes)
     {
-        Gettext::setGettextPropertiesModel($language);
-
-        $locale = Gettext::getLocale($language->slug);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
-
-        $translations = Translations::fromPoFile(
-            Gettext::getStorage()->path($poPath)
-        );
+        $translations = Translations::fromPoFile($language->localPoBasepath);
 
         foreach ($changes as $key => $value) {
             //Update existing translation
@@ -241,9 +235,9 @@ class JSTranslations
     /*
      * Return modification timestamp of last modified file
      */
-    private function getSourceModificationTimestamp()
+    private function getSourceModificationTimestamp($language)
     {
-        $viewPaths = Gettext::getSourcePaths();
+        $viewPaths = $language->getSourcePaths();
 
         //Get list of modified files
         $modified = [];
@@ -269,14 +263,15 @@ class JSTranslations
     /*
      * Check cached key has same value as timestamp of modification source
      */
-    private function hasCachedFilesBeenChanged($key, $timestamp = null)
+    private function hasCachedFilesBeenChanged($language, $key, $timestamp = null)
     {
-        $gettextPathsHash = md5(implode(';', config('admin.gettext_source_paths', [])));
+        $cacheKey = implode(';', $language->getSourcePaths());
+
+        $gettextPathsHash = md5($cacheKey);
 
         $key .= $gettextPathsHash;
 
-        $timestamp = $timestamp ?: $this->getSourceModificationTimestamp();
-
+        $timestamp = $timestamp ?: $this->getSourceModificationTimestamp($language);
 
         //If no modify time is in cache
         $hasInCache = Cache::has($key);
@@ -304,14 +299,14 @@ class JSTranslations
     {
         $locale = Gettext::getLocale($language->slug);
 
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
+        $poPath = $language->localPoPath;
 
         //Run trigger before files sync build
         if ( method_exists($language, 'beforeGettextFilesSync') ){
             $language->beforeGettextFilesSync();
 
             //We need refresh cache times keys if something has been changed in this step...
-            $this->hasCachedFilesBeenChanged($cacheKey);
+            $this->hasCachedFilesBeenChanged($language, $cacheKey);
         }
 
         $loadedTranslations = new Translations;
@@ -319,7 +314,7 @@ class JSTranslations
         //If cached resource exists
         if ( Gettext::getStorage()->exists($poPath) ) {
             $translations = Translations::fromPoFile(
-                Gettext::getStorage()->path($poPath)
+                $language->localPoBasepath
             );
         }
 
@@ -333,7 +328,7 @@ class JSTranslations
             $translations = new Translations;
         }
 
-        $viewPaths = Gettext::getSourcePaths();
+        $viewPaths = $language->getSourcePaths();
 
         //Foreach all $this->ource directories
         foreach ($viewPaths as $path) {
@@ -510,18 +505,16 @@ class JSTranslations
      */
     public function rebuildGettextFiles($language, $translations)
     {
-        Gettext::setGettextPropertiesModel($language);
-
-        $locale = Gettext::getLocale($language->slug);
+        $locale = $language->locale;
 
         Gettext::setTranslationsHeaders($translations, $locale);
 
         //Create uploads po file
-        $poFilename = $locale.'-'.time().'.po';
+        $poFilename = $language->localePrefixWithSlash.$locale.'-'.time().'.po';
 
         //Get storage po file path
-        $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
-        $localePoBasepath = Gettext::getStorage()->path($localePoPath);
+        $localePoPath = $language->localPoPath;
+        $localePoBasepath = $language->localPoBasepath;
 
         //Make missing directories
         AdminFile::makeDirs(dirname($localePoBasepath));
@@ -553,6 +546,6 @@ class JSTranslations
         }
 
         //Regenerate new mo file
-        Gettext::generateMoFile($language->slug, $localePoPath);
+        Gettext::generateMoFile($language);
     }
 }

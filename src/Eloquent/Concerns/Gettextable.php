@@ -8,12 +8,38 @@ use Gettext;
 
 trait Gettextable
 {
+    public function getSourcePaths()
+    {
+        return $this->sourcePaths();
+    }
+
+    public function getGettextPath($path = null)
+    {
+        return ($this->gettextDirectory ?: 'app').'/'.$path;
+    }
+
+    public function getLocalePath($locale, $file = null)
+    {
+        return $this->getGettextPath($locale.'/LC_MESSAGES/'.$file);
+    }
+
+    public function getLocalePrefixAttribute()
+    {
+        return '';
+    }
+
+    public function getLocalePrefixWithSlashAttribute()
+    {
+        return ($this->localePrefix ? $this->localePrefix.'_' : '');
+    }
+
     public function setRulesProperty($rules)
     {
         $rules[] = SetSourceLanguage::class;
 
         return $rules;
     }
+
     public function settings()
     {
         return [
@@ -36,32 +62,19 @@ trait Gettextable
         return true;
     }
 
-    public function onCreate($row)
-    {
-        //Update gettext files...
-        if ($this->hasGettextSupport()) {
-            Gettext::setGettextPropertiesModel($this);
-        }
-    }
-
     public function onUpdate($row)
     {
         //Update gettext files...
         if ($this->hasGettextSupport()) {
-            Gettext::setGettextPropertiesModel($this);
-
-            $locale = Gettext::getLocale($row->slug);
-            $localePoPath = Gettext::getLocalePath($locale, $locale.'.po');
-
             //On update we need downloads file from cloud storage and save it into local storage
             if ( $row->poedit_po->exists ) {
                 Gettext::getStorage()->put(
-                    $localePoPath,
+                    $this->localPoPath,
                     $row->poedit_po->get()
                 );
 
                 //We can regenerate mo files on update
-                Gettext::generateMoFile($row->slug, $localePoPath);
+                Gettext::generateMoFile($row);
             }
         }
     }
@@ -137,14 +150,24 @@ trait Gettextable
         return $permissions;
     }
 
-    public function getLocalPoPath()
+    public function getLocalPoPathAttribute()
     {
-        Gettext::setGettextPropertiesModel($this);
+        if ( $locale = $this->locale ) {
+            $filename = $this->localePrefixWithSlash.$locale.'.po';
 
-        $locale = Gettext::getLocale($this->slug);
-
-        $path = Gettext::getLocalePath($locale, $locale.'.po');
+            $path = $this->getLocalePath($locale, $filename);
+        }
 
         return $path;
+    }
+
+    public function getLocalPoBasePathAttribute()
+    {
+        return Gettext::getStorage()->path($this->localPoPath);
+    }
+
+    public function getLocaleAttribute()
+    {
+        return Gettext::getLocale($this->slug);
     }
 }

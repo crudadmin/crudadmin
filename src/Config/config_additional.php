@@ -76,7 +76,7 @@ return [
     /*
      * Remove missing translates
      */
-    'gettext_remove_missing' => true,
+    'gettext_remove_missing' => false,
 
     /*
      * Permanently delete files after deleted row in db or after overridden uploaded files

@@ -35,12 +35,23 @@ class ValidatorServiceProvider extends ServiceProvider
             $extension = $value->getClientOriginalExtension();
             $isValidExtension = in_array($extension, $supportedExtensions);
 
-            foreach ($supportedExtensions as $neededExt) {
-                $types = $mimeTypes->getMimeTypes($neededExt);
-                $guessedMimeType = $mimeTypes->guessMimeType($value->getPathName());
+            if ( $isValidExtension ) {
+                foreach ($supportedExtensions as $neededExt) {
+                    $types = $mimeTypes->getMimeTypes($neededExt);
+                    $guessedMimeType = $mimeTypes->guessMimeType($value->getPathName());
 
-                if ( in_array($guessedMimeType, $types) && $isValidExtension ){
-                    return true;
+                    //If is exact mimetype allowed
+                    if ( in_array($guessedMimeType, $types) ){
+                        return true;
+                    }
+
+                    //Validate by first part of mimetype
+                    $firstExtensionMimeTypePart = implode('/', array_slice(explode('/', $guessedMimeType), 0, -1)).'/';
+                    foreach ($types as $type) {
+                        if ( str_starts_with($type, $firstExtensionMimeTypePart) ){
+                            return true;
+                        }
+                    }
                 }
             }
 

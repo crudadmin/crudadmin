@@ -49,7 +49,7 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
         //Add sluggable column settings
         if ( $model->hasSluggable() ) {
             $items = array_merge($items, [Group::fields([
-                'slug' => 'name:Url adresa|readonlyIf:slug_dynamic,1|unique:'.$model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL',
+                'slug' => 'name:Url adresa|readonlyIf:slug_dynamic,1',
                 'slug_dynamic' => 'name:Automatická url adresa|type:checkbox|default:1',
             ])->inline()->add('hidden')]);
         }
@@ -79,7 +79,9 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
             }
 
             //Use json unique, or basic column unique method
-            $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
+            if ( $model->getProperty('slugUnique') !== false ){
+                $fields['slug'][$isLocalized ? 'unique_json' : 'unique'] = $model->getTable().',slug,'.(isset($row) ? $row->getKey() : 'NULL').',id,deleted_at,NULL';
+            }
         }
 
         return $fields;

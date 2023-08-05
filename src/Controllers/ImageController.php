@@ -128,26 +128,37 @@ class ImageController extends Controller
 
         $adminFile = $model->getAdminFile($fieldKey, $filename);
 
-        $storage = $adminFile->getStorage();
+        $extension = strtolower($adminFile->extension);
 
-        try {
-            if ( $adminFile->isEncrypted() ) {
-                $response = Image::make($adminFile->get())->response();
-            } else {
-                $response = $storage->response($adminFile->path);
+        if ( in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])){
+            $storage = $adminFile->getStorage();
+
+            try {
+                if ( $adminFile->isEncrypted() ) {
+                    $response = Image::make($adminFile->get())->response();
+                } else {
+                    $response = $storage->response($adminFile->path);
+                }
+
+                //Retrieve resized and compressed image
+                $response->setMaxAge(3600 * 24 * 365)->setPublic();
+
+                //Send response manually, because we does not want to throw cookies etc..
+                $response->send();
+            } catch (FileNotFoundException $e){
+                abort(404);
+            } catch (UnableToRetrieveMetadata $e){
+                abort(404);
+            } catch (Exception $e){
+                abort(500);
             }
-
-            //Retrieve resized and compressed image
-            $response->setMaxAge(3600 * 24 * 365)->setPublic();
-
-            //Send response manually, because we does not want to throw cookies etc..
-            $response->send();
-        } catch (FileNotFoundException $e){
-            abort(404);
-        } catch (UnableToRetrieveMetadata $e){
-            abort(404);
-        } catch (Exception $e){
-            abort(500);
+        } else if ( in_array($extension, ['pdf']) ) {
+            return response()->make($adminFile->get(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="'.$adminFile->filename.'"'
+            ]);
         }
+
+        return $adminFile->downloadResponse();
     }
 }

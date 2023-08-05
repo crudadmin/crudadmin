@@ -42,17 +42,9 @@ class GettextEditor
      */
     public function getTranslations($language)
     {
-        Gettext::setGettextPropertiesModel($language);
-
         JSTranslations::checkIfIsUpToDate($language);
 
-        $locale = Gettext::getLocale($language->slug);
-
-        $poPath = Gettext::getLocalePath($locale, $locale.'.po');
-
-        return Translations::fromPoFile(
-            Gettext::getStorage()->path($poPath)
-        );
+        return Translations::fromPoFile($language->localPoBasepath);
     }
 
     public function getEditorResponse($language)
@@ -130,7 +122,11 @@ class GettextEditor
             return [];
         }
 
-        $sourceLanguage = $language->newQuery()->where('is_source', true)->first();
+        $sourceLanguage = $language->newQuery()->where('slug', '!=', $language->slug)->where('is_source', true)->first();
+
+        if ( !($sourceLanguage) ){
+            return [];
+        }
 
         return json_decode(JSON::toString(
             $this->getTranslations($sourceLanguage)

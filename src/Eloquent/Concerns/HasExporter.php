@@ -287,7 +287,22 @@ trait HasExporter
 
         //Replace files with images
         foreach ($this->getArrayableItems($this->getFields()) as $key => $field) {
-            if ( $field['type'] == 'file' && isset($this->attributes[$key]) ){
+            if ( !(isset($this->attributes[$key])) ){
+                continue;
+            }
+
+            if ( $field['type'] == 'gutenberg' ) {
+                $value = $this->getAttribute($key);
+
+                //Remove cast for locale files.
+                if ( isset($this->casts[$key]) ){
+                    unset($this->casts[$key]);
+                }
+
+                $this->attributes[$key] = (new \Admin\Gutenberg\Contracts\Blocks\BlocksBuilder($value))->renderBlocks();
+            }
+
+            else if ( $field['type'] == 'file' ){
                 if ( $this->hasFieldParam($key, 'locale') ) {
                     //Remove cast for locale files.
                     if ( isset($this->casts[$key]) ){

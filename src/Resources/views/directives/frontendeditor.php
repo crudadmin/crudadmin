@@ -12,8 +12,8 @@ window.CAEditorConfig = {
         updateImage : '<?php echo action('\Admin\Controllers\FrontendEditorController@updateImage') ?>',
 
 <?php if ( $lang = Localization::get() ){ ?>
-        changeState : '<?php echo action('\Admin\Controllers\GettextController@updateEditorState', $lang->slug) ?>',
-        updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->slug) ?>',
+        changeState : '<?php echo action('\Admin\Controllers\GettextController@updateEditorState', $lang->getKey()) ?>',
+        updateText : '<?php echo action('\Admin\Controllers\GettextController@updateTranslations', $lang->getKey()) ?>',
 <?php } ?>
     },
     ckeditor_path : '<?php echo admin_asset('/plugins/ckeditor/ckeditor.js') ?>',
