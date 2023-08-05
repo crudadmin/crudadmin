@@ -386,7 +386,13 @@ abstract class Request extends FormRequest
     protected function resetMultipleSelects($fields = null)
     {
         foreach ($fields as $key => $field) {
-            if (! ($this->model->isFieldType($key, 'select') && $this->model->hasFieldParam($key, 'multiple'))) {
+            if (
+                ! (
+                    $this->model->isFieldType($key, 'select')
+                    && $this->model->hasFieldParam($key, 'multiple')
+                    && !$this->model->hasFieldParam($key, 'belongsToMany')
+                )
+            ) {
                 continue;
             }
 
