@@ -75,6 +75,10 @@ class AdminHelperServiceProvider extends ServiceProvider
             //First need to be injected package js then users one
             ['scripts']
         );
+
+        if ( class_exists(Admin::class) ){
+            Admin::cacheConfig();
+        }
     }
 
     private function isAssocArray(array $arr)
