@@ -129,10 +129,10 @@ trait HasAttributes
 
         $this->setVisibleAdminAttributes($isColumns, $isRow);
 
-        $this->castAdminAttributes();
-
         //Get attributes without mutated values
-        $attributes = parent::attributesToArray();
+        $attributes = $this->withAdminCastAttributes(function(){
+            return parent::attributesToArray();
+        });
 
         $this->withoutMutators = false;
 
@@ -141,8 +141,10 @@ trait HasAttributes
         return $attributes;
     }
 
-    private function castAdminAttributes()
+    private function withAdminCastAttributes($callback)
     {
+        $originalCasts = $this->casts;
+
         //Bind belongs to many values
         foreach ($this->getFields() as $key => $field) {
             /*
@@ -159,6 +161,12 @@ trait HasAttributes
                 $this->addMultiCast($key, \Admin\Eloquent\Casts\DecimalCast::class);
             }
         }
+
+        $response = $callback();
+
+        $this->casts = $originalCasts;
+
+        return $response;
     }
 
     public function callWithoutCasts($callback, $except = null)
