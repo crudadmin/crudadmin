@@ -9,7 +9,7 @@ return [
     /*
      * Auth eloquent model name
      */
-    'auth_eloquent' => 'User',
+    'auth_eloquent' => 'Admin',
 
     /*
      * Default crudadmin storage
