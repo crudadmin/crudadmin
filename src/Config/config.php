@@ -30,7 +30,7 @@ return [
     /*
      * License key
      */
-    'license_key' => 'campaign2019',
+    'license_key' => 'adminv5',
 
     /*
      * Administration groups names
