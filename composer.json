@@ -10,12 +10,12 @@
     ],
     "require": {
         "php": ">=8.0",
-        "crudadmin/framework": "^4.0|dev-master|dev-4.0-dev",
-        "crudadmin/resources" : "^4.0|dev-master|dev-4.0-dev",
+        "crudadmin/framework": "^5.0|dev-master|dev-5.0-dev",
+        "crudadmin/resources" : "^5.0|dev-master|dev-5.0-dev",
         "crudadmin/autoajax" : "^2.0|dev-master",
-        "laravel/framework": "^6|^7|^8|^9|^10",
+        "laravel/framework": "^9|^10",
         "laravel/sanctum": "^2|^3",
-        "laravel/ui": "^1.0|^2.0|^3.0|^4.0",
+        "laravel/ui": "^3.0|^4.0",
         "gettext/gettext": "^4.6"
     },
     "require-dev": {
