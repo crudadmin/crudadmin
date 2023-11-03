@@ -64,9 +64,13 @@ trait HasEncryption
 
     public function getEncryptedAttribute($key)
     {
-        $value = $this->attributes[$key];
+        $value = $this->attributes[$key] ?? null;
 
-        return $this->castAttribute($key, $value);
+        if ( isset($this->casts[$key]) ){
+            return $this->castAttribute($key, $value);
+        }
+
+        return $value;
     }
 
     public function generateEncryptedHash($value)
