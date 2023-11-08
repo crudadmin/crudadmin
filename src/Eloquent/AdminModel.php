@@ -330,7 +330,7 @@ class AdminModel extends CoreAdminModel
      *
      * @return  bool
      */
-    private function isPublishableAllowed()
+    protected function isPublishableAllowed()
     {
         if ( $this->publishable == false ){
             return false;
