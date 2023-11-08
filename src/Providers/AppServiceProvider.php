@@ -18,7 +18,6 @@ class AppServiceProvider extends AdminHelperServiceProvider
         GettextServiceProvider::class,
         ValidatorServiceProvider::class,
         CommandsServiceProvider::class,
-        PasswordResetServiceProvider::class,
         PublishServiceProvider::class,
         FrontendEditorServiceProvider::class,
         SitetreeServiceProvider::class,
