@@ -74,7 +74,7 @@ class ImageController extends Controller
         }
 
         //Resize image
-        $resizedImage = $adminFile->image($resizeData['mutators'] ?? [], true);
+        $resizedImage = $adminFile->image($resizeData['mutators'] ?? [], true, $prefix);
 
         //If is not local storage, and storage url is different than actual crudadmin renderer path
         //we can resize on final destination after resize.
