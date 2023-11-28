@@ -17,9 +17,15 @@ use Admin\Core\Helpers\Storage\AdminFile;
 Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload');
 
 //Image thumbnails and storage downloads
-Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/cache/{table}/{fieldKey}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
+
+//Redirect legacy websites with previous cache location type.
+if ( AdminFile::isCacheInRootFolder() == true ) {
+    Route::get(AdminFile::UPLOADS_DIRECTORY.'/'.AdminFile::CACHE_DIRECTORY.'/{table}/{fieldKey}/{prefix}/{filename}', 'ImageController@redirectToCache');
+}
+
+Route::get(($publicCachePath = AdminFile::getPublicCacheDirectory()).'/{table}/{fieldKey}/admin-thumbnails/{file}', 'ImageController@getThumbnail');
 Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/{table}/{fieldKey}/{filename}', 'ImageController@getFile');
-Route::get('/'.AdminFile::UPLOADS_DIRECTORY.'/cache/{table}/{fieldKey}/{prefix}/{filename}', 'ImageController@resizeImage')->name('crudadminResizer');
+Route::get($publicCachePath.'/{table}/{fieldKey}/{prefix}/{filename}', 'ImageController@resizeImage')->name('crudadminResizer');
 
 //Gettext js translates
 Route::get('/vendor/js/ca-translates.js', 'GettextController@index');
