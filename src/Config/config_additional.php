@@ -226,7 +226,15 @@ return [
     ],
 
     'resizer' => [
-        'storage' => false, //Should we save resized images into external storage?
+        /**
+         * Should we save resized images into external storage? When all other uploads should go there?
+         *
+         * Possible values:
+         * false - save into local storage/crudadmin/uploads/cache
+         * true - use same potentionally "external" driver as crudadmin.uploads
+         * 'crudadmin'|string - custom location, or local storage in storage/crudadmin/cache folder. (eg: If you don't want cache to be located in uploads.)
+         */
+        'storage' => false,
         'storage_cache' => true, //If in_storage is set to true. We can cache whatever image has been resized or no.
         'storage_cache_days' => 31,
         'redirect_after_resize' => true, //When we displaying storage url, we can control whatever we want 301 redirect after resize
