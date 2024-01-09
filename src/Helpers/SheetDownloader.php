@@ -20,6 +20,9 @@ class SheetDownloader
         $this->model = $model;
         $this->rows = $rows;
         $this->randKey = str_random(6);
+
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', '300');
     }
 
     private function getColumn($i)
