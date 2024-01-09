@@ -107,9 +107,11 @@ function localizedRoutes($callback, $forcedLocale = null)
     $path = base_path($callback);
 
     return function() use ($path, $callback, $forcedLocale) {
-        $index = \Localization::addLocalizedRoutes($callback);
+        if ( \Localization::canBootAutomatically() === true ) {
+            $index = \Localization::addLocalizedRoutes($callback);
 
-        app()->router->addLocalizationAttributes($index, $forcedLocale);
+            app()->router->addLocalizationAttributes($index, $forcedLocale);
+        }
 
         require $path;
     };
