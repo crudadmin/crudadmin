@@ -213,7 +213,9 @@ class LocalizationHelper
         }
 
         //Update app localization
-        $this->setLocale(@$language->slug ?: null);
+        if ( $this->canBootAutomatically() && ($locale = $language?->slug) ){
+            $this->setLocale($locale);
+        }
 
         return $language;
     }
