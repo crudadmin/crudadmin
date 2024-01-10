@@ -34,9 +34,9 @@ class ImageController extends Controller
 
         $adminFile = $model->getAdminFile($fieldKey, $filename);
 
-        $storage = $adminFile->getCacheStorage();
+        $resizedImage = $adminFile->resize(50, 50, true, 'admin-thumbnails');
 
-        $resizedImage = $adminFile->resize(50, 50, true);
+        $storage = $resizedImage->getCacheStorage();
 
         //Retrieve resized and compressed image
         $response = $storage->response(
