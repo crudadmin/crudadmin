@@ -128,7 +128,7 @@ trait Historiable
         //Fix json mysql version differences, because PHP has slightly different json format.
         //MySQL has empty values after :
         foreach ($data as $key => $value) {
-            if ( ($jsonData = json_decode($value, true)) && (is_array($jsonData)) ){
+            if ( is_string($value) && ($jsonData = json_decode($value, true)) && (is_array($jsonData)) ){
                 //We want sort localized keys to same order
                 ksort($jsonData);
 
