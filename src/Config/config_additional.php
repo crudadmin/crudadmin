@@ -36,6 +36,7 @@ return [
      */
     'gettext_source_paths' => [
         'routes',
+        'app/Listeners',
         'app/Http',
         'app/Http/Controllers',
         'app/Http/Middleware',
