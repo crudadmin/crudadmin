@@ -69,4 +69,9 @@ CKEDITOR.editorConfig = function( config ) {
     config.format_tags = 'p;h1;h2;h3;pre';
     config.entities = false;
     config.extraPlugins = 'oembed,font';
+
+    //CK editor config mutator
+    if ( window.crudadmin && window.crudadmin.ckeditorConfig ) {
+        window.crudadmin.ckeditorConfig(config);
+    }
 };
