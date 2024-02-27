@@ -19,7 +19,7 @@ Route::get('/admin/download/signed/{hash}', 'DownloadController@signedDownload')
 //Image thumbnails and storage downloads
 
 //Redirect legacy websites with previous cache location type.
-if ( AdminFile::isCacheInRootFolder() == true ) {
+if ( AdminFile::isCacheFolderSymlinked() == true ) {
     Route::get(AdminFile::UPLOADS_DIRECTORY.'/'.AdminFile::CACHE_DIRECTORY.'/{table}/{fieldKey}/{prefix}/{filename}', 'ImageController@redirectToCache');
 }
 
