@@ -180,7 +180,13 @@ class SheetDownloader
         } else if ( $this->model->hasFieldParam($column, ['belongsToMany']) ){
             $value = $this->getBelongsToValue($column, $rawValue);
         } else if ( $this->model->isFieldType($column, 'select') ){
-            $value = $this->model->getSelectOption($column, $rawValue);
+            if ( $this->model->hasFieldParam($column, 'multiple') ) {
+                $value = collect($rawValue)->map(function($value) use ($column) {
+                    $this->model->getSelectOption($column, $value);
+                })->join(', ');
+            } else {
+                $value = $this->model->getSelectOption($column, $rawValue);
+            }
         } else if ( $this->model->hasFieldParam($column, 'locale') || $column == 'slug' && $this->model->hasLocalizedSlug() ){
             $model = $this->model->forceFill([ $column => $rawValue]);
 
