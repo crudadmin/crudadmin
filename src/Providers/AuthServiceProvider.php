@@ -22,11 +22,11 @@ class AuthServiceProvider extends ServiceProvider
 
         config()->set('auth.providers.admins', [
             'driver' => 'eloquent',
-            'model' => ($authModel = Admin::getAuthModel(true)) ? $authModel : \Admin\Models\Admin::class,
+            'model' => $modelClass = (($authModel = Admin::getAuthModel(true)) ? $authModel : \Admin\Models\Admin::class),
         ]);
 
         $this->app->config['auth.passwords.admin'] = [
-            'provider' => (new $authModel)->getTable(),
+            'provider' => (new $modelClass)->getTable(),
             'table' => config('auth.passwords.users.table', 'password_reset_tokens'),
             'expire' => 60,
         ];
