@@ -15,7 +15,7 @@ class AddSelectSupport extends MutationRule
 {
     use DataStore;
 
-    public $attributes = ['options', 'option', 'multiple', 'filterBy', 'fillBy', 'canAdd', 'canEdit', 'canView', 'required_with_values'];
+    public $attributes = ['options', 'option', 'multiple', 'filterBy', 'fillBy', 'canAdd', 'canEdit', 'canView', 'canList', 'required_with_values'];
 
     private function isAllowedMutation($field)
     {

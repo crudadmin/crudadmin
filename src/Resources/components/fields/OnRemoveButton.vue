@@ -11,7 +11,7 @@ export default {
     methods : {
         onRowRemove(ids){
             this.model.emitRowData('onDelete', ids);
-            this.model.fire('onDelete', ids);
+            this.model.fire(['onDelete', 'delete'], ids);
 
             //Reset opened form which has been deleted
             let row = this.model.getRow();

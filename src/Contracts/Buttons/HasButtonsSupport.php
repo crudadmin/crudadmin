@@ -39,7 +39,7 @@ trait HasButtonsSupport
     {
         if (
             //If reloadall is turned on, but we are listing in non-existing parent, we need return only accessed button
-            ($request['parentTable'] && !$request['parentId'])
+            (($request['parentTable'] ?? false) && !($request['parentId'] ?? false))
 
             //If reload is turned off, we need return only accessed buttons
             || $this->reloadAll === false

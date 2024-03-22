@@ -31,12 +31,13 @@ class FieldsRelation extends AdminModel
     {
         return [
             Group::half([
-                'relation1' => 'name:BelongsTo (simple)|belongsTo:articles,name|title:with single column|hidden|required',
+                'relation1' => 'name:BelongsTo (simple)|belongsTo:articles,name|title:with single column|canAdd|canEdit|canView|canList|hidden|required',
+                'relation1_comment' => 'name:BelongsTo comment (simple)|belongsTo:articles_comments,name|filterBy:relation1|title:with single column|canAdd|canEdit|canView|canList|hidden',
                 'relation2' => 'name:BelongsTo (column)|belongsTo:articles,my option :name :score|title:with builded option by columns|required',
                 'relation3' => 'name:BelongsTo (binded data)|belongsTo:articles,my second option :name :score|title:with builded option by columns and given rows|required',
             ]),
             Group::half([
-                'relation_multiple1' => 'name:BelongsToMany (simple)|belongsToMany:articles,name|title:with single column|required',
+                'relation_multiple1' => 'name:BelongsToMany (simple)|belongsToMany:articles,name|title:with single column|canAdd|canView|canEdit|required',
                 'relation_multiple2' => 'name:BelongsToMany (column)|belongsToMany:articles,my option :name :score|title:with builded option by columns|required',
                 'relation_multiple3' => 'name:BelongsToMany (binded data)|belongsToMany:articles,second option :name :score|title:with builded option by columns and given rows|required',
             ]),
