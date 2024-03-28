@@ -152,6 +152,8 @@ class ImageController extends Controller
             } catch (Exception $e){
                 abort(500);
             }
+        } else if ( $adminFile->existsCached() === false ) {
+            abort(404);
         } else if ( in_array($extension, ['pdf']) ) {
             return response()->make($adminFile->get(), 200, [
                 'Content-Type' => 'application/pdf',
