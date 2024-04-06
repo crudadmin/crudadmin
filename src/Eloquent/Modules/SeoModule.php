@@ -37,12 +37,15 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
 
     public function isActive($model)
     {
-        return $model->getProperty('seo') === true;
+        $seo = $model->getProperty('seo');
+
+        return $seo === true || is_string($seo);
     }
 
     public function mutateFields($fields, $row)
     {
         $model = $this->getModel();
+        $seo = $model->getProperty('seo');
 
         $items = [];
 
@@ -62,7 +65,13 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
             'meta_image' => 'name:Obrázky stránky|image|multiple',
         ]))->add('hidden')->name('Meta tagy')->icon('fa-info')->id('seo_tab');
 
-        $fields->push($seoTab);
+        if ( is_string($seo) ) {
+            $fields->group($seo, function($group) use ($seoTab) {
+                $group->push($seoTab);
+            });
+        } else {
+            $fields->push($seoTab);
+        }
     }
 
     /*
