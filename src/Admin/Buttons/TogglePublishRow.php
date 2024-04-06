@@ -19,7 +19,7 @@ class TogglePublishRow extends Button
         }
 
         //Name of button on hover
-        $this->name = _('Publikovať');
+        $this->name = $row->published_at ? _('Skryť') : _('Publikovať');
 
         //Button classes
         $this->class = $this->getRowClass($row);
