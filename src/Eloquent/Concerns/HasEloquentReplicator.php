@@ -85,7 +85,11 @@ trait HasEloquentReplicator
                 $childrenRow->forceRemoveWithRelations($options, $this);
             },
             function($query) {
-                $query->selectOnlyRelationColumns($this)->withTrashed();
+                $query->selectOnlyRelationColumns($this);
+
+                if ( $query->getModel()->hasSoftDeletes() ){
+                    $query->withTrashed();
+                }
             }
         );
 
