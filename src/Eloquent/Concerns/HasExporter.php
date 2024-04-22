@@ -317,7 +317,15 @@ trait HasExporter
 
                     $this->attributes[$key] = count($files) == 1 && isset($files[0]) ? $files[0] : $files;
                 } else {
-                    $this->attributes[$key] = $this->{$key}?->url;
+                    $value = $this->{$key};
+
+                    if ( is_array($value) ){
+                        $this->attributes[$key] = array_map(function($row){
+                            return $row->url;
+                        }, $value);
+                    } else {
+                        $this->attributes[$key] = $value?->url;
+                    }
                 }
             }
         }
