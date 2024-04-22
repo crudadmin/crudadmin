@@ -13,7 +13,7 @@
         "crudadmin/framework": "^5.0|dev-master|dev-5.0-dev",
         "crudadmin/resources" : "^5.0|dev-master|dev-5.0-dev",
         "crudadmin/autoajax" : "^2.0|dev-master",
-        "laravel/framework": "^9|^10",
+        "laravel/framework": "^9|^10|^11",
         "laravel/sanctum": "^2|^3",
         "laravel/ui": "^3.0|^4.0",
         "gettext/gettext": "^4.6"
