@@ -14,12 +14,12 @@
         "crudadmin/resources" : "^5.0|dev-master|dev-5.0-dev",
         "crudadmin/autoajax" : "^2.0|dev-master",
         "laravel/framework": "^9|^10|^11",
-        "laravel/sanctum": "^2|^3",
+        "laravel/sanctum": "^2|^3|^4",
         "laravel/ui": "^3.0|^4.0",
         "gettext/gettext": "^4.6"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^8.0|^9.0|^10.0|^11.0",
         "orchestra/testbench": "^7.0|^8.0",
         "orchestra/testbench-dusk": "^7.0|^8.0|^9.0|^10.0",
         "laravel/legacy-factories": "^1.0.4"
