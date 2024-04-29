@@ -2,9 +2,10 @@
 
 namespace Admin\Eloquent\Concerns;
 
+use Admin;
+use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Admin;
 
 trait HasEloquentReplicator
 {
@@ -39,7 +40,7 @@ trait HasEloquentReplicator
         $clonedRow->save();
 
         $this->cloneBelongsToManyFields(function($key) use ($clonedRow) {
-            if ( $this->{$key}->count() == 0 ) {
+            if ( !($this->{$key} instanceof AdminModel) || $this->{$key}->count() == 0 ) {
                 return;
             }
 
@@ -128,26 +129,43 @@ trait HasEloquentReplicator
         $fields = $row->getFields();
 
         foreach ($fields as $key => $field) {
-            if ( !$row->isFieldType($key, 'file') || !$row->{$key} || !$row->{$key}->exists() ){
+            if ( !$row->isFieldType($key, 'file') || !$row->{$key} ){
                 continue;
             }
 
-            $filename = $row->{$key}->filename;
+            $isArray = $row->hasFieldParam($key, ['multiple', 'locale']);
 
-            $textPrefix = 'cloned_';
-            $prefix = $textPrefix.str_random(4).'_';
+            $fileOrFiles = array_wrap($row->{$key});
+            $modifiedFiles = [];
 
-            //If is already prefixed name, we want start with new prefix
-            if ( substr($filename, 0, strlen($textPrefix)) == $textPrefix ) {
-                $filename = substr($filename, strlen($prefix));
+            foreach ($fileOrFiles as $k => $file) {
+                if ( !$file->exists() ){
+                    continue;
+                }
+
+                $filename = $file->filename;
+
+                $textPrefix = 'cloned_';
+                $prefix = $textPrefix.str_random(4).'_';
+
+                //If is already prefixed name, we want start with new prefix
+                if ( substr($filename, 0, strlen($textPrefix)) == $textPrefix ) {
+                    $filename = substr($filename, strlen($prefix));
+                }
+
+                $newFilename = $prefix.$filename;
+                $newPath = dirname($file->basepath).'/'.$newFilename;
+
+                $file->copy($newPath);
+
+                $modifiedFiles[$k] = $newFilename;
             }
 
-            $newFilename = $prefix.$filename;
-            $newPath = dirname($row->{$key}->basepath).'/'.$newFilename;
+            $newData = $isArray
+                            ? $modifiedFiles
+                            : $modifiedFiles[0] ?? null;
 
-            $row->{$key}->copy($newPath);
-
-            $row->setAttribute($key, $newFilename);
+            $row->setAttribute($key, $newData);
         }
     }
 
