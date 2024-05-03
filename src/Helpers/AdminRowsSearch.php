@@ -202,9 +202,10 @@ class AdminRowsSearch
             $tableColumn = $model->fixAmbiguousColumn($column);
 
             //If is imaginarry field, skip whole process
-            if ( $model->isFieldType($column, 'imaginary') || $model->hasFieldParam($column, ['imaginary']) ) {
+            if ( $model->isFieldType($column, ['imaginary', 'geometry']) || $model->hasFieldParam($column, ['imaginary', 'inaccessible']) ) {
                 return;
             }
+
             //Support for encrypted fields
             else if ( $model->hasFieldParam($column, ['encrypted']) && array_key_exists($column, $model->getEncryptedFields(true)) ) {
                 $builder->whereJsonContains(
