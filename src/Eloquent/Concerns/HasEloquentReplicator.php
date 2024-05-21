@@ -41,11 +41,13 @@ trait HasEloquentReplicator
         $clonedRow->save();
 
         $this->cloneBelongsToManyFields(function($key) use ($clonedRow) {
-            if ( !($this->{$key} instanceof AdminModel) || $this->{$key}->count() == 0 ) {
+            $rows = $this->getValue($key);
+
+            if ( !($rows instanceof Collection) || $rows->count() == 0 ) {
                 return;
             }
 
-            $relationIds = $this->{$key}->pluck('id')->toArray();
+            $relationIds = $rows->pluck('id')->toArray();
 
             $clonedRow->{$key}()->sync($relationIds);
         });
