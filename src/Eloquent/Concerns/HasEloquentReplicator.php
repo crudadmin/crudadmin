@@ -13,6 +13,7 @@ trait HasEloquentReplicator
     {
         $onlyModels = $options['only'] ?? [];
         $exceptModels = $options['except'] ?? [];
+        $unpublish = $options['unpublish'] ?? true;
 
         //Skip clone given models
         if ( count($onlyModels) && $parentRow && !in_array(static::class, $onlyModels) ){
@@ -27,7 +28,7 @@ trait HasEloquentReplicator
             $this->getProperty('sortable') ? '_order' : null
         ]));
 
-        if ( $this->getProperty('publishable') == true ) {
+        if ( $this->getProperty('publishable') == true && $unpublish == true ) {
             $clonedRow->published_at = null;
         }
 
@@ -139,11 +140,12 @@ trait HasEloquentReplicator
             $modifiedFiles = [];
 
             foreach ($fileOrFiles as $k => $file) {
+                $filename = $file->filename;
+
                 if ( !$file->exists() ){
+                    $modifiedFiles[$k] = $filename;
                     continue;
                 }
-
-                $filename = $file->filename;
 
                 $textPrefix = 'cloned_';
                 $prefix = $textPrefix.str_random(4).'_';
