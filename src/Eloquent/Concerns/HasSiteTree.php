@@ -46,4 +46,9 @@ trait HasSiteTree
     {
         // return action('...', $this->getSlug());
     }
+
+    public function toTreeActionArray()
+    {
+        return $this->toArray();
+    }
 }
