@@ -17,6 +17,13 @@ class SiteTreeController extends Controller
 
         $data = $validator->getData();
 
+        //Add relation keys
+        foreach ($model->getForeignColumn() ?: [] as $foreignTable => $relationKeyName) {
+            if ( request()->has($relationKeyName) ) {
+                $data[$relationKeyName] = request($relationKeyName);
+            }
+        }
+
         //For groups automatically insert disabled types
         if ( $data['type'] == 'group' ){
             $data['disabled_types'] = ['group', 'group-link'];
