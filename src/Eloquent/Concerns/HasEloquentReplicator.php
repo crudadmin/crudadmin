@@ -2,9 +2,10 @@
 
 namespace Admin\Eloquent\Concerns;
 
+use Admin;
+use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Admin;
 
 trait HasEloquentReplicator
 {
@@ -12,6 +13,7 @@ trait HasEloquentReplicator
     {
         $onlyModels = $options['only'] ?? [];
         $exceptModels = $options['except'] ?? [];
+        $unpublish = $options['unpublish'] ?? true;
 
         //Skip clone given models
         if ( count($onlyModels) && $parentRow && !in_array(static::class, $onlyModels) ){
@@ -26,7 +28,7 @@ trait HasEloquentReplicator
             $this->getProperty('sortable') ? '_order' : null
         ]));
 
-        if ( $this->getProperty('publishable') == true ) {
+        if ( $this->getProperty('publishable') == true && $unpublish == true ) {
             $clonedRow->published_at = null;
         }
 
@@ -39,11 +41,13 @@ trait HasEloquentReplicator
         $clonedRow->save();
 
         $this->cloneBelongsToManyFields(function($key) use ($clonedRow) {
-            if ( $this->{$key}->count() == 0 ) {
+            $rows = $this->getValue($key);
+
+            if ( !($rows instanceof Collection) || $rows->count() == 0 ) {
                 return;
             }
 
-            $relationIds = $this->{$key}->pluck('id')->toArray();
+            $relationIds = $rows->pluck('id')->toArray();
 
             $clonedRow->{$key}()->sync($relationIds);
         });
@@ -128,26 +132,44 @@ trait HasEloquentReplicator
         $fields = $row->getFields();
 
         foreach ($fields as $key => $field) {
-            if ( !$row->isFieldType($key, 'file') || !$row->{$key} || !$row->{$key}->exists() ){
+            if ( !$row->isFieldType($key, 'file') || !$row->{$key} ){
                 continue;
             }
 
-            $filename = $row->{$key}->filename;
+            $isArray = $row->hasFieldParam($key, ['multiple', 'locale']);
 
-            $textPrefix = 'cloned_';
-            $prefix = $textPrefix.str_random(4).'_';
+            $fileOrFiles = array_wrap($row->{$key});
+            $modifiedFiles = [];
 
-            //If is already prefixed name, we want start with new prefix
-            if ( substr($filename, 0, strlen($textPrefix)) == $textPrefix ) {
-                $filename = substr($filename, strlen($prefix));
+            foreach ($fileOrFiles as $k => $file) {
+                $filename = $file->filename;
+
+                if ( !$file->exists() ){
+                    $modifiedFiles[$k] = $filename;
+                    continue;
+                }
+
+                $textPrefix = 'cloned_';
+                $prefix = $textPrefix.str_random(4).'_';
+
+                //If is already prefixed name, we want start with new prefix
+                if ( substr($filename, 0, strlen($textPrefix)) == $textPrefix ) {
+                    $filename = substr($filename, strlen($prefix));
+                }
+
+                $newFilename = $prefix.$filename;
+                $newPath = dirname($file->path).'/'.$newFilename;
+
+                $file->copy($newPath);
+
+                $modifiedFiles[$k] = $newFilename;
             }
 
-            $newFilename = $prefix.$filename;
-            $newPath = dirname($row->{$key}->basepath).'/'.$newFilename;
+            $newData = $isArray
+                            ? $modifiedFiles
+                            : $modifiedFiles[0] ?? null;
 
-            $row->{$key}->copy($newPath);
-
-            $row->setAttribute($key, $newFilename);
+            $row->setAttribute($key, $newData);
         }
     }
 
