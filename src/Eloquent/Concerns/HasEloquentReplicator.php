@@ -28,6 +28,10 @@ trait HasEloquentReplicator
             $this->getProperty('sortable') ? '_order' : null
         ]));
 
+        if ( method_exists($clonedRow, 'onReplicate') ){
+            $clonedRow->onReplicate($parentRow);
+        }
+
         if ( $this->getProperty('publishable') == true && $unpublish == true ) {
             $clonedRow->published_at = null;
         }
@@ -208,7 +212,9 @@ trait HasEloquentReplicator
             $relationRows = $this->{$modelName}()
                                 ->when($scope, function($query) {
                                     $scope($query);
-                                })->get();
+                                })
+                                ->orderBy('id', 'ASC') //Copy from latest first.
+                                ->get();
 
             if ( $relationRows instanceof Collection ) {
                 foreach ($relationRows as $relationRow) {
