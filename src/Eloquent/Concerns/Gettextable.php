@@ -67,7 +67,7 @@ trait Gettextable
         //Update gettext files...
         if ($this->hasGettextSupport()) {
             //On update we need downloads file from cloud storage and save it into local storage
-            if ( $row->poedit_po->exists ) {
+            if ( $row->poedit_po?->exists ) {
                 Gettext::getStorage()->put(
                     $this->localPoPath,
                     $row->poedit_po->get()
