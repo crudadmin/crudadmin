@@ -5,7 +5,7 @@
             <thead>
                 <th>{{ trans('roles-module') }}</th>
                 <th v-for="(permission, permission_key) in getBasePermissions">{{ permission.name }}</th>
-                <th>{{ _('Ostatné') }}</th>
+                <th>{{ __('Ostatné') }}</th>
                 <th>{{ trans('roles-all') }}</th>
             </thead>
             <tbody>
