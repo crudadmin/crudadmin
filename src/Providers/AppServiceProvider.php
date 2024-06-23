@@ -36,6 +36,7 @@ class AppServiceProvider extends AdminHelperServiceProvider
         'FrontendEditor' => Facades\FrontendEditor::class,
         'SiteTree' => Facades\SiteTree::class,
         'SEO' => Facades\SEOFacade::class,
+        'AdminTree' => Facades\AdminTree::class,
     ];
 
     protected $routeMiddleware = [

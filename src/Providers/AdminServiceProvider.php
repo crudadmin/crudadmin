@@ -17,6 +17,7 @@ class AdminServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind('admin', \Admin\Helpers\Admin::class);
+        $this->app->bind('admintree', \Admin\Helpers\AdminTree::class);
     }
 
     public function boot()

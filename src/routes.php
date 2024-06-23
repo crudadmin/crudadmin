@@ -35,11 +35,8 @@ Route::get('/vendor/js/ca-translates-json.js', 'GettextController@getJson');
  * Admin routes
  */
 Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin', 'hasDevMode', 'adminLocalized']], function () {
-    //Api
-    Route::get('/admin/api/layout', 'LayoutController@index');
-    Route::post('/admin/api/rows/{table}', 'LayoutController@getRows');
-
     //Requests
+    Route::post('/admin/api/rows/{table}', 'Crud\DataController@getRows');
     Route::get('/admin/api/show/{model}/{id}/{subid?}', 'Crud\DataController@show');
     Route::post('/admin/api/store', 'Crud\InsertController@store')->middleware('hasAdminRole:insert');
     Route::put('/admin/api/update', 'Crud\UpdateController@update')->middleware('hasAdminRole:update');
