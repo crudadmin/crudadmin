@@ -56,6 +56,13 @@ class Group extends BaseGroup
      */
     public $attributes = [];
 
+    /**
+     * Set custom tab component
+     *
+     * @var  string
+     */
+    public $component = null;
+
     /*
      * Forward methods to support nonstatic/stattic...
      * origMethodName => alias
@@ -233,6 +240,19 @@ class Group extends BaseGroup
     public function attributes($attributes)
     {
         $this->attributes = Fields::mutate(FieldToArray::class, $attributes);
+
+        return $this;
+    }
+
+    /**
+     * Set component of the tab
+     *
+     * @param  string  $prefix
+     * @return  Group
+     */
+    public function component(string $component)
+    {
+        $this->component = $component;
 
         return $this;
     }
