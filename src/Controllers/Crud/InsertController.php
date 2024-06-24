@@ -70,12 +70,16 @@ class InsertController extends CRUDController
                     }
 
                     //Create row into db
-                    $row = (new $model)->create($requestRow)->fresh();
+                    $createdRow = (new $model)->create($requestRow);
+
+                    //Fetch row with all scoped relations
+                    $row = (new $model)->getAdminRows()->find($createdRow->getKey());
 
                     //Save parent id for $inParent support, because when we will be insering parent childs
                     //we need assign relation key between this rows
-                    if ( $model->getTable() == $parentModel->getTable() )
+                    if ( $model->getTable() == $parentModel->getTable() ) {
                         $parentId = $row->getKey();
+                    }
 
                 } catch (\Illuminate\Database\QueryException $e) {
                     return autoAjax()->mysqlError($e)->throw();
@@ -119,7 +123,10 @@ class InsertController extends CRUDController
      */
     private function assignUnsavedChilds($row, $request, $rows)
     {
-        $unsavedChilds = $unsavedChilds = (array)json_decode($request->_save_children, true);
+        $unsavedChilds = is_array($request->_save_children)
+                            ? $request->_save_children
+                            : (array)json_decode($request->_save_children, true);
+
         if ( count($unsavedChilds) == 0 ){
             return;
         }

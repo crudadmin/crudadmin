@@ -127,8 +127,6 @@ trait HasAttributes
 
         $fields = $this->getFields();
 
-        $this->setVisibleAdminAttributes($isColumns, $isRow);
-
         //Get attributes without mutated values
         $attributes = $this->withAdminCastAttributes(function(){
             return parent::attributesToArray();
@@ -227,6 +225,9 @@ trait HasAttributes
      */
     public function getMutatedAdminAttributes($isColumns = false, $isRow = false)
     {
+        //We need call this first, to other settes be able to use makeVisible
+        $this->setVisibleAdminAttributes($isColumns, $isRow);
+
         $this->runAdminAttributesMutators([
             'setAdminResponse' => true,
             'setAdminRowResponse' => $isRow,
