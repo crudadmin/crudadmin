@@ -68,7 +68,8 @@ class Group extends BaseGroup
      * origMethodName => alias
      */
     protected $forwardCalls = [
-        'inline' => 'inlineFields',
+        'inline' => '_inlineStatic',
+        'component' => '_componentStatic',
     ];
 
     /**
@@ -245,19 +246,6 @@ class Group extends BaseGroup
     }
 
     /**
-     * Set component of the tab
-     *
-     * @param  string  $prefix
-     * @return  Group
-     */
-    public function component(string $component)
-    {
-        $this->component = $component;
-
-        return $this;
-    }
-
-    /**
      * Set where query for tab group relationship
      *
      * @param  Closure  $closure
@@ -292,10 +280,12 @@ class Group extends BaseGroup
     /**
      * Group which will inline all fields in group
      * Fields will be in one row, and not in new row.
+     * ->inline or ::inline is working
+     *
      * @param  array  $fields
      * @return Group
      */
-    public function inlineFields(array $fields = null)
+    public function _inlineStatic(array $fields = null)
     {
         if ( is_array($fields) && count($fields) ){
             $this->fields = $fields;
@@ -304,4 +294,17 @@ class Group extends BaseGroup
         return $this->width($this->width.'-inline');
     }
 
+    /**
+     * Set component of the tab
+     * ->component or ::component are working
+     *
+     * @param  string  $prefix
+     * @return  Group
+     */
+    public function _componentStatic(string $component)
+    {
+        $this->component = $component;
+
+        return $this;
+    }
 }
