@@ -35,9 +35,10 @@ class UpdateController extends InsertController
         foreach ($requests as $data)
         {
             $model = $data['model'];
+            $table = $model->getTable();
             $request = $data['request'];
 
-            $row = $rows[$model->getTable()];
+            $row = $rows[$table];
 
             if ( $row ) {
                 //Save original values
@@ -70,8 +71,11 @@ class UpdateController extends InsertController
 
                 //Check for model rules after row is already updated
                 $row->checkForModelRules(['updated'], true);
+
+                //Re-fetch fresh data, to load new relationships.
+                $rows[$table] = $model->newInstance()->getAdminRows()->find($row->getKey());
             } else {
-                $rows[$model->getTable()] = $this->insertRows($parentModel, [$data], $rows[$parentModel->getTable()]->getKey())[0]['rows'][0];
+                $rows[$table] = $this->insertRows($parentModel, [$data], $rows[$parentModel->getTable()]->getKey())[0]['rows'][0];
             }
         }
 

@@ -80,7 +80,6 @@ class InsertController extends CRUDController
                     if ( $model->getTable() == $parentModel->getTable() ) {
                         $parentId = $row->getKey();
                     }
-
                 } catch (\Illuminate\Database\QueryException $e) {
                     return autoAjax()->mysqlError($e)->throw();
                 }
