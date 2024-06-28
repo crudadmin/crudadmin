@@ -129,7 +129,7 @@ trait HasAttributes
 
         //Get attributes without mutated values
         $attributes = $this->withAdminCastAttributes(function(){
-            return parent::attributesToArray();
+            return $this->toArray();
         });
 
         $this->withoutMutators = false;
