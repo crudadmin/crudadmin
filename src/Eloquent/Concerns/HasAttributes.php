@@ -30,6 +30,29 @@ trait HasAttributes
         return array_merge($this->attributesToArray(), $this->relationsToArray());
     }
 
+    public function toAdminArray()
+    {
+        $array = $this->toArray();
+
+        //Bind belongs to many values
+        foreach ($this->getFields() as $key => $field) {
+            /*
+             * Update multiple values in many relationship
+             */
+            if (
+                //If is belongs to field
+                array_key_exists('belongsToMany', $field) && $this->skipBelongsToMany === false
+
+                //If is visible
+                && (count($this->getVisible()) == 0 || in_array($key, $this->getVisible()))
+            ) {
+                $array[$key] = $this->getValue($key)->pluck('id')->toArray();
+            }
+        }
+
+        return $array;
+    }
+
     /**
      * Check if mutator is whitelisted
      *
@@ -129,7 +152,7 @@ trait HasAttributes
 
         //Get attributes without mutated values
         $attributes = $this->withAdminCastAttributes(function(){
-            return $this->toArray();
+            return $this->toAdminArray();
         });
 
         $this->withoutMutators = false;
@@ -145,13 +168,6 @@ trait HasAttributes
 
         //Bind belongs to many values
         foreach ($this->getFields() as $key => $field) {
-            /*
-             * Update multiple values in many relationship
-             */
-            if (array_key_exists('belongsToMany', $field) && $this->skipBelongsToMany === false) {
-                $this->casts[$key] = \Admin\Eloquent\Casts\BelongsToManyCast::class;
-            }
-
             /*
              * Casts decimal format
              */
@@ -189,13 +205,6 @@ trait HasAttributes
             $visibleColumns = $this->getBaseFields();
 
             $this->{ empty($this->visible) ? 'setVisible' : 'makeVisible'}($visibleColumns);
-        }
-
-        //Add belongsToMany if is visible
-        foreach (($this->getVisible() ?: $visibleColumns) as $key) {
-            if ( $this->hasFieldParam($key, 'belongsToMany') && $this->skipBelongsToMany === false ){
-                $this->append($key);
-            }
         }
     }
 
