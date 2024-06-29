@@ -207,11 +207,11 @@ class AddSelectSupport extends MutationRule
     private function getStaticField($field, $key, $model)
     {
         //Get allowed options
-        $with_options = in_array('*', $model->getAllowedOptions())
+        $withOptions = in_array('*', $model->getAllowedOptions())
                         || in_array($key, $model->getAllowedOptions());
 
         //If is not allowed to displaying all options data
-        if ($with_options !== true
+        if ($withOptions !== true
             || (
                 array_key_exists('hidden', $field)
                 && array_key_exists('invisible', $field)

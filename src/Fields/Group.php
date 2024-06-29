@@ -301,9 +301,9 @@ class Group extends BaseGroup
      * @param  string  $prefix
      * @return  Group
      */
-    public function _componentStatic(string $component)
+    public function _componentStatic($component, $data = [])
     {
-        $this->component = $component;
+        $this->component = [$component, $data ?: []];
 
         return $this;
     }
