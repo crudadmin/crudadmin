@@ -5,11 +5,11 @@ namespace Admin\Eloquent\Concerns;
 use Admin;
 use Admin\Eloquent\Authenticatable;
 use Admin\Helpers\AdminCollection;
+use Arr;
 use Carbon\Carbon;
 use Fields;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Arr;
 
 trait AdminModelTrait
 {
@@ -362,6 +362,30 @@ trait AdminModelTrait
         foreach ($this->flattenGroups($groups) as $group) {
             if ( $group instanceof Admin\Fields\Group && $group->getModel() === $this->getTable() && $closure = $group->getWhere() ) {
                 return $closure($query, $this->getParentRow());
+            }
+        }
+    }
+
+    public function scopeWithFieldRelations($query)
+    {
+        //Load relationships
+        foreach ($this->getFields() as $key => $field) {
+            if ($this->hasFieldParam($key, 'belongsTo')) {
+                $method = substr($key, 0, -3);
+
+                $query->with([
+                    $method,
+                ]);
+            }
+
+            if ($this->hasFieldParam($key, 'belongsToMany')) {
+                $properties = $this->getRelationProperty($key, 'belongsToMany');
+
+                $query->with([
+                    $key.'_pivot' => function($query){
+                        $query->adminRows();
+                    },
+                ]);
             }
         }
     }

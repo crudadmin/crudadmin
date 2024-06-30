@@ -100,7 +100,7 @@ class DataController extends CRUDController
             return $this->showDataFromHistory($model, $id, $history_id);
         }
 
-        $row = $this->getModel($model)->findOrFail($id);
+        $row = $this->getModel($model)->withFieldRelations()->findOrFail($id);
 
         $row->logHistoryAction('view');
 

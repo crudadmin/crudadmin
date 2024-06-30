@@ -79,27 +79,6 @@ class AdminRows
     }
 
     /*
-     * Returns which model dependencies have to be loaded
-     */
-    private function getDependeciesIntoQuery()
-    {
-        $with = [];
-
-        //Load relationships
-        foreach ($this->model->getFields() as $key => $field) {
-            if ($this->model->hasFieldParam($key, 'belongsTo')) {
-                $with[] = substr($key, 0, -3);
-            }
-
-            if ($this->model->hasFieldParam($key, 'belongsToMany')) {
-                $with[] = $key;
-            }
-        }
-
-        return $with;
-    }
-
-    /*
      * Returns filtered and paginated rows from administration
      */
     private function getRowsDataQuery($callback = null, $withDependencies = false)
@@ -107,11 +86,7 @@ class AdminRows
         $query = $this->model->newQuery();
 
         if ( $withDependencies === true ) {
-            //Get model dependencies
-            $with = $this->getDependeciesIntoQuery();
-
-            //Get base columns from database with relationships
-            $query = $query->with($with);
+            $query->withFieldRelations();
         }
 
         //Filter by localization

@@ -34,6 +34,13 @@ trait HasAttributes
     {
         $array = $this->toArray();
 
+        $array = $this->updateRelationsArrayResponse($array);
+
+        return $array;
+    }
+
+    private function updateRelationsArrayResponse($array)
+    {
         //Bind belongs to many values
         foreach ($this->getFields() as $key => $field) {
             /*
@@ -45,8 +52,24 @@ trait HasAttributes
 
                 //If is visible
                 && (count($this->getVisible()) == 0 || in_array($key, $this->getVisible()))
+                && $this->relationLoaded($pivotKey = $key.'_pivot')
             ) {
-                $array[$key] = $this->getValue($key)->pluck('id')->toArray();
+                $properties = $this->getRelationProperty($key, 'belongsToMany');
+
+                $array[$key] = $this->{$pivotKey}->map(function($row) use ($properties) {
+                    $array = $row->toArray();
+                    unset($array[$properties[6]]);
+                    unset($array[$properties[7]]);
+
+                    return [
+                        ...$array,
+                        'id' => $row->{$properties[7]},
+                    ];
+                })->toArray();
+
+                if ( isset($array[$pivotKey]) ) {
+                    unset($array[$pivotKey]);
+                }
             }
         }
 
@@ -172,7 +195,8 @@ trait HasAttributes
              * Casts decimal format
              */
             if ($field['type'] == 'decimal') {
-                $this->addMultiCast($key, \Admin\Eloquent\Casts\DecimalCast::class);
+                //TODO: refactor this, wont work
+                // $this->addMultiCast($key, \Admin\Eloquent\Casts\DecimalCast::class);
             }
         }
 
