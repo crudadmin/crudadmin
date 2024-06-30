@@ -253,7 +253,10 @@ abstract class Request extends FormRequest
     public function jsonFields(array $fields = null)
     {
         foreach ($fields as $key => $field) {
-            if ($this->model->isFieldType($key, 'json') && is_string($value = $this->get($key)) ) {
+            if (
+                ($this->model->isFieldType($key, ['json']) || $this->model->hasFieldParam($key, ['multiple']))
+                && is_string($value = $this->get($key))
+            ) {
                 $json = json_decode($value, true);
 
                 $this->merge([

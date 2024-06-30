@@ -3,8 +3,6 @@
 namespace Admin\Controllers\Crud;
 
 use Admin\Controllers\Crud\CRUDController;
-use Admin\Controllers\Crud\Concerns\CRUDRelations;
-use Admin\Controllers\Crud\Concerns\CRUDResponse;
 use Admin\Helpers\AdminRows;
 use Admin\Requests\DataRequest;
 use Illuminate\Http\Request;
@@ -13,9 +11,6 @@ use Str;
 
 class InsertController extends CRUDController
 {
-    use CRUDResponse,
-        CRUDRelations;
-
     /*
      * Saving new row
      */
@@ -84,8 +79,7 @@ class InsertController extends CRUDController
                     return autoAjax()->mysqlError($e)->throw();
                 }
 
-                $this->updateBelongsToMany($model, $row, $request);
-
+                $this->syncBelongsToMany($model, $request);
                 $this->assignUnsavedChilds($row, $request, $rows);
                 $this->moveTemporaryUploads($row, $request);
                 $row->makeHistorySnapshot($requestRow, 'insert');

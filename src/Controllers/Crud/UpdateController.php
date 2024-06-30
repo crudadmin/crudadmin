@@ -2,8 +2,6 @@
 
 namespace Admin\Controllers\Crud;
 
-use Admin\Controllers\Crud\Concerns\CRUDRelations;
-use Admin\Controllers\Crud\Concerns\CRUDResponse;
 use Admin\Controllers\Crud\InsertController;
 use Admin\Requests\DataRequest;
 use Illuminate\Database\QueryException;
@@ -11,9 +9,6 @@ use Illuminate\Http\Request;
 
 class UpdateController extends InsertController
 {
-    use CRUDResponse,
-        CRUDRelations;
-
     /*
      * Updating rows in db
      */
@@ -59,7 +54,7 @@ class UpdateController extends InsertController
                 //Save into history
                 $row->makeHistorySnapshot($original, 'update');
 
-                $this->updateBelongsToMany($model, $row, $request);
+                $this->syncBelongsToMany($model, $request);
 
                 //Restore original values
                 $row->restoreOriginalAttributes();

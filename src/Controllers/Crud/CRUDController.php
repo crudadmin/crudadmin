@@ -4,10 +4,12 @@ namespace Admin\Controllers\Crud;
 
 use Admin;
 use Admin\Controllers\Controller;
-use Admin\Requests\DataRequest;
+use Admin\Controllers\Crud\Concerns\CRUDRelations;
+use Admin\Controllers\Crud\Concerns\CRUDResponse;
+use Admin\Core\Fields\FieldsValidator;
 use Admin\Core\Fields\Validation\FileMutator;
 use Admin\Core\Fields\Validation\ValidationMutator;
-use Admin\Core\Fields\FieldsValidator;
+use Admin\Requests\DataRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Localization;
@@ -15,6 +17,9 @@ use Validator;
 
 class CRUDController extends Controller
 {
+    use CRUDResponse,
+        CRUDRelations;
+
     /*
      * Get model object by model name, and check user permissions for this model
      */
@@ -230,19 +235,24 @@ class CRUDController extends Controller
 
         $updatedRules = [];
 
-        foreach ($rules as $validation_key => $data) {
-            $originalKey = $this->getDefaultKey($validation_key);
+        foreach ($rules as $validationKey => $data) {
+            $originalKey = $this->getDefaultKey($validationKey);
 
             //If is editing multirows
             if ( isset($row) && $model->hasFieldParam($originalKey, ['multirows']) ) {
                 $key = $originalKey;
             } else {
-                $key = $validation_key;
+                $key = $validationKey;
             }
 
             //If field is hidden from form, then remove required rule
             if ($this->isHiddenField($model, $originalKey)) {
                 unset($data[array_search('required', $data)]);
+            }
+
+            //Enable multiple data receive as json string
+            if ($model->hasFieldParam($originalKey, ['multiple'])) {
+                unset($data[array_search('array', $data)]);
             }
 
             //If selectbox has available values, then add required rule for this field
