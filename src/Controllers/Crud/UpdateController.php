@@ -54,7 +54,7 @@ class UpdateController extends InsertController
                 //Save into history
                 $row->makeHistorySnapshot($original, 'update');
 
-                $this->syncBelongsToMany($model, $request);
+                $this->syncBelongsToMany($row, $request);
 
                 //Restore original values
                 $row->restoreOriginalAttributes();

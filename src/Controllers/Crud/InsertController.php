@@ -79,7 +79,7 @@ class InsertController extends CRUDController
                     return autoAjax()->mysqlError($e)->throw();
                 }
 
-                $this->syncBelongsToMany($model, $request);
+                $this->syncBelongsToMany($row, $request);
                 $this->assignUnsavedChilds($row, $request, $rows);
                 $this->moveTemporaryUploads($row, $request);
                 $row->makeHistorySnapshot($requestRow, 'insert');

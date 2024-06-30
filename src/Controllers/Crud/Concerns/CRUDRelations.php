@@ -7,9 +7,9 @@ trait CRUDRelations
     /*
      * Add/update belongs to many rows into pivot table from selectbox
      */
-    protected function syncBelongsToMany($model, $request)
+    protected function syncBelongsToMany($row, $request)
     {
-        foreach ($model->getFields() as $key => $field) {
+        foreach ($row->getFields() as $key => $field) {
             if (!array_key_exists('belongsToMany', $field)) {
                 continue;
             }
@@ -27,19 +27,20 @@ trait CRUDRelations
 
             $pivotData = [];
 
-            foreach ($values as $row) {
-                $isArray = is_array($row);
+            foreach ($values as $item) {
+                $isArray = is_array($item);
 
-                $id = $isArray ? $row['id'] : $row;
+                $id = $isArray ? $item['id'] : $item;
 
                 if ( $isArray ) {
-                    unset($row['id']);
+                    unset($item['id']);
                 }
 
-                $pivotData[$id] = $isArray ? $row : [];
+                //Pass additional pivot data, or pass noting in case of simple id
+                $pivotData[$id] = $isArray ? $item : [];
             }
 
-            $model->{$key}()->sync($pivotData);
+            $row->{$key}()->sync($pivotData);
         }
     }
 }
