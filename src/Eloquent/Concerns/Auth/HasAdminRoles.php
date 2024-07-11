@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns\Auth;
 
 use Admin;
+use Admin\Models\AdminsRole;
 
 trait HasAdminRoles
 {
@@ -34,6 +35,19 @@ trait HasAdminRoles
         }
 
         return false;
+    }
+
+    public function roles()
+    {
+        //Use roles assigned in CMS
+        if ( $this->hasAdminRoles() ){
+            return parent::roles();
+        }
+
+        //Use staticaly assigned roles
+        return $this->hasMany(AdminsRole::class)->setQuery(
+            AdminsRole::whereIn('id', $this->enabledRoles ?: [])->getQuery()
+        );
     }
 
     /*

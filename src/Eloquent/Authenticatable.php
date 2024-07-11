@@ -68,11 +68,16 @@ class Authenticatable extends BaseAuthenticatable
     public function isEnabled()
     {
         //If field enabled is present.
-        if ( $this->getField('enabled') ){
+        if ( $this->hasEnabledSupport() ){
             return $this->enabled === true;
         }
 
         return true;
+    }
+
+    public function hasEnabledSupport()
+    {
+        return $this->getField('enabled') ? true : false;
     }
 
     public function getAvatarThumbnailAttribute()

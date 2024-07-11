@@ -16,13 +16,13 @@ class OnAdminUpdateRule extends AdminRule
     {
         $isMe = $row->getKey() == admin()->getKey();
 
-        if ( $isMe && $row->enabled == false ){
+        if ( $isMe && $row->hasEnabledSupport() && $row->enabled == false ){
             autoAjax()->pushMessage('Nie je možné deaktivovať vlastný účet.');
 
             $row->enabled = true;
         }
 
-        if ( $isMe && $row->permissions == false ){
+        if ( $isMe && $row->hasAdminRoles() && $row->permissions == false ){
             autoAjax()->pushMessage('Nie je možné upravovať vlastne administrátorske práva.');
 
             $row->permissions = true;
