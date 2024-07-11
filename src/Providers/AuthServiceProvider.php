@@ -20,11 +20,6 @@ class AuthServiceProvider extends ServiceProvider
             'hash' => false,
         ]);
 
-        config()->set('auth.guards.adminSession', [
-            'driver' => 'session',
-            'provider' => 'admins',
-        ]);
-
         $this->app->config['auth.passwords.admin'] = [
             'provider' => (new $modelClass)->getTable(),
             'table' => config('auth.passwords.users.table', 'password_reset_tokens'),
