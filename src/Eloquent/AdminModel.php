@@ -369,6 +369,13 @@ class AdminModel extends CoreAdminModel
             });
         }
 
+       /*
+        * Add global scope for model permissions
+        */
+        if ( Admin::isAdmin() ){
+            $this->withAdminPermissions();
+        }
+
         //We need leave constructor at the bottom
         //because of booting cachable properties.
         //We want cache also booted properties from crudadmin,

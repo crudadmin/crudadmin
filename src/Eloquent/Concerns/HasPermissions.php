@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait HasPermissions
 {
+    /*
+     * We want disable adminRows infinity loop
+     */
+    public static $adminPermissionsInUse = false;
+
     /**
      * If user is assigned to some object eg. via belongsTo column,
      * then we can filter all other child models which belongs to same model as given user.
@@ -122,9 +127,20 @@ trait HasPermissions
 
     public function withAdminPermissions()
     {
-        self::addGlobalScope('adminPermissions', function(Builder $builder){
+        static::addGlobalScope('adminPermissions', function(Builder $builder){
+            //We want disable inherance of adminRows in this function. Because adminRows are global scope
+            //It can be applied also on models inside this feature. And this will couase buggy behaoviour in
+            //relations auto-finding.
+            if ( static::$adminPermissionsInUse ){
+                return;
+            }
+
+            static::$adminPermissionsInUse = true;
+
             //Check if user can see other rows than current session permissions
             $builder->filterByPermissions();
+
+            static::$adminPermissionsInUse = false;
         });
 
         return $this;
@@ -145,26 +161,12 @@ trait HasPermissions
     /**
      * Filter given model by logged user relationship
      */
-    public function scopeFilterByRelatedModels($query)
+    protected function scopeFilterByRelatedModels($query)
     {
         $admin = admin();
 
         foreach ($admin->filterRowsByColumns() as $key) {
-            //Get relation table name from belongsTo field
-            if ( $admin->hasFieldParam($key, 'belongsTo') ) {
-                $field = $admin->getRelationProperty($key, 'belongsTo');
-                $permissionTable = $field[0];
-            }
-
-            //Get relation table name from belongsToModel relation
-            else {
-                foreach ($admin->getBelongsToRelation() as $relation) {
-                    $table = (new $relation)->getTable();
-                    if ( $admin->getForeignColumn($table) == $key ){
-                        $permissionTable = $table;
-                    }
-                }
-            }
+            $permissionTable = $this->getRelatedPermissionTable($admin, $key);
 
             $filterBy = $admin->{$key};
 
@@ -173,12 +175,36 @@ trait HasPermissions
                 $query->where($this->qualifyColumn('id'), $filterBy);
             }
 
-            //Filter by belongsToModel relations
+            // Filter by belongsToModel relations
             foreach ($this->getBelongsToRelation() as $relatedModel) {
                 $relatedModel = new $relatedModel;
 
                 if ( $relatedModel->getTable() == $permissionTable ){
                     $query->where($this->getForeignColumn($relatedModel->getTable()), $filterBy);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns related table of permissions filter
+     */
+    private function getRelatedPermissionTable($admin, $key)
+    {
+        //Get relation table name from belongsTo field
+        if ( $admin->hasFieldParam($key, 'belongsTo') ) {
+            $field = $admin->getRelationProperty($key, 'belongsTo');
+
+            return $field[0];
+        }
+
+        //Get relation table name from belongsToModel relation
+        else {
+            foreach ($admin->getBelongsToRelation() as $relation) {
+                $table = (new $relation)->getTable();
+
+                if ( $admin->getForeignColumn($table) == $key ){
+                    return $table;
                 }
             }
         }
