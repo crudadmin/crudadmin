@@ -21,7 +21,6 @@ class Authenticate
         $guard = $guard ? auth()->guard($guard) : Admin::getAdminGuard();
 
         if ($guard->guest() || ! $guard->user()->isEnabled()) {
-
             //If is user logged but has not privilegies
             if ($guard->user() && ! $guard->user()->isEnabled()) {
                 $guard->logout();

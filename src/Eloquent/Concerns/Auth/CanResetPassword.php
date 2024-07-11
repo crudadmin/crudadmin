@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Eloquent\Concerns;
+namespace Admin\Eloquent\Concerns\Auth;
 
 use Admin\Notifications\ResetPassword as ResetPasswordNotification;
 

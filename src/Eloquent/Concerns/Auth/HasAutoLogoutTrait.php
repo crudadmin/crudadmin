@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Eloquent\Concerns;
+namespace Admin\Eloquent\Concerns\Auth;
 
 use Admin\Admin\Buttons\LogoutUser;
 

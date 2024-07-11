@@ -1,6 +1,6 @@
 <?php
 
-namespace Admin\Eloquent\Concerns;
+namespace Admin\Eloquent\Concerns\Auth;
 
 use Admin\Admin\Buttons\LogoutUser;
 use Admin\Notifications\LoginVerificatorNotification;
@@ -19,6 +19,11 @@ trait HasLoginVerificator
     public function getLoginVerifications()
     {
         return $this->verification;
+    }
+
+    public function getVerificationMethod()
+    {
+        return $this->verification_method;
     }
 
     public function hasLoginVerification()

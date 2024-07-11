@@ -3,7 +3,7 @@
 namespace Admin\Listeners;
 
 use Admin;
-use Admin\Eloquent\Concerns\HasAutoLogoutTrait;
+use Admin\Eloquent\Concerns\Auth\HasAutoLogoutTrait;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 

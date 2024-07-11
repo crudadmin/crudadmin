@@ -37,9 +37,9 @@ class LoginVerificatorNotification extends Notification
      */
     public function via($notifiable)
     {
-        if ( $notifiable->verification_method == 'email' ) {
+        if ( $notifiable->getVerificationMethod() == 'email' ) {
             return ['mail'];
-        } else if ( $notifiable->verification_method == 'sms' ) {
+        } else if ( $notifiable->getVerificationMethod() == 'sms' ) {
             return [SmartSMSChannel::class];
         }
     }
