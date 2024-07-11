@@ -12,14 +12,6 @@ trait HasAdminRoles
     protected $withUserRoles = true;
 
     /*
-     * Checks if is enabled user
-     */
-    public function isEnabled()
-    {
-        return $this->enabled == 1;
-    }
-
-    /*
      * Check if model can apply user roles
      */
     public function canApplyUserRoles()

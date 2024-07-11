@@ -65,6 +65,19 @@ class Authenticatable extends BaseAuthenticatable
         ]);
     }
 
+    /*
+     * Checks if is enabled user
+     */
+    public function isEnabled()
+    {
+        //If field enabled is present.
+        if ( $this->getField('enabled') ){
+            return $this->enabled === true;
+        }
+
+        return true;
+    }
+
     public function getAvatarThumbnailAttribute()
     {
         return $this->avatar ? $this->avatar->resize(100, 100)->url : null;
