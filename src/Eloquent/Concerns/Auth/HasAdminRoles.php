@@ -7,20 +7,15 @@ use Admin;
 trait HasAdminRoles
 {
     /*
-     * Add Admin rules permissions
-     */
-    protected $withUserRoles = true;
-
-    /*
      * Check if model can apply user roles
      */
-    public function canApplyUserRoles()
+    public function hasAdminRoles()
     {
         if (! Admin::isRolesEnabled()) {
             return false;
         }
 
-        return $this->withUserRoles == true;
+        return true;
     }
 
     /*
@@ -29,7 +24,7 @@ trait HasAdminRoles
     public function hasAdminAccess()
     {
         //Permissions are turned off
-        if ( Admin::isRolesEnabled() === false ){
+        if ( $this->hasAdminRoles() == false ){
             return true;
         }
 

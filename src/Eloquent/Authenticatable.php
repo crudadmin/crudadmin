@@ -41,7 +41,7 @@ class Authenticatable extends BaseAuthenticatable
         /*
          * If is enabled admin groups
          */
-        if ($this->canApplyUserRoles()) {
+        if ($this->hasAdminRoles()) {
             $fields->push([
                 'permissions' => 'name:admin::admin.super-admin|type:checkbox|default:0|tooltip:'.$this->getFullAccessMessage().'|hasNotAccess:full_access,invisible',
                 'roles' => 'name:admin::admin.admin-group|hideFromFormIf:permissions,1|belongsToMany:admins_roles,name|canAdd|hasNotAccess:roles,invisible',
@@ -86,7 +86,7 @@ class Authenticatable extends BaseAuthenticatable
             'avatarThumbnail',
         ]);
 
-        if ($this->canApplyUserRoles()) {
+        if ($this->hasAdminRoles()) {
             $this->load('roles');
         }
 
