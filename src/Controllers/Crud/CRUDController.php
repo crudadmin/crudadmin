@@ -33,6 +33,9 @@ class CRUDController extends Controller
             $model = $model->getAdminRows();
         }
 
+        //Set model permissions
+        $model->withAdminPermissions();
+
         //Check if user has allowed model
         if (! admin()->hasAccess($model)) {
             autoAjax()->permissionsError($model->getTable())->throw();

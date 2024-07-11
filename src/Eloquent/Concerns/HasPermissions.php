@@ -3,6 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin\Eloquent\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
 
 trait HasPermissions
 {
@@ -95,6 +96,12 @@ trait HasPermissions
             return true;
         }
 
+        //User is logged under another admin model
+        if ( $this->getTable() != admin()->getTable() ){
+            return true;
+        }
+
+        //User has view all access
         if ( admin()->hasAccess($this::class, 'view_others') === true ){
             return true;
         }
@@ -104,8 +111,20 @@ trait HasPermissions
 
     public function scopeFilterByPermissions($query)
     {
-        if ( $this->canViewAllRowsAccordingToLoggedUser() == false ) {
-            $query->where($this->qualifyColumn('id'), admin()->getKey());
+        if ( $this->canViewAllRowsAccordingToLoggedUser() == true ) {
+            return;
         }
+
+        $query->where($this->qualifyColumn('id'), admin()->getKey());
+    }
+
+    public function withAdminPermissions()
+    {
+        self::addGlobalScope('adminPermissions', function(Builder $builder){
+            //Check if user can see other rows than current session permissions
+            $builder->filterByPermissions();
+        });
+
+        return $this;
     }
 }
