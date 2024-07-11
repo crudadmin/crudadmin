@@ -350,4 +350,23 @@ class Admin extends AdminCore
     {
         return Log::channel('crudadmin');
     }
+
+    public function getAuthProviders()
+    {
+        $providers = [];
+
+        foreach (config('auth.providers') as $key => $provider) {
+            if ( !isset($provider['model']) ){
+                continue;
+            }
+
+            $model = new $provider['model'];
+
+            if ( $model instanceof Authenticatable ){
+                $providers[$key] = $model;
+            }
+        }
+
+        return $providers;
+    }
 }

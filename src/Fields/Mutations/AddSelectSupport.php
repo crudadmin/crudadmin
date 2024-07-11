@@ -259,7 +259,7 @@ class AddSelectSupport extends MutationRule
 
         //When is defined column which will be in selectbox
         if (count($properties) >= 2 && strtolower($properties[1]) != 'null') {
-            $relationModel = Admin::getModelByTable($properties[0]);
+            $relationModel = Admin::getModelByTable($properties[0])->withAdminPermissions();
 
             //Get all columns from each field witch belongsTo relation
             $loadColumns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);

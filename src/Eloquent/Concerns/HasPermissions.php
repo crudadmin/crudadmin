@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Builder;
 trait HasPermissions
 {
     /**
+     * If user is assigned to some object eg. via belongsTo column,
+     * then we can filter all other child models which belongs to same model as given user.
+     *
+     * @return  array
+     */
+    public function filterRowsByColumns()
+    {
+        return [];
+    }
+
+    /**
      * Returns model permissions for admin roles
      *
      * @return  array
@@ -109,15 +120,6 @@ trait HasPermissions
         return false;
     }
 
-    public function scopeFilterByPermissions($query)
-    {
-        if ( $this->canViewAllRowsAccordingToLoggedUser() == true ) {
-            return;
-        }
-
-        $query->where($this->qualifyColumn('id'), admin()->getKey());
-    }
-
     public function withAdminPermissions()
     {
         self::addGlobalScope('adminPermissions', function(Builder $builder){
@@ -126,5 +128,59 @@ trait HasPermissions
         });
 
         return $this;
+    }
+
+    /**
+     * Filter rows by logged admin user permissions
+     */
+    public function scopeFilterByPermissions($query)
+    {
+        if ( $this->canViewAllRowsAccordingToLoggedUser() == false ) {
+            $query->where($this->qualifyColumn('id'), admin()->getKey());
+        }
+
+        $query->filterByRelatedModels();
+    }
+
+    /**
+     * Filter given model by logged user relationship
+     */
+    public function scopeFilterByRelatedModels($query)
+    {
+        $admin = admin();
+
+        foreach ($admin->filterRowsByColumns() as $key) {
+            //Get relation table name from belongsTo field
+            if ( $admin->hasFieldParam($key, 'belongsTo') ) {
+                $field = $admin->getRelationProperty($key, 'belongsTo');
+                $permissionTable = $field[0];
+            }
+
+            //Get relation table name from belongsToModel relation
+            else {
+                foreach ($admin->getBelongsToRelation() as $relation) {
+                    $table = (new $relation)->getTable();
+                    if ( $admin->getForeignColumn($table) == $key ){
+                        $permissionTable = $table;
+                    }
+                }
+            }
+
+            $filterBy = $admin->{$key};
+
+            //Filter by exact model table
+            if ( $permissionTable == $this->getTable() ){
+                $query->where($this->qualifyColumn('id'), $filterBy);
+            }
+
+            //Filter by belongsToModel relations
+            foreach ($this->getBelongsToRelation() as $relatedModel) {
+                $relatedModel = new $relatedModel;
+
+                if ( $relatedModel->getTable() == $permissionTable ){
+                    $query->where($this->getForeignColumn($relatedModel->getTable()), $filterBy);
+                }
+            }
+        }
     }
 }
