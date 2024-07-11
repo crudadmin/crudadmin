@@ -30,7 +30,7 @@ class CRUDController extends Controller
         }
 
         if ( $withAdminRows === true ){
-            $model = $model->getAdminRows();
+            $model->withAdminRows();
         }
 
         //Set model permissions

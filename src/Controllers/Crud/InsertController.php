@@ -68,7 +68,7 @@ class InsertController extends CRUDController
                     $createdRow = (new $model)->create($requestRow);
 
                     //Fetch row with all scoped relations
-                    $row = (new $model)->getAdminRows()->withFieldRelations()->find($createdRow->getKey());
+                    $row = (new $model)->withFieldRelations()->find($createdRow->getKey());
 
                     //Save parent id for $inParent support, because when we will be insering parent childs
                     //we need assign relation key between this rows

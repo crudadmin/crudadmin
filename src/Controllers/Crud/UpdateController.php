@@ -68,7 +68,7 @@ class UpdateController extends InsertController
                 $row->checkForModelRules(['updated'], true);
 
                 //Re-fetch fresh data, to load new relationships.
-                $rows[$table] = $model->newInstance()->getAdminRows()->withFieldRelations()->find($row->getKey());
+                $rows[$table] = $model->newInstance()->withFieldRelations()->find($row->getKey());
             } else {
                 $rows[$table] = $this->insertRows($parentModel, [$data], $rows[$parentModel->getTable()]->getKey())[0]['rows'][0];
             }

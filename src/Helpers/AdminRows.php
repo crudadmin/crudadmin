@@ -22,7 +22,7 @@ class AdminRows
      */
     public function __construct(AdminModel $model, $request = null)
     {
-        $this->model = $model->getAdminRows();
+        $this->model = $model->withAdminRows();
 
         if ( $request ){
             $this->loadRequestParams($request);

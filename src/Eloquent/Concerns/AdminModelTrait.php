@@ -459,7 +459,7 @@ trait AdminModelTrait
     /*
      * Add global scope for models in administration
      */
-    public function getAdminRows()
+    public function withAdminRows()
     {
         self::addGlobalScope('adminRows', function(Builder $builder){
             //We want disable inherance of adminRows in this function. Because adminRows are global scope
