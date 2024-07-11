@@ -57,10 +57,12 @@ class SeoModule extends AdminModelModule implements AdminModelModuleSupport
             ])->inline()->add('hidden')]);
         }
 
+        $isLocalized = Admin::isEnabledLocalization() && $model->getProperty('seoLocalized', true) !== false;
+
         $seoTab = Group::tab(array_merge($items, [
-            'meta_title' => 'name:Titulok stránky'.(Admin::isEnabledLocalization() ? '|locale' : ''),
-            'meta_keywords' => 'name:Kľúčové slova'.(Admin::isEnabledLocalization() ? '|locale' : ''),
-            'meta_description' => 'name:Popis stránky|type:text|max:400'.(Admin::isEnabledLocalization() ? '|locale' : ''),
+            'meta_title' => 'name:Titulok stránky'.($isLocalized ? '|locale' : ''),
+            'meta_keywords' => 'name:Kľúčové slova'.($isLocalized ? '|locale' : ''),
+            'meta_description' => 'name:Popis stránky|type:text|max:400'.($isLocalized ? '|locale' : ''),
             'meta_canonical_url' => 'name:Kanonická url|url',
             'meta_image' => 'name:Obrázky stránky|image|multiple',
         ]))->add('hidden')->name('Meta tagy')->icon('fa-info')->id('seo_tab');
