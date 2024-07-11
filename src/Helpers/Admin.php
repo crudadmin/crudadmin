@@ -4,6 +4,7 @@ namespace Admin\Helpers;
 
 use Admin\Core\Helpers\AdminCore;
 use Admin\Core\Helpers\Storage\AdminFile;
+use Admin\Eloquent\Authenticatable;
 use Log;
 
 class Admin extends AdminCore
@@ -28,6 +29,28 @@ class Admin extends AdminCore
     public function getAdminGuard()
     {
         return auth()->guard('adminSession');
+    }
+
+    public function getAuthProvider()
+    {
+        return session()->get('auth.admin.provider', 'admins');
+    }
+
+    public function setAuthProvider($provider)
+    {
+        if ( !$provider || !($model = config('auth.providers.'.$provider)) ){
+            return;
+        }
+
+        $model = new $model['model'];
+
+        //Check if model is enabled as admin authenticable method
+        if ( !($model instanceof Authenticatable) ) {
+            return;
+        }
+
+        session()->put('auth.admin.provider', $provider);
+        session()->save();
     }
 
     /*

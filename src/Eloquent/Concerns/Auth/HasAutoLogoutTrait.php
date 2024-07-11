@@ -8,7 +8,7 @@ trait HasAutoLogoutTrait
 {
     public function getLogoutSessionKey()
     {
-        return $this->getTable().'.logout.timestamp';
+        return 'auth.admin.logout_'.$this->getTable().'_timestamp';
     }
 
     public function hasAutoLogoutSupport()
