@@ -34,7 +34,7 @@ trait HasAdminRoles
         }
 
         //Has root/admin permissions
-        if ( $this->permissions == 1 ){
+        if ( $this->permissions === true ){
             return true;
         }
 

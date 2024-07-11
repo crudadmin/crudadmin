@@ -6,7 +6,7 @@ use Admin\Eloquent\AdminModel;
 use Admin\Eloquent\Concerns\ModelUsersRoles;
 use DB;
 
-class UsersRole extends AdminModel
+class AdminsRole extends AdminModel
 {
     use ModelUsersRoles;
 

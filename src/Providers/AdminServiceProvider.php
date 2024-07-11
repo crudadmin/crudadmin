@@ -47,7 +47,7 @@ class AdminServiceProvider extends ServiceProvider
 
         //Admin groups
         if (\Admin::isRolesEnabled()) {
-            \Admin::registerModel(\Admin\Models\UsersRole::class);
+            \Admin::registerModel(\Admin\Models\AdminsRole::class);
         }
 
         //Models history
