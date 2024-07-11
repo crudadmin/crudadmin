@@ -3,7 +3,7 @@
 namespace Admin\Eloquent\Concerns;
 
 use Admin;
-use Admin\Eloquent\Authenticatable;
+use Admin\Eloquent\BaseAuthenticatable;
 use Admin\Helpers\AdminCollection;
 use Arr;
 use Carbon\Carbon;
@@ -154,29 +154,18 @@ trait AdminModelTrait
     }
 
     /*
-     * Remove uneccessary properties from model in administration
+     * Reset hidden property
+     * to see everything what is needed in admin
      */
     protected function removeHidden()
     {
-        if ( Admin::isAdmin() == false )
-            return;
-
-        if ($this instanceof Authenticatable) {
-            $this->hidden = [];
-
-            foreach ($this->getFields() as $key => $field) {
-                //Hide all password fields
-                if ( $this->isFieldType($key, 'password') ) {
-                    $this->hidden[] = $key;
-                }
-            }
-
+        if ( Admin::isAdmin() == false ) {
             return;
         }
 
-        $columns = array_merge(array_keys($this->getFields()), ['id', 'created_at', 'updated_at', 'published_at', 'deleted_at', '_order', 'slug', 'language_id']);
+        $whitelistedColumns = array_merge(array_keys($this->getFields()), ['id', 'created_at', 'updated_at', 'published_at', 'deleted_at', '_order', 'slug', 'language_id']);
 
-        foreach ($columns as $column) {
+        foreach ($whitelistedColumns as $column) {
             if (in_array($column, $this->hidden)) {
                 unset($this->hidden[array_search($column, $this->hidden)]);
             }
@@ -190,6 +179,16 @@ trait AdminModelTrait
                 }
             }
         }
+
+        //Hide all passwords
+        foreach ($this->getFields() as $key => $field) {
+            if ( $this->isFieldType($key, 'password') && in_array($key, $this->hidden) == false ) {
+                $this->hidden[] = $key;
+            }
+        }
+
+        //Fix keys
+        $this->hidden = array_values($this->hidden);
     }
 
     /*
