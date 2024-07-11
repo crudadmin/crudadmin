@@ -2,6 +2,8 @@
 
 namespace Admin\Eloquent\Concerns;
 
+use Admin\Eloquent\Authenticatable;
+
 trait HasPermissions
 {
     /**
@@ -85,5 +87,25 @@ trait HasPermissions
         }
 
         return true;
+    }
+
+    public function canViewAllRowsAccordingToLoggedUser()
+    {
+        if ( !($this instanceof Authenticatable) ){
+            return true;
+        }
+
+        if ( admin()->hasAccess($this::class, 'view_others') === true ){
+            return true;
+        }
+
+        return false;
+    }
+
+    public function scopeFilterByPermissions($query)
+    {
+        if ( $this->canViewAllRowsAccordingToLoggedUser() == false ) {
+            $query->where($this->qualifyColumn('id'), admin()->getKey());
+        }
     }
 }

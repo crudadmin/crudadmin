@@ -184,27 +184,33 @@ trait HasAdminRoles
      */
     public function setModelPermissions($permissions)
     {
-        //Set alert tooltips when editing permission group
-        $permissions['update']['title'] = $this->getFullAccessMessage().' '._('Taktiež môže zmeniť prihlasovacie údaje ktorémukoľvek administrátorovi.');
-        $permissions['update']['danger'] = true;
-
         //Add full access changing support
-        $permissions['full_access'] = [
-            'name' => _('Nastavenie plného prístupu'),
-            'title' => _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže nastaviť ktorémukoľvek účtu plný prístup do administrácie.'),
-            'danger' => true,
-        ];
+        if ( $this->hasAdminRoles() ) {
+            $permissions['full_access'] = [
+                'name' => _('Nastavenie plného prístupu'),
+                'title' => $this->getFullAccessMessage().' '._('Keďže môže nastaviť ktorémukoľvek účtu plný prístup do administrácie.'),
+                'danger' => true,
+            ];
 
-        //Add full access changing support
-        $permissions['roles'] = [
-            'name' => _('Priradenie skupín'),
-            'title' => _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému, keďže môže zmeniť priradenie rol pre konkrétnych užívateľov.'),
-            'danger' => true,
-        ];
+            //Add full access changing support
+            $permissions['roles'] = [
+                'name' => _('Priradenie skupín'),
+                'title' => $this->getFullAccessMessage().' '._('Keďže môže zmeniť priradenie rol pre konkrétnych užívateľov.'),
+                'danger' => true,
+            ];
+        }
 
-        $permissions['logout'] = [
-            'name' => _('Odhlásenie používateľov'),
-            'danger' => false,
+        if ( $this->hasAutoLogoutSupport() ) {
+            $permissions['logout'] = [
+                'name' => _('Odhlásenie používateľov'),
+                'danger' => false,
+            ];
+        }
+
+        $permissions['view_others'] = [
+            'name' => _('Zobrazenie ostatných používateľov'),
+            'title' => $this->getFullAccessMessage().' '._('Taktiež môže zmeniť prihlasovacie údaje ktorémukoľvek používateľovi.'),
+            'danger' => true,
         ];
 
         //Update title for all
@@ -215,6 +221,6 @@ trait HasAdminRoles
 
     protected function getFullAccessMessage()
     {
-        return _('Administrátor v tejto skupine môže nadobudnúť plný prístup k systému.');
+        return _('Používateľ v tejto skupine môže nadobudnúť plný prístup k systému.');
     }
 }

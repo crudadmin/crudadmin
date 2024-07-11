@@ -106,6 +106,9 @@ class AdminRows
         //With history count
         $query->withHistoryChangesCount();
 
+        //Check if user can see other rows than current session permissions
+        $query->filterByPermissions();
+
         //Search in rows
         (new AdminRowsSearch($this->model, $query, $this->search))->filter();
 

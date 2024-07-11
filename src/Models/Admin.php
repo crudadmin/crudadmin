@@ -74,7 +74,7 @@ class Admin extends Authenticatable
             'password' => 'name:Heslo|type:password|confirmed|min:4|max:40|'.(isset($row) ? '' : '|required'),
             'avatar' => 'name:Profilová fotografia|type:file|image',
             Group::fields([
-                'enabled' => 'name:Aktívny|type:checkbox|default:1',
+                'enabled' => 'name:Aktívny|type:checkbox|default:1|removeFromFormIf:id,'.(admin() ? admin()->getKey() : 0),
             ])->inline(),
         ];
     }

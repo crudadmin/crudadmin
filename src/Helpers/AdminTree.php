@@ -78,6 +78,8 @@ class AdminTree
      */
     public function makePage($model, $withChilds = true, $initial_request = false, $withOptions = false)
     {
+        $this->mutateModel($model);
+
         //We need refresh fields for actual fields rules. Modified eg. by session.
         //(some admin rules may not have available all fields. Or some properties may be changed)
         $model->getFields(null, true);
@@ -115,7 +117,7 @@ class AdminTree
             'reserved' => $this->getModelReversed($model),
             'columns' => $model->getBaseFields(),
             'inParent' => $model->getProperty('inParent') ?: false,
-            'single' => $model->getProperty('single') ?: false,
+            'single' => $model->getProperty('single'),
             'minimum' => $model->getProperty('minimum'),
             'maximum' => $model->getProperty('maximum'),
             'insertable' => $model->getProperty('insertable'),
@@ -151,7 +153,17 @@ class AdminTree
         return $data;
     }
 
-
+    /**
+     * Change some parameters according to other rules
+     *
+     * @param  Model  $model
+     */
+    public function mutateModel($model)
+    {
+        if ( $model->canViewAllRowsAccordingToLoggedUser() === false ){
+            $model->setProperty('single', true);
+        }
+    }
 
     /*
      * Return fields with correct order of options in select for administration
