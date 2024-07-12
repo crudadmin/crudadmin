@@ -91,6 +91,12 @@ class AdminCustomizationModule extends AdminModelModule implements AdminModelMod
                 'settings.title.update' => $this->t(_('Upravujete používateľa č. :id')),
                 'settings.buttons.create' => $this->t(_('Nový používateľ')),
             ],
+            'admin' => [
+                'icon' => 'fa-user-tie',
+                'settings.title.create' => $this->t(_('Nový administrátor')),
+                'settings.title.update' => $this->t(_('Upravujete administrátora č. :id')),
+                'settings.buttons.create' => $this->t(_('Nový administrátor')),
+            ],
             'news' => [
                 'icon' => 'far fa-newspaper',
             ],

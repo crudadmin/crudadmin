@@ -19,8 +19,6 @@ if (! function_exists('admin')) {
                 }
             } catch (\Throwable $e){}
         }
-
-        return false;
     }
 }
 
