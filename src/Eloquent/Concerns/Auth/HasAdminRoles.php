@@ -24,14 +24,17 @@ trait HasAdminRoles
      */
     public function hasAdminAccess()
     {
-        //Permissions are turned off
-        if ( $this->hasAdminRoles() == false ){
-            return true;
-        }
+        //Enable full access only for admin table
+        if ( $this->getTable() == 'admins' ){
+            //Permissions are turned off
+            if ( $this->hasAdminRoles() == false ){
+                return true;
+            }
 
-        //Has root/admin permissions
-        if ( $this->permissions === true ){
-            return true;
+            //Has root/admin permissions
+            if ( $this->permissions === true ){
+                return true;
+            }
         }
 
         return false;

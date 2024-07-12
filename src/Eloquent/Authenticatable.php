@@ -82,7 +82,9 @@ class Authenticatable extends BaseAuthenticatable
 
     public function getAvatarThumbnailAttribute()
     {
-        return $this->avatar ? $this->avatar->resize(100, 100)->url : null;
+        $image = $this->avatar ?: $this->photo ?: $this->image;
+
+        return $image ? $image->resize(100, 100)->url : null;
     }
 
     public function setAdminResponse()
