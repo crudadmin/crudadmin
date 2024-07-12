@@ -112,6 +112,10 @@ trait HasPermissions
             return true;
         }
 
+        if ( !admin() ){
+            return false;
+        }
+
         //User is logged under another admin model
         if ( $this->getTable() != admin()->getTable() ){
             return true;
@@ -151,7 +155,7 @@ trait HasPermissions
      */
     public function scopeFilterByPermissions($query)
     {
-        if ( $this->canViewAllRowsAccordingToLoggedUser() == false ) {
+        if ( admin() && $this->canViewAllRowsAccordingToLoggedUser() == false ) {
             $query->where($this->qualifyColumn('id'), admin()->getKey());
         }
 
@@ -163,7 +167,9 @@ trait HasPermissions
      */
     protected function scopeFilterByRelatedModels($query)
     {
-        $admin = admin();
+        if ( !($admin = admin()) ){
+            return;
+        }
 
         foreach ($admin->filterRowsByColumns() as $key) {
             $permissionTable = $this->getRelatedPermissionTable($admin, $key);
