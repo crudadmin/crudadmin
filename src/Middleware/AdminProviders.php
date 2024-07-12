@@ -12,10 +12,9 @@ class AdminProviders
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null, $errors = [])
+    public function handle($request, Closure $next)
     {
         config()->set('auth.guards.adminSession', [
             'driver' => 'session',

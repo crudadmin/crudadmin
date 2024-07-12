@@ -33,7 +33,7 @@ class Admin extends AdminCore
 
     public function getAuthProvider()
     {
-        return session()->get('auth.admin.provider', 'admins');
+        return session('auth.admin.provider', 'admins');
     }
 
     public function setAuthProvider($provider)
@@ -51,6 +51,12 @@ class Admin extends AdminCore
 
         session()->put('auth.admin.provider', $provider);
         session()->save();
+
+        //Set provider into config
+        config()->set('auth.guards.adminSession.provider', $provider);
+
+        //Rewrite booted guard
+        auth()->guard('adminSession')->setProvider(auth()->createUserProvider($provider));
     }
 
     /*
