@@ -362,7 +362,7 @@ class Admin extends AdminCore
         $providers = [];
 
         foreach (config('auth.providers') as $key => $provider) {
-            if ( !isset($provider['model']) ){
+            if ( !isset($provider['model']) || !class_exists($provider['model']) ){
                 continue;
             }
 
