@@ -398,4 +398,21 @@ class AdminModel extends CoreAdminModel
 
         return $this->qualifyColumn($this->getDeletedAtColumn());
     }
+
+    /**
+     * @overide from SoftDeletes trait
+     * Perform the actual delete query on this model instance.
+     *
+     * @return mixed
+     */
+    protected function performDeleteOnModel()
+    {
+        if ($this->hasSoftDeletes() === false || $this->forceDeleting) {
+            return tap($this->setKeysForSaveQuery($this->newModelQuery())->forceDelete(), function () {
+                $this->exists = false;
+            });
+        }
+
+        return $this->runSoftDelete();
+    }
 }
