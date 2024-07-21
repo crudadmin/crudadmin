@@ -67,21 +67,22 @@ class InsertController extends CRUDController
                     //Create row into db
                     $createdRow = (new $model)->create($requestRow);
 
-                    //Fetch row with all scoped relations
-                    $row = (new $model)->withFieldRelations()->find($createdRow->getKey());
-
                     //Save parent id for $inParent support, because when we will be insering parent childs
                     //we need assign relation key between this rows
                     if ( $model->getTable() == $parentModel->getTable() ) {
-                        $parentId = $row->getKey();
+                        $parentId = $createdRow->getKey();
                     }
                 } catch (\Illuminate\Database\QueryException $e) {
                     return autoAjax()->mysqlError($e)->throw();
                 }
 
-                $this->syncBelongsToMany($row, $request);
-                $this->assignUnsavedChilds($row, $request, $rows);
-                $this->moveTemporaryUploads($row, $request);
+                $this->syncBelongsToMany($createdRow, $request);
+                $this->assignUnsavedChilds($createdRow, $request, $rows);
+                $this->moveTemporaryUploads($createdRow, $request);
+
+                //Fetch row with all scoped relations
+                $row = (new $model)->withFieldRelations()->find($createdRow->getKey());
+
                 $row->makeHistorySnapshot($requestRow, 'insert');
 
                 //Fire on create event
