@@ -31,6 +31,13 @@ class InsertController extends CRUDController
         //Insert received data into db
         $data = $this->insertRows($model, $requests);
 
+        //Format response
+        foreach ($data as $k => $_row) {
+            $data[$k]['rows'] = $data[$k]['rows']->map(function($row){
+                return $row->getMutatedAdminAttributes(true, true);
+            });
+        }
+
         //Checks for upload errors
         $message = $this->responseMessage(trans('admin::admin.success-created'));
 
@@ -102,9 +109,7 @@ class InsertController extends CRUDController
 
             $data[] = [
                 'model' => $model->getTable(),
-                'rows' => $rows->map(function($row){
-                    return $row->getMutatedAdminAttributes(true, true);
-                }),
+                'rows' => $rows,
                 'buttons' => (new AdminRows($model))->generateButtonsProperties($models),
             ];
         }
