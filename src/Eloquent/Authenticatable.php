@@ -58,7 +58,7 @@ class Authenticatable extends BaseAuthenticatable
         }
 
         $fields->push([
-            'remember_token' => 'name:Remember token|max:100|removeFromForm',
+            'remember_token' => 'name:Remember token|max:100|removeFromForm|inaccessible',
         ]);
     }
 
