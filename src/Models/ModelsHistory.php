@@ -58,15 +58,15 @@ class ModelsHistory extends Model
     {
         return [
             Group::fields([
-                'user' => 'name:Administrator|belongsTo:'.Admin::getAuthModel()->getTable().',username',
+                'user' => 'name:Používateľ|belongsTo:'.Admin::getAuthModel()->getTable().',username',
                 Group::inline([
-                    'table' => 'name:Rozšírenie|type:select|index',
+                    'table' => 'name:Modul|type:select|index',
                     'action' => 'name:Akcia|type:select|limit:50|required',
                     'row_id' => 'name:Č. záznamu|type:integer|index|unsigned',
                 ]),
                 'data' => 'name:Data|type:json'.($this->encrypted ? '|encrypted:array' : ''),
                 'ip' => 'name:IP Adresa|max:20',
-                'created_at' => 'name:Dátum vytvorenia|type:datetime|default:CURRENT_TIMETAMP|column_visible|required',
+                'created_at' => 'name:Dátum a čas|type:datetime|default:CURRENT_TIMETAMP|column_visible|required',
             ])->add('readonly')
         ];
     }
