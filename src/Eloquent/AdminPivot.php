@@ -56,7 +56,7 @@ class AdminPivot extends AdminModel
 
                 $fields->push([
                     $properties[6] => 'belongsTo:'.$model->getTable().'|required',
-                    $properties[7] => 'belongsTo:'.$properties[0].'|required',
+                    $properties[7] => 'belongsTo:'.$properties[0].'|hasOne|required',
                 ]);
             }
         }
