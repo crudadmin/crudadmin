@@ -25,7 +25,7 @@ trait HasAdminRoles
     public function hasAdminAccess()
     {
         //Enable full access only for admin table
-        if ( $this->getTable() == 'admins' ){
+        if ( $this->getTable() == Admin::getAuthModel()->getTable() ){
             //Permissions are turned off
             if ( $this->hasAdminRoles() == false ){
                 return true;
