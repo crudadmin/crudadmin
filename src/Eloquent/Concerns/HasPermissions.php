@@ -4,6 +4,7 @@ namespace Admin\Eloquent\Concerns;
 
 use Admin\Eloquent\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
+use Admin;
 
 trait HasPermissions
 {
@@ -155,7 +156,8 @@ trait HasPermissions
      */
     public function scopeFilterByPermissions($query)
     {
-        if ( admin() && $this->canViewAllRowsAccordingToLoggedUser() == false ) {
+        //Check if user has been logged (we can't use admin() causing authentication loop)
+        if ( Admin::getAdminGuard()->hasUser() && $this->canViewAllRowsAccordingToLoggedUser() == false ) {
             $query->where($this->qualifyColumn('id'), admin()->getKey());
         }
 
@@ -167,7 +169,8 @@ trait HasPermissions
      */
     protected function scopeFilterByRelatedModels($query)
     {
-        if ( !($admin = admin()) ){
+        //Check if user has been logged (we can't use admin() causing authentication loop)
+        if ( !Admin::getAdminGuard()->hasUser() ){
             return;
         }
 
