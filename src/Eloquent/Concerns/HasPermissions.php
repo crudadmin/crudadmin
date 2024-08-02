@@ -174,6 +174,8 @@ trait HasPermissions
             return;
         }
 
+        $admin = admin();
+
         foreach ($admin->filterRowsByColumns() as $key) {
             $permissionTable = $this->getRelatedPermissionTable($admin, $key);
 
