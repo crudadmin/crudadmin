@@ -9,7 +9,9 @@ class OnAdminUpdateRule extends AdminRule
 {
     public function updating(AdminModel $row)
     {
-        $this->check($row);
+        if ( admin() ){
+            $this->check($row);
+        }
     }
 
     public function check($row)
