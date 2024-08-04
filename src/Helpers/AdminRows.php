@@ -55,7 +55,7 @@ class AdminRows
     /*
      * Apply pagination for given eloqment builder
      */
-    protected function paginateRecords($query, $initialRequest)
+    protected function paginateRecords($query, $initialRequest, $rowsCount)
     {
         //If limit is not enabled
         if ($this->limit <= 0) {
@@ -64,10 +64,9 @@ class AdminRows
 
         //If is first loading of first page and model is in reversed mode, then return last x rows.
         if ($this->page == 1 && $initialRequest && $this->model->isReversed() === true) {
-            $count = $query->count();
-            $take = $this->limit - ((ceil($count / $this->limit) * $this->limit) - $count);
+            $take = $this->limit - ((ceil($rowsCount / $this->limit) * $this->limit) - $rowsCount);
 
-            $query->offset($count - $take)->take($take);
+            $query->offset($rowsCount - $take)->take($take);
 
             return;
         }
@@ -119,7 +118,7 @@ class AdminRows
     /*
      * Returns all rows with base fields
      */
-    protected function getRows($rowsData)
+    protected function setRowsResponses($rowsData)
     {
         $rows = [];
 
@@ -191,36 +190,38 @@ class AdminRows
     public function returnModelData($onlyIds = [], $initialRequest)
     {
         try {
-            $withoutRows = $this->returnNoData($onlyIds);
+            $data = [
+                'rows' => [],
+                'count' => 0,
+                'limit' => $this->limit,
+                'page' => $this->page,
+                'buttons' => [],
+            ];
 
-            if (! $withoutRows) {
-                $paginatedRowsData = $this->getRowsDataQuery(function ($query) use ($onlyIds, $initialRequest) {
+            if ( $this->skipRowsResponse($onlyIds) === false ) {
+                $data['count'] = $this->getRowsDataQuery()->count();
+
+                $paginatedRows = $this->getRowsDataQuery(function ($query) use ($onlyIds, $initialRequest, $data) {
                     //Get specific id
                     if ($onlyIds && count($onlyIds) > 0) {
                         $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $onlyIds);
                     } else {
-                        $this->paginateRecords($query, $initialRequest);
+                        $this->paginateRecords($query, $initialRequest, $data['count']);
                     }
                 }, true)->get();
 
-                $totalResultsCount = $this->getRowsDataQuery();
+                $data['rows'] = $this->setRowsResponses($paginatedRows);
+
+                $data['buttons'] = $this->generateButtonsProperties($paginatedRows);
             }
 
-            $data = [
-                'rows' => $withoutRows ? [] : $this->getRows($paginatedRowsData),
-                'count' => $withoutRows ? 0 : $totalResultsCount->count(),
-                'limit' => $this->limit,
-                'page' => $this->page,
-                'buttons' => $withoutRows ? [] : $this->generateButtonsProperties($paginatedRowsData),
-            ];
+            return $data;
         } catch (\Illuminate\Database\QueryException $e) {
             autoAjax()->mysqlError($e)->throw();
         }
-
-        return $data;
     }
 
-    private function returnNoData(array $onlyIds)
+    private function skipRowsResponse(array $onlyIds)
     {
         if ( admin()->hasAccess($this->model, 'read') === false ){
             return true;

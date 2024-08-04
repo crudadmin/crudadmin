@@ -9,7 +9,7 @@ trait HasDeleteSupport {
     /*
      * Check if row can be deleted
      */
-    protected function canDeleteRow($row, $request, $forceFetch = false, $withReservedCheck = true)
+    protected function canDeleteRow($row, $request, $checkMinimumRows = false, $withReservedCheck = true)
     {
         if ($row->canDelete() !== true) {
             return false;
@@ -19,12 +19,14 @@ trait HasDeleteSupport {
             return false;
         }
 
-        $totalCount = Admin::cache($row->getTable().'rows.delete', function() use ($row, $request) {
-            return $row->localization($request->get('language_id'))->count();
-        });
+        if ( $checkMinimumRows == true ) {
+            $totalCount = Admin::cache($row->getTable().'rows.delete', function() use ($row, $request) {
+                return $row->localization($request->get('language_id'))->count();
+            });
 
-        if ($row->getProperty('minimum') >= $totalCount) {
-            return false;
+            if ($row->getProperty('minimum') >= $totalCount) {
+                return false;
+            }
         }
 
         if ($row->getProperty('deletable') == false) {
