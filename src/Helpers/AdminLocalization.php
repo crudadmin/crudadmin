@@ -39,8 +39,8 @@ class AdminLocalization extends LocalizationHelper implements LocalizationInterf
     public function getLocaleIdentifier()
     {
         //Returns user language
-        if ( admin() && admin()->language && $slug = admin()->language->slug ){
-            return $slug;
+        if ( admin() && $localeId = admin()->language_id ){
+            return $this->all()->firstWhere('id', $localeId)?->slug;
         }
 
         //Or return default language
