@@ -18,6 +18,8 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null, $errors = [])
     {
+        Admin::setAuthGuardIfMissing();
+
         $guard = $guard ? auth()->guard($guard) : Admin::getAdminGuard();
 
         if ($guard->guest() || $guard->user()->isEnabled() === false ) {

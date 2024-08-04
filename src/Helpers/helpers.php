@@ -6,7 +6,9 @@ if (! function_exists('admin')) {
     function admin()
     {
         try {
-            if (($guard = Admin::getAdminGuard())->check()) {
+            $guard = Admin::getAdminGuard();
+
+            if ($guard && $guard->check()) {
                 return $guard->user();
             }
         } catch (\Throwable $e){}

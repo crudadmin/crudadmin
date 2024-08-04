@@ -28,6 +28,10 @@ class Admin extends AdminCore
 
     public function getAdminGuard()
     {
+        if ( !config()->has('auth.guards.admin') ){
+            return;
+        }
+
         return auth()->guard('admin');
     }
 
@@ -57,6 +61,24 @@ class Admin extends AdminCore
 
         //Rewrite booted guard
         auth()->guard('admin')->setProvider(auth()->createUserProvider($provider));
+    }
+
+    public function setAuthGuardIfMissing($driver = null)
+    {
+        if ( config()->has('auth.guards.admin') ){
+            return;
+        }
+
+        //Add support for sanctum requests when autorization header is present.
+        if ( $driver == 'session' && request()->headers->has('authorization') ) {
+            $driver = 'sanctum';
+        }
+
+        config()->set('auth.guards.admin', [
+            'driver' => $driver ?: 'session',
+            'provider' => Admin::getAuthProvider(),
+            'hash' => false,
+        ]);
     }
 
     /*
