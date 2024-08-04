@@ -14,12 +14,6 @@ class AuthServiceProvider extends ServiceProvider
             'model' => $modelClass = (($authModel = Admin::getAuthModel(true)) ? $authModel : \Admin\Models\Admin::class),
         ]);
 
-        config()->set('auth.guards.admin', [
-            'driver' => 'sanctum',
-            'provider' => 'admins',
-            'hash' => false,
-        ]);
-
         $this->app->config['auth.passwords.admin'] = [
             'provider' => (new $modelClass)->getTable(),
             'table' => config('auth.passwords.users.table', 'password_reset_tokens'),

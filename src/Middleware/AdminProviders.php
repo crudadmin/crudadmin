@@ -14,11 +14,12 @@ class AdminProviders
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next, $driver = 'session')
     {
-        config()->set('auth.guards.adminSession', [
-            'driver' => 'session',
+        config()->set('auth.guards.admin', [
+            'driver' => $driver ?: 'session',
             'provider' => Admin::getAuthProvider(),
+            'hash' => false,
         ]);
 
         return $next($request);

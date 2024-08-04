@@ -48,7 +48,8 @@ class RouteServiceProvider extends ServiceProvider
             'namespace' => 'Admin\Controllers',
             'prefix' => 'admin/api',
             'middleware' => [
-                SetAppLocale::class
+                SetAppLocale::class,
+                'admin.providers:sanctum',
             ],
         ], function ($router) {
             require __DIR__.'/../Routes/api.php';
