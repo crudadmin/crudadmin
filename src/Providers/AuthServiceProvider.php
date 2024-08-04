@@ -2,8 +2,10 @@
 
 namespace Admin\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Admin;
+use Admin\Helpers\PersonalAccessToken;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -19,5 +21,8 @@ class AuthServiceProvider extends ServiceProvider
             'table' => config('auth.passwords.users.table', 'password_reset_tokens'),
             'expire' => 60,
         ];
+
+        //Disable last_updated_at token updating on each request.
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
 }

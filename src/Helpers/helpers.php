@@ -10,15 +10,6 @@ if (! function_exists('admin')) {
                 return $guard->user();
             }
         } catch (\Throwable $e){}
-
-        //Fallback to admin api guard
-        if ( Admin::isAdmin() ) {
-            try {
-                if (($guard = auth()->guard('admin'))->check()) {
-                    return $guard->user();
-                }
-            } catch (\Throwable $e){}
-        }
     }
 }
 
