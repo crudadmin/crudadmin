@@ -30,9 +30,16 @@ class JSTranslations
 
     protected $filesystem;
 
+    public static $loaderCallback;
+
     public function __construct()
     {
         $this->filesystem = new Filesystem;
+    }
+
+    public function setLoaderCallback($callback)
+    {
+        static::$loaderCallback = $callback;
     }
 
     public function getGettextFlags()
@@ -389,6 +396,13 @@ class JSTranslations
                 }
 
                 $translations->mergeWith($sources);
+            }
+
+            //Custom loader callback
+            else if ( $callback = static::$loaderCallback ){
+                if ( $sources = $callback($file, $translations) ) {
+                    $translations->mergeWith($sources);
+                }
             }
         }
     }
