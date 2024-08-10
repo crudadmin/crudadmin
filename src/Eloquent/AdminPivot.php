@@ -39,7 +39,7 @@ class AdminPivot extends AdminModel
     private function addRelationFields($fields)
     {
         foreach (Admin::getAdminModels() as $model) {
-            if ( $model->getTable() == $this->table ){
+            if ( $model->getTable() == $this->table || $model instanceOf AdminPivot ){
                 continue;
             }
 
