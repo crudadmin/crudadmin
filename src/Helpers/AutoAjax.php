@@ -85,4 +85,9 @@ class AutoAjax extends BaseAutoAjax
     {
         Admin::push('request.'.$type, $message);
     }
+
+    public function warning($message)
+    {
+        return $this->pushMessage($message, 'error');
+    }
 }

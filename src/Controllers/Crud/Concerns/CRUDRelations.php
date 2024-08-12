@@ -20,28 +20,50 @@ trait CRUDRelations
                 continue;
             }
 
-            $values = $request->get($key);
-            if (!is_array($values)) {
-                continue;
+
+            if ( ($pivotData = $this->getPivotData($key, $request)) !== false ) {
+                $row->getAdminRules(function ($rule) use (&$pivotData, $key, $row) {
+                    $method = 'set'.$key.'relation';
+
+                    if (method_exists($rule, $method)) {
+                        $pivotData = $rule->{$method}($row, $pivotData);
+                    }
+                });
+
+                $row->{$key}()->sync($pivotData);
             }
-
-            $pivotData = [];
-
-            foreach ($values as $item) {
-                $isArray = is_array($item);
-
-                $id = $isArray ? $item['id'] : $item;
-
-                if ( $isArray ) {
-                    unset($item['id']);
-                }
-
-                //Pass additional pivot data, or pass noting in case of simple id
-                $pivotData[$id] = $isArray ? $item : [];
-            }
-
-            $row->{$key}()->sync($pivotData);
         }
+    }
+
+    private function getPivotData($key, $request = null)
+    {
+        $values = ($request ?: request())->get($key);
+
+        //Test to cast as array
+        if ( is_string($values) ){
+            $values = json_decode($values, true);
+        }
+
+        if (!is_array($values)) {
+            return false;
+        }
+
+        $pivotData = [];
+
+        foreach ($values as $item) {
+            $isArray = is_array($item);
+
+            $id = $isArray ? $item['id'] : $item;
+
+            if ( $isArray ) {
+                unset($item['id']);
+            }
+
+            //Pass additional pivot data, or pass noting in case of simple id
+            $pivotData[$id] = $isArray ? $item : [];
+        }
+
+        return $pivotData;
     }
 }
 
