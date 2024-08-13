@@ -20,7 +20,11 @@ class Authenticate
     {
         Admin::setAuthGuardIfMissing();
 
+        //Get admin guard
         $guard = $guard ? auth()->guard($guard) : Admin::getAdminGuard();
+
+        //Set default auth guard to admin. When we accessing admin routes.
+        app('auth')->setDefaultDriver('admin');
 
         if ($guard->guest() || $guard->user()->isEnabled() === false ) {
             //If is user logged but has not privilegies
