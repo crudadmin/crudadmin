@@ -21,7 +21,7 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
             $filters[$key] = $state;
         }
 
-        Arr::set($settings, 'rows.filter.items', $filters);
+        Arr::set($settings, 'filter.items', $filters);
 
         return $settings;
     }
