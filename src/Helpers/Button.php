@@ -60,6 +60,11 @@ class Button
     public $reloadAll = false;
 
     /*
+     * Reload opened row on click
+     */
+    public $reloadRow = false;
+
+    /*
      * Should button response be acceptable with yes/no buttons?
      */
     public $accept = false;
