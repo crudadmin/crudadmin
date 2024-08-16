@@ -65,6 +65,11 @@ class Button
     public $reloadRow = false;
 
     /*
+     * Reload children models when button clicked
+     */
+    public $reloadChildren = false;
+
+    /*
      * Should button response be acceptable with yes/no buttons?
      */
     public $accept = false;

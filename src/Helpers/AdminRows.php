@@ -155,6 +155,7 @@ class AdminRows
                         'type' => $button->type,
                         'reloadAll' => $button->reloadAll,
                         'reloadRow' => $button->reloadRow,
+                        'reloadChildren' => $button->reloadChildren,
                         'tooltipEncode' => $button->tooltipEncode,
                         'action' => $button->getAction(),
                     ];
