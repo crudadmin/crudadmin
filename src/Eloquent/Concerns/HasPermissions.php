@@ -202,6 +202,10 @@ trait HasPermissions
      */
     private function getRelatedPermissionTable($admin, $key)
     {
+        if ( $key == 'id' ){
+            return $admin->getTable();
+        }
+
         //Get relation table name from belongsTo field
         if ( $admin->hasFieldParam($key, 'belongsTo') ) {
             $field = $admin->getRelationProperty($key, 'belongsTo');
