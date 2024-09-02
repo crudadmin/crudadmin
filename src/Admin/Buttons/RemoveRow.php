@@ -59,7 +59,7 @@ class RemoveRow extends Button
 
         if ( count($relationMatches) > 0 ){
             return $this->warning(
-                _('Tento záznam sme našli priradený v rozšíraniach pri nasledujúcich záznamoch. Pred zmazanim by ste mali odpriradiť dané prepojenia. Prajete si aj napriek tomu pokračovať?').'<br><br>'.
+                _('Tento záznam sme našli priradený pri nasledujúcich moduloch. Pred zmazanim by ste mali odpriradiť dané prepojenia. Prajete si aj napriek tomu pokračovať?').'<br><br>'.
                 implode('<br>', $relationMatches)
             )->accept(true);
         }

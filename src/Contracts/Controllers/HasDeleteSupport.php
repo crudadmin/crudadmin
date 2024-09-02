@@ -3,6 +3,7 @@
 namespace Admin\Contracts\Controllers;
 
 use Admin;
+use Admin\Eloquent\AdminPivot;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 
 trait HasDeleteSupport {
@@ -65,6 +66,10 @@ trait HasDeleteSupport {
         $parentTable = $row->getTable();
 
         foreach (Admin::getAdminModels() as $model) {
+            if ( $model instanceof AdminPivot ){
+                continue;
+            }
+
             foreach ($model->getFields() as $fieldKey => $field) {
                 if ( !($field['belongsToMany'] ?? $field['belongsTo'] ?? null) ){
                     continue;
