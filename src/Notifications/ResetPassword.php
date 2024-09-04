@@ -3,8 +3,9 @@
 namespace Admin\Notifications;
 
 use Admin;
-use Illuminate\Notifications\Notification;
+use Admin\Eloquent\Authenticatable;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class ResetPassword extends Notification
 {
@@ -60,14 +61,18 @@ class ResetPassword extends Notification
     {
         $user = $this->user;
 
-        $authModel = Admin::getAuthModel();
+        $providers = Admin::getAuthProviders();
+        $providerName = Admin::getAuthProvider();
+        $authModel = $providers[$providerName];
+        $hasMultipleProviders = count($providers) > 1;
+        $params = array_filter([$this->token, $hasMultipleProviders ? $providerName : null]);
 
         if (method_exists($user, 'getResetLink')) {
             $action = $user->getResetLink($this->token);
-        } elseif ( $user instanceof $authModel ) {
-            $action = admin_action('Auth\ResetPasswordController@showResetForm', $this->token);
+        } elseif ( $user instanceof Authenticatable ) {
+            $action = admin_action('Auth\ResetPasswordController@showResetForm', $params);
         } else {
-            $action = route('password.reset', $this->token);
+            $action = route('password.reset', $params);
         }
 
         return (new MailMessage)

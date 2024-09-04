@@ -58,6 +58,7 @@ class Admin extends AdminCore
 
         //Set provider into config
         config()->set('auth.guards.admin.provider', $provider);
+        config()->set('auth.passwords.admin.provider', $provider);
 
         //Rewrite booted guard
         auth()->guard('admin')->setProvider(auth()->createUserProvider($provider));
@@ -76,9 +77,11 @@ class Admin extends AdminCore
 
         config()->set('auth.guards.admin', [
             'driver' => $driver ?: 'session',
-            'provider' => Admin::getAuthProvider(),
+            'provider' => $provider = Admin::getAuthProvider(),
             'hash' => false,
         ]);
+
+        config()->set('auth.passwords.admin.provider', $provider);
     }
 
     public function hasAutoProviderLogin()
