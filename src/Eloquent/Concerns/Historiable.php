@@ -297,14 +297,37 @@ trait Historiable
             return;
         }
 
+        $model = Admin::getModel('ModelsHistory');
+
+        //Logged user does not have relationship to history model
+        if ( $relationKey = $model->getHistoryUserField() ){
+            $data[$relationKey] = $data['user_id'] ?? (admin() ? admin()->getKey() : null);
+        }
+
         $data['action'] = $action;
-        $data['user_id'] = $data['user_id'] ?? (admin() ? admin()->getKey() : null);
         $data['created_at'] = ($data['created_at'] ?? null) ?: Carbon::now();
         $data['table'] = $this->getTable();
         $data['row_id'] = $data['row_id'] ?? $this->getKey();
         $data['ip'] = request()->ip();
 
-        return Admin::getModel('ModelsHistory')->create($data);
+        return $model->create($data);
+    }
+
+    private function getHistoryUserField()
+    {
+        $adminTable = admin()?->getTable();
+
+        foreach ($this->getFields() as $key => $field) {
+            if ( !isset($field['belongsTo']) ){
+                continue;
+            }
+
+            $properties = $this->getRelationPropertyData($field, $key, 'belongsTo');
+
+            if ( $properties[0] == $adminTable ){
+                return $key;
+            }
+        }
     }
 
     public function getEditedHistoryFields()
