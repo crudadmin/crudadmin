@@ -81,6 +81,11 @@ class Admin extends AdminCore
         ]);
     }
 
+    public function hasAutoProviderLogin()
+    {
+        return config('admin.auth_autoprovider', true) === true;
+    }
+
     /*
      * Check if is admin interface
      */

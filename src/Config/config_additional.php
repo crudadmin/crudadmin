@@ -11,6 +11,11 @@ return [
      */
     'auth_eloquent' => 'Admin',
 
+    /**
+     * Automatically select authentication provider
+     */
+    'auth_autoprovider' => true,
+
     /*
      * Default crudadmin storage
      */
