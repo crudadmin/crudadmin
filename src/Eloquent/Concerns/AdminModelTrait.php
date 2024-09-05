@@ -218,12 +218,16 @@ trait AdminModelTrait
      */
     protected function setOrder()
     {
+        if ( !($orderBy = $this->orderBy) ){
+            return;
+        }
+
         //If is turned of sorting of rows
-        if (! $this->isSortable() && $this->orderBy[0] == '_order') {
+        if (! $this->isSortable() && $orderBy[0] == '_order') {
             $this->orderBy[0] = 'id';
         }
 
-        if (! array_key_exists(1, $this->orderBy)) {
+        if (! array_key_exists(1, $orderBy)) {
             $this->orderBy[1] = 'ASC';
         }
 
@@ -231,7 +235,7 @@ trait AdminModelTrait
          * Reverse default order
          */
         if ($this->reversed === true) {
-            $this->orderBy[1] = strtolower($this->orderBy[1]) == 'asc' ? 'DESC' : 'ASC';
+            $this->orderBy[1] = strtolower($orderBy[1]) == 'asc' ? 'DESC' : 'ASC';
         }
     }
 
@@ -490,7 +494,7 @@ trait AdminModelTrait
      */
     public function isSortable($with_order = true)
     {
-        if ($this->orderBy[0] != '_order') {
+        if ($this->orderBy && $this->orderBy[0] != '_order') {
             return false;
         }
 
@@ -506,16 +510,20 @@ trait AdminModelTrait
      */
     public function scopeAddSorting($query)
     {
-        $column = $this->orderBy[0];
+        if ( !($orderBy = $this->orderBy) ){
+            return;
+        }
+
+        $column = $orderBy[0];
 
         if (count(explode('.', $column)) == 1) {
-            $column = $this->getTable().'.'.$this->orderBy[0];
+            $column = $this->getTable().'.'.$orderBy[0];
         }
 
         /*
          * Add global scope for ordering
          */
-        $query->orderBy($column, $this->orderBy[1]);
+        $query->orderBy($column, $orderBy[1]);
     }
 
     /*
@@ -523,11 +531,15 @@ trait AdminModelTrait
      */
     public function isReversed()
     {
-        if (! array_key_exists(2, $this->orderBy) || $this->orderBy[2] != true) {
+        if ( !($orderBy = $this->orderBy) ){
             return false;
         }
 
-        return in_array($this->orderBy[0], ['id', '_order']) && strtolower($this->orderBy[1]) == 'asc';
+        if (!isset($orderBy[2]) || ($orderBy[2] ?? false) !== true) {
+            return false;
+        }
+
+        return in_array($orderBy[0] ?? null, ['id', '_order']) && strtolower($orderBy[1]) == 'asc';
     }
 
     /*
