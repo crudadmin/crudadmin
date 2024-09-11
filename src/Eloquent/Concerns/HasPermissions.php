@@ -191,7 +191,10 @@ trait HasPermissions
                 $relatedModel = new $relatedModel;
 
                 if ( $relatedModel->getTable() == $permissionTable ){
-                    $query->where($this->getForeignColumn($relatedModel->getTable()), $filterBy);
+                    $query->where(
+                        $this->qualifyColumn($this->getForeignColumn($relatedModel->getTable())),
+                        $filterBy
+                    );
                 }
             }
         }
