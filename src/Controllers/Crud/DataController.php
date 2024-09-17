@@ -94,13 +94,19 @@ class DataController extends CRUDController
     /*
      * Displaying row data
      */
-    public function show($model, $id, $history_id = null)
+    public function show($table, $id, $history_id = null)
     {
         if (is_numeric($history_id)) {
-            return $this->showDataFromHistory($model, $id, $history_id);
+            return $this->showDataFromHistory($table, $id, $history_id);
         }
 
-        $row = $this->getModel($model)->withFieldRelations()->findOrFail($id);
+        $model = $this->getModel($table);
+
+        $row = $model
+                    ->select($model->getTable().'.*')
+                    ->withFieldRelations()
+                    ->filterByScopes(request('scopes'))
+                    ->findOrFail($id);
 
         $row->logHistoryAction('view');
 
