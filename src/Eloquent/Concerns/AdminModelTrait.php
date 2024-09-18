@@ -319,16 +319,14 @@ trait AdminModelTrait
             return;
         }
 
-        foreach ($scopes as $scope => $attributes) {
-            $params = explode(';', $attributes);
-
+        foreach ($scopes as $scope => $param) {
             if ( method_exists($this, 'scope'.$scope) ){
-                $query->{$scope}(...$params);
+                $query->{$scope}($param);
             }
 
-            $this->runAdminModules(function($module) use ($query, $scope, $params) {
+            $this->runAdminModules(function($module) use ($query, $scope, $param) {
                 if ( method_exists($module, 'scope'.$scope) ) {
-                    $module->{'scope'.$scope}($query, ...$params);
+                    $module->{'scope'.$scope}($query, $param);
                 }
             });
         }
