@@ -276,7 +276,7 @@ class JSTranslations
 
         $gettextPathsHash = md5($cacheKey);
 
-        $key .= $gettextPathsHash;
+        $key .= '.'.$gettextPathsHash;
 
         $timestamp = $timestamp ?: $this->getSourceModificationTimestamp($language);
 
