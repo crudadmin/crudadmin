@@ -132,7 +132,7 @@ class JSTranslations
         $timestamp = Gettext::getStorage()->lastModified($poPath);
 
         //Set cache key for specific language
-        $cacheKey .= '.'.$lang;
+        $cacheKey .= '.'.$model->getTable().'.'.$lang;
 
         //If we need restore cached translations data
         if ($this->hasCachedFilesBeenChanged($language, $cacheKey, $timestamp)) {
