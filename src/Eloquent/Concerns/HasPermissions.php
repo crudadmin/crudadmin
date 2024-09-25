@@ -157,7 +157,7 @@ trait HasPermissions
     public function scopeFilterByPermissions($query)
     {
         //Check if user has been logged (we can't use admin() causing authentication loop)
-        if ( Admin::getAdminGuard()->hasUser() && $this->canViewAllRowsAccordingToLoggedUser() == false ) {
+        if ( Admin::getAdminGuard()?->hasUser() && $this->canViewAllRowsAccordingToLoggedUser() == false ) {
             $query->where($this->qualifyColumn('id'), admin()->getKey());
         }
 
@@ -170,7 +170,7 @@ trait HasPermissions
     protected function scopeFilterByRelatedModels($query)
     {
         //Check if user has been logged (we can't use admin() causing authentication loop)
-        if ( !Admin::getAdminGuard()->hasUser() ){
+        if ( !Admin::getAdminGuard()?->hasUser() ){
             return;
         }
 
