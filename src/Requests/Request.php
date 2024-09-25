@@ -343,11 +343,7 @@ abstract class Request extends FormRequest
     protected function removeEmptyPassword($fields = null)
     {
         foreach ($fields as $key => $field) {
-            if ($key != 'password') {
-                continue;
-            }
-
-            if (($value = $this->get($key)) === null) {
+            if ($this->model->isFieldType($key, 'password') && ($value = $this->get($key)) === null) {
                 $this->replace($this->except($key));
             }
         }
