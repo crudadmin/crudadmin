@@ -14,12 +14,15 @@ trait CRUDRelations
                 continue;
             }
 
+            if ( $request->isFieldWhitelisted($key) === false ){
+                continue;
+            }
+
             //If field was deleted from request
             //We does not want update this value.
             if ( $request->isRemovedFieldFromRequest($key) === true ){
                 continue;
             }
-
 
             if ( ($pivotData = $this->getPivotData($key, $request)) !== false ) {
                 $row->getAdminRules(function ($rule) use (&$pivotData, $key, $row) {

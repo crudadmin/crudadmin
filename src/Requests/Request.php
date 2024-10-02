@@ -450,6 +450,13 @@ abstract class Request extends FormRequest
                 $row[$field] = null;
             }
 
+            // Whitelisted request fields only
+            foreach ($row as $key => $value) {
+                if ( $this->isFieldWhitelisted($key) == false ){
+                    unset($row[$key]);
+                }
+            }
+
             $this->model->getAdminRules(function ($rule) use (&$row) {
                 if (method_exists($rule, 'fill')) {
                     $row = $rule->fill($row);
@@ -477,6 +484,13 @@ abstract class Request extends FormRequest
         return $this->mutateRowDataRule(
             array_values($requestRows)
         );
+    }
+
+    public function isFieldWhitelisted($key)
+    {
+        $only = array_filter(array_wrap($this->get('_only')));
+
+        return count($only) == 0 || in_array($key, $only) === true;
     }
 
     private function manageUploadedFiles($requestRows)

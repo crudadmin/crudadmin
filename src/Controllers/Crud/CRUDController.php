@@ -241,6 +241,11 @@ class CRUDController extends Controller
         foreach ($rules as $validationKey => $data) {
             $originalKey = $this->getDefaultKey($validationKey);
 
+            // Skip validation rules for non whitelisted keys
+            if ( $request->isFieldWhitelisted($originalKey) === false ){
+                continue;
+            }
+
             //If is editing multirows
             if ( isset($row) && $model->hasFieldParam($originalKey, ['multirows']) ) {
                 $key = $originalKey;
