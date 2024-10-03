@@ -5,7 +5,7 @@ namespace Admin\Helpers\Localization;
 use Cache;
 use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
-use Gettext\Translations;
+use Admin\Helpers\Localization\Translations;
 
 class ResourcesGettext
 {

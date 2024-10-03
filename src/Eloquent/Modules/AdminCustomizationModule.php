@@ -6,7 +6,7 @@ use Admin;
 use AdminLocalization;
 use Admin\Core\Eloquent\Concerns\AdminModelModule;
 use Admin\Core\Eloquent\Concerns\AdminModelModuleSupport;
-use Gettext\Translations;
+use Admin\Helpers\Localization\Translations;
 use Gettext;
 
 class AdminCustomizationModule extends AdminModelModule implements AdminModelModuleSupport

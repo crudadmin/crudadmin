@@ -2,19 +2,20 @@
 
 namespace Admin\Helpers\Localization;
 
+use Admin;
 use Admin\Core\Helpers\Storage\AdminFile;
+use Admin\Helpers\Localization\Extractors\VueJs;
+use Admin\Helpers\Localization\Translations;
 use Cache;
 use Carbon\Carbon;
+use EditorMode;
 use File;
 use Gettext;
 use Gettext\Extractors\PhpCode;
 use Gettext\Generators\Json;
-use Gettext\Translations;
 use Illuminate\Filesystem\Filesystem;
 use \Illuminate\Support\Facades\Blade;
 use \SplFileInfo;
-use EditorMode;
-use Admin;
 
 class JSTranslations
 {
@@ -372,8 +373,18 @@ class JSTranslations
         //Foreach all files and merge translations by file type
         foreach ($this->getAllPathFiles($path) as $file) {
             $type = $this->getCollectorType($file);
+            $options = $this->getDecoderOptions();
+            $sources = null;
 
-            if ($type && $sources = Translations::{'from'.$type.'File'}((string) $file, $this->getDecoderOptions())) {
+            if ( $type == 'VueJs' ) {
+                $sources = new Translations;
+
+                VueJs::fromFile((string)$file, $sources, $options);
+            } else if ( $type ) {
+                $sources = Translations::{'from'.$type.'File'}((string) $file, $options);
+            }
+
+            if ($type && $sources) {
                 if (in_array($type, ['JsCode', 'VueJs'])) {
                     $sources = $this->setJSFlag($sources, $file);
                 }

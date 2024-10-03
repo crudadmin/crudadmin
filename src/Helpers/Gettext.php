@@ -10,7 +10,7 @@ use Admin\Helpers\Localization\LocalizationHelper;
 use App\Core\Models\Language;
 use EditorMode;
 use Facades\Admin\Helpers\Localization\JSTranslations;
-use Gettext\Translations;
+use Admin\Helpers\Localization\Translations;
 use Illuminate\Support\Collection;
 use Localization;
 use Storage;

@@ -9,7 +9,7 @@ use Admin\Tests\Concerns\DropDatabase;
 use Admin\Tests\Concerns\DropUploads;
 use Gettext;
 use Gettext\Generators\PhpArray;
-use Gettext\Translations;
+use Admin\Helpers\Localization\Translations;
 
 class ModelGettextTest extends BrowserTestCase
 {

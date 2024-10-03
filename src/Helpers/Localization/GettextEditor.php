@@ -6,7 +6,7 @@ use Admin;
 use Facades\Admin\Helpers\Localization\JSTranslations;
 use Gettext;
 use Gettext\Generators\Json;
-use Gettext\Translations;
+use Admin\Helpers\Localization\Translations;
 
 class GettextEditor
 {

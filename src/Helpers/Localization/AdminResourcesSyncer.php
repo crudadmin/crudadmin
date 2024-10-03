@@ -7,7 +7,7 @@ use AdminLocalization;
 use Admin\Core\Fields\Group;
 use Admin\Core\Helpers\File;
 use Fields;
-use Gettext\Translations;
+use Admin\Helpers\Localization\Translations;
 use Gettext;
 
 class AdminResourcesSyncer
