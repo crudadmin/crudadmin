@@ -181,9 +181,11 @@ trait HasPermissions
 
             $filterBy = $admin->{$key};
 
+            $rules = [];
+
             //Filter by exact model table
             if ( $permissionTable == $this->getTable() ){
-                $query->where($this->qualifyColumn('id'), $filterBy);
+                $rules[$this->qualifyColumn('id')] = $filterBy;
             }
 
             // Filter by belongsToModel relations
@@ -191,11 +193,24 @@ trait HasPermissions
                 $relatedModel = new $relatedModel;
 
                 if ( $relatedModel->getTable() == $permissionTable ){
-                    $query->where(
-                        $this->qualifyColumn($this->getForeignColumn($relatedModel->getTable())),
-                        $filterBy
-                    );
+                    $rules[$this->qualifyColumn($this->getForeignColumn($relatedModel->getTable()))] = $filterBy;
                 }
+            }
+
+            // Filter by field with hasAccessFilter param
+            foreach ($this->getFields() as $key => $field) {
+                if ( ($field['belongsTo'] ?? false) && $this->hasFieldParam($key, 'hasAccessFilter', true)){
+                    $params = $admin->getRelationProperty($key, 'belongsTo');
+
+                    if ( $params[0] == $permissionTable ) {
+                        $rules[$key] = $filterBy;
+                    }
+                }
+            }
+
+            // Filter by matched rules
+            foreach ($rules as $key => $value) {
+                $query->where($key, $value);
             }
         }
     }
