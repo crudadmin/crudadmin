@@ -185,7 +185,7 @@ trait HasPermissions
 
             //Filter by exact model table
             if ( $permissionTable == $this->getTable() ){
-                $rules[$this->qualifyColumn('id')] = $filterBy;
+                $rules['id'] = $filterBy;
             }
 
             // Filter by belongsToModel relations
@@ -193,7 +193,7 @@ trait HasPermissions
                 $relatedModel = new $relatedModel;
 
                 if ( $relatedModel->getTable() == $permissionTable ){
-                    $rules[$this->qualifyColumn($this->getForeignColumn($relatedModel->getTable()))] = $filterBy;
+                    $rules[$this->getForeignColumn($relatedModel->getTable())] = $filterBy;
                 }
             }
 
@@ -210,7 +210,7 @@ trait HasPermissions
 
             // Filter by matched rules
             foreach ($rules as $key => $value) {
-                $query->where($key, $value);
+                $query->where($this->qualifyColumn($key), $value);
             }
         }
     }
