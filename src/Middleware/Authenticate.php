@@ -43,6 +43,13 @@ class Authenticate
             }
         }
 
+        // Refresh all models, for correct permissions.
+        if ( $guard->user() ) {
+            foreach (Admin::getAdminModels() as $model) {
+                $model->getFields(null, true);
+            }
+        }
+
         return $next($request);
     }
 }
