@@ -118,7 +118,7 @@ class AdminRows
     /*
      * Returns all rows with base fields
      */
-    protected function setRowsResponses($rowsData)
+    protected function setRowsResponses($rowsData, $openedFormIds = [])
     {
         $rows = [];
 
@@ -126,7 +126,11 @@ class AdminRows
             if ( $this->isSingle() ) {
                 $data = $row->getMutatedAdminAttributes(false, true);
             } else {
-                $data = $row->getMutatedAdminAttributes(true);
+                $data = $row->getMutatedAdminAttributes(
+                    true,
+                    // By default this is false, but in some cases we want display response as opened row.
+                    in_array($row->getKey(), $openedFormIds)
+                );
             }
 
             $rows[] = $data;
@@ -189,7 +193,7 @@ class AdminRows
         return $buttons;
     }
 
-    public function returnModelData($onlyIds = [], $initialRequest)
+    public function returnModelData($onlyIds = [], $initialRequest, $openedFormIds = [])
     {
         try {
             $data = [
@@ -212,7 +216,7 @@ class AdminRows
                     }
                 }, true)->get();
 
-                $data['rows'] = $this->setRowsResponses($paginatedRows);
+                $data['rows'] = $this->setRowsResponses($paginatedRows, $openedFormIds);
 
                 $data['buttons'] = $this->generateButtonsProperties($paginatedRows);
             }

@@ -66,7 +66,10 @@ trait HasButtonsSupport
 
         $adminRows = (new AdminRows($model, $request));
 
-        $rows = $adminRows->returnModelData($onlyIds, true);
+        // When we are reloading row, we need return row response
+        $openedFormIds = $this->reloadRow ? array_filter(array_wrap($request['openedFormId'] ?? [])) : [];
+
+        $rows = $adminRows->returnModelData($onlyIds, true, $openedFormIds);
 
         //If no more rows are on this page. We need return lower page.
         //This may happen when buttons removes pressed row, but no more-rows are on given page.
