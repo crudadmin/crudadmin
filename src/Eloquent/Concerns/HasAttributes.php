@@ -16,7 +16,7 @@ trait HasAttributes
 
     /**
      * Convert the model instance to an array.
-     * In admin, do not convert end-point model by developer into array, without his modifications.
+     * In admin, do not convert end-point toArray model response by developer into array, without his modifications.
      *
      * @return array
      */
@@ -32,7 +32,9 @@ trait HasAttributes
 
     public function toAdminArray()
     {
-        $array = $this->toArray();
+        //We need call self::, because AdminModal may have modifier toArray response for frontend outputs.
+        //We need skip that behaviour and load raw toArray
+        $array = self::toArray();
 
         $array = $this->updateRelationsArrayResponse($array);
 
