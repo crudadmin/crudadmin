@@ -153,6 +153,8 @@ class LocalizationHelper
      */
     public function getFirstLanguage()
     {
+        $this->getLanguages();
+
         $this->bootInConsole();
 
         return $this->all()->first();
