@@ -139,7 +139,7 @@ trait HasEloquentReplicator
             }
 
             $newFilename = $prefix.$filename;
-            $newPath = dirname($row->{$key}->basepath).'/'.$newFilename;
+            $newPath = dirname($row->{$key}->path).'/'.$newFilename;
 
             $row->{$key}->copy($newPath);
 
