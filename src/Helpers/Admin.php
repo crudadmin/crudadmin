@@ -72,7 +72,12 @@ class Admin extends AdminCore
 
         //Add support for sanctum requests when autorization header is present.
         if ( $driver == 'session' && request()->headers->has('authorization') ) {
-            $driver = 'sanctum';
+            $token = request()->bearerToken();
+
+            //FLM uploader + empty tokens fix
+            if ( $token && $token !== 'null' ) {
+                $driver = 'sanctum';
+            }
         }
 
         config()->set('auth.guards.admin', [
