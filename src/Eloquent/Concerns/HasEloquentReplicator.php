@@ -124,7 +124,16 @@ trait HasEloquentReplicator
         $fields = $row->getFields();
 
         foreach ($fields as $key => $field) {
-            if ( !$row->isFieldType($key, 'file') || !$row->{$key} || !$row->{$key}->exists() ){
+            if (
+                // Is not file
+                !$row->isFieldType($key, 'file')
+                // We don't have support for multiple files yet
+                || $row->hasFieldParam($key, 'multiple')
+                // Is empty
+                || !($file = $row->{$key})
+                // Does not exists
+                || !$file->exists()
+            ){
                 continue;
             }
 
