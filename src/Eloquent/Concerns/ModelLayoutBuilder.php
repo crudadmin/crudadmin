@@ -11,7 +11,9 @@ trait ModelLayoutBuilder
      */
     public function hasModelGroup()
     {
-        return is_string($this->group) && ! empty($this->group);
+        $group = $this->getProperty('group');
+
+        return is_string($group) && ! empty($group);
     }
 
     private function getAdminModelGroups()
@@ -39,7 +41,7 @@ trait ModelLayoutBuilder
         $groups = $this->getAdminModelGroups();
 
         //If model has no group
-        if (! ($groupKey = $this->group)) {
+        if (! ($groupKey = $this->getProperty('group'))) {
             return;
         }
 
