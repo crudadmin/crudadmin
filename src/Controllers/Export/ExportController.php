@@ -50,12 +50,30 @@ class ExportController extends CRUDController
     {
         $this->logRequest();
 
-        $rows = $this->getBootedModel($table, 'read')->paginate(request('limit'));
+        $limit = request('limit');
+        $rows = $this->getBootedModel($table, 'read');
 
-        $rows->getCollection()->each->setFullExportResponse();
+        // Unlimited response
+        if ( is_null($limit) === false && ($limit == 0 || $limit == -1) ) {
+            $pagination = [
+                'current_page' => 1,
+                'data' => $rows->get()->each->setFullExportResponse(),
+                'from' => 1,
+                'to' => $total = $rows->count(),
+                'last_page' => 1,
+                'per_page' => $total,
+                'total' => $total,
+            ];
+        }
+
+        // Paginated response
+        else {
+            $pagination = $rows->paginate(request('limit'));
+            $pagination->getCollection()->each->setFullExportResponse();
+        }
 
         return autoAjax()->data([
-            'pagination' => $rows,
+            'pagination' => $pagination,
         ]);
     }
 
