@@ -29,11 +29,13 @@ paths:
             example: {{ implode(',', $model->getExportColumns()) }}
         - in: query
           name: limit
-          description: number of records in pagination
+          description: number of records in pagination. Use -1 to disable pagination.
           schema:
             type: integer
             format: int32
-            minimum: 1
+            minimum: -1
+          example:
+            -1 or 10 or 20 ...
         - in: query
           name: with[]
           description: Fetch additional order relationships
