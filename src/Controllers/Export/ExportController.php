@@ -89,6 +89,24 @@ class ExportController extends CRUDController
         ]);
     }
 
+    public function create($table)
+    {
+        $this->logRequest();
+
+        $model = $this->getBootedModel($table, 'insert')->getModel();
+
+        $data = $model->validator()
+                    ->addDefaultValues()
+                    ->validate()
+                    ->getData();
+
+        $row = $model->create($data);
+
+        return autoAjax()->success(_('Záznam bol úspešne uložený.'))->data([
+            'row' => $row->setFullExportResponse()
+        ]);
+    }
+
     public function update($table, $id)
     {
         $this->logRequest();

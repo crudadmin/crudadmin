@@ -103,6 +103,28 @@ paths:
                           type: array
                           items:
                             $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+@if ( admin()->hasAccess($model, 'insert') )
+    post:
+      tags:
+        - {{ $model->getProperty('name') }}
+      summary: Insert row into {{ $model->getProperty('name') }}
+      security:
+        - bearerAuth: []
+      @include('admin::openapi.model_post', compact('model'))
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    data:
+                      type: object
+                      properties:
+                        row:
+                          $ref: '#/components/schemas/{{ class_basename(get_class($model)) }}'
+@endif
   /model/{{ $model->getTable() }}/{identifier}:
     get:
       tags:
@@ -184,25 +206,7 @@ paths:
           schema:
             type: string
           example: Same as in listing model.
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-@foreach(array_unique(array_intersect($model->getFillable(), $model->getExportColumns())) as $key)
-@php
-$field = $model->getField($key) ?? [];
-@endphp
-                {{ $key }}:
-                  type: {{ $model->getExportFieldType($key) }}
-@if ( $name = $model->getExportFieldName($key) )
-                  description: {{ $name }}
-@if ( $model->isFieldType($key, 'file') )
-                  format: binary
-@endif
-@endif
-@endforeach
+      @include('admin::openapi.model_post', compact('model'))
       responses:
         '200':
           description: Success response
