@@ -178,7 +178,7 @@ class DataController extends CRUDController
             }
 
             //Update first row
-            $model->newInstance()->where($model->fixAmbiguousColumn('id'), $id)->update($update);
+            $model->newInstance()->withoutGlobalScopes()->where($model->fixAmbiguousColumn('id'), $id)->update($update);
         }
 
         //Fire on update order event
