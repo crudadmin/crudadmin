@@ -86,9 +86,7 @@ class RemoveRow extends Button
                 return $this->error(sprintf(_('Záznam č. %s nie je možné vymazať.'), $row->getKey()))->throw();
             }
 
-            $row->deleteAdminRow(
-                $row->getProperty('deletable')
-            );
+            $row->deleteAdminRow();
         }
 
         return $this

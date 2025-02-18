@@ -104,12 +104,14 @@ trait HasAdminDeletable
     /**
      * Delete row
      *
-     * @param array $options
+     * @param array $additionalOptions
      * @param AdminModel $parentRow
      */
-    public function deleteAdminRow($options = [], $parentRow = null)
+    public function deleteAdminRow($additionalOptions = [], $parentRow = null)
     {
+        $options = $this->getProperty('deletable');
         $options = is_array($options) ? $options : [];
+        $options = array_merge($options, $additionalOptions ?: []);
 
         $this->logHistoryAction('delete');
 
@@ -180,7 +182,7 @@ trait HasAdminDeletable
                 }
 
                 if ( $withDeepEvents ){
-                    $childrenRow->deleteAdminRow($childrenRow->getProperty('deletable'), $this);
+                    $childrenRow->deleteAdminRow([], $this);
                 } else {
                     $childrenRow->removeWithRelations($options, $this);
                 }
