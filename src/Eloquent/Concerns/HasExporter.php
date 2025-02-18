@@ -127,12 +127,13 @@ trait HasExporter
 
     public function scopeExportColumnsSupport($query, $columns, $withs)
     {
-        if ( !count($columns) ){
-            return;
+        // Select everything if no columns are defined
+        if ( count($columns) == 0 ){
+            $columns = ['*'];
         }
 
-        //Add primary id
-        if ( $withs && count($withs) ){
+        //Add primary id for relations support
+        if ( $withs && count($withs) && in_array('*', $columns) === false ){
             $columns = array_merge([$query->getModel()->getKeyName()], $columns);
         }
 
@@ -151,6 +152,10 @@ trait HasExporter
                 }
             }
         }
+
+        $columns = array_map(function($column) use ($query) {
+            return Str::contains($column, '.') ? $column : $query->qualifyColumn($column);
+        }, $columns);
 
         $query->select(array_unique($columns));
     }
