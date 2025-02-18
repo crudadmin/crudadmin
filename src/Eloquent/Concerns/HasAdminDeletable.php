@@ -105,8 +105,9 @@ trait HasAdminDeletable
      * Delete row
      *
      * @param array $options
+     * @param AdminModel $parentRow
      */
-    public function deleteAdminRow($options = [])
+    public function deleteAdminRow($options = [], $parentRow = null)
     {
         $options = is_array($options) ? $options : [];
 
@@ -120,7 +121,7 @@ trait HasAdminDeletable
 
         // Delete admin row files
         if ( ($options['deep'] ?? false) === true ){
-            $this->removeWithRelations($options);
+            $this->removeWithRelations($options, $parentRow);
         } else {
             $this->finallyDelete(
                 $options['force'] ?? false
@@ -148,19 +149,12 @@ trait HasAdminDeletable
     public function removeWithRelations($options = [], $parentRow = null)
     {
         $options = is_array($options) ? $options : [];
-
-        $onlyModels = $options['only'] ?? [];
-        $exceptModels = $options['except'] ?? [];
         $detach = $options['detach'] ?? false;
         $withDeepEvents = $options['deepEvents'] ?? true;
 
-        //Skip clone given models
-        if ( count($onlyModels) && $parentRow && !in_array(static::class, $onlyModels) ){
-            return;
-        }
-
-        if ( count($exceptModels) && in_array(static::class, $exceptModels) ){
-            return;
+        // Check if row can be deleted deeply
+        if ( $parentRow && $this->canDeleteDeeply($options, $parentRow) === false ){
+            return false;
         }
 
         if ( $detach === true ) {
@@ -180,10 +174,13 @@ trait HasAdminDeletable
 
         $this->runAdminModelChild(
             function($childrenRow) use ($options, $withDeepEvents) {
+                // Depp check
+                if ( $this->canDeleteDeeply($options, $this, $childrenRow) === false ){
+                    return;
+                }
+
                 if ( $withDeepEvents ){
-                    $childrenRow->deleteAdminRow(
-                        $childrenRow->getProperty('deletable')
-                    );
+                    $childrenRow->deleteAdminRow($childrenRow->getProperty('deletable'), $this);
                 } else {
                     $childrenRow->removeWithRelations($options, $this);
                 }
@@ -202,6 +199,8 @@ trait HasAdminDeletable
 
         // Force delete if is enabled
         $this->finallyDelete($options['force'] ?? false);
+
+        return true;
     }
 
     /**
@@ -214,6 +213,33 @@ trait HasAdminDeletable
         } else {
             $this->delete();
         }
+    }
+
+    /**
+     * Check if row can be deleted deeply
+     *
+     * @param array $options
+     * @param AdminModel $parentRow
+     * @param string $class
+     *
+     */
+    private function canDeleteDeeply($options, $parentRow, $class = null)
+    {
+        $onlyModels = $options['only'] ?? [];
+        $exceptModels = $options['except'] ?? [];
+        $classname = $class ? $class::class : static::class;
+
+        //Skip clone given models
+        if ( count($onlyModels) && $parentRow && in_array($classname, $onlyModels) === false ){
+            return false;
+        }
+
+        // Skip except models
+        if ( count($exceptModels) && in_array($classname, $exceptModels) == true ){
+            return false;
+        }
+
+        return true;
     }
 
     /**
