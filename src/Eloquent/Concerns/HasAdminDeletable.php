@@ -1,0 +1,254 @@
+<?php
+
+namespace Admin\Eloquent\Concerns;
+
+use Admin;
+use Admin\Eloquent\AdminPivot;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
+use Admin\Eloquent\AdminModel;
+use Carbon\Carbon;
+
+trait HasAdminDeletable
+{
+    /**
+     * Check if row can be deleted
+     *
+     * @param array $options
+     *
+     * @return bool
+     */
+    public function canBeDeleted($options = [])
+    {
+        if ($this->canDelete() !== true) {
+            return false;
+        }
+
+        if ( admin()->hasAccess($this, 'delete') === false ){
+            return false;
+        }
+
+        if ($this->getProperty('deletable') == false) {
+            return false;
+        }
+
+        $canCheckReserved = $options['reserved'] ?? true;
+        if ($canCheckReserved === true && $this->isReservedRow() === true) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if row is reserved
+     *
+     * @return bool
+     */
+    public function isReservedRow()
+    {
+        $reserved = $this->getProperty('reserved');
+
+        return is_array($reserved) && in_array($this->getKey(), $reserved);
+    }
+
+    /**
+     * Get all deletable relations
+     *
+     * @return array
+     */
+    public function getAllDeletableRelations()
+    {
+        $usedModels = [];
+        $parentTable = $this->getTable();
+
+        foreach (Admin::getAdminModels() as $model) {
+            if ( $model instanceof AdminPivot ){
+                continue;
+            }
+
+            foreach ($model->getFields() as $fieldKey => $field) {
+                if ( !($field['belongsToMany'] ?? $field['belongsTo'] ?? null) ){
+                    continue;
+                }
+
+                $relationType = isset($field['belongsToMany']) ? 'belongsToMany' : 'belongsTo';
+                $relationProperties = $model->getRelationProperty($fieldKey, $relationType);
+
+                //If relation does not match
+                if ( $relationProperties[0] != $parentTable ){
+                    continue;
+                }
+
+                if ( $relationType == 'belongsToMany' ){
+                    $usedIds = $this->getConnection()->table($relationProperties[3])->where($relationProperties[7], $this->getKey())->pluck($relationProperties[7])->unique();
+                } else if ( $relationType == 'belongsTo' ) {
+                    $usedIds = $model->newInstance()->where($relationProperties[4], $this->getKey())->pluck('id');
+                }
+
+                if ( count($usedIds) ) {
+                    $usedModels[$model->getTable()][] = [
+                        'name' => AdminResourcesSyncer::translate($model->getProperty('name')),
+                        'field' => [
+                            'name' => AdminResourcesSyncer::translate($model->getFieldParam($fieldKey, 'name')),
+                            'key' => $fieldKey,
+                        ],
+                        'rows' => $usedIds,
+                    ];
+                }
+            }
+        }
+
+        return $usedModels;
+    }
+
+    /**
+     * Delete row
+     *
+     * @param array $options
+     */
+    public function deleteAdminRow($options = [])
+    {
+        $options = is_array($options) ? $options : [];
+
+        $this->logHistoryAction('delete');
+
+        if ( $this->hasSoftDeletes() ) {
+            $this->deleted_at = Carbon::now();
+        }
+
+        $this->checkForModelRules(['deleting']);
+
+        // Delete admin row files
+        if ( ($options['deep'] ?? false) === true ){
+            $this->removeWithRelations($options);
+        } else {
+            $this->finallyDelete(
+                $options['force'] ?? false
+            );
+        }
+
+        //Remove uploaded files
+        $this->removeFieldFiles();
+
+        //Fire on delete events
+        $this->checkForModelRules(['deleted'], true);
+
+        //Fire on delete events
+        if (method_exists($this, 'onDelete')) {
+            $this->onDelete($this);
+        }
+    }
+
+    /*
+     * Permanently removes files from deleted rows
+     */
+    private function removeFieldFiles()
+    {
+        foreach ($this->getFields() as $key => $field) {
+            if ($this->isFieldType($key, 'file')) {
+                $this->deleteFiles($key);
+            }
+        }
+    }
+
+    /**
+     * Remove row with relations
+     *
+     * @param array $options
+     * @param AdminModel $parentRow
+     */
+    private function removeWithRelations($options = [], $parentRow = null)
+    {
+        $options = is_array($options) ? $options : [];
+
+        $onlyModels = $options['only'] ?? [];
+        $exceptModels = $options['except'] ?? [];
+        $detach = $options['detach'] ?? false;
+        $forceDelete = $options['force'] ?? false;
+        $deeplyRunModels = $options['deepEvents'] ?? true;
+
+        //Skip clone given models
+        if ( count($onlyModels) && $parentRow && !in_array(static::class, $onlyModels) ){
+            return;
+        }
+
+        if ( count($exceptModels) && in_array(static::class, $exceptModels) ){
+            return;
+        }
+
+        if ( $detach === true ) {
+            //Detach all belongsToMany relations
+            $this->runBelongsToManyFields(function($key){
+                $this->{$key}()->detach();
+            });
+
+            $this->runForeignBelongsToFields(function($model, $key) {
+                DB::table($model->getTable())
+                    ->where($key, $this->getKey())
+                    ->update([
+                        $key => null,
+                    ]);
+            });
+        }
+
+        $this->runAdminModelChild(
+            function($childrenRow) use ($options, $deeplyRunModels) {
+                if ( $deeplyRunModels === true ){
+                    $childrenRow->deleteAdminRow(
+                        $childrenRow->getProperty('deletable')
+                    );
+                } else {
+                    $childrenRow->removeWithRelations($options, $this);
+                }
+            },
+            function($query) use ($forceDelete) {
+                $query->selectOnlyRelationColumns($this);
+
+                if ( $forceDelete && $query->getModel()->hasSoftDeletes() ) {
+                    $query->withTrashed();
+                }
+            }
+        );
+
+        // Force delete if is enabled
+        $this->finallyDelete($forceDelete);
+    }
+
+    /**
+     * Finally delete row
+     */
+    private function finallyDelete($forceDelete = false)
+    {
+        if ( $forceDelete && $this->hasSoftDeletes() ) {
+            $this->forceDelete();
+        } else {
+            $this->delete();
+        }
+    }
+
+    /**
+     * Select only relation columns
+     *
+     * @param Builder $query
+     *
+     * @param AdminModel $parent
+     */
+    public function scopeSelectOnlyRelationColumns($query, $parent = null)
+    {
+        $columns = [
+            $this->getKeyName(),
+        ];
+
+        if ( $parent && $relationColumn = $this->getForeignColumn($parent->getTable()) ){
+            $columns[] = $relationColumn;
+        }
+
+        foreach ($this->getFields() as $key => $field) {
+            if ( $field['belongsTo'] ?? null ){
+                $columns[] = $key;
+            }
+        }
+
+        $query->select($columns);
+    }
+}

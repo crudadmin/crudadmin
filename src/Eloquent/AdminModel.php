@@ -18,6 +18,7 @@ use Admin\Eloquent\Concerns\ModelIcons;
 use Admin\Eloquent\Concerns\ModelLayoutBuilder;
 use Admin\Eloquent\Concerns\ModelRules;
 use Admin\Eloquent\Concerns\VueComponent;
+use Admin\Eloquent\Concerns\HasAdminDeletable;
 use Admin\Eloquent\Modules\AdminCustomizationModule;
 use Admin\Eloquent\Modules\FilterStateModule;
 use Admin\Eloquent\Modules\GlobalRelationModule;
@@ -31,6 +32,7 @@ use Localization;
 class AdminModel extends CoreAdminModel
 {
     use AdminModelTrait,
+        HasAdminDeletable,
         ModelLayoutBuilder,
         HasEloquentReplicator,
         HasExporter,

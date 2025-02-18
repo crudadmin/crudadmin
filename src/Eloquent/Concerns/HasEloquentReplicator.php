@@ -2,9 +2,10 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
+use DB;
 use Admin;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 
 trait HasEloquentReplicator
 {
@@ -38,7 +39,7 @@ trait HasEloquentReplicator
 
         $clonedRow->save();
 
-        $this->cloneBelongsToManyFields(function($key) use ($clonedRow) {
+        $this->runBelongsToManyFields(function($key) use ($clonedRow) {
             if ( $this->{$key}->count() == 0 ) {
                 return;
             }
@@ -48,52 +49,12 @@ trait HasEloquentReplicator
             $clonedRow->{$key}()->sync($relationIds);
         });
 
-        $this->cloneModelChilds(function($relationRow) use ($clonedRow, $options) {
+        $this->runAdminModelChild(function($relationRow) use ($clonedRow, $options) {
             $relationRow->replicateWithRelations($options, $clonedRow);
         });
     }
 
-    public function forceRemoveWithRelations($options = [], $parentRow = null)
-    {
-        $onlyModels = $options['only'] ?? [];
-        $exceptModels = $options['except'] ?? [];
-
-        //Skip clone given models
-        if ( count($onlyModels) && $parentRow && !in_array(static::class, $onlyModels) ){
-            return;
-        }
-
-        if ( count($exceptModels) && in_array(static::class, $exceptModels) ){
-            return;
-        }
-
-        //Detach all belongsToMany relations
-        $this->cloneBelongsToManyFields(function($key){
-            $this->{$key}()->detach();
-        });
-
-        $this->onForeingModelRelations(function($model, $key) {
-            \DB::table($model->getTable())
-                ->where($key, $this->getKey())
-                ->update([
-                    $key => null,
-                ]);
-        });
-
-        $this->cloneModelChilds(
-            function($childrenRow) use ($options) {
-                $childrenRow->forceRemoveWithRelations($options, $this);
-            },
-            function($query) {
-                $query->selectOnlyRelationColumns($this)->withTrashed();
-            }
-        );
-
-
-        $this->forceDelete();
-    }
-
-    private function onForeingModelRelations($callback)
+    protected function runForeignBelongsToFields($callback)
     {
         foreach (Admin::getAdminModels() as $model) {
             if ($model->getTable() == $this->getTable()) {
@@ -119,7 +80,7 @@ trait HasEloquentReplicator
      *
      * @param  AdminModel  $row
      */
-    private function cloneExistingFilesToClonedRows($row)
+    protected function cloneExistingFilesToClonedRows($row)
     {
         $fields = $row->getFields();
 
@@ -162,7 +123,7 @@ trait HasEloquentReplicator
      * @param  AdminModel  $row
      * @param  AdminModel  $clonedRow
      */
-    private function cloneBelongsToManyFields($callback)
+    protected function runBelongsToManyFields($callback)
     {
         $fields = $this->getFields();
 
@@ -178,7 +139,7 @@ trait HasEloquentReplicator
     /**
      * Clone belongsToModel childrens
      */
-    private function cloneModelChilds($callback, $scope = null)
+    protected function runAdminModelChild($callback, $scope = null)
     {
         $childs = $this->getModelChilds() ?: [];
         foreach ($childs as $child) {
@@ -201,24 +162,5 @@ trait HasEloquentReplicator
                 $callback($relationRows);
             }
         }
-    }
-
-    public function scopeSelectOnlyRelationColumns($query, $parent = null)
-    {
-        $columns = [
-            $this->getKeyName(),
-        ];
-
-        if ( $parent && $relationColumn = $this->getForeignColumn($parent->getTable()) ){
-            $columns[] = $relationColumn;
-        }
-
-        foreach ($this->getFields() as $key => $field) {
-            if ( $field['belongsTo'] ?? null ){
-                $columns[] = $key;
-            }
-        }
-
-        $query->select($columns);
     }
 }

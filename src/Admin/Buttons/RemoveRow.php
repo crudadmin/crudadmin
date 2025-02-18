@@ -2,17 +2,12 @@
 
 namespace Admin\Admin\Buttons;
 
-use Admin\Contracts\Controllers\HasDeleteSupport;
 use Admin\Eloquent\AdminModel;
-use Admin\Helpers\AdminRows;
 use Admin\Helpers\Button;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class RemoveRow extends Button
 {
-    use HasDeleteSupport;
-
     public $reloadAll = true;
 
     public $icon = 'far fa-trash-alt';
@@ -34,18 +29,21 @@ class RemoveRow extends Button
         //Button classes
         $this->class = implode(' ', array_filter([
             'btn-danger',
-            $this->isReservedRow($row) ? 'disabled' : null,
+            $row->isReservedRow() ? 'disabled' : null,
         ]));
 
-        $this->active = $this->canDeleteRow($row, request(), false, false);
+        $this->active = $row->canBeDeleted([
+            'reserved' => false,
+        ]);
     }
 
     public function question($rows)
     {
         $rows = $rows instanceof Collection ? $rows : collect([$rows]);
+
         $relationMatches = [];
         foreach ($rows as $row) {
-            $rowMatches = $this->getAllRowRelations($row);
+            $rowMatches = $row->getAllDeletableRelations();
 
             foreach ($rowMatches as $table => $modelFieldMatches) {
                 foreach ($modelFieldMatches as $match) {
@@ -81,52 +79,16 @@ class RemoveRow extends Button
      */
     public function fireMultiple(Collection $rows)
     {
-        return $this->delete($rows);
-    }
-
-    /*
-     * Deleting row from db
-     */
-    private function delete($rows)
-    {
         $model = $rows[0]->newInstance();
 
-        //Validate if all given rows can be removed
         foreach ($rows as $row) {
-            if ( $this->canDeleteRow($row, request()) === false ) {
-                return $this->error(sprintf(_('Záznam č. %s nie je možné vymazať.'), $row->getKey()));
-            }
-        }
-
-        foreach ($rows as $row) {
-            //Check again on every delete, because rules may change during deletion process
-            if ( $this->canDeleteRow($row, request(), true) === false ) {
-                return $this->error(sprintf(_('Záznam č. %s nie je možné vymazať.'), $row->getKey()));
+            if ( $row->canBeDeleted() === false ) {
+                return $this->error(sprintf(_('Záznam č. %s nie je možné vymazať.'), $row->getKey()))->throw();
             }
 
-            $row->logHistoryAction('delete');
-
-            $row->deleted_at = Carbon::now();
-
-            $row->checkForModelRules(['deleting']);
-
-            //Remove row from db (softDeletes)
-            if ( $model->hasSoftDeletes() ) {
-                $row->delete();
-            } else {
-                $row->forceDelete();
-            }
-
-            //Remove uploaded files
-            $this->removeFilesOnDelete($row);
-
-            //Fire on delete events
-            $row->checkForModelRules(['deleted'], true);
-
-            //Fire on delete events
-            if (method_exists($model, 'onDelete')) {
-                $row->onDelete($row);
-            }
+            $row->deleteAdminRow(
+                $row->getProperty('deletable')
+            );
         }
 
         return $this
