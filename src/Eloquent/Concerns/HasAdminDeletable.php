@@ -139,33 +139,20 @@ trait HasAdminDeletable
         }
     }
 
-    /*
-     * Permanently removes files from deleted rows
-     */
-    private function removeFieldFiles()
-    {
-        foreach ($this->getFields() as $key => $field) {
-            if ($this->isFieldType($key, 'file')) {
-                $this->deleteFiles($key);
-            }
-        }
-    }
-
     /**
      * Remove row with relations
      *
      * @param array $options
      * @param AdminModel $parentRow
      */
-    private function removeWithRelations($options = [], $parentRow = null)
+    public function removeWithRelations($options = [], $parentRow = null)
     {
         $options = is_array($options) ? $options : [];
 
         $onlyModels = $options['only'] ?? [];
         $exceptModels = $options['except'] ?? [];
         $detach = $options['detach'] ?? false;
-        $forceDelete = $options['force'] ?? false;
-        $deeplyRunModels = $options['deepEvents'] ?? true;
+        $withDeepEvents = $options['deepEvents'] ?? true;
 
         //Skip clone given models
         if ( count($onlyModels) && $parentRow && !in_array(static::class, $onlyModels) ){
@@ -192,8 +179,8 @@ trait HasAdminDeletable
         }
 
         $this->runAdminModelChild(
-            function($childrenRow) use ($options, $deeplyRunModels) {
-                if ( $deeplyRunModels === true ){
+            function($childrenRow) use ($options, $withDeepEvents) {
+                if ( $withDeepEvents ){
                     $childrenRow->deleteAdminRow(
                         $childrenRow->getProperty('deletable')
                     );
@@ -201,17 +188,20 @@ trait HasAdminDeletable
                     $childrenRow->removeWithRelations($options, $this);
                 }
             },
-            function($query) use ($forceDelete) {
+            function($query) {
+                $childModel = $query->getModel();
+                $shouldBeChildRemovedByForce = $query->getModel()->getProperty('deletable')['force'] ?? false;
+
                 $query->selectOnlyRelationColumns($this);
 
-                if ( $forceDelete && $query->getModel()->hasSoftDeletes() ) {
+                if ( $shouldBeChildRemovedByForce && $childModel->hasSoftDeletes() ) {
                     $query->withTrashed();
                 }
             }
         );
 
         // Force delete if is enabled
-        $this->finallyDelete($forceDelete);
+        $this->finallyDelete($options['force'] ?? false);
     }
 
     /**
@@ -250,5 +240,18 @@ trait HasAdminDeletable
         }
 
         $query->select($columns);
+    }
+
+
+    /*
+     * Permanently removes files from deleted rows
+     */
+    private function removeFieldFiles()
+    {
+        foreach ($this->getFields() as $key => $field) {
+            if ($this->isFieldType($key, 'file')) {
+                $this->deleteFiles($key);
+            }
+        }
     }
 }
