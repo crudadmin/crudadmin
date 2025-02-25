@@ -55,7 +55,9 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
         $states = $this->getModel()->getFilterStates();
 
         foreach ($types as $key) {
-            $states[$key]['query']($query);
+            if ( array_key_exists($key, $states) ){
+                $states[$key]['query']($query);
+            }
         }
     }
 }
