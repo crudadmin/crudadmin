@@ -128,6 +128,7 @@ class AdminTree
             'publishableState' => $model->getProperty('publishableState'),
             'sortable' => $model->isSortable(),
             'layouts' => $this->getLayouts($model),
+            'exports' => $this->getExports($model),
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
             'fields' => $this->getModelFields($model, $withOptions),
@@ -310,6 +311,19 @@ class AdminTree
         }
 
         return $layouts;
+    }
+
+    private function getExports($model)
+    {
+        return collect($model->getProperty('exports', []))->map(function($classname){
+            $export = new $classname;
+
+            return [
+                'key' => $export->getKey(),
+                'name' => $export->getName(),
+                'icon' => $export->getIcon(),
+            ];
+        })->values()->toArray();
     }
 
     private function getModelReversed($model)

@@ -16,7 +16,7 @@
 <script>
   window.onload = () => {
     window.ui = SwaggerUIBundle({
-      url: "{{ action('\Admin\Controllers\Export\ExportController@openApiScheme', 'json') }}?models={{ request('models') }}",
+      url: "{{ action('\Admin\Controllers\Api\ApiController@openApiScheme', 'json') }}?models={{ request('models') }}",
       dom_id: '#swagger-ui',
     });
   };

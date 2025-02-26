@@ -49,6 +49,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::get('/admin/api/download-translations/{id}/{table}', 'GettextController@downloadTranslations');
     Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
+    Route::any('/admin/api/export/{table}/{exportKey}', 'Export\ExportController@export');
 
     //Admin gettext translates
     Route::post('/admin/frontend-editor/static-link', 'FrontendEditorController@updateLink');
@@ -65,6 +66,6 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::post('/admin/sitetree/store', 'SiteTreeController@store');
 
     //Swagger mdodels scheme
-    Route::get('/admin/swagger', 'Export\ExportController@swagger');
-    Route::get('/admin/swagger/scheme/{type}', 'Export\ExportController@openApiScheme');
+    Route::get('/admin/swagger', 'Api\ApiController@swagger');
+    Route::get('/admin/swagger/scheme/{type}', 'Api\ApiController@openApiScheme');
 });
