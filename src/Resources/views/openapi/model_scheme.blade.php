@@ -19,7 +19,7 @@ $field = $model->getField($key) ?? [];
 @endif
 @endforeach
 @if ( ($deep ?? false) === true )
-@foreach($model->getExportRelations() as $key => $relation)
+@foreach($model->getAdminApiRelations() as $key => $relation)
         {{ $key }}:
 @if ( $relation['multiple'] === true )
           type: array

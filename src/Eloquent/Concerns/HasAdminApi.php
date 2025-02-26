@@ -10,7 +10,7 @@ use Str;
 
 trait HasAdminApi
 {
-    public function getApiColumns()
+    public function getAdminApiColumns()
     {
         $fields = array_filter($this->getFields(), function($field){
             if ( $field['belongsToMany'] ?? false ){
@@ -25,7 +25,7 @@ trait HasAdminApi
         return $columns;
     }
 
-    public function getExportRelations()
+    public function getAdminApiRelations()
     {
         $relations = [];
 

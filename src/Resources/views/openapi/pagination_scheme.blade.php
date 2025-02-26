@@ -26,7 +26,7 @@ paths:
           required: false
           schema:
             type: string
-            example: {{ implode(',', $model->getApiColumns()) }}
+            example: {{ implode(',', $model->getAdminApiColumns()) }}
         - in: query
           name: limit
           description: number of records in pagination. Use -1 to disable pagination.
@@ -41,11 +41,11 @@ paths:
           description: Fetch additional order relationships
           schema:
             type: string
-@if ( count($model->getExportRelations()) )
+@if ( count($model->getAdminApiRelations()) )
           examples:
-@foreach( $model->getExportRelations() as $relationKey => $relation )
+@foreach( $model->getAdminApiRelations() as $relationKey => $relation )
             {{ $relationKey }} ({{ $relation['name'] }}):
-              value: {{ $relationKey.':'.implode(',', $relation['relation']->getApiColumns()) }}
+              value: {{ $relationKey.':'.implode(',', $relation['relation']->getAdminApiColumns()) }}
 @endforeach
 @endif
         - in: query
@@ -152,7 +152,7 @@ paths:
           required: false
           schema:
             type: string
-            example: {{ implode(',', $model->getApiColumns()) }}
+            example: {{ implode(',', $model->getAdminApiColumns()) }}
         - in: query
           name: with[]
           description: Fetch additional order relationships
@@ -199,7 +199,7 @@ paths:
           required: false
           schema:
             type: string
-            example: {{ implode(',', $model->getApiColumns()) }}
+            example: {{ implode(',', $model->getAdminApiColumns()) }}
         - in: query
           name: _with[]
           description: Fetch additional order relationships
@@ -236,7 +236,7 @@ $schemes = [];
 @continue($model instanceof $authModel)
 @php $schemes[] = $model->getTable() @endphp
      {{ view('admin::openapi.model_scheme', compact('model') + ['deep' => true]) }}
-@foreach( collect($model->getExportRelations())->unique('table') as $relationKey => $relation )
+@foreach( collect($model->getAdminApiRelations())->unique('table') as $relationKey => $relation )
 @continue(in_array($relation['table'], $schemes) || $models->has($relation['table']))
 @php $schemes[] = $relation['table']; @endphp
      {{ view('admin::openapi.model_scheme', [

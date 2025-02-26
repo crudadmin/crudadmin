@@ -146,7 +146,7 @@ class ApiController extends CRUDController
         })->map(function($model){
                     return [
                         'name' => $model->getProperty('name'),
-                        'relations' => collect($model->getExportRelations())->pluck('table'),
+                        'relations' => collect($model->getAdminApiRelations())->pluck('table'),
                     ];
                 });
     }
