@@ -18,7 +18,7 @@ class ApiController extends CRUDController
 
         return $model
             ->withAdminApiResponse()
-            ->bootExportResponse(
+            ->bootAdminApiResponse(
                 request()->only([
                     'columns', '_columns',
                     'with', '_with',
@@ -56,7 +56,7 @@ class ApiController extends CRUDController
         if ( is_null($limit) === false && ($limit == 0 || $limit == -1) ) {
             $pagination = [
                 'current_page' => 1,
-                'data' => $rows->get()->each->setFullExportResponse(),
+                'data' => $rows->get()->each->setFullAdminApiResponse(),
                 'from' => 1,
                 'to' => $total = $rows->count(),
                 'last_page' => 1,
@@ -68,7 +68,7 @@ class ApiController extends CRUDController
         // Paginated response
         else {
             $pagination = $rows->paginate(request('limit'));
-            $pagination->getCollection()->each->setFullExportResponse();
+            $pagination->getCollection()->each->setFullAdminApiResponse();
         }
 
         return autoAjax()->data([
@@ -84,7 +84,7 @@ class ApiController extends CRUDController
                     ->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
 
         return autoAjax()->data([
-            'row' => $row->setFullExportResponse()
+            'row' => $row->setFullAdminApiResponse()
         ]);
     }
 
@@ -105,7 +105,7 @@ class ApiController extends CRUDController
         $row->checkForModelRules(['created'], true);
 
         return autoAjax()->success(_('Záznam bol úspešne uložený.'))->data([
-            'row' => $row->setFullExportResponse()
+            'row' => $row->setFullAdminApiResponse()
         ]);
     }
 
@@ -130,7 +130,7 @@ class ApiController extends CRUDController
         $row->checkForModelRules(['updated'], true);
 
         return autoAjax()->success(_('Zmeny boli úspešne uložené.'))->data([
-            'row' => $row->setFullExportResponse()
+            'row' => $row->setFullAdminApiResponse()
         ]);
     }
 

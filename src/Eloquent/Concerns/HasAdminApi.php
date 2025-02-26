@@ -74,7 +74,7 @@ trait HasAdminApi
         return $relations;
     }
 
-    public function scopeBootExportResponse($query, $props = [])
+    public function scopeBootAdminApiResponse($query, $props = [])
     {
         //Add columns support
         $columns = array_filter(explode(',', $props['_columns'] ?? $props['columns'] ?? ''));
@@ -272,21 +272,21 @@ trait HasAdminApi
 
     }
 
-    public function setExportResponse()
+    public function setAdminApiResponse()
     {
         return $this;
     }
 
-    public function setFullExportResponse()
+    public function setFullAdminApiResponse()
     {
         //Set response for all relations
         foreach ($this->getRelations() as $key => $data) {
             $relation = $this->{$key};
 
             if ( $relation instanceof Collection ) {
-                $relation->each->setFullExportResponse();
+                $relation->each->setFullAdminApiResponse();
             } else if ( $relation instanceof AdminModel ) {
-                $relation->setFullExportResponse();
+                $relation->setFullAdminApiResponse();
             }
         }
 
@@ -327,6 +327,6 @@ trait HasAdminApi
             }
         }
 
-        return $this->setExportResponse();
+        return $this->setAdminApiResponse();
     }
 }
