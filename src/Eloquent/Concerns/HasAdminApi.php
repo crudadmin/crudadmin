@@ -260,7 +260,7 @@ trait HasAdminApi
         return 'string';
     }
 
-    public function getExportFieldName($key)
+    public function getAdminApiFieldName($key)
     {
         $field = $this->getField($key) ?? [];
 
