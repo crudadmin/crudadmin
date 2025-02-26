@@ -8,7 +8,7 @@
         - {{ $key }}
 @endforeach
       properties:
-@foreach($model->getExportColumns() as $key)
+@foreach($model->getApiColumns() as $key)
 @php
 $field = $model->getField($key) ?? [];
 @endphp

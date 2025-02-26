@@ -10,7 +10,7 @@ use Str;
 
 trait HasAdminApi
 {
-    public function getExportColumns()
+    public function getApiColumns()
     {
         $fields = array_filter($this->getFields(), function($field){
             if ( $field['belongsToMany'] ?? false ){

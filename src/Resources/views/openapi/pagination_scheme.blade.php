@@ -26,7 +26,7 @@ paths:
           required: false
           schema:
             type: string
-            example: {{ implode(',', $model->getExportColumns()) }}
+            example: {{ implode(',', $model->getApiColumns()) }}
         - in: query
           name: limit
           description: number of records in pagination. Use -1 to disable pagination.
@@ -45,7 +45,7 @@ paths:
           examples:
 @foreach( $model->getExportRelations() as $relationKey => $relation )
             {{ $relationKey }} ({{ $relation['name'] }}):
-              value: {{ $relationKey.':'.implode(',', $relation['relation']->getExportColumns()) }}
+              value: {{ $relationKey.':'.implode(',', $relation['relation']->getApiColumns()) }}
 @endforeach
 @endif
         - in: query
@@ -152,7 +152,7 @@ paths:
           required: false
           schema:
             type: string
-            example: {{ implode(',', $model->getExportColumns()) }}
+            example: {{ implode(',', $model->getApiColumns()) }}
         - in: query
           name: with[]
           description: Fetch additional order relationships
@@ -199,7 +199,7 @@ paths:
           required: false
           schema:
             type: string
-            example: {{ implode(',', $model->getExportColumns()) }}
+            example: {{ implode(',', $model->getApiColumns()) }}
         - in: query
           name: _with[]
           description: Fetch additional order relationships
