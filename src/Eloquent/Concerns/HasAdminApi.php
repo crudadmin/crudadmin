@@ -8,7 +8,7 @@ use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
 use Str;
 
-trait HasExporter
+trait HasAdminApi
 {
     public function getExportColumns()
     {

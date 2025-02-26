@@ -9,7 +9,7 @@ use Admin\Eloquent\Concerns\HasAttributes;
 use Admin\Eloquent\Concerns\HasButtons;
 use Admin\Eloquent\Concerns\HasEloquentReplicator;
 use Admin\Eloquent\Concerns\HasEncryption;
-use Admin\Eloquent\Concerns\HasExporter;
+use Admin\Eloquent\Concerns\HasAdminApi;
 use Admin\Eloquent\Concerns\HasPermissions;
 use Admin\Eloquent\Concerns\HasSiteBuilder;
 use Admin\Eloquent\Concerns\HasSiteTree;
@@ -35,7 +35,7 @@ class AdminModel extends CoreAdminModel
         HasAdminDeletable,
         ModelLayoutBuilder,
         HasEloquentReplicator,
-        HasExporter,
+        HasAdminApi,
         HasAttributes,
         HasPermissions,
         ModelRules,
