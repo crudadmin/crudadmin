@@ -12,8 +12,8 @@ requestBody:
 $field = $model->getField($key) ?? [];
 @endphp
                 {{ $key }}:
-                  type: {{ $model->getExportFieldType($key) }}
-@if ( $name = $model->getExportFieldName($key) )
+                  type: {{ $model->getAdminApiFieldType($key) }}
+@if ( $name = $model->getAdminApiFieldName($key) )
                   description: {{ $name }}
 @if ( $model->isFieldType($key, 'file') )
                   format: binary

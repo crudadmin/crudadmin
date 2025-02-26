@@ -82,13 +82,13 @@ trait HasAdminApi
         $where = $props['_where'] ?? $props['where'] ?? [];
         $scopes = $props['_scope'] ?? $props['scope'] ?? [];
 
-        $query->exportColumnsSupport($columns, $withs);
-        $query->exportWhereSupport($where);
-        $query->exportWithSupport($withs);
-        $query->exportScopesSupport($scopes);
+        $query->adminApiColumnsSupport($columns, $withs);
+        $query->adminApiWhereSupport($where);
+        $query->adminApiWithSupport($withs);
+        $query->adminApiScopesSupport($scopes);
     }
 
-    public function scopeExportScopesSupport($query, $scopes)
+    public function scopeAdminApiScopesSupport($query, $scopes)
     {
         foreach ($scopes as $key => $scope) {
             $hasParams = is_numeric($key) == false;
@@ -101,7 +101,7 @@ trait HasAdminApi
         }
     }
 
-    public function scopeExportWhereSupport($query, $where)
+    public function scopeAdminApiWhereSupport($query, $where)
     {
         if ( !count($where) ){
             return;
@@ -125,7 +125,7 @@ trait HasAdminApi
         }
     }
 
-    public function scopeExportColumnsSupport($query, $columns, $withs)
+    public function scopeadminApiColumnsSupport($query, $columns, $withs)
     {
         // Select everything if no columns are defined
         if ( count($columns) == 0 ){
@@ -138,7 +138,7 @@ trait HasAdminApi
         }
 
         //We need add child relation foreign keys into this select.
-        $relations = $this->processExportWiths($withs);
+        $relations = $this->processAdminApiWiths($withs);
 
         foreach ($relations as $relationName => $with) {
             $relation = $query->getModel()->{$with['relation']}();
@@ -160,7 +160,7 @@ trait HasAdminApi
         $query->select(array_unique($columns));
     }
 
-    private function processExportWiths($with)
+    private function processAdminApiWiths($with)
     {
         $with = array_filter(
             is_array($with) ? $with : explode(';', $with ?: '')
@@ -174,7 +174,7 @@ trait HasAdminApi
             $relation = $parts[0];
             $columns = $parts[1] ?? null;
 
-            $sub = $this->processExportWiths(array_slice($subRelations, 1));
+            $sub = $this->processAdminApiWiths(array_slice($subRelations, 1));
 
             if ( isset($items[$relation]) === false ){
                 $items[$relation] = compact('relation', 'parts', 'columns', 'sub');
@@ -186,11 +186,11 @@ trait HasAdminApi
         return $items;
     }
 
-    public function scopeExportWithSupport($query, $with = [])
+    public function scopeAdminApiWithSupport($query, $with = [])
     {
         $parentModel = $query->getModel();
 
-        foreach ($this->processExportWiths($with) as $item) {
+        foreach ($this->processAdminApiWiths($with) as $item) {
             $query->with([
                 $item['relation'] => function($query) use ($item, $parentModel, &$foreignKeys) {
                     $model = $query->getModel();
@@ -223,14 +223,14 @@ trait HasAdminApi
                         ->withAdminApiResponse();
 
                     foreach ($item['sub'] as $sub) {
-                        $query->exportWithSupport(implode(':', $sub['parts']));
+                        $query->adminApiWithSupport(implode(':', $sub['parts']));
                     }
                 },
             ]);
         }
     }
 
-    public function getExportFieldType($key)
+    public function getAdminApiFieldType($key)
     {
         $type = $this->getFieldType($key);
         $field = $this->getField($key);
