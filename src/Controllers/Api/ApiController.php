@@ -1,13 +1,12 @@
 <?php
 
-namespace Admin\Controllers\Export;
+namespace Admin\Controllers\Api;
 
 use Admin;
-use Admin\Controllers\Controller;
 use Admin\Controllers\Crud\CRUDController;
 use Symfony\Component\Yaml\Yaml;
 
-class ExportController extends CRUDController
+class ApiController extends CRUDController
 {
     private function getBootedModel($table, $access = true)
     {

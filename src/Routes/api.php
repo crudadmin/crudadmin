@@ -6,12 +6,12 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::group(['middleware' => [ 'auth:admin' ]], function () {
-    Route::get('/model/{table}', 'Export\ExportController@rows');
-    Route::post('/model/{table}', 'Export\ExportController@create');
-    Route::get('/model/{table}/{id}', 'Export\ExportController@show');
-    Route::post('/model/{table}/{id}', 'Export\ExportController@update');
-    Route::get('/models', 'Export\ExportController@models');
-    Route::get('/models_scheme/{table?}', 'Export\ExportController@scheme');
+    Route::get('/model/{table}', 'Api\ApiController@rows');
+    Route::post('/model/{table}', 'Api\ApiController@create');
+    Route::get('/model/{table}/{id}', 'Api\ApiController@show');
+    Route::post('/model/{table}/{id}', 'Api\ApiController@update');
+    Route::get('/models', 'Api\ApiController@models');
+    Route::get('/models_scheme/{table?}', 'Api\ApiController@scheme');
 });
 
 ?>
