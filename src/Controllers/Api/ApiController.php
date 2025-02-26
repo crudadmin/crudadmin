@@ -17,7 +17,7 @@ class ApiController extends CRUDController
         }
 
         return $model
-            ->withExportResponse()
+            ->withAdminApiResponse()
             ->bootExportResponse(
                 request()->only([
                     'columns', '_columns',

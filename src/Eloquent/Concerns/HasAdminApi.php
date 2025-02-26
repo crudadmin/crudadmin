@@ -220,7 +220,7 @@ trait HasAdminApi
 
                     $query
                         ->select($columns ?: [$model->getTable().'.*'])
-                        ->withExportResponse();
+                        ->withAdminApiResponse();
 
                     foreach ($item['sub'] as $sub) {
                         $query->exportWithSupport(implode(':', $sub['parts']));
@@ -267,7 +267,7 @@ trait HasAdminApi
         return $field['name'] ?? $field['title'] ?? '';
     }
 
-    public function scopeWithExportResponse($query)
+    public function scopeWithAdminApiResponse($query)
     {
 
     }
