@@ -10,7 +10,7 @@ class ExportController extends CRUDController
     public function export($table, $exportKey)
     {
         $model = $this->getModel($table);
-        $isDebug = request()->has('debug') == 1;
+        $isDebug = request()->get('debug') == 1;
 
         if ( !($export = $model->getAdminExport($exportKey)) ){
             abort(404);
