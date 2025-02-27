@@ -62,7 +62,7 @@ class DownloadController extends Controller
     {
         $hash = request('hash');
 
-        if ( !($path = SecureDownloader::getSessionBasePath($hash)) ){
+        if ( !($path = SecureDownloader::getSessionBasePath($hash)) || file_exists($path) === false ){
             return abort(404);
         }
 
