@@ -2,7 +2,9 @@
 
 namespace Admin\Controllers\Export;
 
+use Admin\Helpers\SecureDownloader;
 use Admin\Controllers\Crud\CRUDController;
+use Storage;
 
 class ExportController extends CRUDController
 {
@@ -14,8 +16,14 @@ class ExportController extends CRUDController
             abort(404);
         }
 
-        dd($export);
+        if ( $export->save() === false ){
+            abort(500);
+        }
 
-        return $export->export();
+        $basepath = Storage::disk($export->disk)->path($export->path);
+
+        return [
+            'download_url' => (new SecureDownloader($basepath))->getDownloadPath(true),
+        ];
     }
 }

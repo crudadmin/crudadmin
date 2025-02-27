@@ -8,6 +8,7 @@ trait HasExports
     {
         return collect($this->getProperty('exports', []))->map(function($classname){
             $export = new $classname;
+            $export->setModel($this);
 
             return [
                 'key' => $export->getKey(),

@@ -2,9 +2,7 @@
 
 namespace Admin\Controllers;
 
-use Admin\Helpers\File;
 use Admin\Helpers\SecureDownloader;
-use Illuminate\Http\Request;
 use Admin;
 
 class DownloadController extends Controller
