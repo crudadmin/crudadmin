@@ -57,6 +57,8 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
         foreach ($types as $key) {
             if ( array_key_exists($key, $states) ){
                 $states[$key]['query']($query);
+            } else {
+                autoAjax()->error(_('Tento filter už viac nie je dostupný.'))->throw();
             }
         }
     }
