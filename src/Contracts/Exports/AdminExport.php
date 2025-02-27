@@ -86,4 +86,9 @@ class AdminExport
             $this->format
         );
     }
+
+    public function html()
+    {
+        return Excel::raw($this, \Maatwebsite\Excel\Excel::HTML);
+    }
 }
