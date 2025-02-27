@@ -14,7 +14,9 @@ class AdminExport
 
     public $model;
 
-    public $filename;
+    public $format = \Maatwebsite\Excel\Excel::XLSX;
+
+    private $filename;
 
     public static $tempDir = 'temp_download_exports';
 
@@ -54,7 +56,7 @@ class AdminExport
 
     public function extension()
     {
-        return 'xlsx';
+        return strtolower($this->format);
     }
 
     public function disk()
@@ -77,6 +79,11 @@ class AdminExport
         // Cache filename
         $this->filename = $this->filename();
 
-        return Excel::store($this, $this->path($this->filename), $this->disk());
+        return Excel::store(
+            $this,
+            $this->path($this->filename),
+            $this->disk(),
+            $this->format
+        );
     }
 }
