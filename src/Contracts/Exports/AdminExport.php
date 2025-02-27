@@ -4,6 +4,7 @@ namespace Admin\Contracts\Exports;
 
 use Excel;
 use Str;
+use Storage;
 
 class AdminExport
 {
@@ -13,9 +14,7 @@ class AdminExport
 
     public $model;
 
-    public $path;
-
-    public $disk = 'crudadmin.uploads_private';
+    public $filename;
 
     public static $tempDir = 'temp_download_exports';
 
@@ -50,14 +49,34 @@ class AdminExport
 
     public function filename()
     {
-        return Str::snake(class_basename($this)).'-'.date('Y-m-d\_H-i').'_'.str_random(3);
+        return Str::snake(class_basename($this)).'-'.date('Y-m-d\_H-i').'_'.str_random(3).'.'.$this->extension();
+    }
+
+    public function extension()
+    {
+        return 'xlsx';
+    }
+
+    public function disk()
+    {
+        return 'crudadmin.uploads_private';
+    }
+
+    public function path()
+    {
+        return static::$tempDir.'/'.($this->filename ?: $this->filename());
+    }
+
+    public function basepath()
+    {
+        return Storage::disk($this->disk())->path($this->path());
     }
 
     public function save()
     {
-        $this->filename = $this->filename().'.xlsx';
-        $this->path = static::$tempDir.'/'.$this->filename;
+        // Cache filename
+        $this->filename = $this->filename();
 
-        return Excel::store($this, $this->path, $this->disk);
+        return Excel::store($this, $this->path($this->filename), $this->disk());
     }
 }

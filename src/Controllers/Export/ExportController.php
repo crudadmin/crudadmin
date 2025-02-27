@@ -20,10 +20,10 @@ class ExportController extends CRUDController
             abort(500);
         }
 
-        $basepath = Storage::disk($export->disk)->path($export->path);
+        $downloader = new SecureDownloader($export->basepath());
 
         return [
-            'download_url' => (new SecureDownloader($basepath))->getDownloadPath(true),
+            'download_url' => $downloader->getDownloadPath(true),
         ];
     }
 }
