@@ -40,7 +40,7 @@ class RouteServiceProvider extends ServiceProvider
             'namespace' => 'Admin\Controllers',
             'middleware' => ['web', 'admin.providers'],
         ], function ($router) {
-            require __DIR__.'/../routes.php';
+            require __DIR__.'/../Routes/routes.php';
         });
 
         //Admin routes
