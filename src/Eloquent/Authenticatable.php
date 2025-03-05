@@ -87,6 +87,11 @@ class Authenticatable extends BaseAuthenticatable
         return $image ? $image->resize(100, 100)->url : null;
     }
 
+    public function setAuthResponse()
+    {
+        return $this->setAdminResponse();
+    }
+
     public function setAdminResponse()
     {
         $this->append([

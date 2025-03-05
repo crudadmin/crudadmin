@@ -53,4 +53,9 @@ class BaseAuthenticatable extends AdminModel implements AuthenticatableContract,
 
         return Admin::getAdminGuard();
     }
+
+    public function setAuthResponse()
+    {
+        return $this;
+    }
 }

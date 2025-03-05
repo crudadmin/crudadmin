@@ -1,8 +1,7 @@
 <?php
 
 Route::middleware(['guest', 'throttle:auth'])->group(function () {
-    //Export routes
-    Route::post('/auth/login', 'Auth\LoginController@login');
+    AdminAuth::login();
 });
 
 Route::group(['middleware' => [ 'auth:admin' ]], function () {
