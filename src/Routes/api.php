@@ -1,7 +1,9 @@
 <?php
 
 Route::middleware(['guest', 'throttle:auth'])->group(function () {
-    AdminAuth::login();
+    if ( class_exists('\AdminHelpers\Auth\Utilities\AdminAuth') ) {
+        AdminAuth::login();
+    }
 });
 
 Route::group(['middleware' => [ 'auth:admin' ]], function () {
