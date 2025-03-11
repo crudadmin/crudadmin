@@ -1,5 +1,5 @@
 <script src="<?php echo Gettext::getJSPlugin(Localization::class) ?>"></script>
-<script src="<?php echo admin_asset('/js/Gettextable.js') ?>"></script>
+<script src="<?php echo admin_asset('/build/assets/Gettextable.js') ?>"></script>
 
 <?php if ( count($_visibleRoutes = EditorMode::getVisibleRoutes()) > 0 ) { ?>
 <script type="text/javascript">
@@ -19,6 +19,6 @@ window.CAVisibleRoutes = {
 <?php echo $__env->make('admin::partials.crudadmin-props', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 </script>
 
-<script src="<?php echo admin_asset('/js/FrontendEditor.js') ?>"></script>
-<link rel="stylesheet" href="<?php echo admin_asset('/css/frontend.css') ?>">
+<script src="<?php echo admin_asset('/build/assets/FrontendEditor.js') ?>"></script>
+<link rel="stylesheet" href="<?php echo admin_asset('/build/assets/frontend.css') ?>">
 <?php } ?>
