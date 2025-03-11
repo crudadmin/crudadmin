@@ -9,25 +9,23 @@ class OnAdminUpdateRule extends AdminRule
 {
     public function updating(AdminModel $row)
     {
-        if ( admin() ){
-            $this->check($row);
-        }
+        $this->checkUpdatingMyPermissions($row);
     }
 
-    public function check($row)
+    public function checkUpdatingMyPermissions($row)
     {
-        $isMe = $row->getKey() == admin()->getKey();
-
-        if ( $isMe && $row->hasEnabledSupport() && $row->enabled == false ){
-            autoAjax()->pushMessage('Nie je možné deaktivovať vlastný účet.');
-
-            $row->enabled = true;
+        if ( !admin() || $row->getKey() != admin()->getKey() ){
+            return;
         }
 
-        if ( $isMe && $row->hasAdminRoles() && $row->permissions == false ){
-            autoAjax()->pushMessage('Nie je možné upravovať vlastne administrátorske práva.');
+        // Disable changing enabled state of own account
+        if ( $row->hasEnabledSupport() && $row->enabled != $row->getOriginal('enabled') ){
+            autoAjax()->error('Nie je možné deaktivovať vlastný účet.', 422)->throw();
+        }
 
-            $row->permissions = true;
+        // Disable changing admin permissions of own account
+        if ( $row->hasAdminRoles() && $row->permissions != $row->getOriginal('permissions') ){
+            autoAjax()->error('Nie je možné upravovať vlastne administrátorske práva.', 422)->throw();
         }
     }
 }
