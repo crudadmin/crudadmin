@@ -66,7 +66,7 @@ class EditorMode
         $list = [];
 
         foreach ($this->visibleRoutes as $route) {
-            $controller = str_replace($route->action['namespace'], '', $route->action['controller']);
+            $controller = str_replace($route->action['namespace'] ?: 'App\Http\Controllers\\', '', $route->action['controller']);
             $controller = ltrim($controller, '\\');
 
             $list[$controller] = url($route->uri ?: []);
