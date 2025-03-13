@@ -2,13 +2,14 @@
 
 namespace Admin\Helpers;
 
-use Admin\Core\Helpers\Storage\AdminFile;
-use Admin\Eloquent\AdminModel;
-use Facades\Admin\Helpers\SEOService;
-use Localization;
-use Gettext;
-use Route;
 use Admin;
+use Route;
+use Gettext;
+use Localization;
+use Admin\Eloquent\AdminModel;
+use Illuminate\Support\Collection;
+use Facades\Admin\Helpers\SEOService;
+use Admin\Core\Helpers\Storage\AdminFile;
 
 class SEO
 {
@@ -296,7 +297,7 @@ class SEO
         $items = [];
 
         //If is set of admin images
-        if (is_array($image)) {
+        if (is_array($image) || $image instanceof Collection) {
             foreach ($image as $item) {
                 if ($item instanceof AdminFile) {
                     $items[] = $item->resize(1200, 630);
