@@ -327,10 +327,7 @@ class LocalizationHelper
 
         $this->booted = true;
 
-
-        $model = \Admin::getModelByTable($this->getModel()->getTable()) ?: $this->getModel();
-
-        if (!$model) {
+        if ($this->isActive() === false || !($model = \Admin::getModelByTable($this->getModel()->getTable()) ?: $this->getModel())) {
             return $this->defaultCollection();
         }
 
