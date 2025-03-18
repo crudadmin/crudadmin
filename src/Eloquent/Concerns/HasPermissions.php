@@ -176,10 +176,10 @@ trait HasPermissions
 
         $admin = admin();
 
-        foreach ($admin->filterRowsByColumns() as $key) {
-            $permissionTable = $this->getRelatedPermissionTable($admin, $key);
+        foreach ($admin->filterRowsByColumns() as $filterByKey) {
+            $permissionTable = $this->getRelatedPermissionTable($admin, $filterByKey);
 
-            $filterBy = $admin->{$key};
+            $filterBy = $admin->{$filterByKey};
 
             $rules = [];
 
@@ -198,12 +198,25 @@ trait HasPermissions
             }
 
             // Filter by field with hasAccessFilter param
+            // TODO: Once it is $admin->getRelationProperty, and for belongsToMany it is $this->getRelationProperty, find out why and refactor.
             foreach ($this->getFields() as $key => $field) {
+                // belongsTo relation filters
                 if ( ($field['belongsTo'] ?? false) && $this->hasFieldParam($key, 'hasAccessFilter', true)){
                     $params = $admin->getRelationProperty($key, 'belongsTo');
 
                     if ( $params[0] == $permissionTable ) {
                         $rules[$key] = $filterBy;
+                    }
+                }
+
+                // Support belongs to many relations filters
+                if ( ($field['belongsToMany'] ?? false) && $this->hasFieldParam($key, 'hasAccessFilter', true)){
+                    $params = $this->getRelationProperty($key, 'belongsToMany');
+
+                    if ( $params[0] == $permissionTable ) {
+                        $query->whereHas($key, function ($query) use ($filterBy) {
+                            $query->where($query->qualifyColumn('id'), $filterBy);
+                        });
                     }
                 }
             }
