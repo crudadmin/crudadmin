@@ -2,18 +2,31 @@
     "name": "crudadmin/crudadmin",
     "type": "library",
     "description": "Dynamically Laravel CRUD administration with automatic database migrations",
-    "keywords": ["migrations", "database", "framework", "crud", "admin", "administration", "automatic", "laravel", "form"],
+    "keywords": [
+        "migrations",
+        "database",
+        "framework",
+        "crud",
+        "admin",
+        "administration",
+        "automatic",
+        "laravel",
+        "form"
+    ],
     "homepage": "https://crudadmin.com",
     "license": "MIT",
     "authors": [
-        { "name": "Marek Gogoľ", "email": "info@marekgogol.sk" }
+        {
+            "name": "Marek Gogoľ",
+            "email": "info@marekgogol.sk"
+        }
     ],
     "require": {
         "php": ">=8.0",
         "crudadmin/framework": "^5.0|dev-master|dev-5.0-dev",
-        "crudadmin/resources" : "^5.0|dev-master|dev-5.0-dev",
-        "crudadmin/autoajax" : "^2.0|dev-master",
-        "laravel/framework": "^9|^10|^11",
+        "crudadmin/resources": "^5.0|dev-master|dev-5.0-dev",
+        "crudadmin/autoajax": "^2.0|dev-master",
+        "laravel/framework": "^9|^10|^11|^12",
         "laravel/sanctum": "^2|^3|^4",
         "laravel/ui": "^3.0|^4.0",
         "gettext/gettext": "^4.6"
