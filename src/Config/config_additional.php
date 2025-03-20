@@ -249,4 +249,9 @@ return [
     'api' => [
         'logging' => true,
     ],
+
+    /*
+     * If we want to add a postfix to the uploaded files
+     */
+    'uploads_postfix' => false,
 ];
