@@ -15,7 +15,7 @@ return [
     /*
      * Administration name
      */
-    'name' => 'My Admin',
+    'name' => env('APP_NAME', 'My Admin'),
 
     /*
      * Admin disk storage

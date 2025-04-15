@@ -313,7 +313,10 @@ class CRUDController extends Controller
             $model->getProperty('inParent') === true &&
 
             //Check if frontend has inParent enabled as well, because we may turn off this feature
-            $request->has($model->getModelFormPrefix('_in_parent'))
+            $request->has($model->getModelFormPrefix('_in_parent')) &&
+
+            // Check if user has insert/edit permissions for this model
+            admin()->hasAccess($model, 'edit') === true
         ){
             return true;
         }
