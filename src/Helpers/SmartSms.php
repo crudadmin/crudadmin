@@ -12,7 +12,7 @@ class SmartSms
     public function __construct()
     {
         $this->client = new Client([
-            'base_uri' => 'http://www.smartsms.sk',
+            'base_uri' => 'https://smartsms.sk',
         ]);
     }
 
