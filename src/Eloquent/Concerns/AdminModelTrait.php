@@ -2,14 +2,13 @@
 
 namespace Admin\Eloquent\Concerns;
 
-use Admin;
-use Admin\Eloquent\BaseAuthenticatable;
-use Admin\Helpers\AdminCollection;
 use Arr;
-use Carbon\Carbon;
+use Admin;
 use Fields;
-use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
+use Admin\Helpers\AdminCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 trait AdminModelTrait
 {

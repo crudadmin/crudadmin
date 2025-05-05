@@ -30,7 +30,7 @@ class UpdateController extends InsertController
         foreach ($requests as $data)
         {
             $model = $data['model'];
-            $table = $model->getTable();
+            $table = $model->getAdminTable();
             $request = $data['request'];
 
             $row = $rows[$table];

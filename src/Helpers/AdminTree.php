@@ -56,13 +56,13 @@ class AdminTree
 
                     //If is last group in array, then push model into group list
                     if ($i + 1 >= $count) {
-                        $reference[$model->getTable()] = $page;
+                        $reference[$model->getAdminTable()] = $page;
                     }
                 }
 
                 unset($reference);
             } else {
-                $groups[$model->getTable()] = $page;
+                $groups[$model->getAdminTable()] = $page;
             }
         }
 
@@ -99,7 +99,7 @@ class AdminTree
 
             $child = $child_model === $model ? '$_itself' : $this->makePage($child_model);
 
-            $childs[$child_model->getTable()] = $child;
+            $childs[$child_model->getAdminTable()] = $child;
         }
 
         $data = [
