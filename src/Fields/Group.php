@@ -99,7 +99,7 @@ class Group extends BaseGroup
         }
 
         //Cache table name
-        return $this->model = (new $this->modelNamespace)->getTable();
+        return $this->model = (new $this->modelNamespace)->getAdminTable();
     }
 
     /**

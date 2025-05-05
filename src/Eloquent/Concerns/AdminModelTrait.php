@@ -360,7 +360,7 @@ trait AdminModelTrait
         $groups = $parent->getFieldsGroups();
 
         foreach ($this->flattenGroups($groups) as $group) {
-            if ( $group instanceof Admin\Fields\Group && $group->getModel() === $this->getTable() && $closure = $group->getWhere() ) {
+            if ( $group instanceof Admin\Fields\Group && $group->getModel() === $this->getAdminTable() && $closure = $group->getWhere() ) {
                 return $closure($query, $this->getParentRow());
             }
         }
