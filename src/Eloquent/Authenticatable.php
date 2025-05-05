@@ -89,11 +89,6 @@ class Authenticatable extends BaseAuthenticatable
 
     public function setAuthResponse()
     {
-        return $this->setAdminResponse();
-    }
-
-    public function setAdminResponse()
-    {
         $this->append([
             'avatarThumbnail',
         ]);

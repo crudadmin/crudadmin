@@ -3,16 +3,10 @@
 namespace Admin\Helpers;
 
 use Admin;
-use AdminLocalization;
-use Admin\Core\Helpers\Storage\AdminFile;
 use Admin\Eloquent\AdminModel;
-use Admin\Helpers\Localization\LocalizationHelper;
-use App\Core\Models\Language;
 use EditorMode;
 use Facades\Admin\Helpers\Localization\JSTranslations;
 use Admin\Helpers\Localization\Translations;
-use Illuminate\Support\Collection;
-use Localization;
 use Storage;
 
 class Gettext
