@@ -20,6 +20,11 @@ class GettextServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // MAC OS Valet fix. 502 bad gateway.
+        if ( getenv('LC_ALL') === false ){
+            putenv('LC_ALL=C');
+        }
+
         $this->app->bind('gettext', \Admin\Helpers\Gettext::class);
     }
 
