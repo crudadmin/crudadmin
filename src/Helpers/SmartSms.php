@@ -38,7 +38,7 @@ class SmartSms
         return Log::channel($this->getConfig('log_channel'));
     }
 
-    public function sendSMS($number, $message, $from = null)
+    public function sendSMS($number, $message, $from = null, $silent = false)
     {
         $message = $this->removeAccent($message);
 
@@ -61,8 +61,9 @@ class SmartSms
             $response = $this->client->get('/api/send.do?'.http_build_query($params));
             $body = (string)$response->getBody();
 
+            // If error, handle it
             if ( strpos($body, 'ERROR:') !== false ){
-                throw new Exception($body);
+                $this->handleErrorCode($body);
             }
 
             $this->getLog()->info('SUCCESS ['.$number.':'.$from.'] | '.$body.' | ' . $this->logMessage($message));
@@ -70,9 +71,41 @@ class SmartSms
             return true;
         } catch (Exception $e){
             $this->getLog()->error('ERROR ['.$number.':'.$from.'] | '.$e->getMessage().' | ' . $this->logMessage($message));
+
+            if ( $silent == false ){
+                throw $e;
+            }
         }
 
         return false;
+    }
+
+    private function handleErrorCode($message)
+    {
+        $codes = [
+            11 => 'Správa je príliš dlhá',
+            13 => 'Nesprávne číslo príjemcu',
+            14 => 'Nesprávne prihlasovacie meno odosielateľa',
+            15 => 'Neoverený odosielateľ (tel. číslo)',
+            16 => 'Neoverený odosielateľ (11 alfanumerických znakov)',
+            17 => 'Flash SMS nemôžete odosielať so špeciálnymi znakmi',
+            18 => 'Nesprávny počet parametrov',
+            19 => 'Príliš veľa príjemcov (maximum je 100)',
+            101 => 'Nesprávna autorizácia',
+            102 => 'Nesprávne prihlasovacie meno alebo heslo',
+            103 => 'Nedostatok kreditu',
+            301 => 'ID SMS neexistuje',
+            400 => 'Nesprávne ID SMS, ktorej zisťujete status',
+            999 => 'Interná chyba (kontaktujte nás prosím)',
+        ];
+
+        $code = explode(':', $message)[1] ?? null;
+
+        if ( isset($codes[$code]) ){
+            throw new Exception($message . ' - ' . $codes[$code]);
+        }
+
+        throw new Exception($message);
     }
 
     private function logMessage($message)
