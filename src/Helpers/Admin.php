@@ -351,14 +351,20 @@ class Admin extends AdminCore
         $rootGitIgnoreData = file_get_contents($rootGitIgnorePath);
         $prefix = '# CrudAdmin';
 
-        if ( strpos($rootGitIgnoreData, $prefix) === false ) {
-            file_put_contents($rootGitIgnorePath, "\n\n".$prefix."\n", FILE_APPEND);
-        }
+        $directories = array_map(function ($dir) {
+            return str_replace(base_path(), '', $dir);
+        }, $directories);
 
-        foreach ($directories as $dir) {
-            $dir = str_replace(base_path(), '', $dir);
+        $directories = array_filter($directories, function ($dir) use ($rootGitIgnoreData) {
+            return strpos($rootGitIgnoreData, $dir) === false;
+        });
 
-            if ( strpos($rootGitIgnoreData, $dir) === false ) {
+        if ( count($directories) > 0 ) {
+            if ( strpos($rootGitIgnoreData, $prefix) === false ) {
+                file_put_contents($rootGitIgnorePath, "\n\n".$prefix."\n", FILE_APPEND);
+            }
+
+            foreach ($directories as $dir) {
                 file_put_contents($rootGitIgnorePath, $dir."\n", FILE_APPEND);
             }
         }
