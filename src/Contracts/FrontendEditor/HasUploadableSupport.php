@@ -101,7 +101,7 @@ trait HasUploadableSupport
             return;
         }
 
-        $file = $imageRow->upload('image', $basepath, false);
+        $file = $imageRow->upload('image', $basepath);
 
         ImageCompressor::tryShellCompression($file->basepath);
 
