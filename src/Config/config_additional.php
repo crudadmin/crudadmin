@@ -93,8 +93,8 @@ return [
      * Automaticaly resize in aspect ratio all uploaded images which exceed given resolutions
      */
     'image_auto_resize' => true,
-    'image_max_width' => 1920,
-    'image_max_height' => 1200,
+    'image_max_width' => 3840,
+    'image_max_height' => 2160,
 
     /*
      * Image lossy compression in %.
