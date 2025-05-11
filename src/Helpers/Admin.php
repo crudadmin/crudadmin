@@ -345,6 +345,23 @@ class Admin extends AdminCore
 
             file_put_contents($dir.'/.gitignore', $gitignore);
         }
+
+        // Add CrudAdmin paths to main .gitignore file
+        $rootGitIgnorePath = base_path('.gitignore');
+        $rootGitIgnoreData = file_get_contents($rootGitIgnorePath);
+        $prefix = '# CrudAdmin';
+
+        if ( strpos($rootGitIgnoreData, $prefix) === false ) {
+            file_put_contents($rootGitIgnorePath, "\n\n".$prefix."\n", FILE_APPEND);
+        }
+
+        foreach ($directories as $dir) {
+            $dir = str_replace(base_path(), '', $dir);
+
+            if ( strpos($rootGitIgnoreData, $dir) === false ) {
+                file_put_contents($rootGitIgnorePath, $dir."\n", FILE_APPEND);
+            }
+        }
     }
 
     /*
