@@ -3,8 +3,9 @@
 namespace Admin\Controllers;
 
 use Admin;
-use Admin\Models\StaticContent;
 use FrontendEditor;
+use Admin\Models\StaticContent;
+use Illuminate\Support\Collection;
 
 class FrontendEditorController extends Controller
 {
@@ -107,7 +108,9 @@ class FrontendEditorController extends Controller
             $value = $contentRow->getAttribute($fieldKey);
 
             //If content is empty
-            if ( !is_array($value) ){
+            if ( $value instanceof Collection ){
+                $value = $value->toArray();
+            } else {
                 $value = [];
             }
 
