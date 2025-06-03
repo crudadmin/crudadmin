@@ -316,7 +316,7 @@ class CRUDController extends Controller
             $request->has($model->getModelFormPrefix('_in_parent')) &&
 
             // Check if user has insert/edit permissions for this model
-            admin()->hasAccess($model, 'edit') === true
+            admin()->hasAccess($model, 'update') === true
         ){
             return true;
         }
