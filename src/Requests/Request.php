@@ -113,7 +113,7 @@ abstract class Request extends FormRequest
     /*
      * Uploads all files from request by model inputs
      */
-    public function uploadFiles(array $fields = null)
+    public function uploadFiles(array $fields)
     {
         foreach ($fields as $origKey => $field) {
             if ($field['type'] == 'file') {
@@ -203,7 +203,7 @@ abstract class Request extends FormRequest
     /*
      * Update datetimes format by field options
      */
-    public function datetimes(array $fields = null)
+    public function datetimes(array $fields)
     {
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, ['date', 'datetime', 'time', 'timestamp'])) {
@@ -241,16 +241,21 @@ abstract class Request extends FormRequest
     }
 
     //If is no value for checkbox, then automaticaly add zero value
-    public function checkboxes(array $fields = null)
+    public function checkboxes(array $fields, $rules)
     {
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, 'checkbox')) {
+                // If sometimes is present in validation, and no value is present in request, then skip
+                if ( $this->has($key) === false && array_search('sometimes', $rules[$key]) !== false ) {
+                    continue;
+                }
+
                 $this->merge([$key => $this->getCheckboxValue($key)]);
             }
         }
     }
 
-    public function jsonFields(array $fields = null)
+    public function jsonFields(array $fields)
     {
         foreach ($fields as $key => $field) {
             if (
@@ -267,7 +272,7 @@ abstract class Request extends FormRequest
     }
 
     //If is no value for checkbox, then automaticaly add zero value
-    public function removeEmptyForeign(array $fields = null)
+    public function removeEmptyForeign(array $fields)
     {
         foreach ($fields as $key => $field) {
             //If is belongsTo value in request empty, and is not required and is in formular then reset it
@@ -401,7 +406,7 @@ abstract class Request extends FormRequest
         }
     }
 
-    public function applyMutators($model, array $fields = null, $rules = null)
+    public function applyMutators($model, $fields = null, $rules = null)
     {
         //Set model object
         $this->model = $model;
@@ -412,7 +417,7 @@ abstract class Request extends FormRequest
         $fields = $this->getFieldsByRequest($fields);
 
         $this->uploadFiles($fields);
-        $this->checkboxes($fields);
+        $this->checkboxes($fields, $rules);
         $this->datetimes($fields);
         $this->jsonFields($fields);
         $this->removeEmptyForeign($fields);
