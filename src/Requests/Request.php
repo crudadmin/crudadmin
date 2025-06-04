@@ -127,13 +127,13 @@ abstract class Request extends FormRequest
                             $this->replace($this->except($key));
                         }
 
-                        //In frontend, we want load previous value, and put it into request
+                        //In frontend in case of file has been removed, flush it from request.
                         else {
-                            $file = $this->isFileRemoved($key) ? null : @$this->model->getAttribute($key);
-
-                            $this->replace($this->except($key) + [
-                                $key => $file
-                            ]);
+                            if ( $this->isFileRemoved($key) || ($this->has($key) && !$this->get($key)) ) {
+                                $this->replace($this->except($key) + [
+                                    $key => null
+                                ]);
+                            }
                         }
                     } elseif ($this->isFileUpload($key)) {
                         foreach ($this->getFilesInArray($key) as $file) {
