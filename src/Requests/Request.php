@@ -241,7 +241,7 @@ abstract class Request extends FormRequest
         foreach ($fields as $key => $field) {
             if ($this->model->isFieldType($key, 'checkbox')) {
                 // If sometimes is present in validation, and no value is present in request, then skip
-                if ( $this->has($key) === false && array_search('sometimes', $rules[$key]) !== false ) {
+                if ( $this->has($key) === false && isset($rules[$key]) && array_search('sometimes', $rules[$key]) !== false ) {
                     continue;
                 }
 
