@@ -2,7 +2,6 @@
 
 namespace Admin\Helpers;
 
-use Illuminate\Support\Facades\DB;
 use Exception;
 use Carbon\Carbon;
 use Admin;
@@ -169,29 +168,10 @@ class AdminRowsSearch
         }
 
         if ($itemQueryTo) {
-            $date_to = $this->getDateFormat($model, $column, $searchTo);
+            $dateTo = $this->getDateFormat($model, $column, $searchTo);
         }
 
-        if (isset($date) && ! isset($date_to)) {
-            if ( $isInterval === false ) {
-                $query->whereDate($column, $date->format('Y-m-d'));
-            } else {
-                $query->whereDate($column, '>=', $date->format('Y-m-d'));
-            }
-        }
-
-        if (! isset($date) && isset($date_to)) {
-            $query->whereDate($column, '<=', $date_to->format('Y-m-d'));
-        }
-
-        if (isset($date) && isset($date_to)) {
-            $query->whereDate($column, '>=', $date->format('Y-m-d'))
-                  ->whereDate($column, '<=', $date_to->format('Y-m-d'));
-        }
-
-        if (! isset($date) && ! isset($date_to)) {
-            $query->whereRaw('0');
-        }
+        $query->searchAdminColumnDate($column, $date ?? null, $dateTo ?? null, $isInterval);
     }
 
     private function filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval, $itemQuery)
@@ -213,16 +193,7 @@ class AdminRowsSearch
                     $model->generateEncryptedHash($search)
                 );
             } elseif ($searchTo) {
-                $builder->where(function ($builder) use ($column, $search, $searchTo, $tableColumn) {
-                    if (! isset($search) && isset($searchTo)) {
-                        $builder->where($tableColumn, '<=', $searchTo);
-                    }
-
-                    if (isset($search) && isset($searchTo)) {
-                        $builder->where($tableColumn, '>=', $search)
-                                ->where($tableColumn, '<=', $searchTo);
-                    }
-                });
+                $builder->searchAdminColumnNumeric($tableColumn, $search, $searchTo);
             }
 
             //Find exact id, value
@@ -244,11 +215,7 @@ class AdminRowsSearch
                 $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
                     foreach ($queries as $query) {
                         foreach ($byColumns as $key => $selector) {
-                            if ($selector == 'id') {
-                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                            } else {
-                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                            }
+                            $builder->{$key == 0 ? 'where' : 'orWhere'}(fn($builder) => $builder->searchAdminColumnRelation($selector, $query));
                         }
                     }
                 });
@@ -265,11 +232,7 @@ class AdminRowsSearch
                 $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
                     foreach ($queries as $query) {
                         foreach ($byColumns as $key => $selector) {
-                            if ($selector == 'id') {
-                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, $query);
-                            } else {
-                                $builder->{ $key == 0 ? 'where' : 'orWhere' }($relation[0].'.'.$selector, 'like', '%'.$query.'%');
-                            }
+                            $builder->{$key == 0 ? 'where' : 'orWhere'}(fn($builder) => $builder->searchAdminColumnRelation($selector, $query));
                         }
                     }
                 });
@@ -278,13 +241,13 @@ class AdminRowsSearch
             //Find by fulltext in query string
             elseif ($model->hasFieldParam($column, 'locale')) {
                 //Search for all inserted words
-                foreach ($queries as $key => $query) {
-                    $builder->where(DB::raw('CONVERT(LOWER('.$tableColumn.') USING utf8)'), 'like', '%'.mb_strtolower($query).'%');
+                foreach ($queries as $query) {
+                    $builder->searchAdminColumnLocaleText($tableColumn, $query);
                 }
             } else {
                 //Search for all inserted words
-                foreach ($queries as $key => $query) {
-                    $builder->where($tableColumn, 'like', '%'.$query.'%');
+                foreach ($queries as $query) {
+                    $builder->searchAdminColumnText($tableColumn, $query);
                 }
             }
         });
