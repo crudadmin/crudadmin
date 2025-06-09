@@ -61,4 +61,32 @@ trait HasAdminSearch
             $query->whereRaw('0');
         }
     }
+
+    /**
+     * How should be multiworld sentences searched in given column.
+     * Should all matches be present, or any of them?
+     *
+     * @param  mixed $column
+     *
+     * @return void
+     */
+    public function getSearchAdminColumnOperator($column)
+    {
+        return 'where'; //orWhere
+    }
+
+    public function scopeSearchAdminMultiwords($query, $search, $column, $callback, $operator = null)
+    {
+        $queries = array_filter(explode(' ', $search));
+
+        $operator = $operator ?: $this->getSearchAdminColumnOperator($column);
+
+        $query->where(function ($query) use ($queries, $callback, $operator) {
+            foreach ($queries as $term) {
+                $query->{$operator}(function ($query) use ($term, $callback) {
+                    $callback($query, $term);
+                });
+            }
+        });
+    }
 }

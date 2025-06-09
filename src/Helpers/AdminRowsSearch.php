@@ -67,7 +67,6 @@ class AdminRowsSearch
         //If is more than 3 chars for searching
         elseif (strlen($search) >= 3 || ($this->isSelectColumn($model, $column) || is_numeric($search)) || $searchTo) {
             $columns = array_merge(array_keys($model->getFields()), ['id']);
-            $queries = explode(' ', $search);
 
             //If is valid column
             if (in_array($column, $columns)) {
@@ -75,10 +74,10 @@ class AdminRowsSearch
             }
 
             //Search scope
-            $query->where(function ($builder) use ($columns, $queries, $search, $searchTo, $isInterval, $itemQuery) {
+            $query->where(function ($builder) use ($columns, $search, $searchTo, $isInterval, $itemQuery) {
                 foreach ($columns as $key => $column) {
                     //Search in all columns
-                    $this->filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval, $itemQuery);
+                    $this->filterByColumn($builder, $columns, $column, $search, $searchTo, $isInterval, $itemQuery);
                 }
             });
         }
@@ -174,11 +173,11 @@ class AdminRowsSearch
         $query->searchAdminColumnDate($column, $date ?? null, $dateTo ?? null, $isInterval);
     }
 
-    private function filterByColumn($builder, $columns, $column, $queries, $search, $searchTo, $isInterval, $itemQuery)
+    private function filterByColumn($builder, $columns, $column, $search, $searchTo, $isInterval, $itemQuery)
     {
         $model = $builder->getModel();
 
-        $builder->orWhere(function ($builder) use ($model, $columns, $column, $queries, $search, $searchTo, $itemQuery) {
+        $builder->orWhere(function ($builder) use ($model, $columns, $column, $search, $searchTo, $itemQuery) {
             //If is imaginarry field, skip whole process
             if ( $model->isFieldType($column, ['imaginary', 'geometry']) || $model->hasFieldParam($column, ['imaginary', 'inaccessible']) ) {
                 return;
@@ -201,52 +200,41 @@ class AdminRowsSearch
 
             //Find by data in relation
             elseif ($model->hasFieldParam($column, 'belongsTo')) {
-                $relation = explode(',', $model->getField($column)['belongsTo']);
-
-                $byColumns = $this->getNamesBuilder($model, $relation, $columns);
-
-                //We does not have columns for filter
-                if ( count($byColumns) == 0 ){
-                    return;
-                }
-
-                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
-                    foreach ($queries as $query) {
-                        foreach ($byColumns as $key => $selector) {
-                            $builder->{$key == 0 ? 'where' : 'orWhere'}(fn($builder) => $builder->searchAdminColumnRelation($selector, $query));
-                        }
-                    }
-                });
+                $this->searchByRelation($builder, $model, $column, $columns, $search, 'belongsTo');
             } elseif ($model->hasFieldParam($column, 'belongsToMany')) {
-                $relation = explode(',', $model->getField($column)['belongsToMany']);
-
-                $byColumns = $this->getNamesBuilder($model, $relation, $columns);
-
-                //We does not have columns for filter
-                if ( count($byColumns) == 0 ){
-                    return;
-                }
-
-                $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $relation, $queries) {
-                    foreach ($queries as $query) {
-                        foreach ($byColumns as $key => $selector) {
-                            $builder->{$key == 0 ? 'where' : 'orWhere'}(fn($builder) => $builder->searchAdminColumnRelation($selector, $query));
-                        }
-                    }
-                });
+                $this->searchByRelation($builder, $model, $column, $columns, $search, 'belongsToMany');
             }
 
             //Find by fulltext in query string
             elseif ($model->hasFieldParam($column, 'locale')) {
-                //Search for all inserted words
-                foreach ($queries as $query) {
-                    $builder->searchAdminColumnLocaleText($column, $query);
-                }
-            } else {
-                //Search for all inserted words
-                foreach ($queries as $query) {
-                    $builder->searchAdminColumnText($column, $query);
-                }
+                $builder->searchAdminMultiwords($search, $column, fn($builder, $query) => $builder->searchAdminColumnLocaleText($column, $query));
+            }
+
+            // Basic text search
+            else {
+                $builder->searchAdminMultiwords($search, $column, fn($builder, $query) => $builder->searchAdminColumnText($column, $query));
+            }
+        });
+    }
+
+    private function searchByRelation($builder, $model, $column, $columns, $search, $type = 'belongsTo')
+    {
+        $relation = explode(',', $model->getField($column)[$type]);
+
+        $byColumns = $this->getNamesBuilder($model, $relation, $columns);
+
+        //We does not have columns for filter
+        if ( count($byColumns) == 0 ){
+            return;
+        }
+
+        $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $search) {
+            foreach ($byColumns as $key => $selector) {
+                $builder->{$key == 0 ? 'where' : 'orWhere'}(function ($builder) use ($search, $selector) {
+                    $builder->searchAdminMultiwords($search, $selector, function($builder, $query) use ($selector) {
+                        $builder->searchAdminColumnRelation($selector, $query);
+                    }, 'orWhere');
+                });
             }
         });
     }
