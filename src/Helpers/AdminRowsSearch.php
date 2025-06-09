@@ -179,8 +179,6 @@ class AdminRowsSearch
         $model = $builder->getModel();
 
         $builder->orWhere(function ($builder) use ($model, $columns, $column, $queries, $search, $searchTo, $itemQuery) {
-            $tableColumn = $model->fixAmbiguousColumn($column);
-
             //If is imaginarry field, skip whole process
             if ( $model->isFieldType($column, ['imaginary', 'geometry']) || $model->hasFieldParam($column, ['imaginary', 'inaccessible']) ) {
                 return;
@@ -193,12 +191,12 @@ class AdminRowsSearch
                     $model->generateEncryptedHash($search)
                 );
             } elseif ($searchTo) {
-                $builder->searchAdminColumnNumeric($tableColumn, $search, $searchTo);
+                $builder->searchAdminColumnNumeric($column, $search, $searchTo);
             }
 
             //Find exact id, value
             elseif ($this->isPrimaryKey($model, $column, $columns)) {
-                $builder->where($tableColumn, $itemQuery);
+                $builder->where($builder->qualifyColumn($column), $itemQuery);
             }
 
             //Find by data in relation
@@ -242,12 +240,12 @@ class AdminRowsSearch
             elseif ($model->hasFieldParam($column, 'locale')) {
                 //Search for all inserted words
                 foreach ($queries as $query) {
-                    $builder->searchAdminColumnLocaleText($tableColumn, $query);
+                    $builder->searchAdminColumnLocaleText($column, $query);
                 }
             } else {
                 //Search for all inserted words
                 foreach ($queries as $query) {
-                    $builder->searchAdminColumnText($tableColumn, $query);
+                    $builder->searchAdminColumnText($column, $query);
                 }
             }
         });
