@@ -83,7 +83,7 @@ trait HasAdminSearch
         });
     }
 
-    public function scopeSearchAdminByColumn($query, $column, $columns, $search, $searchTo, $itemQuery)
+    public function scopeSearchAdminByColumn($query, $column, $columns, $search, $searchTo)
     {
         $customMethod = 'set'.Str::camel($column).'AdminSearch';
         if (method_exists($this, $customMethod)) {

@@ -74,11 +74,11 @@ class AdminRowsSearch
             }
 
             //Search scope
-            $query->where(function ($query) use ($columns, $search, $searchTo, $isInterval, $itemQuery) {
+            $query->where(function ($query) use ($columns, $search, $searchTo) {
                 foreach ($columns as $key => $column) {
                     //Search in all columns
-                    $query->orWhere(function ($query) use ($column, $columns, $search, $searchTo, $isInterval, $itemQuery) {
-                        $query->searchAdminByColumn($column, $columns, $search, $searchTo, $isInterval, $itemQuery);
+                    $query->orWhere(function ($query) use ($column, $columns, $search, $searchTo) {
+                        $query->searchAdminByColumn($column, $columns, $search, $searchTo);
                     });
                 }
             });
