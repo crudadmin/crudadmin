@@ -107,7 +107,7 @@ trait HasAdminSearch
 
         //Find exact id, value
         elseif ($this->isSearchColumnPrimaryKey($column, $columns)) {
-            $query->where($query->qualifyColumn($column), $itemQuery);
+            $query->where($query->qualifyColumn($column), $search);
         }
 
         //Find by data in relation
