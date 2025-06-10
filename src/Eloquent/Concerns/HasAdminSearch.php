@@ -2,6 +2,8 @@
 
 namespace Admin\Eloquent\Concerns;
 
+use Admin;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 trait HasAdminSearch
@@ -14,15 +16,6 @@ trait HasAdminSearch
     public function scopeSearchAdminColumnLocaleText($query, $column, $term)
     {
         $query->where(DB::raw('CONVERT(LOWER('.$this->qualifyColumn($column).') USING utf8)'), 'like', '%'.mb_strtolower($term).'%');
-    }
-
-    public function scopeSearchAdminColumnRelation($query, $column, $term)
-    {
-        if ($column == 'id') {
-            $query->where($this->qualifyColumn($column), $term);
-        } else {
-            $query->where($this->qualifyColumn($column), 'like', '%'.$term.'%');
-        }
     }
 
     public function scopeSearchAdminColumnNumeric($query, $column, $from, $to)
@@ -88,5 +81,128 @@ trait HasAdminSearch
                 });
             }
         });
+    }
+
+    public function scopeSearchAdminByColumn($query, $column, $columns, $search, $searchTo, $itemQuery)
+    {
+        $customMethod = 'set'.Str::camel($column).'AdminSearch';
+        if (method_exists($this, $customMethod)) {
+            return $this->{$customMethod}($query, $search, $searchTo);
+        }
+
+        //If is imaginarry field, skip whole process
+        if ( $this->isFieldType($column, ['imaginary', 'geometry']) || $this->hasFieldParam($column, ['imaginary', 'inaccessible']) ) {
+            return;
+        }
+
+        //Support for encrypted fields
+        else if ( $this->hasFieldParam($column, ['encrypted']) && array_key_exists($column, $this->getEncryptedFields(true)) ) {
+            $query->whereJsonContains(
+                '_encrypted_hashes->'.$column,
+                $this->generateEncryptedHash($search)
+            );
+        } elseif ($searchTo) {
+            $query->searchAdminColumnNumeric($column, $search, $searchTo);
+        }
+
+        //Find exact id, value
+        elseif ($this->isSearchColumnPrimaryKey($column, $columns)) {
+            $query->where($query->qualifyColumn($column), $itemQuery);
+        }
+
+        //Find by data in relation
+        elseif ($this->hasFieldParam($column, 'belongsTo')) {
+            $query->searchAdminColumnRelation($column, $columns, $search, 'belongsTo');
+        } elseif ($this->hasFieldParam($column, 'belongsToMany')) {
+            $query->searchAdminColumnRelation($column, $columns, $search, 'belongsToMany');
+        }
+
+        //Find by fulltext in query string
+        elseif ($this->hasFieldParam($column, 'locale')) {
+            $query->searchAdminMultiwords($search, $column, fn($query, $term) => $query->searchAdminColumnLocaleText($column, $term));
+        }
+
+        // Basic text search
+        else {
+            $query->searchAdminMultiwords($search, $column, fn($query, $term) => $query->searchAdminColumnText($column, $term));
+        }
+    }
+
+    private function isSearchColumnPrimaryKey($column, $columns)
+    {
+        if (in_array($column, ['id'])) {
+            return true;
+        }
+
+        //If is correct relationship id
+        if (count($columns) == 1) {
+            if ($this->hasFieldParam($column, 'belongsToMany')) {
+                return false;
+            }
+
+            if ($this->hasFieldParam($column, 'belongsTo')) {
+                return true;
+            }
+
+            //If is select, but not multiple
+            if ($this->isAdminSearchSelectColumn($column)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isAdminSearchSelectColumn($column)
+    {
+        return $column && $this->isFieldType($column, ['select', 'radio']) && ! $this->hasFieldParam($column, 'multiple');
+    }
+
+    public function scopeSearchAdminColumnRelation($query, $column, $columns, $search, $type = 'belongsTo')
+    {
+        $relation = explode(',', $this->getField($column)[$type]);
+
+        $byColumns = $this->getSearchRelationNamesBuilder($relation, $columns);
+
+        //We does not have columns for filter
+        if ( count($byColumns) == 0 ){
+            return;
+        }
+
+        $query->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $search) {
+            foreach ($byColumns as $key => $selector) {
+                $builder->{$key == 0 ? 'where' : 'orWhere'}(function ($builder) use ($search, $selector) {
+                    $builder->searchAdminMultiwords($search, $selector, function($query, $term) use ($selector) {
+                        if ($selector == 'id') {
+                            $query->where($query->qualifyColumn($selector), $term);
+                        } else {
+                            $query->where($query->qualifyColumn($selector), 'like', '%'.$term.'%');
+                        }
+                    }, 'orWhere');
+                });
+            }
+        });
+    }
+
+    /*
+     * Get all columns from foreign relationships
+     */
+    private function getSearchRelationNamesBuilder($relation, $columns = [])
+    {
+        if (array_key_exists(1, $relation) && count($columns) > 1) {
+            $relationModel = Admin::getModelByTable($relation[0]);
+
+            $relationColumns = $this->getRelationshipNameBuilder($relation[1]);
+
+            return array_values(array_filter($relationColumns, function($column) use ($relationModel) {
+                if ( in_array($column, ['id', $relationModel->getKeyName()]) ) {
+                    return true;
+                }
+
+                return $relationModel->getField($column) ? true : false;
+            }));
+        } else {
+            return ['id'];
+        }
     }
 }

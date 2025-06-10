@@ -65,7 +65,7 @@ class AdminRowsSearch
         }
 
         //If is more than 3 chars for searching
-        elseif (strlen($search) >= 3 || ($this->isSelectColumn($model, $column) || is_numeric($search)) || $searchTo) {
+        elseif (strlen($search) >= 3 || ($model->isAdminSearchSelectColumn($column) || is_numeric($search)) || $searchTo) {
             $columns = array_merge(array_keys($model->getFields()), ['id']);
 
             //If is valid column
@@ -74,10 +74,12 @@ class AdminRowsSearch
             }
 
             //Search scope
-            $query->where(function ($builder) use ($columns, $search, $searchTo, $isInterval, $itemQuery) {
+            $query->where(function ($query) use ($columns, $search, $searchTo, $isInterval, $itemQuery) {
                 foreach ($columns as $key => $column) {
                     //Search in all columns
-                    $this->filterByColumn($builder, $columns, $column, $search, $searchTo, $isInterval, $itemQuery);
+                    $query->orWhere(function ($query) use ($column, $columns, $search, $searchTo, $isInterval, $itemQuery) {
+                        $query->searchAdminByColumn($column, $columns, $search, $searchTo, $isInterval, $itemQuery);
+                    });
                 }
             });
         }
@@ -90,11 +92,6 @@ class AdminRowsSearch
         }
 
         return $column && $model->isFieldType($column, ['date', 'datetime', 'time']);
-    }
-
-    private function isSelectColumn($model, $column)
-    {
-        return $column && $model->isFieldType($column, ['select', 'radio']) && ! $model->hasFieldParam($column, 'multiple');
     }
 
     private function getDateFormat($model, $column, $value)
@@ -111,53 +108,6 @@ class AdminRowsSearch
         }
     }
 
-    private function isPrimaryKey($model, $column, $columns)
-    {
-        if (in_array($column, ['id'])) {
-            return true;
-        }
-
-        //If is correct relationship id
-        if (count($columns) == 1) {
-            if ($model->hasFieldParam($column, 'belongsToMany')) {
-                return false;
-            }
-
-            if ($model->hasFieldParam($column, 'belongsTo')) {
-                return true;
-            }
-
-            //If is select, but not multiple
-            if ($this->isSelectColumn($model, $column)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /*
-     * Get all columns from foreign relationships
-     */
-    private function getNamesBuilder($model, $relation, $columns = [])
-    {
-        if (array_key_exists(1, $relation) && count($columns) > 1) {
-            $relationModel = Admin::getModelByTable($relation[0]);
-
-            $relationColumns = $model->getRelationshipNameBuilder($relation[1]);
-
-            return array_values(array_filter($relationColumns, function($column) use ($relationModel) {
-                if ( in_array($column, ['id', $relationModel->getKeyName()]) ) {
-                    return true;
-                }
-
-                return $relationModel->getField($column) ? true : false;
-            }));
-        } else {
-            return ['id'];
-        }
-    }
-
     private function filterByDateColumn($query, $itemQuery, $itemQueryTo, $column, $search, $searchTo, $isInterval)
     {
         $model = $query->getModel();
@@ -171,71 +121,5 @@ class AdminRowsSearch
         }
 
         $query->searchAdminColumnDate($column, $date ?? null, $dateTo ?? null, $isInterval);
-    }
-
-    private function filterByColumn($builder, $columns, $column, $search, $searchTo, $isInterval, $itemQuery)
-    {
-        $model = $builder->getModel();
-
-        $builder->orWhere(function ($builder) use ($model, $columns, $column, $search, $searchTo, $itemQuery) {
-            //If is imaginarry field, skip whole process
-            if ( $model->isFieldType($column, ['imaginary', 'geometry']) || $model->hasFieldParam($column, ['imaginary', 'inaccessible']) ) {
-                return;
-            }
-
-            //Support for encrypted fields
-            else if ( $model->hasFieldParam($column, ['encrypted']) && array_key_exists($column, $model->getEncryptedFields(true)) ) {
-                $builder->whereJsonContains(
-                    '_encrypted_hashes->'.$column,
-                    $model->generateEncryptedHash($search)
-                );
-            } elseif ($searchTo) {
-                $builder->searchAdminColumnNumeric($column, $search, $searchTo);
-            }
-
-            //Find exact id, value
-            elseif ($this->isPrimaryKey($model, $column, $columns)) {
-                $builder->where($builder->qualifyColumn($column), $itemQuery);
-            }
-
-            //Find by data in relation
-            elseif ($model->hasFieldParam($column, 'belongsTo')) {
-                $this->searchByRelation($builder, $model, $column, $columns, $search, 'belongsTo');
-            } elseif ($model->hasFieldParam($column, 'belongsToMany')) {
-                $this->searchByRelation($builder, $model, $column, $columns, $search, 'belongsToMany');
-            }
-
-            //Find by fulltext in query string
-            elseif ($model->hasFieldParam($column, 'locale')) {
-                $builder->searchAdminMultiwords($search, $column, fn($builder, $query) => $builder->searchAdminColumnLocaleText($column, $query));
-            }
-
-            // Basic text search
-            else {
-                $builder->searchAdminMultiwords($search, $column, fn($builder, $query) => $builder->searchAdminColumnText($column, $query));
-            }
-        });
-    }
-
-    private function searchByRelation($builder, $model, $column, $columns, $search, $type = 'belongsTo')
-    {
-        $relation = explode(',', $model->getField($column)[$type]);
-
-        $byColumns = $this->getNamesBuilder($model, $relation, $columns);
-
-        //We does not have columns for filter
-        if ( count($byColumns) == 0 ){
-            return;
-        }
-
-        $builder->orWhereHas(trim_end($column, '_id'), function ($builder) use ($byColumns, $search) {
-            foreach ($byColumns as $key => $selector) {
-                $builder->{$key == 0 ? 'where' : 'orWhere'}(function ($builder) use ($search, $selector) {
-                    $builder->searchAdminMultiwords($search, $selector, function($builder, $query) use ($selector) {
-                        $builder->searchAdminColumnRelation($selector, $query);
-                    }, 'orWhere');
-                });
-            }
-        });
     }
 }
