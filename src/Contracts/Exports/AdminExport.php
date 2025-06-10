@@ -2,9 +2,10 @@
 
 namespace Admin\Contracts\Exports;
 
-use Excel;
 use Str;
+use Excel;
 use Storage;
+use Admin\Helpers\AdminRows;
 
 class AdminExport
 {
@@ -44,9 +45,20 @@ class AdminExport
 
     public function rows()
     {
-        $query = $this->query($this->model);
+        $query = $this->model->newQuery();
+
+        $query = $this->filter($query);
+
+        $query = $this->query($query);
 
         return $query->get();
+    }
+
+    public function filter($query)
+    {
+        $query = (new AdminRows($this->model, request()))->getRowsDataQuery($query);
+
+        return $query;
     }
 
     public function filename()

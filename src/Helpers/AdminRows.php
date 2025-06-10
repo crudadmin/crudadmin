@@ -55,11 +55,13 @@ class AdminRows
     /*
      * Apply pagination for given eloqment builder
      */
-    protected function paginateRecords($query, $initialRequest, $rowsCount)
+    protected function getPaginatedQuery($initialRequest, $rowsCount)
     {
+        $query = $this->model->newQuery();
+
         //If limit is not enabled
         if ($this->limit <= 0) {
-            return;
+            return $query;
         }
 
         //If is first loading of first page and model is in reversed mode, then return last x rows.
@@ -68,21 +70,23 @@ class AdminRows
 
             $query->offset($rowsCount - $take)->take($take);
 
-            return;
+            return $query;
         }
 
         $start = $this->limit * $this->page;
         $offset = $start - $this->limit;
 
         $query->offset($offset)->take($this->limit);
+
+        return $query;
     }
 
     /*
      * Returns filtered and paginated rows from administration
      */
-    private function getRowsDataQuery($callback = null, $withDependencies = false)
+    public function getRowsDataQuery($query = null, $withDependencies = false)
     {
-        $query = $this->model->newQuery();
+        $query = $query ?: $this->model->newQuery();
 
         if ( $withDependencies === true ) {
             $query->withFieldRelations();
@@ -107,10 +111,6 @@ class AdminRows
 
         //Search in rows
         (new AdminRowsSearch($this->model, $query, $this->search))->filter();
-
-        if (is_callable($callback)) {
-            call_user_func_array($callback, [$query]);
-        }
 
         return $query;
     }
@@ -207,14 +207,14 @@ class AdminRows
             if ( $this->skipRowsResponse($onlyIds) === false ) {
                 $data['count'] = $this->getRowsDataQuery()->count();
 
-                $paginatedRows = $this->getRowsDataQuery(function ($query) use ($onlyIds, $initialRequest, $data) {
-                    //Get specific id
-                    if ($onlyIds && count($onlyIds) > 0) {
-                        $query->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $onlyIds);
-                    } else {
-                        $this->paginateRecords($query, $initialRequest, $data['count']);
-                    }
-                }, true)->get();
+                //Get specific id
+                if ($onlyIds && count($onlyIds) > 0) {
+                    $query = $this->model->newQuery()->whereIn($this->model->fixAmbiguousColumn($this->model->getKeyName()), $onlyIds);
+                } else {
+                    $query = $this->getPaginatedQuery($initialRequest, $data['count']);
+                }
+
+                $paginatedRows = $this->getRowsDataQuery($query, true)->get();
 
                 $data['rows'] = $this->setRowsResponses($paginatedRows, $openedFormIds);
 
