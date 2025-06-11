@@ -361,7 +361,7 @@ class Admin extends AdminCore
 
         if ( count($directories) > 0 ) {
             if ( strpos($rootGitIgnoreData, $prefix) === false ) {
-                file_put_contents($rootGitIgnorePath, "\n\n".$prefix."\n", FILE_APPEND);
+                file_put_contents($rootGitIgnorePath, "\n".$prefix."\n", FILE_APPEND);
             }
 
             foreach ($directories as $dir) {
