@@ -2,13 +2,16 @@
 
 namespace Admin\Helpers;
 
-use Admin\Core\Helpers\AdminCore;
-use Admin\Core\Helpers\Storage\AdminFile;
-use Admin\Eloquent\Authenticatable;
 use Log;
+use Admin\Core\Helpers\AdminCore;
+use Admin\Eloquent\Authenticatable;
+use Admin\Core\Helpers\Storage\AdminFile;
+use Admin\Helpers\Concerns\HasGitignoreTrait;
 
 class Admin extends AdminCore
 {
+    use HasGitignoreTrait;
+
     private $isAdmin = null;
 
     private $isFrontend = null;
@@ -330,44 +333,6 @@ class Admin extends AdminCore
         }
 
         $this->addGitignoreFiles();
-    }
-
-    public function addGitignoreFiles($directories = null)
-    {
-        $gitignore = "*\n!.gitignore";
-
-        $directories = $directories ?: [
-            public_path(self::getAdminAssetsPath()),
-        ];
-
-        foreach ($directories as $dir) {
-            AdminFile::makeDirs($dir);
-
-            file_put_contents($dir.'/.gitignore', $gitignore);
-        }
-
-        // Add CrudAdmin paths to main .gitignore file
-        $rootGitIgnorePath = base_path('.gitignore');
-        $rootGitIgnoreData = file_get_contents($rootGitIgnorePath);
-        $prefix = '# CrudAdmin';
-
-        $directories = array_map(function ($dir) {
-            return str_replace(base_path(), '', $dir);
-        }, $directories);
-
-        $directories = array_filter($directories, function ($dir) use ($rootGitIgnoreData) {
-            return strpos($rootGitIgnoreData, $dir) === false;
-        });
-
-        if ( count($directories) > 0 ) {
-            if ( strpos($rootGitIgnoreData, $prefix) === false ) {
-                file_put_contents($rootGitIgnorePath, "\n".$prefix."\n", FILE_APPEND);
-            }
-
-            foreach ($directories as $dir) {
-                file_put_contents($rootGitIgnorePath, $dir."\n", FILE_APPEND);
-            }
-        }
     }
 
     /*
