@@ -179,7 +179,16 @@ trait HasPermissions
         foreach ($admin->filterRowsByColumns() as $filterByKey) {
             $permissionTable = $this->getRelatedPermissionTable($admin, $filterByKey);
 
-            $filterBy = $admin->{$filterByKey};
+            $field = $admin->getField($filterByKey);
+
+            // Use belongsToMany ids
+            if ( $field['belongsToMany'] ?? false ) {
+                $relationId = $admin->getRelationProperty($filterByKey, 'belongsToMany')[7];
+
+                $filterBy = $admin->{$filterByKey.'Pivot'}->pluck($relationId)->toArray();
+            } else {
+                $filterBy = $admin->{$filterByKey};
+            }
 
             $rules = [];
 
@@ -215,7 +224,7 @@ trait HasPermissions
 
                     if ( $params[0] == $permissionTable ) {
                         $query->whereHas($key, function ($query) use ($filterBy) {
-                            $query->where($query->qualifyColumn('id'), $filterBy);
+                            $query->{is_array($filterBy) ? 'whereIn' : 'where'}($query->qualifyColumn('id'), $filterBy);
                         });
                     }
                 }
@@ -223,7 +232,7 @@ trait HasPermissions
 
             // Filter by matched rules
             foreach ($rules as $key => $value) {
-                $query->where($this->qualifyColumn($key), $value);
+                $query->{is_array($value) ? 'whereIn' : 'where'}($this->qualifyColumn($key), $value);
             }
         }
     }
