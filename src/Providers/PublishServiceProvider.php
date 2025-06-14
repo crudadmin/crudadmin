@@ -26,6 +26,7 @@ class PublishServiceProvider extends ServiceProvider
 
 
         $this->publishes([
+            __DIR__.'/../Resources/vite/.prettierrc.json' => base_path('.prettierrc.json'),
             __DIR__.'/../Resources/vite/vite.config.js' => base_path('vite.config.js'),
             __DIR__.'/../Resources/vite/package.json' => base_path('package.json'),
             __DIR__.'/../Resources/vite/scripts.blade.php' => resource_path('views/vendor/admin/slots/scripts.blade.php'),
