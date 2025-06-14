@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite dev"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.0.4",
+        "axios": "^1.8.2",
+        "laravel-vite-plugin": "^1.2.0",
+        "sass": "1.77.6",
+        "vite": "^6.2.4"
+    },
+    "dependencies": {
+        "unplugin-auto-import": "^0.17.6",
+        "vite-plugin-externals": "^0.6.2",
+        "vite-plugin-manifest-sri": "^0.2.0",
+        "vite-plugin-resolve-externals": "^0.2.2"
+    }
+}
