@@ -12,7 +12,9 @@ const props = defineProps({
     },
 });
 
-console.log('TestComponent', props.model);
+const adminStore = useAdminStore();
+
+console.log('TestComponent', props.model, adminStore);
 </script>
 
 <style scoped></style>
