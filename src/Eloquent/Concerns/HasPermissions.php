@@ -207,11 +207,10 @@ trait HasPermissions
             }
 
             // Filter by field with hasAccessFilter param
-            // TODO: Once it is $admin->getRelationProperty, and for belongsToMany it is $this->getRelationProperty, find out why and refactor.
             foreach ($this->getFields() as $key => $field) {
-                // belongsTo relation filters
+                // Check if field is both assigned into same relations
                 if ( ($field['belongsTo'] ?? false) && $this->hasFieldParam($key, 'hasAccessFilter', true)){
-                    $params = $admin->getRelationProperty($key, 'belongsTo');
+                    $params = $this->getRelationProperty($key, 'belongsTo');
 
                     if ( $params[0] == $permissionTable ) {
                         $rules[$key] = $filterBy;
@@ -249,6 +248,13 @@ trait HasPermissions
         //Get relation table name from belongsTo field
         if ( $admin->hasFieldParam($key, 'belongsTo') ) {
             $field = $admin->getRelationProperty($key, 'belongsTo');
+
+            return $field[0];
+        }
+
+        //Get relation table name from belongsToMany field
+        elseif ( $admin->hasFieldParam($key, 'belongsToMany') ) {
+            $field = $admin->getRelationProperty($key, 'belongsToMany');
 
             return $field[0];
         }
