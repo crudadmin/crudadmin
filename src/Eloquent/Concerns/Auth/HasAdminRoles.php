@@ -47,9 +47,15 @@ trait HasAdminRoles
             return parent::roles();
         }
 
+        if ( method_exists($this, 'enabledRoles') ) {
+            $enabledRoles = $this->enabledRoles();
+        } else {
+            $enabledRoles = $this->enabledRoles ?: [];
+        }
+
         //Use staticaly assigned roles
         return $this->hasMany(AdminsRole::class)->setQuery(
-            AdminsRole::whereIn('id', $this->enabledRoles ?: [])->getQuery()
+            AdminsRole::whereIn('id', $enabledRoles ?: [])->getQuery()
         );
     }
 
