@@ -1,12 +1,13 @@
 <?php
 
 Route::middleware(['guest', 'throttle:auth'])->group(function () {
-    if ( class_exists('\AdminHelpers\Auth\Utilities\AdminAuth') ) {
-        AdminAuth::login();
-    }
+    AdminAuth::login();
+
 });
 
-Route::group(['middleware' => [ 'auth:admin' ]], function () {
+Route::group(['middleware' => [ 'admin' ]], function () {
+    AdminAuth::user();
+
     Route::get('/model/{table}', 'Api\ApiController@rows');
     Route::post('/model/{table}', 'Api\ApiController@create');
     Route::get('/model/{table}/{id}', 'Api\ApiController@show');

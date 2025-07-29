@@ -40,6 +40,11 @@ class Admin extends AdminCore
 
     public function getAuthProvider()
     {
+        //If provider is set in headers, use it
+        if ( request()->headers->has('provider') ) {
+            return request()->headers->get('provider');
+        }
+
         return session('auth.admin.provider', 'admins');
     }
 

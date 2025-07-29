@@ -57,6 +57,13 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         //Admin routes
+        if ( class_exists('\AdminHelpers\Auth\Utilities\AdminAuth') ) {
+            $this->mapApiRoutes($router);
+        }
+    }
+
+    protected function mapApiRoutes(Router $router)
+    {
         $router->group([
             'namespace' => 'Admin\Controllers',
             'prefix' => 'admin/api',

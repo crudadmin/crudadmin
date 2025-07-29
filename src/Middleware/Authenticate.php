@@ -35,7 +35,9 @@ class Authenticate
             }
 
             if ($request->ajax() || $request->wantsJson()) {
-                return response('Unauthorized.', 401);
+                return response([
+                    'message' => 'Unauthorized.',
+                ], 401);
             } else {
                 return redirect()->guest(
                     config('admin.authentication.login.path', admin_action('Auth\LoginController@showLoginForm'))
