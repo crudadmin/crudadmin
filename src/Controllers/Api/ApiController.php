@@ -134,6 +134,19 @@ class ApiController extends CRUDController
         ]);
     }
 
+    public function delete($table, $id)
+    {
+        $this->logRequest();
+
+        $query = $this->getBootedModel($table, 'delete');
+
+        $row = $query->where(request('_selector', request('selector', 'id')), $id)->firstOrFail();
+
+        $row->deleteAdminRow();
+
+        return autoAjax()->success(_('Záznam bol úspešne odstránený.'));
+    }
+
     public function models()
     {
         $models = collect(Admin::getAdminModels())

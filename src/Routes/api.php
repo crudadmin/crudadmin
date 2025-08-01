@@ -12,6 +12,7 @@ Route::group(['middleware' => [ 'admin' ]], function () {
     Route::post('/model/{table}', 'Api\ApiController@create');
     Route::get('/model/{table}/{id}', 'Api\ApiController@show');
     Route::post('/model/{table}/{id}', 'Api\ApiController@update');
+    Route::delete('/model/{table}/{id}', 'Api\ApiController@delete');
     Route::get('/models', 'Api\ApiController@models');
     Route::get('/models_scheme/{table?}', 'Api\ApiController@scheme');
 });
