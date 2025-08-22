@@ -15,7 +15,8 @@ class Layout
         'top', 'bottom', 'mutators',
         'form-before', 'form-after', 'form-top', 'form-bottom', 'form-header', 'form-header-left', 'form-header-right', 'form-footer',
         'table-before', 'table-after', 'table-header', 'table-header-actions', 'table-footer',
-        'actions-grid-before', 'actions-grid', 'model-builder',
+        'actions-grid-before', 'actions-grid', 'actions-grid-after',
+        'model-builder',
     ];
 
     /*

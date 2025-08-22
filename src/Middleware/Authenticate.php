@@ -29,7 +29,7 @@ class Authenticate
         if ($guard->guest() || $guard->user()->isEnabled() === false ) {
             //If is user logged but has not privilegies
             if ($guard->user() && $guard->user()->isEnabled() === false ) {
-                $guard->logout();
+                $this->logout($guard);
 
                 $errors = ['email' => trans('admin::admin.auth-disabled')];
             }
@@ -53,5 +53,12 @@ class Authenticate
         }
 
         return $next($request);
+    }
+
+    private function logout($guard)
+    {
+        if ( method_exists($guard, 'logout') ) {
+            $guard->logout();
+        }
     }
 }
