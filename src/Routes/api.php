@@ -1,12 +1,14 @@
 <?php
 
+use Admin\Controllers\LoginController;
+
 Route::middleware(['guest', 'throttle:auth'])->group(function () {
-    AdminAuth::login();
+    AdminAuth::login(LoginController::class); //todo:
 
 });
 
 Route::group(['middleware' => [ 'admin' ]], function () {
-    AdminAuth::user();
+    AdminAuth::user(LoginController::class); //todo:
 
     Route::get('/model/{table}', 'Api\ApiController@rows');
     Route::post('/model/{table}', 'Api\ApiController@create');
