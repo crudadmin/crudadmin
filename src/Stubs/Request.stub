@@ -1,0 +1,56 @@
+<?php
+
+namespace DummyNamespace;
+
+use Admin\Core\Requests\AdminModelRequest;
+
+class DummyClass extends AdminModelRequest
+{
+    /**
+     * Use only given fields from admin model
+     *
+     * @return  array
+     */
+    public function only()
+    {
+        return [
+            // 'field_a', 'field_b'
+        ];
+    }
+
+    /**
+     * Use only given fields with validation format, but also merge additional fields
+     *
+     * @return  array
+     */
+    public function rules()
+    {
+        return [
+            // 'field_1' => 'required|min:5',
+        ];
+    }
+
+    /**
+     * Megre additional validation rules into request
+     *
+     * @return  array
+     */
+    public function merge()
+    {
+        return [
+            // 'field' => 'name:email'
+        ];
+    }
+
+    /**
+     * Replace existing validation rules with attached ones
+     *
+     * @return  array
+     */
+    public function replace()
+    {
+        return [
+            // 'field' => 'name:email'
+        ];
+    }
+}
