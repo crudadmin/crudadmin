@@ -172,7 +172,7 @@ class AdminTree
      *
      * Every row in options will be represented as array of key and value,
      */
-    private function updateOptionsForm($key, $field, &$fields)
+    public static function formatFieldOptions($key, &$field)
     {
         if (! array_key_exists('options', $field)) {
             return;
@@ -184,10 +184,12 @@ class AdminTree
             $data[] = [$k, $v];
         }
 
-        $fields[$key]['options'] = $data;
+        $field['options'] = $data;
+
+        return $field;
     }
 
-    private function findEqualOptions($key, $field, &$fields)
+    private function findEqualOptions($key, &$field, &$fields)
     {
         if (! array_key_exists('options', $field) || count($options = $field['options']) == 0) {
             return;
@@ -200,7 +202,7 @@ class AdminTree
 
             //If this set of options exists in other field already
             if ($options == $f['options']) {
-                $fields[$key]['options'] = '$.'.$k;
+                $field['options'] = '$.'.$k;
             }
         }
     }
@@ -215,8 +217,8 @@ class AdminTree
         $fields = $model->getFields();
 
         //Translate model fields
-        foreach ($fields as $key => $field) {
-            $this->updateOptionsForm($key, $field, $fields);
+        foreach ($fields as $key => &$field) {
+            $this->formatFieldOptions($key, $field);
 
             $this->findEqualOptions($key, $field, $fields);
 

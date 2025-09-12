@@ -187,20 +187,24 @@ class DataController extends CRUDController
         }
     }
 
-    public function options($model, $field)
+    public function options($model, $fieldKey)
     {
         $model = $this->getModel($model);
 
         $model->withOptions([
-            $field => [
+            $fieldKey => [
                 'limit' => 100,
                 'displayLimit' => false,
                 'query' => request('query'),
             ]
         ]);
 
-        $field = $model->getField($field);
+        $field = $model->getField($fieldKey);
 
-        return $field['options'];
+        $field = AdminTree::formatFieldOptions($fieldKey, $field);
+
+        return [
+            'options' => $field['options'] ?? [],
+        ];
     }
 }
