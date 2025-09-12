@@ -196,6 +196,7 @@ class DataController extends CRUDController
                 'limit' => 100,
                 'displayLimit' => false,
                 'query' => request('query'),
+                'ids' => array_filter(array_wrap(request('ids'))),
             ]
         ]);
 

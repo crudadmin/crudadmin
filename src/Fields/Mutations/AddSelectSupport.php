@@ -328,6 +328,8 @@ class AddSelectSupport extends MutationRule
                 //Check for super heave tables
                 $limit = $settings['limit'] ?? 0;
                 $displayLimit = $settings['displayLimit'] ?? false;
+                $term = $settings['query'] ?? null;
+                $ids = $settings['ids'] ?? [];
 
                 $loadColumns[] = $relationModel->fixAmbiguousColumn('id');
 
@@ -338,6 +340,12 @@ class AddSelectSupport extends MutationRule
                 $modelColumns = in_array('*', $modelColumns) ? ['*'] : $relationModel->fixAmbiguousColumn($modelColumns);
 
                 $query = $relationModel->select($modelColumns);
+
+                if ( $term ) {
+                    $this->applyOptionsFilter($query, $term, $modelColumns);
+                } else if ( count($ids) > 0 ) {
+                    $query->whereIn($relationModel->fixAmbiguousColumn('id'), $ids);
+                }
 
                 // Limit options rows to display
                 if ( $limit ) {
@@ -368,6 +376,21 @@ class AddSelectSupport extends MutationRule
         $field['options'] = $rows;
 
         return $field;
+    }
+
+    private function applyOptionsFilter($query, $term, $modelColumns)
+    {
+        $query->where(function($query) use ($term, $modelColumns) {
+            $parts = explode(' ', $term);
+
+            foreach ($modelColumns as $column) {
+                $query->orWhere(function($query) use ($column, $parts) {
+                    foreach ($parts as $part) {
+                        $query->where($column, 'like', '%'.$part.'%');
+                    }
+                });
+            }
+        });
     }
 
     /**
