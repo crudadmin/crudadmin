@@ -38,6 +38,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     //Requests
     Route::post('/admin/api/rows/{table}', 'Crud\DataController@getRows');
     Route::any('/admin/api/show/{model}/{id}/{subid?}', 'Crud\DataController@show');
+    Route::any('/admin/api/options/{model}/{field}', 'Crud\DataController@options');
     Route::post('/admin/api/store', 'Crud\InsertController@store')->middleware('hasAdminRole:insert');
     Route::put('/admin/api/update', 'Crud\UpdateController@update')->middleware('hasAdminRole:update');
     Route::post('/admin/api/updateOrder', 'Crud\DataController@updateOrder');

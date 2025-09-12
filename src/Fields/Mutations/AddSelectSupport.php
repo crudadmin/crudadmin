@@ -15,17 +15,26 @@ class AddSelectSupport extends MutationRule
 {
     use DataStore;
 
-    public $attributes = ['options', 'option', 'multiple', 'filterBy', 'fillBy', 'canAdd', 'canEdit', 'canView', 'canList', 'required_with_values'];
+    public $attributes = ['options', 'option', 'multiple', 'filterBy', 'fillBy', 'canAdd', 'canEdit', 'canView', 'canList', 'async', 'required_with_values'];
 
+    /**
+     * Checks if mutation for fields is allowed
+     *
+     * @param  mixed $field
+     * @return void
+     */
     private function isAllowedMutation($field)
     {
         return $field['type'] == 'select' || $field['type'] == 'radio';
     }
 
-    /*
+    /**
      * Check if is array associative
+     *
+     * @param  mixed $arr
+     * @return void
      */
-    protected function isAssoc(array $arr)
+    private function isAssoc(array $arr)
     {
         if ([] === $arr) {
             return false;
@@ -38,6 +47,12 @@ class AddSelectSupport extends MutationRule
         return false;
     }
 
+    /**
+     * Returns filter by attributes
+     *
+     * @param  mixed $field
+     * @return void
+     */
     private function getFilterBy($field)
     {
         if (array_key_exists('filterBy', $field)) {
@@ -67,17 +82,23 @@ class AddSelectSupport extends MutationRule
         return [];
     }
 
+    /**
+     * Returns filter by attributes
+     *
+     * @param  mixed $fields
+     * @return void
+     */
     private function getFillBy($fields)
     {
         $columns = [];
 
-        $actual_key = trim_end($this->getKey(), '_id');
+        $actualKey = trim_end($this->getKey(), '_id');
 
         foreach ($fields as $key => $field) {
             if (array_key_exists('fillBy', $field)) {
                 $fillBy = explode('.', str_replace(',', '.', $field['fillBy']));
 
-                if (trim_end($fillBy[0], '_id') != $actual_key) {
+                if (trim_end($fillBy[0], '_id') != $actualKey) {
                     break;
                 }
 
@@ -88,8 +109,14 @@ class AddSelectSupport extends MutationRule
         return $columns;
     }
 
-    /*
+    /**
      * Get columns by regex prefix
+     *
+     * @param  mixed $properties
+     * @param  mixed $field
+     * @param  mixed $columns
+     * @param  mixed $fields
+     * @return void
      */
     private function getColumnsByProperties($properties, $field, $columns, $fields)
     {
@@ -175,8 +202,13 @@ class AddSelectSupport extends MutationRule
         return $customColumns;
     }
 
-    /*
+    /**
      * Check if column exists in array
+     *
+     * @param  mixed $column
+     * @param  mixed $loadColumns
+     * @param  mixed $option
+     * @return void
      */
     private function existsColumn($column, $loadColumns, $option)
     {
@@ -192,6 +224,12 @@ class AddSelectSupport extends MutationRule
         }
     }
 
+    /**
+     * Returns belongsTo/belongsToMany properties
+     *
+     * @param  mixed $field
+     * @return void
+     */
     private function getBelongsToProperties($field)
     {
         $attribute = array_key_exists('belongsTo', $field)
@@ -204,31 +242,14 @@ class AddSelectSupport extends MutationRule
         return explode(',', $attribute);
     }
 
-    private function getStaticField($field, $key, $model)
-    {
-        //Get allowed options
-        $withOptions = in_array('*', $model->getAllowedOptions())
-                        || in_array($key, $model->getAllowedOptions());
-
-        //If is not allowed to displaying all options data
-        if ($withOptions !== true
-            || (
-                array_key_exists('hidden', $field)
-                && array_key_exists('invisible', $field)
-                && array_key_exists('removeFromForm', $field)
-                && Admin::isAdmin()
-            )
-        ) {
-            if (! array_key_exists('options', $field)) {
-                $field['options'] = [];
-            } elseif (is_string($field['options'])) {
-                $field['options'] = explode(',', $field['options']);
-            }
-
-            return $field;
-        }
-    }
-
+    /**
+     * Retrieve all columns which should be loaded from relationship table to fetch options list
+     *
+     * @param  mixed $model
+     * @param  mixed $fields
+     * @param  mixed $table
+     * @return void
+     */
     private function getAllColumnsFromAllAttributes($model, $fields, $table)
     {
         $columns = [];
@@ -246,7 +267,37 @@ class AddSelectSupport extends MutationRule
         return $columns;
     }
 
-    private function bindRelationships($model, $field, $key, $options, $fields)
+    /**
+     * Renders options settings
+     *
+     * @param  mixed $model
+     * @return void
+     */
+    private function getFieldSettings($model)
+    {
+        $settings = $model->getOptionsSettings();
+
+        $settings = $settings[$this->getKey()] ?? $settings['*'] ?? [];
+
+        return [
+            'limit' => false,
+            'displayLimit' => 10000,
+            'query' => null,
+            ...$settings,
+        ];
+    }
+
+    /**
+     * Bind options from relationship tables
+     *
+     * @param  mixed $model
+     * @param  mixed $field
+     * @param  mixed $key
+     * @param  mixed $options
+     * @param  mixed $fields
+     * @return void
+     */
+    private function bindRelatedOptions($model, $field, $key, $options, $fields)
     {
         $properties = $this->getBelongsToProperties($field);
 
@@ -270,32 +321,36 @@ class AddSelectSupport extends MutationRule
 
             $loadColumns = array_unique($loadColumns);
 
+            $settings = $this->getFieldSettings($model);
+
             //Get data from table, and bind them info buffer for better performance
-            $options = $this->cache('selects.options.'.$properties[0], function () use ($relationModel, $properties, $loadColumns, $customColumns) {
+            $options = $this->cache('selects.options.'.$properties[0], function () use ($settings, $relationModel, $loadColumns, $customColumns, &$field) {
                 //Check for super heave tables
-                $limit = 10000;
+                $limit = $settings['limit'] ?? 0;
+                $displayLimit = $settings['displayLimit'] ?? false;
 
                 $loadColumns[] = $relationModel->fixAmbiguousColumn('id');
 
-                if ($relationModel) {
-                    //Add all custom columns into list of loading actual columns
-                    $modelColumns = array_merge(Arr::flatten(array_values($customColumns)), $loadColumns);
+                //Add all custom columns into list of loading actual columns
+                $modelColumns = array_merge(Arr::flatten(array_values($customColumns)), $loadColumns);
 
-                    //All columns, or required
-                    $modelColumns = in_array('*', $modelColumns) ? ['*'] : $relationModel->fixAmbiguousColumn($modelColumns);
+                //All columns, or required
+                $modelColumns = in_array('*', $modelColumns) ? ['*'] : $relationModel->fixAmbiguousColumn($modelColumns);
 
-                    $query = $relationModel->select($modelColumns);
+                $query = $relationModel->select($modelColumns);
 
-                    if ( $query->count() <= $limit ) {
-                        return $query->get()->toArray();
-                    }
-
-                    return [];
+                // Limit options rows to display
+                if ( $limit ) {
+                    $query->limit($limit);
                 }
 
-                if ( $query->count() <= $limit ){
-                    return $query->get();
+                // If limit is turned off, or count is less than limit. We can show results.
+                if ( $displayLimit === false || $query->count() <= $displayLimit ) {
+                    return $query->get()->toArray();
                 }
+
+                // Turn on async mode.
+                $field['async'] = true;
 
                 return [];
             });
@@ -315,6 +370,18 @@ class AddSelectSupport extends MutationRule
         return $field;
     }
 
+    /**
+     * Build each options row from relationship table to needed option properties
+     *
+     * @param  mixed $rows
+     * @param  mixed $options
+     * @param  mixed $properties
+     * @param  mixed $relationModel
+     * @param  mixed $loadColumns
+     * @param  mixed $customColumns
+     * @param  mixed $field
+     * @return void
+     */
     private function buildOptionsRow(&$rows, $options, $properties, $relationModel, $loadColumns, $customColumns, $field)
     {
         $key = $this->getModel()->getRelationPropertyData($field, $this->getKey())[2];
@@ -352,6 +419,12 @@ class AddSelectSupport extends MutationRule
         }
     }
 
+    /**
+     * Helper function
+     *
+     * @param  mixed $options
+     * @return void
+     */
     private function makeOptionsFromSimpleArray($options)
     {
         $array = [];
@@ -367,6 +440,12 @@ class AddSelectSupport extends MutationRule
         return $array;
     }
 
+    /**
+     * Assoc keys options fixer
+     *
+     * @param  mixed $field
+     * @return void
+     */
     private function updateAssocField(&$field)
     {
         if (array_key_exists('options', $field)) {
@@ -387,8 +466,17 @@ class AddSelectSupport extends MutationRule
         }
     }
 
-    //Bind relationships at the end of the getFields method
-    //for one relationships for all columns which share one table
+
+    /**
+     * Bind relationships at the end of the getFields boot method
+     * for one relationships for all columns which share one table
+     *
+     * @param  mixed $fields
+     * @param  mixed $field
+     * @param  mixed $key
+     * @param  mixed $model
+     * @return void
+     */
     public function initPostUpdate($fields, $field, $key, $model)
     {
         //Get options from model, and cache them
@@ -419,7 +507,7 @@ class AddSelectSupport extends MutationRule
          * If options are in db as relationship
          */
         elseif (array_key_exists('belongsTo', $field) || array_key_exists('belongsToMany', $field)) {
-            return $this->bindRelationships($model, $field, $key, $options, $fields);
+            return $this->bindRelatedOptions($model, $field, $key, $options, $fields);
         }
 
         //Checks if is non associal array
@@ -428,6 +516,48 @@ class AddSelectSupport extends MutationRule
         return $field;
     }
 
+    /**
+     * Renders options for static fields
+     *
+     * @param  mixed $field
+     * @param  mixed $key
+     * @param  mixed $model
+     * @return void
+     */
+    private function getStaticField($field, $key, $model)
+    {
+        $settings = $model->getOptionsSettings();
+
+        //Get allowed options
+        $allowFieldOptions = array_key_exists('*', $settings) || array_key_exists($key, $settings);
+
+        //If is not allowed to displaying all options data
+        if ($allowFieldOptions !== true
+            || (
+                array_key_exists('hidden', $field)
+                && array_key_exists('invisible', $field)
+                && array_key_exists('removeFromForm', $field)
+                && Admin::isAdmin()
+            )
+        ) {
+            if (! array_key_exists('options', $field)) {
+                $field['options'] = [];
+            } elseif (is_string($field['options'])) {
+                $field['options'] = explode(',', $field['options']);
+            }
+
+            return $field;
+        }
+    }
+
+    /**
+     * Updates field options
+     *
+     * @param  mixed $field
+     * @param  mixed $key
+     * @param  mixed $model
+     * @return void
+     */
     public function update($field, $key, $model)
     {
         if ($this->isAllowedMutation($field)) {

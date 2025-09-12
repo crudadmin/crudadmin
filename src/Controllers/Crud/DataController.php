@@ -186,4 +186,21 @@ class DataController extends CRUDController
             return $model->onUpdateOrder();
         }
     }
+
+    public function options($model, $field)
+    {
+        $model = $this->getModel($model);
+
+        $model->withOptions([
+            $field => [
+                'limit' => 100,
+                'displayLimit' => false,
+                'query' => request('query'),
+            ]
+        ]);
+
+        $field = $model->getField($field);
+
+        return $field['options'];
+    }
 }
