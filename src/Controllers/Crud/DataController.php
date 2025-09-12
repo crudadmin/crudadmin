@@ -41,14 +41,11 @@ class DataController extends CRUDController
 
         $data = [];
 
+        $rows = (new AdminRows($model, request()))->returnModelData([], $isInitialRequest);
+
         //Model tree need to be generated at first order
         //Because we want refresh all fields property by booted session.
-        $modelTree = AdminTree::makePage(
-            $model,
-            false,
-            false,
-            $isInitialRequest
-        );
+        $modelTree = AdminTree::makePage($model, false, false, $isInitialRequest, $rows['rows']);
 
         //On initial admin request
         if ( $isInitialRequest === true ) {
@@ -59,13 +56,10 @@ class DataController extends CRUDController
         $data['token'] = csrf_token();
 
         //Add model data
-        $data['model'] = array_merge(@$data['model'] ?: [], $modelTree);
+        $data['model'] = array_merge($data['model'] ?? [], $modelTree);
 
         //Add rows data
-        $data = array_merge(
-            $data,
-            (new AdminRows($model, request()))->returnModelData([], $isInitialRequest)
-        );
+        $data = array_merge($data, $rows);
 
         //Modify intiial request data
         if ( $isInitialRequest === true) {

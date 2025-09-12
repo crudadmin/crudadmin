@@ -74,9 +74,10 @@ class AdminTree
      * @param  object  $model          model instance
      * @param  bool $withChilds     return all model childs
      * @param  bool $layout_request if is first request for admin boot
+     * @param  array $rows           rows data
      * @return json
      */
-    public function makePage($model, $withChilds = true, $initial_request = false, $withOptions = false)
+    public function makePage($model, $withChilds = true, $initial_request = false, $withOptions = false, $rows = [])
     {
         $this->mutateModel($model);
 
@@ -131,7 +132,7 @@ class AdminTree
             'exports' => $this->getExports($model),
             'orderBy' => $model->getProperty('orderBy'),
             'history' => $model->getProperty('history'),
-            'fields' => $this->getModelFields($model, $withOptions),
+            'fields' => $this->getModelFields($model, $withOptions, $rows),
             'fields_groups' => $model->getFieldsGroups(),
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
@@ -207,8 +208,10 @@ class AdminTree
         }
     }
 
-    protected function getModelFields($model, $withOptions = false)
+    protected function getModelFields($model, $withOptions = false, $rows = [])
     {
+        $model->withAsyncOptions($rows);
+
         //If is first request into table, then load also all options from fields
         if ($withOptions === true) {
             $model->withAllOptions();
