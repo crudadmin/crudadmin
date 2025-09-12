@@ -259,4 +259,26 @@ trait ModelRules
             }
         });
     }
+
+    /**
+     * Run admin role
+     *
+     * @param  mixed $method
+     * @param  mixed $callback
+     * @return void
+     */
+    public function runAdminRule($method, $callback = null)
+    {
+        $this->getAdminRules(function ($rule) use ($method, $callback) {
+            if (method_exists($rule, $method) === false) {
+                return;
+            }
+
+            $response = $rule->{$method}($this);
+
+            if ($callback) {
+                $callback($response);
+            }
+        });
+    }
 }
