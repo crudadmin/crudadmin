@@ -102,16 +102,22 @@ trait Gettextable
      */
     public function mutateFields($fields)
     {
-        /*
-         * Checks for gettext support
-         */
-        if ( $this->hasGettextSupport() ) {
-            $fields->push([
-                'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|hasNotAccess:languages.update,invisible|extensions:po|hidden',
-                'is_source' => 'name:Zdrojovy jazyk|type:checkbox|default:0',
-            ]);
+        $this->addGettextFields($fields);
+    }
+
+    /*
+     * Checks for gettext support
+     */
+    public function addGettextFields($fields)
+    {
+        if ( !$this->hasGettextSupport() ) {
+            return;
         }
 
+        $fields->push([
+            'poedit_po' => 'name:admin::admin.languages-po-name|type:file|max:1024|hasNotAccess:languages.update,invisible|extensions:po|hidden',
+            'is_source' => 'name:Zdrojovy jazyk|type:checkbox|default:0',
+        ]);
     }
 
     /*
