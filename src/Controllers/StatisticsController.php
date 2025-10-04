@@ -19,8 +19,8 @@ class StatisticsController extends Controller
         $groups = $statistics->groups();
         $ranges = $statistics->ranges();
 
-        $group = request('group', array_keys($groups)[0]);
-        $range = request('range', array_keys($ranges)[0]);
+        $group = request('group', $statistics->group ?: array_keys($groups)[0]);
+        $range = request('range', $statistics->range ?: array_keys($ranges)[0]);
 
         $query = $statistics->query();
 
