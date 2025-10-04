@@ -51,6 +51,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
     Route::any('/admin/api/export/{table}/{exportKey}', 'Export\ExportController@export');
+    Route::post('/admin/api/statistics/{key}', 'StatisticsController@show');
 
     //Admin gettext translates
     Route::post('/admin/frontend-editor/static-link', 'FrontendEditorController@updateLink');
