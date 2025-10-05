@@ -92,7 +92,7 @@ class StatisticsView
         ];
     }
 
-    public function toArray($group, $range)
+    public function toArray($group, $range, $scopes = [])
     {
         $query = $this->query();
 
@@ -104,10 +104,12 @@ class StatisticsView
 
         $query = $groups[$group]['query']($query);
         $query = $ranges[$range]['query']($query);
+        $query = $query->filterByScopes($scopes);
 
         $data = $this->value($query);
 
         return [
+            'table' => $this->table,
             'title' => $this->title(),
             'group' => $group,
             'range' => $range,

@@ -16,11 +16,13 @@ class StatisticsController extends Controller
 
         $statistics = new $classname();
 
-        $group = request('group');
-        $range = request('range');
 
         return autoAjax()->data(
-            $statistics->toArray($group, $range)
+            $statistics->toArray(
+                request('group'),
+                request('range'),
+                request('scopes')
+            )
         );
     }
 }
