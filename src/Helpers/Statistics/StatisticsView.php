@@ -2,8 +2,9 @@
 
 namespace Admin\Helpers\Statistics;
 
-use Illuminate\Support\Facades\DB;
 use Admin;
+use Admin\Helpers\AdminRowsSearch;
+use Illuminate\Support\Facades\DB;
 
 class StatisticsView
 {
@@ -92,7 +93,7 @@ class StatisticsView
         ];
     }
 
-    public function toArray($group, $range, $scopes = [])
+    public function toArray($group, $range, $scopes = [], $search = [])
     {
         $query = $this->query();
 
@@ -105,6 +106,9 @@ class StatisticsView
         $query = $groups[$group]['query']($query);
         $query = $ranges[$range]['query']($query);
         $query = $query->filterByScopes($scopes);
+
+        //Search in rows
+        (new AdminRowsSearch($this->model(), $query, $search))->filter();
 
         $data = $this->value($query);
 

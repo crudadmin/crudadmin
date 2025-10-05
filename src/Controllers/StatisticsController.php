@@ -21,7 +21,8 @@ class StatisticsController extends Controller
             $statistics->toArray(
                 request('group'),
                 request('range'),
-                request('scopes')
+                request('scopes'),
+                request('search')
             )
         );
     }
