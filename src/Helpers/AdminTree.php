@@ -208,7 +208,7 @@ class AdminTree
         }
     }
 
-    protected function getModelFields($model, $withOptions = false, $rows = [])
+    public function getModelFields($model, $withOptions = false, $rows = [])
     {
         $model->withAsyncOptions($rows);
 

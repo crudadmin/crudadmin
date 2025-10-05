@@ -5,6 +5,7 @@ namespace Admin\Helpers\Statistics;
 use Admin;
 use Admin\Helpers\AdminRowsSearch;
 use Illuminate\Support\Facades\DB;
+use AdminTree;
 
 class StatisticsView
 {
@@ -113,6 +114,9 @@ class StatisticsView
         $data = $this->value($query);
 
         return [
+            'model' => request('initial') ? [
+                'fields' => AdminTree::getModelFields($this->model(), true),
+            ] : [],
             'table' => $this->table,
             'title' => $this->title(),
             'group' => $group,
