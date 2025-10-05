@@ -97,12 +97,7 @@ class AdminRowsSearch
     private function getDateFormat($model, $column, $value)
     {
         try {
-            $field = $model->getField($column);
-
-            $fromFormat = (isset($field['date_format']) ? $field['date_format'] : '') ?: 'd.m.Y';
-            $fromFormat = @explode(' ', $fromFormat)[0];
-
-            return Carbon::createFromFormat($fromFormat, $value);
+            return $model->newInstance()->forceFill([$column => $value])->{$column};
         } catch (Exception $e) {
             return;
         }
