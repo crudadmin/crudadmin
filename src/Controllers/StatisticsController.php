@@ -16,26 +16,11 @@ class StatisticsController extends Controller
 
         $statistics = new $classname();
 
-        $groups = $statistics->groups();
-        $ranges = $statistics->ranges();
+        $group = request('group');
+        $range = request('range');
 
-        $group = request('group', $statistics->group ?: array_keys($groups)[0]);
-        $range = request('range', $statistics->range ?: array_keys($ranges)[0]);
-
-        $query = $statistics->query();
-
-        $query = $groups[$group]['query']($query);
-        $query = $ranges[$range]['query']($query);
-
-        $data = $statistics->value($query);
-
-        return autoAjax()->data([
-            'title' => $statistics->title(),
-            'group' => $group,
-            'range' => $range,
-            'data' => $data,
-            'groups' => $groups,
-            'ranges' => $ranges,
-        ]);
+        return autoAjax()->data(
+            $statistics->toArray($group, $range)
+        );
     }
 }

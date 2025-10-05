@@ -3,6 +3,7 @@
 namespace Admin\Helpers\Statistics;
 
 use Illuminate\Support\Facades\DB;
+use Admin;
 
 class StatisticsView
 {
@@ -19,6 +20,23 @@ class StatisticsView
      * @var undefined
      */
     public $group = null;
+
+    /**
+     * Stats table
+     *
+     * @var mixed
+     */
+    public $table;
+
+    public function model()
+    {
+        return Admin::getModelByTable($this->table);
+    }
+
+    public function query()
+    {
+        return $this->model()->query();
+    }
 
     public function groups()
     {
@@ -71,6 +89,31 @@ class StatisticsView
                     return $query->addSelect(DB::raw('COUNT(*) as value, DATE(created_at) as `group`'))->groupByRaw('`group`');
                 },
             ],
+        ];
+    }
+
+    public function toArray($group, $range)
+    {
+        $query = $this->query();
+
+        $groups = $this->groups();
+        $ranges = $this->ranges();
+
+        $group = $group ?: array_keys($groups)[0];
+        $range = $range ?: array_keys($ranges)[0];
+
+        $query = $groups[$group]['query']($query);
+        $query = $ranges[$range]['query']($query);
+
+        $data = $this->value($query);
+
+        return [
+            'title' => $this->title(),
+            'group' => $group,
+            'range' => $range,
+            'data' => $data,
+            'groups' => $groups,
+            'ranges' => $ranges,
         ];
     }
 }
