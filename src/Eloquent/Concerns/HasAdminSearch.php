@@ -106,7 +106,7 @@ trait HasAdminSearch
         }
 
         //Find exact id, value
-        elseif ($this->isSearchColumnPrimaryKey($column, $columns)) {
+        elseif ($this->isSearchColumnPrimaryKey($column, $columns) || $this->isFieldType($column, 'checkbox')) {
             $query->where($query->qualifyColumn($column), $search);
         }
 
