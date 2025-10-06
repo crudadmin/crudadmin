@@ -30,6 +30,20 @@ class StatisticsView
      */
     public $table;
 
+    /**
+     * Is search enabled
+     *
+     * @var bool
+     */
+    public $search = true;
+
+    /**
+     * Are filters enabled
+     *
+     * @var bool
+     */
+    public $filters = true;
+
     public function model()
     {
         return Admin::getModelByTable($this->table);
@@ -117,6 +131,8 @@ class StatisticsView
             'model' => request('initial') ? [
                 'fields' => AdminTree::getModelFields($this->model(), true),
             ] : [],
+            'search' => $this->search,
+            'filters' => $this->filters,
             'table' => $this->table,
             'title' => $this->title(),
             'group' => $group,
