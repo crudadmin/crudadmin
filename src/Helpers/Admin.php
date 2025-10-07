@@ -423,10 +423,11 @@ class Admin extends AdminCore
             $class = new $classname;
 
             if ( $class->active ) {
-                $classes[] = ltrim(str_replace_first($namespace, '', $classname), '\\');
+                $classes[$class->date] = ltrim(str_replace_first($namespace, '', $classname), '\\');
             }
-
         }
+
+        ksort($classes);
 
         return $classes;
     }

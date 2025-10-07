@@ -10,6 +10,13 @@ use AdminTree;
 class StatisticsView
 {
     /**
+     * View creation date
+     *
+     * @var mixed
+     */
+    public $date;
+
+    /**
      * Stats table
      *
      * @var mixed
@@ -37,6 +44,12 @@ class StatisticsView
      */
     public $filter = null;
 
+    /**
+     * Has date filters?
+     *
+     * @var bool
+     */
+    public $filters = true;
 
     /**
      * Is search enabled
@@ -67,9 +80,9 @@ class StatisticsView
      *
      * @return void
      */
-    public function query()
+    public function query($query)
     {
-        return $this->model()->query();
+        return $query;
     }
 
     /**
@@ -101,21 +114,27 @@ class StatisticsView
      */
     public function filters()
     {
-        return [
+        return array_merge([
             'all' => [
                 'name' => _('Všetko'),
-                'color' => 'primary',
                 'query' => function($query){
                     return $query;
                 },
             ],
-            // 'last_month' => [
-            //     'name' => _('Posledný mesiac'),
-            //     'query' => function($query){
-            //         return $query->where($query->qualifyColumn('created_at'), '>=', now()->subMonth()->startOfDay());
-            //     },
-            // ],
-        ];
+        ], $this->filters ? [
+            'last_month' => [
+                'name' => _('Posledný mesiac'),
+                'query' => function($query){
+                    return $query->where($query->qualifyColumn('created_at'), '>=', now()->subMonth()->startOfDay());
+                },
+            ],
+            'last_week' => [
+                'name' => _('Posledný týždeň'),
+                'query' => function($query){
+                    return $query->where($query->qualifyColumn('created_at'), '>=', now()->subWeek()->startOfDay());
+                },
+            ],
+        ] : []);
     }
 
     /**
@@ -206,7 +225,9 @@ class StatisticsView
     private function getData($filter, $range, $scopes, $search)
     {
         return collect($this->datasets())->map(function($group) use ($filter, $range, $scopes, $search){
-            $query = $this->query();
+            $query = $this->query(
+                $this->model()->query()
+            );
 
             $query = $group['query']($query);
             $query = $this->filters()[$filter]['query']($query);

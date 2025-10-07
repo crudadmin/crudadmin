@@ -1,0 +1,19 @@
+<?php
+
+namespace DummyNamespace;
+
+use Admin\Helpers\Statistics\StatisticsView;
+
+class DummyClass extends StatisticsView
+{
+    public $date = 'DummyCreationDate';
+
+    public $table = '...';
+
+    public $range = 'monthly';
+
+    public function title()
+    {
+        return 'Name of statistics';
+    }
+}
