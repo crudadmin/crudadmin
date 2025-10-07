@@ -24,11 +24,11 @@ class StatisticsView
     public $range = 'monthly';
 
     /**
-     * Default group
+     * Default filter
      *
      * @var undefined
      */
-    public $group = null;
+    public $filter = null;
 
 
     /**
@@ -55,7 +55,7 @@ class StatisticsView
         return $this->model()->query();
     }
 
-    public function groups()
+    public function filters()
     {
         return [
             'all' => [
@@ -120,17 +120,17 @@ class StatisticsView
         return $query->selectRaw('COUNT(*) as `value`')->get();
     }
 
-    public function toArray($group, $range, $scopes = [], $search = [])
+    public function toArray($filter, $range, $scopes = [], $search = [])
     {
         $query = $this->query();
 
-        $groups = $this->groups();
+        $filters = $this->filters();
         $ranges = $this->ranges();
 
-        $group = $group ?: $this->group ?: array_keys($groups)[0];
+        $filter = $filter ?: $this->filter ?: array_keys($filters)[0];
         $range = $range ?: $this->range ?: array_keys($ranges)[0];
 
-        $query = $groups[$group]['query']($query);
+        $query = $filters[$filter]['query']($query);
         $query = $ranges[$range]['query']($query);
         $query = $query->filterByScopes($scopes);
 
@@ -143,15 +143,23 @@ class StatisticsView
             'model' => request('initial') ? [
                 'fields' => AdminTree::getModelFields($this->model(), true),
             ] : [],
-            'search' => $this->search,
-            'filters' => $this->filters,
+            'has' => [
+                'search' => $this->search,
+                'filters' => $this->filters,
+            ],
+            'scopes' => [
+                'filters' => [
+                    'key' => $filter,
+                    'list' => $filters,
+                ],
+                'ranges' => [
+                    'key' => $range,
+                    'list' => $ranges,
+                ],
+            ],
             'table' => $this->table,
             'title' => $this->title(),
-            'group' => $group,
-            'range' => $range,
             'data' => $data,
-            'groups' => $groups,
-            'ranges' => $ranges,
         ];
     }
 }

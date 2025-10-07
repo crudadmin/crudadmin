@@ -18,7 +18,7 @@ class StatisticsController extends Controller
 
         return autoAjax()->data(
             $statistics->toArray(
-                request('group'),
+                request('filter'),
                 request('range'),
                 request('scopes'),
                 request('search')
