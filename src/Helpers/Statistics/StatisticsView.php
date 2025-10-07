@@ -155,6 +155,7 @@ class StatisticsView
         return collect($this->datasets())->map(function($group) use ($filter, $range, $scopes, $search){
             $query = $this->query();
 
+            $query = $group['query']($query);
             $query = $this->filters()[$filter]['query']($query);
             $query = $this->ranges()[$range]['query']($query);
             $query = $query->filterByScopes($scopes);
