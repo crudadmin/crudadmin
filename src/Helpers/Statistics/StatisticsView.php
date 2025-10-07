@@ -43,18 +43,55 @@ class StatisticsView
      *
      * @var bool
      */
-    public $filters = true;
+    public $autoDatasetsFromStates = true;
 
+    /**
+     * Returns model
+     *
+     * @return void
+     */
     public function model()
     {
         return Admin::getModelByTable($this->table);
     }
 
+    /**
+     * Builds base query for all datasets
+     *
+     * @return void
+     */
     public function query()
     {
         return $this->model()->query();
     }
 
+    /**
+     * Datasets displayed on each fetch in graph
+     *
+     * @return void
+     */
+    public function datasets()
+    {
+        if ( $this->autoDatasetsFromStates && count($this->model()->getFilterStates()) > 0 ) {
+            return $this->getStatesDatasets();
+        }
+
+        return [
+            [
+                'name' => _('Všetci'),
+                'color' => 'primary',
+                'query' => function($query){
+                    return $query->selectRaw('COUNT(*) AS `value`');
+                },
+            ]
+        ];
+    }
+
+    /**
+     * Filters which we may applie during data fetching
+     *
+     * @return void
+     */
     public function filters()
     {
         return [
@@ -74,6 +111,11 @@ class StatisticsView
         ];
     }
 
+    /**
+     * Available data ranges to group data by
+     *
+     * @return void
+     */
     public function ranges()
     {
         return [
@@ -116,11 +158,6 @@ class StatisticsView
         ];
     }
 
-    public function value($query)
-    {
-        return $query->selectRaw('COUNT(*) as `value`')->get();
-    }
-
     public function toArray($filter, $range, $scopes = [], $search = [])
     {
         $filter = $filter ?: $this->filter ?: array_keys($this->filters())[0];
@@ -134,7 +171,7 @@ class StatisticsView
             ],
             'has' => [
                 'search' => $this->search,
-                'filters' => $this->filters,
+                'autoDatasetsFromStates' => $this->autoDatasetsFromStates,
             ],
             'scopes' => [
                 'filters' => [
@@ -150,7 +187,16 @@ class StatisticsView
         ];
     }
 
-    public function getData($filter, $range, $scopes, $search)
+    /**
+     * Returns data from queries
+     *
+     * @param  mixed $filter
+     * @param  mixed $range
+     * @param  mixed $scopes
+     * @param  mixed $search
+     * @return void
+     */
+    private function getData($filter, $range, $scopes, $search)
     {
         return collect($this->datasets())->map(function($group) use ($filter, $range, $scopes, $search){
             $query = $this->query();
@@ -163,8 +209,26 @@ class StatisticsView
             //Search in rows
             (new AdminRowsSearch($this->model(), $query, $search))->filter();
 
-            $group['data'] = $this->value($query);
+            $group['data'] = $query->get();
+
             return $group;
         });
+    }
+
+    /**
+     * Get datasets from filter states
+     *
+     * @return void
+     */
+    private function getStatesDatasets()
+    {
+        return array_map(function($state){
+            return [
+                ...$state,
+                'query' => function($query) use ($state) {
+                    return $query->where($state['query'])->selectRaw('COUNT(*) AS `value`');
+                },
+            ];
+        }, $this->model()->getFilterStates());
     }
 }
