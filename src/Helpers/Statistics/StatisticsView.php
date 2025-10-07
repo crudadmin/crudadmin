@@ -67,7 +67,7 @@ class StatisticsView
             // 'last_month' => [
             //     'name' => _('Posledný mesiac'),
             //     'query' => function($query){
-            //         return $query->where('created_at', '>=', now()->subMonth());
+            //         return $query->where($query->qualifyColumn('created_at'), '>=', now()->subMonth());
             //     },
             // ],
         ];
@@ -122,27 +122,15 @@ class StatisticsView
 
     public function toArray($filter, $range, $scopes = [], $search = [])
     {
-        $query = $this->query();
-
-        $filters = $this->filters();
-        $ranges = $this->ranges();
-
-        $filter = $filter ?: $this->filter ?: array_keys($filters)[0];
-        $range = $range ?: $this->range ?: array_keys($ranges)[0];
-
-        $query = $filters[$filter]['query']($query);
-        $query = $ranges[$range]['query']($query);
-        $query = $query->filterByScopes($scopes);
-
-        //Search in rows
-        (new AdminRowsSearch($this->model(), $query, $search))->filter();
-
-        $data = $this->value($query);
+        $filter = $filter ?: $this->filter ?: array_keys($this->filters())[0];
+        $range = $range ?: $this->range ?: array_keys($this->ranges())[0];
 
         return [
-            'model' => request('initial') ? [
-                'fields' => AdminTree::getModelFields($this->model(), true),
-            ] : [],
+            'title' => $this->title(),
+            'model' => [
+                'table' => $this->table,
+                'fields' => request('initial') ? AdminTree::getModelFields($this->model(), true) : [],
+            ],
             'has' => [
                 'search' => $this->search,
                 'filters' => $this->filters,
@@ -150,16 +138,31 @@ class StatisticsView
             'scopes' => [
                 'filters' => [
                     'key' => $filter,
-                    'list' => $filters,
+                    'list' => $this->filters(),
                 ],
                 'ranges' => [
                     'key' => $range,
-                    'list' => $ranges,
+                    'list' => $this->ranges(),
                 ],
             ],
-            'table' => $this->table,
-            'title' => $this->title(),
-            'data' => $data,
+            'datasets' => $this->getData($filter, $range, $scopes, $search),
         ];
+    }
+
+    public function getData($filter, $range, $scopes, $search)
+    {
+        return collect($this->datasets())->map(function($group) use ($filter, $range, $scopes, $search){
+            $query = $this->query();
+
+            $query = $this->filters()[$filter]['query']($query);
+            $query = $this->ranges()[$range]['query']($query);
+            $query = $query->filterByScopes($scopes);
+
+            //Search in rows
+            (new AdminRowsSearch($this->model(), $query, $search))->filter();
+
+            $group['data'] = $this->value($query);
+            return $group;
+        });
     }
 }
