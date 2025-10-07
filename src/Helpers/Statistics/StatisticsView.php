@@ -60,6 +60,7 @@ class StatisticsView
         return [
             'all' => [
                 'name' => _('Všetko'),
+                'color' => 'primary',
                 'query' => function($query){
                     return $query;
                 },
