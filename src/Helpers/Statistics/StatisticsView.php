@@ -79,7 +79,7 @@ class StatisticsView
      */
     public function datasets()
     {
-        if ( $this->autoDatasetsFromStates && count($this->model()->getFilterStates()) > 0 ) {
+        if ( $this->hasFilterStates() ) {
             return $this->getStatesDatasets();
         }
 
@@ -220,6 +220,18 @@ class StatisticsView
 
             return $group;
         });
+    }
+
+    /**
+     * Has model filter states enable
+     *
+     * @return void
+     */
+    private function hasFilterStates()
+    {
+        $model = $this->model();
+
+        return $this->autoDatasetsFromStates && method_exists($model, 'getFilterStates') && count($model->getFilterStates()) > 0;
     }
 
     /**
