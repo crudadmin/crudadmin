@@ -17,6 +17,13 @@ class StatisticsView
     public $table;
 
     /**
+     * Should be autoloaded?
+     *
+     * @var bool
+     */
+    public $active = true;
+
+    /**
      * Default range
      *
      * @var string

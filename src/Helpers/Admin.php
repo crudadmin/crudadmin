@@ -403,4 +403,31 @@ class Admin extends AdminCore
 
         return $providers;
     }
+
+    public function getStatistics()
+    {
+        $basepath = app_path('Admin/Statistics');
+        $namespace = 'App\Admin\Statistics';
+        $files = $this->getNamespaceFiles($basepath);
+
+        $classes = [];
+
+        foreach ($files as $file) {
+            $classname = $this->fromFilePathToNamespace((string) $file, $basepath, $namespace);
+
+            //If is not same class with filename
+            if (! class_exists($classname)) {
+                continue;
+            }
+
+            $class = new $classname;
+
+            if ( $class->active ) {
+                $classes[] = ltrim(str_replace_first($namespace, '', $classname), '\\');
+            }
+
+        }
+
+        return $classes;
+    }
 }
