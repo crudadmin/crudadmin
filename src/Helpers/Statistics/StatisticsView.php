@@ -105,7 +105,7 @@ class StatisticsView
             // 'last_month' => [
             //     'name' => _('Posledný mesiac'),
             //     'query' => function($query){
-            //         return $query->where($query->qualifyColumn('created_at'), '>=', now()->subMonth());
+            //         return $query->where($query->qualifyColumn('created_at'), '>=', now()->subMonth()->startOfDay());
             //     },
             // ],
         ];
