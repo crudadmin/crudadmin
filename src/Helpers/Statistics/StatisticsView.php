@@ -10,6 +10,13 @@ use AdminTree;
 class StatisticsView
 {
     /**
+     * Stats table
+     *
+     * @var mixed
+     */
+    public $table;
+
+    /**
      * Default range
      *
      * @var string
@@ -23,12 +30,6 @@ class StatisticsView
      */
     public $group = null;
 
-    /**
-     * Stats table
-     *
-     * @var mixed
-     */
-    public $table;
 
     /**
      * Is search enabled
@@ -58,11 +59,17 @@ class StatisticsView
     {
         return [
             'all' => [
-                'name' => _('Všetci'),
+                'name' => _('Všetko'),
                 'query' => function($query){
                     return $query;
                 },
             ],
+            // 'last_month' => [
+            //     'name' => _('Posledný mesiac'),
+            //     'query' => function($query){
+            //         return $query->where('created_at', '>=', now()->subMonth());
+            //     },
+            // ],
         ];
     }
 
@@ -75,7 +82,7 @@ class StatisticsView
                 'label_format' => 'Y',
                 'unit' => 'year',
                 'query' => function($query){
-                    return $query->addSelect(DB::raw('COUNT(*) as value, YEAR(created_at) as `group`'))->groupByRaw('`group`');
+                    return $query->selectRaw('YEAR('.$query->qualifyColumn('created_at').') as `group`')->groupByRaw('`group`');
                 },
             ],
             'monthly' => [
@@ -84,7 +91,7 @@ class StatisticsView
                 'label_format' => 'MMM Y',
                 'unit' => 'month',
                 'query' => function($query){
-                    return $query->addSelect(DB::raw('COUNT(*) as value, DATE_FORMAT(created_at, "%Y-%m") as `group`'))->groupByRaw('`group`');
+                    return $query->selectRaw('DATE_FORMAT('.$query->qualifyColumn('created_at').', "%Y-%m") as `group`')->groupByRaw('`group`');
                 },
             ],
             'weekly' => [
@@ -93,7 +100,7 @@ class StatisticsView
                 'label_format' => 'ww. Y',
                 'unit' => 'week',
                 'query' => function($query){
-                    return $query->addSelect(DB::raw('COUNT(*) as value, DATE_FORMAT(created_at, "%Y-%v") as `group`'))->groupByRaw('`group`');
+                    return $query->selectRaw('DATE_FORMAT('.$query->qualifyColumn('created_at').', "%Y-%v") as `group`')->groupByRaw('`group`');
                 },
             ],
             'daily' => [
@@ -102,10 +109,15 @@ class StatisticsView
                 'label_format' => 'DD. MM. YYYY',
                 'unit' => 'day',
                 'query' => function($query){
-                    return $query->addSelect(DB::raw('COUNT(*) as value, DATE(created_at) as `group`'))->groupByRaw('`group`');
+                    return $query->selectRaw('DATE('.$query->qualifyColumn('created_at').') as `group`')->groupByRaw('`group`');
                 },
             ],
         ];
+    }
+
+    public function value($query)
+    {
+        return $query->selectRaw('COUNT(*) as `value`')->get();
     }
 
     public function toArray($group, $range, $scopes = [], $search = [])
@@ -115,8 +127,8 @@ class StatisticsView
         $groups = $this->groups();
         $ranges = $this->ranges();
 
-        $group = $group ?: array_keys($groups)[0];
-        $range = $range ?: array_keys($ranges)[0];
+        $group = $group ?: $this->group ?: array_keys($groups)[0];
+        $range = $range ?: $this->range ?: array_keys($ranges)[0];
 
         $query = $groups[$group]['query']($query);
         $query = $ranges[$range]['query']($query);

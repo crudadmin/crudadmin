@@ -16,7 +16,6 @@ class StatisticsController extends Controller
 
         $statistics = new $classname();
 
-
         return autoAjax()->data(
             $statistics->toArray(
                 request('group'),
