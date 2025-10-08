@@ -106,7 +106,7 @@ trait HasAdminSearch
         }
 
         //Find exact id, value
-        elseif ($this->isSearchColumnPrimaryKey($column, $columns) || $this->isFieldType($column, 'checkbox')) {
+        elseif ($this->isSearchColumnPrimaryKey($column, $columns)) {
             $query->where($query->qualifyColumn($column), $search);
         }
 
@@ -146,6 +146,10 @@ trait HasAdminSearch
 
             //If is select, but not multiple
             if ($this->isAdminSearchSelectColumn($column)) {
+                return true;
+            }
+
+            if ( $this->isFieldType($column, 'checkbox') ) {
                 return true;
             }
         }
