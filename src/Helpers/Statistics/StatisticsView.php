@@ -66,6 +66,13 @@ class StatisticsView
     public $autoDatasetsFromStates = true;
 
     /**
+     * How value should be selected
+     *
+     * @var string
+     */
+    public $selector = 'COUNT(*) AS `value`';
+
+    /**
      * Returns model
      *
      * @return void
@@ -101,7 +108,7 @@ class StatisticsView
                 'name' => _('Všetci'),
                 'color' => 'primary',
                 'query' => function($query){
-                    return $query->selectRaw('COUNT(*) AS `value`');
+                    return $query->selectRaw($this->selector());
                 },
             ]
         ];
@@ -266,9 +273,19 @@ class StatisticsView
             return [
                 ...$state,
                 'query' => function($query) use ($state) {
-                    return $query->where($state['query'])->selectRaw('COUNT(*) AS `value`');
+                    return $query->where($state['query'])->selectRaw($this->selector());
                 },
             ];
         }, $this->model()->getFilterStates());
+    }
+
+    /**
+     * Returns value selector for statistics
+     *
+     * @return void
+     */
+    private function selector()
+    {
+        return $this->selector;
     }
 }
