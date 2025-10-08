@@ -130,13 +130,13 @@ class StatisticsView
             ],
         ], $this->filters ? [
             'last_month' => [
-                'name' => _('Posledný mesiac'),
+                'name' => _('30 dní'),
                 'query' => function($query){
                     return $query->where($query->qualifyColumn('created_at'), '>=', now()->subMonth()->startOfDay());
                 },
             ],
             'last_week' => [
-                'name' => _('Posledný týždeň'),
+                'name' => _('7 dní'),
                 'query' => function($query){
                     return $query->where($query->qualifyColumn('created_at'), '>=', now()->subWeek()->startOfDay());
                 },
