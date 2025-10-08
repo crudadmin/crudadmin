@@ -73,6 +73,15 @@ class StatisticsView
     public $selector = 'COUNT(*) AS `value`';
 
     /**
+     * Additional chart settings
+     *
+     * @var string
+     */
+    public $settings = [
+        'unit' => '',
+    ];
+
+    /**
      * Returns model
      *
      * @return void
@@ -244,6 +253,7 @@ class StatisticsView
             //Search in rows
             (new AdminRowsSearch($this->model(), $query, $search))->filter();
 
+            $group['settings'] = $group['settings'] ?? $this->settings ?: [];
             $group['data'] = $query->get();
 
             return $group;
