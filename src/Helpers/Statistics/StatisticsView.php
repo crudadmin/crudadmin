@@ -294,7 +294,7 @@ class StatisticsView
      *
      * @return void
      */
-    private function selector()
+    protected function selector()
     {
         return $this->selector;
     }
