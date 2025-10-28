@@ -2,11 +2,13 @@
 
 namespace Admin\Eloquent\Concerns;
 
+use Str;
 use Admin;
-use Admin\Core\Casts\LocalizedJsonCast;
 use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
-use Str;
+use Admin\Core\Casts\MultipleJsonCast;
+use Admin\Core\Casts\LocalizedJsonCast;
+use Admin\Core\Helpers\Storage\AdminFile;
 
 trait HasAdminApi
 {
@@ -308,21 +310,22 @@ trait HasAdminApi
             }
 
             else if ( $field['type'] == 'file' ){
-                if ( $this->hasFieldParam($key, 'locale') ) {
-                    //Remove cast for locale files.
-                    if ( isset($this->casts[$key]) ){
-                        unset($this->casts[$key]);
+                if ( $this->hasFieldParam($key, 'locale') || $this->hasFieldParam($key, 'multiple') ) {
+                    $files = $this->castAttributeUncached($key)->map(function($file) use ($key) {
+                        return $file->url;
+                    })->toArray();
+
+                    $this->attributes[$key] = $files[0] ?? null;
+
+                    unset($this->casts[$key]);
+                }
+
+                else {
+                    if ( ($file = $this->{$key}) instanceof AdminFile ) {
+                        $this->attributes[$key] = $file?->url;
+                    } else {
+                        //..
                     }
-
-                    $files = (new LocalizedJsonCast)->get($this, $key, $this->attributes[$key], $this->attributes);
-                    $files = array_wrap($files);
-                    $files = array_map(function($filename) use ($key) {
-                        return $this->getAdminFile($key, $filename)->url;
-                    }, $files);
-
-                    $this->attributes[$key] = count($files) == 1 && isset($files[0]) ? $files[0] : $files;
-                } else {
-                    $this->attributes[$key] = $this->{$key}?->url;
                 }
             }
         }
