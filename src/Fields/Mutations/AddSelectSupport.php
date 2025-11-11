@@ -6,10 +6,10 @@ use Admin;
 use Admin\Contracts\Migrations\Types\ImaginaryType;
 use Admin\Core\Contracts\DataStore;
 use Admin\Core\Fields\Mutations\MutationRule;
-use DB;
 use Fields;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class AddSelectSupport extends MutationRule
 {
@@ -113,15 +113,14 @@ class AddSelectSupport extends MutationRule
      * Get columns by regex prefix
      *
      * @param  mixed $properties
-     * @param  mixed $field
      * @param  mixed $columns
      * @param  mixed $fields
      * @return void
      */
-    private function getColumnsByProperties($properties, $field, $columns, $fields)
+    private function getColumnsByProperties($properties, $columns, $fields)
     {
         //Get foreign column from relationship table which will be loaded into selectbox for filterBy purposes
-        if (count($filterBy = $this->getFilterBy($field)) > 0) {
+        if (count($filterBy = $this->getFilterBy($this->field)) > 0) {
             $columns[] = $filterBy[1];
         }
 
@@ -138,8 +137,8 @@ class AddSelectSupport extends MutationRule
 
             //We want add defaultByOption fields into column list
             //This fields must exists
-            if ( array_key_exists('defaultByOption', $field) ) {
-                $column = explode(',', $field['defaultByOption'])[0];
+            if ( array_key_exists('defaultByOption', $this->field) ) {
+                $column = explode(',', $this->field['defaultByOption'])[0];
 
                 if (
                     $model->getField($column)
@@ -152,76 +151,6 @@ class AddSelectSupport extends MutationRule
 
 
         return $columns;
-    }
-
-    /**
-     * You can define your custom column builds in belongsTo/belongsToMany props
-     * with belongsToColumns function located in parent table.
-     *
-        'identifier' => [
-            'columns' => 'column_a,column_b',
-            'render' => function($row){
-                return $row->column_a.$row->column_b;
-            },
-        ],
-
-        or
-
-        'identifier' => function($row){
-            return $row->column_a.$row->column_b;
-        ],
-     *
-     *
-     * @param  array  $columns
-     * @param  AdminModel  $model
-     *
-     * return array
-     */
-    public function addBelongsToCustomColumnsSupport(&$columns, $model)
-    {
-        $customColumns = [];
-
-        if ( method_exists($model, 'belongsToColumns') ){
-            $definedColumnProps = $model->belongsToColumns();
-
-            foreach ($columns as $key => $column) {
-                if ( array_key_exists($column, $definedColumnProps) ){
-                    //We need remove original column
-                    unset($columns[$key]);
-
-                    //We need register all required columns
-                    if ( is_array($definedColumnProps[$column]) && $loadColumns = @$definedColumnProps[$column]['columns'] ) {
-                        $customColumns[$column] = array_merge($columns, explode(',', $loadColumns));
-                    } else {
-                        $customColumns[$column] = ['*'];
-                    }
-                }
-            }
-        }
-
-        return $customColumns;
-    }
-
-    /**
-     * Check if column exists in array
-     *
-     * @param  mixed $column
-     * @param  mixed $loadColumns
-     * @param  mixed $option
-     * @return void
-     */
-    private function existsColumn($column, $loadColumns, $option)
-    {
-        if (! $option || ! Admin::isAdmin()) {
-            return;
-        }
-
-        if (count($loadColumns) == 2 && strpos($column, ':') === false && ! array_key_exists($column, $option)) {
-            autoAjax()->error(
-                sprintf(_('Nie je možné načítať tabuľku, keďže stĺpec <strong>%s</strong> v tabuľke <strong>%s</strong> neexistuje.'), $properties[1], $properties[0]),
-                500
-            )->throw();
-        }
     }
 
     /**
@@ -301,8 +230,6 @@ class AddSelectSupport extends MutationRule
     {
         $properties = $this->getBelongsToProperties($field);
 
-        $rows = [];
-
         //Override attributes from options function into property field 1
         if (array_key_exists($key, $options) && is_string($options[$key])) {
             $properties[1] = $options[$key];
@@ -313,36 +240,30 @@ class AddSelectSupport extends MutationRule
             $relationModel = Admin::getModelByTable($properties[0])->withAdminPermissions();
 
             //Get all columns from each field witch belongsTo relation
-            $loadColumns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);
-
-            $loadColumns = $this->getColumnsByProperties($properties, $field, $loadColumns, $fields);
-
-            $customColumns = $this->addBelongsToCustomColumnsSupport($loadColumns, $relationModel);
-
-            $loadColumns = array_unique($loadColumns);
+            $loadColumns = $this->getOptionsColumns($relationModel, $model, $fields, $properties);
 
             $settings = $this->getFieldSettings($model);
 
             //Get data from table, and bind them info buffer for better performance
-            $options = $this->cache('selects.options.'.$properties[0], function () use ($settings, $relationModel, $loadColumns, $customColumns, &$field) {
+            $options = $this->cache('selects.options.'.$properties[0], function () use ($settings, $relationModel, $loadColumns, &$field, $model) {
                 //Check for super heave tables
                 $limit = $settings['limit'] ?? 0;
                 $displayLimit = $settings['displayLimit'] ?? false;
                 $term = $settings['query'] ?? null;
                 $ids = $settings['ids'] ?? [];
 
-                $loadColumns[] = $relationModel->fixAmbiguousColumn('id');
-
-                //Add all custom columns into list of loading actual columns
-                $modelColumns = array_merge(Arr::flatten(array_values($customColumns)), $loadColumns);
-
                 //All columns, or required
-                $modelColumns = in_array('*', $modelColumns) ? ['*'] : $relationModel->fixAmbiguousColumn($modelColumns);
+                $selectColumns = in_array('*', $loadColumns) ? ['*'] : $relationModel->fixAmbiguousColumn($loadColumns);
 
-                $query = $relationModel->select($modelColumns);
+                $query = $relationModel->select($selectColumns);
+
+                $mutatorName = 'scope'.Str::studly($this->getKey()).'Option';
+                if ( method_exists($model, $mutatorName) ) {
+                    $model->{$mutatorName}($query);
+                }
 
                 if ( $term ) {
-                    $this->applyOptionsFilter($query, $term, $modelColumns);
+                    $this->applyOptionsFilter($query, $term, $selectColumns);
                 } else if ( count($ids) > 0 ) {
                     $query->whereIn($relationModel->fixAmbiguousColumn('id'), $ids);
                 }
@@ -354,7 +275,15 @@ class AddSelectSupport extends MutationRule
 
                 // If limit is turned off, or count is less than limit. We can show results.
                 if ( $displayLimit === false || $query->count() <= $displayLimit ) {
-                    return $query->get()->toArray();
+                    return $query->get()->map(function ($item) use ($model) {
+                        $mutatorName = 'set'.Str::studly($this->getKey()).'Option';
+
+                        if ( method_exists($model, $mutatorName) ) {
+                            return $model->{$mutatorName}($item);
+                        }
+
+                        return $item->toArray();
+                    });
                 }
 
                 // Turn on async mode.
@@ -363,27 +292,34 @@ class AddSelectSupport extends MutationRule
                 return [];
             });
 
-            //If is unknown belongs to column
-            if (count($options) > 0) {
-                $this->existsColumn($properties[1], $loadColumns, $options[0]);
-            }
-
             if ($options !== false) {
-                $this->buildOptionsRow($rows, $options, $properties, $relationModel, $loadColumns, $customColumns, $field);
+                $field['options'] = $this->formatOptions($options, $relationModel, $loadColumns, $field);
             }
         }
-
-        $field['options'] = $rows;
 
         return $field;
     }
 
-    private function applyOptionsFilter($query, $term, $modelColumns)
+    private function getOptionsColumns($relationModel, $model, $fields, $properties)
     {
-        $query->where(function($query) use ($term, $modelColumns) {
+        //Get all columns from each field witch belongsTo relation
+        $loadColumns = $this->getAllColumnsFromAllAttributes($model, $fields, $properties[0]);
+
+        $loadColumns = $this->getColumnsByProperties($properties, $loadColumns, $fields);
+
+        $loadColumns[] = $relationModel->fixAmbiguousColumn('id');
+
+        $loadColumns = array_unique($loadColumns);
+
+        return $loadColumns;
+    }
+
+    private function applyOptionsFilter($query, $term, $selectColumns)
+    {
+        $query->where(function($query) use ($term, $selectColumns) {
             $parts = explode(' ', $term);
 
-            foreach ($modelColumns as $column) {
+            foreach ($selectColumns as $column) {
                 $query->orWhere(function($query) use ($column, $parts) {
                     foreach ($parts as $part) {
                         $query->where($column, 'like', '%'.$part.'%');
@@ -396,50 +332,36 @@ class AddSelectSupport extends MutationRule
     /**
      * Build each options row from relationship table to needed option properties
      *
-     * @param  mixed $rows
      * @param  mixed $options
-     * @param  mixed $properties
      * @param  mixed $relationModel
      * @param  mixed $loadColumns
-     * @param  mixed $customColumns
      * @param  mixed $field
      * @return void
      */
-    private function buildOptionsRow(&$rows, $options, $properties, $relationModel, $loadColumns, $customColumns, $field)
+    private function formatOptions($options, $relationModel, $loadColumns, $field)
     {
-        $key = $this->getModel()->getRelationPropertyData($field, $this->getKey())[2];
+        $array = [];
 
-        $definedColumnProps = $relationModel && method_exists($relationModel, 'belongsToColumns')
-            ? $relationModel->belongsToColumns()
-            : null;
+        $key = $this->getModel()->getRelationPropertyData($field, $this->getKey())[2];
+        $hasSetMutator = method_exists($this->getModel(), 'set'.Str::studly($this->getKey()).'Option');
+
+        $hiddenColumns = [
+            $key,
+            $relationModel->fixAmbiguousColumn('id'),
+        ];
 
         foreach ($options as $option) {
+            $id = $option[$key];
+
             $option = (array) $option;
+            // When we use custom mutator, we can return full option array, without any restrictions
+            $option = $hasSetMutator ? $option : Arr::only($option, $loadColumns);
+            $option = Arr::except($option, $hiddenColumns);
 
-            /*
-             * Build option row from given columns
-             */
-            foreach ($loadColumns as $column) {
-                $rows[$option[$key]][$column] = $option[$column] ?? null;
-            }
-
-            /*
-             * Build custom option column value from parent belongsToColumns method
-             */
-            foreach ($customColumns as $column => $loadCustomColumns) {
-                if ( $definedColumnProps && array_key_exists($column, $definedColumnProps) ){
-                    $columnProp = $definedColumnProps[$column];
-
-                    if ( is_array($columnProp) ) {
-                        $modelRow = $relationModel->forceFill($option);
-
-                        $rows[$option[$key]][$column] = $columnProp['render']($modelRow);
-                    } else if ( is_callable($columnProp) ) {
-                        $rows[$option[$key]][$column] = $columnProp();
-                    }
-                }
-            }
+            $array[$id] = $option;
         }
+
+        return $array;
     }
 
     /**
