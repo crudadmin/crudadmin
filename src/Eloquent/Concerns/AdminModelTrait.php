@@ -251,7 +251,7 @@ trait AdminModelTrait
             if (
                 $this->hasFieldParam($key, 'hidden', true)
                 && $this->hasFieldParam($key, 'column_visible', true) == false
-                && $this->hasFieldParam($key, 'table_request_present', true) == false
+                && $this->hasFieldParam($key, 'column_present', true) == false
                 && in_array($key, $fields)
             ) {
                 unset($fields[array_search($key, $fields)]);
