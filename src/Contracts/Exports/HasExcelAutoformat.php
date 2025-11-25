@@ -10,19 +10,9 @@ trait HasExcelAutoformat
 {
     protected function autoformatColumns($header)
     {
-        $autoColumnFormat = [
-            // 'SSCC' => '@',
-            // 'B' => '@',
-            // 'EAN CARTON' => NumberFormat::FORMAT_NUMBER,
-            // 'EAN SKU' => NumberFormat::FORMAT_NUMBER,
-
-            // 'QUANTITY IN CARTON' => NumberFormat::FORMAT_NUMBER,
-            // 'TOTAL QUANTITY' => NumberFormat::FORMAT_NUMBER,
-        ];
-
         $columns = [];
 
-        foreach ($autoColumnFormat as $key => $format) {
+        foreach ($this->autoformatColumns ?? [] as $key => $format) {
             if ( $index = $this->excelCharFromIndex($key, $header) ){
                 $columns[$index] = $format;
             }
