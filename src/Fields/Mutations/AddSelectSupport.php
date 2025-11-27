@@ -208,9 +208,11 @@ class AddSelectSupport extends MutationRule
 
         $settings = $settings[$this->getKey()] ?? $settings['*'] ?? [];
 
+        $asyncDisplayLimit = is_numeric($this->field['async'] ?? null) ? (int)$this->field['async'] : 10000;
+
         return [
             'limit' => false,
-            'displayLimit' => 10000,
+            'displayLimit' => $asyncDisplayLimit,
             'query' => null,
             ...$settings,
         ];
