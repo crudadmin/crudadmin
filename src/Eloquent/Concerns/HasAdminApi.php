@@ -6,8 +6,6 @@ use Str;
 use Admin;
 use Admin\Eloquent\AdminModel;
 use Illuminate\Support\Collection;
-use Admin\Core\Casts\MultipleJsonCast;
-use Admin\Core\Casts\LocalizedJsonCast;
 use Admin\Core\Helpers\Storage\AdminFile;
 
 trait HasAdminApi

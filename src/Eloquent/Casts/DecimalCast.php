@@ -2,8 +2,6 @@
 
 namespace Admin\Eloquent\Casts;
 
-use Admin;
-use Admin\Core\Casts\LocalizedJsonCast;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class DecimalCast implements CastsAttributes
