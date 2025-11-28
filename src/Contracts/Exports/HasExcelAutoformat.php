@@ -47,30 +47,35 @@ trait HasExcelAutoformat
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $header = $this->headings();
-
-                $lastLetter = $this->excelCharFromIndex(count($header) - 1);
-
-                // Apply autosize to all columns except whose columns
-                $skipAutosizeColumns = [];
-                foreach ($this->autosizeExcept ?? [] as $key) {
-                    if ( $char = $this->excelCharFromIndex($key, $header) ){
-                        $skipAutosizeColumns[] = $char;
-                    }
-                }
-
-                // Set autosize for given columns
-                $columns = array_diff(range('A', $lastLetter), $skipAutosizeColumns);
-                foreach ($columns as $col) {
-                    $sheet->getColumnDimension($col)->setAutoSize(true);
-                }
-
-                // Set autofilter
-                $sheet->setAutoFilter('A1:'.$lastLetter . $sheet->getHighestRow());
+                $this->addSheetAutosize($sheet);
             },
         ];
     }
 
+    public function addSheetAutosize($sheet)
+    {
+        $header = $this->headings();
+
+        $lastLetter = $this->excelCharFromIndex(count($header) - 1);
+
+        // Apply autosize to all columns except whose columns
+        $skipAutosizeColumns = [];
+
+        foreach ($this->autosizeExcept ?? [] as $key) {
+            if ( $char = $this->excelCharFromIndex($key, $header) ){
+                $skipAutosizeColumns[] = $char;
+            }
+        }
+
+        // Set autosize for given columns
+        $columns = array_diff(range('A', $lastLetter), $skipAutosizeColumns);
+        foreach ($columns as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Set autofilter
+        $sheet->setAutoFilter('A1:'.$lastLetter . $sheet->getHighestRow());
+    }
 
     /**
      * Returns character according to number index
