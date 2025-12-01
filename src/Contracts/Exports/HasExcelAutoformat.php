@@ -10,24 +10,23 @@ use Illuminate\Support\Str;
 
 trait HasExcelAutoformat
 {
+    // public $autoformatColumns = [
+    //     'SSCC' => '@',
+    //     'B' => '@',
+    //     'EAN' => NumberFormat::FORMAT_NUMBER,
+    // ];
+
     // public $autosizeExcept = [
     //     'Column Name A',
     //     'Column Name B',
     // ];
 
-    protected function autoformatColumns($header)
-    {
-        $columns = [];
-
-        foreach ($this->autoformatColumns ?? [] as $key => $format) {
-            if ( $index = $this->excelCharFromIndex($key, $header) ){
-                $columns[$index] = $format;
-            }
-        }
-
-        return $columns;
-    }
-
+    /**
+     * Add styling to header row
+     *
+     * @param  mixed $sheet
+     * @return void
+     */
     public function styles(Worksheet $sheet)
     {
         return [
@@ -41,9 +40,14 @@ trait HasExcelAutoformat
         ];
     }
 
+    /**
+     * Formats columns according to $autoformatColumns
+     *
+     * @return array
+     */
     public function columnFormats(): array
     {
-        return $this->autoformatColumns(
+        return $this->getAutoformatColumns(
             $this->headings()
         );
     }
@@ -60,6 +64,25 @@ trait HasExcelAutoformat
         ];
     }
 
+    /**
+     * Returns array of columns with their formats
+     *
+     * @param  mixed $header
+     * @return void
+     */
+    protected function getAutoformatColumns($header)
+    {
+        return collect($this->autoformatColumns ?? [])->mapWithKeys(function($value, $key) use ($header) {
+            return [$this->excelCharFromIndex($key, $header) => $value];
+        })->toArray();
+    }
+
+    /**
+     * Autosizes all columns except those in $autosizeExcept
+     *
+     * @param  mixed $sheet
+     * @return void
+     */
     public function setColumnsAutosize($sheet)
     {
         // Apply autosize to all columns except whose columns
