@@ -91,6 +91,7 @@ trait HasButtonsSupport
             'open' => $this->open,
             'action' => $this->getAction(),
             'shouldAccept' => $this->accept,
+            'toast_duration' => $this->message['duration'] ?? null,
         ];
 
         //Rows should not be returned in all responses, for example in question we does not want rows.

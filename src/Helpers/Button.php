@@ -149,12 +149,23 @@ class Button
         return $this;
     }
 
-    /*
-     * Display toast message
+    /**
+     * toast
+     *
+     * @param  mixed $message
+     * @param  mixed $type
+     * @param  mixed $duration (seconds)
+     * @return void
      */
-    public function toast($message, $type = 'success')
+    public function toast($message, $type = 'success', $duration = 5)
     {
-        return $this->message($message, null, $type, true);
+        $this->message($message, null, $type, true);
+
+        if ( is_numeric($duration) ) {
+            $this->message['duration'] = $duration;
+        }
+
+        return $this;
     }
 
     public function errorToast($message)

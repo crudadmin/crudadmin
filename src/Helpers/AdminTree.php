@@ -6,6 +6,7 @@ use Admin;
 use Admin\Helpers\Localization\AdminResourcesSyncer;
 use Admin\Helpers\Layout;
 use Illuminate\Support\Str;
+use Admin\Helpers\AdminRows;
 
 class AdminTree
 {
@@ -320,13 +321,13 @@ class AdminTree
 
     private function getExports($model)
     {
-        return collect($model->getProperty('exports', []))->map(function($classname){
-            $export = new $classname;
+        return collect($model->getProperty('exports', []))->map(function($classname) use ($model){
+            $export = new $classname($model);
 
             return [
-                'key' => $export->getKey(),
-                'name' => $export->getName(),
-                'icon' => $export->getIcon(),
+                'key' => AdminRows::getButtonKey($export),
+                'name' => $export->name,
+                'icon' => $export->icon,
             ];
         })->values()->toArray();
     }
