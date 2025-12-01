@@ -12,10 +12,25 @@ use Admin\Helpers\SecureDownloader;
 
 class AdminExport extends Button
 {
+    /**
+     * What format to use for export
+     *
+     * @var undefined
+     */
     public $format = \Maatwebsite\Excel\Excel::XLSX;
 
-    private $filename;
+    /**
+     * filename
+     *
+     * @var mixed
+     */
+    public $filename;
 
+    /**
+     * Temporary directory for exports
+     *
+     * @var string
+     */
     public static $tempDir = 'temp_download_exports';
 
     /**
