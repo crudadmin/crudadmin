@@ -5,9 +5,16 @@ namespace Admin\Contracts\Exports;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use Illuminate\Support\Str;
 
 trait HasExcelAutoformat
 {
+    // public $autosizeExcept = [
+    //     'Column Name A',
+    //     'Column Name B',
+    // ];
+
     protected function autoformatColumns($header)
     {
         $columns = [];
@@ -47,58 +54,58 @@ trait HasExcelAutoformat
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $this->addSheetAutosize($sheet);
+                $this->setColumnsAutosize($sheet);
+                $this->setColumnsAutoFilter($sheet);
             },
         ];
     }
 
-    public function addSheetAutosize($sheet)
+    public function setColumnsAutosize($sheet)
     {
-        $header = $this->headings();
-
-        $lastLetter = $this->excelCharFromIndex(count($header) - 1);
-
         // Apply autosize to all columns except whose columns
-        $skipAutosizeColumns = [];
-
-        foreach ($this->autosizeExcept ?? [] as $key) {
-            if ( $char = $this->excelCharFromIndex($key, $header) ){
-                $skipAutosizeColumns[] = $char;
-            }
-        }
+        $skipAutosizeColumns = collect($this->autosizeExcept ?? [])->map(function($key) {
+            return $this->excelCharFromIndex($key);
+        })->filter()->toArray();
 
         // Set autosize for given columns
-        $columns = array_diff(range('A', $lastLetter), $skipAutosizeColumns);
-        foreach ($columns as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // Set autofilter
-        $sheet->setAutoFilter('A1:'.$lastLetter . $sheet->getHighestRow());
+        collect(range('A', $sheet->getHighestColumn()))->diff($skipAutosizeColumns)->each(function($char) use ($sheet) {
+            $sheet->getColumnDimension($char)->setAutoSize(true);
+        });
     }
 
     /**
-     * Returns character according to number index
-     * Or returns character according to header index
+     * Turns on auto filter for given columns
+     *
+     * @param  mixed $sheet
+     * @param  mixed $columns
+     * @return void
+     */
+    public function setColumnsAutoFilter($sheet)
+    {
+        $sheet->setAutoFilter('A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow());
+    }
+
+    /**
+     * Returns excel column character from heading key name
      *
      * @param  mixed $index
      * @param  mixed $header
      * @return void
      */
-    public function excelCharFromIndex($index, $header = [])
+    public function excelCharFromIndex($index, $header = null)
     {
-        $letters = range('A', 'Z');
-
         if ( is_string($index) ) {
+            $header = $header ?? $this->headings();
+
             foreach ( $header as $key => $value ) {
-                if ( str_slug($value) == str_slug($index) ) {
-                    return $letters[$key];
+                if ( Str::slug($value) == Str::slug($index) ) {
+                    return Coordinate::stringFromColumnIndex($key+1);
                 }
             }
 
             return;
         }
 
-        return $letters[$index];
+        return Coordinate::stringFromColumnIndex($index+1);
     }
 }
