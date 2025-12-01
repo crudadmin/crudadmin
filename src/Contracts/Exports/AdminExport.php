@@ -42,6 +42,11 @@ class AdminExport extends Button
     {
         $query = $this->row->newQuery();
 
+        // If row exists, we need to filter query by row id (this is case in buttons rows export)
+        if ( $this->row->exists ) {
+            $query = $query->whereIn($this->row->getKeyName(), [$this->row->getKey()]);
+        }
+
         $query = $this->filter($query);
 
         $query = $this->query($query);
