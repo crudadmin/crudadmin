@@ -123,12 +123,14 @@ class Button
 
     /**
      * Firing callback on press button for multiple items.
+     * Uncomment this method if you want to use it for multiple items during checking in table.
+     *
      * @param  collection $rows
      */
-    public function fireMultiple(Collection $rows)
-    {
-        return $this->error('Metóda <strong>fireMultiple</strong> nebola nájdená.');
-    }
+    // public function fireMultiple(Collection $rows)
+    // {
+    //     return $this->error('Metóda <strong>fireMultiple</strong> nebola nájdená.');
+    // }
 
     /*
      * Set response message

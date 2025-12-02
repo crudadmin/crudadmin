@@ -161,6 +161,7 @@ class AdminRows
                         'reloadRow' => $button->reloadRow,
                         'reloadChildren' => $button->reloadChildren,
                         'tooltipEncode' => $button->tooltipEncode,
+                        'isMultiple' => method_exists($button, 'fireMultiple') ? true : false,
                         'action' => $button->getAction(),
                     ];
                 }
