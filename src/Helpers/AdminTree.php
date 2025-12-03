@@ -135,6 +135,7 @@ class AdminTree
             'history' => $model->getProperty('history'),
             'fields' => $this->getModelFields($model, $withOptions, $rows),
             'fields_groups' => $model->getFieldsGroups(),
+            'searches' => $model->getProperty('searches') ?: [],
             'childs' => $childs,
             'localization' => $model->isEnabledLanguageForeign(),
             'components' => $model->getFieldsComponents($initial_request),
