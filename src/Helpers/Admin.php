@@ -7,6 +7,7 @@ use Admin\Core\Helpers\AdminCore;
 use Admin\Eloquent\Authenticatable;
 use Admin\Core\Helpers\Storage\AdminFile;
 use Admin\Helpers\Concerns\HasGitignoreTrait;
+use Exception;
 
 class Admin extends AdminCore
 {
@@ -338,6 +339,45 @@ class Admin extends AdminCore
         }
 
         $this->addGitignoreFiles();
+    }
+
+    public function getAppHash()
+    {
+        //Try to get git hash or use models hashes
+        if ( !($hash = $this->getGitHash()) ) {
+            $hash = implode(';', array_keys($this->getAdminModels()));
+        }
+
+        return crc32($hash);
+    }
+
+    /**
+     * Returns curent app git hash
+     *
+     * @return void
+     */
+    public function getGitHash()
+    {
+        $gitDir = base_path('.git');
+        $headFile = $gitDir . '/HEAD';
+
+        if (! is_file($headFile)) {
+            return null;
+        }
+
+        $head = trim(file_get_contents($headFile));
+
+        // Case 1: HEAD points to a branch
+        if (str_starts_with($head, 'ref: ')) {
+            $ref = trim(substr($head, 5));
+            $refFile = $gitDir . '/' . $ref;
+
+            $hash = is_file($refFile) ? trim(file_get_contents($refFile)) : null;
+            return $hash;
+        }
+
+        // Case 2: detached HEAD – HEAD contains the hash directly
+        return $hash = $head;
     }
 
     /*

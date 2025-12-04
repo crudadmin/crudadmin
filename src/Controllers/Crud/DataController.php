@@ -2,8 +2,8 @@
 
 namespace Admin\Controllers\Crud;
 
+use Admin;
 use AdminTree;
-use Illuminate\Http\Request;
 use Admin\Helpers\AdminRows;
 use Admin\Helpers\SecureDownloader;
 use Admin\Helpers\SheetDownloader;
@@ -57,6 +57,9 @@ class DataController extends CRUDController
 
         //Add model data
         $data['model'] = array_merge($data['model'] ?? [], $modelTree);
+
+        // App version hash
+        $data['app_hash'] = Admin::getAppHash();
 
         //Add rows data
         $data = array_merge($data, $rows);
