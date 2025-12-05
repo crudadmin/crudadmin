@@ -44,7 +44,10 @@ trait AdminModelTrait
             }
         }
 
-        $this->setEncryptedHashes();
+        //Set encrypted hashes
+        if ( $this->hasEncryptedHashes() ) {
+            $this->setEncryptedHashes();
+        }
 
         //Check for model rules
         if ( $isPerformingRuleMethods === false ) {

@@ -17,7 +17,7 @@ class EncryptedSearch extends Column
      */
     public function isEnabled(AdminModel $model)
     {
-        return count($model->getEncryptedFields(true)) > 0;
+        return count($model->getEncryptedFields(true)) > 0 && $model->hasEncryptedHashes();
     }
 
     /**

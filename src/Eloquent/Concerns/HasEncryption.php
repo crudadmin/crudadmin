@@ -8,6 +8,23 @@ use Illuminate\Support\Facades\Crypt;
 trait HasEncryption
 {
     /**
+     * Set if model has encrypted hashes
+     *
+     * @var bool
+     */
+    protected $hasEncryptedHashes = true;
+
+    /**
+     * Determine if model has encrypted hashes
+     *
+     * @return void
+     */
+    public function hasEncryptedHashes()
+    {
+        return $this->hasEncryptedHashes;
+    }
+
+    /**
      * Decrypt the given encrypted string.
      *
      * @param  string  $value
