@@ -18,6 +18,10 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
         $filters = [];
 
         foreach ($this->getModel()->getFilterStates() as $key => $state) {
+            if ( isset($state['name']) && is_callable($state['name']) ) {
+                $state['name'] = $state['name']();
+            }
+
             $filters[$key] = $state;
         }
 
@@ -34,6 +38,10 @@ class FilterStateModule extends AdminModelModule implements AdminModelModuleSupp
             $active = $state['active'] ?? null;
 
             if ( is_callable($active) && $active() == true ){
+                if ( isset($state['name']) && is_callable($state['name']) ) {
+                    $state['name'] = $state['name']();
+                }
+
                 foreach (['active', 'query'] as $key) {
                     if ( array_key_exists($key, $state) ){
                         unset($state[$key]);
