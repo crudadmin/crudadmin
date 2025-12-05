@@ -623,4 +623,21 @@ trait AdminModelTrait
 
         return $settings;
     }
+
+    /**
+     * @overide Extends support for UTC ISO 8601 formats
+     *
+     * Return a timestamp as DateTime object.
+     *
+     * @param  mixed  $value
+     * @return \Illuminate\Support\Carbon
+     */
+    protected function asDateTime($value)
+    {
+        if ( strpos($value, 'Z') ) {
+            return (new Carbon($value, 'UTC'))->setTimezone(config('app.timezone'));
+        }
+
+        return parent::asDateTime($value);
+    }
 }
