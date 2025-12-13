@@ -74,6 +74,13 @@ class Button
      */
     public $accept = false;
 
+    /**
+     * Tooltip for button
+     *
+     * @var string
+     */
+    public $tooltip = '';
+
     /*
      * Should be tooltip encoded?
      */
@@ -103,6 +110,7 @@ class Button
         'type' => null,
         'title' => null,
         'message' => null,
+        'size' => 'md',
     ];
 
     /*
@@ -116,10 +124,10 @@ class Button
     /*
      * Firing callback on press button
      */
-    public function fire(AdminModel $row)
-    {
-        return $this->error('Metóda <strong>fire</strong> nebola nájdená.');
-    }
+    // public function fire(AdminModel $row)
+    // {
+    //     return $this->error('Metóda <strong>fire</strong> nebola nájdená.');
+    // }
 
     /**
      * Firing callback on press button for multiple items.
@@ -304,6 +312,18 @@ class Button
     public function withRows($state)
     {
         $this->withRows = $state;
+
+        return $this;
+    }
+
+    /*
+     * Set message size
+     *
+     * md|lg|xl
+     */
+    public function size($size = 'md')
+    {
+        $this->message['size'] = $size;
 
         return $this;
     }

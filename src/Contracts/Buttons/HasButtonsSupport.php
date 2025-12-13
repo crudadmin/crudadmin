@@ -92,6 +92,7 @@ trait HasButtonsSupport
             'action' => $this->getAction(),
             'shouldAccept' => $this->accept,
             'toast_duration' => $this->message['duration'] ?? null,
+            'modal_size' => $this->message['size'] ?? 'md',
         ];
 
         //Rows should not be returned in all responses, for example in question we does not want rows.

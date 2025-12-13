@@ -154,6 +154,7 @@ class AdminRows
                     $data[$key] = [
                         'key' => self::getButtonKey($buttonClass),
                         'name' => $button->name,
+                        'tooltip' => $button->tooltip,
                         'class' => $button->class,
                         'icon' => $button->icon,
                         'type' => $button->type,
@@ -162,6 +163,7 @@ class AdminRows
                         'reloadChildren' => $button->reloadChildren,
                         'tooltipEncode' => $button->tooltipEncode,
                         'isMultiple' => method_exists($button, 'fireMultiple') ? true : false,
+                        'isSingle' => method_exists($button, 'fire') ? true : false,
                         'action' => $button->getAction(),
                     ];
                 }
