@@ -72,9 +72,13 @@ trait HasExcelAutoformat
      */
     protected function getAutoformatColumns($header)
     {
-        return collect($this->autoformatColumns ?? [])->mapWithKeys(function($value, $key) use ($header) {
-            return [$this->excelCharFromIndex($key, $header) => $value];
-        })->toArray();
+        return collect($this->autoformatColumns ?? [])->map(function($value, $key) use ($header) {
+            if ( !($char = $this->excelCharFromIndex($key, $header)) ){
+                return;
+            }
+
+            return [$char => $value];
+        })->filter()->mapWithKeys(fn($item) => $item)->toArray();
     }
 
     /**
