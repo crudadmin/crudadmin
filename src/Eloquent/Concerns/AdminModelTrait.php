@@ -285,7 +285,7 @@ trait AdminModelTrait
     public function scopeFilterByParent($query, $parentId, $parentTable = null)
     {
         if ($parentId > 0) {
-            $column = $this->getForeignColumn($parentTable);
+            $column = $this->qualifyColumn($this->getForeignColumn($parentTable));
 
             if ($parentTable === null && $column && count($column) == 1) {
                 $column = array_values($column)[0];
