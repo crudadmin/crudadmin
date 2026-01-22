@@ -11,7 +11,7 @@ use Illuminate\Support\ServiceProvider;
 class FieldsServiceProvider extends ServiceProvider
 {
     protected $allFields = [
-        'title', 'placeholder', 'hidden', 'orderBy', 'limit', 'multirows', 'defaultByOption', 'unique_options', 'tooltip', 'editor_height', 'counter',
+        'title', 'placeholder', 'hidden', 'orderBy', 'limit', 'multirows', 'defaultByOption', 'unique_options', 'tooltip', 'editor_height', 'counter', 'unsearchable',
         'column_editable', 'column_visible', 'component', 'sub_component', 'component_sub', 'column_component', 'component_data', 'column_present', 'private', 'enum',
         'column_name', 'phone_link', 'ifExists', 'ifDoesntExists', 'hideOnUpdate', 'hideOnCreate', 'keepInRequest', 'encrypted', 'hasOne', 'resize', 'hasAccessFilter',
         'inaccessible' => true, 'inaccessible_column' => true, 'invisible' => true, 'disabled' => true, 'readonly' => true,
