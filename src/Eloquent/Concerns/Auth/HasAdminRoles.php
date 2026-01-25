@@ -74,10 +74,12 @@ trait HasAdminRoles
         return Admin::cache($key, function(){
             $models = [];
 
-            if ($admin_groups = $this->roles) {
-                foreach ($admin_groups as $group) {
+            if ($adminGroups = $this->roles) {
+                foreach ($adminGroups as $group) {
+
                     //JSON decode is backward support for old crudadmin versions (4.1/3)
                     $permissions = is_string($group->permissions) ? (array) json_decode($group->permissions ?: '{}', true) : $group->permissions;
+                    $finalPermissions = [];
 
                     //Remove all disabled permissions
                     foreach ($permissions as $modelKey => $model) {
@@ -86,9 +88,15 @@ trait HasAdminRoles
                                 unset($permissions[$modelKey][$permissionKey]);
                             }
                         }
+
+                        // Replace old saved classname with new one (eg when extending model...)
+                        $newModelClassname = Admin::getModel(class_basename($modelKey));
+                        if ( $newModelClassname ) {
+                            $finalPermissions[get_class($newModelClassname)] = $permissions[$modelKey];
+                        }
                     }
 
-                    $models = array_merge($models, $permissions);
+                    $models = array_merge($models, $finalPermissions);
                 }
             }
 
