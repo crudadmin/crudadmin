@@ -120,7 +120,7 @@ trait HasAdminRoles
         }
 
         if (is_object($model)) {
-            $model = get_class($model);
+            $model = get_class(Admin::getModelByTable($model->getTable()));
         } else {
             $model = trim($model, '/');
         }
