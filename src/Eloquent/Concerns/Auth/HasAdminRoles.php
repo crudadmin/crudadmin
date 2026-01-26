@@ -74,30 +74,27 @@ trait HasAdminRoles
         return Admin::cache($key, function(){
             $models = [];
 
-            if ($adminGroups = $this->roles) {
-                foreach ($adminGroups as $group) {
+            foreach ($this->roles ?: [] as $group) {
+                //JSON decode is backward support for old crudadmin versions (4.1/3)
+                $permissions = is_string($group->permissions)
+                                    ? (array) json_decode($group->permissions ?: '{}', true)
+                                    : $group->permissions;
 
-                    //JSON decode is backward support for old crudadmin versions (4.1/3)
-                    $permissions = is_string($group->permissions) ? (array) json_decode($group->permissions ?: '{}', true) : $group->permissions;
-                    $finalPermissions = [];
+                $finalPermissions = [];
 
-                    //Remove all disabled permissions
-                    foreach ($permissions as $modelKey => $model) {
-                        foreach ($model as $permissionKey => $state) {
-                            if ( $state === false ) {
-                                unset($permissions[$modelKey][$permissionKey]);
-                            }
-                        }
-
-                        // Replace old saved classname with new one (eg when extending model...)
-                        $newModelClassname = Admin::getModel(class_basename($modelKey));
-                        if ( $newModelClassname ) {
-                            $finalPermissions[get_class($newModelClassname)] = $permissions[$modelKey];
+                //Remove all disabled permissions
+                foreach ($permissions as $modelBaseName => $params) {
+                    foreach ($params as $permissionKey => $state) {
+                        if ( $state === false ) {
+                            unset($permissions[$modelBaseName][$permissionKey]);
                         }
                     }
 
-                    $models = array_merge($models, $finalPermissions);
+                    // Replace old saved classname with new one (eg when extending model...)
+                    $finalPermissions[class_basename($modelBaseName)] = $permissions[$modelBaseName];
                 }
+
+                $models = array_merge($models, $finalPermissions);
             }
 
             return $models;
@@ -119,12 +116,6 @@ trait HasAdminRoles
             return true;
         }
 
-        if (is_object($model)) {
-            $model = get_class(Admin::getModelByTable($model->getTable()));
-        } else {
-            $model = trim($model, '/');
-        }
-
         //Check specific role ID
         if ( is_numeric($permissionKey) ) {
             return $this->roles->where('id', $permissionKey)->count() > 0;
@@ -134,22 +125,20 @@ trait HasAdminRoles
         else {
             $permissions = $this->getUserPermissions();
 
-            //Check if any permission is present
-            if ( $permissionKey === true ) {
-                //Check if has at least one true permission
-                if ( array_key_exists($model, $permissions) && count(array_keys($permissions[$model])) > 0 ) {
-                    return true;
-                }
+            $modelName = is_object($model) ? class_basename($model) : class_basename(trim($model, '/'));
+            $hasRules = array_key_exists($modelName, $permissions);
 
-                return false;
+            //Check if permission rules has at least one enabled permission
+            if ( $permissionKey === true ) {
+                return $hasRules && count(array_keys($permissions[$modelName])) > 0;
             }
 
             //Full table access (we need use ===, because true == '*')
             else if ( $permissionKey === '*' ){
-                return $this->hasFullAccessToModel($permissions, $model);
+                return $this->hasFullAccessToModel($permissions, $modelName);
             }
 
-            return array_key_exists($model, $permissions) && @$permissions[$model][$permissionKey] === true;
+            return $hasRules && ($permissions[$modelName][$permissionKey] ?? false) === true;
         }
     }
 
@@ -161,22 +150,22 @@ trait HasAdminRoles
      *
      * @return  bool
      */
-    private function hasFullAccessToModel($permissions, $model)
+    private function hasFullAccessToModel($permissions, $modelName)
     {
         //We need retrieve model without booting
-        $foundModel = array_values(array_filter(Admin::getAdminModels(), function($item) use ($model) {
-            return get_class($item) == $model;
+        $foundModel = array_values(array_filter(Admin::getAdminModels(), function($item) use ($modelName) {
+            return class_basename($item) == $modelName;
         }));
 
         //If user does not have any permissions for given model, or model has not been found
-        if ( count($foundModel) === false || !array_key_exists($model, $permissions) ){
+        if ( count($foundModel) === false || !array_key_exists($modelName, $permissions) ){
             return false;
         }
 
         $allModelPermissionsKeys = array_keys($foundModel[0]->getModelPermissions());
 
         foreach ($allModelPermissionsKeys as $key) {
-            if ( @$permissions[$model][$key] !== true ){
+            if ( ($permissions[$modelName][$key] ?? false) !== true ){
                 return false;
             }
         }
