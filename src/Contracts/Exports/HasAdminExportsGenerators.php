@@ -7,6 +7,20 @@ use Storage;
 trait HasAdminExportsGenerators
 {
     /**
+     * Temporary directory for exports
+     *
+     * @var string
+     */
+    public static $tempDir = 'temp_download_exports';
+
+    /**
+     * filename
+     *
+     * @var mixed
+     */
+    public $filename;
+
+    /**
      * Export storage disk
      *
      * @return void

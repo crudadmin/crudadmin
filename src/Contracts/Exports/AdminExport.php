@@ -4,7 +4,6 @@ namespace Admin\Contracts\Exports;
 
 use Str;
 use Excel;
-use Storage;
 use Admin\Helpers\Button;
 use Admin\Helpers\AdminRows;
 use Admin\Eloquent\AdminModel;
@@ -21,20 +20,6 @@ class AdminExport extends Button
      * @var undefined
      */
     public $format = \Maatwebsite\Excel\Excel::XLSX;
-
-    /**
-     * filename
-     *
-     * @var mixed
-     */
-    public $filename;
-
-    /**
-     * Temporary directory for exports
-     *
-     * @var string
-     */
-    public static $tempDir = 'temp_download_exports';
 
     /**
      * Returns export rows
@@ -77,17 +62,7 @@ class AdminExport extends Button
      */
     public function filename()
     {
-        return Str::snake(class_basename($this)).'-'.date('Y-m-d\_H-i').'_'.str_random(3).'.'.$this->extension();
-    }
-
-    /**
-     * Extension name
-     *
-     * @return void
-     */
-    public function extension()
-    {
-        return strtolower($this->format);
+        return Str::snake(class_basename($this)).'-'.date('Y-m-d\_H-i').'_'.str_random(3).'.'.strtolower($this->format);
     }
 
     /**
@@ -98,9 +73,7 @@ class AdminExport extends Button
     public function save()
     {
         if ( $this->format == 'pdf' ) {
-            return $this->generatePdf(
-                $this->html()
-            );
+            return $this->generatePdf();
         }
 
         return $this->generateDocument();
