@@ -72,9 +72,11 @@ class AdminExport extends Button
     {
         if ( $this->format == 'pdf' ) {
             return $this->generatePdf();
+        } else if ( in_array($this->format, ['xlsx', 'xls', 'csv']) ) {
+            return $this->generateDocument();
+        } else {
+            return $this->generateFile();
         }
-
-        return $this->generateDocument();
     }
 
     /**

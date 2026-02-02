@@ -3,6 +3,7 @@
 namespace Admin\Helpers;
 
 use Admin\Eloquent\AdminModel;
+use Admin\Contracts\Exports\AdminButtonExport;
 
 class AdminRows
 {
@@ -164,6 +165,7 @@ class AdminRows
                         'tooltipEncode' => $button->tooltipEncode,
                         'isMultiple' => method_exists($button, 'fireMultiple') ? true : false,
                         'isSingle' => method_exists($button, 'fire') ? true : false,
+                        'isExport' => is_subclass_of($buttonClass, AdminButtonExport::class, true) ? true : false,
                         'action' => $button->getAction(),
                     ];
                 }

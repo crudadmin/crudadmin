@@ -2,12 +2,18 @@
 
 namespace Admin\Contracts\Exports;
 
-use ZipArchive;
 use Admin\Eloquent\AdminModel;
 use Admin\Helpers\SecureDownloader;
 
 class AdminButtonExport extends AdminExport
 {
+    /**
+     * By default, don't place it in buttons list next to row.
+     *
+     * @var string
+     */
+    public $type = 'action';
+
     /**
      * Ability to download single row export
      *
@@ -43,18 +49,7 @@ class AdminButtonExport extends AdminExport
             return $this->path();
         });
 
-        $zipFilename = $this->filename().'-total_'.count($files).'.zip';
-
-        $zip = new ZipArchive;
-        $zipBasepath = $this->storage()->path($this->path($zipFilename));
-
-        if ($zip->open($zipBasepath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
-            foreach ($files as $file) {
-                $zip->addFromString(basename($file), $this->storage()->get($file));
-            }
-
-            $zip->close();
-        }
+        $zipBasepath = $this->generateZip($files);
 
         return $this->downloadResponse($zipBasepath);
     }
@@ -65,7 +60,7 @@ class AdminButtonExport extends AdminExport
      * @param  mixed $basepath
      * @return void
      */
-    private function downloadResponse($basepath)
+    protected function downloadResponse($basepath)
     {
         $downloader = new SecureDownloader($basepath);
 

@@ -3,6 +3,7 @@
 namespace Admin\Contracts\Exports;
 
 use Storage;
+use ZipArchive;
 
 trait HasAdminExportsGenerators
 {
@@ -98,9 +99,38 @@ trait HasAdminExportsGenerators
     {
         return \Excel::store(
             $this,
-            $this->path($this->filename),
+            $this->path(),
             $this->disk(),
             $this->format
         );
+    }
+
+    public function generateFile() : bool
+    {
+        return $this->storage()->put($this->path(), $this->html());
+    }
+
+    /**
+     * Generate ZIP archive with exports
+     *
+     * @param  mixed $files
+     * @return void
+     */
+    protected function generateZip($files)
+    {
+        $zipFilename = $this->filename().'-total_'.count($files).'.zip';
+
+        $zip = new ZipArchive;
+        $zipBasepath = $this->storage()->path($this->path($zipFilename));
+
+        if ($zip->open($zipBasepath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+            foreach ($files as $file) {
+                $zip->addFromString(basename($file), $this->storage()->get($file));
+            }
+
+            $zip->close();
+        }
+
+        return $zipBasepath;
     }
 }
