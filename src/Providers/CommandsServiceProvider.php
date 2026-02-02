@@ -18,6 +18,7 @@ class CommandsServiceProvider extends ServiceProvider
             \Admin\Commands\AdminInstallCommand::class,
             \Admin\Commands\AdminButtonCommand::class,
             \Admin\Commands\AdminStatisticsCommand::class,
+            \Admin\Commands\AdminExportCommand::class,
             \Admin\Commands\AdminRequestCommand::class,
             \Admin\Commands\AdminAccountCommand::class,
             \Admin\Commands\AdminRuleCommand::class,

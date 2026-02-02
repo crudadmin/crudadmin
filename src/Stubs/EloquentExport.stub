@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Admin\Exports;
+
+use Admin\Contracts\Exports\AdminExport;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Admin\Contracts\Exports\HasExcelAutoformat;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+
+class DummyClass extends AdminExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting, WithEvents
+{
+    use HasExcelAutoformat;
+
+    public $name = 'DummyClass';
+
+    public $icon = 'fa-file-excel';
+
+    public function query($query)
+    {
+        return $query
+            ->select([
+                $query->qualifyColumn('*'),
+            ]);
+    }
+
+    public function collection()
+    {
+        return $this->rows()->map(function($row) {
+            return [
+                $row->id,
+                $row->name,
+            ];
+        });
+    }
+
+    public function headings(): array
+    {
+        return [
+            'ID',
+            'NAME',
+            // ...
+        ];
+    }
+}
