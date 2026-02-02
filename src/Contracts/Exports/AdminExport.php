@@ -106,8 +106,10 @@ class AdminExport extends Button
 
         $downloader = new SecureDownloader($this->basepath());
 
-        $href = '<a href="'.$downloader->getDownloadPath(true).'" target="_blank">'.__('tejto adrese').'</a>';
+        $url = $downloader->getDownloadPath(true);
 
-        return $this->toast(__('Export bol úspešne vygenerovaný.<br>Stiahnuť ho môžeťe na').' '.$href, 'success', 30 * 1000);
+        $href = '<a href="'.$url.'" target="_blank">'.__('tejto adrese').'</a>';
+
+        return $this->toast(__('Export bol úspešne vygenerovaný.<br>Stiahnuť ho môžeťe na').' '.$href, 'success', 30 * 1000)->open($url);
     }
 }
