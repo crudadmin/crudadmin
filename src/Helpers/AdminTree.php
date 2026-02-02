@@ -3,10 +3,11 @@
 namespace Admin\Helpers;
 
 use Admin;
-use Admin\Helpers\Localization\AdminResourcesSyncer;
 use Admin\Helpers\Layout;
 use Illuminate\Support\Str;
 use Admin\Helpers\AdminRows;
+use Admin\Contracts\Exports\AdminButtonExport;
+use Admin\Helpers\Localization\AdminResourcesSyncer;
 
 class AdminTree
 {
@@ -322,15 +323,20 @@ class AdminTree
 
     private function getExports($model)
     {
-        return collect($model->getProperty('exports', []))->map(function($classname) use ($model){
-            $export = new $classname($model);
+        return collect($model->getProperty('exports', []))
+            // Remove button exports
+            ->filter(function($classname){
+                return is_subclass_of($classname, AdminButtonExport::class, true) === false;
+            })
+            ->map(function($classname) use ($model){
+                $export = new $classname($model);
 
-            return [
-                'key' => AdminRows::getButtonKey($export),
-                'name' => $export->name,
-                'icon' => $export->icon,
-            ];
-        })->values()->toArray();
+                return [
+                    'key' => AdminRows::getButtonKey($export),
+                    'name' => $export->name,
+                    'icon' => $export->icon,
+                ];
+            })->values()->toArray();
     }
 
     private function getModelReversed($model)
