@@ -25,7 +25,7 @@ class ExportController extends CRUDController
             ]);
         }
 
-        if ( $export->save() === false ){
+        if ( $export->generate() === false ){
             abort(500);
         }
 

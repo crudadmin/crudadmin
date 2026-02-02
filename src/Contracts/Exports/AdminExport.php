@@ -9,9 +9,12 @@ use Admin\Helpers\Button;
 use Admin\Helpers\AdminRows;
 use Admin\Eloquent\AdminModel;
 use Admin\Helpers\SecureDownloader;
+use Admin\Contracts\Exports\HasAdminExportsGenerators;
 
 class AdminExport extends Button
 {
+    use HasAdminExportsGenerators;
+
     /**
      * What format to use for export
      *
@@ -88,67 +91,30 @@ class AdminExport extends Button
     }
 
     /**
-     * Export storage disk
-     *
-     * @return void
-     */
-    public function disk()
-    {
-        return 'crudadmin.uploads_private';
-    }
-
-    /**
-     * Export storage path
-     *
-     * @return void
-     */
-    public function path()
-    {
-        return static::$tempDir.'/'.($this->filename ?: $this->filename());
-    }
-
-    /**
-     * Basepath
-     *
-     * @return void
-     */
-    public function basepath()
-    {
-        return Storage::disk($this->disk())->path($this->path());
-    }
-
-    /**
      * Save export output
      *
      * @return void
      */
     public function save()
     {
-        // Cache filename
-        $this->filename = $this->filename();
+        if ( $this->format == 'pdf' ) {
+            return $this->generatePdf(
+                $this->html()
+            );
+        }
 
-        return Excel::store(
-            $this,
-            $this->path($this->filename),
-            $this->disk(),
-            $this->format
-        );
+        return $this->generateDocument();
     }
 
     /**
      * Generates export HTML
+     * (you can override this method in your export class by custom html output)
      *
      * @return void
      */
     public function html()
     {
         return Excel::raw($this, \Maatwebsite\Excel\Excel::HTML);
-    }
-
-    public function setup()
-    {
-        ini_set('memory_limit', '-1');
-        ini_set('max_execution_time', '300');
     }
 
     /**
@@ -161,7 +127,7 @@ class AdminExport extends Button
     {
         $this->setup();
 
-        if ( $this->save() === false ){
+        if ( $this->generate() === false ){
             return $this->error(__('Export sa nepodarilo vygenerovať.'));
         }
 
