@@ -116,7 +116,7 @@ class Button
     /*
      * Bind button
      */
-    public function __construct(AdminModel $row)
+    public function __construct($row = null)
     {
         $this->row = $row;
     }

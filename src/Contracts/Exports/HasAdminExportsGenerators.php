@@ -45,9 +45,9 @@ trait HasAdminExportsGenerators
      *
      * @return void
      */
-    public function path()
+    public function path($path = null)
     {
-        return static::$tempDir.'/'.($this->filename ?: $this->filename());
+        return static::$tempDir.'/'.($path ?: $this->filename ?: $this->filename());
     }
 
     /**
