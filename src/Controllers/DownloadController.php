@@ -69,7 +69,9 @@ class DownloadController extends Controller
         $data = SecureDownloader::getSessionBaseData($hash);
 
         if ( ($data['preview'] ?? false) === true ){
-            $response = response()->file($path);
+            $response = response()->file($path, [
+                'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+            ]);
         } else {
             $response = response()->download($path);
         }
