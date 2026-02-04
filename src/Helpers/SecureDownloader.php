@@ -20,12 +20,20 @@ class SecureDownloader
         return sha1($this->basepath);
     }
 
-    public function getDownloadPath($removeAfterDownload = false)
+    /**
+     * getDownloadPath
+     *
+     * @param  mixed $removeAfterDownload
+     * @param  mixed $preview
+     * @return void
+     */
+    public function getDownloadPath($removeAfterDownload = false, $preview = false)
     {
         session()->put(self::$sessionKey.'.'.$this->getHash(), [
             'basepath' => $this->basepath,
             'signature' => Crypt::encryptString($this->basepath),
             'delete' => $removeAfterDownload,
+            'preview' => $preview,
         ]);
 
         session()->save();

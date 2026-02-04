@@ -68,9 +68,13 @@ class DownloadController extends Controller
 
         $data = SecureDownloader::getSessionBaseData($hash);
 
-        $response = response()->download($path);
+        if ( ($data['preview'] ?? false) === true ){
+            $response = response()->file($path);
+        } else {
+            $response = response()->download($path);
+        }
 
-        if ( @$data['delete'] === true ){
+        if ( ($data['delete'] ?? false) === true ){
             $response->deleteFileAfterSend();
         }
 
