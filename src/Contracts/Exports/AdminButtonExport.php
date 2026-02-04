@@ -81,7 +81,10 @@ class AdminButtonExport extends AdminExport
 
         $downloader = new SecureDownloader($basepath);
 
-        $url = $downloader->getDownloadPath(true);
+        // Remove only in case this file is in temporary folder
+        $canRemoveAfterDownload = str_starts_with($basepath, dirname($this->basepath()));
+
+        $url = $downloader->getDownloadPath($canRemoveAfterDownload);
 
         $href = '<a href="'.$url.'" target="_blank">'.__('tejto adrese').'</a>';
 
