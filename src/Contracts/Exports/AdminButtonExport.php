@@ -24,11 +24,16 @@ class AdminButtonExport extends AdminExport
     {
         $this->setup();
 
-        if ( $this->generate() === false ){
+        if ( ($response = $this->generate($row)) === false ){
             return $this->error(__('Export sa nepodarilo vygenerovať.'));
         }
 
-        return $this->downloadResponse($this->basepath());
+        // Error response
+        else if ( $response instanceof $this ) {
+            return $response;
+        }
+
+        return $this->downloadResponse($response);
     }
 
     /**
@@ -39,15 +44,25 @@ class AdminButtonExport extends AdminExport
      */
     public function fireMultiple($rows)
     {
-        $files = $rows->map(function($row){
+        $files = [];
+
+        foreach ($rows as $row) {
             $this->row = $row;
 
-            if ($this->generate() === false) {
+            $response = $this->generate($row);
+
+            // Error responses
+            if ($response === false) {
                 return $this->error(sprintf(_('Export sa nepodarilo vygenerovať pre záznam č. %s.'), $row->getKey()))->throw();
             }
 
-            return $this->path();
-        });
+            // Error response in class as ->error('...');
+            else if ( $response instanceof $this ) {
+                return $response;
+            }
+
+            $files[] = $this->getDownloadResponse($response);
+        };
 
         $zipBasepath = $this->generateZip($files);
 
@@ -60,8 +75,10 @@ class AdminButtonExport extends AdminExport
      * @param  mixed $basepath
      * @return void
      */
-    protected function downloadResponse($basepath)
+    protected function downloadResponse($response)
     {
+        $basepath = $this->getDownloadResponse($response);
+
         $downloader = new SecureDownloader($basepath);
 
         $url = $downloader->getDownloadPath(true);

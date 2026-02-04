@@ -4,6 +4,7 @@ namespace Admin\Contracts\Exports;
 
 use Storage;
 use ZipArchive;
+use Admin\Core\Helpers\Storage\AdminFile;
 
 trait HasAdminExportsGenerators
 {
@@ -75,9 +76,10 @@ trait HasAdminExportsGenerators
     /**
      * Generates export output
      *
+     * @param  mixed $row
      * @return void
      */
-    public function generate()
+    public function generate($row)
     {
         // Cache filename
         $this->filename = $this->filename();
@@ -125,12 +127,43 @@ trait HasAdminExportsGenerators
 
         if ($zip->open($zipBasepath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
             foreach ($files as $file) {
-                $zip->addFromString(basename($file), $this->storage()->get($file));
+                //Add from basepath
+                if ( is_file($file) && file_exists($file) ) {
+                    $zip->addFile($file, basename($file));
+                }
+
+                // $zip->addFromString(basename($file), $this->storage()->get($file));
             }
 
             $zip->close();
         }
 
         return $zipBasepath;
+    }
+
+    /**
+     * Returns basepath for download response
+     *
+     * @param  mixed $response
+     * @return void
+     */
+    public function getDownloadResponse($response)
+    {
+        // Successfuly generated into admin export path
+        if ( $response === true ) {
+            return $this->basepath();
+        }
+
+        // Basepath to file
+        if ( is_string($response) && is_file($response) ) {
+            return $response;
+        }
+
+        // AdminFile instance
+        if ( $response instanceof AdminFile ) {
+            return $response->basepath();
+        }
+
+        //..
     }
 }
