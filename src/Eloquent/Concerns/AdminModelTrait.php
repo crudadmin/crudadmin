@@ -309,7 +309,7 @@ trait AdminModelTrait
                 in_array(class_basename(get_class($this)), $this->getBelongsToRelation(true))
                 && $this->getProperty('withRecursiveRows') !== true
             ) {
-                $query->whereNull($this->getForeignColumn($this->getTable()));
+                $query->whereNull($query->qualifyColumn($this->getForeignColumn($this->getTable())));
             }
         }
     }
