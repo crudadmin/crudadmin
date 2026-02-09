@@ -61,7 +61,7 @@ class EditorMode
     /*
      * Returns visible routes in view templates
      */
-    public function getVisibleRoutes()
+    public function getVisibleRoutes($absolute = true)
     {
         $list = [];
 
@@ -69,7 +69,11 @@ class EditorMode
             $controller = str_replace($route->action['namespace'] ?: 'App\Http\Controllers\\', '', $route->action['controller']);
             $controller = ltrim($controller, '\\');
 
-            $list[$controller] = url($route->uri ?: []);
+            if ( $absolute === false ) {
+                $list[$controller] = url($route->uri ?: []);
+            } else {
+                $list[$controller] = '/' . ltrim($route->uri(), '/');
+            }
         }
 
         return $list;
