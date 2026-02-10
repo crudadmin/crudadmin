@@ -267,7 +267,7 @@ trait HasAdminDeletable
         }
 
         foreach ($this->getFields() as $key => $field) {
-            if ( $field['belongsTo'] ?? null ){
+            if ( ($field['belongsTo'] ?? null) && ($field['imaginary'] ?? false) == false ){
                 $columns[] = $key;
             }
         }
