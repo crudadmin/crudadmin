@@ -4,8 +4,6 @@ namespace Admin\Controllers;
 
 use Admin\Controllers\Crud\CRUDController;
 use Admin\Helpers\AdminRows;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class ButtonController extends CRUDController
 {
@@ -25,8 +23,10 @@ class ButtonController extends CRUDController
             return autoAjax()->error();
         }
 
+        $rows = $model->whereIn($model->qualifyColumn($model->getKeyName()), $request['id'] ?: [])->get();
+
         //If no rows does exists
-        if ( ($rows = $model->whereIn($model->getTable().'.'.$model->getKeyName(), $request['id'] ?: [])->get())->count() === 0 ){
+        if ( $rows->count() === 0 ){
             return autoAjax()->error(_('Záznam neexistuje, pravdepodobne už bol vymazaný.'));
         }
 
