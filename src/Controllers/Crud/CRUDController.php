@@ -10,9 +10,7 @@ use Admin\Core\Fields\FieldsValidator;
 use Admin\Core\Fields\Validation\FileMutator;
 use Admin\Core\Fields\Validation\ValidationMutator;
 use Admin\Requests\DataRequest;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Localization;
 use Validator;
 
 class CRUDController extends Controller
