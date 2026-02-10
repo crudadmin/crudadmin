@@ -15,6 +15,7 @@ class AdminRows
     protected $languageId;
     protected $scopes;
     protected $search;
+    protected $enabledColumns;
 
     /**
      * Class constructor
@@ -39,6 +40,11 @@ class AdminRows
         $this->languageId = (int)$request['language_id'];
         $this->scopes = $request['scopes'] ?? null;
         $this->search = $request['search'] ?? null;
+        $this->enabledColumns = array_filter(array_diff(explode(';', $request['enabled_columns'] ?? '')));
+
+        $this->model->setEnabledColumns($this->enabledColumns);
+
+        return $this;
     }
 
     public function setPage($page)

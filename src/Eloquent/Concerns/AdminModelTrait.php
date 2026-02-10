@@ -17,6 +17,24 @@ trait AdminModelTrait
      */
     private static $adminRowsInUse = false;
 
+    /**
+     * Forced enabled columns for model
+     *
+     * @var array
+     */
+    private static $enabledColumns = [];
+
+    /**
+     * Enable forced enabled columns for model
+     *
+     * @param  mixed $columns
+     * @return void
+     */
+    public function setEnabledColumns($columns)
+    {
+        self::$enabledColumns = $columns;
+    }
+
     /*
      * Update model data before saving
      *
@@ -275,7 +293,7 @@ trait AdminModelTrait
         }
 
         //Push also additional needed columns from request
-        if (request()->has('enabled_columns')) {
+        if (count(self::$enabledColumns) > 0) {
             $fields = array_merge($fields, array_diff(explode(';', request('enabled_columns', '')), $fields));
         }
 
