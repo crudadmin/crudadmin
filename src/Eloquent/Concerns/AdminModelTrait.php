@@ -294,7 +294,7 @@ trait AdminModelTrait
 
         //Push also additional needed columns from request
         if (count(self::$enabledColumns) > 0) {
-            $fields = array_merge($fields, array_diff(explode(';', request('enabled_columns', '')), $fields));
+            $fields = array_merge($fields, array_diff(self::$enabledColumns, $fields));
         }
 
         return array_values($fields);
