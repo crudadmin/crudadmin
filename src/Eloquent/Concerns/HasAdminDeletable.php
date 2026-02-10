@@ -71,6 +71,11 @@ trait HasAdminDeletable
                     continue;
                 }
 
+                // Skip imaginary fields
+                if ( ($field['imaginary'] ?? false) ) {
+                    continue;
+                }
+
                 $relationType = isset($field['belongsToMany']) ? 'belongsToMany' : 'belongsTo';
                 $relationProperties = $model->getRelationProperty($fieldKey, $relationType);
 
