@@ -61,7 +61,7 @@ class EditorMode
     /*
      * Returns visible routes in view templates
      */
-    public function getVisibleRoutes($absolute = true)
+    public function getVisibleRoutes($absolute = false)
     {
         $list = [];
 
