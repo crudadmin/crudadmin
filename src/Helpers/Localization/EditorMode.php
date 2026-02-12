@@ -30,7 +30,20 @@ class EditorMode
      */
     public function isActive()
     {
-        return Admin::isEnabledFrontendEditor() && session($this->sessionEditorKey, false) === true;
+        if ( Admin::isEnabledFrontendEditor() ) {
+            return false;
+        }
+
+        if ( $this->isStateless() ) {
+            return true;
+        }
+
+        return session($this->sessionEditorKey, false) === true;
+    }
+
+    public function isStateless()
+    {
+        return config('admin.frontend_editor.stateless', false) === true;
     }
 
     /*

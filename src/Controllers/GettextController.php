@@ -27,11 +27,9 @@ class GettextController extends Controller
 
         //We does not want cookies send by this request
         //Because some CDN may not cache request with cookies
-        (new Response($script, 200, [
-            'Content-Type' => 'application/javascript; charset=utf-8',
-            'Cache-Control' => 'max-age=2592000,public',
-        ]))->send();
-        die;
+        return response($script, 200)
+            ->header('Content-Type', 'application/javascript; charset=utf-8')
+            ->header('Cache-Control', 'max-age=2592000,public');
     }
 
     /**
