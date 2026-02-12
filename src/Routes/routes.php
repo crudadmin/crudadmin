@@ -53,6 +53,9 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::any('/admin/api/export/{table}/{exportKey}', 'Export\ExportController@export');
     Route::post('/admin/api/statistics/{key}', 'StatisticsController@show');
 
+    // Redirect to stateless editor
+    Route::get('/admin/translation/open', 'GettextController@openStateless');
+
     //Downloading files from uploads in administration
     Route::get('/admin/download/file', 'DownloadController@adminDownload');
     Route::get('/admin/user/download/{hash}', 'DownloadController@securedAdminDownload');

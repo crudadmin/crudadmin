@@ -119,4 +119,17 @@ class GettextController extends Controller
 
         return 1;
     }
+
+    public function openStateless()
+    {
+        if ( EditorMode::isStateless() === false ) {
+            return redirect('/admin');
+        }
+
+        $url = env('APP_NUXT_URL') ?: env('WEB_URL');
+
+        $token = admin()->createToken('admin_token')->plainTextToken;
+
+        return redirect($url.'/?admin_token='.$token);
+    }
 }
