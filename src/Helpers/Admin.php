@@ -7,7 +7,6 @@ use Admin\Core\Helpers\AdminCore;
 use Admin\Eloquent\Authenticatable;
 use Admin\Core\Helpers\Storage\AdminFile;
 use Admin\Helpers\Concerns\HasGitignoreTrait;
-use Exception;
 
 class Admin extends AdminCore
 {

@@ -71,6 +71,12 @@ class GettextController extends Controller
         JSTranslations::updateTranslations($language, $changes);
     }
 
+    // Admin alias due to different route authentication. Temporary fix.
+    public function updateTranslationsFromAdmin($id, $table = null)
+    {
+        return $this->updateTranslations($id, $table);
+    }
+
     /*
      * Download updated poedit file
      */

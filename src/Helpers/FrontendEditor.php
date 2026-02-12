@@ -104,6 +104,7 @@ class FrontendEditor
             Route::post('/frontend-editor/static-link', 'FrontendEditorController@updateLink');
             Route::post('/frontend-editor/static-image', 'FrontendEditorController@updateImage');
             Route::post('/frontend-editor/update-content', 'FrontendEditorController@updateContent');
+            Route::post('/frontend-editor/update-translations/{id}/{table?}', 'GettextController@updateTranslations');
             Route::post('/translates/editable/{id}', 'GettextController@updateEditorState');
             Route::get('/translates/ca-translates.js', 'GettextController@adminIndex');
         });

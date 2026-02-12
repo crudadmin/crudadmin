@@ -48,7 +48,7 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::get('/admin/api/translation/switch/{id}', 'GettextController@switchAdminLanguage');
     Route::get('/admin/api/translation/editor/{id}/{table?}', 'GettextController@getEditorResponse');
     Route::get('/admin/api/download-translations/{id}/{table}', 'GettextController@downloadTranslations');
-    Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslations');
+    Route::post('/admin/api/updateTranslations/{id}/{table?}', 'GettextController@updateTranslationsFromAdmin');
     Route::delete('/admin/api/delete', 'Crud\DataController@delete')->middleware('hasAdminRole:delete');
     Route::any('/admin/api/export/{table}/{exportKey}', 'Export\ExportController@export');
     Route::post('/admin/api/statistics/{key}', 'StatisticsController@show');
