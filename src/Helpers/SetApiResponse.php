@@ -21,12 +21,19 @@ class SetApiResponse
         AdminFile::$isApi = true;
         AdminModel::$localizedResponseArray = false;
 
-        //Update language
-        if ( $code = $request->header('app-locale') ){
-            app()->setLocale($code);
-
-            Localization::setLocale($code);
+        // Language code is not present
+        if ( !($code = $request->header('app-locale')) ){
+            return $next($request);
         }
+
+        // Language is not present anymore
+        if ( !Localization::all()->firstWhere('slug', $code) ) {
+            return $next($request);
+        }
+
+        app()->setLocale($code);
+
+        Localization::setLocale($code);
 
         return $next($request);
     }
