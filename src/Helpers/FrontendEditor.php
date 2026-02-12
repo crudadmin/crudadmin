@@ -76,7 +76,7 @@ class FrontendEditor
             'stateless' => config('admin.frontend_editor.stateless', false) === true,
             'language' => ($lang = Localization::get()) ? $lang->slug : '',
             'enabled' => Admin::isEnabledFrontendEditor() ? true : false,
-            'active' => EditorMode::isActive() ? true : false,
+            'active' => EditorMode::isStateless() ? false : (EditorMode::isActive() ? true : false),
             'translatable' => EditorMode::isActiveTranslatable() ? true : false,
             'uploadable' => FrontendEditor::isActive() ? true : false,
             'linkable' => FrontendEditor::isActive() ? true : false,

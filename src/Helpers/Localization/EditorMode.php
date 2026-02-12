@@ -30,7 +30,7 @@ class EditorMode
      */
     public function isActive()
     {
-        if ( Admin::isEnabledFrontendEditor() ) {
+        if ( Admin::isEnabledFrontendEditor() === false ) {
             return false;
         }
 
@@ -56,6 +56,10 @@ class EditorMode
 
     public function setState($state)
     {
+        if ( $this->isStateless() ) {
+            return;
+        }
+
         session()->put($this->sessionEditorKey, $state);
         session()->save();
     }
