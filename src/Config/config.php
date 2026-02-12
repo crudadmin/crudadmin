@@ -54,7 +54,10 @@ return [
     /*
      * Frontend editor for simple text translates
      */
-    'frontend_editor' => false,
+    'frontend_editor' => [
+        'enabled' => false,
+        'stateless' => false,
+    ],
 
     /*
      * Sitebuilder support into fields.

@@ -9,6 +9,19 @@ use Illuminate\Support\Collection;
 
 class FrontendEditorController extends Controller
 {
+    public function initialize()
+    {
+        return response()->json([
+            'scripts' => [
+                admin_asset('/build/assets/FrontendEditor.js'),
+            ],
+            'styles' => [
+                admin_asset('/build/assets/frontend.css'),
+            ],
+            'config' => FrontendEditor::getConfig(),
+        ]);
+    }
+
     /**
      * Save image from editor request
      *

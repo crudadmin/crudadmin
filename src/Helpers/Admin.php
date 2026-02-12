@@ -180,7 +180,9 @@ class Admin extends AdminCore
      */
     public function isEnabledFrontendEditor()
     {
-        return config('admin.frontend_editor', false);
+        $editor = config('admin.frontend_editor', false);
+
+        return $editor === true || ($editor['enabled'] ?? false) === true;
     }
 
     /*

@@ -53,13 +53,6 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     Route::any('/admin/api/export/{table}/{exportKey}', 'Export\ExportController@export');
     Route::post('/admin/api/statistics/{key}', 'StatisticsController@show');
 
-    //Admin gettext translates
-    Route::post('/admin/frontend-editor/static-link', 'FrontendEditorController@updateLink');
-    Route::post('/admin/frontend-editor/static-image', 'FrontendEditorController@updateImage');
-    Route::post('/admin/frontend-editor/update-content', 'FrontendEditorController@updateContent');
-    Route::post('/admin/translates/editable/{id}', 'GettextController@updateEditorState');
-    Route::get('/admin/translates/ca-translates.js', 'GettextController@adminIndex');
-
     //Downloading files from uploads in administration
     Route::get('/admin/download/file', 'DownloadController@adminDownload');
     Route::get('/admin/user/download/{hash}', 'DownloadController@securedAdminDownload');
@@ -70,4 +63,9 @@ Route::group(['middleware' => ['admin.autologout', 'admin.verification', 'admin'
     //Swagger mdodels scheme
     Route::get('/admin/swagger', 'Api\ApiController@swagger');
     Route::get('/admin/swagger/scheme/{type}', 'Api\ApiController@openApiScheme');
+
+    // Frontend editor routes
+    if ( config('admin.frontend_editor.stateless', false) === false ) {
+        \FrontendEditor::routes();
+    }
 });
