@@ -138,10 +138,12 @@ class AdminCleanUploadsCommand extends Command
             'Trashed rows' => AdminFile::formatFilesizeNumber(array_sum($data['removedBytes'])),
         ];
 
-        $this->line('<info>'.$table.' ('.$model->getProperty('name').')</info>'.(array_sum($info) == 0 ? ' is empty' : ''));
+        $isEmpty = array_sum($data['uneccessaryBytes']) == 0;
+
+        $this->line('<info>'.$table.' ('.$model->getProperty('name').')</info>'.($isEmpty ? ' is empty' : ''));
 
         //If model has no files
-        if ( array_sum($info) == 0 ){
+        if ( $isEmpty ){
             return;
         }
 
