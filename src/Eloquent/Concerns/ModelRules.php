@@ -81,7 +81,7 @@ trait ModelRules
         }
 
         //If is not frontend interface allowed, skip rules
-        if (Admin::isFrontend() && property_exists($rule, 'frontend') && $rule->frontend === true) {
+        if ((Admin::isFrontend() || app()->runningInConsole()) && property_exists($rule, 'frontend') && $rule->frontend === true) {
             return true;
         }
 
