@@ -80,7 +80,7 @@ trait ModelRules
             return true;
         }
 
-        //If is not frontend interface allowed, skip rules
+        //If is not frontend interface allowed, skip rules. Frontend rules are also allowed in console (eg. invoice generation etc.).
         if ((Admin::isFrontend() || app()->runningInConsole()) && property_exists($rule, 'frontend') && $rule->frontend === true) {
             return true;
         }
