@@ -74,6 +74,11 @@ class Button
      */
     public $accept = false;
 
+    /*
+     * Should question step be skipped?
+     */
+    public $skip = false;
+
     /**
      * Tooltip for button
      *
@@ -302,6 +307,17 @@ class Button
     public function accept($accept)
     {
         $this->accept = $accept;
+
+        return $this;
+    }
+
+
+    /*
+     * Skip question step
+     */
+    public function skip($skip = true)
+    {
+        $this->skip = $skip;
 
         return $this;
     }

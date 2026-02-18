@@ -90,6 +90,7 @@ trait HasButtonsSupport
             'redirect' => $this->redirect,
             'open' => $this->open,
             'action' => $this->getAction(),
+            'shouldSkip' => $this->skip,
             'shouldAccept' => $this->accept,
             'toast_duration' => $this->message['duration'] ?? null,
             'modal_size' => $this->message['size'] ?? 'md',
