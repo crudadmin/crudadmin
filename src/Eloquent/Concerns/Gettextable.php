@@ -8,6 +8,11 @@ use Gettext;
 
 trait Gettextable
 {
+    /*
+     * On save flush cache keys
+     */
+    protected $flushableCacheKeys = ['languages'];
+
     public function getSourcePaths()
     {
         return $this->sourcePaths();

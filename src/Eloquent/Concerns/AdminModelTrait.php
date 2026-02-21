@@ -78,6 +78,9 @@ trait AdminModelTrait
         //Save model
         $instance = parent::save($options);
 
+        // Model cache keys flush
+        $this->flushCacheKeys();
+
         //Check for model rules after row is already saved/created for frontend/console situations
         //for admin state events will be initialized in DataController after binding all relationships
         if (! Admin::isAdmin() && $isPerformingRuleMethods === false ) {

@@ -344,7 +344,7 @@ class LocalizationHelper
             $model = $model->withPublished();
         }
 
-        $this->languages = $model->get();
+        $this->languages = $model->getCached('languages');
 
         return $this->all();
     }

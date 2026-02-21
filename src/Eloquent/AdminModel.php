@@ -17,6 +17,7 @@ use Admin\Eloquent\Modules\HistoryModule;
 use Illuminate\Database\Eloquent\Builder;
 use Admin\Eloquent\Concerns\HasAttributes;
 use Admin\Eloquent\Concerns\HasEncryption;
+use Admin\Eloquent\Concerns\HasModelCache;
 use Admin\Eloquent\Concerns\HasAdminSearch;
 use Admin\Eloquent\Concerns\HasPermissions;
 use Admin\Eloquent\Concerns\HasSiteBuilder;
@@ -49,7 +50,8 @@ class AdminModel extends CoreAdminModel
         HasSiteTree,
         HasButtons,
         HasAdminSearch,
-        HasEncryption;
+        HasEncryption,
+        HasModelCache;
 
     /*
      * Template name
