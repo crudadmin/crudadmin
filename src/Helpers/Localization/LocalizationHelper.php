@@ -404,9 +404,8 @@ class LocalizationHelper
             return '{}';
         }
 
-        return JSTranslations::getJsonTranslations(
-            $locale,
-            $this->getModel()
-        );
+        $model = $this->getBySlug($locale);
+
+        return JSTranslations::getJsonTranslations($locale, $model);
     }
 }

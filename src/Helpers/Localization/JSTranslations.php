@@ -118,11 +118,11 @@ class JSTranslations
     public function getCachableTranslates($lang, $model, $cacheKey, $callback)
     {
         //Check if model is activated
-        if ( !($model = Admin::getModelByTable($model->getTable())) ){
+        if ( !Admin::getModelByTable($model->getTable()) ){
             return '[]';
         }
 
-        $language = $model->where('slug', $lang)->firstOrFail();
+        $language = $model?->slug == $lang ? $model : $model->where('slug', $lang)->firstOrFail();
 
         $poPath = $language->localPoPath;
 

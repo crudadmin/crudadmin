@@ -2,9 +2,7 @@
 
 namespace Admin\Helpers;
 
-use Admin;
 use Admin\Models\RoutesSeo;
-use Localization;
 
 class SEOService
 {
