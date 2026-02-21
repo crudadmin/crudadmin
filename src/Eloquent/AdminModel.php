@@ -416,11 +416,16 @@ class AdminModel extends CoreAdminModel
     protected function performDeleteOnModel()
     {
         if ($this->hasSoftDeletes() === false || $this->forceDeleting) {
-            return tap($this->setKeysForSaveQuery($this->newModelQuery())->forceDelete(), function () {
+            $response = tap($this->setKeysForSaveQuery($this->newModelQuery())->forceDelete(), function () {
                 $this->exists = false;
             });
+        } else {
+            $response = $this->runSoftDelete();
         }
 
-        return $this->runSoftDelete();
+        $this->flushCacheKeys();
+
+        return $response;
+
     }
 }
