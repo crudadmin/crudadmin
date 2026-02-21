@@ -178,6 +178,8 @@ class DataController extends CRUDController
             $model->newInstance()->withoutGlobalScopes()->where($model->fixAmbiguousColumn('id'), $id)->update($update);
         }
 
+        $model->flushCacheKeys();
+
         //Fire on update order event
         if (method_exists($model, 'onUpdateOrder')) {
             return $model->onUpdateOrder();
