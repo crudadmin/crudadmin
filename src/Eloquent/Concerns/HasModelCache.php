@@ -40,13 +40,35 @@ trait HasModelCache
         $key = $this->getCacheKey($key);
         $duration = is_null($duration) ? now()->addWeek(1) : $duration;
 
-        $data = $this->cacheDriver()->remember($key, $duration, function() {
+        $rows = $this->runCached($key, $duration, function() {
             return $this->get()->map(function($row){
                 return $row->getAttributes();
             })->toArray();
         });
 
-        return $this->hydrate($data);
+        return $this->hydrate($rows);
+    }
+
+    /**
+     * Run cachable query
+     *
+     * @param  mixed $query
+     * @param  mixed $key
+     * @param  mixed $duration
+     * @param  mixed $callback
+     * @return void
+     */
+    public function scopeRunCached($query, $key, $duration = null, $callback = null)
+    {
+        // Ability to pass callback as duration
+        if ( is_callable($duration) ) {
+            $callback = $duration;
+            $duration = null;
+        }
+
+        return $this->cacheDriver()->remember($key, $duration, function() use ($callback) {
+            return $callback();
+        });
     }
 
     /**
