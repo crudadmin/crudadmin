@@ -39,8 +39,8 @@ trait HasModelCache
     {
         $duration = is_null($duration) ? now()->addWeek(1) : $duration;
 
-        $rows = $this->runCached($key, $duration, function() {
-            return $this->get()->map(function($row){
+        $rows = $this->runCached($key, $duration, function() use ($query) {
+            return $query->get()->map(function($row){
                 return $row->getAttributes();
             })->toArray();
         });
@@ -57,7 +57,7 @@ trait HasModelCache
      * @param  mixed $callback
      * @return void
      */
-    public function scopeRunCached($query, $key, $duration = null, $callback = null)
+    public function runCached($key, $duration = null, $callback = null)
     {
         $key = $this->getCacheKey($key);
 
