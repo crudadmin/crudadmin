@@ -37,7 +37,6 @@ trait HasModelCache
      */
     public function scopeGetCached($query, $key, $duration = null)
     {
-        $key = $this->getCacheKey($key);
         $duration = is_null($duration) ? now()->addWeek(1) : $duration;
 
         $rows = $this->runCached($key, $duration, function() {
@@ -60,6 +59,8 @@ trait HasModelCache
      */
     public function scopeRunCached($query, $key, $duration = null, $callback = null)
     {
+        $key = $this->getCacheKey($key);
+
         // Ability to pass callback as duration
         if ( is_callable($duration) ) {
             $callback = $duration;
