@@ -173,6 +173,7 @@ class AdminRows
                         'isSingle' => method_exists($button, 'fire') ? true : false,
                         'isExport' => is_subclass_of($buttonClass, AdminButtonExport::class, true) ? true : false,
                         'action' => $button->getAction(),
+                        'minimum' => $button->minimum,
                     ];
                 }
             }

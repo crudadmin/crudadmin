@@ -119,6 +119,11 @@ class Button
     ];
 
     /*
+     * Minimum rows to show action button
+     */
+    public $minimum = 1;
+
+    /*
      * Bind button
      */
     public function __construct($row = null)
