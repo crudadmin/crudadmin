@@ -15,9 +15,9 @@ class Authenticatable extends BaseAuthenticatable
 
     public function __construct(array $attributes = [])
     {
-        parent::__construct($attributes);
-
         $this->modules[] = VerificationModule::class;
+
+        parent::__construct($attributes);
     }
 
     public function setRulesProperty($rules = [])
