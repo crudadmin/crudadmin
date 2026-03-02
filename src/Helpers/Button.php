@@ -154,6 +154,14 @@ class Button
     // }
 
     /*
+     * Firing callback on complete button acction
+     */
+    public function complete(AdminModel $row)
+    {
+        return $this;
+    }
+
+    /*
      * Set response message
      */
     public function message($message, $title = null, $type = 'success', $toast = false)
