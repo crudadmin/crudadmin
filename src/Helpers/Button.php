@@ -46,6 +46,9 @@ class Button
 
     /*
      * Redirect in new tab
+     * Or open row in modal
+     *
+     * @var bool|array
      */
     public $open = false;
 
@@ -258,11 +261,22 @@ class Button
     /*
      * Set redirect in new tab
      */
-    public function open($redirect)
+    public function open($open)
     {
-        $this->redirect = $redirect;
+        // Redirect to string
+        if ( is_string($open) ) {
+            $this->redirect = $open;
 
-        $this->open = true;
+            $this->open = true;
+        }
+
+        // Open row in modal
+        else if ( $open instanceof AdminModel ) {
+            $this->open = [
+                'table' => $open->getTable(),
+                'id' => $open->getKey(),
+            ];
+        }
 
         return $this;
     }
