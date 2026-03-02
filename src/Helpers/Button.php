@@ -154,7 +154,7 @@ class Button
     // }
 
     /*
-     * Firing callback on complete button acction
+     * Firing callback on complete button action
      */
     public function complete(AdminModel $row)
     {

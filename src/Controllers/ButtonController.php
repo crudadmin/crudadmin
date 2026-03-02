@@ -53,8 +53,9 @@ class ButtonController extends CRUDController
     private function fireButtonAction($button, $action, $rows)
     {
         $isMultiple = $rows->count() > 1;
+        $isComplete = $action && in_array($action, ['complete']);
 
-        if ($action) {
+        if ($action && !$isComplete) {
             //Enable acceptable state in question by default. This need's to be before method call,
             //because we may disable this feature.
             $button->accept(true);
@@ -79,9 +80,15 @@ class ButtonController extends CRUDController
         else {
             $button->withRows(true);
 
-            if ($isMultiple) {
+            if ( $isComplete ) {
+                $response = $button->complete($rows[0]);
+            }
+
+            else if ($isMultiple) {
                 $response = $button->fireMultiple($rows);
-            } else {
+            }
+
+            else {
                 $response = $button->fire($rows[0]);
             }
         }
