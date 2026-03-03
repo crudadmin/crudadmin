@@ -25,14 +25,14 @@ class ButtonController extends CRUDController
 
         $rows = $model->whereIn($model->qualifyColumn($model->getKeyName()), $request['id'] ?: [])->get();
 
+        $row = $rows->count() > 1 ? null : ($rows[0] ?? null);
+
+        $button = new $button($row);
+
         //If no rows does exists
-        if ( $rows->count() === 0 ){
+        if ( $rows->count() < $button->minimum ){
             return autoAjax()->error(_('Záznam neexistuje, pravdepodobne už bol vymazaný.'));
         }
-
-        $button = new $button(
-            $rows->count() > 1 ? null : $rows[0]
-        );
 
         $response = $this->fireButtonAction(
             $button,
@@ -52,7 +52,7 @@ class ButtonController extends CRUDController
 
     private function fireButtonAction($button, $action, $rows)
     {
-        $isMultiple = $rows->count() > 1;
+        $isMultiple = $rows->count() > 1 || (!method_exists($button, 'fire') && method_exists($button, 'fireMultiple'));
         $isComplete = $action && in_array($action, ['complete']);
 
         if ($action && !$isComplete) {
