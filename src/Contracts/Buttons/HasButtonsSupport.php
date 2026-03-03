@@ -44,11 +44,13 @@ trait HasButtonsSupport
     protected function loadOnlyRows($rows, $request)
     {
         if (
-            //If reloadall is turned on, but we are listing in non-existing parent, we need return only accessed button
-            (($request['parentTable'] ?? false) && !($request['parentId'] ?? false))
+            $rows->count() > 0 && (
+                //If reloadall is turned on, but we are listing in non-existing parent, we need return only accessed button
+                (($request['parentTable'] ?? false) && !($request['parentId'] ?? false))
 
-            //If reload is turned off, we need return only accessed buttons
-            || $this->reloadAll === false
+                //If reload is turned off, we need return only accessed buttons
+                || $this->reloadAll === false
+            )
         ){
             return $rows->pluck($rows[0]->getKeyName())->toArray();
         }
