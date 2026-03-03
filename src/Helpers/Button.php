@@ -284,6 +284,9 @@ class Button
                 'table' => $open->getTable(),
                 'id' => $open->getKey(),
             ];
+
+            // No need to load rows when opening row in modal
+            $this->withRows = false;
         }
 
         return $this;

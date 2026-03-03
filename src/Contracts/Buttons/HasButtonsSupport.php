@@ -7,6 +7,12 @@ use Admin\Helpers\AdminRows;
 
 trait HasButtonsSupport
 {
+    /*
+     * Should button response return rows? Modifiable wia ->withRows(true)
+     * fire() and fireMultiple() returns rows by default
+     */
+    public $withRows = false;
+
     /**
      * Which method should be fired fist
      *

@@ -271,21 +271,21 @@ trait AdminModelTrait
 
         //Remove hidden fields
         foreach ($this->getFields() as $key => $field) {
+            $isVisible = $this->hasFieldParam($key, 'column_visible', true);
+            $isPresnet = $this->hasFieldParam($key, 'column_present', true);
+
             //Skip hidden fields and fields with long values
             if (
                 $this->hasFieldParam($key, 'hidden', true)
-                && $this->hasFieldParam($key, 'column_visible', true) == false
-                && $this->hasFieldParam($key, 'column_present', true) == false
+                && $isVisible == false
+                && $isPresnet == false
                 && in_array($key, $fields)
             ) {
                 unset($fields[array_search($key, $fields)]);
             }
 
             //Add field column if is missing. For example belongToMany relation etc...
-            if (
-                $this->hasFieldParam($key, 'column_visible', true) == true
-                && !in_array($key, $fields)
-            ){
+            if ( ($isVisible == true || $isPresnet == true) && !in_array($key, $fields) ){
                 $fields[] = $key;
             }
         }
