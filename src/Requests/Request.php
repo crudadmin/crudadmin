@@ -484,22 +484,31 @@ abstract class Request extends FormRequest
         );
     }
 
+    private function getOnlySelectors($key)
+    {
+        $fields = $this->get($key);
+
+        $fields = is_string($fields) ? explode(',', $fields) : array_wrap($fields ?: []);
+
+        return array_values(array_filter($fields));
+    }
+
     public function isFieldWhitelisted($key)
     {
-        $useOnly = collect(array_filter([
-            $this->get('_only'),
-            $this->get('_dirty_fields'),
-        ]))->map(function($fields){
-            $fields = is_string($fields) ? explode(',', $fields) : array_wrap($fields ?: []);
-
-            return array_values(array_filter($fields));
-        })->values()->flatten()->toArray();
-
-        if ( count($useOnly) == 0 ) {
-            return true;
+        // When there is exact selection of fields which sould be updated;
+        $useOnly = $this->getOnlySelectors('_only');
+        if ( count($useOnly) > 0 ) {
+            return in_array($key, $useOnly) === true;
         }
 
-        return in_array($key, $useOnly) === true;
+        // Allow to validate and check only dirty fields
+        if ( $this->has('_dirty_fields') ) {
+            $dirtyFields = $this->getOnlySelectors('_dirty_fields');
+
+            return in_array($key, $dirtyFields) === true;
+        }
+
+        return true;
     }
 
     private function manageUploadedFiles($requestRows)
