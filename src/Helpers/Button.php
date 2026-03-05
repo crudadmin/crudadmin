@@ -118,7 +118,7 @@ class Button
         'type' => null,
         'title' => null,
         'message' => null,
-        'size' => 'md',
+        'size' => 'xs',
     ];
 
     /*
@@ -364,10 +364,14 @@ class Button
 
     /*
      * Set message size
+     * Default: xs
+     * xs => 450px
+     * md => 700px
+     * lg => 1000px
+     * xl => 100%
      *
-     * md|lg|xl
      */
-    public function size($size = 'md')
+    public function size($size = 'xs')
     {
         $this->message['size'] = $size;
 
