@@ -472,10 +472,8 @@ abstract class Request extends FormRequest
      */
     public function allWithMutators()
     {
-        $request = $this->all();
-
         $requestRows = [
-            $request,
+            $this->all(),
         ];
 
         $requestRows = $this->manageUploadedFiles($requestRows);
@@ -488,9 +486,20 @@ abstract class Request extends FormRequest
 
     public function isFieldWhitelisted($key)
     {
-        $only = array_filter(array_wrap($this->get('_only')));
+        $useOnly = collect(array_filter([
+            $this->get('_only'),
+            $this->get('_dirty_fields'),
+        ]))->map(function($fields){
+            $fields = is_string($fields) ? explode(',', $fields) : array_wrap($fields ?: []);
 
-        return count($only) == 0 || in_array($key, $only) === true;
+            return array_values(array_filter($fields));
+        })->values()->flatten()->toArray();
+
+        if ( count($useOnly) == 0 ) {
+            return true;
+        }
+
+        return in_array($key, $useOnly) === true;
     }
 
     private function manageUploadedFiles($requestRows)

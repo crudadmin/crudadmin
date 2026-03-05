@@ -3,34 +3,34 @@
 namespace Admin\Eloquent;
 
 use Admin;
-use Localization;
-use Admin\Eloquent\Modules\SeoModule;
-use Admin\Eloquent\Concerns\HasButtons;
-use Admin\Eloquent\Concerns\HasExports;
-use Admin\Eloquent\Concerns\ModelIcons;
-use Admin\Eloquent\Concerns\ModelRules;
+use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Admin\Eloquent\Concerns\AdminModelTrait;
 use Admin\Eloquent\Concerns\HasAdminApi;
-use Admin\Eloquent\Concerns\HasSiteTree;
-use Admin\Eloquent\Concerns\Historiable;
-use Admin\Eloquent\Concerns\VueComponent;
-use Admin\Eloquent\Modules\HistoryModule;
-use Illuminate\Database\Eloquent\Builder;
-use Admin\Eloquent\Concerns\HasAttributes;
-use Admin\Eloquent\Concerns\HasEncryption;
-use Admin\Eloquent\Concerns\HasModelCache;
+use Admin\Eloquent\Concerns\HasAdminDeletable;
 use Admin\Eloquent\Concerns\HasAdminSearch;
+use Admin\Eloquent\Concerns\HasAttributes;
+use Admin\Eloquent\Concerns\HasButtons;
+use Admin\Eloquent\Concerns\HasEloquentReplicator;
+use Admin\Eloquent\Concerns\HasEncryption;
+use Admin\Eloquent\Concerns\HasExports;
+use Admin\Eloquent\Concerns\HasModelCache;
 use Admin\Eloquent\Concerns\HasPermissions;
 use Admin\Eloquent\Concerns\HasSiteBuilder;
-use Admin\Eloquent\Concerns\AdminModelTrait;
-use Admin\Eloquent\Modules\FilterStateModule;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Admin\Eloquent\Concerns\HasAdminDeletable;
+use Admin\Eloquent\Concerns\HasSiteTree;
+use Admin\Eloquent\Concerns\Historiable;
+use Admin\Eloquent\Concerns\ModelIcons;
 use Admin\Eloquent\Concerns\ModelLayoutBuilder;
-use Admin\Eloquent\Modules\GlobalRelationModule;
-use Admin\Eloquent\Concerns\HasEloquentReplicator;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Admin\Eloquent\Concerns\ModelRules;
+use Admin\Eloquent\Concerns\VueComponent;
 use Admin\Eloquent\Modules\AdminCustomizationModule;
-use Admin\Core\Eloquent\AdminModel as CoreAdminModel;
+use Admin\Eloquent\Modules\FilterStateModule;
+use Admin\Eloquent\Modules\GlobalRelationModule;
+use Admin\Eloquent\Modules\HistoryModule;
+use Admin\Eloquent\Modules\SeoModule;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Localization;
 
 class AdminModel extends CoreAdminModel
 {
