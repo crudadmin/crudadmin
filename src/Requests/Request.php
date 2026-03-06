@@ -501,14 +501,24 @@ abstract class Request extends FormRequest
             return in_array($key, $useOnly) === true;
         }
 
-        // Allow to validate and check only dirty fields
-        if ( $this->has('_dirty_fields') ) {
-            $dirtyFields = $this->getOnlySelectors('_dirty_fields');
-
-            return in_array($key, $dirtyFields) === true;
+        // Disable dirty fields
+        if ( $this->isFieldDirty($key) === false ) {
+            return false;
         }
 
         return true;
+    }
+
+    private function isFieldDirty($key)
+    {
+        // Allow to validate and check only dirty fields
+        if ( !$this->has('_dirty_fields') ) {
+            return true;
+        }
+
+        $dirtyFields = $this->getOnlySelectors('_dirty_fields');
+
+        return in_array($key, $dirtyFields) === true;
     }
 
     private function manageUploadedFiles($requestRows)
