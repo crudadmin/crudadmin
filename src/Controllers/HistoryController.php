@@ -35,7 +35,7 @@ class HistoryController extends CRUDController
                             })
                             ->each
                                 ->makeHidden(['data'])
-                                ->append(['fieldRow'])
+                                ->append(['fieldRow', 'changedFields'])
                                 ->values();
 
         //We wang log action after history fetch
