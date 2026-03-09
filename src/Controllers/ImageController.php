@@ -7,6 +7,7 @@ use Admin\Core\Helpers\Storage\AdminFile;
 use Cache;
 use Exception;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Image;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\UnableToRetrieveMetadata;
@@ -34,7 +35,14 @@ class ImageController extends Controller
 
         $adminFile = $model->getAdminFile($fieldKey, $filename);
 
-        $resizedImage = $adminFile->resize(50, 50, true, 'admin-thumbnails');
+        // Mutator for admin thumbnail dimensions
+        if ( method_exists($model, $method = 'get'.Str::camel($fieldKey).'AdminThumbnailDimensions') ) {
+            $dimensions = $model->{$method}();
+        } else {
+            $dimensions = [50, 50];
+        }
+
+        $resizedImage = $adminFile->resize(...[...$dimensions, true, 'admin-thumbnails']);
 
         $storage = $resizedImage->getCacheStorage();
 
