@@ -88,6 +88,6 @@ class AutoAjax extends BaseAutoAjax
 
     public function warning($message)
     {
-        return $this->pushMessage($message, 'error');
+        return $this->pushMessage($message, 'warning');
     }
 }
