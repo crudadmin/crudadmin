@@ -23,6 +23,7 @@ trait CRUDResponse
     {
         return count(array_merge(
             $this->getRequestMessages('error'),
+            $this->getRequestMessages('warning'),
             $this->getRequestMessages('notice')
         )) > 0;
     }
@@ -36,7 +37,11 @@ trait CRUDResponse
             return $sentense.' '.trans('admin::admin.with-errors').':<br>'.implode('<br>', $errors);
         }
 
-       if (count($notices = $this->getRequestMessages('notice'))) {
+        if (count($warnings = $this->getRequestMessages('warning'))) {
+            return $sentense.' '._('s nasledujúcimi hláseniami').':<br>'.implode('<br>', $warnings);
+        }
+
+        if (count($notices = $this->getRequestMessages('notice'))) {
             return $sentense.' '._('s nasledujúcimi hláseniami').':<br>'.implode('<br>', $notices);
         }
 
@@ -46,6 +51,10 @@ trait CRUDResponse
     protected function responseType()
     {
         if ( count($this->getRequestMessages('error')) ){
+            return 'error';
+        }
+
+        if ( count($this->getRequestMessages('warning')) ){
             return 'warning';
         }
 
