@@ -452,7 +452,7 @@ abstract class Request extends FormRequest
 
             // Whitelisted request fields only
             foreach ($row as $key => $value) {
-                if ( $this->isFieldWhitelisted($key) == false ){
+                if ( $this->isFieldDirty($key) == false ){
                     unset($row[$key]);
                 }
             }
@@ -499,11 +499,6 @@ abstract class Request extends FormRequest
         $useOnly = $this->getOnlySelectors('_only');
         if ( count($useOnly) > 0 ) {
             return in_array($key, $useOnly) === true;
-        }
-
-        // Disable dirty fields
-        if ( $this->isFieldDirty($key) === false ) {
-            return false;
         }
 
         return true;
