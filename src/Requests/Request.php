@@ -452,6 +452,13 @@ abstract class Request extends FormRequest
 
             // Whitelisted request fields only
             foreach ($row as $key => $value) {
+                // When this field is explicitly whitelisted, then skip dirty check.
+                // Because we are updating field on demant with _only parameter support.
+                if ( $this->isFieldWhitelisted($key, true) === true ) {
+                    continue;
+                }
+
+                // If field is not dirty, then remove it from request.
                 if ( $this->isFieldDirty($key) == false ){
                     unset($row[$key]);
                 }
@@ -493,12 +500,24 @@ abstract class Request extends FormRequest
         return array_values(array_filter($fields));
     }
 
-    public function isFieldWhitelisted($key)
+    /**
+     * Tells if field is whitelisted
+     *
+     * @param  mixed $key
+     * @param  mixed $explicitly
+     * @return void
+     */
+    public function isFieldWhitelisted($key, $explicitly = false)
     {
         // When there is exact selection of fields which sould be updated;
         $useOnly = $this->getOnlySelectors('_only');
         if ( count($useOnly) > 0 ) {
             return in_array($key, $useOnly) === true;
+        }
+
+        // If explicitly is true, then return when field is not whitelisted
+        if ( $explicitly === true ) {
+            return false;
         }
 
         return true;
