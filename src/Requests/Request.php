@@ -444,7 +444,9 @@ abstract class Request extends FormRequest
      */
     private function mutateRowDataRule(array $rows)
     {
-        return array_map(function ($row) {
+        $useOnly = $this->getOnlySelectors('_only');
+
+        return array_map(function ($row) use ($useOnly) {
             //Reset file values
             foreach ($this->resetValuesInFields as $field) {
                 $row[$field] = null;
@@ -452,10 +454,8 @@ abstract class Request extends FormRequest
 
             // Whitelisted request fields only
             foreach ($row as $key => $value) {
-                // When this field is explicitly whitelisted, then skip dirty check.
-                // Because this field is being updated on demand _only.
-                // Otherwise if we are updating all the fields, check dirty support.
-                if ( $this->isFieldWhitelistedExplicitly($key) === false && $this->isFieldDirty($key) === false ){
+                // Allow dirty support only when no only fields are selected.
+                if ( count($useOnly) === 0 && $this->isFieldDirty($key) === false ){
                     unset($row[$key]);
                 }
 
@@ -516,21 +516,7 @@ abstract class Request extends FormRequest
             return in_array($key, $useOnly) === true;
         }
 
-        // If explicitly is true, then return when field is not whitelisted
-        return $explicitly === true
-            ? false
-            : true;
-    }
-
-    /**
-     * Check if field is whitelisted explicitly
-     *
-     * @param  mixed $key
-     * @return void
-     */
-    public function isFieldWhitelistedExplicitly($key)
-    {
-        return $this->isFieldWhitelisted($key, true);
+        return true;
     }
 
     /**
