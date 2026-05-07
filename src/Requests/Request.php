@@ -533,6 +533,12 @@ abstract class Request extends FormRequest
         return $this->isFieldWhitelisted($key, true);
     }
 
+    /**
+     * Check whatever field has been changed
+     *
+     * @param  mixed $key
+     * @return void
+     */
     private function isFieldDirty($key)
     {
         // Allow to validate and check only dirty fields
