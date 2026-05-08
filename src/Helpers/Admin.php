@@ -78,7 +78,8 @@ class Admin extends AdminCore
             return;
         }
 
-        //Add support for sanctum requests when autorization header is present.
+        // Add support for sanctum requests when autorization header is present.
+        // Switch driver to sanctum if needed.
         if ( $driver == 'session' && request()->headers->has('authorization') ) {
             $token = request()->bearerToken();
 
