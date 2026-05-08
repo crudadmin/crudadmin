@@ -2,11 +2,11 @@
 
 namespace Admin\Middleware;
 
-use Closure;
-use Illuminate\Support\Facades\Auth;
 use Admin;
+use Closure;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 
-class Authenticate
+class Authenticate implements AuthenticatesRequests
 {
     /**
      * Handle an incoming request.
