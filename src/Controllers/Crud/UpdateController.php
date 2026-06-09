@@ -68,7 +68,9 @@ class UpdateController extends InsertController
                 $row->checkForModelRules(['updated'], true);
 
                 //Re-fetch fresh data, to load new relationships.
-                $rows[$table] = $model->newInstance()->withFieldRelations()->find($row->getKey());
+                // (when this row does not exist, we return the original row, this may happen when scopeAdminRows is used)
+                $rows[$table] = $model->newInstance()->withFieldRelations()->find($row->getKey()) ?: $row;
+
             } else {
                 $rows[$table] = $this->insertRows($parentModel, [$data], $rows[$parentModel->getTable()]->getKey())[0]['rows'][0];
             }
@@ -85,7 +87,7 @@ class UpdateController extends InsertController
             ->success($message)
             ->type($this->responseType())
             ->data([
-                'rows' => $rows->keys()->combine($rows)->map(function($row){
+                'rows' => $rows->filter()->map(function($row){
                     return $row->getMutatedAdminAttributes(true, true);
                 }),
             ]);
