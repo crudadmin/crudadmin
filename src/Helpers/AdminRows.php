@@ -4,6 +4,7 @@ namespace Admin\Helpers;
 
 use Admin\Eloquent\AdminModel;
 use Admin\Contracts\Exports\AdminButtonExport;
+use Admin;
 
 class AdminRows
 {
@@ -33,7 +34,7 @@ class AdminRows
 
     public function loadRequestParams($request)
     {
-        $this->parentTable = $request['parentTable'] ?? null;
+        $this->setOriginalParentTable($request['parentTable'] ?? null);
         $this->parentId = $request['parentId'] ?? null;
         $this->limit = (int)$request['limit'];
         $this->page = (int)$request['page'];
@@ -43,6 +44,22 @@ class AdminRows
         $this->enabledColumns = array_filter(array_diff(explode(';', $request['enabled_columns'] ?? '')));
 
         $this->model->setEnabledColumns($this->enabledColumns);
+
+        return $this;
+    }
+
+    /**
+     * Find original parent table from request
+     * Because that table name may be alias from AdminView or AdminModelReplicable
+     *
+     * @param  mixed $parentTable
+     * @return void
+     */
+    private function setOriginalParentTable($parentTable)
+    {
+        if ( $parentTable ) {
+            $this->parentTable = Admin::getModelByTable($parentTable)->getTable();
+        }
 
         return $this;
     }

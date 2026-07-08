@@ -2,7 +2,9 @@
 
 namespace Admin\Eloquent;
 
-class AdminView extends AdminModel
+use Admin\Core\Eloquent\Concerns\AdminModelReplica;
+
+class AdminView extends AdminModel implements AdminModelReplica
 {
     protected $insertable = false;
     protected $editable = false;
