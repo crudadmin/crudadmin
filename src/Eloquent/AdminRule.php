@@ -83,6 +83,11 @@ abstract class AdminRule
     {
         $request = new DataRequest(request()->all());
 
+        // Dont mark if dirty fields are set in this request.
+        if ( $request->has('_dirty_fields') === false ) {
+            return false;
+        }
+
         return $request->isFieldDirty($field);
     }
 }
