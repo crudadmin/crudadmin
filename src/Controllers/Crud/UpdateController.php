@@ -36,9 +36,6 @@ class UpdateController extends InsertController
             $row = $rows[$table];
 
             if ( $row ) {
-                //Save original values
-                $original = $row->backupOriginalAttributes();
-
                 //get mutated data from request
                 $changes = $request->allWithMutators()[0];
 
@@ -55,9 +52,6 @@ class UpdateController extends InsertController
                 $row->makeHistorySnapshot($original, 'update');
 
                 $this->syncBelongsToMany($row, $request);
-
-                //Restore original values
-                $row->restoreOriginalAttributes();
 
                 //Fire on update event
                 if (method_exists($model, 'onUpdate')) {

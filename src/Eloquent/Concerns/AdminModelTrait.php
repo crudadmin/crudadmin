@@ -74,6 +74,7 @@ trait AdminModelTrait
 
         //Save model state before save action
         $this->backupExistsProperty();
+        $this->backupOriginalAttributes();
 
         //Save model
         $instance = parent::save($options);

@@ -216,7 +216,7 @@ trait ModelRules
     {
         $this->backup_original = $this->getRawOriginal() ?: [];
 
-        return $this->getRawOriginal();
+        return $this->backup_original;
     }
 
     /*
