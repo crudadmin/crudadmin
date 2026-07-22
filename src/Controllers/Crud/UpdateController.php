@@ -36,6 +36,9 @@ class UpdateController extends InsertController
             $row = $rows[$table];
 
             if ( $row ) {
+                //Save original values
+                $original = $row->backupOriginalAttributes();
+
                 //get mutated data from request
                 $changes = $request->allWithMutators()[0];
 
