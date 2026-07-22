@@ -269,10 +269,11 @@ trait ModelRules
             return $this;
         }
 
-        // If rules were forced, remove them from silent rules.
-        else if ( $force === true && $this->isRuleSilent($rules) ) {
-            $this->silentRules = array_diff($this->silentRules, $rules);
-        }
+        // If rules were forced and are currently silent, we will remove them from silent
+        // rules only AFTER they have actually run (see bottom of this method). Keeping them
+        // silent for the whole duration of their own execution prevents a recursive re-entry
+        // into the same rules while they are still running.
+        $shouldUnsilence = $force === true && $this->isRuleSilent($rules);
 
         //We ned save first backup state, because multiple rules can modify this value during state
         //for example when some of rule call save method, then backuped value will be resetted
@@ -303,6 +304,11 @@ trait ModelRules
                 $this->beforeSaveMethods($rule, $rules);
             }
         });
+
+        // Now that the rules have actually run, we can safely remove them from silent rules.
+        if ( $shouldUnsilence ) {
+            $this->silentRules = array_diff($this->silentRules, $rules);
+        }
 
         return $this;
     }
