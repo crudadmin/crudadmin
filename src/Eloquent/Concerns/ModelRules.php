@@ -27,6 +27,11 @@ trait ModelRules
     private $performingRuleMethods = [];
 
     /*
+     * Which rules are being skipped
+     */
+    private $silentRules = [];
+
+    /*
      * Returns cached admin rule class
      */
     protected function getCachedAdminRuleClass($class)
@@ -224,11 +229,51 @@ trait ModelRules
                                     : ($this->backup_original ?: []);
     }
 
-    /*
-     * Validate admin rules, on update, delete, create
+    /**
+     * This rules should be skipped by default for all methods
+     *
+     * @param  mixed $rules
+     * @return void
      */
-    public function checkForModelRules($rules = [], $saved = false)
+    public function silentRules($rules = [])
     {
+        $this->silentRules = array_merge($this->silentRules, $rules);
+
+        return $this;
+    }
+
+    /**
+     * Check if any of those rules is silented
+     *
+     * @param  mixed $rules
+     * @return void
+     */
+    public function isRuleSilent($rules)
+    {
+        return count(array_intersect($this->silentRules, $rules)) > 0;
+    }
+
+    /**
+     * Validate admin rules, on update, delete, create
+     *
+     * @param  mixed $rules
+     * @param  mixed $saved
+     * @param  mixed $force
+     * @return void
+     */
+    public function checkForModelRules($rules = [], $saved = false, $force = false)
+    {
+        // If rules are silent, skip processing them.
+        // Used in updating/created rows. Where we need to wait for all dependencies during creation/updationg, to be available in final updated()
+        if ( $force === false && $this->isRuleSilent($rules) ) {
+            return $this;
+        }
+
+        // If rules were forced, remove them from silent rules.
+        else if ( $force === true && $this->isRuleSilent($rules) ) {
+            $this->silentRules = array_diff($this->silentRules, $rules);
+        }
+
         //We ned save first backup state, because multiple rules can modify this value during state
         //for example when some of rule call save method, then backuped value will be resetted
         $exists = $this->backup_exists;
@@ -258,6 +303,8 @@ trait ModelRules
                 $this->beforeSaveMethods($rule, $rules);
             }
         });
+
+        return $this;
     }
 
     /**

@@ -83,7 +83,7 @@ trait AdminModelTrait
 
         //Check for model rules after row is already saved/created for frontend/console situations
         //for admin state events will be initialized in DataController after binding all relationships
-        if (! Admin::isAdmin() && $isPerformingRuleMethods === false ) {
+        if ( $isPerformingRuleMethods === false ) {
             $this->checkForModelRules(['created', 'updated'], true);
         }
 

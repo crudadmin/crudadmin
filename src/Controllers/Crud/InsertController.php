@@ -72,7 +72,7 @@ class InsertController extends CRUDController
                     }
 
                     //Create row into db
-                    $createdRow = (new $model)->create($requestRow);
+                    $createdRow = (new $model)->silentRules(['created'])->create($requestRow);
 
                     //Save parent id for $inParent support, because when we will be insering parent childs
                     //we need assign relation key between this rows
@@ -98,7 +98,7 @@ class InsertController extends CRUDController
                 }
 
                 //Check for model rules after row is already saved/created
-                $row->checkForModelRules(['created'], true);
+                $row->checkForModelRules(['created'], true, true);
 
                 $models[] = $row;
 

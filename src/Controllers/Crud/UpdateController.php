@@ -46,7 +46,7 @@ class UpdateController extends InsertController
                 $this->removeOverridenFiles($row, $changes);
 
                 try {
-                    $row->update($changes);
+                    $row->silentRules(['updated'])->update($changes);
                 } catch (QueryException $e) {
                     return autoAjax()->mysqlError($e);
                 }
@@ -65,7 +65,7 @@ class UpdateController extends InsertController
                 }
 
                 //Check for model rules after row is already updated
-                $row->checkForModelRules(['updated'], true);
+                $row->checkForModelRules(['updated'], true, true);
 
                 //Re-fetch fresh data, to load new relationships.
                 // (when this row does not exist, we return the original row, this may happen when scopeAdminRows is used)
