@@ -534,7 +534,16 @@ abstract class Request extends FormRequest
 
         $dirtyFields = $this->getOnlySelectors('_dirty_fields');
 
-        return in_array($key, $dirtyFields) === true;
+        // Support for array of fields
+        if ( is_array($key) ) {
+            return count(array_intersect($key, $dirtyFields)) > 0;
+        }
+
+
+        // String keys
+        else {
+            return in_array($key, $dirtyFields) === true;
+        }
     }
 
     private function manageUploadedFiles($requestRows)
