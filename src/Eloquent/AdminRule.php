@@ -2,6 +2,8 @@
 
 namespace Admin\Eloquent;
 
+use Admin\Requests\DataRequest;
+
 abstract class AdminRule
 {
     /*
@@ -69,5 +71,18 @@ abstract class AdminRule
      */
     public function deleted(AdminModel $row)
     {
+    }
+
+    /**
+     * Check if field is dirty from CMS
+     *
+     * @param  mixed $field
+     * @return void
+     */
+    public function isFieldDirty($field)
+    {
+        $request = new DataRequest(request()->all());
+
+        return $request->isFieldDirty($field);
     }
 }

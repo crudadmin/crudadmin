@@ -525,7 +525,7 @@ abstract class Request extends FormRequest
      * @param  mixed $key
      * @return void
      */
-    private function isFieldDirty($key)
+    public function isFieldDirty($key)
     {
         // Allow to validate and check only dirty fields
         if ( !$this->has('_dirty_fields') ) {
