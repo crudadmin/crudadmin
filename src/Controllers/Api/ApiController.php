@@ -101,9 +101,6 @@ class ApiController extends CRUDController
 
         $row = $model->create($data);
 
-        //Check for model rules after row is already saved/created
-        $row->checkForModelRules(['created'], true);
-
         return autoAjax()->success(_('Záznam bol úspešne uložený.'))->data([
             'row' => $row->setFullAdminApiResponse()
         ]);
@@ -125,9 +122,6 @@ class ApiController extends CRUDController
                     ->getData();
 
         $row->update($data);
-
-        //Check for model rules after row is already updated
-        $row->checkForModelRules(['updated'], true);
 
         return autoAjax()->success(_('Zmeny boli úspešne uložené.'))->data([
             'row' => $row->setFullAdminApiResponse()
