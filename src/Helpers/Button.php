@@ -193,7 +193,7 @@ class Button
         $this->message($message, null, $type, true);
 
         if ( is_numeric($duration) ) {
-            $this->message['duration'] = $duration;
+            $this->message['duration'] = $duration < 60 ? ($duration * 1000) : $duration;
         }
 
         return $this;
