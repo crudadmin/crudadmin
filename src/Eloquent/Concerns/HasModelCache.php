@@ -49,6 +49,19 @@ trait HasModelCache
     }
 
     /**
+     * Return the first cached row as a hydrated model instance.
+     *
+     * @param mixed $query
+     * @param mixed $key
+     * @param mixed $duration
+     * @return mixed
+     */
+    public function scopeFirstCached($query, $key, $duration = null)
+    {
+        return $query->limit(1)->getCached($key, $duration)->first();
+    }
+
+    /**
      * Run cachable query
      *
      * @param  mixed $query

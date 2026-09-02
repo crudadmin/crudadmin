@@ -155,16 +155,21 @@ class SEO
             return $this->seoRow ?: null;
         }
 
-        $this->seoRows = Admin::getModel('RoutesSeo')->where(function($query){
-                                $query->where('url', $this->withoutLocalizedSlug($this->getRouteUrl()))
-                                      ->orWhere('url', $this->withoutLocalizedSlug($this->getPathInfo()))
-                                      ->orWhere('controller', $this->getRouteController());
-                            })
-                            ->when($this->getSeoGroup(), function($query, $group){
-                                $query->orWhere('group', $group);
-                            })
-                            ->orWhere('url', '/')
-                            ->get();
+        $routeUrl = $this->withoutLocalizedSlug($this->getRouteUrl());
+        $pathInfo = $this->withoutLocalizedSlug($this->getPathInfo());
+        $controller = $this->getRouteController();
+        $group = $this->getSeoGroup();
+
+        $this->seoRows = Admin::getModel('RoutesSeo')
+            ->getCached('public', now()->addHour())
+            ->filter(function($row) use ($routeUrl, $pathInfo, $controller, $group) {
+                return $row->url === $routeUrl
+                    || $row->url === $pathInfo
+                    || $row->controller === $controller
+                    || ($group && $row->group === $group)
+                    || $row->url === '/';
+            })
+            ->values();
 
         $this->defaultSeoRow = $this->seoRows->where('url', '/')->first() ?: false;
 

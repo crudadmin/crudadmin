@@ -33,6 +33,8 @@ class RoutesSeo extends AdminModel
 
     protected $sitetree = 'url';
 
+    protected $flushableCacheKeys = ['public'];
+
     /*
      * Automatic form and database generation
      * @name - field name
